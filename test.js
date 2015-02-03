@@ -7,44 +7,35 @@ var GpioAction = require('./gpioaction');
 var SpyCameraAction = require('./spycameraaction');
 var PushoverAction = require('./pushoveraction');
 
-//////////////////////////////////////////////////////////////////
-// States
-//////////////////////////////////////////////////////////////////
-var richardOnWayHomeState = new State('richard-on-way-home');
-var natalieOnWayHomeState = new State('natalie-on-way-home');
-
-var richardHomeState = new State('richard-home');
-var natalieHomeState = new State('natalie-home');
-
-var fullyArmedState = new GpioState('fully-armed', 4, true);
-var partArmedState = new GpioState('part-armed', 12, true);
-var inAlarmState = new GpioState('alarm-in-alarm', 16, true);
-var confirmedAlarmState = new GpioState('alarm-confirmed-alarm', 20, true);
-
-var loungePir1 = new GpioState('lounge-1', 17, true);
 
 //////////////////////////////////////////////////////////////////
 // Things
 //////////////////////////////////////////////////////////////////
-var richard = new Thing('richard',
-                        { 'richard-on-way-home' : richardOnWayHomeState,
-                          'richard-home'        : richardHomeState }, {} );
-
-var natalie = new Thing('natalie',
-                        { 'natalie-on-way-home' : natalieOnWayHomeState,
-                          'natalie-home'        : natalieHomeState }, {} );
-
+var richard = new Thing('richard', {}, {} );
+var natalie = new Thing('natalie', {}, {} );
 var keyHolders = new Thing('key-holders', {}, {} );
 var reserveKeyHolders = new Thing('reserve-key-holders', {}, {} );
 
-var alarm = new Thing('texecom-prem-elite-48',
-                      { 'fully-armed'     : fullyArmedState,
-                        'part-armed'      : partArmedState,
-                        'in-alarm'        : inAlarmState,
-                        'confirmed-alarm' : confirmedAlarmState }, {} );
+var alarm = new Thing('texecom-prem-elite-48', {}, {} );
 
-var loungePirs = new Thing('lounge-pirs', { 'lounge-pir-1' : loungePir1 }, {} );
+var loungePirs = new Thing('lounge-pirs', {}, {} );
 var loungeCamera = new Thing('lounge-camera', {}, {} );
+
+//////////////////////////////////////////////////////////////////
+// States
+//////////////////////////////////////////////////////////////////
+var richardOnWayHomeState = new State('richard-on-way-home', richard)
+var natalieOnWayHomeState = new State('natalie-on-way-home', natalie);
+
+var richardHomeState = new State('richard-home', richard);
+var natalieHomeState = new State('natalie-home', natalie);
+
+var fullyArmedState = new GpioState('fully-armed', 4, true, alarm);
+var partArmedState = new GpioState('part-armed', 12, true, alarm);
+var inAlarmState = new GpioState('alarm-in-alarm', 16, true, alarm);
+var confirmedAlarmState = new GpioState('alarm-confirmed-alarm', 20, true, alarm);
+
+var loungePir1 = new GpioState('lounge-1', 17, true, loungePirs);
 
 //////////////////////////////////////////////////////////////////
 // Activators
