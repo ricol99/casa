@@ -1,58 +1,58 @@
 var util = require('util');
 var events = require('events');
 
-function Activator(_name, _eventSource, _timeout, _invert) {
-   var name = 'activator:' + _name;
-   var eventSource = _eventSource;
-   var timeout = _timeout;
-   var invert = _invert;
-   var coldStart = true;
+function Activator(_name, _state, _timeout, _invert) {
+   this.name = 'activator:' + _name;
+   this.state = _state;
+   this.timeout = _timeout;
+   this.invert = _invert;
+   this.coldStart = true;
 
-   var timeout = _timeout;
+   this.timeout = _timeout;
 
-   var destActivated = false;
-   var sourceActive = false;
-   var timeoutObj = null;
+   this.destActivated = false;
+   this.sourceActive = false;
+   this.timeoutObj = null;
 
    var that = this;
 
    events.EventEmitter.call(this);
 
-   eventSource.on('active', function (sourceName) {
+   this.state.on('active', function (sourceName) {
       console.log('source ' + sourceName + ' active!');
       
-      if (coldStart) {
-         coldStart = false;
-         destActivated = false;
+      if (that.coldStart) {
+         that.coldStart = false;
+         that.destActivated = false;
       }
 
-      sourceActive = true;
+      that.sourceActive = true;
 
-      if (!destActivated) {
+      if (!that.destActivated) {
          activateDestination();
-         if (timeout != 0) {
+         if (that.timeout != 0) {
             delayedSwitchOff();
          }
       }
    });
 
-   eventSource.on('inactive', function (sourceName) {
+   this.state.on('inactive', function (sourceName) {
       console.log('source ' + sourceName + ' inactive!');
 
-      if (coldStart) {
-         coldStart = false;
-         destActivated = true;
+      if (that.coldStart) {
+         that.coldStart = false;
+         that.destActivated = true;
       }
 
-      sourceActive = false;
+      that.sourceActive = false;
 
       // if destination is activated , restart timer to keep it activated for the timeout after trigger drops
-      if (destActivated) {
+      if (that.destActivated) {
 
          // destination is activated. If there is a timer, restart it. Else ignore
-         if (timeout != 0) {
+         if (that.timeout != 0) {
             // clear old timer and restart new one
-            clearTimeout(timeoutObj);
+            clearTimeout(that.timeoutObj);
             delayedSwitchOff();
          }
          else {
@@ -63,32 +63,27 @@ function Activator(_name, _eventSource, _timeout, _invert) {
    });
 
    var activateDestination = function() {
-      destActivated = true;
-      that.emit(invert ? 'deactivate' : 'activate', name); 
+      that.destActivated = true;
+      that.emit(that.invert ? 'deactivate' : 'activate', that.name); 
    }
 
    var deactivateDestination = function() {
-      destActivated = false;
-      that.emit(invert ? 'activate' : 'deactivate', name); 
+      that.destActivated = false;
+      that.emit(that.invert ? 'activate' : 'deactivate', that.name); 
    }
 
    var delayedSwitchOff = function() {
       that.timeoutObj = setTimeout(function () {
-         if (sourceActive) {
+         if (that.sourceActive) {
             delayedSwitchOff();
          }
          else {  // deactivate destination
             deactivateDestination();
          }
-      }, timeout*1000);
+      }, that.timeout*1000);
    }
 }
 
 util.inherits(Activator, events.EventEmitter);
 
-var create = function(_name, _eventSource, _timeout, _invert) {
-   return new Activator(_name, _eventSource, _timeout, _invert);
-};
-
-exports.create = create;
-exports.Activator = Activator;
+module.exports = exports = Activator;
