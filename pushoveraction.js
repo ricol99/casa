@@ -1,19 +1,17 @@
 var util = require('util');
-var events = require('events');
+var Action = require('./action');
 var push = require( 'pushover-notifications' );
 
-function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority, _activator) {
-   this.name = 'pushoveraction:' + _name;
+function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority, _activator, _thing) {
    this.activatedMessage = _activatedMessage;
    this.deactivatedMessage = _deactivatedMessage;
    this.messagePriority = _priority;
-   this.activator = _activator;
 
    this.actionActive = false;
 
    var that = this;
 
-   events.EventEmitter.call(this);
+   Action.call(this, 'pushover:' + _name, _activator, _thing);
 
    this.activator.on('activate', function () {
       console.log(that.name + ': received activate event');
@@ -74,7 +72,7 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
    });
 }
 
-util.inherits(PushoverAction, events.EventEmitter);
+util.inherits(PushoverAction, Action);
 
 module.exports = exports = PushoverAction;
 

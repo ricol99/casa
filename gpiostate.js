@@ -2,12 +2,11 @@ var util = require('util');
 var Gpio = require('gpio');
 var State = require('./state');
 
-function GpioState(_name, _gpioPin, _triggerLow) {
+function GpioState(_name, _gpioPin, _triggerLow, _thing) {
    this.gpioPin = _gpioPin;
    this.triggerLow = _triggerLow;
 
-   State.call(this);
-   this.name = 'gpiostate:' + _name;
+   State.call(this, 'gpio:' + _name, _thing);
 
    var that = this;
  

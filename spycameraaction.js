@@ -1,18 +1,16 @@
 var http = require('http');
 var util = require('util');
-var events = require('events');
+var Action = require('./action');
 
-function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _activator) {
-   this.name = 'spycam:' + _name;
+function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _activator, _thing) {
    this.options = { hostname: _hostname, port: _port, auth: _user + ':' + _password };
    this.id = _cameraId;
-   this.activator = _activator;
 
    this.capturing = false;
 
    var that = this;
 
-   events.EventEmitter.call(this);
+   Action.call(this, 'spycam:' + _name, _activator, _thing);
 
    this.activator.on('activate', function () {
       console.log(that.name + ': received activate event');
@@ -57,6 +55,6 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
    }
 }
 
-util.inherits(SpyCameraAction, events.EventEmitter);
+util.inherits(SpyCameraAction, Action);
 
 module.exports = exports = SpyCameraAction;

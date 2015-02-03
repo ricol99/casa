@@ -14,12 +14,12 @@ var PushoverAction = require('./pushoveraction');
 var richard = new Thing('richard', {}, {} );
 var natalie = new Thing('natalie', {}, {} );
 var keyHolders = new Thing('key-holders', {}, {} );
-var reserveKeyHolders = new Thing('reserve-key-holders', {}, {} );
 
 var alarm = new Thing('texecom-prem-elite-48', {}, {} );
 
 var loungePirs = new Thing('lounge-pirs', {}, {} );
 var loungeCamera = new Thing('lounge-camera', {}, {} );
+var loungeLight = new Thing('lounge-light', {}, {} );
 
 //////////////////////////////////////////////////////////////////
 // States
@@ -53,31 +53,31 @@ var confirmedAlarmActivator = new Activator('alarm-confirmed-alarm', fullyArmedS
 //////////////////////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////////////////////
-var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator);
-var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeActivator);
+var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, loungeLight);
+var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeActivator, loungeCamera);
 
 var loungeMessage = new PushoverAction('lounge',
                                        'Security-Alarm: * Motion in lounge * - Started recording',
                                        'Security-Alarm: * Motion in lounge ended * - Finished recording',
-                                       2, loungeActivator);
+                                       2, loungeActivator, keyHolders);
 
 var fullyArmedMessage = new PushoverAction('alarm-fully-armed',
                                            'Security-Info: Alarm armed',
                                            'Security-Info: Alarm disarmed',
-                                           0, fullyArmedActivator);
+                                           0, fullyArmedActivator, keyHolders);
 
 var partArmedMessage = new PushoverAction('alarm-part-armed',
                                           'Security-Info: Alarm part armed',
                                           'Security-Info: Alarm disarmed',
-                                          0, partArmedActivator);
+                                          0, partArmedActivator, keyHolders);
 
 var alarmInAlarmMessage = new PushoverAction('alarm-in-alarm',
                                              'Security-Alarm: Alarm triggered',
                                              'Security-Alarm: Alarm disarmed',
-                                             2, inAlarmActivator);
+                                             2, inAlarmActivator, keyHolders);
 
 var confirmedAlarmMessage = new PushoverAction('alarm-confirmed-alarm',
                                                'Security-Info: Alarm confirmed triggered - call police!',
                                                'Security-Info: Alarm disarmed',
-                                               2, confirmedAlarmActivator);
+                                               2, confirmedAlarmActivator, keyHolders);
 

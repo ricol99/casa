@@ -1,17 +1,15 @@
 var util = require('util');
 var Gpio = require('gpio');
-var events = require('events');
+var Action = require('./action');
 
-function GpioAction(_name, _gpioPin, _triggerLow, _activator) {
-   this.name = 'gpioaction:' + _name;
+function GpioAction(_name, _gpioPin, _triggerLow, _activator, _thing) {
    this.gpioPin = _gpioPin;
    this.triggerLow = _triggerLow;
-   this.activator = _activator;
    this.actionActive = false;
 
    var that = this;
 
-   events.EventEmitter.call(this);
+   Action.call(this, 'gpio:' + _name, _activator, _thing);
 
    // Calling export with a pin number will export that header and return a gpio header instance
    var gpio = Gpio.export(this.gpioPin, {
@@ -56,7 +54,7 @@ function GpioAction(_name, _gpioPin, _triggerLow, _activator) {
 
 }
 
-util.inherits(GpioAction, events.EventEmitter);
+util.inherits(GpioAction, Action);
 
 module.exports = exports = GpioAction;
 

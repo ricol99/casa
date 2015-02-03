@@ -8,17 +8,6 @@ function Thing(_name) {
 
    events.EventEmitter.call(this);
    var that = this;
-
-      //actions[actions].setThing(this);  
-
-      that.actions[action].on('activated', function (sourceName) {
-         console.log(that.name + ' action ' + sourceName + ' has been activated');
-      });
-
-      that.actions[action].on('deactivated', function (sourceName) {
-         console.log(that.name + ' action ' + sourceName + ' has been deactivated');
-      });
-   });
 }
 
 util.inherits(Thing, events.EventEmitter);
