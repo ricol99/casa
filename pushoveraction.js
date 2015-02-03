@@ -2,7 +2,7 @@ var util = require('util');
 var Action = require('./action');
 var push = require( 'pushover-notifications' );
 
-function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority, _activator, _thing) {
+function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority, _activator, _user) {
    this.activatedMessage = _activatedMessage;
    this.deactivatedMessage = _deactivatedMessage;
    this.messagePriority = _priority;
@@ -11,7 +11,7 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
 
    var that = this;
 
-   Action.call(this, 'pushover:' + _name, _activator, _thing);
+   Action.call(this, 'pushover:' + _name, _activator, _user);
 
    this.activator.on('activate', function () {
       console.log(that.name + ': received activate event');
@@ -25,7 +25,8 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
          );
 
          var msg = {
-            user: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j',
+            //user: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j',
+            user: that.thing.getProperty('pushoverDestAddr'),
             message: that.activatedMessage,   // required
             title: "Casa Collin Update",
             retry: 60,
@@ -33,12 +34,12 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
             priority: that.messagePriority,
          };
 
-         //pushService.send( msg, function( err, result ) {
-            //if ( err ) {
-               //console.log('Error logging into Pushover: ' + error);
-            //}
-            //pushService = null;
-         //});
+         pushService.send( msg, function( err, result ) {
+            if ( err ) {
+               console.log('Error logging into Pushover: ' + error);
+            }
+            pushService = null;
+         });
       }
    });
 
@@ -54,7 +55,8 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
          );
 
          var msg = {
-            user: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j',
+            //user: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j',
+            user: that.thing.getProperty('pushoverDestAddr'),
             message: that.deactivatedMessage,   // required
             title: "Casa Collin Update",
             retry: 60,
@@ -62,12 +64,12 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
             priority: that.messagePriority,
          };
 
-         //pushService.send( msg, function( err, result ) {
-            //if ( err ) {
-               //console.log('Error logging into Pushover: ' + error);
-            //}
-            //pushService = null;
-         //});
+         pushService.send( msg, function( err, result ) {
+            if ( err ) {
+               console.log('Error logging into Pushover: ' + error);
+            }
+            pushService = null;
+         });
       }
    });
 }

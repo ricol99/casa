@@ -33,7 +33,7 @@ Thing.prototype.addAction = function(_action) {
    });
 
    _action.on('deactivated', function (sourceName) {
-      console.log(that.name + ': action ' + sourceName + ' has been deactivated');
+      console.log(this.name + ': action ' + sourceName + ' has been deactivated');
    });
    console.log(this.name + ': ' + _action.name + ' associated!');
 }

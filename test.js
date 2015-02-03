@@ -15,7 +15,8 @@ var PushoverAction = require('./pushoveraction');
 //////////////////////////////////////////////////////////////////
 var richard = new User('richard', 'Richard');
 var natalie = new User('natalie', 'Natalie');
-var keyHolders = new UserGroup('key-holders', 'Key Holders', {},
+var keyHolders = new UserGroup('key-holders', 'Key Holders',
+                               { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'},
                                { richard: richard, natalie: natalie });
 
 var alarm = new Thing('texecom-prem-elite-48', {}, {} );
