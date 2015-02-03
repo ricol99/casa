@@ -1,21 +1,20 @@
 var util = require('util');
 var events = require('events');
 
-function State(_name) {
+function State(_name, _thing) {
    this.name = 'state:' + _name;
-   this.thing = null;
+   this.thing = _thing;
 
    events.EventEmitter.call(this);
 
    var that = this;
+
+   if (this.thing) {
+      this.thing.addState(this);
+   }
 }
 
 util.inherits(State, events.EventEmitter);
-
-State.prototype.setThing = function(_thing) {
-   this.thing = _thing;
-   console.log(this.name + ': ' + _thing.name + ' associated!');
-}
 
 module.exports = exports = State;
  
