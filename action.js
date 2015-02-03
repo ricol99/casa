@@ -16,6 +16,22 @@ function Action(_name, _activator, _thing) {
    if (this.thing) {
       this.thing.addAction(this);
    }
+
+   this.activator.on('activate', function () {
+      console.log('ACTIVATED KHDSGhkdfgsAhfgdhfgdshfgdshgdfhgdhfgdhfgdfhgdghgdfjhdsgfhdsgfhsfghdfsghkdsfgkjdsfgdsfgdshfgdshkfgsdkhdsgfkgs');
+
+      if (that.actionEnabled) {
+         that.emit('activated', that.name);
+      }
+   });
+
+   this.activator.on('deactivate', function () {
+      console.log('DEACTIVATED KHDSGhkdfgsAhfgdhfgdshfgdshgdfhgdhfgdhfgdfhgdghgdfjhdsgfhdsgfhsfghdfsghkdsfgkjdsfgdsfgdshfgdshkfgsdkhdsgfkgs');
+
+      if (that.actionEnabled) {
+         that.emit('deactivated', that.name);
+      }
+   });
 }
 
 util.inherits(Action, events.EventEmitter);

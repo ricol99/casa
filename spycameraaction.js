@@ -12,13 +12,13 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
 
    Action.call(this, 'spycam:' + _name, _activator, _thing);
 
-   this.activator.on('activate', function () {
-      console.log(that.name + ': received activate event');
+   this.on('activated', function () {
+      console.log(that.name + ': received activated event');
       capture();
    });
 
-   this.activator.on('deactivate', function () {
-      console.log(that.name + ': received deactivate event');
+   this.on('deactivated', function () {
+      console.log(that.name + ': received deactivated event');
       cancelCapture();
    });
 

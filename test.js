@@ -35,9 +35,9 @@ var richardHomeState = new State('richard-home', richard);
 var natalieHomeState = new State('natalie-home', natalie);
 
 var fullyArmedState = new GpioState('fully-armed', 4, true, alarm);
-var partArmedState = new GpioState('part-armed', 12, true, alarm);
-var inAlarmState = new GpioState('alarm-in-alarm', 16, true, alarm);
-var confirmedAlarmState = new GpioState('alarm-confirmed-alarm', 20, true, alarm);
+//var partArmedState = new GpioState('part-armed', 12, true, alarm);
+//var inAlarmState = new GpioState('alarm-in-alarm', 16, true, alarm);
+//var confirmedAlarmState = new GpioState('alarm-confirmed-alarm', 20, true, alarm);
 
 var loungePir1 = new GpioState('lounge-1', 17, true, loungePirs);
 
