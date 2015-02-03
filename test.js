@@ -1,5 +1,7 @@
 var util = require('util')
 var Thing = require('./thing');
+var User = require('./user');
+var UserGroup = require('./usergroup');
 var State = require('./state');
 var GpioState = require('./gpiostate');
 var Activator = require('./activator');
@@ -11,9 +13,10 @@ var PushoverAction = require('./pushoveraction');
 //////////////////////////////////////////////////////////////////
 // Things
 //////////////////////////////////////////////////////////////////
-var richard = new Thing('richard', {}, {} );
-var natalie = new Thing('natalie', {}, {} );
-var keyHolders = new Thing('key-holders', {}, {} );
+var richard = new User('richard', 'Richard');
+var natalie = new User('natalie', 'Natalie');
+var keyHolders = new UserGroup('key-holders', 'Key Holders', {},
+                               { richard: richard, natalie: natalie });
 
 var alarm = new Thing('texecom-prem-elite-48', {}, {} );
 
