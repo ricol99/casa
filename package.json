@@ -9,5 +9,6 @@
   "license": "MIT",
   "dependencies": {
     "limb": "0.1.1"
-  }
+  },
+  "start": "node internet_main.js"
 }
