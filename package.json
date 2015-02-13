@@ -8,6 +8,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "limb": "^1.2.0"
+    "limb": "^1.1.0"
   }
 }
