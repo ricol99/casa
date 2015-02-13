@@ -29,16 +29,19 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { richard: richard, natalie: natalie }, casaCollin,
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'});
 
-var alarmCasa = new Casa('alarm', 'Texecom Alarm', 7000, casaCollin, {});
+var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm', 10002, casaCollin, {});
 
 var internetCasa = new PeerCasa('internet', 'Internet Peer Casa',
-                                { hostname: 'localhost', port: 7000 }, casaCollin, {});
+                                { hostname: 'localhost', port: 7000 }, 
+                                alarmCasa, casaCollin, {});
 
-var cctvCasa = new PeerCasa('cctv', 'CCTV Peer Casa',
-                            { hostname: 'pi-cctv', port: 7000 }, casaCollin, {});
+var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
+                            { hostname: 'pi-cctv', port: 9000 },
+                            alarmCasa, casaCollin, {});
 
-var lightCasa = new PeerCasa('light', 'Light Peer Casa',
-                            { hostname: 'pi-light', port: 7000 }, casaCollin, {});
+var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
+                             { hostname: 'pi-light', port: 8000 },
+                             alarmCasa,  casaCollin, {});
 
 var loungePirs = new Thing('lounge-pirs', 'Lounge PIRs', alarmCasa, {} );
 
@@ -50,9 +53,9 @@ var loungeCamera = new Thing('lounge-camera', 'Lounge Camera', cctvCasa, {} );
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var internetCasaState = new PeerCasaState('internet-casa', internetCasa);
-var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa);
-var lightCasaState = new PeerCasaState('light-casa', lightCasa);
+var internetCasaState = new PeerCasaState('internet-casa', internetCasa, true);
+var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa, false);
+var lightCasaState = new PeerCasaState('light-casa', lightCasa, false);
 
 var richardOnWayHomeState = new State('richard-on-way-home', richard)
 var natalieOnWayHomeState = new State('natalie-on-way-home', natalie);

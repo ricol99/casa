@@ -12,11 +12,13 @@ function Casa(_name, _displayName, _listeningPort, _owner, _props) {
    limb.on('client', function(client) {
      // do stuff with newly client
      console.log('New client id=' + client.id + ', name=' + client.data.name);
+     that.emit('casa-joined', client.data.name);
    })
 
    limb.on('drop', function(client) {
      // do stuff with dropped client
-     console.log('Drppoed client id=' + client.id + ', name=' + client.data.name);
+     console.log('Dropped client id=' + client.id + ', name=' + client.data.name);
+     that.emit('casa-lost', client.data.name);
    })
 
 }
