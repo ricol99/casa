@@ -7,8 +7,7 @@
     "name": "Richard Collin"
   },
   "license": "MIT",
-  },
   "dependencies": {
-    "limb": "*",
-  },
+    "limb": "^1.2.0"
+  }
 }
