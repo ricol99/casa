@@ -10,8 +10,4 @@ function UserGroup(_name, _displayName, _props, _users) {
 
 util.inherits(UserGroup, User);
 
-User.prototype.getUser = function(_userName) {
-   return this.users[_userName];
-};
-
 module.exports = exports = UserGroup;

@@ -2,10 +2,11 @@ var util = require('util');
 var Action = require('./action');
 var push = require( 'pushover-notifications' );
 
-function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority, _activator, _user) {
+function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMessage, _deactPriority, _activator, _user) {
    this.activatedMessage = _activatedMessage;
    this.deactivatedMessage = _deactivatedMessage;
-   this.messagePriority = _priority;
+   this.messageActPriority = _actPriority;
+   this.messageDeactPriority = _deactPriority;
 
    this.actionActive = false;
    this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
@@ -20,7 +21,7 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
 
       if (!that.actionActive) {
          that.actionActive = true;
-         that.emit('activated', that.name);
+         //that.emit('activated', that.name);
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
@@ -28,12 +29,12 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
             title: "Casa Update",
             retry: 60,
             expire: 3600,
-            priority: that.messagePriority,
+            priority: that.messageActPriority,
          };
 
          that.pushService.send( msg, function( err, result ) {
             if ( err ) {
-               console.log('Error logging into Pushover: ' + error);
+               console.log('Error logging into Pushover: ' + err);
             }
          });
       }
@@ -44,7 +45,7 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
 
       if (that.actionActive) {
          that.actionActive = false;
-         that.emit('deactivated', that.name);
+         //that.emit('deactivated', that.name);
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
@@ -52,7 +53,7 @@ function PushoverAction(_name, _activatedMessage, _deactivatedMessage, _priority
             title: "Casa Collin Update",
             retry: 60,
             expire: 3600,
-            priority: that.messagePriority,
+            priority: that.messageDeactPriority,
          };
 
          that.pushService.send( msg, function( err, result ) {

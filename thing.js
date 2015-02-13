@@ -2,8 +2,9 @@ var util = require('util');
 var events = require('events');
 
 
-function Thing(_name) {
+function Thing(_name, _props) {
    this.name = 'thing:' + _name;
+   this.props = _props;
    this.states = {};
    this.actions = {};
 
@@ -42,5 +43,9 @@ Thing.prototype.addAction = function(_action) {
    console.log(this.name + ': ' + _action.name + ' associated!');
 }
 
+
+Thing.prototype.getProperty = function(_propName) {
+   return this.props[_propName];
+};
 
 module.exports = exports = Thing;
