@@ -19,9 +19,9 @@ var internetParent = new Parent('internet-parent', 'Internet Parent', 'localhost
 
 var richard = new User('richard', 'Richard');
 var natalie = new User('natalie', 'Natalie');
-var admin = new UserGroup('admin', 'Adminstrators',
-                          { pushoverDestAddr: 'gX5JLc28t775dYr1yjuo4p38t7hziV'},
-                          { richard: richard });
+var admins = new UserGroup('admins', 'Adminstrators',
+                           { pushoverDestAddr: 'gX5JLc28t775dYr1yjuo4p38t7hziV'},
+                           { richard: richard });
 
 var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'},
@@ -98,12 +98,12 @@ var fireAlarmMessage = new PushoverAction('alarm-fire-alarm',
 var fullyArmedMessage = new PushoverAction('alarm-fully-armed',
                                            'Security-Info: Alarm armed', 0,
                                            'Security-Info: Alarm disarmed', 0,
-                                           fullyArmedActivator, keyHolders);
+                                           fullyArmedActivator, admins);
 
 var partArmedMessage = new PushoverAction('alarm-part-armed',
                                           'Security-Info: Alarm part armed', 0,
                                           'Security-Info: Alarm disarmed', 0,
-                                          partArmedActivator, keyHolders);
+                                          partArmedActivator, admins);
 
 var alarmInAlarmMessage = new PushoverAction('alarm-in-alarm',
                                              'Security-Alarm: Alarm triggered', 2,
