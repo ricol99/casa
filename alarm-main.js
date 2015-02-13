@@ -7,6 +7,7 @@ var UserGroup = require('./usergroup');
 var State = require('./state');
 var GpioState = require('./gpiostate');
 var Activator = require('./activator');
+var AndActivator = require('./and-activator');
 var GpioAction = require('./gpioaction');
 var SpyCameraAction = require('./spycameraaction');
 var PushoverAction = require('./pushoveraction');
@@ -60,6 +61,7 @@ var loungePir1 = new GpioState('lounge-1', 27, true, loungePirs);
 //////////////////////////////////////////////////////////////////
 var internetParentActivator = new Activator('internet-parent', internetParentState, 0, true);
 var loungeActivator = new Activator('lounge-pir-1', loungePir1, 15, false);
+var loungeFullyArmedActivator = new AndActivator('lounge-activity', [ loungeActivator, fullyArmedState ], 0, false);
 
 var tamperActivator = new Activator('alarm-tamper-alarm', tamperState, 0, false);
 var mainsFailureActivator = new Activator('alarm-mains-failure', mainsFailureState, 0, false);
@@ -73,12 +75,12 @@ var confirmedAlarmActivator = new Activator('alarm-confirmed-alarm', confirmedAl
 // Actions
 //////////////////////////////////////////////////////////////////
 //var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, loungeLight);
-var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeActivator, loungeCamera);
+var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, loungeCamera);
 
 var loungeMessage = new PushoverAction('lounge',
                                        'Security-Alarm: * Motion in lounge * - Started recording', 2,
                                        'Security-Alarm: * Motion in lounge ended * - Finished recording', 0,
-                                       loungeActivator, keyHolders);
+                                       loungeFullyArmedActivator, admins);
 
 var tamperMessage = new PushoverAction('alarm-tamper-alarm',
                                        'Security-Info: * Alarm being tampered with! *', 2,

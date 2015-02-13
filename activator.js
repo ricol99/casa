@@ -1,9 +1,9 @@
 var util = require('util');
 var events = require('events');
 
-function Activator(_name, _state, _timeout, _invert) {
+function Activator(_name, _source, _timeout, _invert) {
    this.name = 'activator:' + _name;
-   this.state = _state;
+   this.source = _source;
    this.timeout = _timeout;
    this.invert = _invert;
    this.coldStart = true;
@@ -18,7 +18,15 @@ function Activator(_name, _state, _timeout, _invert) {
 
    events.EventEmitter.call(this);
 
-   this.state.on('active', function (sourceName) {
+   this.source.on('active', function (sourceName) {
+      sourceActive(sourceName);
+   });
+
+   this.source.on('activated', function (sourceName) {
+      sourceActive(sourceName);
+   });
+
+   var sourceActive = function(sourceName) {
       console.log('source ' + sourceName + ' active!');
       
       if (that.coldStart) {
@@ -34,9 +42,17 @@ function Activator(_name, _state, _timeout, _invert) {
             delayedSwitchOff();
          }
       }
+   }
+
+   this.source.on('inactive', function (sourceName) {
+      sourceInactive(sourceName);
    });
 
-   this.state.on('inactive', function (sourceName) {
+   this.source.on('deactivated', function (sourceName) {
+      sourceInactive(sourceName);
+   });
+
+   var sourceInactive = function(sourceName) {
       console.log('source ' + sourceName + ' inactive!');
 
       if (that.coldStart) {
@@ -60,7 +76,7 @@ function Activator(_name, _state, _timeout, _invert) {
             deactivateDestination();
          }
       }
-   });
+   }
 
    var activateDestination = function() {
       that.destActivated = true;
