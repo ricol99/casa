@@ -2,7 +2,7 @@
   "name": "casa",
   "version": "0.0.1",
   "description": "home automation",
-  "main": "src/internet_main.js",
+  "main": "internet_main.js",
   "author": {
     "name": "Richard Collin"
   },
