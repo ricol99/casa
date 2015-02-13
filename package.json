@@ -8,7 +8,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "limb": "0.1.1"
+    "limb": "~0.1.1",
+    "pushover-notifications": "~0.2.2"
   },
   "start": "node internet_main.js"
 }
