@@ -1,19 +1,29 @@
 var util = require('util');
 var events = require('events');
 
-
-function Thing(_name, _props) {
+function Thing(_name, _displayName, _owner, _props) {
    this.name = 'thing:' + _name;
+   this.displayName = _displayName;
+   this.owner = _owner;
    this.props = _props;
+   this.children = {};
    this.states = {};
    this.actions = {};
 
    events.EventEmitter.call(this);
+
+   if (this.owner) {
+      this.owner.addChild(this);
+   }
    var that = this;
 
 }
 
 util.inherits(Thing, events.EventEmitter);
+
+Thing.prototype.addChild = function(_child) {
+   this.children[_child.name] = _child;
+}
 
 Thing.prototype.addState = function(_state) {
    this.states[_state.name] = _state;
