@@ -76,7 +76,7 @@ var loungePir1 = new GpioState('lounge-1', 27, true, loungePirs);
 //////////////////////////////////////////////////////////////////
 // Activators
 //////////////////////////////////////////////////////////////////
-var internetCasaActivator = new Activator('internet-casa', internetCasaState, 0, true);
+var internetCasaActivator = new Activator('internet-casa', internetCasaState, 0, false);
 var loungeActivator = new Activator('lounge-pir-1', loungePir1, 15, false);	// Gives me a minimum of 15 seconds recording time
 
 var tamperActivator = new Activator('alarm-tamper-alarm', tamperState, 0, false);
@@ -138,7 +138,7 @@ var confirmedAlarmMessage = new PushoverAction('alarm-confirmed-alarm',
                                                confirmedAlarmActivator, keyHolders);
 
 //var internetParentMessage = new PushoverAction('internet-parent',
-                                               //'Security-Info: Internet connection lost!,',
-                                               //'Security-Info: Connected to Internet!',
+                                               //'Security-Info: Connected to Internet!', 0,
+                                               //'Security-Info: Internet connection lost!', 2,
                                                //2, internetParentActivator, admins);
 

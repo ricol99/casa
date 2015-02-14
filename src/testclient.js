@@ -25,37 +25,37 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { richard: richard, natalie: natalie }, casaCollin,
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'});
 
-var internetCasa = new Casa('internet', 'Internet Casa', 7000, casaCollin, {});
+var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm Casa', 7001, casaCollin, {});
 
-var alarmCasa = new PeerCasa('casa-collin-alarm', 'Texecom Alarm Casa',
+var internetCasa = new PeerCasa('internet', 'Internet Casa',
                             { hostname: 'localhost', port: 7000 },
-                            internetCasa, casaCollin, {});
+                            alarmCasa, casaCollin, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            internetCasa, casaCollin, {});
+                            alarmCasa, casaCollin, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            internetCasa,  casaCollin, {});
+                            alarmCasa,  casaCollin, {});
 
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var alarmCasaState = new PeerCasaState('alarm-casa', alarmCasa, false);
-var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa, false);
-var lightCasaState = new PeerCasaState('light-casa', lightCasa, false);
+var internetCasaState = new PeerCasaState('internet-casa', internetCasa, true);
+//var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa, false);
+//var lightCasaState = new PeerCasaState('light-casa', lightCasa, false);
 
 //////////////////////////////////////////////////////////////////
 // Activators
 //////////////////////////////////////////////////////////////////
-var alarmCasaActivator = new Activator('alarm-casa-casa', alarmCasaState, 0, false);
+var internetCasaActivator = new Activator('internet-casa', internetCasaState, 0, false);
 
 //////////////////////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////////////////////
-var alarmCasaMessage = new PushoverAction('internet-parent',
+var internetCasaMessage = new PushoverAction('internet-casa',
                                           'Security-Info: Connected to Internet!', 0,
-                                          'Security-Info: Internet connection lost!', 2, 
-                                          alarmCasaActivator, admins);
+                                          'Security-Info: Internet connection lost!,', 2, 
+                                          internetCasaActivator, admins);
 
