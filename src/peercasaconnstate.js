@@ -3,7 +3,7 @@ var limb = require('limb');
 var State = require('./state');
 var io = require('socket.io-client')
 
-function PeerCasaState(_name, _peerCasa, _proActiveMonitor) {
+function PeerCasaConnState(_name, _peerCasa, _proActiveMonitor) {
    this.peerCasa = _peerCasa;
    this.proActiveMonitor = _proActiveMonitor;
    this.active = false;
@@ -98,7 +98,7 @@ function PeerCasaState(_name, _peerCasa, _proActiveMonitor) {
    }
 }
 
-util.inherits(PeerCasaState, State);
+util.inherits(PeerCasaConnState, State);
 
-module.exports = exports = PeerCasaState;
+module.exports = exports = PeerCasaConnState;
  

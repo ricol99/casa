@@ -28,11 +28,7 @@ function Casa(_name, _displayName, _listeningPort, _owner, _props) {
      socket.on('login', function(data) {
        console.log(that.name + ': login: ' + data.name);
        name = data.name;
-       that.emit('casa-joined', name);
-     });
-
-     socket.on('active', function(data) {
-       console.log(that.name + ': Peer casa active event received from ' + name + ': ' + data);
+       that.emit('casa-joined', name, socket);
      });
    });
 

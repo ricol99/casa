@@ -12,7 +12,7 @@ var AndActivator = require('./and-activator');
 var GpioAction = require('./gpioaction');
 var SpyCameraAction = require('./spycameraaction');
 var PushoverAction = require('./pushoveraction');
-var PeerCasaState = require('./peercasastate');
+var PeerCasaConnState = require('./peercasaconnstate');
 
 //////////////////////////////////////////////////////////////////
 // Things
@@ -53,9 +53,9 @@ var loungeCamera = new Thing('lounge-camera', 'Lounge Camera', cctvCasa, {} );
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var internetCasaState = new PeerCasaState('internet-casa', internetCasa, true);
-var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa, false);
-var lightCasaState = new PeerCasaState('light-casa', lightCasa, false);
+var internetCasaState = new PeerCasaConnState('internet-casa', internetCasa, true);
+var cctvCasaState = new PeerCasaConnState('cctv-casa', cctvCasa, false);
+var lightCasaState = new PeerCasaConnState('light-casa', lightCasa, false);
 
 var richardOnWayHomeState = new State('richard-on-way-home', richard)
 var natalieOnWayHomeState = new State('natalie-on-way-home', natalie);

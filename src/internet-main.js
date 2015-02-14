@@ -8,7 +8,7 @@ var State = require('./state');
 var Activator = require('./activator');
 var AndActivator = require('./and-activator');
 var PushoverAction = require('./pushoveraction');
-var PeerCasaState = require('./peercasastate');
+var PeerCasaConnState = require('./peercasaconnstate');
 
 //////////////////////////////////////////////////////////////////
 // Things
@@ -42,9 +42,9 @@ var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var alarmCasaState = new PeerCasaState('alarm-casa', alarmCasa, false);
-var cctvCasaState = new PeerCasaState('cctv-casa', cctvCasa, false);
-var lightCasaState = new PeerCasaState('light-casa', lightCasa, false);
+var alarmCasaState = new PeerCasaConnState('alarm-casa', alarmCasa, false);
+var cctvCasaState = new PeerCasaConnState('cctv-casa', cctvCasa, false);
+var lightCasaState = new PeerCasaConnState('light-casa', lightCasa, false);
 
 //////////////////////////////////////////////////////////////////
 // Activators
