@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "home automation",
   "main": "src/internet_main.js",
+  "start": "node src/internet_main.js",
   "author": {
     "name": "Richard Collin"
   },
@@ -10,6 +11,5 @@
   "dependencies": {
     "pushover-notifications": "~0.2.2",
     "limb": "~0.1.1"
-  },
-  "start": "node src/internet_main.js"
+  }
 }
