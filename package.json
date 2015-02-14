@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "pushover-notifications": "~0.2.2",
-    "limb": "~0.1.1"
+    "limb": "~0.1.1",
+    "string": "~3.0.0"
   }
 }
