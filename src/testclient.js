@@ -28,7 +28,7 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
 var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm Casa', 7001, casaCollin, {});
 
 var internetCasa = new PeerCasa('internet', 'Internet Casa',
-                            { hostname: 'localhost', port: 7000 },
+                            { hostname: 'casa.elasticbeanstalk.com', port: 80 },
                             alarmCasa, casaCollin, true, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
