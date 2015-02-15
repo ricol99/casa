@@ -88,9 +88,9 @@ var loungeFullyArmedActivator = new AndActivator('lounge-activity', [ loungeActi
 //////////////////////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////////////////////
-//var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, loungeLight);
+//var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, lightCasa);
 
-var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, loungeCamera);
+var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, cctvCasa);
 
 var loungeMessage = new PushoverAction('lounge',
                                        'Security-Alarm: * Motion in lounge * - Started recording', 2,
