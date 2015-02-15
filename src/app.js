@@ -24,10 +24,10 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { richard: richard, natalie: natalie }, casaCollin,
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'});
 
-var internetCasa = new Casa('internet', 'Internet Casa', 80, casaCollin, {});
+var internetCasa = new Casa('internet', 'Internet Casa', process.env.PORT, casaCollin, {});
 
 var alarmCasa = new PeerCasa('casa-collin-alarm', 'Texecom Alarm Casa',
-                            { hostname: 'localhost', port: 7000 },
+                            { hostname: 'localhost', port: 10002 },
                             internetCasa, casaCollin, false, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
