@@ -1,6 +1,5 @@
 var util = require('util');
 var Thing = require('./thing');
-//var limb = require('limb')
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
