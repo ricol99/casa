@@ -8,7 +8,6 @@ var State = require('./state');
 var Activator = require('./activator');
 var AndActivator = require('./and-activator');
 var PushoverAction = require('./pushoveraction');
-var PeerCasaConnState = require('./peercasaconnstate');
 
 //////////////////////////////////////////////////////////////////
 // Things
@@ -29,27 +28,25 @@ var internetCasa = new Casa('internet', 'Internet Casa', 7000, casaCollin, {});
 
 var alarmCasa = new PeerCasa('casa-collin-alarm', 'Texecom Alarm Casa',
                             { hostname: 'localhost', port: 7000 },
-                            internetCasa, casaCollin, {});
+                            internetCasa, casaCollin, false, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            internetCasa, casaCollin, {});
+                            internetCasa, casaCollin, false, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            internetCasa,  casaCollin, {});
+                            internetCasa,  casaCollin, false, {});
 
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var alarmCasaState = new PeerCasaConnState('alarm-casa', alarmCasa, false);
-var cctvCasaState = new PeerCasaConnState('cctv-casa', cctvCasa, false);
-var lightCasaState = new PeerCasaConnState('light-casa', lightCasa, false);
+var weatherWetState = new State('weather-state', internetCasa);
 
 //////////////////////////////////////////////////////////////////
 // Activators
 //////////////////////////////////////////////////////////////////
-var alarmCasaActivator = new Activator('alarm-casa-casa', alarmCasaState, 0, false);
+var alarmCasaActivator = new Activator('alarm-casa-casa', alarmCasa, 0, false);
 
 //////////////////////////////////////////////////////////////////
 // Actions
@@ -59,3 +56,9 @@ var alarmCasaMessage = new PushoverAction('internet-parent',
                                           'Security-Info: Internet connection lost!', 2, 
                                           alarmCasaActivator, admins);
 
+setTimeout(function() {
+   weatherWetState.emit('active', weatherWetState.name);
+   setTimeout(function() {
+      weatherWetState.emit('inactive', weatherWetState.name);
+   }, 10000);
+}, 10000);

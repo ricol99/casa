@@ -8,7 +8,7 @@ var State = require('./state');
 var Activator = require('./activator');
 var AndActivator = require('./and-activator');
 var PushoverAction = require('./pushoveraction');
-var PeerCasaConnState = require('./peercasaconnstate');
+var PeerState = require('./peerstate');
 
 //////////////////////////////////////////////////////////////////
 // Things
@@ -29,33 +29,32 @@ var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm Casa', 7001, casaCo
 
 var internetCasa = new PeerCasa('internet', 'Internet Casa',
                             { hostname: 'localhost', port: 7000 },
-                            alarmCasa, casaCollin, {});
+                            alarmCasa, casaCollin, true, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            alarmCasa, casaCollin, {});
+                            alarmCasa, casaCollin, false, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            alarmCasa,  casaCollin, {});
+                            alarmCasa,  casaCollin, false, {});
 
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var internetCasaState = new PeerCasaConnState('internet-casa', internetCasa, true);
-//var cctvCasaState = new PeerCasaConnState('cctv-casa', cctvCasa, false);
-//var lightCasaState = new PeerCasaConnState('light-casa', lightCasa, false);
+var weatherWetState = new PeerState('weather-state', internetCasa);
 
 //////////////////////////////////////////////////////////////////
 // Activators
 //////////////////////////////////////////////////////////////////
-var internetCasaActivator = new Activator('internet-casa', internetCasaState, 0, false);
+var internetCasaActivator = new Activator('internet-casa', internetCasa, 0, false);
+var wetWeatherActivator = new Activator('wet-weather', weatherWetState, 0, false);
 
 //////////////////////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////////////////////
-var internetCasaMessage = new PushoverAction('internet-casa',
-                                          'Security-Info: Connected to Internet!', 0,
-                                          'Security-Info: Internet connection lost!,', 2, 
-                                          internetCasaActivator, admins);
+var wetWeatherMessage = new PushoverAction('wet-weather',
+                                          'Info: It is going to rain!', 0,
+                                          'Info: the rain has gone!', 0, 
+                                          wetWeatherActivator, admins);
 

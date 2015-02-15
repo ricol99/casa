@@ -36,25 +36,26 @@ function Casa(_name, _displayName, _listeningPort, _owner, _props) {
      console.log('listening on *:' + that.listeningPort);
    });
 
-   //limb.listen(this.listeningPort)
- 
-   //limb.on('client', function(client) {
-     //// do stuff with newly client
-     //console.log('New client id=' + client.id + ', name=' + client.data.name);
-     //that.emit('casa-joined', client.data.name);
-   //})
-
-   //limb.on('drop', function(client) {
-     //// do stuff with dropped client
-     //console.log('Dropped client id=' + client.id + ', name=' + client.data.name);
-     //that.emit('casa-lost', client.data.name);
-   //})
-
 }
 
 util.inherits(Casa, Thing);
 
+Casa.prototype.addState = function(_state) {
+   this.states[_state.name] = _state;
+   that = this;
+
+   _state.on('active', function (sourceName) {
+      console.log(this.name + ': ' + sourceName + ' has become active');
+      that.emit('state-active', sourceName);
+   });
+
+   _state.on('inactive', function (sourceName) {
+      console.log(this.name + ': ' + sourceName + ' has become inactive');
+      that.emit('state-inactive', sourceName);
+   });
+
+   console.log(this.name + ': ' + _state.name + ' associated!');
+}
+
+
 module.exports = exports = Casa;
-
-
-

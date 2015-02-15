@@ -12,7 +12,6 @@ var AndActivator = require('./and-activator');
 var GpioAction = require('./gpioaction');
 var SpyCameraAction = require('./spycameraaction');
 var PushoverAction = require('./pushoveraction');
-var PeerCasaConnState = require('./peercasaconnstate');
 
 //////////////////////////////////////////////////////////////////
 // Things
@@ -33,35 +32,31 @@ var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm', 10002, casaCollin
 
 var internetCasa = new PeerCasa('internet', 'Internet Peer Casa',
                                 { hostname: 'casa.elasticbeanstalk.com', port: 80 }, 
-                                alarmCasa, casaCollin, {});
+                                alarmCasa, casaCollin, true, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'pi-cctv', port: 9000 },
-                            alarmCasa, casaCollin, {});
+                            alarmCasa, casaCollin, false, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                              { hostname: 'pi-light', port: 8000 },
-                             alarmCasa,  casaCollin, {});
+                             alarmCasa,  casaCollin, false, {});
 
-var loungePirs = new Thing('lounge-pirs', 'Lounge PIRs', alarmCasa, {} );
+//var loungePirs = new Thing('lounge-pirs', 'Lounge PIRs', alarmCasa, {} );
 
 //var loungeCamera = new IpCamera('lounge-camera', 'Lounge Camera', cctvCasa, {} );
-var loungeCamera = new Thing('lounge-camera', 'Lounge Camera', cctvCasa, {} );
+//var loungeCamera = new Thing('lounge-camera', 'Lounge Camera', cctvCasa, {} );
 
 //var loungeLight = new Thing('lounge-light', 'Lounge Light', lightCasa, {} );
 
 //////////////////////////////////////////////////////////////////
 // States
 //////////////////////////////////////////////////////////////////
-var internetCasaState = new PeerCasaConnState('internet-casa', internetCasa, true);
-var cctvCasaState = new PeerCasaConnState('cctv-casa', cctvCasa, false);
-var lightCasaState = new PeerCasaConnState('light-casa', lightCasa, false);
+//var richardOnWayHomeState = new State('richard-on-way-home', richard)
+//var natalieOnWayHomeState = new State('natalie-on-way-home', natalie);
 
-var richardOnWayHomeState = new State('richard-on-way-home', richard)
-var natalieOnWayHomeState = new State('natalie-on-way-home', natalie);
-
-var richardHomeState = new State('richard-home', richard);
-var natalieHomeState = new State('natalie-home', natalie);
+//var richardHomeState = new State('richard-home', richard);
+//var natalieHomeState = new State('natalie-home', natalie);
 
 var tamperState = new GpioState('alarm-tamper-alarm', 4, true, alarmCasa);
 var mainsFailureState = new GpioState('alarm-mains-failure', 17, true, alarmCasa);
@@ -71,12 +66,12 @@ var partArmedState = new GpioState('alarm-part-armed', 23, true, alarmCasa);
 var inAlarmState = new GpioState('alarm-in-alarm', 24, true, alarmCasa);
 var confirmedAlarmState = new GpioState('alarm-confirmed-alarm', 25, true, alarmCasa);
 
-var loungePir1 = new GpioState('lounge-1', 27, true, loungePirs);
+var loungePir1 = new GpioState('lounge-1', 27, true, alarmCasa);
 
 //////////////////////////////////////////////////////////////////
 // Activators
 //////////////////////////////////////////////////////////////////
-var internetCasaActivator = new Activator('internet-casa', internetCasaState, 0, false);
+var internetCasaActivator = new Activator('internet-casa', internetCasa, 0, false);
 var loungeActivator = new Activator('lounge-pir-1', loungePir1, 15, false);	// Gives me a minimum of 15 seconds recording time
 
 var tamperActivator = new Activator('alarm-tamper-alarm', tamperState, 0, false);
@@ -136,9 +131,4 @@ var confirmedAlarmMessage = new PushoverAction('alarm-confirmed-alarm',
                                                'Security-Info: Alarm confirmed triggered - call police!', 2,
                                                'Security-Info: Alarm disarmed', 2,
                                                confirmedAlarmActivator, keyHolders);
-
-//var internetParentMessage = new PushoverAction('internet-parent',
-                                               //'Security-Info: Connected to Internet!', 0,
-                                               //'Security-Info: Internet connection lost!', 2,
-                                               //2, internetParentActivator, admins);
 
