@@ -102,7 +102,7 @@ var loungeFullyArmedActivator = new AndActivator('lounge-activity', [ loungeActi
 //////////////////////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////////////////////
-//var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, loungeLight);
+//var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, lightCasa);
 
 var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, alarmCasa);
 
