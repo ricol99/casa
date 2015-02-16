@@ -1,6 +1,6 @@
 var util = require('util');
 var events = require('events');
-var LogicActivator = require('./logic-activator');
+var LogicActivator = require('./logicactivator');
 
 function AndActivator(_name, _sources, _timeout, _invert) {
    this.inputs = [];

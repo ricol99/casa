@@ -1,17 +1,18 @@
 var util = require('util')
 var Thing = require('./thing');
+var CasaArea = require('./casaarea');
 var Casa = require('./casa');
 var PeerCasa = require('./peercasa');
 var User = require('./user');
 var UserGroup = require('./usergroup');
 var State = require('./state');
 var Activator = require('./activator');
-var AndActivator = require('./and-activator');
+var AndActivator = require('./andactivator');
 var PushoverAction = require('./pushoveraction');
 var PeerState = require('./peerstate');
 
 //////////////////////////////////////////////////////////////////
-// Things
+// Things and Users
 //////////////////////////////////////////////////////////////////
 var casaCollin = new Thing('collin', 'Casa Collin Home', null, {} );
 
@@ -25,19 +26,28 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { richard: richard, natalie: natalie }, casaCollin,
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'});
 
-var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm Casa', 10002, casaCollin, {});
+//////////////////////////////////////////////////////////////////
+// Areas
+//////////////////////////////////////////////////////////////////
+var internet = new CasaArea('internet', 'Casa Collin Internet', casaCollin);
+var home = new CasaArea('home', 'Casa Collin Home', casaCollin);
 
+//////////////////////////////////////////////////////////////////
+// Casa Installations
+//////////////////////////////////////////////////////////////////
 var internetCasa = new PeerCasa('internet', 'Internet Casa',
                             { hostname: 'casa.elasticbeanstalk.com', port: 80 },
-                            alarmCasa, casaCollin, true, {});
+                            alarmCasa, internet, true, null, {});
 
-var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
+var alarmCasa = new Casa('alarm', 'Texecom Alarm Casa', 10002, home, internet, {});
+
+var cctvCasa = new PeerCasa('cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            alarmCasa, casaCollin, false, {});
+                            alarmCasa, home, false, internet, {});
 
-var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
+var lightCasa = new PeerCasa('light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            alarmCasa,  casaCollin, false, {});
+                            alarmCasa, home, false, internet, {});
 
 //////////////////////////////////////////////////////////////////
 // States

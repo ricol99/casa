@@ -1,0 +1,301 @@
+{
+   "name": "casasystem:casa-collin",
+   "displayName": "Casa Collin System",
+   "owner": "",
+   "props": {},
+   "users": [ 
+      {
+         "name": "user:richard",
+         "displayName": "Richard",
+         "props": {}
+      },
+      {
+         "name": "user:natalie",
+         "displayName": "Natalie",
+         "props": {}
+      },
+      {
+         "name": "usergroup:admins",
+         "displayName": "Administrators",
+         "users": [
+           "user:richard"
+         ],
+         "props": {
+            "pushoverDestAddr": "gX5JLc28t775dYr1yjuo4p38t7hziV"
+         }
+      },
+      {
+         "name": "usergroup:key-holders",
+         "displayName": "Key Holders",
+         "users": [
+           "user:richard",
+           "user:natalie"
+         ],
+         "props": {
+            "pushoverDestAddr": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j"
+         }
+      }
+   ],
+   "areas": [ 
+      {
+         "name": "casaarea:internet",
+         "displayName": "Casa Collin Internet",
+         "parentArea": "",
+         "casas": [
+            {
+               "name": "casa:internet",
+               "displayName": "Internet Casa",
+               "address": {
+                  "hostname": "casa.elasticbeanstalk.com",
+                  "port": "*EVAL*process.env.PORT"
+               },
+               "props": {},
+               "states": [
+               ],
+               "activators": [
+                  {
+                     "name": "activator:alarm-tamper-alarm",
+                     "source": "gpiostate:alarm-tamper-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-mains-failure",
+                     "source": "gpiostate:alarm-mains-failure",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-fire-alarm",
+                     "source": "gpiostate:alarm-fire-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-fully-armed",
+                     "source": "gpiostate:alarm-fully-armed",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-part-armed",
+                     "source": "gpiostate:alarm-part-armed",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-in-alarm",
+                     "source": "gpiostate:alarm-in-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-confirmed-alarm",
+                     "source": "gpiostate:alarm-confirmed-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  }
+               ],
+               "actions": [
+                  {
+                     "name": "pushoveraction:alarm-tamper-alarm",
+                     "activeMessage": "Security-Info: * Alarm being tampered with! *",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Info: Alarm no longer in tamper mode",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-tamper-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-mains-failure",
+                     "activeMessage": "Security-Info: * Alarm has lost mains power! *",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Info: Alarm mains power restored",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-mains-failure",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-fire-alarm",
+                     "activeMessage": "Security-Info: * Fire Alarm! *",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Info: Fire alarm reset",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-fire-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-fully-armed",
+                     "activeMessage": "Security-Info: Alarm armed",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-fully-armed",
+                     "target": "usergroup:admins"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-part-armed",
+                     "activeMessage": "Security-Info: Alarm part armed",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-part-armed",
+                     "target": "usergroup:admins"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-in-alarm",
+                     "activeMessage": "Security-Info: Alarm triggered",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessagePriority": 2,
+                     "source": "activator:alarm-in-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-confirmed-alarm",
+                     "activeMessage": "Security-Info: Alarm confirmed triggered - call police!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessagePriority": 2,
+                     "source": "activator:alarm-confirmed-alarm",
+                     "target": "usergroup:key-holders"
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "casaarea:home",
+         "displayName": "Casa Collin Home",
+         "parentArea": "casa:internet",
+         "casas": [
+            {
+               "name": "casa:alarm",
+               "displayName": "Texecom Alarm",
+               "address": {
+                  "hostname": "pi-alarm.home",
+                  "port": 80
+               },
+               "props": {},
+               "states": [
+                  {
+                     "name": "gpiostate:alarm-tamper-alarm",
+                     "gpioPin": 4,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-mains-failure",
+                     "gpioPin": 17,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-fire-alarm",
+                     "gpioPin": 18,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-fully-armed",
+                     "gpioPin": 22,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-part-armed",
+                     "gpioPin": 23,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-in-alarm",
+                     "gpioPin": 24,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-confirmed-alarm",
+                     "gpioPin": 25,
+                     "triggerLow": true
+                  },
+                  {
+                     "name": "gpiostate:alarm-lounge-pir",
+                     "gpioPin": 27,
+                     "triggerLow": true
+                  }
+               ],
+               "activators": [
+                  {
+                     "name": "activator:internet-connection",
+                     "source": "Casa:internet",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-lounge-pir",
+                     "source": "gpiostate:lounge-pir",
+                     "timeout": 15,
+                     "invert": false
+                  },
+                  {
+                     "name": "and-activator:lounge-activity",
+                     "sources": [
+                        "activator:alarm-lounge-pir",
+                        "gpiostate:alarm-fully-armed"
+                     ],
+                     "timeout": 0,
+                     "invert": false
+                  }
+               ],
+               "actions": [
+                  {
+                     "name": "spycameraaction:lounge",
+                     "cctvHostname": "192.168.1.245",
+                     "cctvPort": 8000,
+                     "userId": "ricol99",
+                     "password": "carrot99",
+                     "cameraId": 1,
+                     "source": "and-activator:lounge-activity",
+                     "target": ""
+                  },
+                  {
+                     "name": "pushoveraction:alarm-lounge",
+                     "activeMessage": "Security-Alarm: * Motion in lounge * - Started recording",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Alarm:  Motion in lounge ended * - Finished recording",
+                     "inactiveMessagePriority": 0,
+                     "source": "and-activator:lounge-activity",
+                     "target": "usergroup:keyholders"
+                  }
+               ]
+            },
+            {
+               "name": "casa:cctv",
+               "displayName": "CCTV",
+               "address": {
+                  "hostname": "pi-cctv.home",
+                  "port": 80
+               },
+               "props": {},
+               "states": [
+               ],
+               "activators": [
+               ],
+               "actions": [
+               ]
+            },
+            {
+               "name": "casa:light",
+               "displayName": "Light Controller",
+               "address": {
+                  "hostname": "pi-light.home",
+                  "port": 80
+               },
+               "props": {},
+               "states": [
+               ],
+               "activators": [
+               ],
+               "actions": [
+               ]
+            }
+         ]
+      }
+   ]
+}
+

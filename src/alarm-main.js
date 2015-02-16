@@ -1,5 +1,6 @@
 var util = require('util')
 var Thing = require('./thing');
+var CasaArea = require('./casaarea');
 var Casa = require('./casa');
 var PeerCasa = require('./peercasa');
 var User = require('./user');
@@ -8,13 +9,13 @@ var UserGroup = require('./usergroup');
 var State = require('./state');
 var GpioState = require('./gpiostate');
 var Activator = require('./activator');
-var AndActivator = require('./and-activator');
+var AndActivator = require('./andactivator');
 var GpioAction = require('./gpioaction');
 var SpyCameraAction = require('./spycameraaction');
 var PushoverAction = require('./pushoveraction');
 
 //////////////////////////////////////////////////////////////////
-// Things
+// Things and Users
 //////////////////////////////////////////////////////////////////
 var casaCollin = new Thing('collin', 'Casa Collin Home', null, {} );
 
@@ -28,20 +29,33 @@ var keyHolders = new UserGroup('key-holders', 'Key Holders',
                                { richard: richard, natalie: natalie }, casaCollin,
                                { pushoverDestAddr: 'g7KTUJvsJbPUNH5SL8oEitXBBuL32j'});
 
-var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm', 10002, casaCollin, {});
+//////////////////////////////////////////////////////////////////
+// Areas
+//////////////////////////////////////////////////////////////////
+var internet = new CasaArea('internet', 'Casa Collin Internet', casaCollin);
+var home = new CasaArea('home', 'Casa Collin Home', casaCollin);
+
+//////////////////////////////////////////////////////////////////
+// Casa Installations
+//////////////////////////////////////////////////////////////////
 
 var internetCasa = new PeerCasa('internet', 'Internet Peer Casa',
                                 { hostname: 'casa.elasticbeanstalk.com', port: 80 }, 
-                                alarmCasa, casaCollin, true, {});
+                                alarmCasa, internet, true, null, {});
+
+var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm', 10002, home, internet, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'pi-cctv', port: 9000 },
-                            alarmCasa, casaCollin, false, {});
+                            alarmCasa, home, false, internet, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                              { hostname: 'pi-light', port: 8000 },
-                             alarmCasa,  casaCollin, false, {});
+                             alarmCasa, home, false, internet, {});
 
+//////////////////////////////////////////////////////////////////
+// Things
+//////////////////////////////////////////////////////////////////
 //var loungePirs = new Thing('lounge-pirs', 'Lounge PIRs', alarmCasa, {} );
 
 //var loungeCamera = new IpCamera('lounge-camera', 'Lounge Camera', cctvCasa, {} );
@@ -90,7 +104,7 @@ var loungeFullyArmedActivator = new AndActivator('lounge-activity', [ loungeActi
 //////////////////////////////////////////////////////////////////
 //var loungeLight = new GpioAction('lounge', 21 ,true, loungeActivator, loungeLight);
 
-var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, loungeCamera);
+var loungeCam = new SpyCameraAction('lounge', '192.168.1.245', 8000, 'ricol99', 'carrot99', 1, loungeFullyArmedActivator, alarmCasa);
 
 var loungeMessage = new PushoverAction('lounge',
                                        'Security-Alarm: * Motion in lounge * - Started recording', 2,

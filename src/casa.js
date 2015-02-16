@@ -4,9 +4,11 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-function Casa(_name, _displayName, _listeningPort, _owner, _props) {
+function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _props) {
    this.listeningPort = _listeningPort;
-   Thing.call(this, 'casa:' + _name, _displayName, _owner, _props);
+   this.parentCasaArea = _parentCasaArea;
+
+   Thing.call(this, 'casa:' + _name, _displayName, _casaArea, _props);
    var that = this;
 
    app.get('/', function(req, res){
