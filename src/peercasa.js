@@ -21,6 +21,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
    this.connected = false;
    this.socket = null;
+   this.intervalID = null;
    
    var that = this;
 
@@ -44,6 +45,12 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
             console.log(that.name + ': Event received from my peer. Event name: active, instate: ' + data.stateName);
             that.emit('state-inactive', data.stateName);
          });
+
+         // Establish heartbeat
+         that.intervalID = setInterval(function(){
+            that.socket.emit('heartbeat', { name: that.casa.name });
+         }, 60000);
+
       });
 
       that.socket.on('error', function(error) {
@@ -52,6 +59,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
          if (that.connected) {
             that.connected = false;
+            clearInterval(that.intervalID);
             that.emit('inactive', that.name);
          }
       });
@@ -63,6 +71,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
       that.socket.on('disconnect', function() {
          console.log(that.name + ': Error disconnect');
          that.connected = false;
+         clearInterval(that.intervalID);
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.emit('inactive', that.name);
       });
@@ -95,6 +104,11 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
                  console.log(that.name + ': Event received from my peer. Event name: inactive, instate: ' + data.stateName);
                  that.emit('state-inactive', data.stateName);
               });
+
+              // Establish heartbeat
+              that.intervalID = setInterval(function(){
+                 that.socket.emit('heartbeat', { name: that.casa.name });
+              }, 60000);
            }
          }
       });
@@ -106,6 +120,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
            if (that.connected == true) {
               that.connected = false;
+              clearInterval(that.intervalID);
               that.socket = null;
               console.log(that.name + ': Lost connection to my peer. Going inactive.');
               that.emit('inactive', that.name);
