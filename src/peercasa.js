@@ -3,16 +3,25 @@ var Thing = require('./thing');
 var S = require('string');
 var io = require('socket.io-client');
 
-function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveMonitor, _parentCasaArea, _props) {
-   this.address = _address;
-   this.casa = _casa;
-   this.proActiveMonitor = _proActiveMonitor;
-   this.parentCasaArea = _parentCasaArea;
+function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveConnect, _props) {
+
+ if (_name.name) {
+      // constructing from object rather than params
+      this.address = _name.address;
+      this.casa = _name.casa;
+      this.proActiveConnect = _name.proActiveConnect;
+      Thing.call(this, _name.name, _name.displayName, _name.casaArea, _name.props);
+   }
+   else {
+      this.address = _address;
+      this.casa = _casa;
+      this.proActiveConnect = _proActiveConnect;
+      Thing.call(this, _name, _displayName, _casaArea, _props);
+   }
 
    this.connected = false;
    this.socket = null;
    
-   Thing.call(this, 'peer-casa:' + _name, _displayName, _casaArea, _props);
    var that = this;
 
    var connectToPeerCasa = function() {
@@ -59,7 +68,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveMon
       });
    }
 
-   if (this.proActiveMonitor) {
+   if (this.proActiveConnect) {
       // My role is to connect to my remote instance
       connectToPeerCasa();
    }

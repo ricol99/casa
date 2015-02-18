@@ -41,17 +41,17 @@ var home = new CasaArea('home', 'Casa Collin Home', casaCollin);
 
 var internetCasa = new PeerCasa('internet', 'Internet Peer Casa',
                                 { hostname: 'casa.elasticbeanstalk.com', port: 80 }, 
-                                alarmCasa, internet, true, null, {});
+                                alarmCasa, internet, true, {});
 
 var alarmCasa = new Casa('casa-collin-alarm', 'Texecom Alarm', 10002, home, internet, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'pi-cctv', port: 9000 },
-                            alarmCasa, home, false, internet, {});
+                            alarmCasa, home, false, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                              { hostname: 'pi-light', port: 8000 },
-                             alarmCasa, home, false, internet, {});
+                             alarmCasa, home, false, {});
 
 //////////////////////////////////////////////////////////////////
 // Things

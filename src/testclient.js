@@ -37,17 +37,17 @@ var home = new CasaArea('home', 'Casa Collin Home', casaCollin);
 //////////////////////////////////////////////////////////////////
 var internetCasa = new PeerCasa('internet', 'Internet Casa',
                             { hostname: 'casa.elasticbeanstalk.com', port: 80 },
-                            alarmCasa, internet, true, null, {});
+                            alarmCasa, internet, true, {});
 
 var alarmCasa = new Casa('alarm', 'Texecom Alarm Casa', 10002, home, internet, {});
 
 var cctvCasa = new PeerCasa('cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            alarmCasa, home, false, internet, {});
+                            alarmCasa, home, false, {});
 
 var lightCasa = new PeerCasa('light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            alarmCasa, home, false, internet, {});
+                            alarmCasa, home, false, {});
 
 //////////////////////////////////////////////////////////////////
 // States

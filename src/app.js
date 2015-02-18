@@ -38,15 +38,15 @@ var internetCasa = new Casa('internet', 'Internet Casa', process.env.PORT, inter
 
 var alarmCasa = new PeerCasa('casa-collin-alarm', 'Texecom Alarm Casa',
                             { hostname: 'collin.viewcam.me', port: 10002 },
-                            internetCasa, home, false, internet, {});
+                            internetCasa, home, false, {});
 
 var cctvCasa = new PeerCasa('casa-collin-cctv', 'CCTV Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10003 }, 
-                            internetCasa, home, false, internet, {});
+                            internetCasa, home, false, {});
 
 var lightCasa = new PeerCasa('casa-collin-light', 'Light Peer Casa',
                             { hostname: 'collin.viewcam.me', port: 10004 },
-                            internetCasa,  home, false, internet, {});
+                            internetCasa,  home, false, {});
 
 //////////////////////////////////////////////////////////////////
 // States

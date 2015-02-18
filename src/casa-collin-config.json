@@ -1,7 +1,6 @@
 {
    "name": "casasystem:casa-collin",
    "displayName": "Casa Collin System",
-   "owner": "",
    "props": {},
    "users": [ 
       {
@@ -47,7 +46,7 @@
                "displayName": "Internet Casa",
                "address": {
                   "hostname": "casa.elasticbeanstalk.com",
-                  "port": "*EVAL*process.env.PORT"
+                  "port": 80
                },
                "props": {},
                "states": [
@@ -167,7 +166,7 @@
       {
          "name": "casaarea:home",
          "displayName": "Casa Collin Home",
-         "parentArea": "casa:internet",
+         "parentArea": "casaarea:internet",
          "casas": [
             {
                "name": "casa:alarm",

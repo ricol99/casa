@@ -1,11 +1,11 @@
 var S = require('string');
 
-var configFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.js'; 
-var casaName = (process.argv.length >=4) ? process.argv[3] : 'internet';
+var configFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.json'; 
+var casaName = (process.argv.length >=4) ? process.argv[3] : 'casa:internet';
 
-console.log('File: ' + configFile + ' - Casa name: casa:' + casaName);
+console.log('File: ' + configFile + ' - Casa name: ' + casaName);
 var config = require('./' + configFile);
 
-console.log(config.name);
 System = require('./' + S(config.name).between('', ':').s);
-System(casaName, config);
+var system = new System(casaName, config);
+

@@ -5,10 +5,21 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _props) {
-   this.listeningPort = _listeningPort;
-   this.parentCasaArea = _parentCasaArea;
 
-   Thing.call(this, 'casa:' + _name, _displayName, _casaArea, _props);
+  if (_name.name) {
+      // constructing from object rather than params
+      this.listeningPort = _name.address.port;
+      this.casaArea = _name.casaArea;
+      this.parentCasaArea = _name.parentCasaArea;
+      Thing.call(this, _name.name, _name.displayName, _name.casaArea, _name.props);
+   }
+   else {
+      this.listeningPort = _listeningPort;
+      this.casaArea = _casaArea;
+      this.parentCasaArea = _parentCasaArea;
+      Thing.call(this, _name, _displayName, _casaArea, _props);
+   }
+
    var that = this;
 
    app.get('/', function(req, res){

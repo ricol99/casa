@@ -2,7 +2,7 @@ var util = require('util');
 var events = require('events');
 
 function Thing(_name, _displayName, _owner, _props) {
-   this.name = 'thing:' + _name;
+   this.name = _name;
    this.displayName = _displayName;
    this.owner = _owner;
    this.props = _props;
@@ -12,7 +12,7 @@ function Thing(_name, _displayName, _owner, _props) {
 
    events.EventEmitter.call(this);
 
-   if (this.owner) {
+    if (this.owner) {
       this.owner.addChild(this);
    }
    var that = this;
