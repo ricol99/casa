@@ -45,7 +45,6 @@
                "name": "casa:internet",
                "displayName": "Internet Casa",
                "address": {
-                  //"hostname": "casa.elasticbeanstalk.com",
                   "hostname": "192.168.1.229",
                   "port": 80
                },
