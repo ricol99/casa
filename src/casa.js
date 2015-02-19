@@ -40,7 +40,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      socket.on('login', function(data) {
        console.log(that.name + ': login: ' + data.name);
        name = data.name;
-       that.socket.emit('loginAACCKK');
+       socket.emit('loginAACCKK');
        that.emit('casa-joined', name, socket);
      });
    });
