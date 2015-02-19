@@ -164,10 +164,10 @@
                   },
                   {
                      "name": "pushoveraction:internet-connection",
-                     "activeMessage": "Security-Alarm: * Internet connection lost to Alarm",
-                     "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Alarm:  Internet connection to the alarm has been restored",
-                     "inactiveMessagePriority": 0,
+                     "activeMessage": "Security-Alarm:  Internet connection to the alarm has been restored",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Security-Alarm: * Internet connection lost to Alarm",
+                     "inactiveMessagePriority": 2,
                      "source": "casa:alarm",
                      "target": "usergroup:admins"
                   }

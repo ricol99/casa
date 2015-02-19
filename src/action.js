@@ -42,6 +42,22 @@ function Action(_name, _activator, _thing) {
          that.emit('deactivated', that.name);
       }
    });
+
+   this.activator.on('active', function () {
+      console.log(that.name + ': ACTIVATED');
+
+      if (that.actionEnabled) {
+         that.emit('activated', that.name);
+      }
+   });
+
+   this.activator.on('inactive', function () {
+      console.log(that.name + ': DEACTIVATED');
+
+      if (that.actionEnabled) {
+         that.emit('deactivated', that.name);
+      }
+   });
 }
 
 util.inherits(Action, events.EventEmitter);
