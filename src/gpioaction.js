@@ -5,6 +5,9 @@ var CasaSystem = require('./casasystem');
 
 function GpioAction(_name, _gpioPin, _triggerLow, _activator, _thing) {
 
+   this.gpioPin = 0;
+   this.triggerLow = false;
+
    if (_name.name) {
       // constructing from object rather than params
       this.gpioPin = _name.gpioPin;

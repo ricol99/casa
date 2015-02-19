@@ -6,7 +6,11 @@ var io = require('socket.io')(http);
 
 function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _props) {
 
-  if (_name.name) {
+   this.listeningPort = null;
+   this.casaArea = null;
+   this.parentCasaArea = null;
+
+   if (_name.name) {
       // constructing from object rather than params
       this.listeningPort = (process.env.PORT) ? process.env.PORT : _name.address.port;
       this.casaArea = _name.casaArea;
@@ -31,8 +35,8 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      var name;
 
      socket.on('disconnect', function() {
-       console.log(that.name + ': Peer casa ' + name + ' dropped');
        if (name) {
+          console.log(that.name + ': Peer casa ' + name + ' dropped');
           that.emit('casa-lost', name);
        }
      });
@@ -54,16 +58,17 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
 util.inherits(Casa, Thing);
 
 Casa.prototype.addState = function(_state) {
+   console.log(this.name + ': State '  +_state.name + ' added to casa ');
    this.states[_state.name] = _state;
-   that = this;
+   var that = this;
 
    _state.on('active', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become active');
+      console.log(that.name + ': ' + sourceName + ' has become active');
       that.emit('state-active', sourceName);
    });
 
    _state.on('inactive', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become inactive');
+      console.log(that.name + ': ' + sourceName + ' has become inactive');
       that.emit('state-inactive', sourceName);
    });
 

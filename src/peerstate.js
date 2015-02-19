@@ -3,7 +3,7 @@ var events = require('events');
 var S = require('string');
 
 function PeerState(_name, _peerCasa) {
-   this.name = 'peer-state:' + _name;
+   this.name = _name;
    this.peerCasa = _peerCasa;
 
    events.EventEmitter.call(this);

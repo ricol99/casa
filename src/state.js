@@ -2,22 +2,15 @@ var util = require('util');
 var events = require('events');
 
 function State(_name, _casa) {
-
-   if (_name.name) {
-      // constructing from object rather than params
-      this.name = _name.name;
-      this.casa = _name.owner;
-   }
-   else {
-      this.name = _name;
-      this.casa = _casa;
-   }
+   this.name = _name;
+   this.casa = _casa;
 
    events.EventEmitter.call(this);
 
    var that = this;
 
    if (this.casa) {
+      console.log('State casa: ' + this.casa.name);
       this.casa.addState(this);
    }
 }

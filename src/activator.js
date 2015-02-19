@@ -4,6 +4,11 @@ var CasaSystem = require('./casasystem');
 
 function Activator(_name, _source, _timeout, _invert) {
 
+   this.source = null;
+   this.name = null;
+   this.timeout = 0;
+   this.invert = false;
+
    if (_name.name) {
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();

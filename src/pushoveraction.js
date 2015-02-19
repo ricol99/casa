@@ -5,7 +5,12 @@ var CasaSystem = require('./casasystem');
 
 function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMessage, _deactPriority, _activator, _user) {
 
-  if (_name.name) {
+   this.activatedMessage = null;
+   this.deactivatedMessage = null;
+   this.messageActPriority = 0;
+   this.messageDeactPriority = 0;
+
+   if (_name.name) {
       // constructing from object rather than params
       // Resolve source and **TBD** target
       var casaSys = CasaSystem.mainInstance();

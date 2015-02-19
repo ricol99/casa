@@ -25,19 +25,19 @@ Thing.prototype.addChild = function(_child) {
    this.children[_child.name] = _child;
 }
 
-Thing.prototype.addState = function(_state) {
-   this.states[_state.name] = _state;
-
-   _state.on('active', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become active');
-   });
-
-   _state.on('inactive', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become inactive');
-   });
-
-   console.log(this.name + ': ' + _state.name + ' associated!');
-}
+//Thing.prototype.addState = function(_state) {
+ //  this.states[_state.name] = _state;
+//
+ //  _state.on('active', function (sourceName) {
+  //    console.log(this.name + ': ' + sourceName + ' has become active');
+   //});
+//
+ //  _state.on('inactive', function (sourceName) {
+  //    console.log(this.name + ': ' + sourceName + ' has become inactive');
+   //});
+//
+ //  console.log(this.name + ': ' + _state.name + ' associated!');
+//}
 
 Thing.prototype.addAction = function(_action) {
    this.actions[_action.name] = _action;

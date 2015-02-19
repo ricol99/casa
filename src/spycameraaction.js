@@ -5,7 +5,10 @@ var CasaSystem = require('./casasystem');
 
 function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _activator, _thing) {
 
-  if (_name.name) {
+   this.options = { };
+   this.id = 0;
+
+   if (_name.name) {
       // constructing from object rather than params
       // Resolve source and **TBD** target
       var casaSys = CasaSystem.mainInstance();

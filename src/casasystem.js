@@ -2,7 +2,7 @@ var util = require('util');
 var S = require('string');
 var Thing = require('./thing');
 
-var mainInstance = null;
+var _mainInstance = null;
 
 function CasaSystem(_casaName, _config) {
    this.casaName = _casaName;
@@ -18,7 +18,7 @@ function CasaSystem(_casaName, _config) {
    Thing.call(this, _config.name, _config.displayName, null, _config.props);
 
    var that = this;
-   mainInstance = this;
+   _mainInstance = this;
 
    // Extract Users
    this.config.users.forEach(function(user) { 
@@ -304,7 +304,7 @@ CasaSystem.prototype.findConfigState = function (stateName) {
 }
 
 CasaSystem.mainInstance = function() {
-   return mainInstance;
+   return _mainInstance;
 }
 
 module.exports = exports = CasaSystem;

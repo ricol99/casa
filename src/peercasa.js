@@ -6,6 +6,10 @@ var io = require('socket.io-client');
 // TBD Need to add event send failure queue
 function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveConnect, _props) {
 
+   this.address = null;
+   this.casa = null;
+   this.proActiveConnect = false;
+
    if (_name.name) {
       // constructing from object rather than params
       this.address = _name.address;
@@ -170,12 +174,12 @@ PeerCasa.prototype.establishListeners = function() {
 
    this.socket.on('state-activeAACCKK', function(data) {
       console.log(that.name + ': Active Event ACKed by my peer.');
-      unAckMessages.shift();
+      that.unAckedMessages.shift();
    });
 
    this.socket.on('state-inactiveAACCKK', function(data) {
       console.log(that.name + ': Inactive Event ACKed by my peer.');
-      unAckMessages.shift();
+      that.unAckedMessages.shift();
    });
 
    // Establish heartbeat
@@ -192,5 +196,24 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
    });
 
 }
+
+PeerCasa.prototype.addState = function(_state) {
+   console.log(this.name + ': State '  +_state.name + ' added to casa ');
+   this.states[_state.name] = _state;
+   var that = this;
+
+   _state.on('active', function (sourceName) {
+      console.log(this.name + ': ' + sourceName + ' has become active');
+      //that.emit('state-active', sourceName);
+   });
+
+   _state.on('inactive', function (sourceName) {
+      console.log(this.name + ': ' + sourceName + ' has become inactive');
+      //that.emit('state-inactive', sourceName);
+   });
+
+   console.log(this.name + ': ' + _state.name + ' associated!');
+}
+
 module.exports = exports = PeerCasa;
 
