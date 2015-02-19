@@ -1,16 +1,20 @@
 var util = require('util');
 var Action = require('./action');
 var push = require( 'pushover-notifications' );
+var CasaSystem = require('./casasystem');
 
 function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMessage, _deactPriority, _activator, _user) {
 
   if (_name.name) {
       // constructing from object rather than params
+      // Resolve source and **TBD** target
+      var casaSys = CasaSystem.mainInstance();
+      var source = casaSys.findSource(_name.source);
       this.activatedMessage = _name.activateMessage;
       this.deactivatedMessage = _name.inactiveMessage;
       this.messageActPriority = _name.activeMessagePriority;
       this.messageDeactPriority = _name.inactiveMessagePriority;
-      Action.call(this, _name.name, _name.source, _name.target);
+      Action.call(this, _name.name, source, null);
    }
    else {
       this.activatedMessage = _activatedMessage;

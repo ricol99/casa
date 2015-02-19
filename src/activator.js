@@ -1,12 +1,14 @@
 var util = require('util');
 var events = require('events');
+var CasaSystem = require('./casasystem');
 
 function Activator(_name, _source, _timeout, _invert) {
 
    if (_name.name) {
       // constructing from object rather than params
+      var casaSys = CasaSystem.mainInstance();
+      this.source = casaSys.findSource(_name.source);
       this.name = _name.name;
-      this.source = _name.source;
       this.timeout = _name.timeout;
       this.invert = _name.invert;
    }

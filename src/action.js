@@ -1,14 +1,14 @@
 var util = require('util');
 var events = require('events');
+var CasaSystem = require('./casasystem');
 
 function Action(_name, _activator, _thing) {
 
-
-
   if (_name.name) {
       // constructing from object rather than params
+      var casaSys = CasaSystem.mainInstance();
+      this.activator = casaSys.findSource(_name.source);
       this.name = _name.name;
-      this.activator = _name.source;
       this.thing = _name.owner;
    }
    else {
@@ -28,7 +28,7 @@ function Action(_name, _activator, _thing) {
    }
 
    this.activator.on('activate', function () {
-      console.log('ACTIVATED KHDSGhkdfgsAhfgdhfgdshfgdshgdfhgdhfgdhfgdfhgdghgdfjhdsgfhdsgfhsfghdfsghkdsfgkjdsfgdsfgdshfgdshkfgsdkhdsgfkgs');
+      console.log(that.name + ': ACTIVATED');
 
       if (that.actionEnabled) {
          that.emit('activated', that.name);
@@ -36,7 +36,7 @@ function Action(_name, _activator, _thing) {
    });
 
    this.activator.on('deactivate', function () {
-      console.log('DEACTIVATED KHDSGhkdfgsAhfgdhfgdshfgdshgdfhgdhfgdhfgdfhgdghgdfjhdsgfhdsgfhsfghdfsghkdsfgkjdsfgdsfgdshfgdshkfgsdkhdsgfkgs');
+      console.log(that.name + ': DEACTIVATED');
 
       if (that.actionEnabled) {
          that.emit('deactivated', that.name);

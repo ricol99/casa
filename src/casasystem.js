@@ -2,6 +2,8 @@ var util = require('util');
 var S = require('string');
 var Thing = require('./thing');
 
+var mainInstance = null;
+
 function CasaSystem(_casaName, _config) {
    this.casaName = _casaName;
    this.config = _config;
@@ -16,6 +18,7 @@ function CasaSystem(_casaName, _config) {
    Thing.call(this, _config.name, _config.displayName, null, _config.props);
 
    var that = this;
+   mainInstance = this;
 
    // Extract Users
    this.config.users.forEach(function(user) { 
@@ -56,6 +59,7 @@ function CasaSystem(_casaName, _config) {
             that.configCasaArea = area;
             that.casaArea = that.areas[index];
             console.log('New casa: ' + casaObj.name);
+            break;
          }
       }
    });
@@ -138,12 +142,8 @@ function CasaSystem(_casaName, _config) {
    this.casa.activators = [];
 
    this.configCasa.activators.forEach(function(activator) { 
-      // Resolve source
-      var source = that.findOrCreateCasaState(that.casa, activator.source);
-
       var Activator = that.cleverRequire(activator.name);
       activator.owner = that.casa;
-      activator.source = source;
       var activatorObj = new Activator(activator);
       that.casa.activators.push(activatorObj);
       console.log('New activator: ' + activator.name);
@@ -154,17 +154,8 @@ function CasaSystem(_casaName, _config) {
    this.casa.actions = [];
 
    this.configCasa.actions.forEach(function(action) { 
-      // Resolve source
-      var source = that.findOrCreateCasaState(that.casa, action.source);
-
-      if (!source) {
-         source = that.findActivator(action.source);
-      }
-
       var Action = that.cleverRequire(action.name);
       action.owner = that.casa;
-      action.source = source;
-      action.target = that.findUser(action.target);
       var actionObj = new Action(action);
       that.casa.actions.push(actionObj);
       console.log('New action: ' + action.name);
@@ -224,10 +215,9 @@ CasaSystem.prototype.findCasa = function (casaName) {
    return null;
 }
 
-CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
-
+CasaSystem.prototype.findCasaState = function (casa, stateName) {
    var source = null;
-   len = casa.states.length;
+   var len = casa.states.length;
 
    for (var i=0; i < len; ++i) {
       if (casa.states[i].name == stateName) {
@@ -235,6 +225,12 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          break;
       }
    }
+   return source;
+}
+
+CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
+
+   var source = this.findCasaState(casa, stateName);
 
    if (!source) {
       // Create a peer state
@@ -253,6 +249,10 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
    return source;
 }
 
+CasaSystem.prototype.findState = function (stateName) {
+   return this.findCasaState(this.casa, stateName);
+}
+
 CasaSystem.prototype.findActivator = function (activatorName) {
    var activatorLen = this.casa.activators.length;
 
@@ -264,6 +264,19 @@ CasaSystem.prototype.findActivator = function (activatorName) {
 
    return null;
 }
+
+CasaSystem.prototype.findSource = function (sourceName) {
+
+   // Resolve source
+   var source = this.findOrCreateCasaState(this.casa, sourceName);
+
+   if (!source) {
+      source = this.findActivator(sourceName);
+   }
+
+   return source;
+}
+
 
 CasaSystem.prototype.findConfigState = function (stateName) {
    that = this;
@@ -288,6 +301,10 @@ CasaSystem.prototype.findConfigState = function (stateName) {
    });
 
    return source;
+}
+
+CasaSystem.mainInstance = function() {
+   return mainInstance;
 }
 
 module.exports = exports = CasaSystem;

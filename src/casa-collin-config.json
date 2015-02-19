@@ -45,7 +45,8 @@
                "name": "casa:internet",
                "displayName": "Internet Casa",
                "address": {
-                  "hostname": "casa.elasticbeanstalk.com",
+                  //"hostname": "casa.elasticbeanstalk.com",
+                  "hostname": "192.168.1.229",
                   "port": 80
                },
                "props": {},
@@ -223,19 +224,19 @@
                ],
                "activators": [
                   {
-                     "name": "activator:internet-connection",
-                     "source": "Casa:internet",
+                     "name": "activator:going-to-rain-at-home",
+                     "source": "state:going-to-rain-at-home",
                      "timeout": 0,
                      "invert": false
                   },
                   {
                      "name": "activator:alarm-lounge-pir",
-                     "source": "gpiostate:lounge-pir",
+                     "source": "gpiostate:alarm-lounge-pir",
                      "timeout": 15,
                      "invert": false
                   },
                   {
-                     "name": "and-activator:lounge-activity",
+                     "name": "andactivator:lounge-activity",
                      "sources": [
                         "activator:alarm-lounge-pir",
                         "gpiostate:alarm-fully-armed"
@@ -252,8 +253,7 @@
                      "userId": "ricol99",
                      "password": "carrot99",
                      "cameraId": 1,
-                     "source": "and-activator:lounge-activity",
-                     "target": ""
+                     "source": "andactivator:lounge-activity"
                   },
                   {
                      "name": "pushoveraction:alarm-lounge",
@@ -261,7 +261,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Security-Alarm:  Motion in lounge ended * - Finished recording",
                      "inactiveMessagePriority": 0,
-                     "source": "and-activator:lounge-activity",
+                     "source": "andactivator:lounge-activity",
                      "target": "usergroup:keyholders"
                   }
                ]

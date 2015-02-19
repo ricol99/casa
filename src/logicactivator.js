@@ -5,7 +5,7 @@ var Activator = require('./activator');
 function LogicActivator(_name, _sources, _timeout, _invert) {
    this.inputs = [];
 
-   Activator.call(this, 'and:' + _name, this, _timeout, _invert);
+   Activator.call(this, _name, this, _timeout, _invert);
 
    var that = this;
 
