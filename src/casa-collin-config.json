@@ -161,6 +161,15 @@
                      "inactiveMessagePriority": 2,
                      "source": "activator:alarm-confirmed-alarm",
                      "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:internet-connection",
+                     "activeMessage": "Security-Alarm: * Internet connection lost to Alarm",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Security-Alarm:  Internet connection to the alarm has been restored",
+                     "inactiveMessagePriority": 0,
+                     "source": "casa:alarm",
+                     "target": "usergroup:admins"
                   }
                ]
             }

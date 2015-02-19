@@ -14,6 +14,7 @@ function CasaSystem(_casaName, _config) {
    this.configCasa = null;
    this.casaArea = null;
    this.constructors = {};
+   this.allObjects = [];
 
    Thing.call(this, _config.name, _config.displayName, null, _config.props);
 
@@ -26,6 +27,7 @@ function CasaSystem(_casaName, _config) {
       user.owner = that;
       var userObj = new User(user);
       that.users.push(userObj);
+      that.allObjects[userObj.name] = userObj;
       console.log('New user: ' + user.name);
    });
 
@@ -35,6 +37,7 @@ function CasaSystem(_casaName, _config) {
       area.owner = that;
       var areaObj = new Area(area);
       that.areas.push(areaObj);
+      that.allObjects[areaObj.name] = areaObj;
       console.log('New area: ' + area.name);
    });
 
@@ -54,6 +57,7 @@ function CasaSystem(_casaName, _config) {
             area.casas[j].parentCasaArea = that.findCasaArea(area.parentArea);
             var casaObj = new Casa(area.casas[j]);
             that.areas[index].casas.push(casaObj);
+            that.allObjects[casaObj.name] = casaObj;
             that.casa = casaObj;
             that.configCasa = area.casas[j];
             that.configCasaArea = area;
@@ -80,6 +84,7 @@ function CasaSystem(_casaName, _config) {
          configArea.casas[j].proActiveConnect = proActiveConnect;
          var casaObj = new PeerCasa(configArea.casas[j]);
          this.casa.casaArea.casas.push(casaObj);
+         this.allObjects[casaObj.name] = casaObj;
          console.log('New peercasa: ' + casaObj.name);
       }
       else {
@@ -102,6 +107,7 @@ function CasaSystem(_casaName, _config) {
          this.config.areas[j].casas[0].proActiveConnect = true;
          var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
          this.areas[j].casas.push(casaObj);
+         this.allObjects[casaObj.name] = casaObj;
          console.log('New peercasa: ' + casaObj.name);
       } 
    }
@@ -121,6 +127,7 @@ function CasaSystem(_casaName, _config) {
                this.config.areas[area].casas[j].proActiveConnect = false;
                var casaObj = new PeerCasa(this.config.areas[area].casas[j]);
                this.areas[area].casas.push(casaObj);
+               this.allObjects[casaObj.name] = casaObj;
                console.log('New peercasa: ' + casaObj.name);
             }
          }
@@ -135,6 +142,7 @@ function CasaSystem(_casaName, _config) {
       state.owner = that.casa;
       var stateObj = new State(state);
       that.casa.states.push(stateObj);
+      that.allObjects[stateObj.name] = stateObj;
       console.log('New state: ' + state.name);
    });
 
@@ -146,6 +154,7 @@ function CasaSystem(_casaName, _config) {
       activator.owner = that.casa;
       var activatorObj = new Activator(activator);
       that.casa.activators.push(activatorObj);
+      that.allObjects[activatorObj.name] = activatorObj;
       console.log('New activator: ' + activator.name);
    });
 
@@ -158,6 +167,7 @@ function CasaSystem(_casaName, _config) {
       action.owner = that.casa;
       var actionObj = new Action(action);
       that.casa.actions.push(actionObj);
+      that.allObjects[actionObj.name] = actionObj;
       console.log('New action: ' + action.name);
    });
 
@@ -274,6 +284,10 @@ CasaSystem.prototype.findSource = function (sourceName) {
       source = this.findActivator(sourceName);
    }
 
+   if (!source) {
+      source = this.findCasa(sourceName);
+   }
+
    return source;
 }
 
@@ -301,6 +315,10 @@ CasaSystem.prototype.findConfigState = function (stateName) {
    });
 
    return source;
+}
+
+CasaSystem.prototype.resolveObject = function (objName) {
+    return this.allObjects[objName];
 }
 
 CasaSystem.mainInstance = function() {

@@ -12,14 +12,16 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
 
    if (_name.name) {
       // constructing from object rather than params
-      // Resolve source and **TBD** target
+      // Resolve source and target
       var casaSys = CasaSystem.mainInstance();
       var source = casaSys.findSource(_name.source);
-      this.activatedMessage = _name.activateMessage;
+      var target = (_name.target) ? casaSys.resolveObject(_name.target) : null;
+
+      this.activatedMessage = _name.activeMessage;
       this.deactivatedMessage = _name.inactiveMessage;
       this.messageActPriority = _name.activeMessagePriority;
       this.messageDeactPriority = _name.inactiveMessagePriority;
-      Action.call(this, _name.name, source, null);
+      Action.call(this, _name.name, source, target);
    }
    else {
       this.activatedMessage = _activatedMessage;

@@ -10,13 +10,14 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
 
    if (_name.name) {
       // constructing from object rather than params
-      // Resolve source and **TBD** target
+      // Resolve source and target
       var casaSys = CasaSystem.mainInstance();
       var source = casaSys.findSource(_name.source);
+      var target = (_name.target) ? casaSys.resolveObject(_name.target) : null;
 
       this.options = { hostname: _name.cctvHostname, port: _name.cctvPort, auth: _name.userId + ':' + _name.password };
       this.id = _name.cameraId;
-      Action.call(this, _name, source, null);
+      Action.call(this, _name, source, target);
    }
    else {
       this.options = { hostname: _hostname, port: _port, auth: _user + ':' + _password };
