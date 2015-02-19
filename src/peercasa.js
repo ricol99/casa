@@ -79,7 +79,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
    // publish state changes to remote casas
    this.casa.on('state-active', function(name) {
       console.log(that.name + ': if there is a socket I will publish state ' + name + ' active to peer casa');
-      if (that.socket) {
+      if (that.connected) {
          console.log(that.name + ': publishing state ' + name + ' active to peer casa');
          that.unAckedMessages.push( { message: 'state-active', data: { stateName: name } } );
          that.socket.emit('state-active', { stateName: name });
@@ -88,7 +88,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
    this.casa.on('state-inactive', function(name) {
       console.log(that.name + ': if there is a socket I will publish state ' + name + ' inactive to peer casa');
-      if (that.socket) {
+      if (that.connected) {
          console.log(that.name + ': publishing state ' + name + ' inactive to peer casa');
          that.unAckedMessages.push( { message: 'instate-active', data: { stateName: name } } );
          that.socket.emit('state-inactive', { stateName: name });
