@@ -3,10 +3,18 @@ var Gpio = require('gpio');
 var State = require('./state');
 
 function GpioState(_name, _gpioPin, _triggerLow, _thing) {
-   this.gpioPin = _gpioPin;
-   this.triggerLow = _triggerLow;
 
-   State.call(this, 'gpio:' + _name, _thing);
+   if (_name.name) {
+      // constructing from object rather than params
+      this.gpioPin = _name.gpioPin;
+      this.triggerLow = _name.triggerLow;
+      State.call(this, _name.name, _name.owner);
+   }
+   else {
+      this.gpioPin = _gpioPin;
+      this.triggerLow = _triggerLow;
+      State.call(this, _name, _thing);
+   }
 
    var that = this;
  

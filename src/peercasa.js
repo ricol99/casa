@@ -3,9 +3,10 @@ var Thing = require('./thing');
 var S = require('string');
 var io = require('socket.io-client');
 
+// TBD Need to add event send failure queue
 function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveConnect, _props) {
 
- if (_name.name) {
+   if (_name.name) {
       // constructing from object rather than params
       this.address = _name.address;
       this.casa = _name.casa;
@@ -22,64 +23,13 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
    this.connected = false;
    this.socket = null;
    this.intervalID = null;
+   this.unAckedMessages = [];
    
    var that = this;
 
-   var connectToPeerCasa = function() {
-      console.log(that.name + ': Attempting to connect to peer casa ' + that.address.hostname + ':' + that.address.port);
-      that.socket = io('http://' + that.address.hostname + ':' + that.address.port + '/');
-
-      that.socket.on('connect', function() {
-         console.log(that.name + ': Connected to my peer. Going active.');
-         that.socket.emit('login', { name: that.casa.name });
-         that.connected = true;
-         that.emit('active', that.name);
-
-         // listen for state changes from peer casas
-         that.socket.on('state-active', function(data) {
-            console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
-            that.emit('state-active', data.stateName);
-         });
-
-         that.socket.on('state-inactive', function(data) {
-            console.log(that.name + ': Event received from my peer. Event name: active, instate: ' + data.stateName);
-            that.emit('state-inactive', data.stateName);
-         });
-
-         // Establish heartbeat
-         that.intervalID = setInterval(function(){
-            that.socket.emit('heartbeat', { name: that.casa.name });
-         }, 60000);
-
-      });
-
-      that.socket.on('error', function(error) {
-         console.log(that.name + ': Error received: ' + error);
-         console.log(that.name + ': Lost connection to my peer. Going inactive.');
-
-         if (that.connected) {
-            that.connected = false;
-            clearInterval(that.intervalID);
-            that.emit('inactive', that.name);
-         }
-      });
-
-      that.socket.on('event', function(data) {
-         console.log(that.name + ': Event received: ' + data);
-      });
-
-      that.socket.on('disconnect', function() {
-         console.log(that.name + ': Error disconnect');
-         that.connected = false;
-         clearInterval(that.intervalID);
-         console.log(that.name + ': Lost connection to my peer. Going inactive.');
-         that.emit('inactive', that.name);
-      });
-   }
-
    if (this.proActiveConnect) {
       // My role is to connect to my remote instance
-      connectToPeerCasa();
+      this.connectToPeerCasa();
    }
    else {
       // Listen to Casa for my remote instance to connect
@@ -92,23 +42,16 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
               that.connected = true;
               that.socket = socket;
               console.log(that.name + ': Connected to my peer. Going active.');
-              that.emit('active', that.name);
 
               // listen for state changes from peer casas
-              that.socket.on('state-active', function(data) {
-                 console.log(that.name + ': Event received from my peer. Event name: active, instate: ' + data.stateName);
-                 that.emit('state-active', data.stateName);
-              });
+              that.establishListeners();
 
-              that.socket.on('state-inactive', function(data) {
-                 console.log(that.name + ': Event received from my peer. Event name: inactive, instate: ' + data.stateName);
-                 that.emit('state-inactive', data.stateName);
-              });
+              if (that.unAckedMessages.length > 1) {
+                  resendUnAckedMessages();
+               }
 
-              // Establish heartbeat
-              that.intervalID = setInterval(function(){
-                 that.socket.emit('heartbeat', { name: that.casa.name });
-              }, 60000);
+              that.emit('active', that.name);
+
            }
          }
       });
@@ -129,11 +72,12 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
       });
    }
 
-   // publish state chnages to peer casas
+   // publish state changes to remote casas
    this.casa.on('state-active', function(name) {
       console.log(that.name + ': if there is a socket I will publish state ' + name + ' active to peer casa');
       if (that.socket) {
          console.log(that.name + ': publishing state ' + name + ' active to peer casa');
+         that.unAckedMessages.push( { message: 'state-active', data: { stateName: name } } );
          that.socket.emit('state-active', { stateName: name });
       }
    });
@@ -142,6 +86,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
       console.log(that.name + ': if there is a socket I will publish state ' + name + ' inactive to peer casa');
       if (that.socket) {
          console.log(that.name + ': publishing state ' + name + ' inactive to peer casa');
+         that.unAckedMessages.push( { message: 'instate-active', data: { stateName: name } } );
          that.socket.emit('state-inactive', { stateName: name });
       }
    });
@@ -157,5 +102,95 @@ PeerCasa.prototype.getPort = function() {
    return this.address.port;
 };
 
+PeerCasa.prototype.connectToPeerCasa = function() {
+   var that = this;
+
+   console.log(this.name + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
+   this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
+
+   this.socket.on('connect', function() {
+      console.log(that.name + ': Connected to my peer. Going active.');
+      that.establishListeners();
+      that.unAckedMessages.push( { message: 'login', data: { name: that.casa.name } } );
+      that.socket.emit('login', { name: that.casa.name });
+   });
+
+   this.socket.on('loginAACCKK', function(data) {
+      console.log(that.name + ': Login Event ACKed by my peer.');
+
+      unAckedMessages.pop();  // Remove Login
+
+      if (that.unAckedMessages.length > 1) {
+         resendUnAckedMessages();
+      }
+      
+      that.connected = true;
+      that.emit('active', that.name);
+   });
+
+   this.socket.on('error', function(error) {
+      console.log(that.name + ': Error received: ' + error);
+      console.log(that.name + ': Lost connection to my peer. Going inactive.');
+
+      if (that.connected) {
+         that.connected = false;
+         clearInterval(that.intervalID);
+         that.emit('inactive', that.name);
+      }
+   });
+
+   this.socket.on('event', function(data) {
+      console.log(that.name + ': Event received: ' + data);
+   });
+
+   this.socket.on('disconnect', function() {
+      console.log(that.name + ': Error disconnect');
+      that.connected = false;
+      clearInterval(that.intervalID);
+      console.log(that.name + ': Lost connection to my peer. Going inactive.');
+      that.emit('inactive', that.name);
+   });
+}
+
+PeerCasa.prototype.establishListeners = function() {
+   var that = this;
+
+   // listen for state changes from peer casas
+   this.socket.on('state-active', function(data) {
+      console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
+      that.emit('state-active', data.stateName);
+      that.socket.emit('state-activeAACCKK');
+   });
+
+   this.socket.on('state-inactive', function(data) {
+      console.log(that.name + ': Event received from my peer. Event name: active, instate: ' + data.stateName);
+      that.emit('state-inactive', data.stateName);
+      that.socket.emit('state-inactiveAACCKK');
+   });
+
+   this.socket.on('state-activeAACCKK', function(data) {
+      console.log(that.name + ': Active Event ACKed by my peer.');
+      unAckMessages.shift();
+   });
+
+   this.socket.on('state-inactiveAACCKK', function(data) {
+      console.log(that.name + ': Inactive Event ACKed by my peer.');
+      unAckMessages.shift();
+   });
+
+   // Establish heartbeat
+   this.intervalID = setInterval(function(){
+      that.socket.emit('heartbeat', { name: that.casa.name });
+   }, 60000);
+}
+
+PeerCasa.prototype.resendUnAckedMessages = function() {
+   var that = this;
+
+   this.unAckedMessages.forEach(function(message) {
+      that.socket.emit(message.message, message.data);
+   });
+
+}
 module.exports = exports = PeerCasa;
 

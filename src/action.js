@@ -3,9 +3,19 @@ var events = require('events');
 
 function Action(_name, _activator, _thing) {
 
-   this.name = 'action:' + _name;
-   this.activator = _activator;
-   this.thing = _thing;
+
+
+  if (_name.name) {
+      // constructing from object rather than params
+      this.name = _name.name;
+      this.activator = _name.source;
+      this.thing = _name.owner;
+   }
+   else {
+      this.name = _name;
+      this.activator = _activator;
+      this.thing = _thing;
+   }
 
    this.actionEnabled = true;
 

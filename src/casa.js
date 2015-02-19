@@ -8,7 +8,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
 
   if (_name.name) {
       // constructing from object rather than params
-      this.listeningPort = _name.address.port;
+      this.listeningPort = (process.env.PORT) ? process.env.PORT : _name.address.port;
       this.casaArea = _name.casaArea;
       this.parentCasaArea = _name.parentCasaArea;
       Thing.call(this, _name.name, _name.displayName, _name.casaArea, _name.props);
@@ -40,6 +40,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      socket.on('login', function(data) {
        console.log(that.name + ': login: ' + data.name);
        name = data.name;
+       that.socket.emit('loginAACCKK');
        that.emit('casa-joined', name, socket);
      });
    });

@@ -2,10 +2,21 @@ var util = require('util');
 var events = require('events');
 
 function Activator(_name, _source, _timeout, _invert) {
-   this.name = 'activator:' + _name;
-   this.source = _source;
-   this.timeout = _timeout;
-   this.invert = _invert;
+
+   if (_name.name) {
+      // constructing from object rather than params
+      this.name = _name.name;
+      this.source = _name.source;
+      this.timeout = _name.timeout;
+      this.invert = _name.invert;
+   }
+   else {
+      this.name = _name;
+      this.source = _source;
+      this.timeout = _timeout;
+      this.invert = _invert;
+   }
+
    this.coldStart = true;
 
    this.timeout = _timeout;

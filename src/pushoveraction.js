@@ -3,10 +3,23 @@ var Action = require('./action');
 var push = require( 'pushover-notifications' );
 
 function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMessage, _deactPriority, _activator, _user) {
-   this.activatedMessage = _activatedMessage;
-   this.deactivatedMessage = _deactivatedMessage;
-   this.messageActPriority = _actPriority;
-   this.messageDeactPriority = _deactPriority;
+
+  if (_name.name) {
+      // constructing from object rather than params
+      this.activatedMessage = _name.activateMessage;
+      this.deactivatedMessage = _name.inactiveMessage;
+      this.messageActPriority = _name.activeMessagePriority;
+      this.messageDeactPriority = _name.inactiveMessagePriority;
+      Action.call(this, _name.name, _name.source, _name.target);
+   }
+   else {
+      this.activatedMessage = _activatedMessage;
+      this.deactivatedMessage = _deactivatedMessage;
+      this.messageActPriority = _actPriority;
+      this.messageDeactPriority = _deactPriority;
+      Action.call(this, _name, _activator, _user);
+   }
+
 
    this.actionActive = false;
    this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
@@ -14,7 +27,6 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
 
    var that = this;
 
-   Action.call(this, 'pushover:' + _name, _activator, _user);
 
    this.on('activated', function () {
       console.log(that.name + ': received activated event');

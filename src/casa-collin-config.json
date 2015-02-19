@@ -50,6 +50,9 @@
                },
                "props": {},
                "states": [
+                  {
+                     "name": "state:going-to-rain-at-home"
+                  }
                ],
                "activators": [
                   {
