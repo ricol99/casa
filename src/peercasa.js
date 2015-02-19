@@ -118,7 +118,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    this.socket.on('loginAACCKK', function(data) {
       console.log(that.name + ': Login Event ACKed by my peer.');
 
-      unAckedMessages.pop();  // Remove Login
+      that.unAckedMessages.pop();  // Remove Login
 
       if (that.unAckedMessages.length > 1) {
          resendUnAckedMessages();

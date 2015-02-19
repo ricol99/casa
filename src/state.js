@@ -6,7 +6,7 @@ function State(_name, _casa) {
    if (_name.name) {
       // constructing from object rather than params
       this.name = _name.name;
-      this.casa = _name.casa;
+      this.casa = _name.owner;
    }
    else {
       this.name = _name;
