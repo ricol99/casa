@@ -182,7 +182,7 @@
                      "target": "usergroup:key-holders"
                   },
                   {
-                     "name": "pushoveraction"alarm-casa-status",
+                     "name": "pushoveraction:alarm-casa-status",
                      "activeMessage": "Security-Alarm:  Alarm casa in active",
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Security-Alarm: * Alarm casa has gone down",
