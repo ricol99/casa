@@ -293,7 +293,7 @@ CasaSystem.prototype.findSource = function (sourceName) {
 
 
 CasaSystem.prototype.findConfigState = function (stateName) {
-   that = this;
+   var that = this;
 
    var source = null;
    this.config.areas.forEach(function(configArea, index) { 
