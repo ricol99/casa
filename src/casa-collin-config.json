@@ -178,7 +178,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Security-Alarm: * Internet connection lost to Alarm",
                      "inactiveMessagePriority": 2,
-                     "source": "oractivator:internet-connection",
+                     "source": "casa:alarm",
                      "target": "usergroup:admins"
                   }
                ]
