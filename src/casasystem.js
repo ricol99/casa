@@ -250,7 +250,7 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          var peerCasaName = ret.owner;
          var sourceName  = ret.name;
 
-         var peerCasa = that.findCasa(peerCasaName);
+         var peerCasa = this.findCasa(peerCasaName);
          var PeerState = require('./peerstate');
          source = new PeerState(sourceName, peerCasa);
       }
@@ -293,7 +293,7 @@ CasaSystem.prototype.findSource = function (sourceName) {
 
 
 CasaSystem.prototype.findConfigState = function (stateName) {
-   that = this;
+   var that = this;
 
    var source = null;
    this.config.areas.forEach(function(configArea, index) { 
