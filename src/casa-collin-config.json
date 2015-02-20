@@ -278,7 +278,7 @@
                "name": "casa:cctv",
                "displayName": "CCTV",
                "address": {
-                  "hostname": "pi-cctv.home",
+                  "hostname": "lx9901827.home",
                   "port": 80
                },
                "props": {},
