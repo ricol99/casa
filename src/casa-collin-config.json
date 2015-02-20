@@ -96,6 +96,16 @@
                      "source": "gpiostate:alarm-confirmed-alarm",
                      "timeout": 0,
                      "invert": false
+                  },
+                  {
+                     "name": "oractivator:internet-connection",
+                     "sources": [
+                        "casa:alarm",
+                        "casa:cctv",
+                        "casa:light"
+                     ],
+                     "timeout": 0,
+                     "invert": false
                   }
                ],
                "actions": [
@@ -168,7 +178,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Security-Alarm: * Internet connection lost to Alarm",
                      "inactiveMessagePriority": 2,
-                     "source": "casa:alarm",
+                     "source": "oractivator:internet-connection",
                      "target": "usergroup:admins"
                   }
                ]
