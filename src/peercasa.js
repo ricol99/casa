@@ -184,7 +184,10 @@ PeerCasa.prototype.establishListeners = function() {
 
    // Establish heartbeat
    this.intervalID = setInterval(function(){
-      that.socket.emit('heartbeat', { name: that.casa.name });
+
+      if (that.connected) {
+         that.socket.emit('heartbeat', { name: that.casa.name });
+      }
    }, 60000);
 }
 
