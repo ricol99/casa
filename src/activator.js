@@ -37,26 +37,26 @@ function Activator(_name, _source, _timeout, _invert) {
    events.EventEmitter.call(this);
 
    this.source.on('active', function (sourceName) {
-      sourceActive(sourceName);
+      that.sourceIsActive(sourceName);
    });
 
    this.source.on('activated', function (sourceName) {
-      sourceActive(sourceName);
+      that.sourceIsActive(sourceName);
    });
 
    this.source.on('inactive', function (sourceName) {
-      sourceInactive(sourceName);
+      that.sourceIsInactive(sourceName);
    });
 
    this.source.on('deactivated', function (sourceName) {
-      sourceInactive(sourceName);
+      that.sourceIsInactive(sourceName);
    });
 
 }
 
 util.inherits(Activator, events.EventEmitter);
 
-Activator.prototype.sourceActive = function(sourceName) {
+Activator.prototype.sourceIsActive = function(sourceName) {
    console.log('source ' + sourceName + ' active!');
    
    if (this.coldStart) {
@@ -74,7 +74,7 @@ Activator.prototype.sourceActive = function(sourceName) {
    }
 }
 
-Activator.prototype.sourceInactive = function(sourceName) {
+Activator.prototype.sourceIsInactive = function(sourceName) {
    console.log('source ' + sourceName + ' inactive!');
 
    if (this.coldStart) {
