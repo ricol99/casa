@@ -163,13 +163,13 @@ PeerCasa.prototype.establishListeners = function() {
    this.socket.on('state-active', function(data) {
       console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
       that.emit('state-active', data.stateName);
-      that.socket.emit('state-activeAACCKK');
+      that.socket.emit('state-activeAACCKK', data);
    });
 
    this.socket.on('state-inactive', function(data) {
       console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + data.stateName);
       that.emit('state-inactive', data.stateName);
-      that.socket.emit('state-inactiveAACCKK');
+      that.socket.emit('state-inactiveAACCKK', data);
    });
 
    this.socket.on('state-activeAACCKK', function(data) {
