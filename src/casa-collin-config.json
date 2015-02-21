@@ -39,7 +39,6 @@
       {
          "name": "casaarea:internet",
          "displayName": "Casa Collin Internet",
-         "parentArea": "",
          "casas": [
             {
                "name": "casa:internet",
