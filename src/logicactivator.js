@@ -13,26 +13,26 @@ function LogicActivator(_name, _sources, _timeout, _invert) {
       that.inputs.push( { source : _source, active : false });
 
       that.inputs[index].source.on('activate', function (sourceName) {
-         that.sourceIsActive(sourceName);
+         that.oneSourceIsActive(sourceName);
       });
 
       that.inputs[index].source.on('active', function (sourceName) {
-         that.sourceIsActive(sourceName);
+         that.oneSourceIsActive(sourceName);
       });
 
       that.inputs[index].source.on('deactivate', function (sourceName) {
-         that.sourceInactive(sourceName);
+         that.oneSourceIsInactive(sourceName);
       });
 
-      that.inputs[index].source.on('deactivate', function (sourceName) {
-         that.sourceInactive(sourceName);
+      that.inputs[index].source.on('inactive', function (sourceName) {
+         that.oneSourceIsInactive(sourceName);
       });
    });
 }
 
 util.inherits(LogicActivator, Activator);
 
-LogicActivator.prototype.sourceIsActive = function(sourceName) {
+LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
    console.log(this.name + ': Input source ' + sourceName + ' active!');
          
    // find the input in my array
@@ -45,13 +45,13 @@ LogicActivator.prototype.sourceIsActive = function(sourceName) {
       item.active = true;
    });
 
-   if (this.checkActivate(that.inputs)) {
-      this.emit('active', that.name);
+   if (this.checkActivate(this.inputs)) {
+      this.emit('active', this.name);
    }
 }
 
-LogicActivator.prototype.sourceIsInActive = function(sourceName) {
-   console.log(that.name + ' : Input source ' + sourceName + ' inactive!');
+LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
+   console.log(this.name + ' : Input source ' + sourceName + ' inactive!');
          
    // find the input in my array
    items = this.inputs.filter(function(item) {
@@ -63,8 +63,8 @@ LogicActivator.prototype.sourceIsInActive = function(sourceName) {
       item.active = false;
    });
 
-   if (this.checkDeactivate(that.inputs)) {
-      this.emit('inactive', that.name);
+   if (this.checkDeactivate(this.inputs)) {
+      this.emit('inactive', this.name);
    }
 }
 

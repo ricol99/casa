@@ -90,7 +90,9 @@ Activator.prototype.sourceIsInactive = function(sourceName) {
       // destination is activated. If there is a timer, restart it. Else ignore
       if (this.timeout != 0) {
          // clear old timer and restart new one
-         this.clearTimeout(this.timeoutObj);
+         if (this.timeoutObj) {
+            clearTimeout(this.timeoutObj);
+         }
          this.delayedSwitchOff();
       }
       else {
@@ -102,12 +104,12 @@ Activator.prototype.sourceIsInactive = function(sourceName) {
 
 Activator.prototype.activateDestination = function() {
    this.destActivated = true;
-   this.emit(that.invert ? 'deactivate' : 'activate', this.name); 
+   this.emit(this.invert ? 'deactivate' : 'activate', this.name); 
 }
 
 Activator.prototype.deactivateDestination = function() {
    this.destActivated = false;
-   this.emit(that.invert ? 'activate' : 'deactivate', this.name); 
+   this.emit(this.invert ? 'activate' : 'deactivate', this.name); 
 }
 
 Activator.prototype.delayedSwitchOff = function() {
