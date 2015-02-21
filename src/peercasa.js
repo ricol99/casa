@@ -9,6 +9,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
    this.address = null;
    this.casa = null;
    this.proActiveConnect = false;
+   this.listenersSetUp = false;
 
    if (_name.name) {
       // constructing from object rather than params
@@ -157,42 +158,47 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 }
 
 PeerCasa.prototype.establishListeners = function() {
-   var that = this;
 
-   // listen for state changes from peer casas
-   this.socket.on('state-active', function(data) {
-      console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
-      that.emit('state-active', data.stateName);
-      that.socket.emit('state-activeAACCKK', data);
-   });
+   if (!this.listenersSetUp) {
+      var that = this;
 
-   this.socket.on('state-inactive', function(data) {
-      console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + data.stateName);
-      that.emit('state-inactive', data.stateName);
-      that.socket.emit('state-inactiveAACCKK', data);
-   });
+      // listen for state changes from peer casas
+      this.socket.on('state-active', function(data) {
+         console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
+         that.emit('state-active', data.stateName);
+         that.socket.emit('state-activeAACCKK', data);
+      });
 
-   this.socket.on('state-activeAACCKK', function(data) {
-      console.log(that.name + ': Active Event ACKed by my peer.');
-      that.unAckedMessages.shift();
-   });
+      this.socket.on('state-inactive', function(data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + data.stateName);
+         that.emit('state-inactive', data.stateName);
+         that.socket.emit('state-inactiveAACCKK', data);
+      });
 
-   this.socket.on('state-inactiveAACCKK', function(data) {
-      console.log(that.name + ': Inactive Event ACKed by my peer.');
-      that.unAckedMessages.shift();
-   });
+      this.socket.on('state-activeAACCKK', function(data) {
+         console.log(that.name + ': Active Event ACKed by my peer.');
+         that.unAckedMessages.shift();
+      });
 
-   this.socket.on('heartbeat', function(data) {
-      // do nothing!
-   });
+      this.socket.on('state-inactiveAACCKK', function(data) {
+         console.log(that.name + ': Inactive Event ACKed by my peer.');
+         that.unAckedMessages.shift();
+      });
 
-   // Establish heartbeat
-   this.intervalID = setInterval(function(){
+      this.socket.on('heartbeat', function(data) {
+         // do nothing!
+      });
 
-      if (that.connected) {
-         that.socket.emit('heartbeat', { name: that.casa.name });
-      }
-   }, 60000);
+      // Establish heartbeat
+      this.intervalID = setInterval(function(){
+
+         if (that.connected) {
+            that.socket.emit('heartbeat', { name: that.casa.name });
+         }
+      }, 60000);
+
+      this.listenersSetUp = true;
+   }
 }
 
 PeerCasa.prototype.resendUnAckedMessages = function() {
