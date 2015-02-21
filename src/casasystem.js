@@ -95,21 +95,24 @@ function CasaSystem(_casaName, _config) {
    // Extract Peer casa of parent area
    var parentCasaArea = this.findCasaArea(configArea.parentArea);
 
-   var len = this.config.areas.length;
+   if (parentCasaArea) {
+      var len = this.config.areas.length;
 
-   for (var j=0; j < len; ++j) {
-      console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + configArea.parentArea);
-      if (this.config.areas[j].name == configArea.parentArea) {
-         // found parent area
-         var PeerCasa = this.cleverRequire('peer' + this.config.areas[j].casas[0].name);
-         this.config.areas[j].casas[0].casaArea = this.areas[j];
-         this.config.areas[j].casas[0].casa = this.casa;
-         this.config.areas[j].casas[0].proActiveConnect = true;
-         var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
-         this.areas[j].casas.push(casaObj);
-         this.allObjects[casaObj.name] = casaObj;
-         console.log('New peercasa: ' + casaObj.name);
-      } 
+      for (var j=0; j < len; ++j) {
+         console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + configArea.parentArea);
+
+         if (this.config.areas[j].name == configArea.parentArea) {
+            // found parent area
+            var PeerCasa = this.cleverRequire('peer' + this.config.areas[j].casas[0].name);
+            this.config.areas[j].casas[0].casaArea = this.areas[j];
+            this.config.areas[j].casas[0].casa = this.casa;
+            this.config.areas[j].casas[0].proActiveConnect = true;
+            var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
+            this.areas[j].casas.push(casaObj);
+            this.allObjects[casaObj.name] = casaObj;
+            console.log('New peercasa: ' + casaObj.name);
+         } 
+      }
    }
 
    // If casa is a parent casa (position 0 of an area), extract children peer casas in child area
