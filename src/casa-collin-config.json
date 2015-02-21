@@ -177,7 +177,7 @@
                      "activeMessage": "Security-Alarm:  Internet connection to the alarm has been restored",
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Security-Alarm: * Internet connection lost to Alarm",
-                     "inactiveMessagePriority": 2,
+                     "inactiveMessagePriority": 1,
                      "source": "oractivator:internet-connection",
                      "target": "usergroup:key-holders"
                   },
@@ -186,7 +186,7 @@
                      "activeMessage": "Security-Alarm:  Alarm casa in active",
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Security-Alarm: * Alarm casa has gone down",
-                     "inactiveMessagePriority": 2,
+                     "inactiveMessagePriority": 1,
                      "source": "casa:alarm",
                      "target": "usergroup:admins"
                   }
