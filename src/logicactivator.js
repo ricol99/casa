@@ -22,7 +22,7 @@ function LogicActivator(_name, _sources, _timeout, _invert) {
       });
 
       var sourceActive = function(sourceName) {
-         console.log('AND input source ' + sourceName + ' active!');
+         console.log(that.name + ': Input source ' + sourceName + ' active!');
          
          // find the input in my array
          items = that.inputs.filter(function(item) {
@@ -48,7 +48,7 @@ function LogicActivator(_name, _sources, _timeout, _invert) {
       });
 
       var sourceInactive = function(sourceName) {
-         console.log('AND input source ' + sourceName + ' inactive!');
+         console.log(that.name + ' : Input source ' + sourceName + ' inactive!');
          
          // find the input in my array
          items = that.inputs.filter(function(item) {
