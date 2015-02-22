@@ -213,18 +213,6 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
 PeerCasa.prototype.addState = function(_state) {
    console.log(this.name + ': State '  +_state.name + ' added to casa ');
    this.states[_state.name] = _state;
-   var that = this;
-
-   _state.on('active', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become active');
-      //that.emit('state-active', sourceName);
-   });
-
-   _state.on('inactive', function (sourceName) {
-      console.log(this.name + ': ' + sourceName + ' has become inactive');
-      //that.emit('state-inactive', sourceName);
-   });
-
    console.log(this.name + ': ' + _state.name + ' associated!');
 }
 
