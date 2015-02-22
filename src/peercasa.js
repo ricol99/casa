@@ -49,7 +49,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
               console.log(that.name + ': Connected to my peer. Going active.');
 
               // listen for state changes from peer casas
-              that.establishListeners();
+              that.establishListeners(true);
 
               if (that.unAckedMessages.length > 1) {
                   resendUnAckedMessages();
@@ -126,7 +126,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.unAckedMessages.pop();  // Remove Login
 
       if (that.unAckedMessages.length > 1) {
-         resendUnAckedMessages();
+         that.resendUnAckedMessages();
       }
       
       that.connected = true;
@@ -157,9 +157,9 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    });
 }
 
-PeerCasa.prototype.establishListeners = function() {
+PeerCasa.prototype.establishListeners = function(force) {
 
-   if (!this.listenersSetUp) {
+   if (!this.listenersSetUp || force) {
       var that = this;
 
       // listen for state changes from peer casas
