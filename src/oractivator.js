@@ -3,7 +3,7 @@ var events = require('events');
 var LogicActivator = require('./logicactivator');
 var CasaSystem = require('./casasystem');
 
-function OrActivator(_name, _sources, _timeout, _invert) {
+function OrActivator(_name, _sources) {
 
   if (_name.name) {
       // constructing from object rather than params
@@ -14,10 +14,10 @@ function OrActivator(_name, _sources, _timeout, _invert) {
          sources.push(casaSys.findSource(sourceName));
       });
 
-      LogicActivator.call(this, _name.name, sources, _name.timeout, _name.invert);
+      LogicActivator.call(this, _name.name, sources);
    }
    else {
-      LogicActivator.call(this, _name, _sources, _timeout, _invert);
+      LogicActivator.call(this, _name, _sources);
    }
 
    var that = this;
@@ -25,14 +25,27 @@ function OrActivator(_name, _sources, _timeout, _invert) {
 
 util.inherits(OrActivator, LogicActivator);
 
-OrActivator.prototype.checkActivate = function(inputs) {
-   return inputs.some(function (input) {
-      return input.active;
-   });
+OrActivator.prototype.checkActivate = function(_inputs, _currentlyActive) {
+
+   if (_currentlyActive) {
+      return false;
+   }
+   else {
+      return _inputs.some(function (_input) {
+         return _input.active;
+      });
+   }
 };
 
-OrActivator.prototype.checkDeactivate = function(inputs) {
-   return !this.checkActivate(inputs);
+OrActivator.prototype.checkDeactivate = function(_inputs, _currentlyActive) {
+   if (_currentlyActive) {
+      return !_inputs.some(function (_input) {
+         return _input.active;
+      });
+   }
+   else {
+      return false;
+   }
 };
 
 module.exports = exports = OrActivator;

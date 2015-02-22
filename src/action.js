@@ -4,7 +4,11 @@ var CasaSystem = require('./casasystem');
 
 function Action(_name, _activator, _thing) {
 
-  if (_name.name) {
+   this.activator = null;
+   this.name = null;
+   this.thing = null;
+
+   if (_name.name) {
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();
       this.activator = casaSys.findSource(_name.source);
@@ -26,22 +30,6 @@ function Action(_name, _activator, _thing) {
    if (this.thing) {
       this.thing.addAction(this);
    }
-
-   this.activator.on('activate', function () {
-      console.log(that.name + ': ACTIVATED');
-
-      if (that.actionEnabled) {
-         that.emit('activated', that.name);
-      }
-   });
-
-   this.activator.on('deactivate', function () {
-      console.log(that.name + ': DEACTIVATED');
-
-      if (that.actionEnabled) {
-         that.emit('deactivated', that.name);
-      }
-   });
 
    this.activator.on('active', function () {
       console.log(that.name + ': ACTIVATED');

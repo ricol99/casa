@@ -14,8 +14,14 @@ function Activator(_name, _source, _timeout, _invert) {
       var casaSys = CasaSystem.mainInstance();
       this.source = casaSys.findSource(_name.source);
       this.name = _name.name;
-      this.timeout = _name.timeout;
-      this.invert = _name.invert;
+
+      if (_name.timeout) {
+         this.timeout = _name.timeout;
+      }
+
+      if (_name.invert) {
+         this.invert = _name.invert;
+      }
    }
    else {
       this.name = _name;
@@ -25,8 +31,6 @@ function Activator(_name, _source, _timeout, _invert) {
    }
 
    this.coldStart = true;
-
-   this.timeout = _timeout;
 
    this.destActivated = false;
    this.sourceActive = false;
@@ -40,18 +44,9 @@ function Activator(_name, _source, _timeout, _invert) {
       that.sourceIsActive(sourceName);
    });
 
-   this.source.on('activated', function (sourceName) {
-      that.sourceIsActive(sourceName);
-   });
-
    this.source.on('inactive', function (sourceName) {
       that.sourceIsInactive(sourceName);
    });
-
-   this.source.on('deactivated', function (sourceName) {
-      that.sourceIsInactive(sourceName);
-   });
-
 }
 
 util.inherits(Activator, events.EventEmitter);
@@ -66,11 +61,11 @@ Activator.prototype.sourceIsActive = function(sourceName) {
 
    this.sourceActive = true;
 
-   if (!this.destActivated) {
+   if (this.destActivated) {
+      this.restartTimer();
+   }
+   else {
       this.activateDestination();
-      if (this.timeout != 0) {
-         this.delayedSwitchOff();
-      }
    }
 }
 
@@ -84,19 +79,10 @@ Activator.prototype.sourceIsInactive = function(sourceName) {
 
    this.sourceActive = false;
 
-   // if destination is activated , restart timer to keep it activated for the timeout after trigger drops
    if (this.destActivated) {
 
-      // destination is activated. If there is a timer, restart it. Else ignore
-      if (this.timeout != 0) {
-         // clear old timer and restart new one
-         if (this.timeoutObj) {
-            clearTimeout(this.timeoutObj);
-         }
-         this.delayedSwitchOff();
-      }
-      else {
-         // else deactivate now as no timer
+      // Destination is active. If there is no timeout, deactivate. Else, let the timer do it
+      if (this.timeout == 0) {
          this.deactivateDestination();
       }
    }
@@ -104,25 +90,25 @@ Activator.prototype.sourceIsInactive = function(sourceName) {
 
 Activator.prototype.activateDestination = function() {
    this.destActivated = true;
-   this.emit(this.invert ? 'deactivate' : 'activate', this.name); 
+   this.emit(this.invert ? 'inactive' : 'active', this.name); 
 }
 
 Activator.prototype.deactivateDestination = function() {
    this.destActivated = false;
-   this.emit(this.invert ? 'activate' : 'deactivate', this.name); 
+   this.emit(this.invert ? 'active' : 'inactive', this.name); 
 }
 
-Activator.prototype.delayedSwitchOff = function() {
+Activator.prototype.restartTimer = function() {
    var that = this;
 
-   this.timeoutObj = setTimeout(function () {
-      if (that.sourceActive) {
-         that.delayedSwitchOff();
-      }
-      else {  // deactivate destination
-         that.deactivateDestination();
-      }
-   }, this.timeout*1000);
+   if (this.timeoutObj) {
+      clearTimeout(this.timeoutObj);
+   }
+
+   this.timeoutObj = setTimeout(function() {
+      that.deactivateDestination();
+      that.timeoutObj = null;
+   }), this.timeout*1000);
 }
 
 module.exports = exports = Activator;

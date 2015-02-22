@@ -2,39 +2,34 @@ var util = require('util');
 var events = require('events');
 var Activator = require('./activator');
 
-function LogicActivator(_name, _sources, _timeout, _invert) {
+function LogicActivator(_name, _sources) {
+   this.name = _name;
    this.inputs = [];
 
-   Activator.call(this, _name, this, _timeout, _invert);
+   this.active = false;
+
+   events.EventEmitter.call(this);
 
    var that = this;
 
-   _sources.forEach(function(_source, index) {
+   _sources.forEach(function(_source, _index) {
       that.inputs.push( { source : _source, active : false });
 
-      that.inputs[index].source.on('activate', function (sourceName) {
+      that.inputs[_index].source.on('active', function (sourceName) {
          that.oneSourceIsActive(sourceName);
       });
 
-      that.inputs[index].source.on('active', function (sourceName) {
-         that.oneSourceIsActive(sourceName);
-      });
-
-      that.inputs[index].source.on('deactivate', function (sourceName) {
-         that.oneSourceIsInactive(sourceName);
-      });
-
-      that.inputs[index].source.on('inactive', function (sourceName) {
+      that.inputs[_index].source.on('inactive', function (sourceName) {
          that.oneSourceIsInactive(sourceName);
       });
    });
 }
 
-util.inherits(LogicActivator, Activator);
+util.inherits(LogicActivator, events.EventEmitter);
 
 LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
    console.log(this.name + ': Input source ' + sourceName + ' active!');
-         
+
    // find the input in my array
    items = this.inputs.filter(function(item) {
       return (item.source.name == sourceName);
@@ -45,7 +40,8 @@ LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
       item.active = true;
    });
 
-   if (this.checkActivate(this.inputs)) {
+   if (this.checkActivate(this.inputs, this.active)) {
+      this.active = true;
       this.emit('active', this.name);
    }
 }
@@ -53,6 +49,11 @@ LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
 LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
    console.log(this.name + ' : Input source ' + sourceName + ' inactive!');
          
+   if (coldStart) {
+      this.coldStart = false;
+      this.active = true;
+   }
+
    // find the input in my array
    items = this.inputs.filter(function(item) {
       return (item.source.name == sourceName);
@@ -63,7 +64,8 @@ LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
       item.active = false;
    });
 
-   if (this.checkDeactivate(this.inputs)) {
+   if (this.checkDeactivate(this.inputs, this.active)) {
+      this.active = false;
       this.emit('inactive', this.name);
    }
 }
