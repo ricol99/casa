@@ -236,12 +236,6 @@
                ],
                "activators": [
                   {
-                     "name": "activator:going-to-rain-at-home",
-                     "source": "state:going-to-rain-at-home",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
                      "name": "activator:alarm-lounge-pir",
                      "source": "gpiostate:alarm-lounge-pir",
                      "timeout": 15,
