@@ -45,7 +45,7 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
       if (!that.actionActive) {
          that.actionActive = true;
 
-         var _title = Casa Collin' + (that.messageActPriority > 0) ? ' Alarm' : ' Update';
+         var _title = 'Casa Collin' + (that.messageActPriority > 0) ? ' Alarm' : ' Update';
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
@@ -70,7 +70,7 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
       if (that.actionActive) {
          that.actionActive = false;
 
-         var _title = Casa Collin' + (that.messageDeactPriority > 0) ? ' Alarm' : ' Update';
+         var _title = 'Casa Collin' + (that.messageDeactPriority > 0) ? ' Alarm' : ' Update';
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
