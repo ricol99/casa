@@ -44,12 +44,13 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
 
       if (!that.actionActive) {
          that.actionActive = true;
-         //that.emit('activated', that.name);
+
+         var _title = Casa Collin' + (that.messageActPriority > 0) ? ' Alarm' : ' Update';
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
             message: that.activatedMessage,    // required
-            title: 'Casa Collin' + (that.messageActPriority > 0) ? ' Alarm' : ' Update', 
+            title: _title, 
             retry: 60,
             expire: 3600,
             priority: that.messageActPriority,
@@ -68,12 +69,13 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
 
       if (that.actionActive) {
          that.actionActive = false;
-         //that.emit('deactivated', that.name);
+
+         var _title = Casa Collin' + (that.messageDeactPriority > 0) ? ' Alarm' : ' Update';
 
          var msg = {
             user: that.thing.getProperty('pushoverDestAddr'),
             message: that.deactivatedMessage,   // required
-            title: 'Casa Collin' + (that.messageDeactPriority > 0) ? ' Alarm' : ' Update',
+            title: _title,
             retry: 60,
             expire: 3600,
             priority: that.messageDeactPriority,

@@ -187,6 +187,7 @@ PeerCasa.prototype.establishListeners = function(force) {
 
       this.socket.on('heartbeat', function(data) {
          // do nothing!
+         console.log(that.name + ': Heartbeat received');
       });
 
       // Establish heartbeat

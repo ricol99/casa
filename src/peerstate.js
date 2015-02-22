@@ -15,6 +15,7 @@ function PeerState(_name, _peerCasa) {
    }
 
    this.peerCasa.on('state-active', function(_name) {
+      console.log(that.name + ': checking state-active event ' + _name + ' received from remote.');
       if (_name == that.name) {
          console.log(that.name + ': received active event from peer. Going active!');
          that.emit('active', _name);
@@ -22,6 +23,7 @@ function PeerState(_name, _peerCasa) {
    });
 
    this.peerCasa.on('state-inactive', function(_name) {
+      console.log(that.name + ': checking state-inactive event ' + _name + ' received from remote.');
       if (_name == that.name) {
          console.log(that.name + ': received inactive event from peer. Going inactive!');
          that.emit('inactive', _name);
