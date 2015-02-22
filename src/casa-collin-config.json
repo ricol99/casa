@@ -145,15 +145,6 @@
                      "target": "usergroup:admins"
                   },
                   {
-                     "name": "pushoveraction:alarm-part-armed",
-                     "activeMessage": "Alarm part armed",
-                     "activeMessagePriority": 0,
-                     "inactiveMessage": "Alarm disarmed",
-                     "inactiveMessagePriority": 0,
-                     "source": "gpiostate:alarm-part-armed",
-                     "target": "usergroup:admins"
-                  },
-                  {
                      "name": "pushoveraction:alarm-in-alarm",
                      "activeMessage": "Alarm triggered",
                      "activeMessagePriority": 2,
