@@ -49,7 +49,16 @@
                },
                "props": {},
                "states": [],
-               "activators": [],
+               "activators": [
+                  {
+                     "name": "oractivator:home-internet-connection",
+                     "sources": [
+                        "casa:alarm",
+                        "casa:cctv",
+                        "casa:light"
+                     ]
+                  }
+               ],
                "actions": [
                   {
                      "name": "pushoveraction:alarm-tamper-alarm",
@@ -120,7 +129,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Internet connection to home has been lost!",
                      "inactiveMessagePriority": 1,
-                     "source": "casa:alarm",
+                     "source": "oractivator:home-internet-connection",
                      "target": "usergroup:key-holders"
                   },
                   {
