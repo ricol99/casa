@@ -54,7 +54,17 @@
                   }
                ],
                "activators": [],
-               "actions": []
+               "actions": [
+                  {
+                     "name": "pushoveraction:alarm-part-armed",
+                     "activeMessage": "Alarm part armed",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Alarm disarmed",
+                     "inactiveMessagePriority": 0,
+                     "source": "gpiostate:alarm-part-armed",
+                     "target": "usergroup:admins"
+                  }
+               ]
             }
          ]
       },
