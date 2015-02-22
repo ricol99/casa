@@ -173,9 +173,6 @@ function CasaSystem(_casaName, _config) {
       that.allObjects[actionObj.name] = actionObj;
       console.log('New action: ' + action.name);
    });
-
-
-   // **TBD** Add Activators for Peer Casas' connected status
 }
 
 util.inherits(CasaSystem, Thing);
@@ -254,8 +251,12 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          var sourceName  = ret.name;
 
          var peerCasa = this.findCasa(peerCasaName);
-         var PeerState = require('./peerstate');
-         source = new PeerState(sourceName, peerCasa);
+         source = this.findCasaState(peerCasa, stateName);
+
+         if (!source) {
+            var PeerState = require('./peerstate');
+            source = new PeerState(sourceName, peerCasa);
+         }
       }
    }
 
