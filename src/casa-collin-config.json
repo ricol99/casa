@@ -49,50 +49,7 @@
                },
                "props": {},
                "states": [],
-               "activators": [
-                  {
-                     "name": "activator:alarm-tamper-alarm",
-                     "source": "gpiostate:alarm-tamper-alarm",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-mains-failure",
-                     "source": "gpiostate:alarm-mains-failure",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-fire-alarm",
-                     "source": "gpiostate:alarm-fire-alarm",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-fully-armed",
-                     "source": "gpiostate:alarm-fully-armed",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-part-armed",
-                     "source": "gpiostate:alarm-part-armed",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-in-alarm",
-                     "source": "gpiostate:alarm-in-alarm",
-                     "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:alarm-confirmed-alarm",
-                     "source": "gpiostate:alarm-confirmed-alarm",
-                     "timeout": 0,
-                     "invert": false
-                  }
-               ],
+               "activators": [],
                "actions": [
                   {
                      "name": "pushoveraction:alarm-tamper-alarm",
@@ -100,7 +57,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Alarm no longer in tamper mode",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-tamper-alarm",
+                     "source": "gpiostate:alarm-tamper-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
@@ -109,7 +66,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Alarm mains power restored",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-mains-failure",
+                     "source": "gpiostate:alarm-mains-failure",
                      "target": "usergroup:key-holders"
                   },
                   {
@@ -118,7 +75,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Fire alarm reset",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-fire-alarm",
+                     "source": "gpiostate:alarm-fire-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
@@ -127,7 +84,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Alarm disarmed",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-fully-armed",
+                     "source": "gpiostate:alarm-fully-armed",
                      "target": "usergroup:admins"
                   },
                   {
@@ -136,7 +93,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Alarm disarmed",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-part-armed",
+                     "source": "gpiostate:alarm-part-armed",
                      "target": "usergroup:admins"
                   },
                   {
@@ -145,7 +102,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Alarm trigger reset",
                      "inactiveMessagePriority": 2,
-                     "source": "activator:alarm-in-alarm",
+                     "source": "gpiostate:alarm-in-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
@@ -154,7 +111,7 @@
                      "activeMessagePriority": 2,
                      "inactiveMessage": "Confirmed alarm reset",
                      "inactiveMessagePriority": 2,
-                     "source": "activator:alarm-confirmed-alarm",
+                     "source": "gpiostate:alarm-confirmed-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
