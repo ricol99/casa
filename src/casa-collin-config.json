@@ -53,15 +53,136 @@
                      "name": "state:going-to-rain-at-home"
                   }
                ],
-               "activators": [],
+               "activators": [
+                  {
+                     "name": "activator:alarm-tamper-alarm",
+                     "source": "gpiostate:alarm-tamper-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-mains-failure",
+                     "source": "gpiostate:alarm-mains-failure",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-fire-alarm",
+                     "source": "gpiostate:alarm-fire-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-fully-armed",
+                     "source": "gpiostate:alarm-fully-armed",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-part-armed",
+                     "source": "gpiostate:alarm-part-armed",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-in-alarm",
+                     "source": "gpiostate:alarm-in-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:alarm-confirmed-alarm",
+                     "source": "gpiostate:alarm-confirmed-alarm",
+                     "timeout": 0,
+                     "invert": false
+                  },
+                  {
+                     "name": "activator:internet-connection",
+                     "timeout": 0,
+                     "source": "casa:alarm",
+                     "invert": false
+                  }
+               ],
                "actions": [
+                  {
+                     "name": "pushoveraction:alarm-tamper-alarm",
+                     "activeMessage": "Alarm being tampered with!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Alarm no longer in tamper mode",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-tamper-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-mains-failure",
+                     "activeMessage": "Alarm has lost mains power!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Alarm mains power restored",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-mains-failure",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-fire-alarm",
+                     "activeMessage": "Fire Alarm!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Fire alarm reset",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-fire-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-fully-armed",
+                     "activeMessage": "Alarm armed",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Alarm disarmed",
+                     "inactiveMessagePriority": 0,
+                     "source": "activator:alarm-fully-armed",
+                     "target": "usergroup:admins"
+                  },
                   {
                      "name": "pushoveraction:alarm-part-armed",
                      "activeMessage": "Alarm part armed",
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Alarm disarmed",
                      "inactiveMessagePriority": 0,
-                     "source": "gpiostate:alarm-part-armed",
+                     "source": "activator:alarm-part-armed",
+                     "target": "usergroup:admins"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-in-alarm",
+                     "activeMessage": "Alarm triggered",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Alarm trigger reset",
+                     "inactiveMessagePriority": 2,
+                     "source": "activator:alarm-in-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-confirmed-alarm",
+                     "activeMessage": "Alarm confirmed - call police!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Confirmed alarm reset",
+                     "inactiveMessagePriority": 2,
+                     "source": "activator:alarm-confirmed-alarm",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:internet-connection",
+                     "activeMessage": "Internet connection to Casa Collin restored",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Internet connection to Casa Collin has been lost!",
+                     "inactiveMessagePriority": 1,
+                     "source": "activator:internet-connection",
+                     "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-casa-status",
+                     "activeMessage": "Casa 'alarm' is active",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Casa 'alarm' has gone down!",
+                     "inactiveMessagePriority": 1,
+                     "source": "casa:alarm",
                      "target": "usergroup:admins"
                   }
                ]
@@ -135,37 +256,9 @@
                      "source": "gpiostate:alarm-lounge-pir",
                      "timeout": 15,
                      "invert": false
-                  },
-                  {
-                     "name": "andactivator:lounge-activity",
-                     "sources": [
-                        "activator:alarm-lounge-pir",
-                        "gpiostate:alarm-fully-armed"
-                     ],
-                     "timeout": 0,
-                     "invert": false
                   }
                ],
-               "actions": [
-                  {
-                     "name": "spycameraaction:lounge",
-                     "cctvHostname": "192.168.1.245",
-                     "cctvPort": 8000,
-                     "userId": "ricol99",
-                     "password": "carrot99",
-                     "cameraId": 1,
-                     "source": "andactivator:lounge-activity"
-                  },
-                  {
-                     "name": "pushoveraction:alarm-lounge",
-                     "activeMessage": "Motion in lounge - Started recording!",
-                     "activeMessagePriority": 2,
-                     "inactiveMessage": "Motion in lounge ended - Finished recording",
-                     "inactiveMessagePriority": 0,
-                     "source": "andactivator:lounge-activity",
-                     "target": "usergroup:keyholders"
-                  }
-               ]
+               "actions": []
             },
             {
                "name": "casa:cctv",
