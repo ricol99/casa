@@ -110,81 +110,81 @@
                "actions": [
                   {
                      "name": "pushoveraction:alarm-tamper-alarm",
-                     "activeMessage": "Security-Info: * Alarm being tampered with! *",
+                     "activeMessage": "Alarm being tampered with!",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Info: Alarm no longer in tamper mode",
+                     "inactiveMessage": "Alarm no longer in tamper mode",
                      "inactiveMessagePriority": 0,
                      "source": "activator:alarm-tamper-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:alarm-mains-failure",
-                     "activeMessage": "Security-Info: * Alarm has lost mains power! *",
+                     "activeMessage": "Alarm has lost mains power!",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Info: Alarm mains power restored",
+                     "inactiveMessage": "Alarm mains power restored",
                      "inactiveMessagePriority": 0,
                      "source": "activator:alarm-mains-failure",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:alarm-fire-alarm",
-                     "activeMessage": "Security-Info: * Fire Alarm! *",
+                     "activeMessage": "Fire Alarm!",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Info: Fire alarm reset",
+                     "inactiveMessage": "Fire alarm reset",
                      "inactiveMessagePriority": 0,
                      "source": "activator:alarm-fire-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:alarm-fully-armed",
-                     "activeMessage": "Security-Info: Alarm armed",
+                     "activeMessage": "Alarm armed",
                      "activeMessagePriority": 0,
-                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessage": "Alarm disarmed",
                      "inactiveMessagePriority": 0,
                      "source": "activator:alarm-fully-armed",
                      "target": "usergroup:admins"
                   },
                   {
                      "name": "pushoveraction:alarm-part-armed",
-                     "activeMessage": "Security-Info: Alarm part armed",
+                     "activeMessage": "Alarm part armed",
                      "activeMessagePriority": 0,
-                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessage": "Alarm disarmed",
                      "inactiveMessagePriority": 0,
-                     "source": "activator:alarm-part-armed",
+                     "source": "gpiostate:alarm-part-armed",
                      "target": "usergroup:admins"
                   },
                   {
                      "name": "pushoveraction:alarm-in-alarm",
-                     "activeMessage": "Security-Info: Alarm triggered",
+                     "activeMessage": "Alarm triggered",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessage": "Alarm trigger reset",
                      "inactiveMessagePriority": 2,
                      "source": "activator:alarm-in-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:alarm-confirmed-alarm",
-                     "activeMessage": "Security-Info: Alarm confirmed triggered - call police!",
+                     "activeMessage": "Alarm confirmed - call police!",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Info: Alarm disarmed",
+                     "inactiveMessage": "Confirmed alarm reset",
                      "inactiveMessagePriority": 2,
                      "source": "activator:alarm-confirmed-alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:internet-connection",
-                     "activeMessage": "Security-Alarm:  Internet connection to the alarm has been restored",
+                     "activeMessage": "Internet connection to Casa Collin restored",
                      "activeMessagePriority": 0,
-                     "inactiveMessage": "Security-Alarm: * Internet connection lost to Alarm",
+                     "inactiveMessage": "Internet connection to Casa Collin has been lost!",
                      "inactiveMessagePriority": 1,
                      "source": "oractivator:internet-connection",
                      "target": "usergroup:key-holders"
                   },
                   {
                      "name": "pushoveraction:alarm-casa-status",
-                     "activeMessage": "Security-Alarm:  Alarm casa in active",
+                     "activeMessage": "Casa 'alarm' is active",
                      "activeMessagePriority": 0,
-                     "inactiveMessage": "Security-Alarm: * Alarm casa has gone down",
+                     "inactiveMessage": "Casa 'alarm' has gone down!",
                      "inactiveMessagePriority": 1,
                      "source": "casa:alarm",
                      "target": "usergroup:admins"
@@ -283,9 +283,9 @@
                   },
                   {
                      "name": "pushoveraction:alarm-lounge",
-                     "activeMessage": "Security-Alarm: * Motion in lounge * - Started recording",
+                     "activeMessage": "Motion in lounge - Started recording!",
                      "activeMessagePriority": 2,
-                     "inactiveMessage": "Security-Alarm:  Motion in lounge ended * - Finished recording",
+                     "inactiveMessage": "Motion in lounge ended - Finished recording",
                      "inactiveMessagePriority": 0,
                      "source": "andactivator:lounge-activity",
                      "target": "usergroup:keyholders"
