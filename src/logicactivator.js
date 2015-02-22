@@ -49,11 +49,6 @@ LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
 LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
    console.log(this.name + ' : Input source ' + sourceName + ' inactive!');
          
-   if (coldStart) {
-      this.coldStart = false;
-      this.active = true;
-   }
-
    // find the input in my array
    items = this.inputs.filter(function(item) {
       return (item.source.name == sourceName);
