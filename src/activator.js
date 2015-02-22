@@ -108,7 +108,7 @@ Activator.prototype.restartTimer = function() {
    this.timeoutObj = setTimeout(function() {
       that.deactivateDestination();
       that.timeoutObj = null;
-   }), this.timeout*1000);
+   }, this.timeout*1000);
 }
 
 module.exports = exports = Activator;
