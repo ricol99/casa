@@ -48,11 +48,7 @@
                   "port": 80
                },
                "props": {},
-               "states": [
-                  {
-                     "name": "state:going-to-rain-at-home"
-                  }
-               ],
+               "states": [],
                "activators": [
                   {
                      "name": "activator:alarm-tamper-alarm",
@@ -94,12 +90,6 @@
                      "name": "activator:alarm-confirmed-alarm",
                      "source": "gpiostate:alarm-confirmed-alarm",
                      "timeout": 0,
-                     "invert": false
-                  },
-                  {
-                     "name": "activator:internet-connection",
-                     "timeout": 0,
-                     "source": "casa:alarm",
                      "invert": false
                   }
                ],
@@ -169,11 +159,11 @@
                   },
                   {
                      "name": "pushoveraction:internet-connection",
-                     "activeMessage": "Internet connection to Casa Collin restored",
+                     "activeMessage": "Internet connection to home restored",
                      "activeMessagePriority": 0,
-                     "inactiveMessage": "Internet connection to Casa Collin has been lost!",
+                     "inactiveMessage": "Internet connection to home has been lost!",
                      "inactiveMessagePriority": 1,
-                     "source": "activator:internet-connection",
+                     "source": "casa:alarm",
                      "target": "usergroup:key-holders"
                   },
                   {
