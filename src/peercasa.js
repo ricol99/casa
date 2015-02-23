@@ -79,7 +79,6 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
    // publish state changes to remote casas
    this.casa.on('state-active', function(name) {
-      console.log(that.name + ': if there is a socket I will publish state ' + name + ' active to peer casa');
       if (that.connected) {
          console.log(that.name + ': publishing state ' + name + ' active to peer casa');
          that.unAckedMessages.push( { message: 'state-active', data: { stateName: name } } );
@@ -88,7 +87,6 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
    });
 
    this.casa.on('state-inactive', function(name) {
-      console.log(that.name + ': if there is a socket I will publish state ' + name + ' inactive to peer casa');
       if (that.connected) {
          console.log(that.name + ': publishing state ' + name + ' inactive to peer casa');
          that.unAckedMessages.push( { message: 'state-inactive', data: { stateName: name } } );
@@ -98,7 +96,6 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
 
    // publish activator changes to remote casas
    this.casa.on('activator-active', function(name) {
-      console.log(that.name + ': if there is a socket I will publish activator ' + name + ' active to peer casa');
       if (that.connected) {
          console.log(that.name + ': publishing activator ' + name + ' active to peer casa');
          that.unAckedMessages.push( { message: 'activator-active', data: { activatorName: name } } );
@@ -107,7 +104,6 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
    });
 
    this.casa.on('activator-inactive', function(name) {
-      console.log(that.name + ': if there is a socket I will publish activator ' + name + ' inactive to peer casa');
       if (that.connected) {
          console.log(that.name + ': publishing activator ' + name + ' inactive to peer casa');
          that.unAckedMessages.push( { message: 'activator-inactive', data: { activatorName: name } } );
