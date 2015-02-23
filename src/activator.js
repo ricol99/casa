@@ -54,8 +54,9 @@ function Activator(_name, _source, _minOutputTime, _invert, _inputDebounceTime, 
 
    events.EventEmitter.call(this);
 
-   if (this.inputDebouceTime > 0) {
+   if (this.inputDebounceTime > 0) {
       this.source = new InputDebouncer(this.source, this.inputDebounceTime);
+      console.log('Created input debouncer');
    }
 
    this.source.on('active', function (sourceName) {
@@ -134,16 +135,25 @@ function InputDebouncer(_source, _threshold) {
    this.threshold = _threshold;
    this.timeoutObj = null;
    this.sourceActive = false;
+   this.coldStart = true;
 
-   var that = this;;
+   events.EventEmitter.call(this);
+
+   var that = this;
 
    this.source.on('active', function (sourceName) {
+
+      if (that.coldStart) {
+         that.coldStart = false;
+         that.sourceActive = false;
+      }
 
       if (!that.sourceActive) {
          that.sourceActive = true;
 
          // If a timer is already running, ignore. ELSE create one
          if (that.timeoutObj == null) {
+
             // Activating
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
@@ -158,11 +168,17 @@ function InputDebouncer(_source, _threshold) {
 
    this.source.on('inactive', function (sourceName) {
 
+      if (that.coldStart) {
+         that.coldStart = false;
+         that.sourceActive = true;
+      }
+
       if (that.sourceActive) {
          that.sourceActive = false;
 
          // If a timer is already running, ignore. ELSE create one
          if (that.timeoutObj == null) {
+
             // Deactivating
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
@@ -175,5 +191,7 @@ function InputDebouncer(_source, _threshold) {
       }
    });
 }
+
+util.inherits(InputDebouncer, events.EventEmitter);
 
 module.exports = exports = Activator;

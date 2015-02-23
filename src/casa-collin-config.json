@@ -61,7 +61,12 @@
                   {
                      "name": "activator:debounced-home-internet-connection",
                      "source": "oractivator:home-internet-connection",
-                     "inputDebounceTime": 10
+                     "inputDebounceTime": 20
+                  },
+                  {
+                     "name": "activator:debounced-casa-alarm",
+                     "source": "casa:alarm",
+                     "inputDebounceTime": 20
                   }
                ],
                "actions": [
@@ -143,7 +148,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Casa 'alarm' has gone down!",
                      "inactiveMessagePriority": 1,
-                     "source": "casa:alarm",
+                     "source": "activator:debounced-casa-alarm",
                      "target": "usergroup:admins"
                   },
                   {
