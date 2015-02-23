@@ -59,6 +59,8 @@ function CasaSystem(_casaName, _config) {
             that.areas[index].casas.push(casaObj);
             that.allObjects[casaObj.name] = casaObj;
             that.casa = casaObj;
+            that.casa.states = [];
+            that.casa.activators = [];
             that.configCasa = area.casas[j];
             that.configCasaArea = area;
             that.casaArea = that.areas[index];
@@ -83,6 +85,8 @@ function CasaSystem(_casaName, _config) {
          configArea.casas[j].casa = this.casa;
          configArea.casas[j].proActiveConnect = proActiveConnect;
          var casaObj = new PeerCasa(configArea.casas[j]);
+         casaObj.states = [];
+         casaObj.activators = [];
          this.casa.casaArea.casas.push(casaObj);
          this.allObjects[casaObj.name] = casaObj;
          console.log('New peercasa: ' + casaObj.name);
@@ -108,6 +112,8 @@ function CasaSystem(_casaName, _config) {
             this.config.areas[j].casas[0].casa = this.casa;
             this.config.areas[j].casas[0].proActiveConnect = true;
             var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
+            casaObj.states = [];
+            casaObj.activators = [];
             this.areas[j].casas.push(casaObj);
             this.allObjects[casaObj.name] = casaObj;
             console.log('New peercasa: ' + casaObj.name);
@@ -129,6 +135,8 @@ function CasaSystem(_casaName, _config) {
                this.config.areas[area].casas[j].casa = this.casa;
                this.config.areas[area].casas[j].proActiveConnect = false;
                var casaObj = new PeerCasa(this.config.areas[area].casas[j]);
+               casaObj.states = [];
+               casaObj.activators = [];
                this.areas[area].casas.push(casaObj);
                this.allObjects[casaObj.name] = casaObj;
                console.log('New peercasa: ' + casaObj.name);
@@ -138,8 +146,6 @@ function CasaSystem(_casaName, _config) {
    }
 
    // Extract States
-   this.casa.states = [];
-
    this.configCasa.states.forEach(function(state) { 
       var State = that.cleverRequire(state.name);
       state.owner = that.casa;
@@ -150,8 +156,6 @@ function CasaSystem(_casaName, _config) {
    });
 
    // Extract Activators
-   this.casa.activators = [];
-
    this.configCasa.activators.forEach(function(activator) { 
       var Activator = that.cleverRequire(activator.name);
       activator.owner = that.casa.name;
