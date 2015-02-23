@@ -148,7 +148,7 @@
                      "inactiveMessage": "Motion in lounge ended - Finished recording",
                      "inactiveMessagePriority": 0,
                      "source": "andactivator:lounge-activity",
-                     "target": "usergroup:keyholders"
+                     "target": "usergroup:key-holders"
                   }
                ]
             }
