@@ -2,12 +2,13 @@ var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
-function Activator(_name, _source, _timeout, _invert, _casa) {
+function Activator(_name, _source, _minOutputTime, _invert, _inputDebounceTime, _casa) {
 
    this.source = null;
    this.name = null;
-   this.timeout = 0;
+   this.minOutputTime = 0;
    this.invert = false;
+   this.inputDebounceTime = 0;
    this.casa = null;
 
    if (_name.name) {
@@ -17,8 +18,12 @@ function Activator(_name, _source, _timeout, _invert, _casa) {
       this.casa = casaSys.findCasa(_name.owner);
       this.name = _name.name;
 
-      if (_name.timeout) {
-         this.timeout = _name.timeout;
+      if (_name.minOutputTime) {
+         this.minOutputTime = _name.minOutputTime;
+      }
+
+      if (_name.inputDebounceTime) {
+         this.inputDebounceTime = _name.inputDebounceTime;
       }
 
       if (_name.invert) {
@@ -28,8 +33,9 @@ function Activator(_name, _source, _timeout, _invert, _casa) {
    else {
       this.name = _name;
       this.source = _source;
-      this.timeout = _timeout;
+      this.minOutputTime = _minOutputTime;
       this.invert = _invert;
+      this.inputDebounceTime = _inputDebounceTime;
       this.casa = _casa;
    }
 
@@ -42,11 +48,15 @@ function Activator(_name, _source, _timeout, _invert, _casa) {
 
    this.destActivated = false;
    this.sourceActive = false;
-   this.timeoutObj = null;
+   this.minOutputTimeObj = null;
 
    var that = this;
 
    events.EventEmitter.call(this);
+
+   if (this.inputDebouceTime > 0) {
+      this.source = new InputDebouncer(this.source, this.inputDebounceTime);
+   }
 
    this.source.on('active', function (sourceName) {
       that.sourceIsActive(sourceName);
@@ -89,8 +99,8 @@ Activator.prototype.sourceIsInactive = function(sourceName) {
 
    if (this.destActivated) {
 
-      // Destination is active. If there is no timeout, deactivate. Else, let the timer do it
-      if (this.timeout == 0) {
+      // Destination is active. If there is no minOutputTime, deactivate. Else, let the timer do it
+      if (this.minOutputTime == 0) {
          this.deactivateDestination();
       }
    }
@@ -109,14 +119,61 @@ Activator.prototype.deactivateDestination = function() {
 Activator.prototype.restartTimer = function() {
    var that = this;
 
-   if (this.timeoutObj) {
-      clearTimeout(this.timeoutObj);
+   if (this.minOutputTimeObj) {
+      clearTimeout(this.minOutputTimeObj);
    }
 
-   this.timeoutObj = setTimeout(function() {
+   this.minOutputTimeObj = setTimeout(function() {
       that.deactivateDestination();
-      that.timeoutObj = null;
-   }, this.timeout*1000);
+      that.minOutputTimeObj = null;
+   }, this.minOutputTime*1000);
+}
+
+function InputDebouncer(_source, _threshold) {
+   this.source = _source;
+   this.threshold = _threshold;
+   this.timeoutObj = null;
+   this.sourceActive = false;
+
+   var that = this;;
+
+   this.source.on('active', function (sourceName) {
+
+      if (!that.sourceActive) {
+         that.sourceActive = true;
+
+         // If a timer is already running, ignore. ELSE create one
+         if (that.timeoutObj == null) {
+            // Activating
+            that.timeoutObj = setTimeout(function() {
+               that.timeoutObj = null;
+
+               if (that.sourceActive) {
+                  that.emit('active', that.source.name);
+               }
+            }, that.threshold*1000);
+         }
+      }
+   });
+
+   this.source.on('inactive', function (sourceName) {
+
+      if (that.sourceActive) {
+         that.sourceActive = false;
+
+         // If a timer is already running, ignore. ELSE create one
+         if (that.timeoutObj == null) {
+            // Deactivating
+            that.timeoutObj = setTimeout(function() {
+               that.timeoutObj = null;
+
+               if (!that.sourceActive) {
+                  that.emit('inactive', that.source.name);
+               }
+            }, that.threshold*1000);
+         }
+      }
+   });
 }
 
 module.exports = exports = Activator;

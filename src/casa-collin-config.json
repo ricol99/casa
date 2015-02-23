@@ -44,7 +44,7 @@
                "name": "casa:internet",
                "displayName": "Internet Casa",
                "address": {
-                  "hostname": "casa.elasticbeanstalk.com",
+                  "hostname": "lx9901827.home",
                   "port": 80
                },
                "props": {},
@@ -213,8 +213,7 @@
                   {
                      "name": "activator:alarm-lounge-pir",
                      "source": "gpiostate:alarm-lounge-pir",
-                     "timeout": 15,
-                     "invert": false
+                     "minOutputTime": 15,
                   },
                   {
                      "name": "andactivator:lounge-activity",
@@ -222,8 +221,6 @@
                         "activator:alarm-lounge-pir",
                         "gpiostate:alarm-fully-armed"
                      ],
-                     "timeout": 0,
-                     "invert": false
                   }
                ],
                "actions": [
