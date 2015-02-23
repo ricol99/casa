@@ -56,7 +56,10 @@
                         "casa:alarm",
                         "casa:cctv",
                         "casa:light"
-                     ]
+                     ],
+                     "name": "activator:debounced-home-internet-connection",
+                     "source": oractivator:home-internet-connection",
+                     "inputDebounceTime": 10
                   }
                ],
                "actions": [
@@ -129,7 +132,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Internet connection to home has been lost!",
                      "inactiveMessagePriority": 1,
-                     "source": "oractivator:home-internet-connection",
+                     "source": "activator:debounced-home-internet-connection",
                      "target": "usergroup:key-holders"
                   },
                   {
@@ -213,14 +216,14 @@
                   {
                      "name": "activator:alarm-lounge-pir",
                      "source": "gpiostate:alarm-lounge-pir",
-                     "minOutputTime": 15,
+                     "minOutputTime": 15
                   },
                   {
                      "name": "andactivator:lounge-activity",
                      "sources": [
                         "activator:alarm-lounge-pir",
                         "gpiostate:alarm-fully-armed"
-                     ],
+                     ]
                   }
                ],
                "actions": [
