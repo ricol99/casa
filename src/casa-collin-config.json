@@ -56,9 +56,11 @@
                         "casa:alarm",
                         "casa:cctv",
                         "casa:light"
-                     ],
+                     ]
+                  },
+                  {
                      "name": "activator:debounced-home-internet-connection",
-                     "source": oractivator:home-internet-connection",
+                     "source": "oractivator:home-internet-connection",
                      "inputDebounceTime": 10
                   }
                ],
