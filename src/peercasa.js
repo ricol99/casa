@@ -48,7 +48,7 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
               that.socket = socket;
               console.log(that.name + ': Connected to my peer. Going active.');
 
-              // listen for state changes from peer casas
+              // listen for state and activator changes from peer casas
               that.establishListeners(true);
 
               if (that.unAckedMessages.length > 1) {
@@ -91,8 +91,27 @@ function PeerCasa(_name, _displayName, _address, _casa, _casaArea, _proActiveCon
       console.log(that.name + ': if there is a socket I will publish state ' + name + ' inactive to peer casa');
       if (that.connected) {
          console.log(that.name + ': publishing state ' + name + ' inactive to peer casa');
-         that.unAckedMessages.push( { message: 'instate-active', data: { stateName: name } } );
+         that.unAckedMessages.push( { message: 'state-inactive', data: { stateName: name } } );
          that.socket.emit('state-inactive', { stateName: name });
+      }
+   });
+
+   // publish activator changes to remote casas
+   this.casa.on('activator-active', function(name) {
+      console.log(that.name + ': if there is a socket I will publish activator ' + name + ' active to peer casa');
+      if (that.connected) {
+         console.log(that.name + ': publishing activator ' + name + ' active to peer casa');
+         that.unAckedMessages.push( { message: 'activator-active', data: { activatorName: name } } );
+         that.socket.emit('activator-active', { activatorName: name });
+      }
+   });
+
+   this.casa.on('activator-inactive', function(name) {
+      console.log(that.name + ': if there is a socket I will publish activator ' + name + ' inactive to peer casa');
+      if (that.connected) {
+         console.log(that.name + ': publishing activator ' + name + ' inactive to peer casa');
+         that.unAckedMessages.push( { message: 'activator-inactive', data: { activatorName: name } } );
+         that.socket.emit('activator-inactive', { activatorName: name });
       }
    });
 }
@@ -175,12 +194,35 @@ PeerCasa.prototype.establishListeners = function(force) {
          that.socket.emit('state-inactiveAACCKK', data);
       });
 
+      // listen for activator changes from peer casas
+      this.socket.on('activator-active', function(data) {
+         console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + data.activatorName);
+         that.emit('activator-active', data.activatorName);
+         that.socket.emit('activator-activeAACCKK', data);
+      });
+
+      this.socket.on('activator-inactive', function(data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + data.activatorName);
+         that.emit('activator-inactive', data.activatorName);
+         that.socket.emit('activator-inactiveAACCKK', data);
+      });
+
       this.socket.on('state-activeAACCKK', function(data) {
          console.log(that.name + ': Active Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
 
       this.socket.on('state-inactiveAACCKK', function(data) {
+         console.log(that.name + ': Inactive Event ACKed by my peer.');
+         that.unAckedMessages.shift();
+      });
+
+      this.socket.on('activator-activeAACCKK', function(data) {
+         console.log(that.name + ': Active Event ACKed by my peer.');
+         that.unAckedMessages.shift();
+      });
+
+      this.socket.on('activator-inactiveAACCKK', function(data) {
          console.log(that.name + ': Inactive Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
@@ -215,6 +257,12 @@ PeerCasa.prototype.addState = function(_state) {
    console.log(this.name + ': State '  +_state.name + ' added to casa ');
    this.states[_state.name] = _state;
    console.log(this.name + ': ' + _state.name + ' associated!');
+}
+
+PeerCasa.prototype.addActivator = function(_activator) {
+   console.log(this.name + ': Activator '  +_activator.name + ' added to casa ');
+   this.activators[_activator.name] = _activator;
+   console.log(this.name + ': ' + _activator.name + ' associated!');
 }
 
 module.exports = exports = PeerCasa;

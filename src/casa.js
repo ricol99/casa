@@ -75,5 +75,23 @@ Casa.prototype.addState = function(_state) {
    console.log(this.name + ': ' + _state.name + ' associated!');
 }
 
+Casa.prototype.addActivator = function(_activator) {
+   console.log(this.name + ': Activator '  + _activator.name + ' added to casa ');
+   this.activators[_activator.name] = _activator;
+   var that = this;
+
+   _activator.on('active', function (sourceName) {
+      console.log(that.name + ': ' + sourceName + ' has become active');
+      that.emit('activator-active', sourceName);
+   });
+
+   _activator.on('inactive', function (sourceName) {
+      console.log(that.name + ': ' + sourceName + ' has become inactive');
+      that.emit('activator-inactive', sourceName);
+   });
+
+   console.log(this.name + ': ' + _activator.name + ' associated!');
+}
+
 
 module.exports = exports = Casa;

@@ -2,17 +2,19 @@ var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
-function Activator(_name, _source, _timeout, _invert) {
+function Activator(_name, _source, _timeout, _invert, _casa) {
 
    this.source = null;
    this.name = null;
    this.timeout = 0;
    this.invert = false;
+   this.casa = null;
 
    if (_name.name) {
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();
       this.source = casaSys.findSource(_name.source);
+      this.casa = casaSys.findCasa(_name.owner);
       this.name = _name.name;
 
       if (_name.timeout) {
@@ -28,6 +30,12 @@ function Activator(_name, _source, _timeout, _invert) {
       this.source = _source;
       this.timeout = _timeout;
       this.invert = _invert;
+      this.casa = _casa;
+   }
+
+   if (this.casa) {
+      console.log('Activator casa: ' + this.casa.name);
+      this.casa.addActivator(this);
    }
 
    this.coldStart = true;

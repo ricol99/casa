@@ -44,7 +44,7 @@
                "name": "casa:internet",
                "displayName": "Internet Casa",
                "address": {
-                  "hostname": "casa.elasticbeanstalk.com",
+                  "hostname": "lx9901827.home",
                   "port": 80
                },
                "props": {},
@@ -140,6 +140,15 @@
                      "inactiveMessagePriority": 1,
                      "source": "casa:alarm",
                      "target": "usergroup:admins"
+                  },
+                  {
+                     "name": "pushoveraction:alarm-lounge",
+                     "activeMessage": "Motion in lounge - Started recording!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Motion in lounge ended - Finished recording",
+                     "inactiveMessagePriority": 0,
+                     "source": "andactivator:lounge-activity",
+                     "target": "usergroup:keyholders"
                   }
                ]
             }
@@ -206,9 +215,28 @@
                      "source": "gpiostate:alarm-lounge-pir",
                      "timeout": 15,
                      "invert": false
+                  },
+                  {
+                     "name": "andactivator:lounge-activity",
+                     "sources": [
+                        "activator:alarm-lounge-pir",
+                        "gpiostate:alarm-fully-armed"
+                     ],
+                     "timeout": 0,
+                     "invert": false
                   }
                ],
-               "actions": []
+               "actions": [
+                  {
+                     "name": "spycameraaction:lounge",
+                     "cctvHostname": "192.168.1.245",
+                     "cctvPort": 8000,
+                     "userId": "ricol99",
+                     "password": "carrot99",
+                     "cameraId": 1,
+                     "source": "andactivator:lounge-activity"
+                  }
+               ]
             },
             {
                "name": "casa:cctv",

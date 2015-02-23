@@ -2,9 +2,15 @@ var util = require('util');
 var events = require('events');
 var Activator = require('./activator');
 
-function LogicActivator(_name, _sources) {
+function LogicActivator(_name, _sources, _casa) {
    this.name = _name;
+   this.casa = _casa;
    this.inputs = [];
+
+   if (this.casa) {
+      console.log('Activator casa: ' + this.casa.name);
+      this.casa.addActivator(this);
+   }
 
    this.active = false;
 
