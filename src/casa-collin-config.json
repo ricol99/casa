@@ -266,15 +266,24 @@
                "name": "casa:cctv",
                "displayName": "CCTV",
                "address": {
-                  "hostname": "pi-cctv.home",
+                  "hostname": "lx9901827.home",
                   "port": 80
                },
                "props": {},
                "states": [
+                  {
+                     "name": "teststate:alarm-part-armed",
+                     "writable": true
+                  }
                ],
                "activators": [
                ],
                "actions": [
+                  {
+                  "name": "setstateaction:test-part-arm",
+                  "source": "gpiostate:alarm-part-armed",
+                  "target": "teststate:alarm-part-armed"
+                  }
                ]
             },
             {

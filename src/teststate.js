@@ -11,7 +11,7 @@ function TestState(_name) {
 
    State.call(this, _name.name, _name.casa);
 
-   that.active = false;
+   this.active = false;
 
    var that = this;
 }
@@ -19,7 +19,7 @@ function TestState(_name) {
 util.inherits(TestState, State);
 
 // *TBD* Could we lose events here?
-TestState.prototype.setActive(_callback) {
+TestState.prototype.setActive = function(_callback) {
 
    if (active) {
       console.log(this.name + ': Already active, no emit needed!');
@@ -38,7 +38,7 @@ TestState.prototype.setActive(_callback) {
    }
 }
 
-TestState.prototype.setInActive(_callback) {
+TestState.prototype.setInActive = function(_callback) {
 
    if (!active) {
       console.log(this.name + ': Already inactive, no emit needed!');

@@ -6,7 +6,7 @@ function State(_name, _casaName) {
    this.name = _name;
 
    var casaSys = CasaSystem.mainInstance();
-   this.casa = casaSys.findCasa(_casa);
+   this.casa = casaSys.findCasa(_casaName);
 
    events.EventEmitter.call(this);
 
@@ -22,12 +22,12 @@ util.inherits(State, events.EventEmitter);
 
 // Override these two functions if you want to support writable states
 State.prototype.setActive = function(_callback) {
-   console.log(this.name + ': State is read only!");
+   console.log(this.name + ': State is read only!');
    _callback(false);
 }
 
 State.prototype.setInActive = function(_callback) {
-   console.log(this.name + ': State is read only!");
+   console.log(this.name + ': State is read only!');
    _callback(false);
 }
 

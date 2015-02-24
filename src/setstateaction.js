@@ -3,20 +3,14 @@ var Action = require('./action');
 var push = require( 'pushover-notifications' );
 var CasaSystem = require('./casasystem');
 
-function SetStateAction(_name, _source, _state) {
+function SetStateAction(_config) {
 
-   if (_name.name) {
-      // constructing from object rather than params
-      // Resolve source and target
-      var casaSys = CasaSystem.mainInstance();
-      var source = casaSys.findSource(_name.source);
-      var target = (_name.target) ? casaSys.resolveObject(_name.target) : null;
+   // Resolve source and target
+   var casaSys = CasaSystem.mainInstance();
+   var source = casaSys.findSource(_config.source);
+   this.state = (_config.target) ? casaSys.resolveObject(_config.target) : null;
 
-      Action.call(this, _name.name, source, target);
-   }
-   else {
-      Action.call(this, _name, _source, _state);
-   }
+   Action.call(this, _config.name, source, null);
 
    this.actionActive = false;
 
@@ -29,7 +23,7 @@ function SetStateAction(_name, _source, _state) {
          that.actionActive = true;
          that.state.setActive(function(result) {
             if (!result) {
-               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!'):
+               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!');
             }
          });
       }
@@ -43,7 +37,7 @@ function SetStateAction(_name, _source, _state) {
 
          that.state.setActive(function(result) {
             if (!result) {
-               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!'):
+               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!');
             }
          });
       }
