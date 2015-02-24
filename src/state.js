@@ -17,12 +17,15 @@ function State(_name, _casa) {
 
 util.inherits(State, events.EventEmitter);
 
-State.prototype.setActive = function(callback) {
-   callback(false);
+// Override these two functions if you want to support writable states
+State.prototype.setActive = function(_callback) {
+   console.log(this.name + ': State is read only!");
+   _callback(false);
 }
 
-State.prototype.setInActive = function(callback) {
-   callback(false);
+State.prototype.setInActive = function(_callback) {
+   console.log(this.name + ': State is read only!");
+   _callback(false);
 }
 
 module.exports = exports = State;

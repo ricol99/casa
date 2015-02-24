@@ -33,5 +33,13 @@ function PeerState(_name, _peerCasa) {
 
 util.inherits(PeerState, events.EventEmitter);
 
+PeerState.prototype.setActive = function(_callback) {
+   this.peerCasa.setStateActive(this, _callback);
+}
+
+PeerState.prototype.setInActive = function(_callback) {
+   this.peerCasa.setStateInactive(this, _callback);
+}
+
 module.exports = exports = PeerState;
 

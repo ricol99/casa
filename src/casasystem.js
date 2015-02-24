@@ -260,6 +260,7 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          if (!source) {
             var PeerState = require('./peerstate');
             source = new PeerState(sourceName, peerCasa);
+            this.allObjects[source.name] = source;
          }
       }
    }
@@ -302,6 +303,7 @@ CasaSystem.prototype.findOrCreateCasaActivator = function (casa, activatorName) 
          if (!source) {
             var PeerActivator = require('./peeractivator');
             source = new PeerActivator(sourceName, peerCasa);
+            this.allObjects[source.name] = source;
          }
       }
    }

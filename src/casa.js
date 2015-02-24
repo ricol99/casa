@@ -100,5 +100,8 @@ Casa.prototype.addActivator = function(_activator) {
    console.log(this.name + ': ' + _activator.name + ' associated!');
 }
 
+Casa.prototype.findState = function(_stateName) {
+   return this.states[_stateName];
+}
 
 module.exports = exports = Casa;
