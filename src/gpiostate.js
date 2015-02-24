@@ -25,7 +25,7 @@ function GpioState(_name, _gpioPin, _triggerLow, _thing) {
       State.call(this, _name, _thing);
    }
 
-   that.ready = false;
+   this.ready = false;
 
    var that = this;
    var direction = (this.writable) ? 'out' : 'in';
@@ -36,7 +36,7 @@ function GpioState(_name, _gpioPin, _triggerLow, _thing) {
       interval: 400,
       ready: function() {
          that.ready = true;
-         gpio.on("change", function (value) {
+         that.gpio.on("change", function (value) {
             console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + value);
             value = that.triggerLow ? (value == 1 ? 0 : 1) : value;
             if (value == 1) {
@@ -53,19 +53,19 @@ function GpioState(_name, _gpioPin, _triggerLow, _thing) {
 util.inherits(GpioState, State);
 
 // *TBD* Could we lose events here?
-GpioState.prototype.setActive(_callback) {
+GpioState.prototype.setActive = function(_callback) {
    set(this.triggerLow ? 0 : 1, _callback);
 }
 
-GpioState.prototype.setInActive(_callback) {
+GpioState.prototype.setInActive = function(_callback) {
    set(this.triggerLow ? 1 : 0, _callback);
 }
 
-GpioState.prototype.set(_value, _callback) {
+GpioState.prototype.set = function(_value, _callback) {
    var that = this;
 
    if (this.ready && this.writable) {
-      gpio.set(value, function (err) {
+      this.gpio.set(value, function (err) {
          _callback(err != 0);
       });
    }
