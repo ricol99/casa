@@ -3,21 +3,22 @@ var events = require('events');
 var LogicActivator = require('./logicactivator');
 var CasaSystem = require('./casasystem');
 
-function XorActivator(_name, _sources, _timeout, _invert) {
+function XorActivator(_name, _sources, _casa) {
 
    if (_name.name) {
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();
+      var casa = casaSys.findCasa(_name.owner);
       var sources = [];
 
       _name.sources.forEach(function(sourceName) {
          sources.push(casaSys.findSource(sourceName));
       });
 
-      LogicActivator.call(this, _name.name, sources, _name.timeout, _name.invert);
+      LogicActivator.call(this, _name.name, sources, casa);
    }
    else {
-      LogicActivator.call(this, _name, _sources, _timeout, _invert);
+      LogicActivator.call(this, _name, _sources, _casa);
    }
 
    var that = this;
@@ -25,18 +26,15 @@ function XorActivator(_name, _sources, _timeout, _invert) {
 
 util.inherits(XorActivator, LogicActivator);
 
-XorActivator.prototype.checkActivate = function(inputs) {
-   if (inputs.every(function (input) { return input.active; })) {
+XorActivator.prototype.checkActivate = function() {
+
+   if (this.inputs.every(function (input) { return input.active; })) {
       return false;
    }
 
-   return inputs.some(function (input) {
+   return this.inputs.some(function (input) {
       return input.active;
    });
-};
-
-XorActivator.prototype.checkDeactivate = function(inputs) {
-   return !this.checkActivate(inputs);
 };
 
 module.exports = exports = XorActivator;

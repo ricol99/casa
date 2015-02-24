@@ -27,20 +27,10 @@ function AndActivator(_name, _sources, _casa) {
 
 util.inherits(AndActivator, LogicActivator);
 
-AndActivator.prototype.checkActivate = function(_inputs, _currentlyActive) {
-
-   if (_currentlyActive) {
-      return false;
-   }
-   else {
-      return _inputs.every(function (_input) {
-         return _input.active;
-      });
-   }
-};
-
-AndActivator.prototype.checkDeactivate = function(_inputs, _currentlyActive) {
-   return _currentlyActive;
+AndActivator.prototype.checkActivate = function() {
+   return this.inputs.every(function (_input) {
+      return _input.active;
+   });
 };
 
 module.exports = exports = AndActivator;

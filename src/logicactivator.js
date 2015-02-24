@@ -46,10 +46,7 @@ LogicActivator.prototype.oneSourceIsActive = function(sourceName) {
       item.active = true;
    });
 
-   if (this.checkActivate(this.inputs, this.active)) {
-      this.active = true;
-      this.emit('active', this.name);
-   }
+   this.emitIfNecessary();
 }
 
 LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
@@ -65,9 +62,23 @@ LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
       item.active = false;
    });
 
-   if (this.checkDeactivate(this.inputs, this.active)) {
-      this.active = false;
-      this.emit('inactive', this.name);
+   this.emitIfNecessary();
+}
+
+LogicActivator.prototype.emitIfNecessary = function() {
+
+   var res = checkActivate();
+
+   if(this.active) {
+
+      if (!res) {
+         this.active = false;
+         this.emit('inactive', this.name);
+      }
+
+   } else if (res) {
+      this.active = true;
+      this.emit('active', this.name);
    }
 }
 

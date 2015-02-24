@@ -26,27 +26,10 @@ function OrActivator(_name, _sources, _casa) {
 
 util.inherits(OrActivator, LogicActivator);
 
-OrActivator.prototype.checkActivate = function(_inputs, _currentlyActive) {
-
-   if (_currentlyActive) {
-      return false;
-   }
-   else {
-      return _inputs.some(function (_input) {
-         return _input.active;
-      });
-   }
-};
-
-OrActivator.prototype.checkDeactivate = function(_inputs, _currentlyActive) {
-   if (_currentlyActive) {
-      return !_inputs.some(function (_input) {
-         return _input.active;
-      });
-   }
-   else {
-      return false;
-   }
+OrActivator.prototype.checkActivate = function() {
+   return this.inputs.some(function (_input) {
+      return _input.active;
+   });
 };
 
 module.exports = exports = OrActivator;
