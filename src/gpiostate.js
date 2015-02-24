@@ -17,7 +17,7 @@ function GpioState(_name, _gpioPin, _triggerLow, _thing) {
          this.writable = _name.writable;
       }
 
-      State.call(this, _name.name, _name.owner);
+      State.call(this, _name.name, _name.casa);
    }
    else {
       this.gpioPin = _gpioPin;

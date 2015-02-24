@@ -148,7 +148,7 @@ function CasaSystem(_casaName, _config) {
    // Extract States
    this.configCasa.states.forEach(function(state) { 
       var State = that.cleverRequire(state.name);
-      state.owner = that.casa;
+      state.casa = that.casa.name;
       var stateObj = new State(state);
       that.casa.states.push(stateObj);
       that.allObjects[stateObj.name] = stateObj;
@@ -158,7 +158,7 @@ function CasaSystem(_casaName, _config) {
    // Extract Activators
    this.configCasa.activators.forEach(function(activator) { 
       var Activator = that.cleverRequire(activator.name);
-      activator.owner = that.casa.name;
+      activator.casa = that.casa.name;
       var activatorObj = new Activator(activator);
       that.casa.activators.push(activatorObj);
       that.allObjects[activatorObj.name] = activatorObj;

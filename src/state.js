@@ -1,9 +1,12 @@
 var util = require('util');
 var events = require('events');
+var CasaSystem = require('./casasystem');
 
-function State(_name, _casa) {
+function State(_name, _casaName) {
    this.name = _name;
-   this.casa = _casa;
+
+   var casaSys = CasaSystem.mainInstance();
+   this.casa = casaSys.findCasa(_casa);
 
    events.EventEmitter.call(this);
 

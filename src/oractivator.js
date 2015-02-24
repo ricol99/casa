@@ -8,7 +8,7 @@ function OrActivator(_name, _sources, _casa) {
   if (_name.name) {
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();
-      var casa = casaSys.findCasa(_name.owner);
+      var casa = casaSys.findCasa(_name.casa);
       var sources = [];
 
       _name.sources.forEach(function(sourceName) {

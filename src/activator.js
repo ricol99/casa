@@ -15,7 +15,7 @@ function Activator(_name, _source, _minOutputTime, _invert, _inputDebounceTime, 
       // constructing from object rather than params
       var casaSys = CasaSystem.mainInstance();
       this.source = casaSys.findSource(_name.source);
-      this.casa = casaSys.findCasa(_name.owner);
+      this.casa = casaSys.findCasa(_name.casa);
       this.name = _name.name;
 
       if (_name.minOutputTime) {
