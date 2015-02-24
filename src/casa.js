@@ -34,6 +34,13 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      console.log('a casa has joined');
      var name;
 
+     socket.on('error', function() {
+       if (name) {
+          console.log(that.name + ': Peer casa ' + name + ' dropped');
+          that.emit('casa-lost', name);
+       }
+     });
+
      socket.on('disconnect', function() {
        if (name) {
           console.log(that.name + ': Peer casa ' + name + ' dropped');
