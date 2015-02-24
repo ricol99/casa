@@ -61,7 +61,8 @@
                   {
                      "name": "activator:debounced-home-internet-connection",
                      "source": "oractivator:home-casas",
-                     "inputDebounceTime": 20
+                     "inputDebounceTime": 20,
+                     "invert": true
                   },
                   {
                      "name": "activator:debounced-casa-alarm",
@@ -142,19 +143,19 @@
                   },
                   {
                      "name": "pushoveraction:internet-connection",
-                     "activeMessage": "Internet connection to home restored",
-                     "activeMessagePriority": 0,
-                     "inactiveMessage": "Internet connection to home has been lost!",
-                     "inactiveMessagePriority": 1,
+                     "activeMessage": "Internet connection to home has been lost!",
+                     "activeMessagePriority": 1,
+                     "inactiveMessage": "Internet connection to home restored",
+                     "inactiveMessagePriority": 0,
                      "source": "activator:debounced-home-internet-connection",
                      "target": "usergroup:admins"
                   },
                   {
                      "name": "pushoveraction:internet-connection-armed",
-                     "activeMessage": "Internet connection to home restored",
-                     "activeMessagePriority": 0,
-                     "inactiveMessage": "Internet connection to home has been lost while alarm is fully armed!",
-                     "inactiveMessagePriority": 2,
+                     "activeMessage": "Internet connection to home has been lost while alarm is fully armed!",
+                     "activeMessagePriority": 2,
+                     "inactiveMessage": "Internet connection to home restored",
+                     "inactiveMessagePriority": 0,
                      "source": "andactivator:home-internet-connection-armed",
                      "target": "usergroup:key-holders"
                   },
