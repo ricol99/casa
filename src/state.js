@@ -17,5 +17,13 @@ function State(_name, _casa) {
 
 util.inherits(State, events.EventEmitter);
 
+State.prototype.setActive(callback) {
+   callback(false);
+}
+
+State.prototype.setInActive(callback) {
+   callback(false);
+}
+
 module.exports = exports = State;
  
