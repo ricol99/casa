@@ -17,11 +17,11 @@ function State(_name, _casa) {
 
 util.inherits(State, events.EventEmitter);
 
-State.prototype.setActive(callback) {
+State.prototype.setActive = function(callback) {
    callback(false);
 }
 
-State.prototype.setInActive(callback) {
+State.prototype.setInActive = function(callback) {
    callback(false);
 }
 
