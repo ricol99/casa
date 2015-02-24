@@ -51,7 +51,7 @@
                "states": [],
                "activators": [
                   {
-                     "name": "oractivator:home-internet-connection",
+                     "name": "oractivator:home-casas",
                      "sources": [
                         "casa:alarm",
                         "casa:cctv",
@@ -60,7 +60,7 @@
                   },
                   {
                      "name": "activator:debounced-home-internet-connection",
-                     "source": "oractivator:home-internet-connection",
+                     "source": "oractivator:home-casas",
                      "inputDebounceTime": 20
                   },
                   {
@@ -155,7 +155,7 @@
                      "activeMessagePriority": 0,
                      "inactiveMessage": "Internet connection to home has been lost while alarm is fully armed!",
                      "inactiveMessagePriority": 2,
-                     "source": "activator:home-internet-connection-armed",
+                     "source": "andactivator:home-internet-connection-armed",
                      "target": "usergroup:key-holders"
                   },
                   {
