@@ -38,6 +38,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
        if (name) {
           console.log(that.name + ': Peer casa ' + name + ' dropped');
           that.emit('casa-lost', name);
+          name = null;
        }
      });
 
@@ -45,6 +46,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
        if (name) {
           console.log(that.name + ': Peer casa ' + name + ' dropped');
           that.emit('casa-lost', name);
+          name = null;
        }
      });
 
