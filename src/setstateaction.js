@@ -27,7 +27,7 @@ function SetStateAction(_name, _source, _state) {
 
       if (!that.actionActive) {
          that.actionActive = true;
-         that.source.setActive(function(result) {
+         that.state.setActive(function(result) {
             if (!result) {
                console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!'):
             }
@@ -41,7 +41,7 @@ function SetStateAction(_name, _source, _state) {
       if (that.actionActive) {
          that.actionActive = false;
 
-         that.source.setActive(function(result) {
+         that.state.setActive(function(result) {
             if (!result) {
                console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!'):
             }
