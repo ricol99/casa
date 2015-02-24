@@ -132,7 +132,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
 
    this.socket.on('connect', function() {
-      console.log(that.name + ': Connected to my peer. Going active.');
+      console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
       that.unAckedMessages.push( { message: 'login', data: { name: that.casa.name } } );
       that.socket.emit('login', { name: that.casa.name });
