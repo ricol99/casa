@@ -67,7 +67,7 @@ LogicActivator.prototype.oneSourceIsInactive = function(sourceName) {
 
 LogicActivator.prototype.emitIfNecessary = function() {
 
-   var res = checkActivate();
+   var res = this.checkActivate();
 
    if(this.active) {
 
