@@ -79,6 +79,11 @@
                ],
                "actions": [
                   {
+                  "name": "setstateaction:test-part-arm",
+                  "source": "gpiostate:alarm-part-armed",
+                  "target": "teststate:alarm-part-armed"
+                  },
+                  {
                      "name": "pushoveraction:alarm-tamper-alarm",
                      "activeMessage": "Alarm being tampered with!",
                      "activeMessagePriority": 2,
@@ -279,11 +284,6 @@
                "activators": [
                ],
                "actions": [
-                  {
-                  "name": "setstateaction:test-part-arm",
-                  "source": "gpiostate:alarm-part-armed",
-                  "target": "teststate:alarm-part-armed"
-                  }
                ]
             },
             {
