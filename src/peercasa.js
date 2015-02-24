@@ -139,7 +139,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    });
 
    this.socket.on('loginAACCKK', function(data) {
-      console.log(that.name + ': Login Event ACKed by my peer.');
+      console.log(that.name + ': Login Event ACKed by my peer. Going active.');
 
       that.unAckedMessages.pop();  // Remove Login
 
