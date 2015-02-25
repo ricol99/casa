@@ -263,7 +263,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          that.socket.emit('set-state-active-respAACCKK', data);
 
          if (that.incompleteRequests[data.requestId]) {
-            that.incompleteRequests[data.requestId].callback(data.result);
+            that.incompleteRequests[data.requestId].completeRequest(data.result);
             delete that.incompleteRequests[data.requestId];
             that.incompleteRequests[data.requestId] = null;
          }
@@ -271,10 +271,10 @@ PeerCasa.prototype.establishListeners = function(force) {
 
       this.socket.on('set-state-inactive-resp', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-resp, state: ' + data.stateName);
-         that.socket.emit('set-state-active-respAACCKK', data);
+         that.socket.emit('set-state-inactive-respAACCKK', data);
 
          if (that.incompleteRequests[data.requestId]) {
-            that.incompleteRequests[data.requestId].callback(data.result);
+            that.incompleteRequests[data.requestId].completeRequest(data.result);
             delete that.incompleteRequests[data.requestId];
             that.incompleteRequests[data.requestId] = null;
          }
@@ -303,11 +303,19 @@ PeerCasa.prototype.establishListeners = function(force) {
       this.socket.on('set-state-active-reqAACCKK', function(data) {
          console.log(that.name + ': set state active request event ACKed by my peer. *Not confirmed*');
          that.unAckedMessages.shift();
+
+         if (that.incompleteRequests[data.requestId]) {
+            that.incompleteRequests[data.requestId].ackRequest();
+         }
       });
 
       this.socket.on('set-state-inactive-reqAACCKK', function(data) {
          console.log(that.name + ': set state inactive request event ACKed by my peer. *Not confirmed*');
          that.unAckedMessages.shift();
+
+         if (that.incompleteRequests[data.requestId]) {
+            that.incompleteRequests[data.requestId].ackRequest();
+         }
       });
 
       this.socket.on('set-state-active-respAACCKK', function(data) {
@@ -340,8 +348,25 @@ PeerCasa.prototype.establishListeners = function(force) {
 PeerCasa.prototype.resendUnAckedMessages = function() {
    var that = this;
 
-   this.unAckedMessages.forEach(function(message) {
-      that.socket.emit(message.message, message.data);
+   this.unAckedMessages.forEach(function(_message) {
+      if (_message) {
+         that.socket.emit(_message.message, _message.data);
+      }
+   });
+
+   var toDelete = [];
+   this.incompleteRequests.forEach(function(_request, index) {
+      if (_request) {
+         _request.resendRequest(function(_requestId) {
+            toDelete.push(requestId);
+         });
+      }
+   });
+
+   // Clean up any already acked messages
+   toDelete.forEach(function(_requestId) {
+      delete that.incompleteRequests[_requestId];
+      that.incompleteRequests[_requestId] = null;
    });
 
 }
@@ -353,17 +378,69 @@ PeerCasa.prototype.addState = function(_state) {
    console.log(this.name + ': ' + _state.name + ' associated!');
 }
 
+function RemoteCasaRequestor(_requestId, _callback) {
+   this.requestId = _requestId;
+   this.callback = _callback;
+   this.acked = false;
+   this.timeout = null;
+   this.message = null;;
+}
+
+RemoteCasaRequestor.prototype.sendRequest(_message, _timeout) {
+   var that = this;
+   this.message = _message;
+   this.socket.emit(this.message.message, this.message.data);
+   this.timeout = setTimeout(function() {
+      that.callback(false);
+      _timeout(that.requestId);
+   }, 30000);
+}
+
+RemoteCasaRequestor.prototype.resendRequest(_deleteMe) {
+   var that = this;
+
+   if (this.acked) {
+      // remote casa has already received the request, we will never know the result :-)
+      this.callback(false);
+      _deleteMe(this.requestId);
+   }
+   else {
+      if (this.timeout) {
+         clearTimeout(this,timeout);
+      }
+
+      this.socket.emit(this.message.message, this.message.data);
+
+      this.timeout = setTimeout(function() {
+         that.callback(false);
+         _deleteMe(that.requestId);
+      }, 30000);
+   }
+}
+
+RemoteCasaRequestor.prototype.ackRequest() {
+   this.acked = true;
+}
+
+RemoteCasaRequestor.prototype.completeRequest(_result) {
+   clearTimeout(this.timeout);
+   this.callback(_result);
+}
+
 PeerCasa.prototype.setStateActive = function(_state, _callback) {
-   console.log(this.name + ': Attempting to set state ' + _state.name + ' to active');
 
    if (this.connected) {
       console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
-      var id = this.name + ':active:' + (this.reqId)++;
+      var id = this.name + ':active:' + this.reqId;
+      this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-active-req', data: {stateName: _state.name, requestId: id } };
       this.unAckedMessages.push(message);
-      this.incompleteRequests[id] =  { message: message, callback: _callback };
-      this.socket.emit('set-state-active-req', { stateName: _state.name, requestId: id });
-      console.log(this.name + ': Message sent to remote casa');
+      that.incompleteRequests[id] = new RemoteCasaRequestor(id);
+      that.incompleteRequests[id].sendRequest(message, function(_requestId) {
+         // Timeout has occurred, so delete request
+         delete that.incompleteRequests[_requestId];
+         that.incompleteRequests[_requestId] = null;
+      });
    }
    else {
       _callback(false);
@@ -374,11 +451,16 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
 
    if (this.connected) {
       console.log(this.name + ': requesting state change to inactive from peer casa. State ' + _state.name);
-      var id = this.name + ':inactive:' + (this.reqId)++;
+      var id = this.name + ':inactive:' + this.reqId;
+      this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-inactive-req', data: {stateName: _state.name, requestId: id } };
       this.unAckedMessages.push(message);
-      this.incompleteRequests[id] =  { message: message, callback: _callback };
-      this.socket.emit('set-state-inactive-req', { stateName: _state.name, requestId: id });
+      that.incompleteRequests[id] = new RemoteCasaRequestor(id);
+      that.incompleteRequests[id].sendRequest(message, function(_requestId) {
+         // Timeout has occurred, so delete request
+         delete that.incompleteRequests[_requestId];
+         that.incompleteRequests[_requestId] = null;
+      });
    }
    else {
       _callback(false);
