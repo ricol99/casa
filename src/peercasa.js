@@ -386,7 +386,7 @@ function RemoteCasaRequestor(_requestId, _callback) {
    this.message = null;;
 }
 
-RemoteCasaRequestor.prototype.sendRequest(_message, _timeout) {
+RemoteCasaRequestor.prototype.sendRequest = function(_message, _timeout) {
    var that = this;
    this.message = _message;
    this.socket.emit(this.message.message, this.message.data);
@@ -396,7 +396,7 @@ RemoteCasaRequestor.prototype.sendRequest(_message, _timeout) {
    }, 30000);
 }
 
-RemoteCasaRequestor.prototype.resendRequest(_deleteMe) {
+RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
    var that = this;
 
    if (this.acked) {
@@ -418,11 +418,11 @@ RemoteCasaRequestor.prototype.resendRequest(_deleteMe) {
    }
 }
 
-RemoteCasaRequestor.prototype.ackRequest() {
+RemoteCasaRequestor.prototype.ackRequest = function() {
    this.acked = true;
 }
 
-RemoteCasaRequestor.prototype.completeRequest(_result) {
+RemoteCasaRequestor.prototype.completeRequest = function(_result) {
    clearTimeout(this.timeout);
    this.callback(_result);
 }
