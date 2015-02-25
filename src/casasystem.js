@@ -279,7 +279,7 @@ CasaSystem.prototype.findOrCreateState = function (stateName) {
       var configState = this.findConfigState(stateName);
 
       if (configState) {
-         state = this.findOrCreateCasaState(findCasa(configState.owner), stateName);
+         state = this.findOrCreateCasaState(this.findCasa(configState.owner), stateName);
       }
    }
    return state;
