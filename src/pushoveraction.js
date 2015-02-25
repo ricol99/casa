@@ -47,7 +47,7 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
          var _title = 'Casa Collin' + ((that.messageActPriority > 0) ? ' Alarm' : ' Update');
 
          var msg = {
-            user: that.thing.getProperty('pushoverDestAddr'),
+            user: that.target.getProperty('pushoverDestAddr'),
             message: that.activatedMessage,    // required
             title: _title, 
             retry: 60,
@@ -72,7 +72,7 @@ function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMess
          var _title = 'Casa Collin' + ((that.messageDeactPriority > 0) ? ' Alarm' : ' Update');
 
          var msg = {
-            user: that.thing.getProperty('pushoverDestAddr'),
+            user: that.target.getProperty('pushoverDestAddr'),
             message: that.deactivatedMessage,   // required
             title: _title,
             retry: 60,
