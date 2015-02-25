@@ -26,8 +26,11 @@ function SetStateAction(_config) {
          that.actionActive = true;
          that.state.setActive(function(result) {
 
-            if (!result) {
-               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!');
+            if (result) {
+               console.log(that.name + ': Set State ' + that.state.name + ' to active!');
+            }
+            else {
+               console.log(that.name + ': Failed to set State ' + that.state.name + ' to active!');
             }
          });
       }
@@ -41,8 +44,11 @@ function SetStateAction(_config) {
 
          that.state.setInActive(function(result) {
 
-            if (!result) {
-               console.log(that.name + ': Failed to set State ' + that.source.name + ' to active!');
+            if (result) {
+               console.log(that.name + ': Set State ' + that.state.name + ' to inactive!');
+            }
+            else {
+               console.log(that.name + ': Failed to set State ' + that.state.name + ' to inactive!');
             }
          });
       }

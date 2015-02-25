@@ -181,20 +181,20 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 function StateRequestor(_requestId, _state) {
    this.requestId = _requestId;
    this.state = _state;
+}
 
+StateRequestor.prototype.setActive = function(_callback) {
    var that = this;
+   this.state.setActive(function(_result) {
+      _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+   });
+}
 
-   var setActive = function(_callback) {
-      that.state.setActive(function(_result) {
-         _callback( { stateName: that.name, requestId: that.requestId, result: _result });
-      });
-   }
-
-   var setInactive = function(_callback) {
-      that.state.setInactive(function(_result) {
-         _callback( { stateName: that.name, requestId: that.requestId, result: _result });
-      });
-   }
+StateRequestor.prototype.setInactive = function(_callback) {
+   var that = this;
+   this.state.setInactive(function(_result) {
+      _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+   });
 }
 
 PeerCasa.prototype.establishListeners = function(force) {
@@ -234,7 +234,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          var state = that.casa.findState(data.stateName);
 
          if (state) {
-            that.stateRequests[data.requestId] = StateRequestor(data.requestId, state);
+            that.stateRequests[data.requestId] = new StateRequestor(data.requestId, state);
             that.stateRequests[data.requestId].setActive(function(_resp) {
                that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result });
                delete that.stateRequests[ _resp.requestId];
@@ -249,7 +249,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          var state = that.casa.findState(data.stateName);
 
          if (state) {
-            that.stateRequests[data.requestId] = StateRequestor(data.requestId, state);
+            that.stateRequests[data.requestId] = new StateRequestor(data.requestId, state);
             that.stateRequests[data.requestId].setInactive(function(_resp) {
                that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result });
                delete that.stateRequests[ _resp.requestId];
@@ -263,7 +263,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          that.socket.emit('set-state-active-respAACCKK', data);
 
          if (that.incompleteRequests[data.requestId]) {
-            that.incompleteRequests[data.requestId].callback(data.response);
+            that.incompleteRequests[data.requestId].callback(data.result);
             delete that.incompleteRequests[data.requestId];
             that.incompleteRequests[data.requestId] = null;
          }
@@ -274,7 +274,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          that.socket.emit('set-state-active-respAACCKK', data);
 
          if (that.incompleteRequests[data.requestId]) {
-            that.incompleteRequests[data.requestId].callback(data.response);
+            that.incompleteRequests[data.requestId].callback(data.result);
             delete that.incompleteRequests[data.requestId];
             that.incompleteRequests[data.requestId] = null;
          }
