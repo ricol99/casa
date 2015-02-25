@@ -428,6 +428,7 @@ RemoteCasaRequestor.prototype.completeRequest = function(_result) {
 }
 
 PeerCasa.prototype.setStateActive = function(_state, _callback) {
+   var that = this;
 
    if (this.connected) {
       console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
@@ -435,8 +436,8 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-active-req', data: {stateName: _state.name, requestId: id } };
       this.unAckedMessages.push(message);
-      that.incompleteRequests[id] = new RemoteCasaRequestor(id);
-      that.incompleteRequests[id].sendRequest(message, function(_requestId) {
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id);
+      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          // Timeout has occurred, so delete request
          delete that.incompleteRequests[_requestId];
          that.incompleteRequests[_requestId] = null;
@@ -448,6 +449,7 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
 }
 
 PeerCasa.prototype.setStateInactive = function(_state, _callback) {
+   var that = this;
 
    if (this.connected) {
       console.log(this.name + ': requesting state change to inactive from peer casa. State ' + _state.name);
@@ -455,8 +457,8 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-inactive-req', data: {stateName: _state.name, requestId: id } };
       this.unAckedMessages.push(message);
-      that.incompleteRequests[id] = new RemoteCasaRequestor(id);
-      that.incompleteRequests[id].sendRequest(message, function(_requestId) {
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id);
+      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          // Timeout has occurred, so delete request
          delete that.incompleteRequests[_requestId];
          that.incompleteRequests[_requestId] = null;
