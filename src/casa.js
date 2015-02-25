@@ -32,29 +32,29 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
 
    io.on('connection', function(socket) {
      console.log('a casa has joined');
-     var name;
+     var peerName = null;
 
      socket.on('error', function() {
        if (name) {
-          console.log(that.name + ': Peer casa ' + name + ' dropped');
-          that.emit('casa-lost', name);
-          name = null;
+          console.log(that.name + ': Peer casa ' + peerName + ' dropped');
+          that.emit('casa-lost', peerName);
+          peerName = null;
        }
      });
 
      socket.on('disconnect', function() {
-       if (name) {
-          console.log(that.name + ': Peer casa ' + name + ' dropped');
-          that.emit('casa-lost', name);
-          name = null;
+       if (peerName) {
+          console.log(that.name + ': Peer casa ' + peerName + ' dropped');
+          that.emit('casa-lost', peerName);
+          peerName = null;
        }
      });
 
      socket.on('login', function(data) {
        console.log(that.name + ': login: ' + data.name);
-       name = data.name;
+       peerName = data.name;
        socket.emit('loginAACCKK');
-       that.emit('casa-joined', name, socket);
+       that.emit('casa-joined', peerName, socket);
      });
    });
 
