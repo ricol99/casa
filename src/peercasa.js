@@ -215,7 +215,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          var state = that.casa.findState(data.stateName);
 
          if (state) {
-            this.stateRequests[data.message.reqId] = new function(_requestId, _state, _callback) {
+            this.stateRequests[data.data.requestId] = new function(_requestId, _state, _callback) {
                _state.SetActive(function(resp) {
                   that.socket.emit('set-state-active-resp', { stateName: _state.name, reqId: _requestId, result: resp.result });
                   _callback(_requestId);
@@ -223,7 +223,7 @@ PeerCasa.prototype.establishListeners = function(force) {
             };
 
             // invoke the function conserving 'this' 
-            this.stateRequests[data.message.reqId].call(this, data.message.reqId, state, function(_reqId) {
+            this.stateRequests[data.data.requestId].call(this, data.message.reqId, state, function(_reqId) {
                delete that.stateRequests[_reqId];
                that.stateRequests[_reqId] = null;
             });
