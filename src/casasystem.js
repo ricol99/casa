@@ -273,13 +273,13 @@ CasaSystem.prototype.findState = function (stateName) {
 }
 
 CasaSystem.prototype.findOrCreateState = function (stateName) {
-   var state = resolveObject(stateName);
+   var state = this.resolveObject(stateName);
 
    if (!state) {
-      var configState = findConfigState(stateName);
+      var configState = this.findConfigState(stateName);
 
       if (configState) {
-         state = findOrCreateCasaState(findCasa(configState.owner), stateName);
+         state = this.findOrCreateCasaState(findCasa(configState.owner), stateName);
       }
    }
    return state;
