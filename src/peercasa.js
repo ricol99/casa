@@ -347,6 +347,7 @@ PeerCasa.prototype.addState = function(_state) {
 }
 
 PeerCasa.prototype.setStateActive = function(_state, _callback) {
+   console.log(this.name + ': Attempting to set state ' + _state.name + ' to active');
 
    if (this.connected) {
       console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
@@ -355,9 +356,10 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       this.unAckedMessages.push(message);
       this.incompleteRequests[id] =  { message: message, callback: _callback };
       this.socket.emit('set-state-active-req', { stateName: _state.name, requestId: id });
+      console.log(this.name + ': Message sent to remote casa');
    }
    else {
-      callback(false);
+      _callback(false);
    }
 }
 
@@ -372,7 +374,7 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       this.socket.emit('set-state-inactive-req', { stateName: _state.name, requestId: id });
    }
    else {
-      callback(false);
+      _callback(false);
    }
 }
 

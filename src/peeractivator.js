@@ -15,7 +15,6 @@ function PeerActivator(_name, _peerCasa) {
    }
 
    this.peerCasa.on('activator-active', function(_name) {
-      console.log(that.name + ': checking activator-active event ' + _name + ' received from remote.');
       if (_name == that.name) {
          console.log(that.name + ': received active event from peer. Going active!');
          that.emit('active', _name);
@@ -23,7 +22,6 @@ function PeerActivator(_name, _peerCasa) {
    });
 
    this.peerCasa.on('activator-inactive', function(_name) {
-      console.log(that.name + ': checking activator-inactive event ' + _name + ' received from remote.');
       if (_name == that.name) {
          console.log(that.name + ': received inactive event from peer. Going inactive!');
          that.emit('inactive', _name);
