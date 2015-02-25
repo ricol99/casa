@@ -178,6 +178,25 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    });
 }
 
+function StateRequestor(_requestId, _state) {
+   this.requestId = _requestId;
+   this.state = _state;
+
+   var that = this;
+
+   var setActive = function(_callback) {
+      that.state.setActive(function(_result) {
+         _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+      });
+   }
+
+   var setInactive = function(_callback) {
+      that.state.setInactive(function(_result) {
+         _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+      });
+   }
+}
+
 PeerCasa.prototype.establishListeners = function(force) {
 
    if (!this.listenersSetUp || force) {
@@ -215,17 +234,11 @@ PeerCasa.prototype.establishListeners = function(force) {
          var state = that.casa.findState(data.stateName);
 
          if (state) {
-            this.stateRequests[data.requestId] = function(_requestId, _state, _callback) {
-               _state.SetActive(function(resp) {
-                  that.socket.emit('set-state-active-resp', { stateName: _state.name, reqId: _requestId, result: resp.result });
-                  _callback(_requestId);
-               });
-            };
-
-            // invoke the function conserving 'this' 
-            this.stateRequests[data.requestId].call(this, data.requestId, state, function(_reqId) {
-               delete that.stateRequests[_reqId];
-               that.stateRequests[_reqId] = null;
+            that.stateRequests[data.requestId] = StateRequestor(data.requestId, state);
+            that.stateRequests[data.requestId].setActive(function(_resp) {
+               that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result });
+               delete that.stateRequests[ _resp.requestId];
+               that.stateRequests[ _resp.requestId] = null;
             });
          }
       });
@@ -236,17 +249,11 @@ PeerCasa.prototype.establishListeners = function(force) {
          var state = that.casa.findState(data.stateName);
 
          if (state) {
-            this.stateRequests[data.requestId] = function(_requestId, _state, _callback) {
-               _state.SetInactive(function(resp) {
-                  that.socket.emit('set-state-inactive-resp', { stateName: _state.name, reqId: _requestId, result: resp.result });
-                  _callback(_requestId);
-               });
-            };
-
-            // invoke the function conserving 'this' 
-            this.stateRequests[data.requestId].call(this, data.requestId, state, function(_reqId) {
-               delete that.stateRequests[_reqId];
-               that.stateRequests[_reqId] = null;
+            that.stateRequests[data.requestId] = StateRequestor(data.requestId, state);
+            that.stateRequests[data.requestId].setInactive(function(_resp) {
+               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result });
+               delete that.stateRequests[ _resp.requestId];
+               that.stateRequests[ _resp.requestId] = null;
             });
          }
       });
