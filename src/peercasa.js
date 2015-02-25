@@ -376,21 +376,22 @@ PeerCasa.prototype.addState = function(_state) {
    console.log(this.name + ': ' + _state.name + ' associated!');
 }
 
-function RemoteCasaRequestor(_requestId, _callback) {
+function RemoteCasaRequestor(_requestId, _callback, _socket) {
    this.requestId = _requestId;
    this.callback = _callback;
+   this.socket = _socket;
    this.acked = false;
    this.timeout = null;
    this.message = null;;
 }
 
-RemoteCasaRequestor.prototype.sendRequest = function(_message, _timeout) {
+RemoteCasaRequestor.prototype.sendRequest = function(_message, _deleteMe) {
    var that = this;
    this.message = _message;
    this.socket.emit(this.message.message, this.message.data);
    this.timeout = setTimeout(function() {
       that.callback(false);
-      _timeout(that.requestId);
+      _deleteMe(that.requestId);
    }, 30000);
 }
 
@@ -433,7 +434,7 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       var id = this.name + ':active:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-active-req', data: {stateName: _state.name, requestId: id } };
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback);
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          // Timeout has occurred, so delete request
          delete that.incompleteRequests[_requestId];
@@ -453,7 +454,7 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       var id = this.name + ':inactive:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-state-inactive-req', data: {stateName: _state.name, requestId: id } };
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback);
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          // Timeout has occurred, so delete request
          delete that.incompleteRequests[_requestId];
