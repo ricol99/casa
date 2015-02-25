@@ -272,6 +272,19 @@ CasaSystem.prototype.findState = function (stateName) {
    return this.findCasaState(this.casa, stateName);
 }
 
+CasaSystem.prototype.findOrCreateState = function (stateName) {
+   var state = resolveObject(stateName);
+
+   if (!state) {
+      var configState = findConfigState(stateName);
+
+      if (configState) {
+         state = findOrCreateCasaState(findCasa(configState.owner), stateName);
+      }
+   }
+   return state;
+}
+
 CasaSystem.prototype.findCasaActivator = function (casa, activatorName) {
    var source = null;
    var len = casa.activators.length;

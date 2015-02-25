@@ -8,7 +8,7 @@ function SetStateAction(_config) {
    // Resolve source and target
    var casaSys = CasaSystem.mainInstance();
    var source = casaSys.findSource(_config.source);
-   this.state = (_config.target) ? casaSys.resolveObject(_config.target) : null;
+   this.state = (_config.target) ? casaSys.findOrCreateState(_config.target) : null;
 
    Action.call(this, _config.name, source, null);
 
