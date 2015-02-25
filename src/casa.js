@@ -35,7 +35,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      var peerName = null;
 
      socket.on('error', function() {
-       if (name) {
+       if (peerName) {
           console.log(that.name + ': Peer casa ' + peerName + ' dropped');
           that.emit('casa-lost', peerName);
           peerName = null;
