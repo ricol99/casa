@@ -39,7 +39,7 @@ TestState.prototype.setActive = function(_callback) {
    }
 }
 
-TestState.prototype.setInActive = function(_callback) {
+TestState.prototype.setInactive = function(_callback) {
 
    if (!this.active) {
       console.log(this.name + ': Already inactive, no emit needed!');

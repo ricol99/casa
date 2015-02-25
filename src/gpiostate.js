@@ -57,7 +57,7 @@ GpioState.prototype.setActive = function(_callback) {
    set(this.triggerLow ? 0 : 1, _callback);
 }
 
-GpioState.prototype.setInActive = function(_callback) {
+GpioState.prototype.setInactive = function(_callback) {
    set(this.triggerLow ? 1 : 0, _callback);
 }
 

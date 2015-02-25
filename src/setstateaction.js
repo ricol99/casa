@@ -42,7 +42,7 @@ function SetStateAction(_config) {
       if (that.actionActive) {
          that.actionActive = false;
 
-         that.state.setInActive(function(result) {
+         that.state.setInactive(function(result) {
 
             if (result) {
                console.log(that.name + ': Set State ' + that.state.name + ' to inactive!');

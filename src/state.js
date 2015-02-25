@@ -26,7 +26,7 @@ State.prototype.setActive = function(_callback) {
    _callback(false);
 }
 
-State.prototype.setInActive = function(_callback) {
+State.prototype.setInactive = function(_callback) {
    console.log(this.name + ': State is read only!');
    _callback(false);
 }
