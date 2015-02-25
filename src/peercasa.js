@@ -232,8 +232,23 @@ PeerCasa.prototype.establishListeners = function(force) {
 
       this.socket.on('set-state-inactive-req', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-req, state: ' + data.stateName);
-         that.socket.emit('set-state-active-reqAACCKK', data);
-         // TBD Talk to real state
+         that.socket.emit('set-state-inactive-reqAACCKK', data);
+         var state = that.casa.findState(data.stateName);
+
+         if (state) {
+            this.stateRequests[data.requestId] = function(_requestId, _state, _callback) {
+               _state.SetInactive(function(resp) {
+                  that.socket.emit('set-state-inactive-resp', { stateName: _state.name, reqId: _requestId, result: resp.result });
+                  _callback(_requestId);
+               });
+            };
+
+            // invoke the function conserving 'this' 
+            this.stateRequests[data.requestId].call(this, data.requestId, state, function(_reqId) {
+               delete that.stateRequests[_reqId];
+               that.stateRequests[_reqId] = null;
+            });
+         }
       });
 
       this.socket.on('set-state-active-resp', function(data) {
