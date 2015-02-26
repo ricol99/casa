@@ -69,6 +69,7 @@ function ScheduleState(_obj) {
    var that = this;
 
    if (this.setSunTimes()) {
+
       this.refreshJob = schedule.scheduleJob('1 0 * * *', function() {
          that.setSunTimes();
 
@@ -79,10 +80,31 @@ function ScheduleState(_obj) {
             that.resetEndJob();
          }
       });
-   }
 
-   this.resetStartJob();
-   this.resetEndJob();
+      if (this.startRuleIsSunTime) {
+
+         if (this.startRule > new Date()) {
+            this.resetStartJob();
+         }
+      }
+      else {
+         this.resetStartJob();
+      }
+
+      if (this.endRuleIsSunTime) {
+
+         if (this.endRule > new Date()) {
+            this.resetEndJob();
+         }
+      }
+      else {
+         this.resetEndJob();
+      }
+   }
+   else {
+      this.resetStartJob();
+      this.resetEndJob();
+   }
 }
 
 util.inherits(ScheduleState, State);
