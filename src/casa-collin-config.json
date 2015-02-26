@@ -277,7 +277,19 @@
                "props": {},
                "states": [
                   {
-                     "name": "daylightstate:non-adjusted"
+                     "name": "schedulestate:daylight-non-adjusted",
+                     "startRule": "sunriseEnd",
+                     "endRule": "sunsetStart"
+                  },
+                  {
+                     "name": "schedulestate:lengthened-daylight",
+                     "startRule": "sunrise:-900",
+                     "endRule": "sunset+900"
+                  },
+                  {
+                     "name": "schedulestate:sunrise-for-one-hour",
+                     "startRule": "sunrise:-900",
+                     "activeFor": 3600
                   },
                   {
                      "name": "schedulestate:test-state",
@@ -296,7 +308,7 @@
                "activators": [
                   {
                      "name": "activator:night-non-adjusted",
-                     "source": "daylightstate:non-adjusted",
+                     "source": "schedulestate:daylight-non-adjusted",
                      "invert": true
                   }
                ],
@@ -308,7 +320,7 @@
                   },
                   {
                   "name": "setstateaction:test-daylight-state",
-                  "source": "daylightstate:non-adjusted",
+                  "source": "schedulestate:daylight-non-adjusted",
                   "target": "teststate:schedule-test"
                   }
                ]
