@@ -44,7 +44,7 @@
                "name": "casa:internet",
                "displayName": "Internet Casa",
                "address": {
-                  "hostname": "casa.elasticbeanstalk.com",
+                  "hostname": "lx9901827.home",
                   "port": 80
                },
                "props": {},
@@ -272,7 +272,7 @@
                "displayName": "CCTV",
                "address": {
                   "hostname": "lx9901827.home",
-                  "port": 80
+                  "port": 81
                },
                "props": {},
                "states": [
