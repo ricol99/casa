@@ -58,7 +58,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          peerName = data.name;
          if (that.clients[peerName]) {
             // old socket still open
-            if (socket == that.clients[peerName] {
+            if (socket == that.clients[peerName]) {
                // socket has been reused
                console.log(that.name + ': Old socket ihas been reused for casa ' + data.name + '. Ignoring....');
                socket.emit('loginAACCKK');
