@@ -277,13 +277,16 @@
                "props": {},
                "states": [
                   {
-                     "name": "teststate:alarm-part-armed",
-                     "writable": true
+                     "name": "daylightstate:non-adjusted"
                   },
                   {
                      "name": "schedulestate:test-state",
                      "startRule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
                      "activeFor": 30
+                  },
+                  {
+                     "name": "teststate:alarm-part-armed",
+                     "writable": true
                   },
                   {
                      "name": "teststate:schedule-test",
@@ -296,6 +299,11 @@
                   {
                   "name": "setstateaction:test-scheduling-state",
                   "source": "schedulestate:test-state",
+                  "target": "teststate:schedule-test"
+                  },
+                  {
+                  "name": "setstateaction:test-daylight-state",
+                  "source": "daylightstate:non-adjusted",
                   "target": "teststate:schedule-test"
                   }
                ]
