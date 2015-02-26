@@ -36,8 +36,8 @@ function ScheduleState(_obj) {
       }
    });
 
-   if (that.endRule) {
-      that.endJob = schedule.scheduleJob(that.endRule, function() {
+   if (this.endRule) {
+      this.endJob = schedule.scheduleJob(this.endRule, function() {
 
          if (that.active) {
             that.active = false;
