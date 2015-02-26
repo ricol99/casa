@@ -21,23 +21,23 @@ function ScheduleState(_obj) {
 
    var that = this;
 
-   this.startJob = schedule.scheduleJob(this.startRule, function(){
+   this.startJob = schedule.scheduleJob(this.startRule, function() {
 
       if (!that.active) {
          that.active = true;
          that.emit('active', that.name);
 
-         if (!this.endRule) {
+         if (!that.endRule) {
             setTimeout(function() {
                that.active = false;
                that.emit('inactive', that.name);
-            }, this.activeFor*1000);
+            }, that.activeFor*1000);
          }
       }
    });
 
-   if (this.endRule) {
-      this.endJob = schedule.scheduleJob(this.endRule, function(){
+   if (that.endRule) {
+      that.endJob = schedule.scheduleJob(that.endRule, function() {
 
          if (that.active) {
             that.active = false;
