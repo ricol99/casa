@@ -9,6 +9,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
    this.listeningPort = null;
    this.casaArea = null;
    this.parentCasaArea = null;
+   this.clients = [];
 
    if (_name.name) {
       // constructing from object rather than params
@@ -31,31 +32,46 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
    });
 
    io.on('connection', function(socket) {
-     console.log('a casa has joined');
-     var peerName = null;
+      console.log('a casa has joined');
+      var peerName = null;
 
-     socket.on('error', function() {
-       if (peerName) {
-          console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-          that.emit('casa-lost', peerName);
-          peerName = null;
-       }
-     });
+      socket.on('error', function() {
+         if (peerName) {
+            console.log(that.name + ': Peer casa ' + peerName + ' dropped');
+            that.clients[peerName] = null;
+            that.emit('casa-lost', peerName);
+            peerName = null;
+         }
+      });
 
-     socket.on('disconnect', function() {
-       if (peerName) {
-          console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-          that.emit('casa-lost', peerName);
-          peerName = null;
-       }
-     });
+      socket.on('disconnect', function() {
+         if (peerName) {
+            that.clients[peerName] = null;
+            console.log(that.name + ': Peer casa ' + peerName + ' dropped');
+            that.emit('casa-lost', peerName);
+            peerName = null;
+         }
+      });
 
-     socket.on('login', function(data) {
-       console.log(that.name + ': login: ' + data.name);
-       peerName = data.name;
-       socket.emit('loginAACCKK');
-       that.emit('casa-joined', peerName, socket);
-     });
+      socket.on('login', function(data) {
+         console.log(that.name + ': login: ' + data.name);
+         peerName = data.name;
+         if (that.clients[peerName]) {
+            // old socket still open
+            console.log(that.name + ': Old socket still open for casa ' + data.name + '. Closing.....');
+            that.clients[peerName].close();
+            setTimeout(function() {
+               that.clients[peerName] = socket;
+               socket.emit('loginAACCKK');
+               that.emit('casa-joined', peerName, socket);
+            }, 5000);
+         }
+         else {
+            that.clients[peerName] = socket;
+            socket.emit('loginAACCKK');
+            that.emit('casa-joined', peerName, socket);
+         }
+      });
    });
 
    http.listen(this.listeningPort, function(){
