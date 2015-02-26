@@ -39,7 +39,7 @@ function DaylightState(_obj) {
             that.active = true;
             that.emit('active', that.name);
          }
-      }
+      });
 
       var eveningJob = schedule.scheduleJob(times.sunriseEnd, function() {
 
@@ -52,7 +52,7 @@ function DaylightState(_obj) {
             that.active = false;
             that.emit('inactive', that.name);
          }
-      }
+      });
    });
 }
 
