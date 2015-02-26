@@ -294,6 +294,11 @@
                   }
                ],
                "activators": [
+                  {
+                     "name": "activator:night-non-adjusted",
+                     "source": "daylightstate:non-adjusted",
+                     "invert": true
+                  }
                ],
                "actions": [
                   {
