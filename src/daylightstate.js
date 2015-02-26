@@ -11,7 +11,7 @@ function DaylightState(_obj) {
 
    // Defaults to London
    this.latitude = (_obj.latitude) ? _obj.latitude : 51.5;
-   this.longitude = (_obj.longitude) ? _obj.longitude -0.1;
+   this.longitude = (_obj.longitude) ? _obj.longitude : -0.1;
 
    State.call(this, _obj.name, _obj.casa);
 
