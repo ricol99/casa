@@ -58,13 +58,20 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          peerName = data.name;
          if (that.clients[peerName]) {
             // old socket still open
-            console.log(that.name + ': Old socket still open for casa ' + data.name + '. Closing.....');
-            that.clients[peerName].close();
-            setTimeout(function() {
-               that.clients[peerName] = socket;
+            if (socket == that.clients[peerName] {
+               // socket has been reused
+               console.log(that.name + ': Old socket ihas been reused for casa ' + data.name + '. Ignoring....');
                socket.emit('loginAACCKK');
-               that.emit('casa-joined', peerName, socket);
-            }, 5000);
+            }
+            else {
+               console.log(that.name + ': Old socket still open for casa ' + data.name + '. Closing.....');
+               that.clients[peerName].close();
+               setTimeout(function() {
+                  that.clients[peerName] = socket;
+                  socket.emit('loginAACCKK');
+                  that.emit('casa-joined', peerName, socket);
+               }, 5000);
+            }
          }
          else {
             that.clients[peerName] = socket;
