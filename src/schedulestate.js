@@ -9,6 +9,7 @@ function ScheduleState(_obj) {
 
    if (_obj.endRule) {
       this.endRule = _obj.endRule;
+      this.activeFor = null;
    }
    else {
       this.endRule = null;
@@ -27,7 +28,8 @@ function ScheduleState(_obj) {
          that.active = true;
          that.emit('active', that.name);
 
-         if (!that.endRule) {
+         if (that.activeFor) {
+
             setTimeout(function() {
                that.active = false;
                that.emit('inactive', that.name);
