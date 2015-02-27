@@ -15,16 +15,16 @@ function PeerState(_name, _peerCasa) {
    }
 
    this.peerCasa.on('state-active', function(_data) {
-      if (_data.name == that.name) {
+      if (_data.stateName == that.name) {
          console.log(that.name + ': received active event from peer. Going active!');
-         that.emit('active', _data.name);
+         that.emit('active', _data.stateName);
       }
    });
 
    this.peerCasa.on('state-inactive', function(_data) {
-      if (_data.name == that.name) {
+      if (_data.stateName == that.name) {
          console.log(that.name + ': received inactive event from peer. Going inactive!');
-         that.emit('inactive', _data.name);
+         that.emit('inactive', _data.stateName);
       }
    });
 }

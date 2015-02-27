@@ -15,16 +15,16 @@ function PeerActivator(_name, _peerCasa) {
    }
 
    this.peerCasa.on('activator-active', function(_data) {
-      if (_data.name == that.name) {
+      if (_data.activatorName == that.name) {
          console.log(that.name + ': received active event from peer. Going active!');
-         that.emit('active', _data.name);
+         that.emit('active', _data.activatorName);
       }
    });
 
    this.peerCasa.on('activator-inactive', function(_data) {
-      if (_data.name == that.name) {
+      if (_data.activatorName == that.name) {
          console.log(that.name + ': received inactive event from peer. Going inactive!');
-         that.emit('inactive', _data.name);
+         that.emit('inactive', _data.activatorName);
       }
    });
 }
