@@ -203,7 +203,7 @@ CasaSystem.prototype.extractCasaAreas = function() {
    if (this.configCasaArea.parentArea) {
       this.config.areas.forEach(function(area) { 
 
-         if (this.configCasaArea.parentArea == area.name) {
+         if (that.configCasaArea.parentArea == area.name) {
             // Create parent area
             var Area = that.cleverRequire('parent' + area.name);
             area.owner = that;
