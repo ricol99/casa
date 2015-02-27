@@ -27,6 +27,8 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
 
    var that = this;
 
+   this.casaArea.addCasa(this);
+
    app.get('/', function(req, res){
      res.sendFile(__dirname + '/index.html');
    });
@@ -60,7 +62,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
             // old socket still open
             if (socket == that.clients[peerName]) {
                // socket has been reused
-               console.log(that.name + ': Old socket ihas been reused for casa ' + data.name + '. Ignoring....');
+               console.log(that.name + ': Old socket has been reused for casa ' + data.name + '. Ignoring....');
                socket.emit('loginAACCKK');
             }
             else {

@@ -22,53 +22,35 @@ function CasaSystem(_casaName, _config) {
    _mainInstance = this;
 
    // Extract Users
-   this.config.users.forEach(function(user) { 
-      var User = that.cleverRequire(user.name);
-      user.owner = that;
-      var userObj = new User(user);
-      that.users.push(userObj);
-      that.allObjects[userObj.name] = userObj;
-      console.log('New user: ' + user.name);
-   });
+   this.extractUsers();
 
    // Extract Casa Areas
-   this.config.areas.forEach(function(area) { 
-      var Area = that.cleverRequire(area.name);
-      area.owner = that;
-      var areaObj = new Area(area);
-      that.areas.push(areaObj);
-      that.allObjects[areaObj.name] = areaObj;
-      console.log('New area: ' + area.name);
-   });
+   this.extractCasaAreas();
 
    // Extract Casa
-   this.config.areas.forEach(function(area, index) { 
-      that.areas[index].casas = [];
-      var casaLen = area.casas.length;
+   this.casaArea.casas = [];
+   var casaLen = this.configCasaArea.casas.length;
 
-      console.log('casas: ' + casaLen);
+   console.log('casas: ' + casaLen);
 
-      for (var j=0; j < casaLen; ++j) {
+   for (var j=0; j < casaLen; ++j) {
 
-         if (that.casaName == area.casas[j].name) {
-            // Found myself! Build me!
-            var Casa = that.cleverRequire(that.casaName);
-            area.casas[j].casaArea = that.areas[index];
-            area.casas[j].parentCasaArea = that.findCasaArea(area.parentArea);
-            var casaObj = new Casa(area.casas[j]);
-            that.areas[index].casas.push(casaObj);
-            that.allObjects[casaObj.name] = casaObj;
-            that.casa = casaObj;
-            that.casa.states = [];
-            that.casa.activators = [];
-            that.configCasa = area.casas[j];
-            that.configCasaArea = area;
-            that.casaArea = that.areas[index];
-            console.log('New casa: ' + casaObj.name);
-            break;
-         }
+      if (this.casaName == this.configCasaArea.casas[j].name) {
+         // Found myself! Build me!
+         var Casa = that.cleverRequire(this.casaName);
+         this.configCasaArea.casas[j].casaArea = this.casaArea;
+         this.configCasaArea.casas[j].parentCasaArea = this.casaArea.parentArea;
+         var casaObj = new Casa(this.configCasaArea.casas[j]);
+         this.casaArea.casas.push(casaObj);
+         this.allObjects[casaObj.name] = casaObj;
+         this.casa = casaObj;
+         this.casa.states = [];
+         this.casa.activators = [];
+         this.configCasa = this.configCasaArea.casas[j];
+         console.log('New casa: ' + casaObj.name);
+         break;
       }
-   });
+   }
 
    
    // Extract Peer Casas for area
@@ -81,13 +63,13 @@ function CasaSystem(_casaName, _config) {
       if (!configArea.casas[j].casaArea) {
          // Found a Peer Casa to create!
          var PeerCasa = this.cleverRequire('peer' + this.casaName);
-         configArea.casas[j].casaArea = this.casa.casaArea;
+         configArea.casas[j].casaArea = this.casaArea;
          configArea.casas[j].casa = this.casa;
          configArea.casas[j].proActiveConnect = proActiveConnect;
          var casaObj = new PeerCasa(configArea.casas[j]);
          casaObj.states = [];
          casaObj.activators = [];
-         this.casa.casaArea.casas.push(casaObj);
+         this.casaArea.casas.push(casaObj);
          this.allObjects[casaObj.name] = casaObj;
          console.log('New peercasa: ' + casaObj.name);
       }
@@ -107,7 +89,7 @@ function CasaSystem(_casaName, _config) {
 
          if (this.config.areas[j].name == configArea.parentArea) {
             // found parent area
-            var PeerCasa = this.cleverRequire('peer' + this.config.areas[j].casas[0].name);
+            var PeerCasa = this.cleverRequire('parent' + this.config.areas[j].casas[0].name);
             this.config.areas[j].casas[0].casaArea = this.areas[j];
             this.config.areas[j].casas[0].casa = this.casa;
             this.config.areas[j].casas[0].proActiveConnect = true;
@@ -130,11 +112,11 @@ function CasaSystem(_casaName, _config) {
             var casaLen = this.config.areas[area].casas.length;
 
             for (var j=0; j < casaLen; ++j) {
-               var PeerCasa = this.cleverRequire('peer' + this.config.areas[area].casas[j].name);
+               var ChildCasa = this.cleverRequire('child' + this.config.areas[area].casas[j].name);
                this.config.areas[area].casas[j].casaArea = this.areas[area];
                this.config.areas[area].casas[j].casa = this.casa;
                this.config.areas[area].casas[j].proActiveConnect = false;
-               var casaObj = new PeerCasa(this.config.areas[area].casas[j]);
+               var casaObj = new ChildCasa(this.config.areas[area].casas[j]);
                casaObj.states = [];
                casaObj.activators = [];
                this.areas[area].casas.push(casaObj);
@@ -189,6 +171,94 @@ CasaSystem.prototype.cleverRequire = function(_name) {
       this.constructors[str] = require('./' + str);
    }
    return this.constructors[str];
+}
+
+// Extract Users
+CasaSystem.prototype.extractUsers = function() {
+   var that = this;
+
+   this.config.users.forEach(function(user) { 
+      var User = that.cleverRequire(user.name);
+      user.owner = that;
+      var userObj = new User(user);
+      that.users.push(userObj);
+      that.allObjects[userObj.name] = userObj;
+      console.log('New user: ' + user.name);
+   });
+}
+
+// Extract Casa Areas
+CasaSystem.prototype.extractCasaAreas = function() {
+   var that = this;
+
+   // Find and create my area
+   this.config.areas.forEach(function(area) { 
+
+      if (area.casas.some(function(casa) { return casa.name == that.casaName; })) {
+         that.configCasaArea = area;
+      }
+   });
+
+   // Find parent area
+   if (this.configCasaArea.parentArea) {
+      this.config.areas.forEach(function(area) { 
+
+         if (this.configCasaArea.parentArea == area.name) {
+            // Create parent area
+            var Area = that.cleverRequire('parent' + area.name);
+            area.owner = that;
+            var areaObj = new Area(area);
+            areaObj.casas = [];
+            that.parentArea = areaObj;
+            that.areas.push(areaObj);
+            that.allObjects[areaObj.name] = areaObj;
+            console.log('New area: ' + area.name);
+         }
+      });
+   }
+
+   // Extract my area
+   var Area = this.cleverRequire(this.configCasaArea.name);
+   this.configCasaArea.owner = this;
+   this.casaArea = new Area(this.configCasaArea);
+   this.areas.push(this.casaArea);
+   this.casaArea.casas = [];
+   this.allObjects[this.casaArea.name] = this.casaArea;
+   console.log('New area: ' + this.configCasaArea.name);
+
+   // Extract child casa areas
+   this.extractChildCasaAreas(this.casaArea);
+}
+
+CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
+   var that = this;
+
+   this.config.areas.forEach(function(area) { 
+
+      if (area.parentArea && (_parentArea.name == area.parentArea)) {
+         // Create child area
+         var Area = that.cleverRequire('child' + area.name);
+         area.owner = that;
+         var areaObj = new Area(area);
+         areaObj.casas = [];
+         that.areas.push(areaObj);
+         that.allObjects[areaObj.name] = areaObj;
+         console.log('New area: ' + area.name);
+
+         // recursively deduce all children of the new area
+         that.extractChildCasaAreas(areaObj);
+      }
+   });
+}
+
+CasaSystem.prototype.findNextHopToChildCasaArea = function(_currentCasaArea, _childCasaArea) {
+
+   if (_childCasaArea.parentArea == _currentCasaArea) {
+      return _childCasaArea;
+   }
+   else {
+      return this.findNextHopToChildCasaArea(_currentCasaArea, _childCasaArea.parentArea);
+   }
 }
 
 CasaSystem.prototype.findUser = function (userName) {

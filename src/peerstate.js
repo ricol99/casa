@@ -14,17 +14,17 @@ function PeerState(_name, _peerCasa) {
       this.peerCasa.addState(this);
    }
 
-   this.peerCasa.on('state-active', function(_name) {
-      if (_name == that.name) {
+   this.peerCasa.on('state-active', function(_data) {
+      if (_data.name == that.name) {
          console.log(that.name + ': received active event from peer. Going active!');
-         that.emit('active', _name);
+         that.emit('active', _data.name);
       }
    });
 
-   this.peerCasa.on('state-inactive', function(_name) {
-      if (_name == that.name) {
+   this.peerCasa.on('state-inactive', function(_data) {
+      if (_data.name == that.name) {
          console.log(that.name + ': received inactive event from peer. Going inactive!');
-         that.emit('inactive', _name);
+         that.emit('inactive', _data.name);
       }
    });
 }
