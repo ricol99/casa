@@ -288,7 +288,7 @@
                   },
                   {
                      "name": "schedulestate:sunrise-for-one-hour",
-                     "startRule": "sunrise:-900",
+                     "startRule": "sunriseEnd:",
                      "activeFor": 3600
                   },
                   {
