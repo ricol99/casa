@@ -6,9 +6,10 @@ var CasaSystem = require('./casasystem');
 function CasaArea(_obj) {
    this.casas = [];
 
+   this.casaSys = CasaSystem.mainInstance();
+
    if (_obj.parentArea) {
-      var casaSys = CasaSystem.mainInstance();
-      this.parentArea = casaSys.findCasaArea(_obj.parentArea);
+      this.parentArea = this.casaSys.findCasaArea(_obj.parentArea);
    }
    else {
       this.parentArea = null;

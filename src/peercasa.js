@@ -188,14 +188,6 @@ StateRequestor.prototype.setInactive = function(_callback) {
    });
 }
 
-PeerCasa.prototype.broadcastIfNecessary = function(_messageName, _messageData) {
-   // Do nothing - specialised classes may have different behavior
-}
-
-PeerCasa.prototype.forwardIfNecessary = function(_messageName, _messageData) {
-   // Do nothing - specialised classes may have different behavior
-}
-
 PeerCasa.prototype.establishListeners = function(force) {
 
    if (!this.listenersSetUp || force) {
@@ -205,14 +197,12 @@ PeerCasa.prototype.establishListeners = function(force) {
       this.socket.on('state-active', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
          that.emit('state-active', data);
-         that.broadcastIfNecessary('state-active', data);
          that.socket.emit('state-activeAACCKK', data);
       });
 
       this.socket.on('state-inactive', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + data.stateName);
          that.emit('state-inactive', data);
-         that.broadcastIfNecessary('state-inactive', data);
          that.socket.emit('state-inactiveAACCKK', data);
       });
 
@@ -220,94 +210,92 @@ PeerCasa.prototype.establishListeners = function(force) {
       this.socket.on('activator-active', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + data.activatorName);
          that.emit('activator-active', data);
-         that.broadcastIfNecessary('activator-active', data);
          that.socket.emit('activator-activeAACCKK', data);
       });
 
       this.socket.on('activator-inactive', function(data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + data.activatorName);
          that.emit('activator-inactive', data);
-         that.broadcastIfNecessary('activator-inactive', data.stateName);
          that.socket.emit('activator-inactiveAACCKK', data);
       });
 
-      this.socket.on('set-state-active-req', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + data.stateName);
-         var state = that.casa.findState(data.stateName);
+      this.socket.on('set-state-active-req', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.stateName);
+         var state = that.casa.findState(_data.stateName);
 
          if (state) {
-            data.acker = that.casa.name;
-            that.socket.emit('set-state-active-reqAACCKK', data);
-            that.stateRequests[data.requestId] = new StateRequestor(data.requestId, state);
-            that.stateRequests[data.requestId].setActive(function(_resp) {
-               that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: data.requestor });
+            _data.acker = that.casa.name;
+            that.socket.emit('set-state-active-reqAACCKK', _data);
+            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
+            that.stateRequests[_data.requestId].setActive(function(_resp) {
+               that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.stateRequests[ _resp.requestId];
                that.stateRequests[ _resp.requestId] = null;
             });
          } 
          else {
             // TBD Find the casa that ownes the state and work out how to foward the request
-            that.forwardIfNecessary('set-state-active-req', data);
+            that.emit('forward-request', { message: 'set-state-active-req', data: _data});
          }
       });
 
-      this.socket.on('set-state-inactive-req', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-req, state: ' + data.stateName);
-         var state = that.casa.findState(data.stateName);
+      this.socket.on('set-state-inactive-req', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-req, state: ' + _data.stateName);
+         var state = that.casa.findState(_data.stateName);
 
          if (state) {
-            data.acker = that.casa.name;
-            that.socket.emit('set-state-inactive-reqAACCKK', data);
-            that.stateRequests[data.requestId] = new StateRequestor(data.requestId, state);
-            that.stateRequests[data.requestId].setInactive(function(_resp) {
-               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: data.requestor });
+            _data.acker = that.casa.name;
+            that.socket.emit('set-state-inactive-reqAACCKK', _data);
+            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
+            that.stateRequests[_data.requestId].setInactive(function(_resp) {
+               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.stateRequests[ _resp.requestId];
                that.stateRequests[ _resp.requestId] = null;
             });
          }
          else {
             // TBD Find the casa that ownes the state and work out how to foward the request
-            that.forwardIfNecessary('set-state-inactive-req', data);
+            that.emit('forward-request', { message: 'set-state-inactive-req', data: _data});
          }
       });
 
-      this.socket.on('set-state-active-resp', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-resp, state: ' + data.stateName);
+      this.socket.on('set-state-active-resp', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-state-active-resp, state: ' + _data.stateName);
 
-         if (data.requestor == that.casa.name) {
+         if (_data.requestor == that.casa.name) {
             // Request origniated from here
-            data.acker = that.casa.name;
-            that.socket.emit('set-state-active-respAACCKK', data);
+            _data.acker = that.casa.name;
+            that.socket.emit('set-state-active-respAACCKK', _data);
 
-            if (that.incompleteRequests[data.requestId]) {
-               that.incompleteRequests[data.requestId].completeRequest(data.result);
-               delete that.incompleteRequests[data.requestId];
-               that.incompleteRequests[data.requestId] = null;
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
+               delete that.incompleteRequests[_data.requestId];
+               that.incompleteRequests[_data.requestId] = null;
             }
          }
          else {
             // Find the casa that ownes the original request and work out how to foward the response
-            that.forwardIfNecessary('set-state-active-resp', data);
+            that.emit('forward-response', { message: 'set-state-active-resp', data: _data});
          }
       });
 
-      this.socket.on('set-state-inactive-resp', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-resp, state: ' + data.stateName);
+      this.socket.on('set-state-inactive-resp', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-resp, state: ' + _data.stateName);
 
-         if (data.requestor == that.casa.name) {
+         if (_data.requestor == that.casa.name) {
             // Request origniated from here
-            data.acker = that.casa.name;
-            that.socket.emit('set-state-inactive-respAACCKK', data);
+            _data.acker = that.casa.name;
+            that.socket.emit('set-state-inactive-respAACCKK', _data);
 
-            if (that.incompleteRequests[data.requestId]) {
-               that.incompleteRequests[data.requestId].completeRequest(data.result);
-               delete that.incompleteRequests[data.requestId];
-               that.incompleteRequests[data.requestId] = null;
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
+               delete that.incompleteRequests[_data.requestId];
+               that.incompleteRequests[_data.requestId] = null;
             }
          }
          else {
             // Find the casa that ownes the original request and work out how to foward the response
-            that.forwardIfNecessary('set-state-inctive-resp', data);
+            that.emit('forward-response', { message: 'set-state-inactive-resp', data: _data});
          }
       });
 
@@ -331,61 +319,61 @@ PeerCasa.prototype.establishListeners = function(force) {
          that.unAckedMessages.shift();
       });
 
-      this.socket.on('set-state-active-reqAACCKK', function(data) {
+      this.socket.on('set-state-active-reqAACCKK', function(_data) {
          console.log(that.name + ': set state active request event ACKed by my peer. *Not confirmed*');
 
-         if (data.requestor == that.casa.name) {
-            // We mane the request
+         if (_data.requestor == that.casa.name) {
+            // We made the request
 
-            if (that.incompleteRequests[data.requestId]) {
-               that.incompleteRequests[data.requestId].ackRequest();
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].ackRequest();
             }
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.forwardIfNecessary('set-state-active-reqAACCKK', data);
+            that.emit('forward-request', { message: 'set-state-active-reqAACCKK', data: _data});
          }
       });
 
-      this.socket.on('set-state-inactive-reqAACCKK', function(data) {
+      this.socket.on('set-state-inactive-reqAACCKK', function(_data) {
          console.log(that.name + ': set state inactive request event ACKed by my peer. *Not confirmed*');
 
-         if (data.requestor == that.casa.name) {
-            // We mane the request
+         if (_data.requestor == that.casa.name) {
+            // We made the request
 
-            if (that.incompleteRequests[data.requestId]) {
-               that.incompleteRequests[data.requestId].ackRequest();
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].ackRequest();
             }
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.forwardIfNecessary('set-state-inactive-reqAACCKK', data);
+            that.emit('forward-request', { message: 'set-state-inactive-reqAACCKK', data: _data});
          }
       });
 
-      this.socket.on('set-state-active-respAACCKK', function(data) {
+      this.socket.on('set-state-active-respAACCKK', function(_data) {
          console.log(that.name + ': set state active response event ACKed by my peer.');
 
-         if (data.requestor == that.casa.name) {
-            // We mane the request
+         if (_data.requestor == that.casa.name) {
+            // We made the request
             that.unAckedMessages.shift();
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.forwardIfNecessary('set-state-active-respAACCKK', data);
+            that.emit('forward-response', { message: 'set-state-active-respAACCKK', data: _data});
          }
       });
 
-      this.socket.on('set-state-inactive-respAACCKK', function(data) {
+      this.socket.on('set-state-inactive-respAACCKK', function(_data) {
          console.log(that.name + ': set state inactive response event ACKed by my peer.' );
 
-         if (data.requestor == that.casa.name) {
-            // We mane the request
+         if (_data.requestor == that.casa.name) {
+            // We made the request
             that.unAckedMessages.shift();
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.forwardIfNecessary('set-state-inactive-respAACCKK', data);
+            that.emit('forward-response', { message: 'set-state-inactive-respAACCKK', data: _data});
          }
       });
 
