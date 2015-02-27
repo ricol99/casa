@@ -69,6 +69,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
                console.log(that.name + ': Old socket still open for casa ' + data.name + '. Closing.....');
                that.clients[peerName].close();
                setTimeout(function() {
+                  console.log(that.name + ': Establishing new logon session after race with old socket.');
                   that.clients[peerName] = socket;
                   socket.emit('loginAACCKK');
                   that.emit('casa-joined', peerName, socket);
