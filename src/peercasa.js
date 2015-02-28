@@ -177,14 +177,14 @@ function StateRequestor(_requestId, _state) {
 StateRequestor.prototype.setActive = function(_callback) {
    var that = this;
    this.state.setActive(function(_result) {
-      _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
    });
 }
 
 StateRequestor.prototype.setInactive = function(_callback) {
    var that = this;
    this.state.setInactive(function(_result) {
-      _callback( { stateName: that.name, requestId: that.requestId, result: _result });
+      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
    });
 }
 
