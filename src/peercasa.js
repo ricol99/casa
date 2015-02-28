@@ -40,7 +40,7 @@ function PeerCasa(_obj) {
 
            if (!that.connected) {
               that.connected = true;
-              that.socket = _socket;
+              that.socket = _data.socket;
               console.log(that.name + ': Connected to my peer. Going active.');
 
               // listen for state and activator changes from peer casas
@@ -126,7 +126,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
       that.unAckedMessages.push( { message: 'login', data: { name: that.casa.name } } );
-      that.socket.emit('login', { name: that.casa.name });
+      that.socket.emit('login', { casaName: that.casa.name });
    });
 
    this.socket.on('loginAACCKK', function(_data) {
