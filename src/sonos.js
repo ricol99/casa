@@ -24,14 +24,15 @@ function SonosAction(_config) {
               //console.log([err, playing]);
            //});
 
-           var text = 'House secured for the night';
+           var text = 'Emmie is very very cute';//'House secured for the night';
 
            //Replace all spaces with a _ because Sonos doesn't support spaces
            text = text.replace(/ /g,'_');
 
            //For supported languages see www.voicerss.org/api/documentation.aspx
            //This url just redirects to voicerss because of the specific url format for the sonos
-           var url = 'http://i872953.iris.fhict.nl/speech/en-gb_' + encodeURIComponent(text)+'.mp3';
+           //var url = 'http://i872953.iris.fhict.nl/speech/en-gb_' + encodeURIComponent(text)+'.mp3';
+           var url = 'http://192.168.1.80:81/nuclear_alarm.mp3'
 
            sonos.play(url, function(err, playing) {
              console.log([err, playing]);
@@ -43,4 +44,4 @@ function SonosAction(_config) {
 }
 
 
-var player = new SonosAction( { zone: 'Living Room' });
+var player = new SonosAction( { zone: 'Dylan\'s Room' });

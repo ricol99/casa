@@ -1,8 +1,10 @@
 var util = require('util');
 var Thing = require('./thing');
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+
 
 function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _props) {
 
@@ -29,7 +31,11 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
 
    this.casaArea.addCasa(this);
 
-   app.get('/', function(req, res){
+   app.get('/nuclear_alarm.mp3', function(req, res){
+     res.sendFile(__dirname + '/nuclear_alarm.mp3');
+   });
+
+   app.get('/index.html', function(req, res){
      res.sendFile(__dirname + '/index.html');
    });
 
