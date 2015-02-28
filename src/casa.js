@@ -62,17 +62,17 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
       });
 
       _socket.on('login', function(_data) {
-         console.log(that.name + ': login: ' + _data.name);
-         peerName = _data.name;
+         console.log(that.name + ': login: ' + _data.casaName);
+         peerName = _data.casaName;
          if (that.clients[peerName]) {
             // old socket still open
             if (_socket == that.clients[peerName]) {
                // socket has been reused
-               console.log(that.name + ': Old socket has been reused for casa ' + _data.name + '. Ignoring....');
+               console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Ignoring....');
                _socket.emit('loginAACCKK');
             }
             else {
-               console.log(that.name + ': Old socket still open for casa ' + _data.name + '. Closing.....');
+               console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing.....');
                that.clients[peerName].emit('disconnect');
                setTimeout(function() {
                   console.log(that.name + ': Establishing new logon session after race with old socket.');

@@ -125,7 +125,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    this.socket.on('connect', function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
-      that.unAckedMessages.push( { message: 'login', data: { name: that.casa.name } } );
+      that.unAckedMessages.push( { message: 'login', data: { casaName: that.casa.name } } );
       that.socket.emit('login', { casaName: that.casa.name });
    });
 
