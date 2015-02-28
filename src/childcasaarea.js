@@ -12,6 +12,7 @@ function ChildCasaArea(_obj) {
 util.inherits(ChildCasaArea, CasaArea);
 
 ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
+   var that = this;
    // TBD Add listeners and logic
 
    // BROADCASTING local broadcast (this casa's peer states and activators) already done by peer casa class

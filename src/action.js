@@ -18,19 +18,19 @@ function Action(_name, _source, _target) {
       this.target.addAction(this);
    }
 
-   this.source.on('active', function () {
+   this.source.on('active', function (_data) {
       console.log(that.name + ': ACTIVATED');
 
       if (that.actionEnabled) {
-         that.emit('activated', { sourceName: that.name });
+         that.emit('activated', _data);
       }
    });
 
-   this.source.on('inactive', function () {
+   this.source.on('inactive', function (_data) {
       console.log(that.name + ': DEACTIVATED');
 
       if (that.actionEnabled) {
-         that.emit('deactivated', { sourceName: that.name });
+         that.emit('deactivated', _data);
       }
    });
 }
