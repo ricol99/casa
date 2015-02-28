@@ -43,7 +43,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
       console.log('a casa has joined');
       var peerName = null;
 
-      socket.on('error', function() {
+      _socket.on('error', function() {
          if (peerName) {
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
             that.clients[peerName] = null;
@@ -52,7 +52,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          }
       });
 
-      socket.on('disconnect', function() {
+      _socket.on('disconnect', function() {
          if (peerName) {
             that.clients[peerName] = null;
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
@@ -61,7 +61,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          }
       });
 
-      socket.on('login', function(_data) {
+      _socket.on('login', function(_data) {
          console.log(that.name + ': login: ' + _data.name);
          peerName = _data.name;
          if (that.clients[peerName]) {
