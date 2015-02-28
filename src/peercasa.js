@@ -214,7 +214,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
       });
 
       this.socket.on('activator-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + data.sourceName);
+         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
          that.emit('activator-inactive', _data);
          that.socket.emit('activator-inactiveAACCKK', _data);
       });
