@@ -20,20 +20,20 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
    // BROADCASTING Broadcast to child areas (Uber casa) of the casa we are running in except source area (not the the parent area of this child casa area);
 
    _casa.on('state-active', function(_data) {
-      console.log(that.name + ': Event received from child. Event name: active, state: ' + _data.stateName);
+      console.log(that.name + ': Event received from child. Event name: active, state: ' + _data.sourceName);
    });
 
    _casa.on('state-inactive', function(_data) {
-      console.log(that.name + ': Event received from child. Event name: inactive, state: ' + _data.stateName);
+      console.log(that.name + ': Event received from child. Event name: inactive, state: ' + _data.sourceName);
    });
 
    // listen for activator changes from peer casas
    _casa.on('activator-active', function(_data) {
-      console.log(that.name + ': Event received from child. Event name: active, activator: ' + _data.activatorName);
+      console.log(that.name + ': Event received from child. Event name: active, activator: ' + _data.sourceName);
    });
 
    _casa.on('activator-inactive', function(_data) {
-      console.log(that.name + ': Event received from child. Event name: inactive, activator: ' + _data.activatorName);
+      console.log(that.name + ': Event received from child. Event name: inactive, activator: ' + _data.sourceName);
    });
 
 

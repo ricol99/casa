@@ -197,7 +197,9 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('state-active', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: active, state: ' + _data.sourceName);
          that.emit('state-active', _data);
+         console.log('XXXXXXXX');
          that.socket.emit('state-activeAACCKK', _data);
+         console.log('YYYYYYYY');
       });
 
       this.socket.on('state-inactive', function(_data) {
