@@ -29,7 +29,7 @@ TestState.prototype.setActive = function(_callback) {
       if (this.writable) {
          console.log(this.name + ': Set to active!');
          this.active = true;
-         this.emit('active', this.name);
+         this.emit('active', { sourceName: this.name });
          _callback(true);
       }
       else {
@@ -49,7 +49,7 @@ TestState.prototype.setInactive = function(_callback) {
       if (this.writable) {
          console.log(this.name + ': Set to inactive!');
          this.active = false;
-         this.emit('inactive', this.name);
+         this.emit('inactive', { sourceName: this.name });
          _callback(true);
       }
       else {

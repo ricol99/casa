@@ -22,7 +22,7 @@ function Action(_name, _source, _target) {
       console.log(that.name + ': ACTIVATED');
 
       if (that.actionEnabled) {
-         that.emit('activated', that.name);
+         that.emit('activated', { sourceName: that.name });
       }
    });
 
@@ -30,7 +30,7 @@ function Action(_name, _source, _target) {
       console.log(that.name + ': DEACTIVATED');
 
       if (that.actionEnabled) {
-         that.emit('deactivated', that.name);
+         that.emit('deactivated', { sourceName: that.name });
       }
    });
 }

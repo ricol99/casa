@@ -39,7 +39,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
      res.sendFile(__dirname + '/index.html');
    });
 
-   io.on('connection', function(socket) {
+   io.on('connection', function(_socket) {
       console.log('a casa has joined');
       var peerName = null;
 
@@ -47,7 +47,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          if (peerName) {
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
             that.clients[peerName] = null;
-            that.emit('casa-lost', peerName);
+            that.emit('casa-lost', { peerName: peerName });
             peerName = null;
          }
       });
@@ -56,36 +56,36 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          if (peerName) {
             that.clients[peerName] = null;
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-            that.emit('casa-lost', peerName);
+            that.emit('casa-lost', { peerName: peerName });
             peerName = null;
          }
       });
 
-      socket.on('login', function(data) {
-         console.log(that.name + ': login: ' + data.name);
-         peerName = data.name;
+      socket.on('login', function(_data) {
+         console.log(that.name + ': login: ' + _data.name);
+         peerName = _data.name;
          if (that.clients[peerName]) {
             // old socket still open
-            if (socket == that.clients[peerName]) {
+            if (_socket == that.clients[peerName]) {
                // socket has been reused
-               console.log(that.name + ': Old socket has been reused for casa ' + data.name + '. Ignoring....');
-               socket.emit('loginAACCKK');
+               console.log(that.name + ': Old socket has been reused for casa ' + _data.name + '. Ignoring....');
+               _socket.emit('loginAACCKK');
             }
             else {
-               console.log(that.name + ': Old socket still open for casa ' + data.name + '. Closing.....');
+               console.log(that.name + ': Old socket still open for casa ' + _data.name + '. Closing.....');
                that.clients[peerName].emit('disconnect');
                setTimeout(function() {
                   console.log(that.name + ': Establishing new logon session after race with old socket.');
-                  that.clients[peerName] = socket;
-                  socket.emit('loginAACCKK');
-                  that.emit('casa-joined', peerName, socket);
+                  that.clients[peerName] = _socket;
+                  _socket.emit('loginAACCKK');
+                  that.emit('casa-joined', { peerName: peerName, socket: _socket });
                }, 5000);
             }
          }
          else {
-            that.clients[peerName] = socket;
-            socket.emit('loginAACCKK');
-            that.emit('casa-joined', peerName, socket);
+            that.clients[peerName] = _socket;
+            _socket.emit('loginAACCKK');
+            that.emit('casa-joined', { peerName: peerName, socket: _socket });
          }
       });
    });
@@ -103,14 +103,14 @@ Casa.prototype.addState = function(_state) {
    this.states[_state.name] = _state;
    var that = this;
 
-   _state.on('active', function (sourceName) {
-      console.log(that.name + ': ' + sourceName + ' has become active');
-      that.emit('state-active', sourceName);
+   _state.on('active', function (_data) {
+      console.log(that.name + ': ' + _data.sourceName + ' has become active');
+      that.emit('state-active', _data);
    });
 
-   _state.on('inactive', function (sourceName) {
-      console.log(that.name + ': ' + sourceName + ' has become inactive');
-      that.emit('state-inactive', sourceName);
+   _state.on('inactive', function (_data) {
+      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
+      that.emit('state-inactive', _data);
    });
 
    console.log(this.name + ': ' + _state.name + ' associated!');
@@ -121,14 +121,14 @@ Casa.prototype.addActivator = function(_activator) {
    this.activators[_activator.name] = _activator;
    var that = this;
 
-   _activator.on('active', function (sourceName) {
-      console.log(that.name + ': ' + sourceName + ' has become active');
-      that.emit('activator-active', sourceName);
+   _activator.on('active', function (_data) {
+      console.log(that.name + ': ' + _data.sourceName + ' has become active');
+      that.emit('activator-active', _data);
    });
 
-   _activator.on('inactive', function (sourceName) {
-      console.log(that.name + ': ' + sourceName + ' has become inactive');
-      that.emit('activator-inactive', sourceName);
+   _activator.on('inactive', function (_data) {
+      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
+      that.emit('activator-inactive', _data);
    });
 
    console.log(this.name + ': ' + _activator.name + ' associated!');

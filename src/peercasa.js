@@ -33,14 +33,14 @@ function PeerCasa(_obj) {
    }
    else {
       // Listen to Casa for my remote instance to connect
-      this.casa.on('casa-joined', function(name, socket) {
+      this.casa.on('casa-joined', function(_data) {
       
-         if (name == S(that.name).strip('peer-')) {
-           console.log(that.name + ': I am connected to my peer. Socket: ' + socket);
+         if (_data.peerName == S(that.name).strip('peer-')) {
+           console.log(that.name + ': I am connected to my peer. Socket: ' + _data.socket);
 
            if (!that.connected) {
               that.connected = true;
-              that.socket = socket;
+              that.socket = _socket;
               console.log(that.name + ': Connected to my peer. Going active.');
 
               // listen for state and activator changes from peer casas
@@ -50,14 +50,14 @@ function PeerCasa(_obj) {
                   resendUnAckedMessages();
                }
 
-              that.emit('active', that.name);
+              that.emit('active', { sourceName: that.name });
            }
          }
       });
 
-      this.casa.on('casa-lost', function(name) {
+      this.casa.on('casa-lost', function(_data) {
 
-         if (name == S(that.name).strip('peer-')) {
+         if (_data.peerName == S(that.name).strip('peer-')) {
            console.log(that.name + ': I have lost my peer!');
 
            if (that.connected) {
@@ -65,43 +65,43 @@ function PeerCasa(_obj) {
               that.connected = false;
               clearInterval(that.intervalID);
               that.socket = null;
-              that.emit('inactive', that.name);
+              that.emit('inactive', { sourceName: that.name });
            }
          }
       });
    }
 
    // publish state changes in this node (casa object) to remote casas
-   this.casa.on('state-active', function(name) {
+   this.casa.on('state-active', function(_data) {
       if (that.connected) {
-         console.log(that.name + ': publishing state ' + name + ' active to peer casa');
-         that.unAckedMessages.push( { message: 'state-active', data: { stateName: name } } );
-         that.socket.emit('state-active', { stateName: name });
+         console.log(that.name + ': publishing state ' + _data.sourceName + ' active to peer casa');
+         that.unAckedMessages.push( { message: 'state-active', data: _data } );
+         that.socket.emit('state-active', _data);
       }
    });
 
-   this.casa.on('state-inactive', function(name) {
+   this.casa.on('state-inactive', function(_data) {
       if (that.connected) {
-         console.log(that.name + ': publishing state ' + name + ' inactive to peer casa');
-         that.unAckedMessages.push( { message: 'state-inactive', data: { stateName: name } } );
-         that.socket.emit('state-inactive', { stateName: name });
+         console.log(that.name + ': publishing state ' + _data.sourceName + ' inactive to peer casa');
+         that.unAckedMessages.push( { message: 'state-inactive', data: _data } );
+         that.socket.emit('state-inactive', _data);
       }
    });
 
    // publish activator changes to remote casas
-   this.casa.on('activator-active', function(name) {
+   this.casa.on('activator-active', function(_data) {
       if (that.connected) {
-         console.log(that.name + ': publishing activator ' + name + ' active to peer casa');
-         that.unAckedMessages.push( { message: 'activator-active', data: { activatorName: name } } );
-         that.socket.emit('activator-active', { activatorName: name });
+         console.log(that.name + ': publishing activator ' + _data.sourceName + ' active to peer casa');
+         that.unAckedMessages.push( { message: 'activator-active', data: _data } );
+         that.socket.emit('activator-active', _data);
       }
    });
 
-   this.casa.on('activator-inactive', function(name) {
+   this.casa.on('activator-inactive', function(_data) {
       if (that.connected) {
-         console.log(that.name + ': publishing activator ' + name + ' inactive to peer casa');
-         that.unAckedMessages.push( { message: 'activator-inactive', data: { activatorName: name } } );
-         that.socket.emit('activator-inactive', { activatorName: name });
+         console.log(that.name + ': publishing activator ' + _data.sourceName + ' inactive to peer casa');
+         that.unAckedMessages.push( { message: 'activator-inactive', data: _data } );
+         that.socket.emit('activator-inactive', _data);
       }
    });
 }
@@ -129,7 +129,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.socket.emit('login', { name: that.casa.name });
    });
 
-   this.socket.on('loginAACCKK', function(data) {
+   this.socket.on('loginAACCKK', function(_data) {
       console.log(that.name + ': Login Event ACKed by my peer. Going active.');
 
       that.unAckedMessages.pop();  // Remove Login
@@ -139,22 +139,22 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       }
       
       that.connected = true;
-      that.emit('active', that.name);
+      that.emit('active', { sourceName: that.name });
    });
 
-   this.socket.on('error', function(error) {
-      console.log(that.name + ': Error received: ' + error);
+   this.socket.on('error', function(_error) {
+      console.log(that.name + ': Error received: ' + _error);
 
       if (that.connected) {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
          clearInterval(that.intervalID);
-         that.emit('inactive', that.name);
+         that.emit('inactive', { sourceName: that.name });
       }
    });
 
-   this.socket.on('event', function(data) {
-      console.log(that.name + ': Event received: ' + data);
+   this.socket.on('event', function(_data) {
+      console.log(that.name + ': Event received: ' + _data);
    });
 
    this.socket.on('disconnect', function() {
@@ -164,7 +164,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
          clearInterval(that.intervalID);
-         that.emit('inactive', that.name);
+         that.emit('inactive', { sourceName: that.name });
       }
    });
 }
@@ -188,40 +188,40 @@ StateRequestor.prototype.setInactive = function(_callback) {
    });
 }
 
-PeerCasa.prototype.establishListeners = function(force) {
+PeerCasa.prototype.establishListeners = function(_force) {
 
-   if (!this.listenersSetUp || force) {
+   if (!this.listenersSetUp || _force) {
       var that = this;
 
       // listen for state changes from peer casas
-      this.socket.on('state-active', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: active, state: ' + data.stateName);
-         that.emit('state-active', data);
-         that.socket.emit('state-activeAACCKK', data);
+      this.socket.on('state-active', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: active, state: ' + _data.sourceName);
+         that.emit('state-active', _data);
+         that.socket.emit('state-activeAACCKK', _data);
       });
 
-      this.socket.on('state-inactive', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + data.stateName);
-         that.emit('state-inactive', data);
-         that.socket.emit('state-inactiveAACCKK', data);
+      this.socket.on('state-inactive', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
+         that.emit('state-inactive', _data);
+         that.socket.emit('state-inactiveAACCKK', _data);
       });
 
       // listen for activator changes from peer casas
-      this.socket.on('activator-active', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + data.activatorName);
-         that.emit('activator-active', data);
-         that.socket.emit('activator-activeAACCKK', data);
+      this.socket.on('activator-active', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
+         that.emit('activator-active', _data);
+         that.socket.emit('activator-activeAACCKK', _data);
       });
 
-      this.socket.on('activator-inactive', function(data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + data.activatorName);
-         that.emit('activator-inactive', data);
-         that.socket.emit('activator-inactiveAACCKK', data);
+      this.socket.on('activator-inactive', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + data.sourceName);
+         that.emit('activator-inactive', _data);
+         that.socket.emit('activator-inactiveAACCKK', _data);
       });
 
       this.socket.on('set-state-active-req', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.stateName);
-         var state = that.casa.findState(_data.stateName);
+         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.sourceName);
+         var state = that.casa.findState(_data.sourceName);
 
          if (state) {
             _data.acker = that.casa.name;
@@ -299,22 +299,22 @@ PeerCasa.prototype.establishListeners = function(force) {
          }
       });
 
-      this.socket.on('state-activeAACCKK', function(data) {
+      this.socket.on('state-activeAACCKK', function(_data) {
          console.log(that.name + ': Active Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
 
-      this.socket.on('state-inactiveAACCKK', function(data) {
+      this.socket.on('state-inactiveAACCKK', function(_data) {
          console.log(that.name + ': Inactive Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
 
-      this.socket.on('activator-activeAACCKK', function(data) {
+      this.socket.on('activator-activeAACCKK', function(_data) {
          console.log(that.name + ': Active Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
 
-      this.socket.on('activator-inactiveAACCKK', function(data) {
+      this.socket.on('activator-inactiveAACCKK', function(_data) {
          console.log(that.name + ': Inactive Event ACKed by my peer.');
          that.unAckedMessages.shift();
       });
@@ -377,7 +377,7 @@ PeerCasa.prototype.establishListeners = function(force) {
          }
       });
 
-      this.socket.on('heartbeat', function(data) {
+      this.socket.on('heartbeat', function(_data) {
          // do nothing!
          console.log(that.name + ': Heartbeat received');
       });
@@ -386,7 +386,7 @@ PeerCasa.prototype.establishListeners = function(force) {
       this.intervalID = setInterval(function(){
 
          if (that.connected) {
-            that.socket.emit('heartbeat', { name: that.casa.name });
+            that.socket.emit('heartbeat', { casaName: that.casa.name });
          }
       }, 60000);
 

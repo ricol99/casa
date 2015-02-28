@@ -51,7 +51,7 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
          http.get(that.options, function(res) {
             console.log('STATUS: ' + res.statusCode);
             console.log('HEADERS: ' + JSON.stringify(res.headers));
-            that.emit('activated', that.name);
+            that.emit('activated', { sourceName: that.name });
          });
       }
    }
@@ -67,7 +67,7 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
          http.get(that.options, function(res) {
             console.log('STATUS: ' + res.statusCode);
             console.log('HEADERS: ' + JSON.stringify(res.headers));
-            that.emit('deactivated', that.name);
+            that.emit('deactivated', { sourceName: that.name });
          });
       }
    }

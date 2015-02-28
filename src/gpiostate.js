@@ -40,10 +40,10 @@ function GpioState(_name, _gpioPin, _triggerLow, _thing) {
             console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + value);
             value = that.triggerLow ? (value == 1 ? 0 : 1) : value;
             if (value == 1) {
-               that.emit('active', that.name);
+               that.emit('active', { sourceName: that.name });
             }
             else {
-               that.emit('inactive', that.name);
+               that.emit('inactive', { sourceName: that.name });
             }
          });
       }
