@@ -220,8 +220,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       });
 
       this.socket.on('set-state-active-req', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.sourceName);
-         var state = that.casa.findState(_data.sourceName);
+         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.stateName);
+         var state = that.casa.findState(_data.stateName);
 
          if (state) {
             _data.acker = that.casa.name;
@@ -484,10 +484,10 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
       var id = this.name + ':active:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'set-state-active-req', data: {stateName: _state.name, requestId: id, requestor: this.casa.name } };
+      var message = { message: 'set-state-active-req', data: { stateName: _state.name, requestId: id, requestor: this.casa.name } };
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         // Timeout has occurred, so delete request
+         console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
          that.incompleteRequests[_requestId] = null;
       });
@@ -507,7 +507,7 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       var message = { message: 'set-state-inactive-req', data: {stateName: _state.name, requestId: id, requestor: this.casa.name } };
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         // Timeout has occurred, so delete request
+         console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
          that.incompleteRequests[_requestId] = null;
       });
