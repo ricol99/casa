@@ -46,12 +46,13 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
 
          // https active request
          that.options.path = '/++ssControlActiveMode?cameraNum=' + that.id;
-         console.log(util.inspect(that.options, false, null));
 
          http.get(that.options, function(res) {
             console.log('STATUS: ' + res.statusCode);
             console.log('HEADERS: ' + JSON.stringify(res.headers));
             that.emit('activated', { sourceName: that.name });
+         }).on('error', function(e) {
+            console.log("Got error: " + e.message);
          });
       }
    }
@@ -62,12 +63,13 @@ function SpyCameraAction(_name, _hostname, _port, _user, _password, _cameraId, _
 
          // https passive request
          that.options.path = '/++ssControlPassiveMode?cameraNum=' + that.id;
-         console.log(util.inspect(that.options, false, null));
 
          http.get(that.options, function(res) {
             console.log('STATUS: ' + res.statusCode);
             console.log('HEADERS: ' + JSON.stringify(res.headers));
             that.emit('deactivated', { sourceName: that.name });
+         }).on('error', function(e) {
+            console.log("Got error: " + e.message);
          });
       }
    }
