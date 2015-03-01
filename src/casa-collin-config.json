@@ -181,6 +181,15 @@
                      "inactiveMessagePriority": 0,
                      "source": "andactivator:lounge-activity",
                      "target": "usergroup:key-holders"
+                  },
+                  {
+                     "name": "pushoveraction:daylight-non-adjusted",
+                     "activeMessage": "Good morning!",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Good evening!",
+                     "inactiveMessagePriority": 0,
+                     "source": "schedulestate:daylight-non-adjusted",
+                     "target": "usergroup:admins"
                   }
                ]
             }
