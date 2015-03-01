@@ -45,6 +45,7 @@ function PeerCasa(_obj) {
 
               // listen for state and activator changes from peer casas
               that.establishListeners(true);
+              that.establishHeartbeat();
 
               if (that.unAckedMessages.length > 1) {
                   resendUnAckedMessages();
@@ -67,6 +68,7 @@ function PeerCasa(_obj) {
                   console.log(that.name + ': Lost connection to my peer. Going inactive.');
                   that.connected = false;
                   clearInterval(that.intervalID);
+                  that.intervalID = null;
                   that.socket = null;
                   that.emit('inactive', { sourceName: that.name });
                }
@@ -129,6 +131,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    this.socket.on('connect', function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
+      that.establishHeartbeat();
       that.unAckedMessages.push( { message: 'login', data: { casaName: that.casa.name } } );
       that.socket.emit('login', { casaName: that.casa.name });
    });
@@ -153,6 +156,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
          clearInterval(that.intervalID);
+         that.intervalID = null;
          that.emit('inactive', { sourceName: that.name });
       }
    });
@@ -168,6 +172,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
          clearInterval(that.intervalID);
+         that.intervalID = null;
          that.emit('inactive', { sourceName: that.name });
       }
    });
@@ -386,6 +391,14 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Heartbeat received');
       });
 
+      this.listenersSetUp = true;
+   }
+}
+
+PeerCasa.prototype.establishHeartbeat = function() {
+   var that = this;
+
+   if (!this.intervalID) {
       // Establish heartbeat
       this.intervalID = setInterval(function(){
 
@@ -393,8 +406,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             that.socket.emit('heartbeat', { casaName: that.casa.name });
          }
       }, 60000);
-
-      this.listenersSetUp = true;
    }
 }
 
