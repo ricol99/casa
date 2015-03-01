@@ -68,11 +68,11 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
             // old socket still open
             if (_socket == that.clients[peerName]) {
                // socket has been reused
-               console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Ignoring....');
-               _socket.emit('loginAACCKK');
+               console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
+               _socket.close();
             }
             else {
-               console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing.....');
+               console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
                that.emit('casa-lost', { peerName: peerName, socket: that.clients[peerName] });
                console.log(that.name + ': Establishing new logon session after race with old socket.');
                that.clients[peerName] = _socket;
