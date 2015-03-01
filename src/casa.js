@@ -47,7 +47,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          if (peerName) {
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
             that.clients[peerName] = null;
-            that.emit('casa-lost', { peerName: peerName });
+            that.emit('casa-lost', { peerName: peerName, socket: _socket });
             peerName = null;
          }
       });
@@ -56,7 +56,7 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
          if (peerName) {
             that.clients[peerName] = null;
             console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-            that.emit('casa-lost', { peerName: peerName });
+            that.emit('casa-lost', { peerName: peerName, socket: _socket });
             peerName = null;
          }
       });
@@ -73,13 +73,11 @@ function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _
             }
             else {
                console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing.....');
-               that.clients[peerName].emit('disconnect');
-               setTimeout(function() {
-                  console.log(that.name + ': Establishing new logon session after race with old socket.');
-                  that.clients[peerName] = _socket;
-                  _socket.emit('loginAACCKK');
-                  that.emit('casa-joined', { peerName: peerName, socket: _socket });
-               }, 5000);
+               that.emit('casa-lost', { peerName: peerName, socket: that.clients[peerName] });
+               console.log(that.name + ': Establishing new logon session after race with old socket.');
+               that.clients[peerName] = _socket;
+               _socket.emit('loginAACCKK');
+               that.emit('casa-joined', { peerName: peerName, socket: _socket });
             }
          }
          else {

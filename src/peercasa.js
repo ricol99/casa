@@ -58,15 +58,19 @@ function PeerCasa(_obj) {
       this.casa.on('casa-lost', function(_data) {
 
          if (_data.peerName == S(that.name).strip('peer-')) {
-           console.log(that.name + ': I have lost my peer!');
+            // Cope with race between old diconnect and new connect - Ignore is sockets do not match
+            if (!that.socket || (that.socket == _data.socket)) {
 
-           if (that.connected) {
-              console.log(that.name + ': Lost connection to my peer. Going inactive.');
-              that.connected = false;
-              clearInterval(that.intervalID);
-              that.socket = null;
-              that.emit('inactive', { sourceName: that.name });
-           }
+               console.log(that.name + ': I have lost my peer!');
+
+               if (that.connected) {
+                  console.log(that.name + ': Lost connection to my peer. Going inactive.');
+                  that.connected = false;
+                  clearInterval(that.intervalID);
+                  that.socket = null;
+                  that.emit('inactive', { sourceName: that.name });
+               }
+            }
          }
       });
    }
