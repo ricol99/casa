@@ -15,7 +15,7 @@ function Thing(_config) {
 
     //if (this.owner) {
       //this.owner.addChild(this);
-   }
+   //}
    var that = this;
 
 }
