@@ -26,7 +26,7 @@ ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
          console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
          // Broadcast to all children - peers already know
-         that.casaSys.casa.childAreas.forEach(function(_area) {
+         that.casaSys.childAreas.forEach(function(_area) {
             _area.broadcastMessage(_message);
          });
       });

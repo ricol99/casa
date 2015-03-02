@@ -10,6 +10,7 @@ function CasaSystem(_casaName, _config) {
    this.uberCasa = false;
    this.users = [];
    this.areas = [];
+   this.childAreas = [];
    this.casa = null;
    this.configCasaArea = null;
    this.configCasa = null;
@@ -194,6 +195,7 @@ CasaSystem.prototype.extractParentCasa = function() {
             this.config.areas[j].casas[0].casa = this.casa.name;
             this.config.areas[j].casas[0].proActiveConnect = true;
             var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
+            this.parentArea = casaObj.area;
             this.allObjects[casaObj.name] = casaObj;
             console.log('New parentcasa: ' + casaObj.name);
          } 
@@ -214,6 +216,11 @@ CasaSystem.prototype.extractChildCasas = function() {
             this.config.areas[area].casas[j].casa = this.casa.name;
             this.config.areas[area].casas[j].proActiveConnect = false;
             var casaObj = new ChildCasa(this.config.areas[area].casas[j]);
+
+            if (!childAreas[casaObj.area.name]) {
+               childAreas[casaObj.area.name] = this.areas[area];
+            }
+
             this.allObjects[casaObj.name] = casaObj;
             console.log('New childcasa: ' + casaObj.name);
          }
