@@ -13,8 +13,8 @@ function Thing(_config) {
 
    events.EventEmitter.call(this);
 
-    if (this.owner) {
-      this.owner.addChild(this);
+    //if (this.owner) {
+      //this.owner.addChild(this);
    }
    var that = this;
 
@@ -29,13 +29,13 @@ Thing.prototype.addChild = function(_child) {
 Thing.prototype.addAction = function(_action) {
    this.actions[_action.name] = _action;
 
-   _action.on('activated', function (_data) {
-      console.log(this.name + ': ' + _data.sourceName + ' has been activated');
-   });
+   //_action.on('activated', function (_data) {
+      //console.log(this.name + ': ' + _data.sourceName + ' has been activated');
+   //});
 
-   _action.on('deactivated', function (_data) {
-      console.log(this.name + ': ' + _data.sourceName + ' has been deactivated');
-   });
+   //_action.on('deactivated', function (_data) {
+      //console.log(this.name + ': ' + _data.sourceName + ' has been deactivated');
+   //});
 
    console.log(this.name + ': ' + _action.name + ' associated!');
 }
