@@ -70,11 +70,6 @@
                      "inputDebounceTime": 60
                   },
                   {
-                     "name": "activator:debounced-casa-cctv",
-                     "source": "casa:cctv",
-                     "inputDebounceTime": 60
-                  },
-                  {
                      "name": "andactivator:home-internet-connection-armed",
                      "sources": [
                         "activator:debounced-home-internet-connection",
