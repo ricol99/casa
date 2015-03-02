@@ -26,7 +26,7 @@ function Casa(_config) {
 
    var that = this;
 
-   this.casaArea.addCasa(this);
+   //this.casaArea.addCasa(this);
 
    app.get('/nuclear_alarm.mp3', function(req, res){
      res.sendFile(__dirname + '/nuclear_alarm.mp3');

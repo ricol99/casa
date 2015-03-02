@@ -24,10 +24,8 @@ util.inherits(CasaArea, Thing);
 
 CasaArea.prototype.addCasa = function(_casa) {
 
-   if (_casa != this.casaSys.casa) {
-      this.casas.push(_casa);
-      this.setupCasaListeners(_casa);
-   }
+   this.casas.push(_casa);
+   this.setupCasaListeners(_casa);
 }
 
 CasaArea.prototype.setupCasaListeners = function(_casa) {
