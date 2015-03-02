@@ -2,15 +2,23 @@ var util = require('util');
 var Thing = require('./thing');
 var S = require('string');
 var io = require('socket.io-client');
+var CasaSystem = require('./casasystem');
 
-function PeerCasa(_obj) {
+function PeerCasa(_config) {
+   var casaSys = CasaSystem.mainInstance();
+   this.casa = casaSys.findCasa(_config.casa);
+   this.casaArea = casaSys.findCasaArea(_config.casaArea);
 
-   this.address = _obj.address;
-   this.casa = _obj.casa;
-   this.proActiveConnect = _obj.proActiveConnect;
-   this.casaArea = _obj.casaArea;
+   this.proActiveConnect = _config.proActiveConnect;
+   this.address = _config.address;
 
-   Thing.call(this, _obj.name, _obj.displayName, _obj.casaArea, _obj.props);
+   _config.owner = this.casaArea;
+
+   Thing.call(this, _config);
+
+   this.states = [];
+   this.activators = [];
+   this.actions = [];
 
    this.listenersSetUp = false;
    this.connected = false;

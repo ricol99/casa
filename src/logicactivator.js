@@ -1,25 +1,28 @@
 var util = require('util');
 var events = require('events');
-var Activator = require('./activator');
+var CasaSystem = require('./casasystem');
 
-function LogicActivator(_name, _sources, _casa) {
-   this.name = _name;
-   this.casa = _casa;
-   this.inputs = [];
+function LogicActivator(_config) {
+   this.name = _config.name;
 
-   if (this.casa) {
-      console.log('Activator casa: ' + this.casa.name);
-      this.casa.addActivator(this);
-   }
+   var casaSys = CasaSystem.mainInstance();
+   this.casa = casaSys.findCasa(_config.casa);
 
-   this.active = false;
+   var sources = [];
 
    events.EventEmitter.call(this);
 
+   this.inputs = [];
+   this.active = false;
+
+   this.casa.addActivator(this);
+
    var that = this;
 
-   _sources.forEach(function(_source, _index) {
-      that.inputs.push( { source : _source, active : false });
+   _config.sources.forEach(function(_sourceName, _index) {
+      var source = casaSys.findSource(_sourceName);
+      console.log(that.name + ': Sourcename= ' + _sourceName + ' res = ' + source.name);
+      that.inputs.push( { source : source, active : false });
 
       that.inputs[_index].source.on('active', function (_data) {
          that.oneSourceIsActive(_data.sourceName);

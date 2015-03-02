@@ -2,28 +2,13 @@ var util = require('util');
 var Gpio = require('gpio');
 var State = require('./state');
 
-function GpioState(_name, _gpioPin, _triggerLow, _thing) {
+function GpioState(_config) {
 
-   this.gpioPin = 0;
-   this.triggerLow = false;
-   this.writable = false;
+   this.gpioPin = _config.gpioPin;
+   this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
+   this.writable = (_config.writable) ? _config.writable : false;
 
-   if (_name.name) {
-      // constructing from object rather than params
-      this.gpioPin = _name.gpioPin;
-      this.triggerLow = _name.triggerLow;
-
-      if (_name.writable) {
-         this.writable = _name.writable;
-      }
-
-      State.call(this, _name.name, _name.casa);
-   }
-   else {
-      this.gpioPin = _gpioPin;
-      this.triggerLow = _triggerLow;
-      State.call(this, _name, _thing);
-   }
+   State.call(this, _config);
 
    this.ready = false;
 

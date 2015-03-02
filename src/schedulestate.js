@@ -3,54 +3,54 @@ var State = require('./state');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 
-function ScheduleState(_obj) {
+function ScheduleState(_config) {
 
    this.writable = false;
 
    // Defaults to London
-   this.latitude = (_obj.latitude) ? _obj.latitude : 51.5;
-   this.longitude = (_obj.longitude) ? _obj.longitude : -0.1;
+   this.latitude = (_config.latitude) ? _config.latitude : 51.5;
+   this.longitude = (_config.longitude) ? _config.longitude : -0.1;
 
    this.startRuleIsSunTime = false;
    this.endRuleIsSunTime = false;
 
-   State.call(this, _obj.name, _obj.casa);
+   State.call(this, _config);
 
-   if (typeof _obj.startRule == "string") {
-      var arr = _obj.startRule.split(':');
+   if (typeof _config.startRule == "string") {
+      var arr = _config.startRule.split(':');
 
       if (arr.length == 2) {
          this.origStartRule = arr[0];
          this.startDelta = parseInt(arr[1]);
       }
       else {
-         this.origStartRule = _obj.startRule;
+         this.origStartRule = _config.startRule;
          this.startDelta = 0;
       }
    }
    else {
-      this.origStartRule = _obj.startRule;
+      this.origStartRule = _config.startRule;
       this.startDelta = 0;
    }
 
    this.startRule = this.origStartRule;
 
-   if (_obj.endRule) {
+   if (_config.endRule) {
 
-      if (typeof _obj.endRule == "string") {
-         var arr = _obj.endRule.split(':');
+      if (typeof _config.endRule == "string") {
+         var arr = _config.endRule.split(':');
 
          if (arr.length == 2) {
             this.origEndRule = arr[0];
             this.endDelta = parseInt(arr[1]);
          }
          else {
-            this.origEndRule = _obj.endRule;
+            this.origEndRule = _config.endRule;
             this.endDelta = 0;
          }
       }
       else {
-         this.origEndRule = _obj.endRule;
+         this.origEndRule = _config.endRule;
          this.endDelta = 0;
       }
 
@@ -60,7 +60,7 @@ function ScheduleState(_obj) {
    else {
       this.origEndRule = null;
       this.endRule = null;
-      this.activeFor = _obj.activeFor;
+      this.activeFor = _config.activeFor;
    }
 
    this.active = false;

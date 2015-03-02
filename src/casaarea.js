@@ -15,7 +15,7 @@ function CasaArea(_obj) {
       this.parentArea = null;
    }
 
-   Thing.call(this, _obj.name, _obj.displayName, _obj.owner, _obj.props);
+   Thing.call(this, _obj);
 
    var that = this;
 }

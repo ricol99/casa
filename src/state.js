@@ -2,20 +2,18 @@ var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
-function State(_name, _casaName) {
-   this.name = _name;
+function State(_config) {
+   this.name = _config.name;
 
    var casaSys = CasaSystem.mainInstance();
-   this.casa = casaSys.findCasa(_casaName);
+   this.casa = casaSys.findCasa(_config.casa);
 
    events.EventEmitter.call(this);
 
+   this.casa.addState(this);
+
    var that = this;
 
-   if (this.casa) {
-      console.log('State casa: ' + this.casa.name);
-      this.casa.addState(this);
-   }
 }
 
 util.inherits(State, events.EventEmitter);

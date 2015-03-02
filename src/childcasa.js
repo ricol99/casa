@@ -13,5 +13,4 @@ function ChildCasa(_obj) {
 
 util.inherits(ChildCasa, PeerCasa);
 
-
 module.exports = exports = ChildCasa;

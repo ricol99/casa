@@ -1,15 +1,11 @@
 var util = require('util');
 var State = require('./state');
 
-function TestState(_name) {
+function TestState(_config) {
 
-   this.writable = false;
+   this.writeable = (_config.writable) ? _config.writable  : false;
 
-   if (_name.writable) {
-      this.writable = _name.writable;
-   }
-
-   State.call(this, _name.name, _name.casa);
+   State.call(this, config);
 
    this.active = false;
 
