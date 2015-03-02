@@ -120,12 +120,14 @@ ScheduleState.prototype.setSunTimes = function() {
       this.startRule.setSeconds(this.startRule.getSeconds() + this.startDelta);
       this.startRuleIsSunTime = true;
       result = true;
+      console.log(this.name + ': Sun time ' + this.origStartRule + 'for start of schedule. Actual scheduled time is' + this.startRule);
    }
    
    if (this.origEndRule && ((typeof this.origEndRule == 'string') && this.times[this.origEndRule])) {
       this.endRule = this.times[this.origEndRule];
       this.endRule.setSeconds(this.endRule.getSeconds() + this.endDelta);
       this.endRuleIsSunTime = true;
+      console.log(this.name + ': Sun time ' + this.origEndRule + 'for end of schedule. Actual scheduled time is' + this.endRule);
       result = true;
    }
 
