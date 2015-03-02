@@ -30,6 +30,7 @@ function ScheduleState(_obj) {
    }
    else {
       this.origStartRule = _obj.startRule;
+      this.startDelta = 0;
    }
 
    this.startRule = this.origStartRule;
@@ -50,6 +51,7 @@ function ScheduleState(_obj) {
       }
       else {
          this.origEndRule = _obj.endRule;
+         this.endDelta = 0;
       }
 
       this.endRule = this.origEndRule;
@@ -134,7 +136,7 @@ ScheduleState.prototype.resetStartJob = function() {
    var that = this;
    
    if (this.startJob) {
-     delete this.startJob;
+     this.startJob.cancel();
    }
 
    this.startJob = schedule.scheduleJob(this.startRule, function() {
@@ -164,7 +166,7 @@ ScheduleState.prototype.resetEndJob = function() {
    if (this.endRule) {
 
       if (this.endJob) {
-         delete this.endJob;
+         this.endJob.cancel();
       }
 
       this.endJob = schedule.scheduleJob(this.endRule, function() {
