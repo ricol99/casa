@@ -298,7 +298,7 @@
                   {
                      "name": "schedulestate:lengthened-daylight",
                      "startRule": "sunrise:-900",
-                     "endRule": "sunset+900"
+                     "endRule": "sunset:+900"
                   },
                   {
                      "name": "schedulestate:sunrise-for-one-hour",
