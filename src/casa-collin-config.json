@@ -71,7 +71,7 @@
                   },
                   {
                      "name": "activator:debounced-casa-cctv",
-                     "source": "casa:ctv",
+                     "source": "casa:cctv",
                      "inputDebounceTime": 60
                   },
                   {
