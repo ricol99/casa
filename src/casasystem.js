@@ -217,8 +217,8 @@ CasaSystem.prototype.extractChildCasas = function() {
             this.config.areas[area].casas[j].proActiveConnect = false;
             var casaObj = new ChildCasa(this.config.areas[area].casas[j]);
 
-            if (!childAreas[casaObj.area.name]) {
-               childAreas[casaObj.area.name] = this.areas[area];
+            if (!this.childAreas[this.areas[area].name]) {
+               this.childAreas[this.areas[area].name] = this.areas[area];
             }
 
             this.allObjects[casaObj.name] = casaObj;
