@@ -9,6 +9,7 @@ function ChildCasa(_obj) {
 
    var that = this;
 
+   this.casa.addChildCasa(this);
 }
 
 util.inherits(ChildCasa, PeerCasa);

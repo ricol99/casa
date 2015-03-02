@@ -19,6 +19,10 @@ function Casa(_config) {
    this.states = [];
    this.activators = [];
    this.actions = [];
+   this.uber = false;
+
+   this.parentCasa = null;
+   this.childCasas = [];
 
    var that = this;
 
@@ -127,6 +131,22 @@ Casa.prototype.addActivator = function(_activator) {
 
 Casa.prototype.findState = function(_stateName) {
    return this.states[_stateName];
+}
+
+Casa.prototype.addChildCasa = function(_childCasa) {
+   this.childCasas[_childCasa.name] = _childCasa;
+}
+
+Casa.prototype.setUber = function(_uber) {
+   this.uber = _uber;
+}
+
+Casa.prototype.isUber = function() {
+   return this.uber;
+}
+
+Casa.prototype.setParentCasa = function(_parentCasa) {
+   this.parentCasa = _parentCasa;
 }
 
 module.exports = exports = Casa;

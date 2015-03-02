@@ -7,6 +7,7 @@ var _mainInstance = null;
 function CasaSystem(_casaName, _config) {
    this.casaName = _casaName;
    this.config = _config;
+   this.uberCasa = false;
    this.users = [];
    this.areas = [];
    this.casa = null;
@@ -37,8 +38,12 @@ function CasaSystem(_casaName, _config) {
    this.extractParentCasa();
 
    // Extract Child casas if this is an Uber casa (position 0 casa in an area)
-   if (this.configCasaArea.casas[0].name == this.casa.name) {
+   if (this.uberCasa) {
+      this.casa.setUber(true);
       this.extractChildCasas();
+
+      // Allow Casa Areas to build broadcast and forwarding routes
+      this.buildCasaAreaRoutes();
    }
 
    // Extract all states hosted by this casa
@@ -86,6 +91,10 @@ CasaSystem.prototype.extractCasaAreas = function() {
 
       if (area.casas.some(function(casa) { return casa.name == that.casaName; })) {
          that.configCasaArea = area;
+
+         if (area.casas[0].name == that.casaName) {
+            that.uberCasa = true;
+         }
       }
    });
 
@@ -116,6 +125,14 @@ CasaSystem.prototype.extractCasaAreas = function() {
 
    // Extract child casa areas
    this.extractChildCasaAreas(this.casaArea);
+}
+
+CasaSystem.prototype.buildCasaAreaRoutes = function() {
+   var casaAreaLen = this.areas.length;
+
+   for (var j=0; j < casaAreaLen; ++j) {
+      this.areas[j].createRoutes();
+   }
 }
 
 CasaSystem.prototype.extractMyCasa = function() {
@@ -309,13 +326,13 @@ CasaSystem.prototype.findCasa = function (casaName) {
    return null;
 }
 
-CasaSystem.prototype.findCasaState = function (casa, stateName) {
+CasaSystem.prototype.findCasaState = function (_casa, _stateName) {
    var source = null;
-   var len = casa.states.length;
+   var len = _casa.states.length;
 
    for (var i=0; i < len; ++i) {
-      if (casa.states[i].name == stateName) {
-         source = casa.states[i];
+      if (_casa.states[i].name == _stateName) {
+         source = _casa.states[i];
          break;
       }
    }
@@ -335,12 +352,19 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          var sourceName  = ret.name;
 
          var peerCasa = this.findCasa(peerCasaName);
-         source = this.findCasaState(peerCasa, stateName);
 
-         if (!source) {
-            var PeerState = require('./peerstate');
-            source = new PeerState(sourceName, peerCasa);
-            this.allObjects[source.name] = source;
+         if (!peerCasa) {
+            peerCasa = this.casa.parentCasa;
+         }
+
+         if (peerCasa) {
+            source = this.findCasaState(peerCasa, stateName);
+
+            if (!source) {
+               var PeerState = require('./peerstate');
+               source = new PeerState(sourceName, peerCasa);
+               this.allObjects[source.name] = source;
+            }
          }
       }
    }
@@ -476,6 +500,10 @@ CasaSystem.prototype.findConfigActivator = function (activatorName) {
 
 CasaSystem.prototype.resolveObject = function (objName) {
     return this.allObjects[objName];
+}
+
+CasaSystem.prototype.isUberCasa = function() {
+  return this.uberCasa;
 }
 
 CasaSystem.mainInstance = function() {
