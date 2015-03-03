@@ -1,11 +1,11 @@
 var util = require('util');
 var PeerCasa = require('./peercasa');
 
-function ParentCasa(_obj) {
+function ParentCasa(_config) {
 
-   _obj.proActiveConnect = true;
+   _config.proActiveConnect = true;
 
-   PeerCasa.call(this, _obj);
+   PeerCasa.call(this, _config);
 
    var that = this;
 

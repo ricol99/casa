@@ -3,19 +3,19 @@ var Thing = require('./thing');
 var CasaSystem = require('./casasystem');
 
 
-function CasaArea(_obj) {
+function CasaArea(_config) {
    this.casas = [];
 
    this.casaSys = CasaSystem.mainInstance();
 
-   if (_obj.parentArea) {
-      this.parentArea = this.casaSys.findCasaArea(_obj.parentArea);
+   if (_config.parentArea) {
+      this.parentArea = this.casaSys.findCasaArea(_config.parentArea);
    }
    else {
       this.parentArea = null;
    }
 
-   Thing.call(this, _obj.name, _obj.displayName, _obj.owner, _obj.props);
+   Thing.call(this, _config);
 
    var that = this;
 }

@@ -1,11 +1,11 @@
 var util = require('util');
 var events = require('events');
 
-function Thing(_name, _displayName, _owner, _props) {
-   this.name = _name;
-   this.displayName = _displayName;
-   this.owner = _owner;
-   this.props = _props;
+function Thing(_config) {
+   this.name = _config.name;
+   this.displayName = _config.displayName;
+   this.owner = _config.owner;
+   this.props = _config.props;
    this.children = {};
    this.states = {};
    this.actions = {};

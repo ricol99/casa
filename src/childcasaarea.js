@@ -1,9 +1,9 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
 
-function ChildCasaArea(_obj) {
+function ChildCasaArea(_config) {
 
-   CasaArea.call(this, _obj);
+   CasaArea.call(this, _config);
 
    var that = this;
 

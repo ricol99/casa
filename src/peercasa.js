@@ -3,14 +3,15 @@ var Thing = require('./thing');
 var S = require('string');
 var io = require('socket.io-client');
 
-function PeerCasa(_obj) {
+function PeerCasa(_config) {
 
-   this.address = _obj.address;
-   this.casa = _obj.casa;
-   this.proActiveConnect = _obj.proActiveConnect;
-   this.casaArea = _obj.casaArea;
+   this.address = _config.address;
+   this.casa = _config.casa;
+   this.proActiveConnect = _config.proActiveConnect;
+   this.casaArea = _config.casaArea;
+   _config.owner = _config.casaArea;
 
-   Thing.call(this, _obj.name, _obj.displayName, _obj.casaArea, _obj.props);
+   Thing.call(this, _config);
 
    this.listenersSetUp = false;
    this.connected = false;

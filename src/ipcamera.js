@@ -3,9 +3,9 @@ var http = require('http');
 var Cam = require('onvif').Cam;
 var Thing = require('./thing');
 
-function IpCamera(_name, _displayName, _parent, _props) {
+function IpCamera(_config) {
 
-   Thing.call(this, 'ip-cam:' + _name, _displayName, _parent, _props);
+   Thing.call(this, _config);
    var that = this;
 
    new Cam({ hostname: '192.168.1.177', username: 'admin', password: 'admin' }, function(err) {

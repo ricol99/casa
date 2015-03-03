@@ -16,7 +16,7 @@ function CasaSystem(_casaName, _config) {
    this.constructors = {};
    this.allObjects = [];
 
-   Thing.call(this, _config.name, _config.displayName, null, _config.props);
+   Thing.call(this, _config);
 
    var that = this;
    _mainInstance = this;

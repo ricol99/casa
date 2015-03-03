@@ -6,26 +6,15 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 
-function Casa(_name, _displayName, _listeningPort, _casaArea, _parentCasaArea, _props) {
+function Casa(_config) {
 
-   this.listeningPort = null;
-   this.casaArea = null;
-   this.parentCasaArea = null;
+   this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.address.port;
+   this.casaArea = _config.casaArea;
+   this.parentCasaArea = _config.parentCasaArea;
+   _config.owner = _config.casaArea;
+   Thing.call(this, _config);
+
    this.clients = [];
-
-   if (_name.name) {
-      // constructing from object rather than params
-      this.listeningPort = (process.env.PORT) ? process.env.PORT : _name.address.port;
-      this.casaArea = _name.casaArea;
-      this.parentCasaArea = _name.parentCasaArea;
-      Thing.call(this, _name.name, _name.displayName, _name.casaArea, _name.props);
-   }
-   else {
-      this.listeningPort = _listeningPort;
-      this.casaArea = _casaArea;
-      this.parentCasaArea = _parentCasaArea;
-      Thing.call(this, _name, _displayName, _casaArea, _props);
-   }
 
    var that = this;
 
