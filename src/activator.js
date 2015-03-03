@@ -2,42 +2,16 @@ var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
-function Activator(_name, _source, _minOutputTime, _invert, _inputDebounceTime, _casa) {
+function Activator(_config) {
 
-   this.source = null;
-   this.name = null;
-   this.minOutputTime = 0;
-   this.invert = false;
-   this.inputDebounceTime = 0;
-   this.casa = null;
+   this.name = _config.name;
+   var casaSys = CasaSystem.mainInstance();
+   this.source = casaSys.findSource(_config.source);
+   this.casa = casaSys.findCasa(_config.casa);
 
-   if (_name.name) {
-      // constructing from object rather than params
-      var casaSys = CasaSystem.mainInstance();
-      this.source = casaSys.findSource(_name.source);
-      this.casa = casaSys.findCasa(_name.casa);
-      this.name = _name.name;
-
-      if (_name.minOutputTime) {
-         this.minOutputTime = _name.minOutputTime;
-      }
-
-      if (_name.inputDebounceTime) {
-         this.inputDebounceTime = _name.inputDebounceTime;
-      }
-
-      if (_name.invert) {
-         this.invert = _name.invert;
-      }
-   }
-   else {
-      this.name = _name;
-      this.source = _source;
-      this.minOutputTime = _minOutputTime;
-      this.invert = _invert;
-      this.inputDebounceTime = _inputDebounceTime;
-      this.casa = _casa;
-   }
+   this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
+   this.inputDebounceTime = (_config.inputDebounceTime) ? _config.inputDebounceTime : 0;
+   this.invert = (_config.invert) ? _config.invert : false;
 
    if (this.casa) {
       console.log('Activator casa: ' + this.casa.name);
