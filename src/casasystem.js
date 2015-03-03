@@ -78,9 +78,9 @@ function CasaSystem(_casaName, _config) {
       var len = this.config.areas.length;
 
       for (var j=0; j < len; ++j) {
-         console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + configArea.parentArea);
+         console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + this.configCasaArea.parentArea);
 
-         if (this.config.areas[j].name == configArea.parentArea) {
+         if (this.config.areas[j].name == this.configCasaArea.parentArea) {
             // found parent area
             var PeerCasa = this.cleverRequire('parent' + this.config.areas[j].casas[0].name);
             this.config.areas[j].casas[0].casaArea = this.areas[j].name;
