@@ -4,17 +4,20 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+var CasaSystem = require('./casasystem');
 
 function Casa(_config) {
 
+   var casaSys = CasaSystem.mainInstance();
+   this.casaArea = casaSys.findCasaArea(_config.casaArea);
+
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.address.port;
-   this.casaArea = _config.casaArea;
-   this.parentCasaArea = _config.parentCasaArea;
-   _config.owner = _config.casaArea;
+   _config.owner = this.casaArea;  // TBD ***** Should this be a string
    Thing.call(this, _config);
 
    this.clients = [];
+   this.states = [];
+   this.activators = [];
 
    var that = this;
 

@@ -2,16 +2,21 @@ var util = require('util');
 var Thing = require('./thing');
 var S = require('string');
 var io = require('socket.io-client');
+var CasaSystem = require('./casasystem');
 
 function PeerCasa(_config) {
+   var casaSys = CasaSystem.mainInstance();
+   this.casa = casaSys.findCasa(_config.casa);
+   this.casaArea = casaSys.findCasaArea(_config.casaArea);
 
    this.address = _config.address;
-   this.casa = _config.casa;
    this.proActiveConnect = _config.proActiveConnect;
-   this.casaArea = _config.casaArea;
-   _config.owner = _config.casaArea;
+   _config.owner = this.casaArea; // TBD ***** Should this be a string
 
    Thing.call(this, _config);
+
+   this.states = [];
+   this.activators = [];
 
    this.listenersSetUp = false;
    this.connected = false;
