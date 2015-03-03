@@ -7,12 +7,15 @@ function SetStateAction(_config) {
 
    // Resolve source and target
    var casaSys = CasaSystem.mainInstance();
-   var source = casaSys.findSource(_config.source);
-   console.log(_config.name + ': source = '+ source.name);
    this.state = (_config.target) ? casaSys.findOrCreateState(_config.target) : null;
-   console.log(_config.name + ': state = '+ this.state.name);
 
-   Action.call(this, _config.name, source, null);
+   // I don't want to target the state with the generic base class action.js
+   _config.target = null;
+
+   Action.call(this, _config);
+
+   console.log(_config.name + ': source = '+ this.source.name);
+   console.log(_config.name + ': state = '+ this.state.name);
 
    this.actionActive = false;
 

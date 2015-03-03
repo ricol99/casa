@@ -1,36 +1,14 @@
 var util = require('util');
 var Action = require('./action');
 var push = require( 'pushover-notifications' );
-var CasaSystem = require('./casasystem');
 
-function PushoverAction(_name, _activatedMessage, _actPriority, _deactivatedMessage, _deactPriority, _activator, _user) {
+function PushoverAction(_config) {
 
-   this.activatedMessage = null;
-   this.deactivatedMessage = null;
-   this.messageActPriority = 0;
-   this.messageDeactPriority = 0;
-
-   if (_name.name) {
-      // constructing from object rather than params
-      // Resolve source and target
-      var casaSys = CasaSystem.mainInstance();
-      var source = casaSys.findSource(_name.source);
-      var target = (_name.target) ? casaSys.resolveObject(_name.target) : null;
-
-      this.activatedMessage = _name.activeMessage;
-      this.deactivatedMessage = _name.inactiveMessage;
-      this.messageActPriority = _name.activeMessagePriority;
-      this.messageDeactPriority = _name.inactiveMessagePriority;
-      Action.call(this, _name.name, source, target);
-   }
-   else {
-      this.activatedMessage = _activatedMessage;
-      this.deactivatedMessage = _deactivatedMessage;
-      this.messageActPriority = _actPriority;
-      this.messageDeactPriority = _deactPriority;
-      Action.call(this, _name, _activator, _user);
-   }
-
+   this.activatedMessage = _config.activeMessage;
+   this.deactivatedMessage = _config.inactiveMessage;
+   this.messageActPriority = _config.activeMessagePriority;
+   this.messageDeactPriority = _config.inactiveMessagePriority;
+   Action.call(this, _config);
 
    this.actionActive = false;
    this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
