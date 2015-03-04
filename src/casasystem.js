@@ -53,16 +53,8 @@ function CasaSystem(_casaName, _config) {
    // Extract all states hosted by this casa
    this.extractCasaStates();
 
-   // Extract Activators
-   this.configCasa.activators.forEach(function(activator) { 
-      var Activator = that.cleverRequire(activator.name);
-      activator.casa = that.casa.name;
-      var activatorObj = new Activator(activator);
-      that.casa.activators.push(activatorObj);
-      that.allObjects[activatorObj.name] = activatorObj;
-      console.log('New activator: ' + activator.name);
-   });
-
+   // Extract all activators hosted by this casa
+   this.extractCasaActivators();
 
    // Extract Actions
    this.configCasa.actions.forEach(function(action) { 
@@ -247,6 +239,18 @@ CasaSystem.prototype.extractCasaStates = function() {
       var stateObj = new State(state);
       that.allObjects[stateObj.name] = stateObj;
       console.log('New state: ' + state.name);
+   });
+}
+
+CasaSystem.prototype.extractCasaActivators = function() {
+   var that = this;
+
+   this.configCasa.activators.forEach(function(activator) { 
+      var Activator = that.cleverRequire(activator.name);
+      activator.casa = that.casa.name;
+      var activatorObj = new Activator(activator);
+      that.allObjects[activatorObj.name] = activatorObj;
+      console.log('New activator: ' + activator.name);
    });
 }
 
