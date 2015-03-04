@@ -179,6 +179,15 @@
                      "target": "usergroup:admins"
                   },
                   {
+                     "name": "pushoveraction:cctv-casa-status",
+                     "activeMessage": "Casa 'cctv' is active",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Casa 'cctv' has gone down!",
+                     "inactiveMessagePriority": 1,
+                     "source": "activator:debounced-casa-cctv",
+                     "target": "usergroup:admins"
+                  },
+                  {
                      "name": "pushoveraction:alarm-lounge",
                      "activeMessage": "Motion in lounge - Started recording!",
                      "activeMessagePriority": 2,
