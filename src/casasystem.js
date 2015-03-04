@@ -56,14 +56,8 @@ function CasaSystem(_casaName, _config) {
    // Extract all activators hosted by this casa
    this.extractCasaActivators();
 
-   // Extract Actions
-   this.configCasa.actions.forEach(function(action) { 
-      var Action = that.cleverRequire(action.name);
-      action.casa = that.casa.name;
-      var actionObj = new Action(action);
-      that.allObjects[actionObj.name] = actionObj;
-      console.log('New action: ' + action.name);
-   });
+   // Extract all actions hosted by this casa
+   this.extractCasaActions();
 }
 
 util.inherits(CasaSystem, Thing);
@@ -117,7 +111,6 @@ CasaSystem.prototype.extractCasaAreas = function() {
             var Area = that.cleverRequire('parent' + area.name);
             area.owner = that;
             var areaObj = new Area(area);
-            areaObj.casas = [];
             that.parentCasaArea = areaObj;
             that.areas.push(areaObj);
             that.allObjects[areaObj.name] = areaObj;
@@ -254,6 +247,18 @@ CasaSystem.prototype.extractCasaActivators = function() {
    });
 }
 
+CasaSystem.prototype.extractCasaActions = function() {
+   var that = this;
+
+   this.configCasa.actions.forEach(function(action) { 
+      var Action = that.cleverRequire(action.name);
+      action.casa = that.casa.name;
+      var actionObj = new Action(action);
+      that.allObjects[actionObj.name] = actionObj;
+      console.log('New action: ' + action.name);
+   });
+}
+
 CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
    var that = this;
 
@@ -337,12 +342,19 @@ CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
          var sourceName  = ret.name;
 
          var peerCasa = this.findCasa(peerCasaName);
-         source = this.findCasaState(peerCasa, stateName);
 
-         if (!source) {
-            var PeerState = require('./peerstate');
-            source = new PeerState(sourceName, peerCasa);
-            this.allObjects[source.name] = source;
+         if (!peerCasa) {
+            peerCasa = this.casa.parentCasa;
+         }
+
+         if (peerCasa) {
+            source = this.findCasaState(peerCasa, stateName);
+
+            if (!source) {
+               var PeerState = require('./peerstate');
+               source = new PeerState(sourceName, peerCasa);
+               this.allObjects[source.name] = source;
+            }
          }
       }
    }
@@ -403,23 +415,17 @@ CasaSystem.prototype.findActivator = function (activatorName) {
 
 CasaSystem.prototype.findSource = function (sourceName) {
 
-   console.log(this.name + ': looking for state with name ' + sourceName);
    // Resolve source
    var source = this.findOrCreateCasaState(this.casa, sourceName);
 
    if (!source) {
-      console.log(this.name + ': looking for activator with name ' + sourceName);
       source = this.findOrCreateCasaActivator(this.casa, sourceName);
    }
 
    if (!source) {
-      console.log(this.name + ': looking for casa with name ' + sourceName);
       source = this.findCasa(sourceName);
    }
 
-   if (source) {
-      console.log(this.name + ': Found object with name ' + sourceName);
-   }
    return source;
 }
 

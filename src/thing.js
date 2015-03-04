@@ -6,6 +6,7 @@ function Thing(_config) {
    this.displayName = _config.displayName;
    this.owner = _config.owner; // TBD ***** Should this be a string
    this.props = _config.props;
+
    this.children = {};
    this.states = {};
    this.actions = {};

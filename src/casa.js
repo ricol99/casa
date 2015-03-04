@@ -19,6 +19,7 @@ function Casa(_config) {
    this.clients = [];
    this.states = [];
    this.activators = [];
+   this.actions = [];
    this.uber = false;
 
    var that = this;
@@ -151,6 +152,12 @@ Casa.prototype.addActivator = function(_activator) {
    });
 
    console.log(this.name + ': ' + _activator.name + ' associated!');
+}
+
+Casa.prototype.addAction = function(_action) {
+   console.log(this.name + ': Action '  + _action.name + ' added to casa ');
+   this.actions[_action.name] = _action;
+   var that = this;
 }
 
 Casa.prototype.findState = function(_stateName) {
