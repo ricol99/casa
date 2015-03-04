@@ -131,7 +131,7 @@ PeerCasa.prototype.getPort = function() {
 
 PeerCasa.prototype.broadcastMessage = function(_message) {
 
-   if (this.connected) {
+   if (this.connected && _message.sourceCasa != this) {
       console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa.name);
       this.unAckedMessages.push( { message: _message.message, data: _message.data } );
       this.socket.emit(_message.message, _message.data);
