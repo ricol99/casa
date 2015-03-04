@@ -50,15 +50,8 @@ function CasaSystem(_casaName, _config) {
       this.buildCasaAreaRoutes();
    }
 
-   // Extract States
-   this.configCasa.states.forEach(function(state) { 
-      var State = that.cleverRequire(state.name);
-      state.casa = that.casa.name;
-      var stateObj = new State(state);
-      that.casa.states.push(stateObj);
-      that.allObjects[stateObj.name] = stateObj;
-      console.log('New state: ' + state.name);
-   });
+   // Extract all states hosted by this casa
+   this.extractCasaStates();
 
    // Extract Activators
    this.configCasa.activators.forEach(function(activator) { 
@@ -243,6 +236,18 @@ CasaSystem.prototype.extractChildCasas = function() {
          }
       }
    }
+}
+
+CasaSystem.prototype.extractCasaStates = function() {
+   var that = this;
+
+   this.configCasa.states.forEach(function(state) { 
+      var State = that.cleverRequire(state.name);
+      state.casa = that.casa.name;
+      var stateObj = new State(state);
+      that.allObjects[stateObj.name] = stateObj;
+      console.log('New state: ' + state.name);
+   });
 }
 
 CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
