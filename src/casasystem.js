@@ -324,17 +324,8 @@ CasaSystem.prototype.findCasa = function (casaName) {
    return null;
 }
 
-CasaSystem.prototype.findCasaState = function (casa, stateName) {
-   var source = null;
-   var len = casa.states.length;
-
-   for (var i=0; i < len; ++i) {
-      if (casa.states[i].name == stateName) {
-         source = casa.states[i];
-         break;
-      }
-   }
-   return source;
+CasaSystem.prototype.findCasaState = function (_casa, _stateName) {
+   return _casa.states[_stateName];
 }
 
 CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
@@ -380,17 +371,8 @@ CasaSystem.prototype.findOrCreateState = function (stateName) {
    return state;
 }
 
-CasaSystem.prototype.findCasaActivator = function (casa, activatorName) {
-   var source = null;
-   var len = casa.activators.length;
-
-   for (var i=0; i < len; ++i) {
-      if (casa.activators[i].name == activatorName) {
-         source = casa.activators[i];
-         break;
-      }
-   }
-   return source;
+CasaSystem.prototype.findCasaActivator = function (_casa, _activatorName) {
+   return _casa.activators[_activatorName];
 }
 
 CasaSystem.prototype.findOrCreateCasaActivator = function (casa, activatorName) {
@@ -425,17 +407,23 @@ CasaSystem.prototype.findActivator = function (activatorName) {
 
 CasaSystem.prototype.findSource = function (sourceName) {
 
+   console.log(this.name + ': looking for state with name ' + sourceName);
    // Resolve source
    var source = this.findOrCreateCasaState(this.casa, sourceName);
 
    if (!source) {
+      console.log(this.name + ': looking for activator with name ' + sourceName);
       source = this.findOrCreateCasaActivator(this.casa, sourceName);
    }
 
    if (!source) {
+      console.log(this.name + ': looking for casa with name ' + sourceName);
       source = this.findCasa(sourceName);
    }
 
+   if (source) {
+      console.log(this.name + ': Found object with name ' + sourceName);
+   }
    return source;
 }
 
