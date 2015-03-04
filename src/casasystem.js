@@ -7,13 +7,17 @@ var _mainInstance = null;
 function CasaSystem(_casaName, _config) {
    this.casaName = _casaName;
    this.config = _config;
+   this.uberCasa = false;
    this.users = [];
    this.areas = [];
    this.casa = null;
    this.configCasaArea = null;
    this.configCasa = null;
+
    this.casaArea = null;
    this.parentCasaArea = null;
+   this.childCasaAreas = [];
+
    this.constructors = {};
    this.allObjects = [];
 
@@ -28,90 +32,22 @@ function CasaSystem(_casaName, _config) {
    // Extract Casa Areas
    this.extractCasaAreas();
 
-   // Extract Casa
-   this.casaArea.casas = [];
-   var casaLen = this.configCasaArea.casas.length;
+   // Extract My Casa
+   this.extractMyCasa();
 
-   console.log('casas: ' + casaLen);
+   // Extract other Casas in my area (Peer Casas)  
+   this.extractPeerCasas();
 
-   for (var j=0; j < casaLen; ++j) {
+  // Extract Parent casa of parent area
+   this.extractParentCasa();
 
-      if (this.casaName == this.configCasaArea.casas[j].name) {
-         // Found myself! Build me!
-         var Casa = that.cleverRequire(this.casaName);
-         this.configCasaArea.casas[j].casaArea = this.casaArea.name;
-         var casaObj = new Casa(this.configCasaArea.casas[j]);
-         this.casaArea.casas.push(casaObj);
-         this.allObjects[casaObj.name] = casaObj;
-         this.casa = casaObj;
-         this.configCasa = this.configCasaArea.casas[j];
-         console.log('New casa: ' + casaObj.name);
-         break;
-      }
-   }
+   // Extract Child casas if this is an Uber casa (position 0 casa in an area)
+   if (this.uberCasa) {
+      this.casa.setUber(true);
+      this.extractChildCasas();
 
-   
-   // Extract Peer Casas for area
-   var casaLen = this.configCasaArea.casas.length;
-   var proActiveConnect = false;
-
-   for (var j=0; j < casaLen; ++j) {
-
-      if (!this.configCasaArea.casas[j].casaArea) {
-         // Found a Peer Casa to create!
-         var PeerCasa = this.cleverRequire('peer' + this.casaName);
-         this.configCasaArea.casas[j].casaArea = this.casaArea.name;
-         this.configCasaArea.casas[j].casa = this.casa.name;
-         this.configCasaArea.casas[j].proActiveConnect = proActiveConnect;
-         var casaObj = new PeerCasa(this.configCasaArea.casas[j]);
-         this.casaArea.casas.push(casaObj);
-         this.allObjects[casaObj.name] = casaObj;
-         console.log('New peercasa: ' + casaObj.name);
-      }
-      else {
-         proActiveConnect = true;
-      }
-   }
-
-   // Extract Parent casa of parent area
-   if (this.parentCasaArea) {
-      var len = this.config.areas.length;
-
-      for (var j=0; j < len; ++j) {
-         console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + this.configCasaArea.parentArea);
-
-         if (this.config.areas[j].name == this.configCasaArea.parentArea) {
-            // found parent area
-            var PeerCasa = this.cleverRequire('parent' + this.config.areas[j].casas[0].name);
-            this.config.areas[j].casas[0].casaArea = this.areas[j].name;
-            this.config.areas[j].casas[0].casa = this.casa.name;
-            var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
-            this.areas[j].casas.push(casaObj);
-            this.allObjects[casaObj.name] = casaObj;
-            console.log('New peercasa: ' + casaObj.name);
-         } 
-      }
-   }
-
-   // If casa is a parent casa (position 0 of an area), extract children peer casas in child area
-   if (this.configCasaArea.casas[0].name == this.casa.name) {
-      var areaLen = this.areas.length;
-
-      for (var area = 0; area < areaLen; ++area) {
-         if (this.config.areas[area].parentArea == this.casa.casaArea.name) {
-            var casaLen = this.config.areas[area].casas.length;
-
-            for (var j=0; j < casaLen; ++j) {
-               var ChildCasa = this.cleverRequire('child' + this.config.areas[area].casas[j].name);
-               this.config.areas[area].casas[j].casaArea = this.areas[area].name;
-               this.config.areas[area].casas[j].casa = this.casa.name;
-               var casaObj = new ChildCasa(this.config.areas[area].casas[j]);
-               this.areas[area].casas.push(casaObj);
-               this.allObjects[casaObj.name] = casaObj;
-               console.log('New peercasa: ' + casaObj.name);
-            }
-         }
-      }
+      // Allow Casa Areas to build broadcast and forwarding routes
+      this.buildCasaAreaRoutes();
    }
 
    // Extract States
@@ -180,6 +116,10 @@ CasaSystem.prototype.extractCasaAreas = function() {
 
       if (area.casas.some(function(casa) { return casa.name == that.casaName; })) {
          that.configCasaArea = area;
+
+         if (area.casas[0].name == that.casaName) {
+            that.uberCasa = true;
+         }
       }
    });
 
@@ -206,12 +146,103 @@ CasaSystem.prototype.extractCasaAreas = function() {
    this.configCasaArea.owner = this;
    this.casaArea = new Area(this.configCasaArea);
    this.areas.push(this.casaArea);
-   this.casaArea.casas = [];
    this.allObjects[this.casaArea.name] = this.casaArea;
    console.log('New area: ' + this.configCasaArea.name);
 
    // Extract child casa areas
    this.extractChildCasaAreas(this.casaArea);
+}
+
+CasaSystem.prototype.buildCasaAreaRoutes = function() {
+   var casaAreaLen = this.areas.length;
+
+   for (var j=0; j < casaAreaLen; ++j) {
+      this.areas[j].createRoutes();
+   }
+}
+
+CasaSystem.prototype.extractMyCasa = function() {
+   var casaLen = this.configCasaArea.casas.length;
+
+   console.log('casas: ' + casaLen);
+
+   for (var j=0; j < casaLen; ++j) {
+
+      if (this.casaName == this.configCasaArea.casas[j].name) {
+         // Found myself! Build me!
+         var Casa = this.cleverRequire(this.casaName);
+         this.configCasaArea.casas[j].casaArea = this.casaArea.name;
+         var casaObj = new Casa(this.configCasaArea.casas[j]);
+         this.allObjects[casaObj.name] = casaObj;
+         this.casa = casaObj;
+         this.configCasa = this.configCasaArea.casas[j];
+         console.log('New casa: ' + casaObj.name);
+         break;
+      }
+   }
+}
+
+CasaSystem.prototype.extractPeerCasas = function() {
+   var casaLen = this.configCasaArea.casas.length;
+   var proActiveConnect = false;
+
+   for (var j=0; j < casaLen; ++j) {
+
+      if (!this.configCasaArea.casas[j].casaArea) {
+         // Found a Peer Casa to create!
+         var PeerCasa = this.cleverRequire('peer' + this.casaName);
+         this.configCasaArea.casas[j].casaArea = this.casaArea.name;
+         this.configCasaArea.casas[j].casa = this.casa.name;
+         this.configCasaArea.casas[j].proActiveConnect = proActiveConnect;
+         var casaObj = new PeerCasa(this.configCasaArea.casas[j]);
+         this.allObjects[casaObj.name] = casaObj;
+         console.log('New peercasa: ' + casaObj.name);
+      }
+      else {
+         proActiveConnect = true;
+      }
+   }
+}
+
+CasaSystem.prototype.extractParentCasa = function() {
+
+   if (this.parentCasaArea) {
+      var len = this.config.areas.length;
+
+      for (var j=0; j < len; ++j) {
+         console.log('area: ' + this.config.areas[j].name + '  ==  area: ' + this.configCasaArea.parentArea);
+
+         if (this.config.areas[j].name == this.configCasaArea.parentArea) {
+            // found parent area
+            var PeerCasa = this.cleverRequire('parent' + this.config.areas[j].casas[0].name);
+            this.config.areas[j].casas[0].casaArea = this.areas[j].name;
+            this.config.areas[j].casas[0].casa = this.casa.name;
+            var casaObj = new PeerCasa(this.config.areas[j].casas[0]);
+            this.parentArea = casaObj.area;
+            this.allObjects[casaObj.name] = casaObj;
+            console.log('New parentcasa: ' + casaObj.name);
+         } 
+      }
+   }
+}
+
+CasaSystem.prototype.extractChildCasas = function() {
+   var areaLen = this.config.areas.length;
+
+   for (var area = 0; area < areaLen; ++area) {
+      if (this.config.areas[area].parentArea == this.casa.casaArea.name) {
+         var casaLen = this.config.areas[area].casas.length;
+
+         for (var j=0; j < casaLen; ++j) {
+            var ChildCasa = this.cleverRequire('child' + this.config.areas[area].casas[j].name);
+            this.config.areas[area].casas[j].casaArea = this.areas[area].name;
+            this.config.areas[area].casas[j].casa = this.casa.name;
+            var casaObj = new ChildCasa(this.config.areas[area].casas[j]);
+            this.allObjects[casaObj.name] = casaObj;
+            console.log('New childcasa: ' + casaObj.name);
+         }
+      }
+   }
 }
 
 CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
@@ -226,6 +257,7 @@ CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
          var areaObj = new Area(area);
          areaObj.casas = [];
          that.areas.push(areaObj);
+         that.childCasaAreas[areaObj.name] = areaObj;
          that.allObjects[areaObj.name] = areaObj;
          console.log('New area: ' + area.name);
 
@@ -450,6 +482,10 @@ CasaSystem.prototype.findConfigActivator = function (activatorName) {
 
 CasaSystem.prototype.resolveObject = function (objName) {
     return this.allObjects[objName];
+}
+
+CasaSystem.prototype.isUberCasa = function() {
+  return this.uberCasa;
 }
 
 CasaSystem.mainInstance = function() {

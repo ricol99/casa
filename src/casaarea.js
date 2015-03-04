@@ -32,4 +32,8 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
    // Do nothing, specialised classes will do more
 }
 
+CasaArea.prototype.createRoutes = function() {
+   // Do nothing, specialised classes will do more
+}
+
 module.exports = exports = CasaArea;
