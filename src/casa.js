@@ -18,6 +18,7 @@ function Casa(_config) {
    this.clients = [];
    this.states = [];
    this.activators = [];
+   this.uber = false;
 
    var that = this;
 
@@ -126,6 +127,14 @@ Casa.prototype.addActivator = function(_activator) {
 
 Casa.prototype.findState = function(_stateName) {
    return this.states[_stateName];
+}
+
+Casa.prototype.setUber = function(_uber) {
+   this.uber = _uber;
+}
+
+Casa.prototype.isUber = function() {
+   return this.uber;
 }
 
 module.exports = exports = Casa;

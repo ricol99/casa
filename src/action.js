@@ -8,6 +8,7 @@ function Action(_config) {
 
    // Resolve source and target
    var casaSys = CasaSystem.mainInstance();
+   this.casa = casaSys.findCasa(_config.casa);
    this.source = casaSys.findSource(_config.source);
    this.target = (_config.target) ? casaSys.resolveObject(_config.target) : null;
 
@@ -16,6 +17,8 @@ function Action(_config) {
    events.EventEmitter.call(this);
 
    var that = this;
+
+   this.casa.addAction(this);
 
    if (this.target) {
       this.target.addAction(this);

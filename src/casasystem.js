@@ -136,13 +136,10 @@ function CasaSystem(_casaName, _config) {
 
 
    // Extract Actions
-   this.casa.actions = [];
-
    this.configCasa.actions.forEach(function(action) { 
       var Action = that.cleverRequire(action.name);
-      action.owner = that.casa;
+      action.casa = that.casa.name;
       var actionObj = new Action(action);
-      that.casa.actions.push(actionObj);
       that.allObjects[actionObj.name] = actionObj;
       console.log('New action: ' + action.name);
    });

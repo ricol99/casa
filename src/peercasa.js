@@ -9,8 +9,9 @@ function PeerCasa(_config) {
    this.casa = casaSys.findCasa(_config.casa);
    this.casaArea = casaSys.findCasaArea(_config.casaArea);
 
-   this.address = _config.address;
    this.proActiveConnect = _config.proActiveConnect;
+   this.address = _config.address;
+
    _config.owner = this.casaArea; // TBD ***** Should this be a string
 
    Thing.call(this, _config);
@@ -128,6 +129,15 @@ PeerCasa.prototype.getPort = function() {
    return this.address.port;
 };
 
+PeerCasa.prototype.broadcastMessage = function(_message) {
+
+   if (this.connected) {
+      console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa.name);
+      this.unAckedMessages.push( { message: _message.message, data: _message.data } );
+      this.socket.emit(_message.message, _message.data);
+   }
+}
+
 PeerCasa.prototype.connectToPeerCasa = function() {
    var that = this;
 
@@ -212,12 +222,14 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('state-active', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: active, state: ' + _data.sourceName);
          that.emit('state-active', _data);
+         that.emit('broadcast-message', { message: 'state-active', data:_data, sourceCasa: that });
          that.socket.emit('state-activeAACCKK', _data);
       });
 
       this.socket.on('state-inactive', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
          that.emit('state-inactive', _data);
+         that.emit('broadcast-message', { message: 'state-inactive', data:_data, sourceCasa: that });
          that.socket.emit('state-inactiveAACCKK', _data);
       });
 
@@ -225,12 +237,14 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('activator-active', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
          that.emit('activator-active', _data);
+         that.emit('broadcast-message', { message: 'activator-active', data:_data, sourceCasa: that });
          that.socket.emit('activator-activeAACCKK', _data);
       });
 
       this.socket.on('activator-inactive', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
          that.emit('activator-inactive', _data);
+         that.emit('broadcast-message', { message: 'activator-inactive', data:_data, sourceCasa: that });
          that.socket.emit('activator-inactiveAACCKK', _data);
       });
 
@@ -250,7 +264,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          } 
          else {
             // TBD Find the casa that ownes the state and work out how to foward the request
-            that.emit('forward-request', { message: 'set-state-active-req', data: _data});
+            that.emit('forward-request', { message: 'set-state-active-req', data: _data, sourceCasa: that });
          }
       });
 
@@ -270,7 +284,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // TBD Find the casa that ownes the state and work out how to foward the request
-            that.emit('forward-request', { message: 'set-state-inactive-req', data: _data});
+            that.emit('forward-request', { message: 'set-state-inactive-req', data: _data, sourceCasa: that });
          }
       });
 
@@ -290,7 +304,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'set-state-active-resp', data: _data});
+            that.emit('forward-response', { message: 'set-state-active-resp', data: _data, sourceCasa: that });
          }
       });
 
@@ -310,7 +324,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'set-state-inactive-resp', data: _data});
+            that.emit('forward-response', { message: 'set-state-inactive-resp', data: _data, sourceCasa: that });
          }
       });
 
