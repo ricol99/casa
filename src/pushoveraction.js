@@ -8,6 +8,7 @@ function PushoverAction(_config) {
    this.deactivatedMessage = _config.inactiveMessage;
    this.messageActPriority = (_config.activeMessagePriority) ? _config.activeMessagePriority : 0;
    this.messageDeactPriority = (_config.inactiveMessagePriority) ? _config.inactiveMessagePriority : 0;
+
    Action.call(this, _config);
 
    this.actionActive = false;

@@ -18,6 +18,7 @@ function PeerCasa(_config) {
 
    this.states = [];
    this.activators = [];
+   this.actions = [];
 
    this.listenersSetUp = false;
    this.connected = false;
@@ -457,7 +458,7 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
 
 PeerCasa.prototype.addState = function(_state) {
    // Peer state being added to peer casa
-   console.log(this.name + ': State '  +_state.name + ' added to casa ');
+   console.log(this.name + ': State '  +_state.name + ' added to peercasa ');
    this.states[_state.name] = _state;
    console.log(this.name + ': ' + _state.name + ' associated!');
 }
@@ -554,9 +555,15 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
 
 PeerCasa.prototype.addActivator = function(_activator) {
    // Peer acivator being added to peer casa
-   console.log(this.name + ': Activator '  +_activator.name + ' added to casa ');
+   console.log(this.name + ': Activator '  +_activator.name + ' added to peercasa ');
    this.activators[_activator.name] = _activator;
    console.log(this.name + ': ' + _activator.name + ' associated!');
+}
+
+PeerCasa.prototype.addAction = function(_action) {
+   console.log(this.name + ': Action '  + _action.name + ' added to peercasa ');
+   this.actions[_action.name] = _action;
+   var that = this;
 }
 
 module.exports = exports = PeerCasa;

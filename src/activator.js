@@ -3,8 +3,8 @@ var events = require('events');
 var CasaSystem = require('./casasystem');
 
 function Activator(_config) {
-   this.name = _config.name;
 
+   this.name = _config.name;
    var casaSys = CasaSystem.mainInstance();
    this.source = casaSys.findSource(_config.source);
    this.casa = casaSys.findCasa(_config.casa);
@@ -13,7 +13,11 @@ function Activator(_config) {
    this.inputDebounceTime = (_config.inputDebounceTime) ? _config.inputDebounceTime : 0;
    this.invert = (_config.invert) ? _config.invert : false;
 
-   this.casa.addActivator(this);
+   if (this.casa) {
+      console.log('Activator casa: ' + this.casa.name);
+      this.casa.addActivator(this);
+   }
+
    this.coldStart = true;
 
    this.destActivated = false;

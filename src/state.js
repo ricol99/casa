@@ -10,10 +10,12 @@ function State(_config) {
 
    events.EventEmitter.call(this);
 
-   this.casa.addState(this);
-
    var that = this;
 
+   if (this.casa) {
+      console.log('State casa: ' + this.casa.name);
+      this.casa.addState(this);
+   }
 }
 
 util.inherits(State, events.EventEmitter);
