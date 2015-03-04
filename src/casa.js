@@ -15,6 +15,7 @@ function Casa(_config) {
    _config.owner = this.casaArea;  // TBD ***** Should this be a string
    Thing.call(this, _config);
 
+   this.anonymousClients = [];
    this.clients = [];
    this.states = [];
    this.activators = [];
@@ -34,60 +35,86 @@ function Casa(_config) {
 
    io.on('connection', function(_socket) {
       console.log('a casa has joined');
-      var peerName = null;
-
-      _socket.on('error', function() {
-         if (peerName) {
-            console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-            that.clients[peerName] = null;
-            that.emit('casa-lost', { peerName: peerName, socket: _socket });
-            peerName = null;
-         }
-      });
-
-      _socket.on('disconnect', function() {
-         if (peerName) {
-            that.clients[peerName] = null;
-            console.log(that.name + ': Peer casa ' + peerName + ' dropped');
-            that.emit('casa-lost', { peerName: peerName, socket: _socket });
-            peerName = null;
-         }
-      });
-
-      _socket.on('login', function(_data) {
-         console.log(that.name + ': login: ' + _data.casaName);
-         peerName = _data.casaName;
-         if (that.clients[peerName]) {
-            // old socket still open
-            if (_socket == that.clients[peerName]) {
-               // socket has been reused
-               console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-               _socket.close();
-            }
-            else {
-               console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
-               that.emit('casa-lost', { peerName: peerName, socket: that.clients[peerName] });
-               console.log(that.name + ': Establishing new logon session after race with old socket.');
-               that.clients[peerName] = _socket;
-               _socket.emit('loginAACCKK');
-               that.emit('casa-joined', { peerName: peerName, socket: _socket });
-            }
-         }
-         else {
-            that.clients[peerName] = _socket;
-            _socket.emit('loginAACCKK');
-            that.emit('casa-joined', { peerName: peerName, socket: _socket });
-         }
-      });
+      anonymousClients[socket.address.port.toString()] = new Connection(that, _socket);
    });
 
    http.listen(this.listeningPort, function(){
      console.log('listening on *:' + that.listeningPort);
    });
-
 }
 
 util.inherits(Casa, Thing);
+
+Casa.prototype.nameClient = function(_connection, _name) {
+   this.anonymousClients[_connection.socket.address.port.toString()] = null;
+   this.clients = _connection;
+}
+
+Casa.prototype.deleteMe = function(_connection) {
+   if (_connection.peerName) {
+      this.anonymousClients[_connection.socket.address.port.toString()] = null;
+   } 
+   else {
+      this.clients[_connection.peerName] = null;
+   }
+   delete _connection;
+}
+
+function Connection(_server, _socket) {
+   this.server = _server;
+   this.name = _server.name;
+   this.socket = _socket;
+
+   this.peerName = null;
+
+   var that = this;
+
+   this.socket.on('error', function() {
+
+      if (that.peerName) {
+         console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
+         that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
+      }
+      that.server.deleteMe(that);
+   });
+
+   this.socket.on('disconnect', function() {
+      if (that.peerName) {
+         console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
+         that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
+      }
+      that.server.deleteMe(that);
+   });
+
+   this.socket.on('login', function(_data) {
+      console.log(that.name + ': login: ' + _data.casaName);
+      that.peerName = _data.casaName;
+
+      if (that.server.clients[that.peerName]) {
+
+         // old socket still open
+         if (that.server.clients[that.peerName] == that) {
+            // socket has been reused
+            console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
+            that.socket.close();
+            deleteMe(that);
+         }
+         else {
+            console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
+            that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
+            console.log(that.name + ': Establishing new logon session after race with old socket.');
+            that.server.nameClient(that, that.peerName); 
+            that.socket.emit('loginAACCKK');
+            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket });
+         }
+      }
+      else {
+         that.server.nameClient(that, that.peerName); 
+         that.socket.emit('loginAACCKK');
+         that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket });
+      }
+   });
+}
 
 Casa.prototype.addState = function(_state) {
    console.log(this.name + ': State '  +_state.name + ' added to casa ');
