@@ -35,7 +35,7 @@ function Casa(_config) {
 
    io.on('connection', function(_socket) {
       console.log('a casa has joined');
-      anonymousClients[socket.address.port.toString()] = new Connection(that, _socket);
+      that.anonymousClients[_socket.id] = new Connection(that, _socket);
    });
 
    http.listen(this.listeningPort, function(){
@@ -46,13 +46,13 @@ function Casa(_config) {
 util.inherits(Casa, Thing);
 
 Casa.prototype.nameClient = function(_connection, _name) {
-   this.anonymousClients[_connection.socket.address.port.toString()] = null;
-   this.clients = _connection;
+   this.clients[_name] = _connection;
+   this.anonymousClients[_connection.id] = null;
 }
 
 Casa.prototype.deleteMe = function(_connection) {
    if (_connection.peerName) {
-      this.anonymousClients[_connection.socket.address.port.toString()] = null;
+      this.anonymousClients[_connection.socket.id] = null;
    } 
    else {
       this.clients[_connection.peerName] = null;
@@ -71,6 +71,8 @@ function Connection(_server, _socket) {
 
    this.socket.on('error', function() {
 
+      console.log('error');
+
       if (that.peerName) {
          console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
          that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
@@ -79,6 +81,9 @@ function Connection(_server, _socket) {
    });
 
    this.socket.on('disconnect', function() {
+
+      console.log('disconnect');
+
       if (that.peerName) {
          console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
          that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
@@ -91,9 +96,11 @@ function Connection(_server, _socket) {
       that.peerName = _data.casaName;
 
       if (that.server.clients[that.peerName]) {
+         console.log('loginnnnnnnnn');
 
          // old socket still open
          if (that.server.clients[that.peerName] == that) {
+            console.log('resued');
             // socket has been reused
             console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
             that.socket.close();
@@ -109,6 +116,7 @@ function Connection(_server, _socket) {
          }
       }
       else {
+         console.log('name client');
          that.server.nameClient(that, that.peerName); 
          that.socket.emit('loginAACCKK');
          that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket });
