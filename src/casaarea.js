@@ -23,7 +23,7 @@ function CasaArea(_config) {
 util.inherits(CasaArea, Thing);
 
 CasaArea.prototype.addCasa = function(_casa) {
-   this.casas.push(_casa);
+   this.casas[_casa.name] = _casa;;
 
    this.setupCasaListeners(_casa);
 }

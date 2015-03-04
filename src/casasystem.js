@@ -264,7 +264,6 @@ CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
          var Area = that.cleverRequire('child' + area.name);
          area.owner = that;
          var areaObj = new Area(area);
-         areaObj.casas = [];
          that.areas.push(areaObj);
          that.childCasaAreas[areaObj.name] = areaObj;
          that.allObjects[areaObj.name] = areaObj;
@@ -308,16 +307,13 @@ CasaSystem.prototype.findCasaArea = function (areaName) {
    return null;
 }
 
-CasaSystem.prototype.findCasa = function (casaName) {
+CasaSystem.prototype.findCasa = function (_casaName) {
    areaLen = this.areas.length;
 
    for (var i=0; i < areaLen; ++i) {
 
-      casaLen = this.areas[i].casas.length;
-
-      for (var j=0; j < casaLen; ++j) {
-         if (this.areas[i].casas[j].name == casaName)
-            return this.areas[i].casas[j];
+      if (this.areas[i].casas[_casaName]) {
+         return this.areas[i].casas[_casaName];
       }
    }
 
