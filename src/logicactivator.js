@@ -3,8 +3,8 @@ var events = require('events');
 var CasaSystem = require('./casasystem');
 
 function LogicActivator(_config) {
-
    this.name = _config.name;
+
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.findCasa(_config.casa);
 
@@ -13,18 +13,15 @@ function LogicActivator(_config) {
    events.EventEmitter.call(this);
 
    this.inputs = [];
-
-   if (this.casa) {
-      console.log('Activator casa: ' + this.casa.name);
-      this.casa.addActivator(this);
-   }
-
    this.active = false;
+
+   this.casa.addActivator(this);
 
    var that = this;
 
    _config.sources.forEach(function(_sourceName, _index) {
       var source = casaSys.findSource(_sourceName);
+      console.log(that.name + ': Sourcename= ' + _sourceName + ' res = ' + source.name);
       that.inputs.push( { source : source, active : false });
 
       that.inputs[_index].source.on('active', function (_data) {

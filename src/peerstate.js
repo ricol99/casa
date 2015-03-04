@@ -10,9 +10,7 @@ function PeerState(_name, _peerCasa) {
 
    var that = this;
 
-   if (this.peerCasa) {
-      this.peerCasa.addState(this);
-   }
+   this.peerCasa.addState(this);
 
    this.peerCasa.on('state-active', function(_data) {
       if (_data.sourceName == that.name) {
