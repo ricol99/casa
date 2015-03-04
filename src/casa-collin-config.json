@@ -355,7 +355,33 @@
                ]
             }
          ]
+      },
+      {
+         "name": "casaarea:richard-phone",
+         "displayName": "Richard's Phone",
+         "parentArea": "casaarea:internet",
+         "casas": [
+            {
+               "name": "casa:richard-iphone",
+               "displayName": "Richard's iPhone",
+               "address": {
+                  "hostname": "lx9901827.home",
+                  "port": 82
+               },
+               "props": {},
+               "states": [
+               ],
+               "activators": [
+               ],
+               "actions": [
+                  {
+                  "name": "setstateaction:test-scheduling-state-iphone",
+                  "source": "schedulestate:test-state",
+                  "target": "teststate:schedule-test-iphone"
+                  }
+               ]
+            }
+         ]
       }
    ]
 }
-
