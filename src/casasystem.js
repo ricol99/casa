@@ -484,7 +484,7 @@ CasaSystem.prototype.findConfigActivator = function (_activatorName) {
 
          for (var j=0; j < activatorLen; ++j) {
 
-            if (configArea.casas[i].activators[j].name == _activatorName) {
+            if (_configArea.casas[i].activators[j].name == _activatorName) {
                console.log('Found the config activator ' + _configArea.casas[i].activators[j].name);
                _configArea.casas[i].activators[j].owner = _configArea.casas[i].name;
                source = _configArea.casas[i].activators[j];
