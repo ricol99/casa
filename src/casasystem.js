@@ -345,39 +345,31 @@ CasaSystem.prototype.findCasaState = function (_casa, _stateName) {
    return source;
 }
 
-CasaSystem.prototype.findOrCreateCasaState = function (_casa, _stateName) {
+CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
 
-   var source = this.findCasaState(_casa, _stateName);
+   var source = this.findCasaState(casa, stateName);
 
    if (!source) {
       // Create a peer state
-      var ret = this.findConfigState(_stateName);
+      var ret = this.findConfigState(stateName);
 
       if (ret) {
          var peerCasaName = ret.owner;
          var sourceName  = ret.name;
 
          var peerCasa = this.findCasa(peerCasaName);
+         source = this.findCasaState(peerCasa, stateName);
 
-         if (!peerCasa && this.parentCasaArea) {
-            peerCasa = this.casa.parentCasaArea.casas[0];
-         }
-
-         if (peerCasa) {
-            source = this.findCasaState(peerCasa, _stateName);
-
-            if (!source) {
-               var PeerState = require('./peerstate');
-               source = new PeerState(_sourceName, peerCasa);
-               this.allObjects[source.name] = source;
-            }
+         if (!source) {
+            var PeerState = require('./peerstate');
+            source = new PeerState(sourceName, peerCasa);
+            this.allObjects[source.name] = source;
          }
       }
    }
 
    return source;
 }
-
 
 CasaSystem.prototype.findState = function (_stateName) {
    return this.findCasaState(this.casa, _stateName);
