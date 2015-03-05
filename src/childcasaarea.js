@@ -7,6 +7,8 @@ function ChildCasaArea(_config) {
 
    var that = this;
 
+   this.siblingCasaAreas = null;
+   this.grandParentCasaArea = null;
 }
 
 util.inherits(ChildCasaArea, CasaArea);
@@ -26,14 +28,17 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
          console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
          that.siblingCasaAreas.forEach(function(_area) {
+            console.log(that.name + ': Broadcasting to child area ' + _area.name);
             _area.broadcastMessage(_message);
          });
 
-         if (that.parentCasaArea) {
-            that.parentCasaArea.broadcastMessage(_message);
+         if (that.parentArea) {
+            console.log(that.name + ': Broadcasting to my parent area ' + that.parentArea.name);
+            that.parentArea.broadcastMessage(_message);
          }
 
          if (that.grandParentCasaArea) {
+            console.log(that.name + ': Broadcasting to my parent's parent area ' + that.grandParentCasaArea);
             that.grandParentCasaArea.broadcastMessage(_message);
          }
       });
@@ -59,8 +64,9 @@ ChildCasaArea.prototype.createRoutes = function() {
       return (_area != that) && (_area.parentArea == that.parentArea);
    });
 
-   this.parentCasaArea = this.casaSys.casa.area;
-   this.grandParentCasaArea = this.casaSys.casa.parentCasaArea;
+   if (this.parentArea && this.parentArea.parentArea) {
+      this.grandParentCasaArea = this.parentArea.parentArea;
+   }
 }
 
 module.exports = exports = ChildCasaArea;
