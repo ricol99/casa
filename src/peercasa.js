@@ -118,6 +118,18 @@ function PeerCasa(_config) {
          that.socket.emit('activator-inactive', _data);
       }
    });
+
+   // broadcsast messages from other nodes to remote casas
+   this.casaArea.on('broadcast-message', function(_message) {
+      console.log(that.name + ': received message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+      console.log(that.connected.toString() + ' ' + _message.sourceCasa + ' ' + that.name);
+
+      if (that.connected && _message.sourceCasa != that.name) {
+         console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+         that.unAckedMessages.push( { message: _message.message, data: _message.data } );
+         that.socket.emit(_message.message, _message.data);
+      }
+   });
 }
 
 util.inherits(PeerCasa, Thing);
@@ -129,15 +141,6 @@ PeerCasa.prototype.getHostname = function() {
 PeerCasa.prototype.getPort = function() {
    return this.address.port;
 };
-
-PeerCasa.prototype.broadcastMessage = function(_message) {
-
-   if (this.connected && _message.sourceCasa != this.name) {
-      console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
-      this.unAckedMessages.push( { message: _message.message, data: _message.data } );
-      this.socket.emit(_message.message, _message.data);
-   }
-}
 
 PeerCasa.prototype.connectToPeerCasa = function() {
    var that = this;

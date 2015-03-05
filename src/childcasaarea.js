@@ -17,7 +17,6 @@ util.inherits(ChildCasaArea, CasaArea);
 
 ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;
-   // TBD Add listeners and logic
 
    // BROADCASTING local broadcast (this casa's peer states and activators) already done by peer casa class
    // BROADCASTING Broadcast to area this casa is running in (not the child casa area);
@@ -29,9 +28,11 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
       _casa.on('broadcast-message', function(_message) {
          console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
-         that.casaSys.childCasaAreas.forEach(function(_area) {
+         that.casaSys.areas.forEach(function(_area) {
+            console.log(that.name + ': Possible sibling child area ' + _area.name);
 
-            if (_area != that) {
+            // Is the area a sibling?
+            if ((_area != that) && (_area.parentArea == that.parentArea)) {
                console.log(that.name + ': Broadcasting to child area ' + _area.name);
                _area.broadcastMessage(_message);
             }
@@ -48,6 +49,7 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
          }
       });
 
+      // TBD
       // FORWARDING If my casa is the target, peer casa class takes care of this
       // FORWARDING If my area is the target, find peer casa and forward
       // FORWARDING If my area is not the target, is the area a child area of mine? YES - forward to next hop for child. NO - forward to parent

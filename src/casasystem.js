@@ -261,7 +261,7 @@ CasaSystem.prototype.extractChildCasaAreas = function(_parentArea) {
          that.areas.push(areaObj);
          that.childCasaAreas[areaObj.name] = areaObj;
          that.allObjects[areaObj.name] = areaObj;
-         console.log('New area: ' + area.name);
+         console.log('New child area: ' + area.name);
 
          // recursively deduce all children of the new area
          that.extractChildCasaAreas(areaObj);

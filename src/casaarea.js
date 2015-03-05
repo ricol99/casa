@@ -52,8 +52,14 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
          else {
             // source is a peer casa
 	    console.log(that.name + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
-            that.casaSys.childCasaAreas.forEach(function(_area) {
-               _area.broadcastMessage(_message);
+
+            that.casaSys.areas.forEach(function(_area) {
+               console.log(that.name + ': Possible sibling child area ' + _area.name);
+
+               if ((_area != that) && (_area.parentArea == that.area)) {
+                  console.log(that.name + ': Broadcasting to child area ' + _area.name);
+                  _area.broadcastMessage(_message);
+               }
             });
          }
       });
@@ -73,14 +79,8 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
 }
 
 CasaArea.prototype.broadcastMessage = function(_message) {
-   // Broadcasts to all peers
-   var that = this;
-
-   this.casas.forEach(function(_casa) {
-      if (_casa != that.casaSys.casa) {
-         _casa.broadcastMessage(_message);
-      }
-   });
+   // Broadcasts to all my casas
+   this.emit('broadcast-message', _message);
 }
 
 module.exports = exports = CasaArea;
