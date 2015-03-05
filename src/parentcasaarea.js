@@ -45,7 +45,4 @@ ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
    }
 }
 
-ParentCasaArea.prototype.createRoutes = function() {
-}
-
 module.exports = exports = ParentCasaArea;

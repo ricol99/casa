@@ -44,7 +44,7 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
 
       _casa.on('broadcast-message', function(_message) {
 
-         if (_message.sourceCasa == that.casaSys.casa) {
+         if (_mes.namesage.sourceCasa == that.casaSys.casa.name) {
             // source is the main Casa
             // Ignore at the moment as the broadcast is currently handled by Casa and PeerCasa objects - not nice but not changing it at the moment!
 	    console.log(that.name + ': Event received from casa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
@@ -70,9 +70,6 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
          console.log(that.name + ': Forward event response from child. State: ' + _data.data.stateName);
       });
    }
-}
-
-CasaArea.prototype.createRoutes = function() {
 }
 
 CasaArea.prototype.broadcastMessage = function(_message) {

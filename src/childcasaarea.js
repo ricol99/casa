@@ -1,14 +1,16 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
+var CasaSystem = require('./casasystem');
 
 function ChildCasaArea(_config) {
+
+   // Resolve source and target
+   this.casaSys = CasaSystem.mainInstance();
 
    CasaArea.call(this, _config);
 
    var that = this;
 
-   this.siblingCasaAreas = null;
-   this.grandParentCasaArea = null;
 }
 
 util.inherits(ChildCasaArea, CasaArea);
@@ -27,19 +29,22 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
       _casa.on('broadcast-message', function(_message) {
          console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
-         that.siblingCasaAreas.forEach(function(_area) {
-            console.log(that.name + ': Broadcasting to child area ' + _area.name);
-            _area.broadcastMessage(_message);
+         that.casaSys.childCasaAreas.forEach(function(_area) {
+
+            if (_area != that) {
+               console.log(that.name + ': Broadcasting to child area ' + _area.name);
+               _area.broadcastMessage(_message);
+            }
          });
 
          if (that.parentArea) {
             console.log(that.name + ': Broadcasting to my parent area ' + that.parentArea.name);
             that.parentArea.broadcastMessage(_message);
-         }
 
-         if (that.grandParentCasaArea) {
-            console.log(that.name + ': Broadcasting to my parent\'s parent area ' + that.grandParentCasaArea);
-            that.grandParentCasaArea.broadcastMessage(_message);
+            if (that.parentArea.parentArea) {
+               console.log(that.name + ': Broadcasting to my parent\'s parent area ' + that.parentArea.parentArea);
+               that.parentArea.parentArea.broadcastMessage(_message);
+            }
          }
       });
 
@@ -54,18 +59,6 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
       _casa.on('forward-response', function(_data) {
          console.log(that.name + ': Forward event response from child. State: ' + _data.data.stateName);
       });
-   }
-}
-
-ChildCasaArea.prototype.createRoutes = function() {
-   var that = this;
-
-   this.siblingCasaAreas = this.casaSys.areas.filter(function(_area) {
-      return (_area != that) && (_area.parentArea == that.parentArea);
-   });
-
-   if (this.parentArea && this.parentArea.parentArea) {
-      this.grandParentCasaArea = this.parentArea.parentArea;
    }
 }
 

@@ -45,9 +45,6 @@ function CasaSystem(_casaName, _config) {
    if (this.uberCasa) {
       this.casa.setUber(true);
       this.extractChildCasas();
-
-      // Allow Casa Areas to build broadcast and forwarding routes
-      this.buildCasaAreaRoutes();
    }
 
    // Extract all states hosted by this casa
@@ -129,14 +126,6 @@ CasaSystem.prototype.extractCasaAreas = function() {
 
    // Extract child casa areas
    this.extractChildCasaAreas(this.casaArea);
-}
-
-CasaSystem.prototype.buildCasaAreaRoutes = function() {
-   var casaAreaLen = this.areas.length;
-
-   for (var j=0; j < casaAreaLen; ++j) {
-      this.areas[j].createRoutes();
-   }
 }
 
 CasaSystem.prototype.extractMyCasa = function() {
