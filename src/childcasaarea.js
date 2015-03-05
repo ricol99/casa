@@ -11,7 +11,7 @@ function ChildCasaArea(_config) {
 
 util.inherits(ChildCasaArea, CasaArea);
 
-ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
+hildCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;
    // TBD Add listeners and logic
 
