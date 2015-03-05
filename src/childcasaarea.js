@@ -38,7 +38,7 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
          }
 
          if (that.grandParentCasaArea) {
-            console.log(that.name + ': Broadcasting to my parent's parent area ' + that.grandParentCasaArea);
+            console.log(that.name + ': Broadcasting to my parent\'s parent area ' + that.grandParentCasaArea);
             that.grandParentCasaArea.broadcastMessage(_message);
          }
       });
