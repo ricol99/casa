@@ -3,9 +3,9 @@ var State = require('./state');
 
 function TestState(_config) {
 
-   this.writeable = (_config.writable) ? _config.writable  : false;
+   this.writable = (_config.writable) ? _config.writable : false;
 
-   State.call(this, config);
+   State.call(this, _config);
 
    this.active = false;
 

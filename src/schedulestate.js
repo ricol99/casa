@@ -72,7 +72,7 @@ function ScheduleState(_config) {
 
    if (this.setSunTimes()) {
 
-      this.refreshJob = schedule.scheduleJob('1 0 * * *', function() {
+      this.refreshJob = schedule.scheduleJob('1 1 * * *', function() {
          that.setSunTimes();
 
          if (that.startRuleIsSunTime) {

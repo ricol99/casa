@@ -1,14 +1,12 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
-var CasaSystem = require('./casasystem');
 
-function ChildCasaArea(_obj) {
+function ChildCasaArea(_config) {
 
-   CasaArea.call(this, _obj);
+   CasaArea.call(this, _config);
 
    var that = this;
 
-   this.casaSys = CasaSystem.mainInstance();
 }
 
 util.inherits(ChildCasaArea, CasaArea);
@@ -27,14 +25,16 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
       _casa.on('broadcast-message', function(_message) {
          console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
-         that.siblingAreas.forEach(function(_area) {
+         that.siblingCasaAreas.forEach(function(_area) {
             _area.broadcastMessage(_message);
          });
 
-         parentArea.broadcastMessage(_message);
+         if (that.parentCasaArea) {
+            that.parentCasaArea.broadcastMessage(_message);
+         }
 
-         if (that.grandParentArea) {
-            grandParentArea.broadcastMessage(_message);
+         if (that.grandParentCasaArea) {
+            that.grandParentCasaArea.broadcastMessage(_message);
          }
       });
 
@@ -55,13 +55,12 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
 ChildCasaArea.prototype.createRoutes = function() {
    var that = this;
 
-   this.siblingAreas = this.casaSys.areas.filter(function(_area) {
+   this.siblingCasaAreas = this.casaSys.areas.filter(function(_area) {
       return (_area != that) && (_area.parentArea == that.parentArea);
    });
 
-   this.parentArea = this.casaSys.casa.area;
-   this.grandParentArea = this.casaSys.casa.parentArea;
+   this.parentCasaArea = this.casaSys.casa.area;
+   this.grandParentCasaArea = this.casaSys.casa.parentCasaArea;
 }
-
 
 module.exports = exports = ChildCasaArea;

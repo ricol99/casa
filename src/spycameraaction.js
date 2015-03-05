@@ -1,15 +1,12 @@
 var http = require('http');
 var util = require('util');
 var Action = require('./action');
-var CasaSystem = require('./casasystem');
 
 function SpyCameraAction(_config) {
 
-   this.options = { };
-   this.id = 0;
-
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };
    this.id = _config.cameraId;
+
    Action.call(this, _config);
 
    this.capturing = false;

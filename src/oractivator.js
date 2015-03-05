@@ -1,7 +1,6 @@
 var util = require('util');
 var events = require('events');
 var LogicActivator = require('./logicactivator');
-var CasaSystem = require('./casasystem');
 
 function OrActivator(_config) {
 

@@ -1,16 +1,14 @@
 var util = require('util');
 var User = require('./user');
-var CasaSystem = require('./casasystem');
 
 function UserGroup(_config) {
    this.users = [];
 
    var that = this;
 
-   var casaSys = CasaSystem.mainInstance();
-
-   _config.users.forEach( function(_userName) {
-      that.users.push(casaSys.findUser(_userName));
+   // TBD - Need to resolve user objects from config object
+   _config.users.forEach( function(userName) {
+      that.users.push(_config.owner.findUser(userName));
    });
 
    User.call(this, _config);

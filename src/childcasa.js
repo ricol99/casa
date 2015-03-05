@@ -1,17 +1,17 @@
 var util = require('util');
 var PeerCasa = require('./peercasa');
 
-function ChildCasa(_obj) {
+function ChildCasa(_config) {
 
-   _obj.proActiveConnect = false;
+   _config.proActiveConnect = false;
 
-   PeerCasa.call(this, _obj);
+   PeerCasa.call(this, _config);
 
    var that = this;
 
-   this.casa.addChildCasa(this);
 }
 
 util.inherits(ChildCasa, PeerCasa);
+
 
 module.exports = exports = ChildCasa;

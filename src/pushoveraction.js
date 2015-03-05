@@ -1,7 +1,6 @@
 var util = require('util');
 var Action = require('./action');
 var push = require( 'pushover-notifications' );
-var CasaSystem = require('./casasystem');
 
 function PushoverAction(_config) {
 

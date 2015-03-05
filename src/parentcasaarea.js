@@ -1,9 +1,9 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
 
-function ParentCasaArea(_obj) {
+function ParentCasaArea(_config) {
 
-   CasaArea.call(this, _obj);
+   CasaArea.call(this, _config);
 
    var that = this;
 
@@ -23,10 +23,10 @@ ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
    if (this.casaSys.isUberCasa()) {
 
       _casa.on('broadcast-message', function(_message) {
-         console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+         console.log(that.name + ': Event received from parent. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
          // Broadcast to all children - peers already know
-         that.casaSys.childAreas.forEach(function(_area) {
+         that.casaSys.childCasaAreas.forEach(function(_area) {
             _area.broadcastMessage(_message);
          });
       });

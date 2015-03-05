@@ -5,7 +5,17 @@ var CasaSystem = require('./casasystem');
 
 function SetStateAction(_config) {
 
+   // Resolve source and target
+   var casaSys = CasaSystem.mainInstance();
+   this.state = (_config.target) ? casaSys.findOrCreateState(_config.target) : null;
+
+   // I don't want to target the state with the generic base class action.js
+   _config.target = null;
+
    Action.call(this, _config);
+
+   console.log(_config.name + ': source = '+ this.source.name);
+   console.log(_config.name + ': state = '+ this.state.name);
 
    this.actionActive = false;
 
@@ -15,15 +25,15 @@ function SetStateAction(_config) {
       console.log(that.name + ': received activated event');
 
       if (!that.actionActive) {
-         console.log(that.name + ': Going active. Attempting to set state ' + that.target.name + ' to active');
+         console.log(that.name + ': Going active. Attempting to set state ' + that.state.name + ' to active');
          that.actionActive = true;
-         that.target.setActive(function(result) {
+         that.state.setActive(function(result) {
 
             if (result) {
-               console.log(that.name + ': Set State ' + that.target.name + ' to active!');
+               console.log(that.name + ': Set State ' + that.state.name + ' to active!');
             }
             else {
-               console.log(that.name + ': Failed to set State ' + that.target.name + ' to active!');
+               console.log(that.name + ': Failed to set State ' + that.state.name + ' to active!');
             }
          });
       }
@@ -35,13 +45,13 @@ function SetStateAction(_config) {
       if (that.actionActive) {
          that.actionActive = false;
 
-         that.target.setInactive(function(result) {
+         that.state.setInactive(function(result) {
 
             if (result) {
-               console.log(that.name + ': Set State ' + that.target.name + ' to inactive!');
+               console.log(that.name + ': Set State ' + that.state.name + ' to inactive!');
             }
             else {
-               console.log(that.name + ': Failed to set State ' + that.target.name + ' to inactive!');
+               console.log(that.name + ': Failed to set State ' + that.state.name + ' to inactive!');
             }
          });
       }

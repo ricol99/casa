@@ -70,6 +70,11 @@
                      "inputDebounceTime": 60
                   },
                   {
+                     "name": "activator:debounced-casa-cctv",
+                     "source": "casa:cctv",
+                     "inputDebounceTime": 60
+                  },
+                  {
                      "name": "andactivator:home-internet-connection-armed",
                      "sources": [
                         "activator:debounced-home-internet-connection",
@@ -171,6 +176,15 @@
                      "inactiveMessage": "Casa 'alarm' has gone down!",
                      "inactiveMessagePriority": 1,
                      "source": "activator:debounced-casa-alarm",
+                     "target": "usergroup:admins"
+                  },
+                  {
+                     "name": "pushoveraction:cctv-casa-status",
+                     "activeMessage": "Casa 'cctv' is active",
+                     "activeMessagePriority": 0,
+                     "inactiveMessage": "Casa 'cctv' has gone down!",
+                     "inactiveMessagePriority": 1,
+                     "source": "activator:debounced-casa-cctv",
                      "target": "usergroup:admins"
                   },
                   {
@@ -365,6 +379,10 @@
                },
                "props": {},
                "states": [
+                  {
+                     "name": "teststate:schedule-test-iphone",
+                     "writable": true
+                  }
                ],
                "activators": [
                ],
@@ -380,4 +398,3 @@
       }
    ]
 }
-
