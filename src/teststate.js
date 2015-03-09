@@ -7,8 +7,6 @@ function TestState(_config) {
 
    State.call(this, _config);
 
-   this.active = false;
-
    var that = this;
 }
 

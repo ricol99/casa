@@ -217,6 +217,13 @@ StateRequestor.prototype.setInactive = function(_callback) {
    });
 }
 
+StateRequestor.prototype.isActive = function(_callback) {
+   var that = this;
+   this.state.isActive(function(_result) {
+      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
+   });
+}
+
 PeerCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
@@ -292,6 +299,26 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
       });
 
+      this.socket.on('get-state-active-req', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: get-state-active-req, state: ' + _data.stateName);
+         var state = that.casa.findState(_data.stateName);
+
+         if (state) {
+            _data.acker = that.casa.name;
+            that.socket.emit('get-state-active-reqAACCKK', _data);
+            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
+            that.stateRequests[_data.requestId].isActive(function(_resp) {
+               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
+               delete that.stateRequests[ _resp.requestId];
+               that.stateRequests[ _resp.requestId] = null;
+            });
+         }
+         else {
+            // TBD Find the casa that ownes the state and work out how to foward the request
+            that.emit('forward-request', { message: 'get-state-active-req', data: _data, sourceCasa: that.name });
+         }
+      });
+
       this.socket.on('set-state-active-resp', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: set-state-active-resp, state: ' + _data.stateName);
 
@@ -329,6 +356,26 @@ PeerCasa.prototype.establishListeners = function(_force) {
          else {
             // Find the casa that ownes the original request and work out how to foward the response
             that.emit('forward-response', { message: 'set-state-inactive-resp', data: _data, sourceCasa: that.name });
+         }
+      });
+
+      this.socket.on('get-state-active-resp', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: get-state-active-resp, state: ' + _data.stateName);
+
+         if (_data.requestor == that.casa.name) {
+            // Request origniated from here
+            _data.acker = that.casa.name;
+            that.socket.emit('get-state-active-respAACCKK', _data);
+
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
+               delete that.incompleteRequests[_data.requestId];
+               that.incompleteRequests[_data.requestId] = null;
+            }
+         }
+         else {
+            // Find the casa that ownes the original request and work out how to foward the response
+            that.emit('forward-response', { message: 'get-state-active-resp', data: _data, sourceCasa: that.name });
          }
       });
 
@@ -384,6 +431,22 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
       });
 
+      this.socket.on('get-state-active-reqAACCKK', function(_data) {
+         console.log(that.name + ': get state active request event ACKed by my peer. *Not confirmed*');
+
+         if (_data.requestor == that.casa.name) {
+            // We made the request
+
+            if (that.incompleteRequests[_data.requestId]) {
+               that.incompleteRequests[_data.requestId].ackRequest();
+            }
+         }
+         else {
+            // we didn't make the request, so forward the ACK
+            that.emit('forward-request', { message: 'get-state-active-reqAACCKK', data: _data});
+         }
+      });
+
       this.socket.on('set-state-active-respAACCKK', function(_data) {
          console.log(that.name + ': set state active response event ACKed by my peer.');
 
@@ -407,6 +470,19 @@ PeerCasa.prototype.establishListeners = function(_force) {
          else {
             // we didn't make the request, so forward the ACK
             that.emit('forward-response', { message: 'set-state-inactive-respAACCKK', data: _data});
+         }
+      });
+
+      this.socket.on('get-state-active-respAACCKK', function(_data) {
+         console.log(that.name + ': get state active response event ACKed by my peer.' );
+
+         if (_data.requestor == that.casa.name) {
+            // We made the request
+            that.unAckedMessages.shift();
+         }
+         else {
+            // we didn't make the request, so forward the ACK
+            that.emit('forward-response', { message: 'get-state-active-respAACCKK', data: _data});
          }
       });
 
@@ -523,7 +599,7 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
       var id = this.name + ':active:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'set-state-active-req', data: { stateName: _state.name, requestId: id, requestor: this.casa.name } };
+      var message = { message: 'set-state-active-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
@@ -543,10 +619,30 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       console.log(this.name + ': requesting state change to inactive from peer casa. State ' + _state.name);
       var id = this.name + ':inactive:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'set-state-inactive-req', data: {stateName: _state.name, requestId: id, requestor: this.casa.name } };
+      var message = { message: 'set-state-inactive-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
+         delete that.incompleteRequests[_requestId];
+         that.incompleteRequests[_requestId] = null;
+      });
+   }
+   else {
+      _callback(false);
+   }
+}
+
+PeerCasa.prototype.isStateActive = function(_state, _callback) {
+   var that = this;
+
+   if (this.connected) {
+      console.log(this.name + ': requesting is state active from peer casa. State ' + _state.name);
+      var id = this.name + ':isactive:' + this.reqId;
+      this.reqId = (this.reqId +  1) % 10000;
+      var message = { message: 'get-state-active-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
+      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
+         console.log(that.name + ': Timeout occurred sending a isActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
          that.incompleteRequests[_requestId] = null;
       });

@@ -41,5 +41,10 @@ PeerState.prototype.setInactive = function(_callback) {
    this.peerCasa.setStateInactive(this, _callback);
 }
 
+PeerState.prototype.isActive = function(_callback) {
+   console.log(this.name + ': Attempting to get state activity status');
+   this.peerCasa.isStateActive(this, _callback);
+}
+
 module.exports = exports = PeerState;
 

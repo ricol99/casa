@@ -24,10 +24,13 @@ function GpioState(_config) {
          that.gpio.on("change", function (value) {
             console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + value);
             value = that.triggerLow ? (value == 1 ? 0 : 1) : value;
+
             if (value == 1) {
+               that.active = true;
                that.emit('active', { sourceName: that.name });
             }
             else {
+               that.active = false;
                that.emit('inactive', { sourceName: that.name });
             }
          });

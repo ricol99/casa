@@ -70,10 +70,16 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
 
       _casa.on('forward-request', function(_data) {
          console.log(that.name + ': Forward event request from child. State: ' + _data.data.stateName);
+
+         if (this.casaSys.isUberCasa()) {
+         }
       });
 
       _casa.on('forward-response', function(_data) {
          console.log(that.name + ': Forward event response from child. State: ' + _data.data.stateName);
+
+         if (this.casaSys.isUberCasa()) {
+         }
       });
    }
 }

@@ -4,6 +4,7 @@ var CasaSystem = require('./casasystem');
 
 function State(_config) {
    this.name = _config.name;
+   this.active = false;
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.findCasa(_config.casa);
@@ -29,6 +30,12 @@ State.prototype.setActive = function(_callback) {
 State.prototype.setInactive = function(_callback) {
    console.log(this.name + ': State is read only!');
    _callback(false);
+}
+
+
+State.prototype.isActive = function(_callback) {
+   console.log(this.name + ': State is read only!');
+   _callback(this.active);
 }
 
 module.exports = exports = State;
