@@ -59,7 +59,7 @@ util.inherits(Casa, Thing);
 
 Casa.prototype.createAdvertisement = function() {
    try {
-     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.id, txtRecord: { gang: this.gang }});
+     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.name, txtRecord: { id: this.id, gang: this.gang }});
      this.ad.on('error', function(err) {
         console.log('Not advertising service! Error: ' + err);
      });
