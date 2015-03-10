@@ -21,7 +21,7 @@ if (!config.id) {
    }
    catch (ex) {
       // Generate id and write to file
-      var id = crypto.randomBytes(20).toString('hex');
+      var id = crypto.randomBytes(16).toString('hex');
       if (err=fs.writeFileSync(idFilename, JSON.stringify({id: id}))) {
          console.log('Cannot write ID file!');
          throw err
