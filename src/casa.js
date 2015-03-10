@@ -5,7 +5,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-if (!process.env.INTERNET-CASA) {
+if (!process.env.INTERNETCASA) {
    var mdns = require('mdns');
 }
 
@@ -49,7 +49,7 @@ function Casa(_config) {
    http.listen(this.listeningPort, function(){
       console.log('listening on *:' + that.listeningPort);
 
-      if ((!process.env.INTERNET-CASA) {
+      if (!process.env.INTERNETCASA) {
          that.createAdvertisement();
       }
    });
