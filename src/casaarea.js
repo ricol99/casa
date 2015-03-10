@@ -46,7 +46,7 @@ CasaArea.prototype.setupCasaListeners = function(_casa) {
 
          if (_mes.namesage.sourceCasa == that.casaSys.casa.name) {
             // source is the main Casa
-            // Ignore at the moment as the broadcast is currently handled by Casa and PeerCasa objects - not nice but not changing it at the moment!
+            // Ignore at the moment as the broadcast is currently handled by Casa and PeerCasaSession objects - not nice but not changing it at the moment!
 	    console.log(that.name + ': Event received from casa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
          }
          else {

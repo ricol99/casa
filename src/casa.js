@@ -4,6 +4,11 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+
+if (!process.env.INTERNET-CASA) {
+   var mdns = require('mdns');
+}
+
 var CasaSystem = require('./casasystem');
 
 function Casa(_config) {
@@ -15,6 +20,8 @@ function Casa(_config) {
    _config.owner = this.casaArea;  // TBD ***** Should this be a string
    Thing.call(this, _config);
 
+   this.id = _config.id;
+   this.gang = '';
    this.anonymousClients = [];
    this.clients = [];
    this.states = [];
@@ -40,11 +47,28 @@ function Casa(_config) {
    });
 
    http.listen(this.listeningPort, function(){
-     console.log('listening on *:' + that.listeningPort);
+      console.log('listening on *:' + that.listeningPort);
+
+      if ((!process.env.INTERNET-CASA) {
+         that.createAdvertisement();
+      }
    });
 }
 
 util.inherits(Casa, Thing);
+
+Casa.prototype.createAdvertisement = function() {
+   try {
+     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.id, txtRecord: { gang: this.gang }});
+     this.ad.on('error', function(err) {
+        console.log('Not advertising service! Error: ' + err);
+     });
+     this.ad.start();
+   }
+   catch (ex) {
+     console.log('Not advertising service! Error: ' + ex);
+   }
+}
 
 Casa.prototype.nameClient = function(_connection, _name) {
    this.clients[_name] = _connection;
