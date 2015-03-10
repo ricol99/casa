@@ -219,7 +219,7 @@
                "displayName": "Texecom Alarm",
                "address": {
                   "hostname": "pi-alarm.home",
-                  "port": 80
+                  "port": 8080
                },
                "props": {},
                "states": [
@@ -295,7 +295,7 @@
                "displayName": "CCTV",
                "address": {
                   "hostname": "lx9901827.home",
-                  "port": 81
+                  "port": 8081
                },
                "props": {},
                "states": [
@@ -353,7 +353,7 @@
                "displayName": "Light Controller",
                "address": {
                   "hostname": "pi-light.home",
-                  "port": 80
+                  "port": 8082
                },
                "props": {},
                "states": [
@@ -375,7 +375,7 @@
                "displayName": "Richard's iPhone",
                "address": {
                   "hostname": "lx9901827.home",
-                  "port": 82
+                  "port": 8083
                },
                "props": {},
                "states": [
