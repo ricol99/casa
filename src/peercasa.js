@@ -131,7 +131,6 @@ function PeerCasa(_config) {
 util.inherits(PeerCasa, Thing);
 
 PeerCasa.prototype.closeDown = function() {
-{
    this.casaSys.remoteCasas[this.name] = null;
    delete this;
 }
