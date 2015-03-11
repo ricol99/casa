@@ -18,9 +18,10 @@ function PeerCasaFactory(_config) {
    this.browser.on('serviceUp', function(service) {
       console.log("service up: ", service);
 
-      if (!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) {
+      if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
+         (service.name != that.casa.name && !that.casaSys.remoteCasas[service.name])) {
 
-         if (service.name != that.casa.name && !that.casaSys.remoteCasas[service.name]) {
+         if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.name != service.name)) {
             // Found a peer
             var config  = {
                name: service.name,
