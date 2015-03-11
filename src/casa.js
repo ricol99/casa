@@ -158,32 +158,42 @@ function Connection(_server, _socket) {
 
    this.socket.on('login', function(_data) {
       console.log(that.name + ': login: ' + _data.casaName);
-      that.peerName = _data.casaName;
 
-      if (that.server.clients[that.peerName]) {
+      // Cope with racing peers
+      if (_data.casaType && (_data.casaType == 'peer') && that.server.casaSys.remoteCasas[_data.casaName]) {
+         // Already connecting proactively, so close this connection request
+         console.log(that.name + ': Racing peer connections, closing server connection socket');
+         that.socket.close();
+         deleteMe(that);
+      }
+      else {
+         that.peerName = _data.casaName;
 
-         // old socket still open
-         if (that.server.clients[that.peerName] == that) {
-            // socket has been reused
-            console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-            that.socket.close();
-            deleteMe(that);
+         if (that.server.clients[that.peerName]) {
+
+            // old socket still open
+            if (that.server.clients[that.peerName] == that) {
+               // socket has been reused
+               console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
+               that.socket.close();
+               deleteMe(that);
+            }
+            else {
+               console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
+               that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
+               console.log(that.name + ': Establishing new logon session after race with old socket.');
+               var remoteCasa = that.server.createRemoteCasa(_data);
+               that.server.nameClient(that, that.peerName, remoteCasa); 
+               that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+               that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+            }
          }
          else {
-            console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
-            that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
-            console.log(that.name + ': Establishing new logon session after race with old socket.');
             var remoteCasa = that.server.createRemoteCasa(_data);
             that.server.nameClient(that, that.peerName, remoteCasa); 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
             that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
          }
-      }
-      else {
-         var remoteCasa = that.server.createRemoteCasa(_data);
-         that.server.nameClient(that, that.peerName, remoteCasa); 
-         that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
-         that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
       }
    });
 }
