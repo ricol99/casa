@@ -9,7 +9,7 @@ function SetStateAction(_config) {
    var casaSys = CasaSystem.mainInstance();
 
    if (_config.target) {
-      this.state = casaSys.findOrCreateState(_config.target);
+      this.state = casaSys.findState(_config.target);
       this.stateName = _config.target;
    }
    else {

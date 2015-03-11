@@ -49,26 +49,31 @@ LogicActivator.prototype.establishListeners = function() {
 
       this.inputs.forEach(function(_sourceName, _index) {
 
-         that.inputs[_index].source.on('active', function (_data) {
+         var activeCallback = function(_data) {
             that.oneSourceIsActive(_data.sourceName);
-         });
+         };
 
-         that.inputs[_index].source.on('inactive', function (_data) {
+         var inactiveCallback = function(_data) {
             that.oneSourceIsInactive(_data.sourceName);
-         });
+         };
 
-         that.inputs[_index].source.on('invalid', function (_data) {
+         var invalidCallback = function(_data) {
             this.activatorEnabled = false;
             var len = that.inputs.length;
 
             for (var i = 0; i < len; ++i) {
-               that.inputs[i].source.removeListener('active', that);
-               that.inputs[i].source.removeListener('inactive', that);
-               that.inputs[i].source.removeListener('invalid', that);
+               that.inputs[i].source.removeListener('active', activeCallback);
+               that.inputs[i].source.removeListener('inactive', inactiveCallback);
+               that.inputs[i].source.removeListener('invalid', invalidCallback);
             }
             that.emit('invalid');
-         });
+         };
+
+         that.inputs[_index].source.on('active', activeCallback);
+         that.inputs[_index].source.on('inactive', inactiveCallback);
+         that.inputs[_index].source.on('invalid', invalidCallback);
       });
+
       this.activatorEnabled = true;
    }
 

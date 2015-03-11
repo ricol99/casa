@@ -42,31 +42,36 @@ Action.prototype.establishListeners = function() {
    }
 
    if (this.actionEnabled) { 
-      this.source.on('active', function (_data) {
+      var activeCallback = function(_data) {
          console.log(that.name + ': ACTIVATED');
 
          if (that.actionEnabled) {
             that.emit('activated', _data);
          }
-      });
+      };
 
-      this.source.on('inactive', function (_data) {
+      var inactiveCallback = function(_data) {
          console.log(that.name + ': DEACTIVATED');
 
          if (that.actionEnabled) {
             that.emit('deactivated', _data);
          }
-      });
+      };
 
-      this.source.on('invalid', function (_data) {
+      var invalidCallback = function(_data) {
          console.log(that.name + ': INVALID');
 
          that.actionEnabled = false;
-         that.source.removeListener('active', that);
-         that.source.removeListener('inactive', that);
-         that.source.removeListener('invalid', that);
+         that.source.removeListener('active', activeCallback);
+         that.source.removeListener('inactive', inactiveCallback);
+         that.source.removeListener('invalid', invalidCallback);
          that.emit('invalid');
-      });
+      };
+
+
+      this.source.on('active', activeCallback);
+      this.source.on('inactive', inactiveCallback);
+      this.source.on('invalid', invalidCallback);
 
    }
    return this.actionEnabled;

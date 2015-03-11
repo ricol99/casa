@@ -40,28 +40,40 @@ Activator.prototype.establishListeners = function() {
 
    if (this.activatorEnabled) {
 
-      this.source.on('active', function (_data) {
-         that.sourceIsActive(_data.sourceName);
-      });
-
-      this.source.on('inactive', function (_data) {
-         that.sourceIsInactive(_data.sourceName);
-      });
-
-      this.source.on('invalid', function (_data) {
-         console.log(that.name + ': INVALID');
-
-         that.activatorEnabled = false;
-         that.source.removeListener('active', that);
-         that.source.removeListener('inactive', that);
-         that.source.removeListener('invalid', that);
-         that.emit('invalid');
-      });
-
       if (this.inputDebounceTime > 0) {
+         this.origSource = this.source;
          this.source = new InputDebouncer(this.source, this.inputDebounceTime);
          console.log(this.name + ': Created input debouncer');
       }
+
+      var activeCallback = function(_data) {
+         that.sourceIsActive(_data.sourceName);
+      };
+
+      var inactiveCallback = function(_data) {
+         that.sourceIsInactive(_data.sourceName);
+      };
+
+      var invalidCallback = function(_data) {
+         console.log(that.name + ': INVALID');
+
+         that.activatorEnabled = false;
+         that.source.removeListener('active', activeCallback);
+         that.source.removeListener('inactive', inactiveCallback);
+         that.source.removeListener('invalid', invalidCallback);
+
+         if (this.inputDebounceTime > 0) {
+            // restore the source
+            delete that.source;
+            that.source = that.origSource;
+         }
+         that.emit('invalid');
+      };
+
+      this.source.on('active', activeCallback);
+      this.source.on('inactive', inactiveCallback);
+      this.source.on('invalid', invalidCallback);
+
    }
    return this.activatorEnabled;
 }
@@ -155,7 +167,7 @@ function InputDebouncer(_source, _threshold) {
 
    var that = this;
 
-   this.source.on('active', function (_data) {
+   var activeCallback = function(_data) {
 
       if (that.coldStart) {
          that.coldStart = false;
@@ -178,9 +190,9 @@ function InputDebouncer(_source, _threshold) {
             }, that.threshold*1000);
          }
       }
-   });
+   };
 
-   this.source.on('inactive', function (_data) {
+   var inactiveCallback = function(_data) {
 
       if (that.coldStart) {
          that.coldStart = false;
@@ -203,7 +215,18 @@ function InputDebouncer(_source, _threshold) {
             }, that.threshold*1000);
          }
       }
-   });
+   };
+
+   var invalidCallback = function(_data) {
+      that.source.removeListener('active', activeCallback);
+      that.source.removeListener('inactive', inactiveCallback);
+      that.source.removeListener('invalid', invalidCallback);
+      that.emit('invalid');
+   };
+
+   this.source.on('active', activeCallback);
+   this.source.on('inactive', inactiveCallback);
+   this.source.on('invalid', invalidCallback);
 }
 
 util.inherits(InputDebouncer, events.EventEmitter);

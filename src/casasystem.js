@@ -149,158 +149,20 @@ CasaSystem.prototype.findCasaState = function (_casa, _stateName) {
    return _casa.states[_stateName];
 }
 
-CasaSystem.prototype.findOrCreateCasaState = function (casa, stateName) {
-
-   var source = this.findCasaState(casa, stateName);
-
-   // TBD 
-   if (false) { // !source) {
-
-      // Create a peer state
-      var ret = this.findConfigState(stateName);
-
-      if (ret) {
-         var peerCasaName = ret.owner;
-         var sourceName  = ret.name;
-
-         var peerCasa = this.findRemoteCasa(peerCasaName);
-
-         if (!peerCasa && this.parentCasaArea) {
-            peerCasa = this.parentCasaArea.casas['UBER'];
-         }
-
-         if (peerCasa) {
-            source = this.findCasaState(peerCasa, stateName);
-
-            if (!source) {
-               var PeerState = require('./peerstate');
-               source = new PeerState(sourceName, peerCasa);
-               this.allObjects[source.name] = source;
-            }
-         }
-      }
-   }
-
-   return source;
-}
-
-CasaSystem.prototype.findState = function (stateName) {
-   return this.findCasaState(this.casa, stateName);
-}
-
-CasaSystem.prototype.findOrCreateState = function (stateName) {
-   var state = this.resolveObject(stateName);
-
-   // TBD
-   if (false) { // (!state) {
-      var configState = this.findConfigState(stateName);
-
-      if (configState) {
-         state = this.findOrCreateCasaState(this.findRemoteCasa(configState.owner), stateName);
-      }
-   }
-   return state;
+CasaSystem.prototype.findState = function (_stateName) {
+    return this.allObjects[_stateName];
 }
 
 CasaSystem.prototype.findCasaActivator = function (_casa, _activatorName) {
    return _casa.activators[_activatorName];
 }
 
-CasaSystem.prototype.findOrCreateCasaActivator = function (casa, activatorName) {
-
-   var source = this.findCasaActivator(casa, activatorName);
-
-   // TBD
-   if (false) { // !source) {
-      // Create a peer activator
-      var ret = this.findConfigActivator(activatorName);
-
-      if (ret) {
-         var peerCasaName = ret.owner;
-         var sourceName  = ret.name;
-
-         var peerCasa = this.findRemoteCasa(peerCasaName);
-         source = this.findCasaActivator(peerCasa, activatorName);
-
-         if (!source) {
-            var PeerActivator = require('./peeractivator');
-            source = new PeerActivator(sourceName, peerCasa);
-            this.allObjects[source.name] = source;
-         }
-      }
-   }
-
-   return source;
+CasaSystem.prototype.findActivator = function (_activatorName) {
+    return this.allObjects[_activatorName];
 }
 
-CasaSystem.prototype.findActivator = function (activatorName) {
-   return findCasaActivator(this.casa, activatorName);
-}
-
-CasaSystem.prototype.findSource = function (sourceName) {
-
-   // Resolve source
-   var source = this.findOrCreateCasaState(this.casa, sourceName);
-
-   if (!source) {
-      source = this.findOrCreateCasaActivator(this.casa, sourceName);
-   }
-
-   if (!source) {
-      source = this.findRemoteCasa(sourceName);
-   }
-
-   return source;
-}
-
-CasaSystem.prototype.findConfigState = function (stateName) {
-   var that = this;
-
-   var source = null;
-   this.config.areas.forEach(function(configArea, index) { 
-      var casaLen = configArea.casas.length;
-
-      for (var i=0; i < casaLen; ++i) {
-         var stateLen = configArea.casas[i].states.length;
-
-         for (var j=0; j < stateLen; ++j) {
-
-            if (configArea.casas[i].states[j].name == stateName) {
-               console.log('Found the config state ' + configArea.casas[i].states[j].name);
-               configArea.casas[i].states[j].owner = configArea.casas[i].name;
-               source = configArea.casas[i].states[j];
-               break;
-            }
-         }
-      }
-   });
-
-   return source;
-}
-
-CasaSystem.prototype.findConfigActivator = function (activatorName) {
-   var that = this;
-
-   var source = null;
-   this.config.areas.forEach(function(configArea, index) { 
-      var casaLen = configArea.casas.length;
-
-      for (var i=0; i < casaLen; ++i) {
-         var activatorLen = configArea.casas[i].activators.length;
-
-         for (var j=0; j < activatorLen; ++j) {
-
-            if (configArea.casas[i].activators[j].name == activatorName) {
-               console.log('Found the config activator ' + configArea.casas[i].activators[j].name);
-               configArea.casas[i].activators[j].owner = configArea.casas[i].name;
-               source = configArea.casas[i].activators[j];
-               break;
-            }
-         }
-      }
-   });
-
-   return source;
+CasaSystem.prototype.findSource = function (_sourceName) {
+   return this.allObjects[_sourceName];
 }
 
 CasaSystem.prototype.resolveObject = function (objName) {
