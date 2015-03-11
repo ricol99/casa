@@ -5,39 +5,75 @@ var CasaSystem = require('./casasystem');
 function LogicActivator(_config) {
 
    this.name = _config.name;
-   var casaSys = CasaSystem.mainInstance();
-   this.casa = casaSys.findCasa(_config.casa);
+   this.casaSys = CasaSystem.mainInstance();
+   this.casa = this.casaSys.casa;
 
    var sources = [];
 
    events.EventEmitter.call(this);
 
    this.inputs = [];
+   this.inputNames = [];
 
-   if (this.casa) {
-      console.log('Activator casa: ' + this.casa.name);
-      this.casa.addActivator(this);
-   }
+   this.casa.addActivator(this);
 
    this.active = false;
 
    var that = this;
 
    _config.sources.forEach(function(_sourceName, _index) {
-      var source = casaSys.findSource(_sourceName);
-      that.inputs.push( { source : source, active : false });
-
-      that.inputs[_index].source.on('active', function (_data) {
-         that.oneSourceIsActive(_data.sourceName);
-      });
-
-      that.inputs[_index].source.on('inactive', function (_data) {
-         that.oneSourceIsInactive(_data.sourceName);
-      });
+      that.inputNames.push(_sourceName);
    });
+
+   this.establishListeners();
 }
 
 util.inherits(LogicActivator, events.EventEmitter);
+
+LogicActivator.prototype.establishListeners = function() {
+   var that = this;
+   var tempSources = [];
+   this.activatorEnabled = false;
+
+   var len = this.inputNames.length;
+   for (var i = 0; i < len; ++i) {
+      var source = this.casaSys.findSource(this.inputNames[i]);
+      if (!source) {
+         break;
+      }
+      tempSources.push( { source: source, active: false });
+   }
+
+   if (tempSources.length == this.inputNames.length) {
+      this.inputs = tempSources;
+
+      this.inputs.forEach(function(_sourceName, _index) {
+
+         that.inputs[_index].source.on('active', function (_data) {
+            that.oneSourceIsActive(_data.sourceName);
+         });
+
+         that.inputs[_index].source.on('inactive', function (_data) {
+            that.oneSourceIsInactive(_data.sourceName);
+         });
+
+         that.inputs[_index].source.on('invalid', function (_data) {
+            this.activatorEnabled = false;
+            var len = that.inputs.length;
+
+            for (var i = 0; i < len; ++i) {
+               that.inputs[i].source.removeListener('active', that);
+               that.inputs[i].source.removeListener('inactive', that);
+               that.inputs[i].source.removeListener('invalid', that);
+            }
+            that.emit('invalid');
+         });
+      });
+      this.activatorEnabled = true;
+   }
+
+   return this.activatorEnabled;
+}
 
 LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {
    console.log(this.name + ': Input source ' + _sourceName + ' active!');
@@ -85,6 +121,14 @@ LogicActivator.prototype.emitIfNecessary = function() {
    } else if (res) {
       this.active = true;
       this.emit('active', { sourceName: this.name });
+   }
+}
+
+LogicActivator.prototype.invalidateSource = function() {
+
+   if (this.activatorEnabled) {
+      this.activatorEnabled = false;
+      this.emit('invalid');
    }
 }
 

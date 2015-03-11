@@ -10,9 +10,7 @@ function PeerState(_name, _peerCasa) {
 
    var that = this;
 
-   if (this.peerCasa) {
-      this.peerCasa.addState(this);
-   }
+   this.peerCasa.addState(this);
 
    this.peerCasa.on('state-active', function(_data) {
       if (_data.sourceName == that.name) {
@@ -44,6 +42,10 @@ PeerState.prototype.setInactive = function(_callback) {
 PeerState.prototype.isActive = function(_callback) {
    console.log(this.name + ': Attempting to get state activity status');
    this.peerCasa.isStateActive(this, _callback);
+}
+
+PeerState.prototype.invalidateSource = function() {
+   this.emit('invalid');
 }
 
 module.exports = exports = PeerState;

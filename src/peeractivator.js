@@ -31,5 +31,9 @@ function PeerActivator(_name, _peerCasa) {
 
 util.inherits(PeerActivator, events.EventEmitter);
 
+PeerActivator.prototype.invalidateSource = function() {
+   this.emit('invalid');
+}
+
 module.exports = exports = PeerActivator;
 

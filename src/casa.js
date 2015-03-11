@@ -13,15 +13,15 @@ var CasaSystem = require('./casasystem');
 
 function Casa(_config) {
 
-   var casaSys = CasaSystem.mainInstance();
-   this.casaArea = casaSys.findCasaArea(_config.casaArea);
+   this.casaSys = CasaSystem.mainInstance();
 
-   this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.address.port;
-   _config.owner = this.casaArea;  // TBD ***** Should this be a string
+   this.area = _config.area;
+   this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
    Thing.call(this, _config);
 
    this.id = _config.id;
-   this.gang = '';
+   this.gang = _config.gang;
+
    this.anonymousClients = [];
    this.clients = [];
    this.states = [];
@@ -31,11 +31,11 @@ function Casa(_config) {
 
    var that = this;
 
-   this.casaArea.addCasa(this);
+   //app.get('/nuclear_alarm.mp3', function(req, res){
+     //res.sendFile(__dirname + '/nuclear_alarm.mp3');
+   //});
 
-   app.get('/nuclear_alarm.mp3', function(req, res){
-     res.sendFile(__dirname + '/nuclear_alarm.mp3');
-   });
+   this.buildSimpleConfig(_config);
 
    app.get('/index.html', function(req, res){
      res.sendFile(__dirname + '/index.html');
@@ -57,6 +57,24 @@ function Casa(_config) {
 
 util.inherits(Casa, Thing);
 
+Casa.prototype.buildSimpleConfig = function(_config) {
+   this.config = {};
+   this.config.name = _config.name;
+   this.config.displayName = _config.displayName;
+   this.config.states = [];
+   this.config.activators = [];
+
+   var len = _config.states.length;
+   for (var i = 0; i < len; ++i) {
+      this.config.states[i] = _config.states[i].name;
+   }
+
+   var len = _config.activators.length;
+   for (var j = 0; j < len; ++j) {
+      this.config.activators[j] = _config.activators[j].name;
+   }
+}
+
 Casa.prototype.createAdvertisement = function() {
    try {
      this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.name, txtRecord: { id: this.id, gang: this.gang }});
@@ -70,9 +88,10 @@ Casa.prototype.createAdvertisement = function() {
    }
 }
 
-Casa.prototype.nameClient = function(_connection, _name) {
+Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
    this.clients[_name] = _connection;
    this.anonymousClients[_connection.id] = null;
+   this.remoteCasa = _remoteCasa;
 }
 
 Casa.prototype.deleteMe = function(_connection) {
@@ -82,6 +101,12 @@ Casa.prototype.deleteMe = function(_connection) {
    else {
       this.clients[_connection.peerName] = null;
    }
+   if (this.remoteCasa) {
+      this.remoteCasa.invalidateSources();
+      this.casaSys.remoteCasas[this.remoteCasa.name] = null;
+      delete this.remoteCasa;
+   }
+
    delete _connection;
 }
 
@@ -90,6 +115,7 @@ function Connection(_server, _socket) {
    this.name = _server.name;
    this.socket = _socket;
 
+   this.remoteCasa = null;
    this.peerName = null;
 
    var that = this;
@@ -129,17 +155,61 @@ function Connection(_server, _socket) {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
             that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
             console.log(that.name + ': Establishing new logon session after race with old socket.');
-            that.server.nameClient(that, that.peerName); 
-            that.socket.emit('loginAACCKK');
-            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket });
+            var remoteCasa = that.server.createRemoteCasa(_data);
+            that.server.nameClient(that, that.peerName, remoteCasa); 
+            that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
          }
       }
       else {
-         that.server.nameClient(that, that.peerName); 
-         that.socket.emit('loginAACCKK');
-         that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket });
+         var remoteCasa = that.server.createRemoteCasa(_data);
+         that.server.nameClient(that, that.peerName, remoteCasa); 
+         that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+         that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
       }
    });
+}
+
+Casa.prototype.createRemoteCasa = function(_data) {
+   var remoteCasa;
+
+   if (_data.casaType == 'child') {
+      console.log('Creating a child casa for casa ' + _data.casaName);
+      ChildCasa = require('./childcasa');
+      remoteCasa = new ChildCasa( _data.casaConfig);
+   }
+   else if (_data.casaType == 'peer') {
+      console.log('Creating a peer casa for casa ' + _data.casaName);
+      PeerCasa = require('./peercasa');
+      remoteCasa = new PeerCasa(_data.casaConfig);
+   }
+
+   this.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
+
+   // Build states and Activators
+   var len = _data.casaConfig.states.length;
+   console.log(this.name + ': New states found = ' + len);
+
+   var PeerState = require('./peerstate');
+   for (var i = 0; i < len; ++i) {
+      console.log(this.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
+      var source = new PeerState(_data.casaConfig.states[i], remoteCasa);
+      this.casaSys.allObjects[source.name] = source;
+   }
+
+   len = _data.casaConfig.activators.length;
+   console.log(this.name + ': New activators found = ' + len);
+
+   var PeerActivator = require('./peeractivator');
+   for (i = 0; i < len; ++i) {
+      console.log(this.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
+      var source = new PeerActivator(_data.casaConfig.activators[i], remoteCasa);
+      this.casaSys.allObjects[source.name] = source;
+   }
+
+   // TBD Refresh all inactive activators and actions
+
+   return remoteCasa;
 }
 
 Casa.prototype.addState = function(_state) {

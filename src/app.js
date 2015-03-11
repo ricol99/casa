@@ -1,19 +1,17 @@
-var S = require('string');
 var crypto = require('crypto');
 var fs = require('fs');
 
-var configFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.json'; 
-var casaName = (process.argv.length >=4) ? process.argv[3] : 'internet';
+var configFile = (process.argv.length >= 3) ? process.argv[2] : 'internet-config.json'; 
 
-console.log('File: ' + configFile + ' - Casa name: casa:' + casaName);
+console.log('File: ' + configFile);
 var config = require('./' + configFile);
 
-if (casaName == 'internet' && !config.id) {
+if (config.name == 'casa:internet' && !config.id) {
    config.id = '0000001';
 }
 
 if (!config.id) {
-   var idFilename = './.' + casaName + 'ID.json';
+   var idFilename = './.' + config.name + 'ID.json';
 
    try {
       uniqueId = require(idFilename);
@@ -30,7 +28,7 @@ if (!config.id) {
   }
 } 
 
-System = require('./' + S(config.name).between('', ':').s);
+System = require('./casasystem');
 
-var system = new System('casa:' + casaName, config);
+var system = new System(config);
 

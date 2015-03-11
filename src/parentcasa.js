@@ -1,17 +1,18 @@
 var util = require('util');
-var PeerCasaSession = require('./peercasasession');
+var PeerCasa = require('./peercasa');
 
 function ParentCasa(_config) {
 
    _config.proActiveConnect = true;
 
-   PeerCasaSession.call(this, _config);
+   PeerCasa.call(this, _config);
+   this.loginAs = 'child';
 
    var that = this;
 
 }
 
-util.inherits(ParentCasa, PeerCasaSession);
+util.inherits(ParentCasa, PeerCasa);
 
 ParentCasa.prototype.broadcastIfNecessary = function(_messageName, _messageData) {
    // Do something - specialised classes may have different behavior

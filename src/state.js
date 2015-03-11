@@ -7,7 +7,7 @@ function State(_config) {
    this.active = false;
 
    var casaSys = CasaSystem.mainInstance();
-   this.casa = casaSys.findCasa(_config.casa);
+   this.casa = casaSys.casa;
 
    events.EventEmitter.call(this);
 

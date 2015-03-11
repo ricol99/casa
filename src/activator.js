@@ -5,9 +5,9 @@ var CasaSystem = require('./casasystem');
 function Activator(_config) {
 
    this.name = _config.name;
-   var casaSys = CasaSystem.mainInstance();
-   this.source = casaSys.findSource(_config.source);
-   this.casa = casaSys.findCasa(_config.casa);
+   this.casaSys = CasaSystem.mainInstance();
+   this.soureName = _config.source;
+   this.casa = this.casaSys.casa;
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
    this.inputDebounceTime = (_config.inputDebounceTime) ? _config.inputDebounceTime : 0;
@@ -28,21 +28,43 @@ function Activator(_config) {
 
    events.EventEmitter.call(this);
 
-   if (this.inputDebounceTime > 0) {
-      this.source = new InputDebouncer(this.source, this.inputDebounceTime);
-      console.log('Created input debouncer');
-   }
-
-   this.source.on('active', function (_data) {
-      that.sourceIsActive(_data.sourceName);
-   });
-
-   this.source.on('inactive', function (_data) {
-      that.sourceIsInactive(_data.sourceName);
-   });
+   this.establishListeners();
 }
 
 util.inherits(Activator, events.EventEmitter);
+
+Activator.prototype.establishListeners = function() {
+   var that = this;
+   this.source = this.casaSys.findSource(this.sourceName);
+   this.activatorEnabled = (this.source != null);
+
+   if (this.activatorEnabled) {
+
+      this.source.on('active', function (_data) {
+         that.sourceIsActive(_data.sourceName);
+      });
+
+      this.source.on('inactive', function (_data) {
+         that.sourceIsInactive(_data.sourceName);
+      });
+
+      this.source.on('invalid', function (_data) {
+         console.log(that.name + ': INVALID');
+
+         that.activatorEnabled = false;
+         that.source.removeListener('active', that);
+         that.source.removeListener('inactive', that);
+         that.source.removeListener('invalid', that);
+         that.emit('invalid');
+      });
+
+      if (this.inputDebounceTime > 0) {
+         this.source = new InputDebouncer(this.source, this.inputDebounceTime);
+         console.log(this.name + ': Created input debouncer');
+      }
+   }
+   return this.activatorEnabled;
+}
 
 Activator.prototype.sourceIsActive = function(_sourceName) {
    console.log('source ' + _sourceName + ' active!');
@@ -102,6 +124,14 @@ Activator.prototype.restartTimer = function() {
       that.deactivateDestination();
       that.minOutputTimeObj = null;
    }, this.minOutputTime*1000);
+}
+
+Activator.prototype.invalidateSource = function() {
+
+   if (this.activatorEnabled) {
+      this.activatorEnabled = false;
+      this.emit('invalid');
+   }
 }
 
 function InputDebouncer(_source, _threshold) {
