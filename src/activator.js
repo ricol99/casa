@@ -67,11 +67,13 @@ Activator.prototype.establishListeners = function() {
 }
 
 Activator.prototype.refreshSources = function() {
+   var ret = true;
 
    if (!this.activatorEnabled) {
-      return this.establishListeners();
+      ret = this.establishListeners();
+      console.log(this.name + ': Refreshed action. result=' + ret);
    }
-   return true;
+   return ret;
 }
 
 Activator.prototype.sourceIsActive = function(_sourceName) {

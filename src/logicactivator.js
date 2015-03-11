@@ -76,11 +76,13 @@ LogicActivator.prototype.establishListeners = function() {
 }
 
 LogicActivator.prototype.refreshSources = function() {
+   var ret = true;
 
    if (!this.activatorEnabled) {
-      return this.establishListeners();
+      ret = this.establishListeners();
+      console.log(this.name + ': Refreshed action. result=' + ret);
    }
-   return true;
+   return ret;
 }
 
 LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {

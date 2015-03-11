@@ -93,7 +93,6 @@ Casa.prototype.refreshActivatorsAndActions = function() {
    for(var prop in this.activators) {
 
       if(this.activators.hasOwnProperty(prop)){
-         console.log(this.name + ': Refreshing activator ' + this.activators[prop].name);
          this.activators[prop].refreshSources();
       }
    }
@@ -101,7 +100,6 @@ Casa.prototype.refreshActivatorsAndActions = function() {
    for(var prop in this.actions) {
 
       if(this.actions.hasOwnProperty(prop)){
-         console.log(this.name + ': Refreshing action ' + this.actions[prop].name);
          this.actions[prop].refreshSources();
       }
    }

@@ -73,11 +73,13 @@ Action.prototype.establishListeners = function() {
 }
 
 Action.prototype.refreshSources = function() {
+   var ret = true;
 
    if (!this.actionEnabled) {
-      return this.establishListeners();
+      ret = this.establishListeners();
+      console.log(this.name + ': Refreshed action. result=' + ret);
    }
-   return true;
+   return ret;
 }
 
 module.exports = exports = Action;
