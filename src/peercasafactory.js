@@ -40,7 +40,7 @@ function PeerCasaFactory(_config) {
    });
 
    setTimeout(function() {
-      this.browser.start();
+      that.browser.start();
    }, 10000);
 }
 
