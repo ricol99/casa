@@ -16,7 +16,7 @@ function PeerCasaFactory(_config) {
    var that = this;
 
    this.browser.on('serviceUp', function(service) {
-      console.log("service up: ", service);
+      console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
       if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
          (service.name != that.casa.name && !that.casaSys.remoteCasas[service.name])) {
@@ -31,6 +31,7 @@ function PeerCasaFactory(_config) {
             var peerCasa = new PeerCasa(config);
             that.casaSys.remoteCasas[peerCasa.name] = peerCasa;
             that.casaSys.allObjects[peerCasa.name] = peerCasa;
+            peerCasa.start();
             console.log('New peer casa: ' + peerCasa.name);
          }
       }
