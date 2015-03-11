@@ -139,12 +139,4 @@ LogicActivator.prototype.emitIfNecessary = function() {
    }
 }
 
-LogicActivator.prototype.invalidateSource = function() {
-
-   if (this.activatorEnabled) {
-      this.activatorEnabled = false;
-      this.emit('invalid');
-   }
-}
-
 module.exports = exports = LogicActivator;

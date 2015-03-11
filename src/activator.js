@@ -6,7 +6,7 @@ function Activator(_config) {
 
    this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
-   this.soureName = _config.source;
+   this.sourceName = _config.source;
    this.casa = this.casaSys.casa;
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
@@ -146,14 +146,6 @@ Activator.prototype.restartTimer = function() {
       that.deactivateDestination();
       that.minOutputTimeObj = null;
    }, this.minOutputTime*1000);
-}
-
-Activator.prototype.invalidateSource = function() {
-
-   if (this.activatorEnabled) {
-      this.activatorEnabled = false;
-      this.emit('invalid');
-   }
 }
 
 function InputDebouncer(_source, _threshold) {
