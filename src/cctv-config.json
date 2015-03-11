@@ -1,0 +1,72 @@
+{
+   "name": "casa:cctv",
+   "displayName": "Casa Collin CCTV System",
+   "gang": "casa-collin",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "localhost",
+         "port": 80
+      }
+   },
+   "area": {
+      "name": "casaarea:home",
+      "displayName": "Casa Collin Home"
+   },
+   "listeningPort": 8081,
+   "props": {},
+   "states": [
+      {
+         "name": "schedulestate:daylight-non-adjusted",
+         "startRule": "sunriseEnd",
+         "endRule": "sunsetStart"
+      },
+      {
+         "name": "schedulestate:lengthened-daylight",
+         "startRule": "sunrise:-900",
+         "endRule": "sunset:+900"
+      },
+      {
+         "name": "schedulestate:sunrise-for-one-hour",
+         "startRule": "sunriseEnd",
+         "activeFor": 3600
+      },
+      {
+         "name": "schedulestate:test-state",
+         "startRule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+         "activeFor": 30
+      },
+      {
+         "name": "teststate:alarm-part-armed",
+         "writable": true
+      },
+      {
+         "name": "teststate:schedule-test",
+         "writable": true
+      }
+   ],
+   "activators": [
+      {
+         "name": "activator:night-non-adjusted",
+         "source": "schedulestate:daylight-non-adjusted",
+         "invert": true
+      }
+   ],
+   "actions": [
+      {
+      "name": "setstateaction:test-scheduling-state-broken",
+      "source": "schedulestate:test-state-not-found",
+      "target": "teststate:schedule-test-not-gonna-find-me-yet"
+      },
+      {
+      "name": "setstateaction:test-scheduling-state",
+      "source": "schedulestate:test-state",
+      "target": "teststate:schedule-test"
+      },
+      {
+      "name": "setstateaction:test-daylight-state",
+      "source": "schedulestate:daylight-non-adjusted",
+      "target": "teststate:schedule-test"
+      }
+   ]
+}
