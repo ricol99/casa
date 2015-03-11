@@ -46,11 +46,13 @@ function CasaSystem(_config) {
 
    // start conecting to parent, if it exists
    if (this.parentCasa) {
-      this.parentCasa.start();
+      setTimeout(function() {
+         this.parentCasa.start();
+      }, 20000);
    }
 
    var PeerCasaFactory = require('./peercasafactory');
-   this.peerCasaFactory = new PeerCasaFactory({ gang: 'casa-collin' });
+   this.peerCasaFactory = new PeerCasaFactory({ gang: _config.gang });
 }
 
 util.inherits(CasaSystem, Thing);

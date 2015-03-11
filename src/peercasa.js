@@ -188,6 +188,17 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          casaConfig: that.casa.config
       };
 
+      if (that.casaType == 'child') {
+         var peers = [];
+         for(var prop in this.remoteCasas) {
+            
+            if (that.casaSys.remoteCasas.hasOwnProperty(prop) && (that.casaSys.remoteCasas[prop].loginAs == 'peer')){
+               peers.push(that.casaSys.remoteCasas[prop].name);
+            }
+         }
+         messageData.peers = peers;
+      }
+
       that.unAckedMessages.push( { message: 'login', data: messageData } );
       that.socket.emit('login', messageData);
    });
