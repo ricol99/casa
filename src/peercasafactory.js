@@ -28,11 +28,14 @@ function PeerCasaFactory(_config) {
                proActiveConnect: true,
                address: { hostname: service.host, port: service.port }
             };
-            var peerCasa = new PeerCasa(config);
-            that.casaSys.remoteCasas[peerCasa.name] = peerCasa;
-            that.casaSys.allObjects[peerCasa.name] = peerCasa;
-            peerCasa.start();
-            console.log('New peer casa: ' + peerCasa.name);
+
+            if (!that.casaSys.remoteCasas[service.name]) {
+               var peerCasa = new PeerCasa(config);
+               that.casaSys.remoteCasas[peerCasa.name] = peerCasa;
+               that.casaSys.allObjects[peerCasa.name] = peerCasa;
+               peerCasa.start();
+               console.log('New peer casa: ' + peerCasa.name);
+            }
          }
       }
    });
