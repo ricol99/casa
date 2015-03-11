@@ -88,6 +88,26 @@ Casa.prototype.createAdvertisement = function() {
    }
 }
 
+Casa.prototype.refreshActivatorsAndActions = function() {
+
+   for(var prop in this.activators) {
+
+      if(this.activators.hasOwnProperty(prop)){
+         console.log(this.name + ': Refreshing activator ' + this.activators[prop].name);
+         this.activators[prop].refreshSources();
+      }
+   }
+
+   for(var prop in this.actions) {
+
+      if(this.actions.hasOwnProperty(prop)){
+         console.log(this.name + ': Refreshing action ' + this.actions[prop].name);
+         this.actions[prop].refreshSources();
+      }
+   }
+
+}
+
 Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
    this.clients[_name] = _connection;
    this.anonymousClients[_connection.id] = null;
@@ -207,7 +227,8 @@ Casa.prototype.createRemoteCasa = function(_data) {
       this.casaSys.allObjects[source.name] = source;
    }
 
-   // TBD Refresh all inactive activators and actions
+   // Refresh all inactive activators and actions
+   this.refreshActivatorsAndActions();
 
    return remoteCasa;
 }

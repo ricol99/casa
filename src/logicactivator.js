@@ -75,6 +75,10 @@ LogicActivator.prototype.establishListeners = function() {
    return this.activatorEnabled;
 }
 
+LogicActivator.prototype.refreshSources = function() {
+   return this.establishListeners();
+}
+
 LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {
    console.log(this.name + ': Input source ' + _sourceName + ' active!');
 

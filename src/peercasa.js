@@ -253,7 +253,8 @@ PeerCasa.prototype.createStatesAndActivators = function(_data) {
       this.casaSys.allObjects[source.name] = source;
    }
 
-   // TBD Refresh all inactive activators and actions
+   // Refresh all inactive activators and actions
+   this.casa.refreshActivatorsAndActions();
 }
 
 function StateRequestor(_requestId, _state) {

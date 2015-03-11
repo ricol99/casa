@@ -66,6 +66,10 @@ Activator.prototype.establishListeners = function() {
    return this.activatorEnabled;
 }
 
+Activator.prototype.refreshSources = function() {
+   return this.establishListeners();
+}
+
 Activator.prototype.sourceIsActive = function(_sourceName) {
    console.log('source ' + _sourceName + ' active!');
    

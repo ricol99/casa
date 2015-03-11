@@ -72,5 +72,9 @@ Action.prototype.establishListeners = function() {
    return this.actionEnabled;
 }
 
+Action.prototype.refreshSources = function() {
+   return this.establishListeners();
+}
+
 module.exports = exports = Action;
 
