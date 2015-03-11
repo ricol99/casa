@@ -130,6 +130,12 @@ function PeerCasa(_config) {
 
 util.inherits(PeerCasa, Thing);
 
+PeerCasa.prototype.closeDown = function() {
+{
+   this.casaSys.remoteCasas[this.name] = null;
+   delete this;
+}
+
 PeerCasa.prototype.invalidateSources = function() {
 
    for(var prop in this.states) {
