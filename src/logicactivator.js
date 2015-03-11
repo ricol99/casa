@@ -76,7 +76,11 @@ LogicActivator.prototype.establishListeners = function() {
 }
 
 LogicActivator.prototype.refreshSources = function() {
-   return this.establishListeners();
+
+   if (!this.activatorEnabled) {
+      return this.establishListeners();
+   }
+   return true;
 }
 
 LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {

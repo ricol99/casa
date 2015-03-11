@@ -67,7 +67,11 @@ Activator.prototype.establishListeners = function() {
 }
 
 Activator.prototype.refreshSources = function() {
-   return this.establishListeners();
+
+   if (!this.activatorEnabled) {
+      return this.establishListeners();
+   }
+   return true;
 }
 
 Activator.prototype.sourceIsActive = function(_sourceName) {
