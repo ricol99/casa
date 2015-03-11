@@ -5,7 +5,7 @@
    "parentcasa": {
       "name": "casa:internet",
       "address": {
-         "hostname": "casa-dev.elasticbeanstalk.com",
+         "hostname": "lx9901827.home",
          "port": 80
       }
    },
