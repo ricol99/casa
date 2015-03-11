@@ -162,7 +162,8 @@ function Connection(_server, _socket) {
       // Cope with racing peers
       if (_data.casaType && (_data.casaType == 'peer') && that.server.casaSys.remoteCasas[_data.casaName]) {
 
-         if (that.server.casaSys.remoteCasas[_data.casaName].connected) {
+         //if (that.server.casaSys.remoteCasas[_data.casaName].connected) {
+         if (_data.casaName > that.name) {
             // Already connected proactively, so close this connection request
             console.log(that.name + ': Racing peer connections for casa ' + _data.casaName + ', closing server connection socket');
             that.socket.close();
