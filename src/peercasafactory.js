@@ -39,7 +39,9 @@ function PeerCasaFactory(_config) {
      console.log("service down: ", service);
    });
 
-   this.browser.start();
+   setTimeout(function() {
+      this.browser.start();
+   }, 10000);
 }
 
 module.exports = exports = PeerCasaFactory;
