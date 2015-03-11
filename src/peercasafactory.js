@@ -38,7 +38,7 @@ function PeerCasaFactory(_config) {
    });
 
    this.browser.on('serviceDown', function(service) {
-     console.log("service down: ", service);
+      console.log('service down: casa=' + service.name);
    });
 
    setTimeout(function() {
