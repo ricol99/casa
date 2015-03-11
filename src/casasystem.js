@@ -47,7 +47,7 @@ function CasaSystem(_config) {
    // start conecting to parent, if it exists
    if (this.parentCasa) {
       setTimeout(function() {
-         this.parentCasa.start();
+         that.parentCasa.start();
       }, 20000);
    }
 
