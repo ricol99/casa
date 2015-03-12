@@ -197,7 +197,6 @@ CasaSystem.prototype.deleteCasaArea = function(_area) {
 
 CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
    var knownPeerCasas = [];
-
    var len = _peers.length;
 
    for (var i = 0 ; i < len; ++i) {
@@ -212,8 +211,8 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 
    for (i = 0 ; i < len; ++i) {
 
-      if (knownPeerCasas[i].area) {
-         peerAreas.push(knownPeerCasas[i].area);
+      if (knownPeerCasas[i].casaArea) {
+         peerAreas.push(knownPeerCasas[i].casaArea);
       }
    }
 
@@ -221,7 +220,7 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
       return this.createChildCasaArea(knownPeerCasas);
    }
    else if (peerAreas.length == 1) {
-      return knownPeerCasas[0].area;
+      return knownPeerCasas[0].casaArea;
    }
    else if (peerAreas.length > 1) {
       // set all casaAreas to the same, if they are not
@@ -230,7 +229,7 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 
       for (i = 0 ; i < len; ++i) {
 
-         if (!knownPeerCasas[i].area || knownPeerCasas[i].area != peerAreas[0]) {
+         if (!knownPeerCasas[i].casaArea || knownPeerCasas[i].casaArea != peerAreas[0]) {
             knownPeerCasas[i].setCasaArea(peerAreas[0]);
          }
       }
