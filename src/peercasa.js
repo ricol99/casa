@@ -340,7 +340,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          that.emit('broadcast-message', { message: 'casa-inactive', data:_data, sourceCasa: that.name });
          that.emit('casa-inactive', _data);
 
-         var remoteCasa = that.casasys.remoteCasas[_data.sourceName];
+         var remoteCasa = that.casaSys.remoteCasas[_data.sourceName];
 
          if (remoteCasa) {
             remoteCasa.invalidateSources();
