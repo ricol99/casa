@@ -155,7 +155,10 @@ function Connection(_server, _socket) {
             console.log(that.name + ': Establishing new logon session after race with old socket.');
             var remoteCasa = that.server.createRemoteCasa(_data);
             that.server.nameClient(that, that.peerName, remoteCasa); 
+
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+            that.socket.emit('casa-active', { sourceName: that.name, config: that.config });
+
             that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
          }
       }

@@ -13,6 +13,7 @@ function PeerCasa(_config) {
 
    this.casaArea = null;
    this.loginAs = 'peer';
+   this.remoteCasas = [];
 
    Thing.call(this, _config);
 
@@ -120,11 +121,6 @@ function PeerCasa(_config) {
 
 util.inherits(PeerCasa, Thing);
 
-PeerCasa.prototype.closeDown = function() {
-   this.casaSys.remoteCasas[this.name] = null;
-   delete this;
-}
-
 PeerCasa.prototype.invalidateSources = function() {
 
    for(var prop in this.states) {
@@ -151,6 +147,18 @@ PeerCasa.prototype.invalidateSources = function() {
    delete this.activators;
    this.states = [];
    this.activators = [];
+
+   for(var prop in this.remoteCasas) {
+
+      if(this.remoteCasas.hasOwnProperty(prop)){
+         console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
+         this.remoteCasas[prop].invalidateSource();
+         this.casaSys.allObjects[this.remoteCasas[prop].name] = null;
+         this.casaSys.remoteCasas[this.remoteCasas[prop].name] = null;
+         delete this.remoteCasas[prop];
+         this.remoteCasas[prop] = null;
+      }
+   }
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -207,9 +215,17 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       if (that.unAckedMessages.length > 1) {
          that.resendUnAckedMessages();
       }
-      that.createStatesAndActivators(_data);
+      that.createStatesAndActivators(_data, that);
       that.connected = true;
+      that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, config: that.casa.config }});
+      that.socket.emit('casa-active', { sourceName: that.casa.name, config: that.casa.config });
+
       that.emit('active', { sourceName: that.name });
+   });
+
+   this.socket.on('casa-activeAACCKK', function(_data) {
+      console.log(that.name + ': casa-active Event ACKed by my peer.');
+      that.unAckedMessages.pop();  // Remove casa-active event from resend queue
    });
 
    this.socket.on('error', function(_error) {
@@ -239,24 +255,24 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    });
 }
 
-PeerCasa.prototype.createStatesAndActivators = function(_data) {
+PeerCasa.prototype.createStatesAndActivators = function(_data, _peerCasa) {
    var len = _data.casaConfig.states.length;
-   console.log(this.name + ': New states found = ' + len);
+   console.log(_peerCasa.name + ': New states found = ' + len);
 
    var PeerState = require('./peerstate');
    for (var i = 0; i < len; ++i) {
-      console.log(this.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
-      var source = new PeerState(_data.casaConfig.states[i], this);
+      console.log(_peerCasa.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
+      var source = new PeerState(_data.casaConfig.states[i], _peerCasa);
       this.casaSys.allObjects[source.name] = source;
    }
 
    len = _data.casaConfig.activators.length;
-   console.log(this.name + ': New activators found = ' + len);
+   console.log(_peerCasa.name + ': New activators found = ' + len);
 
    var PeerActivator = require('./peeractivator');
    for (i = 0; i < len; ++i) {
-      console.log(this.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
-      var source = new PeerActivator(_data.casaConfig.activators[i], this);
+      console.log(_peerCasa.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
+      var source = new PeerActivator(_data.casaConfig.activators[i], _peerCasa);
       this.casaSys.allObjects[source.name] = source;
    }
 
@@ -294,6 +310,50 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
       var that = this;
+
+      // listen for remote casas availability from peer casas
+      this.socket.on('casa-active', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
+         console.log('AAAAAAAAAAAAAA');
+         that.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: that.name });
+         console.log('AAAAAAAAAAAAAA');
+
+         if (!that.casaSys.remoteCasas[_data.sourceName]) {
+            console.log('VVVVVVVVVVVVVV');
+            // Create a remote casa to represent the newly available casa
+            RemoteCasa = require('./remotecasa');
+            var remoteCasa = new RemoteCasa(_data.config, that);
+            console.log('VVVVVVVVVVVVVV');
+            that.remoteCasas[remoteCasa.name] = remoteCasa;
+            that.casSys.remoteCasas[remoteCasa.name] = remoteCasa;
+            that.casSys.allObjects[remoteCasa.name] = remoteCasa;
+            console.log('VVVVVVVVVVVVVV');
+            that.createStatesAndActivators(_data, remoteCasa);
+            console.log('VVVVVVVVVVVVVV');
+         }
+         console.log('AAAAAAAAAAAAAA');
+         that.emit('casa-active', _data);
+         console.log('AAAAAAAAAAAAAA');
+         that.socket.emit('casa-activeAACCKK', _data);
+         console.log('AAAAAAAAAAAAAA');
+      });
+
+      this.socket.on('casa-inactive', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: casa-inactive, casa: ' + _data.sourceName);
+         that.emit('broadcast-message', { message: 'casa-inactive', data:_data, sourceCasa: that.name });
+         that.emit('casa-inactive', _data);
+
+         var remoteCasa = that.casasys.remoteCasas[_data.sourceName];
+
+         if (remoteCasa) {
+            remoteCasa.invalidateSources();
+            that.remoteCasas[remoteCasa.name] = null;
+            that.casSys.remoteCasas[remoteCasa.name] = null;
+            that.casSys.allObjects[remoteCasa.name] = null;
+            delete remoteCasa;
+         }
+         that.socket.emit('casa-inactiveAACCKK', _data);
+      });
 
       // listen for state changes from peer casas
       this.socket.on('state-active', function(_data) {
