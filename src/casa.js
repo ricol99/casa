@@ -171,7 +171,7 @@ function Connection(_server, _socket) {
          that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
          setTimeout(function() {
             console.log('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
-            that.socket.emit('casa-active', { sourceName: that.name, casaConfig: that.config });
+            that.socket.emit('casa-active', { sourceName: that.name, casaConfig: that.server.config });
          }, 2000);
          that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
       }
