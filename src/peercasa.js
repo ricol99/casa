@@ -218,6 +218,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.createStatesAndActivators(_data, that);
       that.connected = true;
       that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, config: that.casa.config }});
+      console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj');
       that.socket.emit('casa-active', { sourceName: that.casa.name, config: that.casa.config });
 
       that.emit('active', { sourceName: that.name });
@@ -313,6 +314,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
       // listen for remote casas availability from peer casas
       this.socket.on('casa-active', function(_data) {
+         console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
+         console.log('casa area ' + that.casaArea.name);
          console.log(that.name + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
          that.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: that.name });
 
@@ -321,8 +324,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
             RemoteCasa = require('./remotecasa');
             var remoteCasa = new RemoteCasa(_data.config, that);
             that.remoteCasas[remoteCasa.name] = remoteCasa;
-            that.casSys.remoteCasas[remoteCasa.name] = remoteCasa;
-            that.casSys.allObjects[remoteCasa.name] = remoteCasa;
+            that.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
+            that.casaSys.allObjects[remoteCasa.name] = remoteCasa;
             that.createStatesAndActivators(_data, remoteCasa);
          }
          that.emit('casa-active', _data);
@@ -339,8 +342,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
          if (remoteCasa) {
             remoteCasa.invalidateSources();
             that.remoteCasas[remoteCasa.name] = null;
-            that.casSys.remoteCasas[remoteCasa.name] = null;
-            that.casSys.allObjects[remoteCasa.name] = null;
+            that.casaSys.remoteCasas[remoteCasa.name] = null;
+            that.casaSys.allObjects[remoteCasa.name] = null;
             delete remoteCasa;
          }
          that.socket.emit('casa-inactiveAACCKK', _data);
