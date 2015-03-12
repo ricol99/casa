@@ -217,7 +217,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       }
       that.createStatesAndActivators(_data, that);
       that.connected = true;
-      that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, config: that.casa.config }});
+      that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, casaConfig: that.casa.config }});
       console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj');
       that.socket.emit('casa-active', { sourceName: that.casa.name, config: that.casa.config });
 
