@@ -98,10 +98,16 @@ CasaSystem.prototype.extractParentCasa = function() {
 
    if (this.config.parentCasa) {
       var ParentCasa = require('./parentcasa');
-      this.config.casa = this.casa.name;
       this.parentCasa = new ParentCasa(this.config.parentCasa);
       this.allObjects[this.parentCasa.name] = this.parentCasa;
       console.log('New parentcasa: ' + this.parentCasa.name);
+
+      var ParentCasaArea = require('./parentcasaarea');
+      this.parentCasaArea = new ParentCasaArea ({ name: 'parentcasaarea:my-parent' });
+      this.allObjects[this.parentCasaArea.name] = this.parentCasaArea;
+      console.log('New parentcasaarea: ' + this.parentCasaArea.name);
+
+      this.parentCasa.setCasaArea(this.parentCasaArea);
    }
 }
 
@@ -178,7 +184,6 @@ CasaSystem.prototype.deleteCasaArea = function(_area) {
 
 CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
    var knownPeerCasas = [];
-   console.log('AAAAAAAAAAAAAA');
 
    var len = _peers.length;
 
@@ -189,7 +194,6 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
       }
    }
 
-   console.log('AAAAAAAAAAAAAA');
    var len = knownPeerCasas.length;
    var peerAreas = [];
 
@@ -197,21 +201,16 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 
       if (knownPeerCasas[i].area) {
          peerAreas.push(knownPeerCasas[i].area);
-         console.log('BBBBBBBBBBBBBB');
       }
    }
 
-   console.log('AAAAAAAAAAAAAA');
    if (peerAreas.length == 0) {
-      console.log('CCCCCCCCCCCCCC');
-      return this.createChildArea(knownPeerCasas);
+      return this.createChildCasaArea(knownPeerCasas);
    }
    else if (peerAreas.length == 1) {
-      console.log('DDDDDDDDDDDDDD');
       return knownPeerCasas[0].area;
    }
    else if (peerAreas.length > 1) {
-      console.log('EEEEEEEEEEEEEE');
       // set all casaAreas to the same, if they are not
      
       var len = knownPeerCasas.length;
@@ -231,27 +230,22 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
 
    var area = null;
 
-   console.log('AAAAAAAAAAAAAA');
    // Resolve area
    if (_peers) {
-      console.log('YYYYYYYYYYYYYY');
       area = this.resolveCasaAreasAndPeers(_config.name, _peers);
    }
 
-   console.log('XXXXXXXXXXXXXX');
    var ChildCasa = require('./childcasa');
    var childCasa = new ChildCasa(_config);
 
    if (area) {
-      console.log('ZZZZZZZZZZZZZZ');
-      childCasa.setArea(area);
+      childCasa.setCasaArea(area);
    }
 
    this.remoteCasas[childCasa.name] = childCasa;
    this.allObjects[childCasa.name] = childCasa;
 
-   this.setUber(true);
-   console.log('FFFFFFFFFFFFFF');
+   this.setUberCasa(true);
    return childCasa;
 }
 
