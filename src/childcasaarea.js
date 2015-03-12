@@ -29,7 +29,6 @@ function ChildCasaArea(_config) {
       }
 
       if (that.casaSys.peerCasaArea) {
-         console.log(that.name + ': Broadcasting message from child to my peers');
          that.casaSys.peerCasaArea.broadcastMessage(_message);
       }
 
