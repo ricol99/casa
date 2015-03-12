@@ -5,10 +5,6 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-if (!process.env.INTERNETCASA) {
-   var mdns = require('mdns');
-}
-
 var CasaSystem = require('./casasystem');
 
 function Casa(_config) {
@@ -48,10 +44,6 @@ function Casa(_config) {
 
    http.listen(this.listeningPort, function(){
       console.log('listening on *:' + that.listeningPort);
-
-      if (!process.env.INTERNETCASA) {
-         that.createAdvertisement();
-      }
    });
 }
 
@@ -73,19 +65,6 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    var len = _config.activators.length;
    for (var j = 0; j < len; ++j) {
       this.config.activators[j] = _config.activators[j].name;
-   }
-}
-
-Casa.prototype.createAdvertisement = function() {
-   try {
-     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.name, txtRecord: { id: this.id, gang: this.gang }});
-     this.ad.on('error', function(err) {
-        console.log('Not advertising service! Error: ' + err);
-     });
-     this.ad.start();
-   }
-   catch (ex) {
-     console.log('Not advertising service! Error: ' + ex);
    }
 }
 

@@ -58,8 +58,8 @@ function CasaSystem(_config) {
       }, 20000);
    }
 
-   var PeerCasaFactory = require('./peercasafactory');
-   this.peerCasaFactory = new PeerCasaFactory({ gang: _config.gang });
+   var PeerCasaService = require('./peercasaservice');
+   this.peerCasaService = new PeerCasaService({ gang: _config.gang });
 }
 
 util.inherits(CasaSystem, Thing);
