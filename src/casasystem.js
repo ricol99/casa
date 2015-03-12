@@ -266,7 +266,7 @@ CasaSystem.prototype.createPeerCasa = function(_config) {
    console.log('Creating a peer casa for casa ' + _config.name);
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
-   peerCasa.setArea(this.peerCasaArea);
+   peerCasa.setCasaArea(this.peerCasaArea);
 
    this.remoteCasas[peerCasa.name] = peerCasa;
    this.allObjects[peerCasa.name] = peerCasa;
