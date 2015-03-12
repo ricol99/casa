@@ -31,7 +31,7 @@ function PeerCasaFactory(_config) {
 
 
             // Only try to connect if we don't have a session alreadt AND it is our role to connect and not wait
-            if ((!that.casaSys.remoteCasas[service.name]) && (service.name > this.casa.name)) {
+            if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.name)) {
                var peerCasa = new PeerCasa(config);
                that.casaSys.remoteCasas[peerCasa.name] = peerCasa;
                that.casaSys.allObjects[peerCasa.name] = peerCasa;
