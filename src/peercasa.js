@@ -220,6 +220,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.connected = true;
       that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, casaConfig: that.casa.config }});
       console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj');
+      console.log('casa config = ", that.casa.config);
       that.socket.emit('casa-active', { sourceName: that.casa.name, casaConfig: that.casa.config });
 
       that.emit('active', { sourceName: that.name });
@@ -325,6 +326,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          if (!that.casaSys.remoteCasas[_data.sourceName]) {
             // Create a remote casa to represent the newly available casa
             RemoteCasa = require('./remotecasa');
+            console.log('ksdjksdjksjskjdsjdjskdjskdjskdjskdjskdj', _data);
             var remoteCasa = new RemoteCasa(_data.casaConfig, that);
             that.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
