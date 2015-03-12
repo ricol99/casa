@@ -1,16 +1,32 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
-var CasaSystem = require('./casasystem');
 
 function PeerCasaArea(_config) {
-
-   // Resolve source and target
-   this.casaSys = CasaSystem.mainInstance();
 
    CasaArea.call(this, _config);
 
    var that = this;
 
+   this.broadcastListener = function(_message) {
+      console.log(that.name + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+
+      // Broadcast to all children - peers and parent already know
+      for(var prop in that.casaSys.childCasaAreas) {
+
+         if(that.casaSys.childCasaAreas.hasOwnProperty(prop)){
+            console.log(that.name + ': Broadcasting to child area ' + that.casaSys.childCasaAreas[prop].name);
+            that.casaSys.childCasaAreas[prop].broadcastMessage(_message);
+         }
+      }
+   };
+
+   this.forwardRequestListener = function(_data) {
+      console.log(that.name + ': Forward event request from peer. State: ' + _data.data.stateName);
+   };
+
+   this.forwardResponseListener = function(_data) {
+      console.log(that.name + ': Forward event response from peer. State: ' + _data.data.stateName);
+   };
 }
 
 util.inherits(PeerCasaArea, CasaArea);
@@ -18,29 +34,32 @@ util.inherits(PeerCasaArea, CasaArea);
 PeerCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;
 
-   // BROADCASTING local broadcast (this casa's peer states and activators) already done by peer casa class
-   // BROADCASTING Broadcast to area this casa is running in (not the child casa area);
-   // BROADCASTING Broadcast to parent area (Uber casa) of the casa we are running in (not the the parent area of this child casa area);
-   // BROADCASTING Broadcast to child areas (Uber casa) of the casa we are running in except source area (not the the parent area of this child casa area);
-
    if (this.casaSys.isUberCasa()) {
 
-      _casa.on('broadcast-message', function(_message) {
-         console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
-      });
+      // BROADCASTING local broadcast (this casa's peer states and activators) already done by peer casa class
+      // BROADCASTING Broadcast to area this casa is running in (not the child casa area);
+      // BROADCASTING Broadcast to parent area (Uber casa) of the casa we are running in (not the the parent area of this child casa area);
+      // BROADCASTING Broadcast to child areas (Uber casa) of the casa we are running in except source area (not the the parent area of this child casa area);
+
+      _casa.on('broadcast-message', this.broadcastListener);
 
       // TBD
       // FORWARDING If my casa is the target, peer casa class takes care of this
       // FORWARDING If my area is the target, find peer casa and forward
       // FORWARDING If my area is not the target, is the area a child area of mine? YES - forward to next hop for child. NO - forward to parent
 
-      _casa.on('forward-request', function(_data) {
-         console.log(that.name + ': Forward event request from child. State: ' + _data.data.stateName);
-      });
+      _casa.on('forward-request', this.forwardRequestListener);
 
-      _casa.on('forward-response', function(_data) {
-         console.log(that.name + ': Forward event response from child. State: ' + _data.data.stateName);
-      });
+      _casa.on('forward-response', this.forwardResponseListener);
+   }
+}
+
+PeerCasaArea.prototype.removeCasaListeners = function(_casa) {
+
+   if (this.casaSys.isUberCasa()) {
+      _casa.removeListeners('broadcast-message', this.broadcastListener);
+      _casa.removeListeners('forward-request', this.forwardRequestListener);
+      _casa.removeListeners('forward-response', this.forwardResponseListener);
    }
 }
 

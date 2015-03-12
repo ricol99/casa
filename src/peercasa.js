@@ -11,7 +11,7 @@ function PeerCasa(_config) {
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
 
-   this.area = null;
+   this.casaArea = null;
    this.loginAs = 'peer';
 
    Thing.call(this, _config);
@@ -116,18 +116,6 @@ function PeerCasa(_config) {
          that.socket.emit('activator-inactive', _data);
       }
    });
-
-   // broadcsast messages from other nodes to remote casas
-   //this.casaArea.on('broadcast-message', function(_message) {
-      //console.log(that.name + ': received message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
-      //console.log(that.connected.toString() + ' ' + _message.sourceCasa + ' ' + that.name);
-//
-      //if (that.connected && _message.sourceCasa != that.name) {
-         //console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
-         //that.unAckedMessages.push( { message: _message.message, data: _message.data } );
-         //that.socket.emit(_message.message, _message.data);
-      //}
-   //});
 }
 
 util.inherits(PeerCasa, Thing);
@@ -743,17 +731,33 @@ PeerCasa.prototype.addAction = function(_action) {
    var that = this;
 }
 
-PeerCasa.prototype.setCasaArea = function(_area) {
-   if (this.area != _area) {
+PeerCasa.prototype.setCasaArea = function(_casaArea) {
+   var that = this;
 
-      if (this.area) {
-         this.area.removeCasa(this);
+   var broadcastCallback = function(_message) {
+      console.log(that.name + ': received message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+      console.log(that.connected.toString() + ' ' + _message.sourceCasa + ' ' + that.name);
+
+      if (that.connected && _message.sourceCasa != that.name) {
+         console.log(this.name + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+         that.unAckedMessages.push( { message: _message.message, data: _message.data } );
+         that.socket.emit(_message.message, _message.data);
+      }
+   };
+
+   if (this.casaArea != _casaArea) {
+
+      if (this.casaArea) {
+         this.casaArea.removeCasa(this);
+         this.casaArea.removeListener('broadcast-message', broadcastCallback);
       }
 
-      this.area = _area;
+      this.casaArea = _casaArea;
 
-      if (this.area) {
-         this.area.addCasa(this);
+      if (this.casaArea) {
+         this.casaArea.addCasa(this);
+         // listen for broadcast messages from other nodes to remote casas
+         this.casaArea.on('broadcast-message', broadcastCallback);
       }
    }
 }
