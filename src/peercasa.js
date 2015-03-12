@@ -314,28 +314,19 @@ PeerCasa.prototype.establishListeners = function(_force) {
       // listen for remote casas availability from peer casas
       this.socket.on('casa-active', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
-         console.log('AAAAAAAAAAAAAA');
          that.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: that.name });
-         console.log('AAAAAAAAAAAAAA');
 
          if (!that.casaSys.remoteCasas[_data.sourceName]) {
-            console.log('VVVVVVVVVVVVVV');
             // Create a remote casa to represent the newly available casa
             RemoteCasa = require('./remotecasa');
             var remoteCasa = new RemoteCasa(_data.config, that);
-            console.log('VVVVVVVVVVVVVV');
             that.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casSys.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casSys.allObjects[remoteCasa.name] = remoteCasa;
-            console.log('VVVVVVVVVVVVVV');
             that.createStatesAndActivators(_data, remoteCasa);
-            console.log('VVVVVVVVVVVVVV');
          }
-         console.log('AAAAAAAAAAAAAA');
          that.emit('casa-active', _data);
-         console.log('AAAAAAAAAAAAAA');
          that.socket.emit('casa-activeAACCKK', _data);
-         console.log('AAAAAAAAAAAAAA');
       });
 
       this.socket.on('casa-inactive', function(_data) {
