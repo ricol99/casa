@@ -55,7 +55,7 @@ function CasaSystem(_config) {
    if (this.parentCasa) {
       setTimeout(function() {
          that.parentCasa.start();
-      }, 20000);
+      }, 10000);
    }
 
    var PeerCasaService = require('./peercasaservice');
