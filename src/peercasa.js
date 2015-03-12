@@ -76,7 +76,7 @@ function PeerCasa(_config) {
                   that.connected = false;
                   clearInterval(that.intervalID);
                   that.intervalID = null;
-                  that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name }});
+                  that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
                   that.socket = null;
                   that.emit('inactive', { sourceName: that.name });
                }
@@ -238,7 +238,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          clearInterval(that.intervalID);
          that.intervalID = null;
-         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name }});
+         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
       }
@@ -252,7 +252,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          clearInterval(that.intervalID);
          that.intervalID = null;
-         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name }});
+         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
       }
@@ -792,7 +792,7 @@ PeerCasa.prototype.setCasaArea = function(_casaArea) {
    var that = this;
 
    var broadcastCallback = function(_message) {
-      console.log(that.name + ': received message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+      console.log(that.name + ': received message ' + _message.message + ' originally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
       console.log(that.connected.toString() + ' ' + _message.sourceCasa + ' ' + that.name);
 
       if (that.connected && _message.sourceCasa != that.name) {
