@@ -9,7 +9,7 @@ function CasaSystem(_config) {
    this.config = _config;
    this.uberCasa = false;
    this.users = [];
-   this.areas = [];
+   this.casaAreas = [];
    this.casa = null;
    this.peerCasas = [];
    this.parentCasa = null;
@@ -20,6 +20,8 @@ function CasaSystem(_config) {
 
    this.constructors = {};
    this.allObjects = [];
+
+   this.areaID = 1;
 
    Thing.call(this, _config);
 
@@ -139,6 +141,130 @@ CasaSystem.prototype.extractCasaActions = function() {
    });
 }
 
+CasaSystem.prototype.createChildCasaArea = function(_casas) {
+   var ChildCasaArea = require('./childcasaarea');
+   var childCasaArea = new ChildCasaArea({ name: 'childcasaarea:' + this.casa.name + this.areaId});
+
+   this.areaId = (this.areaId + 1) % 100000;
+
+   this.casaAreas[childCasaArea.name] = childCasaArea;
+   this.childCasaAreas[childCasaArea.name] = childCasaArea;
+   this.allObjects[childCasaArea.name] = childCasaArea;
+
+   var len = _casas.length;
+
+   for (var i = 0 ; i < len; ++i) {
+      _casas[i].setArea(childCasaArea);
+   }
+   return childCasaArea;
+}
+
+CasaSystem.prototype.findCasaArea = function(_areaName) {
+   return this.casaAreas[_areaName];
+}
+
+CasaSystem.prototype.deleteCasaArea = function(_area) {
+   this.casaAreas[_area.name] = null;
+   this.allObjects[_area.name] = null;
+   this.childCasaAreas[_area.name] = null;
+
+   if (_area == this.parentCasaArea) {
+      this.parentCasaArea = null;
+   }
+   _area.removeAllCasas();
+
+   delete _area;
+}
+
+CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
+   var knownPeerCasas = [];
+   console.log('AAAAAAAAAAAAAA');
+
+   var len = _peers.length;
+
+   for (var i = 0 ; i < len; ++i) {
+
+      if (this.remoteCasas[_peers[i]]) {
+         knownPeerCasas.push(this.remoteCasas[_peers[i]]);
+      }
+   }
+
+   console.log('AAAAAAAAAAAAAA');
+   var len = knownPeerCasas.length;
+   var peerAreas = [];
+
+   for (i = 0 ; i < len; ++i) {
+
+      if (knownPeerCasas[i].area) {
+         peerAreas.push(knownPeerCasas[i].area);
+         console.log('BBBBBBBBBBBBBB');
+      }
+   }
+
+   console.log('AAAAAAAAAAAAAA');
+   if (peerAreas.length == 0) {
+      console.log('CCCCCCCCCCCCCC');
+      return this.createChildArea(knownPeerCasas);
+   }
+   else if (peerAreas.length == 1) {
+      console.log('DDDDDDDDDDDDDD');
+      return knownPeerCasas[0].area;
+   }
+   else if (peerAreas.length > 1) {
+      console.log('EEEEEEEEEEEEEE');
+      // set all casaAreas to the same, if they are not
+     
+      var len = knownPeerCasas.length;
+
+      for (i = 0 ; i < len; ++i) {
+
+         if (!knownPeerCasas[i].area || knownPeerCasas[i].area != peerAreas[0]) {
+            knownPeerCasas[i].setCasaArea(peerAreas[0]);
+         }
+      }
+      return peerAreas[0];
+   }
+}
+
+CasaSystem.prototype.createChildCasa = function(_config, _peers) {
+   console.log('Creating a child casa for casa ' + _config.name);
+
+   var area = null;
+
+   console.log('AAAAAAAAAAAAAA');
+   // Resolve area
+   if (_peers) {
+      console.log('YYYYYYYYYYYYYY');
+      area = this.resolveCasaAreasAndPeers(_config.name, _peers);
+   }
+
+   console.log('XXXXXXXXXXXXXX');
+   var ChildCasa = require('./childcasa');
+   var childCasa = new ChildCasa(_config);
+
+   if (area) {
+      console.log('ZZZZZZZZZZZZZZ');
+      childCasa.setArea(area);
+   }
+
+   this.remoteCasas[childCasa.name] = childCasa;
+   this.allObjects[childCasa.name] = childCasa;
+
+   this.setUber(true);
+   console.log('FFFFFFFFFFFFFF');
+   return childCasa;
+}
+
+CasaSystem.prototype.createPeerCasa = function(_config) {
+   console.log('Creating a peer casa for casa ' + _config.name);
+   var PeerCasa = require('./peercasa');
+   var peerCasa = new PeerCasa(_config);
+
+   this.remoteCasas[peerCasa.name] = peerCasa;
+   this.allObjects[peerCasa.name] = peerCasa;
+   return peerCasa;
+}
+
 CasaSystem.prototype.findUser = function (_userName) {
    return this.users[_userName];
 }
@@ -169,6 +295,17 @@ CasaSystem.prototype.findSource = function (_sourceName) {
 
 CasaSystem.prototype.resolveObject = function (objName) {
     return this.allObjects[objName];
+}
+
+CasaSystem.prototype.setUberCasa = function(_uberCasa) {
+   if (_uberCasa && !this.uberCasa) {
+      // Becoming an uber casa
+      this.uberCasa = _uberCasa;
+   }
+   else if (!_uberCasa && this.uberCasa) {
+      // Losing uber casa status
+      this.uberCasa = _uberCasa;
+   }
 }
 
 CasaSystem.prototype.isUberCasa = function() {

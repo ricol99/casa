@@ -61,6 +61,7 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};
    this.config.name = _config.name;
    this.config.displayName = _config.displayName;
+   if (_config.gang) this.config.gang = _config.gang;
    this.config.states = [];
    this.config.activators = [];
 
@@ -192,17 +193,11 @@ Casa.prototype.createRemoteCasa = function(_data) {
    var remoteCasa;
 
    if (_data.casaType == 'child') {
-      console.log('Creating a child casa for casa ' + _data.casaName);
-      ChildCasa = require('./childcasa');
-      remoteCasa = new ChildCasa( _data.casaConfig);
+      remoteCasa = this.casaSys.createChildCasa(_data.casaConfig, _data.peers);
    }
    else if (_data.casaType == 'peer') {
-      console.log('Creating a peer casa for casa ' + _data.casaName);
-      PeerCasa = require('./peercasa');
-      remoteCasa = new PeerCasa(_data.casaConfig);
+      remoteCasa = this.casaSys.createPeerCasa(_data.casaConfig);
    }
-
-   this.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
 
    // Build states and Activators
    var len = _data.casaConfig.states.length;

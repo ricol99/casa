@@ -7,9 +7,11 @@ var CasaSystem = require('./casasystem');
 function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
-
+   
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
+
+   this.area = null;
    this.loginAs = 'peer';
 
    Thing.call(this, _config);
@@ -195,13 +197,15 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 
       if (that.casaType == 'child') {
          var peers = [];
-         for(var prop in this.remoteCasas) {
+         for(var prop in this.casaSys.remoteCasas) {
             
             if (that.casaSys.remoteCasas.hasOwnProperty(prop) && (that.casaSys.remoteCasas[prop].loginAs == 'peer')){
                peers.push(that.casaSys.remoteCasas[prop].name);
             }
          }
-         messageData.peers = peers;
+         if (peers.length > 0) {
+            messageData.peers = peers;
+         }
       }
 
       that.unAckedMessages.push( { message: 'login', data: messageData } );
@@ -738,6 +742,21 @@ PeerCasa.prototype.addAction = function(_action) {
    console.log(this.name + ': Action '  + _action.name + ' added to peercasa ');
    this.actions[_action.name] = _action;
    var that = this;
+}
+
+PeerCasa.prototype.setCasaArea = function(_area) {
+   if (this.area != _area) {
+
+      if (this.area) {
+         this.area.removeCasa(this);
+      }
+
+      this.area = _area;
+
+      if (this.area) {
+         this.area.addCasa(this);
+      }
+   }
 }
 
 module.exports = exports = PeerCasa;

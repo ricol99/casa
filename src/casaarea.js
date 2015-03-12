@@ -4,15 +4,9 @@ var CasaSystem = require('./casasystem');
 
 function CasaArea(_config) {
    this.casas = [];
+   this.casaCount = 0;
 
    this.casaSys = CasaSystem.mainInstance();
-
-   if (_config.parentArea) {
-      this.parentArea = this.casaSys.findCasaArea(_config.parentArea);
-   }
-   else {
-      this.parentArea = null;
-   }
 
    Thing.call(this, _config);
 
@@ -22,9 +16,28 @@ function CasaArea(_config) {
 util.inherits(CasaArea, Thing);
 
 CasaArea.prototype.addCasa = function(_casa) {
-   this.casas[_casa.name] = _casa;;
+   this.casas[_casa.name] = _casa;
+   this.casaCount++;
 
    this.setupCasaListeners(_casa);
+}
+
+CasaArea.prototype.removeCasa = function(_casa) {
+   this.casas[_casa.name] = null;
+   this.casaCount--;
+ 
+   // delete area if empty!
+   if (this.casaCount == 0) {
+      this.casasys.deleteCasaArea(this);
+   }
+}
+
+CasaArea.prototype.removeAllCasas = function() {
+  var len = this.casas.length;
+
+   for (var i = 0 ; i < len; ++i) {
+      this.casas[i].setArea(null);
+   }
 }
 
 CasaArea.prototype.setUber = function(_casa) {
