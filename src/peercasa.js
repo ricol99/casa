@@ -76,6 +76,7 @@ function PeerCasa(_config) {
                   that.connected = false;
                   clearInterval(that.intervalID);
                   that.intervalID = null;
+                  that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name });
                   that.socket = null;
                   that.emit('inactive', { sourceName: that.name });
                }
@@ -152,7 +153,7 @@ PeerCasa.prototype.invalidateSources = function() {
 
       if(this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
-         this.remoteCasas[prop].invalidateSource();
+         this.remoteCasas[prop].invalidateSources();
          this.casaSys.allObjects[this.remoteCasas[prop].name] = null;
          this.casaSys.remoteCasas[this.remoteCasas[prop].name] = null;
          delete this.remoteCasas[prop];
@@ -237,6 +238,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          clearInterval(that.intervalID);
          that.intervalID = null;
+         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
       }
@@ -250,6 +252,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          clearInterval(that.intervalID);
          that.intervalID = null;
+         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
       }
