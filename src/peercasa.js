@@ -195,9 +195,9 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          casaConfig: that.casa.config
       };
 
-      if (that.casaType == 'child') {
+      if (that.loginAs == 'child') {
          var peers = [];
-         for(var prop in that.casaSys.remoteCasas) {
+         for (var prop in that.casaSys.remoteCasas) {
             console.log('CCCCCCCCCCCASA ' + that.casaSys.remoteCasas[prop].name);
             if (that.casaSys.remoteCasas.hasOwnProperty(prop) && (that.casaSys.remoteCasas[prop].loginAs == 'peer')){
                peers.push(that.casaSys.remoteCasas[prop].name);
