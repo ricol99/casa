@@ -16,6 +16,8 @@ function CasaSystem(_config) {
    this.remoteCasas = [];
 
    this.casaArea = null;
+   this.parentCasaArea = null;
+   this.peerCasaArea = null;
    this.childCasaAreas = [];
 
    this.constructors = {};
@@ -45,6 +47,9 @@ function CasaSystem(_config) {
 
    // Extract all actions hosted by this casa
    this.extractCasaActions();
+
+   // Create area for peer casas to live in
+   this.createPeerCasaArea();
 
    // start conecting to parent, if it exists
    if (this.parentCasa) {
@@ -104,6 +109,7 @@ CasaSystem.prototype.extractParentCasa = function() {
 
       var ParentCasaArea = require('./parentcasaarea');
       this.parentCasaArea = new ParentCasaArea ({ name: 'parentcasaarea:my-parent' });
+      this.casaAreas[this.parentCasaArea.name] = this.parentCasaArea;
       this.allObjects[this.parentCasaArea.name] = this.parentCasaArea;
       console.log('New parentcasaarea: ' + this.parentCasaArea.name);
 
@@ -145,6 +151,13 @@ CasaSystem.prototype.extractCasaActions = function() {
       that.allObjects[actionObj.name] = actionObj;
       console.log('New action: ' + action.name);
    });
+}
+
+CasaSystem.prototype.createPeerCasaArea = function() {
+   var PeerCasaArea = require('./peercasaarea');
+   this.peerCasaArea= new PeerCasaArea({ name: 'peercasaarea:my-peers' });
+   this.casaAreas[this.peerCasaArea.name] = this.peerCasaArea;
+   this.allObjects[this.peerCasaArea.name] = this.peerCasaArea;
 }
 
 CasaSystem.prototype.createChildCasaArea = function(_casas) {
@@ -253,6 +266,7 @@ CasaSystem.prototype.createPeerCasa = function(_config) {
    console.log('Creating a peer casa for casa ' + _config.name);
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
+   peerCasa.setArea(this.peerCasaArea);
 
    this.remoteCasas[peerCasa.name] = peerCasa;
    this.allObjects[peerCasa.name] = peerCasa;
