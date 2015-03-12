@@ -104,6 +104,7 @@ CasaSystem.prototype.extractParentCasa = function() {
    if (this.config.parentCasa) {
       var ParentCasa = require('./parentcasa');
       this.parentCasa = new ParentCasa(this.config.parentCasa);
+      this.remoteCasas[this.parentCasa.name] = this.parentCasa;
       this.allObjects[this.parentCasa.name] = this.parentCasa;
       console.log('New parentcasa: ' + this.parentCasa.name);
 
