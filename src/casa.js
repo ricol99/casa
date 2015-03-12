@@ -157,7 +157,10 @@ function Connection(_server, _socket) {
             that.server.nameClient(that, that.peerName, remoteCasa); 
 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
-            that.socket.emit('casa-active', { sourceName: that.name, config: that.config });
+            setTimeout(function() {
+               console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh');
+               that.socket.emit('casa-active', { sourceName: that.name, config: that.config });
+            }, 2000);
 
             that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
          }

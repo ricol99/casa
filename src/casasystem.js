@@ -197,12 +197,15 @@ CasaSystem.prototype.deleteCasaArea = function(_area) {
 
 CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
    var knownPeerCasas = [];
-   var len = _peers.length;
 
-   for (var i = 0 ; i < len; ++i) {
+   if (_peers) {
+      var len = _peers.length;
 
-      if (this.remoteCasas[_peers[i]]) {
-         knownPeerCasas.push(this.remoteCasas[_peers[i]]);
+      for (var i = 0 ; i < len; ++i) {
+
+         if (this.remoteCasas[_peers[i]]) {
+            knownPeerCasas.push(this.remoteCasas[_peers[i]]);
+         }
       }
    }
 
@@ -243,9 +246,7 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
    var area = null;
 
    // Resolve area
-   if (_peers) {
-      area = this.resolveCasaAreasAndPeers(_config.name, _peers);
-   }
+   area = this.resolveCasaAreasAndPeers(_config.name, _peers);
 
    var ChildCasa = require('./childcasa');
    var childCasa = new ChildCasa(_config);
