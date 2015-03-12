@@ -23,7 +23,7 @@ function CasaSystem(_config) {
    this.constructors = {};
    this.allObjects = [];
 
-   this.areaID = 1;
+   this.areaId = 1;
 
    Thing.call(this, _config);
 
