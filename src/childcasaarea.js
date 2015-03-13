@@ -77,8 +77,9 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
       // All my uncles and aunties
       for(var prop3 in this.casaSys.peerCasaArea.casas) {
 
-      if (this.casaSys.peerCasaArea.casas.hasOwnProperty(prop3)){
-         casaList.push(this.casaSys.peerCasaArea.casas[prop3]);
+         if (this.casaSys.peerCasaArea.casas.hasOwnProperty(prop3)){
+            casaList.push(this.casaSys.peerCasaArea.casas[prop3]);
+         }
       }
    }
 
