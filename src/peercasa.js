@@ -290,24 +290,29 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 }
 
 PeerCasa.prototype.createStatesAndActivators = function(_data, _peerCasa) {
-   var len = _data.casaConfig.states.length;
-   console.log(_peerCasa.name + ': New states found = ' + len);
 
-   var PeerState = require('./peerstate');
-   for (var i = 0; i < len; ++i) {
-      console.log(_peerCasa.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
-      var source = new PeerState(_data.casaConfig.states[i], _peerCasa);
-      this.casaSys.allObjects[source.name] = source;
+   if (_data.casaConfig &&  _data.casaConfig.states) {
+      var len = _data.casaConfig.states.length;
+      console.log(_peerCasa.name + ': New states found = ' + len);
+
+      var PeerState = require('./peerstate');
+      for (var i = 0; i < len; ++i) {
+         console.log(_peerCasa.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
+         var source = new PeerState(_data.casaConfig.states[i], _peerCasa);
+         this.casaSys.allObjects[source.name] = source;
+      }
    }
 
-   len = _data.casaConfig.activators.length;
-   console.log(_peerCasa.name + ': New activators found = ' + len);
+   if (_data.casaConfig &&  _data.casaConfig.activators) {
+      var len = _data.casaConfig.activators.length;
+      console.log(_peerCasa.name + ': New activators found = ' + len);
 
-   var PeerActivator = require('./peeractivator');
-   for (i = 0; i < len; ++i) {
-      console.log(_peerCasa.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
-      var source = new PeerActivator(_data.casaConfig.activators[i], _peerCasa);
-      this.casaSys.allObjects[source.name] = source;
+      var PeerActivator = require('./peeractivator');
+      for (i = 0; i < len; ++i) {
+         console.log(_peerCasa.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
+         var source = new PeerActivator(_data.casaConfig.activators[i], _peerCasa);
+         this.casaSys.allObjects[source.name] = source;
+      }
    }
 
    // Refresh all inactive activators and actions
