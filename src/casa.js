@@ -157,8 +157,15 @@ function Connection(_server, _socket) {
             that.server.nameClient(that, that.peerName, remoteCasa); 
 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+            var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+            var casaListLen = casaList.length;
+
             setTimeout(function() {
-               that.socket.emit('casa-active', { sourceName: that.name, casaConfig: that.server.config });
+
+               // Send info regarding all relevant casas
+               for (var i = 0; i < casaListLen; ++i) {
+                  that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
+               }
             }, 1000);
 
             that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
@@ -168,9 +175,17 @@ function Connection(_server, _socket) {
          var remoteCasa = that.server.createRemoteCasa(_data);
          that.server.nameClient(that, that.peerName, remoteCasa); 
          that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+         var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+         var casaListLen = casaList.length;
+
          setTimeout(function() {
-            that.socket.emit('casa-active', { sourceName: that.name, casaConfig: that.server.config });
+
+            // Send info regarding all relevant casas
+            for (var i = 0; i < casaListLen; ++i) {
+               that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
+            }
          }, 1000);
+
          that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
       }
    });

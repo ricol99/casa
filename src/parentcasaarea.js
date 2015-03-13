@@ -33,6 +33,38 @@ function ParentCasaArea(_config) {
 
 util.inherits(ParentCasaArea, CasaArea);
 
+ParentCasaArea.prototype.buildCasaForwardingList = function() {
+   var casalist = [];
+
+   // My child
+   casaList.push(this.casaSys.casa);
+
+   // All my grand children
+   for (var prop in this.casaSys.childCasaAreas) {
+
+      if (this.casaSys.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.casaSys.childCasaAreas[prop];
+
+         for(var prop2 in childCasaArea.casas) {
+
+            if (childCasaArea.casas.hasOwnProperty(prop2)){
+               casaList.push(childCasaArea.casas[prop2]);
+            }
+         }
+      }
+   }
+
+   // Any remotes my child is aware of
+   for(var prop4 in this.casaSys.remoteCasas) {
+
+      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
+         casaList.push(this.casaSys.remoteCasas[prop4]);
+      }
+   }
+
+   return casaList;
+}
+
 ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;
 

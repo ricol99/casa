@@ -33,7 +33,6 @@ function ChildCasaArea(_config) {
       }
 
       if (that.casaSys.parentCasaArea) {
-         console.log(that.name + ': Broadcasting to my parent');
          that.parentCasaArea.broadcastMessage(_message);
       }
    };
@@ -48,6 +47,56 @@ function ChildCasaArea(_config) {
 }
 
 util.inherits(ChildCasaArea, CasaArea);
+
+ChildCasaArea.prototype.buildCasaForwardingList = function() {
+   var casalist = [];
+
+   // My parent
+   casaList.push(this.casaSys.casa);
+
+   // All my siblings
+   for (var prop in this.casaSys.childCasaAreas) {
+
+      if (this.casaSys.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.casaSys.childCasaAreas[prop];
+
+         // Is the area a sibling?
+         if (childCasaArea != this) {
+
+            for(var prop2 in childCasaArea.casas) {
+
+               if (childCasaArea.casas.hasOwnProperty(prop2)){
+                  casaList.push(childCasaArea.casas[prop2]);
+               }
+            }
+         }
+      }
+   }
+
+   if (this.casaSys.peerCasaArea) {
+      // All my uncles and aunties
+      for(var prop3 in this.casaSys.peerCasaArea.casas) {
+
+      if (this.casaSys.peerCasaArea.casas.hasOwnProperty(prop3)){
+         casaList.push(this.casaSys.peerCasaArea.casas[prop3]);
+      }
+   }
+
+   if (this.casaSys.parentCasaArea) {
+      // My grand parent
+      casaList.push(this.casaSys.parentCasaArea.casas[0];
+   }
+
+   // Any remotes my parent is aware of
+   for(var prop4 in this.casaSys.remoteCasas) {
+
+      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
+         casaList.push(this.casaSys.remoteCasas[prop4]);
+      }
+   }
+
+   return casaList;
+}
 
 ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;

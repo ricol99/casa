@@ -11,6 +11,7 @@ function RemoteCasa(_config, _peerCasa) {
 
    Thing.call(this, _config);
 
+   this.loginAs = 'remote';
    this.states = [];
    this.activators = [];
    this.actions = [];

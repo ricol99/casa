@@ -7,6 +7,7 @@ var CasaSystem = require('./casasystem');
 function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
+   this.config = _config;
    
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
@@ -218,8 +219,15 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       }
       that.createStatesAndActivators(_data, that);
       that.connected = true;
-      that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: that.casa.name, casaConfig: that.casa.config }});
-      that.socket.emit('casa-active', { sourceName: that.casa.name, casaConfig: that.casa.config });
+
+      var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+      var casaListLen = casaList.length;
+
+      // Send info regarding all relevant casas
+      for (var i = 0; i < casaListLen; ++i) {
+         that.unAckedMessages.push( { message: 'casa-active', data: { sourceName: casaList[i].name, casaConfig: casaList[i].config }});
+         that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
+      }  
 
       that.emit('active', { sourceName: that.name });
    });

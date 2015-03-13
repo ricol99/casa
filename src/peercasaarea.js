@@ -31,6 +31,30 @@ function PeerCasaArea(_config) {
 
 util.inherits(PeerCasaArea, CasaArea);
 
+PeerCasaArea.prototype.buildCasaForwardingList = function() {
+   var casalist = [];
+
+   // My peer
+   casaList.push(this.casaSys.casa);
+
+   // All my peer's children
+   for (var prop in this.casaSys.childCasaAreas) {
+
+      if (this.casaSys.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.casaSys.childCasaAreas[prop];
+
+         for(var prop2 in childCasaArea.casas) {
+
+            if (childCasaArea.casas.hasOwnProperty(prop2)){
+               casaList.push(childCasaArea.casas[prop2]);
+            }
+         }
+      }
+   }
+
+   return casaList;
+}
+
 PeerCasaArea.prototype.setupCasaListeners = function(_casa) {
    var that = this;
 
