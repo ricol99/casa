@@ -37,10 +37,6 @@ Action.prototype.establishListeners = function() {
       this.target = null;
    }
 
-   if (this.target) {
-      this.target.addAction(this);
-   }
-
    if (this.actionEnabled) { 
       var activeCallback = function(_data) {
          console.log(that.name + ': ACTIVATED');
