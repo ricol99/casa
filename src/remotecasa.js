@@ -107,7 +107,7 @@ RemoteCasa.prototype.invalidateSources = function() {
       if(this.states.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding state ' + this.states[prop].name);
          this.states[prop].invalidateSource();
-         this.casaSys.allObjects[this.states[prop].name] = undefined;
+         delete this.casaSys.allObjects[this.states[prop].name];
          delete this.states[prop];
       }
    }
@@ -117,7 +117,7 @@ RemoteCasa.prototype.invalidateSources = function() {
       if(this.activators.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding activator ' + this.activators[prop].name);
          this.activators[prop].invalidateSource();
-         this.casaSys.allObjects[this.activators[prop].name] = undefined;
+         delete this.casaSys.allObjects[this.activators[prop].name];
          delete this.activators[prop];
       }
    }

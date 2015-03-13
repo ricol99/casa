@@ -132,7 +132,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.states.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding state ' + this.states[prop].name);
          this.states[prop].invalidateSource();
-         this.casaSys.allObjects[this.states[prop].name] = undefined;
+         delete this.casaSys.allObjects[this.states[prop].name];
          delete this.states[prop];
       }
    }
@@ -142,7 +142,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.activators.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding activator ' + this.activators[prop].name);
          this.activators[prop].invalidateSource();
-         this.casaSys.allObjects[this.activators[prop].name] = undefined;
+         delete this.casaSys.allObjects[this.activators[prop].name];
          delete this.activators[prop];
       }
    }
@@ -157,10 +157,9 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
          this.remoteCasas[prop].invalidateSources();
-         this.casaSys.allObjects[this.remoteCasas[prop].name] = undefined;
-         this.casaSys.remoteCasas[this.remoteCasas[prop].name] = undefined;
+         delete this.casaSys.allObjects[this.remoteCasas[prop].name];
+         delete this.casaSys.remoteCasas[this.remoteCasas[prop].name];
          delete this.remoteCasas[prop];
-         this.remoteCasas[prop] = undefined;
       }
    }
 }
@@ -277,9 +276,9 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       setTimeout(function() {
 
          if (!that.connected) {
-            delete this.socket;
-            that.casaSys.remoteCasas[that.remoteCasa.name] = undefined;
-            that.casaSys.allObjects[that.remoteCasa.name] = undefined;
+            delete that.socket;
+            delete that.casaSys.remoteCasas[that.remoteCasa.name];
+            delete that.casaSys.allObjects[that.remoteCasa.name];
             delete that;
          }
       }, this.deathTime * 1000);
@@ -370,9 +369,9 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
          if (remoteCasa) {
             remoteCasa.invalidateSources();
-            that.remoteCasas[remoteCasa.name] = undefined;
-            that.casaSys.remoteCasas[remoteCasa.name] = undefined;
-            that.casaSys.allObjects[remoteCasa.name] = undefined;
+            delete that.remoteCasas[remoteCasa.name];
+            delete that.casaSys.remoteCasas[remoteCasa.name];
+            delete that.casaSys.allObjects[remoteCasa.name];
             delete remoteCasa;
          }
          that.socket.emit('casa-inactiveAACCKK', _data);
