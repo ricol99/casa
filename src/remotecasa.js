@@ -51,22 +51,38 @@ RemoteCasa.prototype.establishListeners = function(_force) {
       // listen for state changes from peer casas
       this.peerCasa.on('state-active', function(_data) {
          console.log(that.name + ': Event received from remote casa. Event name: active, state: ' + _data.sourceName);
+
+         if (that.states[_data.sourceName]) {
+            that.states[_data.sourceName].stateHasGoneActive(_data);
+         }
          that.emit('state-active', _data);
       });
 
       this.peerCasa.on('state-inactive', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
+
+         if (that.states[_data.sourceName]) {
+            that.states[_data.sourceName].stateHasGoneInactive(_data);
+         }
          that.emit('state-inactive', _data);
       });
 
       // listen for activator changes from peer casas
       this.peerCasa.on('activator-active', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
+
+         if (that.activators[_data.sourceName]) {
+            that.activators[_data.sourceName].activatorHasGoneActive(_data);
+         }
          that.emit('activator-active', _data);
       });
 
       this.peerCasa.on('activator-inactive', function(_data) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
+
+         if (that.activators[_data.sourceName]) {
+            that.activators[_data.sourceName].activatorHasGoneInactive(_data);
+         }
          that.emit('activator-inactive', _data);
       });
 

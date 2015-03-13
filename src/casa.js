@@ -108,7 +108,9 @@ Casa.prototype.deleteMe = function(_connection) {
       delete this.remoteCasa;
    }
 
-   this.socket.close();
+   if (this.socket) {
+      this.socket.close();
+   }
    delete _connection;
 }
 
