@@ -156,12 +156,16 @@ PeerCasa.prototype.invalidateSources = function() {
 
       if(this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
+         var remoteCasa = remoteCasas[prop];
          this.remoteCasas[prop].invalidateSources();
          delete this.casaSys.allObjects[this.remoteCasas[prop].name];
          delete this.casaSys.remoteCasas[this.remoteCasas[prop].name];
          delete this.remoteCasas[prop];
+         delete remoteCasa;
       }
    }
+   delete this.remoteCasas;
+   this.remoteCasas = [];
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -264,6 +268,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
+         that.deleteMeIfNeeded();
       }
    });
 }
