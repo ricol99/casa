@@ -93,12 +93,14 @@ Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
 }
 
 Casa.prototype.deleteMe = function(_connection) {
+
    if (_connection.peerName) {
       delete this.anonymousClients[_connection.socket.id];
    } 
    else {
       delete this.clients[_connection.peerName];
    }
+
    if (this.remoteCasa) {
       this.remoteCasa.invalidateSources();
       delete this.casaSys.remoteCasas[this.remoteCasa.name];
@@ -106,6 +108,7 @@ Casa.prototype.deleteMe = function(_connection) {
       delete this.remoteCasa;
    }
 
+   this.socket.close();
    delete _connection;
 }
 
@@ -147,7 +150,6 @@ function Connection(_server, _socket) {
          if (that.server.clients[that.peerName] == that) {
             // socket has been reused
             console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-            that.socket.close();
             deleteMe(that);
          }
          else {
