@@ -152,11 +152,11 @@ PeerCasa.prototype.invalidateSources = function() {
    this.states = [];
    this.activators = [];
 
-   for(var prop in this.remoteCasas) {
+   for (var prop in this.remoteCasas) {
 
-      if(this.remoteCasas.hasOwnProperty(prop)){
+      if (this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
-         var remoteCasa = remoteCasas[prop];
+         var remoteCasa = this.remoteCasas[prop];
          this.remoteCasas[prop].invalidateSources();
          delete this.casaSys.allObjects[this.remoteCasas[prop].name];
          delete this.casaSys.remoteCasas[this.remoteCasas[prop].name];
