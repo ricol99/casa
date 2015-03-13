@@ -23,20 +23,26 @@ function RemoteCasa(_config, _peerCasa) {
 
    // Listen to Casa for my remote instance to connect
    this.peerCasa.on('casa-active', function(_data) {
-     that.active = true;
-     console.log(that.name + ': Connected to my peer. Going active.');
 
-     // listen for state and activator changes from peer casas
-     that.establishListeners(true);
-     that.emit('active', { sourceName: that.name });
+      if (_data.sourceName == that.name) {
+         that.active = true;
+         console.log(that.name + ': Connected to my peer. Going active.');
+
+         // listen for state and activator changes from peer casas
+         that.establishListeners(true);
+         that.emit('active', { sourceName: that.name });
+      }
    });
 
    this.peerCasa.on('casa-inactive', function(_data) {
 
-      if (that.active) {
-         console.log(that.name + ': Lost connection to my peer. Going inactive.');
-         that.active = false;
-         that.emit('inactive', { sourceName: that.name });
+      if (_data.sourceName == that.name) {
+
+         if (that.active) {
+            console.log(that.name + ': Lost connection to my peer. Going inactive.');
+            that.active = false;
+            that.emit('inactive', { sourceName: that.name });
+         }
       }
    });
 }
