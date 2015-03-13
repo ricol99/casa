@@ -23,7 +23,7 @@ CasaArea.prototype.addCasa = function(_casa) {
 }
 
 CasaArea.prototype.removeCasa = function(_casa) {
-   this.casas[_casa.name] = null;
+   this.casas[_casa.name] = undefined;
    this.casaCount--;
  
    this.removeCasaListeners(_casa);

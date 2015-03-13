@@ -88,21 +88,21 @@ Casa.prototype.refreshActivatorsAndActions = function() {
 
 Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
    this.clients[_name] = _connection;
-   this.anonymousClients[_connection.id] = null;
+   this.anonymousClients[_connection.id] = undefined;
    this.remoteCasa = _remoteCasa;
 }
 
 Casa.prototype.deleteMe = function(_connection) {
    if (_connection.peerName) {
-      this.anonymousClients[_connection.socket.id] = null;
+      this.anonymousClients[_connection.socket.id] = undefined;
    } 
    else {
-      this.clients[_connection.peerName] = null;
+      this.clients[_connection.peerName] = undefined;
    }
    if (this.remoteCasa) {
       this.remoteCasa.invalidateSources();
-      this.casaSys.remoteCasas[this.remoteCasa.name] = null;
-      this.casaSys.allObjects[this.remoteCasa.name] = null;
+      this.casaSys.remoteCasas[this.remoteCasa.name] = undefined;
+      this.casaSys.allObjects[this.remoteCasa.name] = undefined;
       delete this.remoteCasa;
    }
 

@@ -132,7 +132,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.states.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding state ' + this.states[prop].name);
          this.states[prop].invalidateSource();
-         this.casaSys.allObjects[this.states[prop].name] = null;
+         this.casaSys.allObjects[this.states[prop].name] = undefined;
          delete this.states[prop];
       }
    }
@@ -142,7 +142,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.activators.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding activator ' + this.activators[prop].name);
          this.activators[prop].invalidateSource();
-         this.casaSys.allObjects[this.activators[prop].name] = null;
+         this.casaSys.allObjects[this.activators[prop].name] = undefined;
          delete this.activators[prop];
       }
    }
@@ -157,10 +157,10 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.name + ': Invaliding remote casa ' + this.remoteCasas[prop].name);
          this.remoteCasas[prop].invalidateSources();
-         this.casaSys.allObjects[this.remoteCasas[prop].name] = null;
-         this.casaSys.remoteCasas[this.remoteCasas[prop].name] = null;
+         this.casaSys.allObjects[this.remoteCasas[prop].name] = undefined;
+         this.casaSys.remoteCasas[this.remoteCasas[prop].name] = undefined;
          delete this.remoteCasas[prop];
-         this.remoteCasas[prop] = null;
+         this.remoteCasas[prop] = undefined;
       }
    }
 }
@@ -278,8 +278,8 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 
          if (!that.connected) {
             delete this.socket;
-            that.casaSys.remoteCasas[that.remoteCasa.name] = null;
-            that.casaSys.allObjects[that.remoteCasa.name] = null;
+            that.casaSys.remoteCasas[that.remoteCasa.name] = undefined;
+            that.casaSys.allObjects[that.remoteCasa.name] = undefined;
             delete that;
          }
       }, this.deathTime * 1000);
@@ -370,9 +370,9 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
          if (remoteCasa) {
             remoteCasa.invalidateSources();
-            that.remoteCasas[remoteCasa.name] = null;
-            that.casaSys.remoteCasas[remoteCasa.name] = null;
-            that.casaSys.allObjects[remoteCasa.name] = null;
+            that.remoteCasas[remoteCasa.name] = undefined;
+            that.casaSys.remoteCasas[remoteCasa.name] = undefined;
+            that.casaSys.allObjects[remoteCasa.name] = undefined;
             delete remoteCasa;
          }
          that.socket.emit('casa-inactiveAACCKK', _data);
@@ -383,6 +383,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Event received from my peer. Event name: active, state: ' + _data.sourceName);
          that.emit('state-active', _data);
          that.emit('broadcast-message', { message: 'state-active', data:_data, sourceCasa: that.name });
+
+         if (that.states[_data.sourceName]) {
+            that.states[_data.sourceName].stateHasGoneActive(_data);
+         }
          that.socket.emit('state-activeAACCKK', _data);
       });
 
@@ -390,6 +394,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
          that.emit('state-inactive', _data);
          that.emit('broadcast-message', { message: 'state-inactive', data:_data, sourceCasa: that.name });
+
+         if (that.states[_data.sourceName]) {
+            that.states[_data.sourceName].stateHasGoneInactive(_data);
+         }
          that.socket.emit('state-inactiveAACCKK', _data);
       });
 
@@ -398,6 +406,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
          that.emit('activator-active', _data);
          that.emit('broadcast-message', { message: 'activator-active', data:_data, sourceCasa: that.name });
+
+         if (that.activators[_data.sourceName]) {
+            that.activators[_data.sourceName].activatorHasGoneActive(_data);
+         }
          that.socket.emit('activator-activeAACCKK', _data);
       });
 
@@ -405,6 +417,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
          that.emit('activator-inactive', _data);
          that.emit('broadcast-message', { message: 'activator-inactive', data:_data, sourceCasa: that.name });
+
+         if (that.activators[_data.sourceName]) {
+            that.activators[_data.sourceName].activatorHasGoneInactive(_data);
+         }
          that.socket.emit('activator-inactiveAACCKK', _data);
       });
 
@@ -419,7 +435,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             that.stateRequests[_data.requestId].setActive(function(_resp) {
                that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.stateRequests[ _resp.requestId];
-               that.stateRequests[ _resp.requestId] = null;
             });
          } 
          else {
@@ -439,7 +454,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             that.stateRequests[_data.requestId].setInactive(function(_resp) {
                that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.stateRequests[ _resp.requestId];
-               that.stateRequests[ _resp.requestId] = null;
             });
          }
          else {
@@ -459,7 +473,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             that.stateRequests[_data.requestId].isActive(function(_resp) {
                that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.stateRequests[ _resp.requestId];
-               that.stateRequests[ _resp.requestId] = null;
             });
          }
          else {
@@ -479,7 +492,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             if (that.incompleteRequests[_data.requestId]) {
                that.incompleteRequests[_data.requestId].completeRequest(_data.result);
                delete that.incompleteRequests[_data.requestId];
-               that.incompleteRequests[_data.requestId] = null;
             }
          }
          else {
@@ -499,7 +511,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             if (that.incompleteRequests[_data.requestId]) {
                that.incompleteRequests[_data.requestId].completeRequest(_data.result);
                delete that.incompleteRequests[_data.requestId];
-               that.incompleteRequests[_data.requestId] = null;
             }
          }
          else {
@@ -519,7 +530,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
             if (that.incompleteRequests[_data.requestId]) {
                that.incompleteRequests[_data.requestId].completeRequest(_data.result);
                delete that.incompleteRequests[_data.requestId];
-               that.incompleteRequests[_data.requestId] = null;
             }
          }
          else {
@@ -679,7 +689,6 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
    // Clean up any already acked messages
    toDelete.forEach(function(_requestId) {
       delete that.incompleteRequests[_requestId];
-      that.incompleteRequests[_requestId] = null;
    });
 
 }
@@ -753,7 +762,6 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
-         that.incompleteRequests[_requestId] = null;
       });
    }
    else {
@@ -773,7 +781,6 @@ PeerCasa.prototype.setStateInactive = function(_state, _callback) {
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
-         that.incompleteRequests[_requestId] = null;
       });
    }
    else {
@@ -793,7 +800,6 @@ PeerCasa.prototype.isStateActive = function(_state, _callback) {
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a isActive request for state ' + _state.name);
          delete that.incompleteRequests[_requestId];
-         that.incompleteRequests[_requestId] = null;
       });
    }
    else {

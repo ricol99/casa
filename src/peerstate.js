@@ -11,23 +11,19 @@ function PeerState(_name, _peerCasa) {
    var that = this;
 
    this.peerCasa.addState(this);
-
-   this.peerCasa.on('state-active', function(_data) {
-      if (_data.sourceName == that.name) {
-         console.log(that.name + ': received active event from peer. Going active!');
-         that.emit('active', _data);
-      }
-   });
-
-   this.peerCasa.on('state-inactive', function(_data) {
-      if (_data.sourceName == that.name) {
-         console.log(that.name + ': received inactive event from peer. Going inactive!');
-         that.emit('inactive', _data);
-      }
-   });
 }
 
 util.inherits(PeerState, events.EventEmitter);
+
+PeerState.prototype.stateHasGoneActive = function(_data) {
+   console.log(that.name + ': received active event from peer. Going active!');
+   that.emit('active', _data);
+}
+
+PeerState.prototype.stateHasGoneInactive = function(_data) {
+   console.log(that.name + ': received inactive event from peer. Going inactive!');
+   that.emit('inactive', _data);
+}
 
 PeerState.prototype.setActive = function(_callback) {
    console.log(this.name + ': Attempting to set state to active');

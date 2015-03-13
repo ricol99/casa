@@ -13,23 +13,19 @@ function PeerActivator(_name, _peerCasa) {
    if (this.peerCasa) {
       this.peerCasa.addActivator(this);
    }
-
-   this.peerCasa.on('activator-active', function(_data) {
-      if (_data.sourceName == that.name) {
-         console.log(that.name + ': received active event from peer. Going active!');
-         that.emit('active', _data);
-      }
-   });
-
-   this.peerCasa.on('activator-inactive', function(_data) {
-      if (_data.sourceName == that.name) {
-         console.log(that.name + ': received inactive event from peer. Going inactive!');
-         that.emit('inactive', _data);
-      }
-   });
 }
 
 util.inherits(PeerActivator, events.EventEmitter);
+
+PeerActivator.prototype.activatorHasGoneActive = function(_data) {
+   console.log(that.name + ': received active event from peer. Going active!');
+   that.emit('active', _data);
+}
+
+PeerActivator.prototype.activatorHasGoneInactive = function(_data) {
+   console.log(that.name + ': received inactive event from peer. Going inactive!');
+   that.emit('inactive', _data);
+}
 
 PeerActivator.prototype.invalidateSource = function() {
    this.emit('invalid');

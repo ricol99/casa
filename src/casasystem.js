@@ -184,9 +184,9 @@ CasaSystem.prototype.findCasaArea = function(_areaName) {
 }
 
 CasaSystem.prototype.deleteCasaArea = function(_area) {
-   this.casaAreas[_area.name] = null;
-   this.allObjects[_area.name] = null;
-   this.childCasaAreas[_area.name] = null;
+   this.casaAreas[_area.name] = undefined;
+   this.allObjects[_area.name] = undefined;
+   this.childCasaAreas[_area.name] = undefined;
 
    if (_area == this.parentCasaArea) {
       this.parentCasaArea = null;
