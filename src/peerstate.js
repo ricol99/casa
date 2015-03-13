@@ -16,13 +16,13 @@ function PeerState(_name, _peerCasa) {
 util.inherits(PeerState, events.EventEmitter);
 
 PeerState.prototype.stateHasGoneActive = function(_data) {
-   console.log(that.name + ': received active event from peer. Going active!');
-   that.emit('active', _data);
+   console.log(this.name + ': received active event from peer. Going active!');
+   this.emit('active', _data);
 }
 
 PeerState.prototype.stateHasGoneInactive = function(_data) {
-   console.log(that.name + ': received inactive event from peer. Going inactive!');
-   that.emit('inactive', _data);
+   console.log(this.name + ': received inactive event from peer. Going inactive!');
+   this.emit('inactive', _data);
 }
 
 PeerState.prototype.setActive = function(_callback) {
