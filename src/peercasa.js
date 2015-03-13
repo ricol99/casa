@@ -331,7 +331,6 @@ PeerCasa.prototype.establishListeners = function(_force) {
          if (!that.casaSys.remoteCasas[_data.sourceName]) {
             // Create a remote casa to represent the newly available casa
             RemoteCasa = require('./remotecasa');
-            console.log('ksdjksdjksjskjdsjdjskdjskdjskdjskdjskdj', _data);
             var remoteCasa = new RemoteCasa(_data.casaConfig, that);
             that.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
