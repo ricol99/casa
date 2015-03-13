@@ -220,7 +220,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.createStatesAndActivators(_data, that);
       that.connected = true;
 
-      var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+      var casaList = that.casaArea.buildCasaForwardingList();
       var casaListLen = casaList.length;
 
       // Send info regarding all relevant casas

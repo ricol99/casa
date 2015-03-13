@@ -84,7 +84,7 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
 
    if (this.casaSys.parentCasaArea) {
       // My grand parent
-      casaList.push(this.casaSys.parentCasaArea.casas[0];
+      casaList.push(this.casaSys.parentCasaArea.casas[0]);
    }
 
    // Any remotes my parent is aware of
