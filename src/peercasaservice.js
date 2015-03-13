@@ -3,7 +3,7 @@ var Thing = require('./thing');
 var PeerCasa = require('./peercasa');
 var CasaSystem = require('./casasystem');
 
-if (process.env.INTERNETCASA) {
+if (!process.env.INTERNETCASA) {
    var mdns = require('mdns');
 }
 
@@ -17,7 +17,7 @@ function PeerCasaService(_config) {
    this.name = this.casa.name;
    this.id = this.casa.id;
 
-   if (process.env.INTERNETCASA) {
+   if (!process.env.INTERNETCASA) {
       this.createAdvertisement();
 
       this.browser = mdns.createBrowser(mdns.tcp('casa'));
