@@ -367,7 +367,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
          var remoteCasa = that.casaSys.remoteCasas[_data.sourceName];
 
-         if (remoteCasa) {
+         if (remoteCasa && remoteCasa.loginAs == 'remote') {
             remoteCasa.invalidateSources();
             delete that.remoteCasas[remoteCasa.name];
             delete that.casaSys.remoteCasas[remoteCasa.name];
