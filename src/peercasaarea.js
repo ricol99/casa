@@ -32,7 +32,7 @@ function PeerCasaArea(_config) {
 util.inherits(PeerCasaArea, CasaArea);
 
 PeerCasaArea.prototype.buildCasaForwardingList = function() {
-   var casalist = [];
+   var casaList = [];
 
    // My peer
    casaList.push(this.casaSys.casa);

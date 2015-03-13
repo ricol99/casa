@@ -49,7 +49,7 @@ function ChildCasaArea(_config) {
 util.inherits(ChildCasaArea, CasaArea);
 
 ChildCasaArea.prototype.buildCasaForwardingList = function() {
-   var casalist = [];
+   var casaList = [];
 
    // My parent
    casaList.push(this.casaSys.casa);
