@@ -102,6 +102,7 @@ Casa.prototype.deleteMe = function(_connection) {
    if (this.remoteCasa) {
       this.remoteCasa.invalidateSources();
       this.casaSys.remoteCasas[this.remoteCasa.name] = null;
+      this.casaSys.allObjects[this.remoteCasa.name] = null;
       delete this.remoteCasa;
    }
 

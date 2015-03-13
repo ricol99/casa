@@ -15,6 +15,8 @@ function PeerCasa(_config) {
    this.casaArea = null;
    this.loginAs = 'peer';
    this.remoteCasas = [];
+   this.persistent = false;
+   this.deathTime = 60;
 
    Thing.call(this, _config);
 
@@ -248,6 +250,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
+         that.deleteMeIfNeeded();
       }
    });
 
@@ -264,6 +267,23 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.emit('inactive', { sourceName: that.name });
       }
    });
+}
+
+PeerCasa.prototype.deleteMeIfNeeded = function() {
+   var that = this;
+
+   if (!this.persistent) {
+
+      setTimeout(function() {
+
+         if (!that.connected)
+            delete this.socket;
+            that.casaSys.remoteCasas[that.remoteCasa.name] = null;
+            that.casaSys.allObjects[that.remoteCasa.name] = null;
+            delete that;
+         }
+      }, this.deathTime * 1000);
+   }
 }
 
 PeerCasa.prototype.createStatesAndActivators = function(_data, _peerCasa) {

@@ -7,6 +7,7 @@ function ParentCasa(_config) {
 
    PeerCasa.call(this, _config);
    this.loginAs = 'child';
+   this.persistent = true;
 
    var that = this;
 
