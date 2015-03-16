@@ -181,7 +181,7 @@ function InputDebouncer(_source, _threshold) {
                that.timeoutObj = null;
 
                if (!sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name })'
+                  that.emit('invalid', { sourceName: that.source.name });
                } 
                else if (that.sourceActive) {
                   that.emit('active', { sourceName: that.source.name });
@@ -209,7 +209,7 @@ function InputDebouncer(_source, _threshold) {
                that.timeoutObj = null;
 
                if (!sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name })'
+                  that.emit('invalid', { sourceName: that.source.name });
                }
                else if (!that.sourceActive) {
                   that.emit('inactive', { sourceName: that.source.name });
@@ -232,7 +232,7 @@ function InputDebouncer(_source, _threshold) {
                that.timeoutObj = null;
 
                if (!sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name })'
+                  that.emit('invalid', { sourceName: that.source.name });
                }
                else if (that.sourceActive) {
                   that.emit('active', { sourceName: that.source.name });
