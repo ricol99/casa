@@ -61,7 +61,7 @@ Action.prototype.establishListeners = function() {
          that.source.removeListener('active', activeCallback);
          that.source.removeListener('inactive', inactiveCallback);
          that.source.removeListener('invalid', invalidCallback);
-         that.emit('invalid');
+         that.emit('invalid', { sourceName: that.name });
       };
 
 

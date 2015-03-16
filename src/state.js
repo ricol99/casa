@@ -5,6 +5,7 @@ var CasaSystem = require('./casasystem');
 function State(_config) {
    this.name = _config.name;
    this.active = false;
+   this.sourceEnabled = true;
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;

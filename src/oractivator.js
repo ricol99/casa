@@ -4,6 +4,7 @@ var LogicActivator = require('./logicactivator');
 
 function OrActivator(_config) {
 
+   _config.allInputsRequiredForValidity = false;
    LogicActivator.call(this, _config);
 
    var that = this;

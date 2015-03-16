@@ -28,7 +28,8 @@ PeerActivator.prototype.activatorHasGoneInactive = function(_data) {
 }
 
 PeerActivator.prototype.invalidateSource = function() {
-   this.emit('invalid');
+   this.sourceEnabled = false;
+   this.emit('invalid', { sourceName: this.name });
 }
 
 module.exports = exports = PeerActivator;

@@ -41,7 +41,8 @@ PeerState.prototype.isActive = function(_callback) {
 }
 
 PeerState.prototype.invalidateSource = function() {
-   this.emit('invalid');
+   this.sourceEnabled = false;
+   this.emit('invalid', { sourceName: this.name });
 }
 
 module.exports = exports = PeerState;

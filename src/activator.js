@@ -35,10 +35,37 @@ util.inherits(Activator, events.EventEmitter);
 
 Activator.prototype.establishListeners = function() {
    var that = this;
-   this.source = this.casaSys.findSource(this.sourceName);
-   this.activatorEnabled = (this.source != null);
 
-   if (this.activatorEnabled) {
+   // Listener callbacks
+   var activeCallback = function(_data) {
+      that.sourceIsActive(_data.sourceName);
+   };
+
+   var inactiveCallback = function(_data) {
+      that.sourceIsInactive(_data.sourceName);
+   };
+
+   var invalidCallback = function(_data) {
+      console.log(that.name + ': INVALID');
+
+      that.sourceEnabled = false;
+      that.source.removeListener('active', activeCallback);
+      that.source.removeListener('inactive', inactiveCallback);
+      that.source.removeListener('invalid', invalidCallback);
+
+      if (this.inputDebounceTime > 0) {
+         // restore the source
+         delete that.source;
+         that.source = that.origSource;
+      }
+      that.emit('invalid', { sourceName: that.name });
+   };
+
+   // refresh source
+   this.source = this.casaSys.findSource(this.sourceName);
+   this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
+
+   if (this.sourceEnabled) {
 
       if (this.inputDebounceTime > 0) {
          this.origSource = this.source;
@@ -46,42 +73,18 @@ Activator.prototype.establishListeners = function() {
          console.log(this.name + ': Created input debouncer');
       }
 
-      var activeCallback = function(_data) {
-         that.sourceIsActive(_data.sourceName);
-      };
-
-      var inactiveCallback = function(_data) {
-         that.sourceIsInactive(_data.sourceName);
-      };
-
-      var invalidCallback = function(_data) {
-         console.log(that.name + ': INVALID');
-
-         that.activatorEnabled = false;
-         that.source.removeListener('active', activeCallback);
-         that.source.removeListener('inactive', inactiveCallback);
-         that.source.removeListener('invalid', invalidCallback);
-
-         if (this.inputDebounceTime > 0) {
-            // restore the source
-            delete that.source;
-            that.source = that.origSource;
-         }
-         that.emit('invalid');
-      };
-
       this.source.on('active', activeCallback);
       this.source.on('inactive', inactiveCallback);
       this.source.on('invalid', invalidCallback);
 
    }
-   return this.activatorEnabled;
+   return this.sourceEnabled;
 }
 
 Activator.prototype.refreshSources = function() {
    var ret = true;
 
-   if (!this.activatorEnabled) {
+   if (!this.sourceEnabled) {
       ret = this.establishListeners();
       console.log(this.name + ': Refreshed action. result=' + ret);
    }
@@ -213,7 +216,7 @@ function InputDebouncer(_source, _threshold) {
       that.source.removeListener('active', activeCallback);
       that.source.removeListener('inactive', inactiveCallback);
       that.source.removeListener('invalid', invalidCallback);
-      that.emit('invalid');
+      that.emit('invalid', { sourceName: that.name });
    };
 
    this.source.on('active', activeCallback);
