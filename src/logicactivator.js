@@ -5,7 +5,8 @@ var CasaSystem = require('./casasystem');
 function LogicActivator(_config) {
 
    this.name = _config.name;
-   this.allInputsRequiredForValidity = (_config.allInputsRequiredForValidity) ? _config.allInputsRequiredForValidity : true;
+   this.allInputsRequiredForValidity = _config.hasOwnProperty('allInputsRequiredForValidity') ? _config.allInputsRequiredForValidity : true;
+   console.log(this.name + ': All inputs for validity = ' + this.allInputsRequiredForValidity);
 
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;

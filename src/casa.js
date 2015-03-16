@@ -24,6 +24,7 @@ function Casa(_config) {
    this.activators = [];
    this.actions = [];
    this.uber = false;
+   this.sourceEnabled = true;
 
    var that = this;
 

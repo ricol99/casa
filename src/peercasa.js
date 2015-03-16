@@ -28,6 +28,7 @@ function PeerCasa(_config) {
    this.casaListeners = [];
 
    this.connected = false;
+   this.sourceEnabled = true;
    this.socket = null;
    this.intervalID = null;
    this.unAckedMessages = [];

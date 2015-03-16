@@ -180,7 +180,7 @@ function InputDebouncer(_source, _threshold) {
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
 
-               if (!sourceEnabled) {
+               if (!that.sourceEnabled) {
                   that.emit('invalid', { sourceName: that.source.name });
                } 
                else if (that.sourceActive) {
@@ -208,7 +208,7 @@ function InputDebouncer(_source, _threshold) {
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
 
-               if (!sourceEnabled) {
+               if (!that.sourceEnabled) {
                   that.emit('invalid', { sourceName: that.source.name });
                }
                else if (!that.sourceActive) {
@@ -231,7 +231,7 @@ function InputDebouncer(_source, _threshold) {
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
 
-               if (!sourceEnabled) {
+               if (!that.sourceEnabled) {
                   that.emit('invalid', { sourceName: that.source.name });
                }
                else if (that.sourceActive) {
