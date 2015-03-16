@@ -157,6 +157,7 @@ function InputDebouncer(_source, _threshold) {
    this.timeoutObj = null;
    this.sourceActive = false;
    this.coldStart = true;
+   this.sourceEnabled = true;
 
    events.EventEmitter.call(this);
 
@@ -179,7 +180,10 @@ function InputDebouncer(_source, _threshold) {
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
 
-               if (that.sourceActive) {
+               if (!sourceEnabled) {
+                  that.emit('invalid', { sourceName: that.source.name })'
+               } 
+               else if (that.sourceActive) {
                   that.emit('active', { sourceName: that.source.name });
                }
             }, that.threshold*1000);
@@ -204,7 +208,10 @@ function InputDebouncer(_source, _threshold) {
             that.timeoutObj = setTimeout(function() {
                that.timeoutObj = null;
 
-               if (!that.sourceActive) {
+               if (!sourceEnabled) {
+                  that.emit('invalid', { sourceName: that.source.name })'
+               }
+               else if (!that.sourceActive) {
                   that.emit('inactive', { sourceName: that.source.name });
                }
             }, that.threshold*1000);
@@ -213,10 +220,32 @@ function InputDebouncer(_source, _threshold) {
    };
 
    var invalidCallback = function(_data) {
+
+      if (that.sourceEnabled) {
+         that.sourceEnabled = false;
+
+         // If a timer is already running, ignore. ELSE create one
+         if (that.timeoutObj == null) {
+
+            // Deactivating
+            that.timeoutObj = setTimeout(function() {
+               that.timeoutObj = null;
+
+               if (!sourceEnabled) {
+                  that.emit('invalid', { sourceName: that.source.name })'
+               }
+               else if (that.sourceActive) {
+                  that.emit('active', { sourceName: that.source.name });
+               }
+               else {
+                  that.emit('inactive', { sourceName: that.source.name });
+               }
+            }, that.threshold*1000);
+         }
+      }
       that.source.removeListener('active', activeCallback);
       that.source.removeListener('inactive', inactiveCallback);
       that.source.removeListener('invalid', invalidCallback);
-      that.emit('invalid', { sourceName: that.name });
    };
 
    this.source.on('active', activeCallback);
