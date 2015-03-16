@@ -106,6 +106,7 @@ Casa.prototype.deleteMe = function(_connection) {
 
    if (this.remoteCasa) {
       console.log(this.name + ': deleting remote casa ' + this.remoteCasa.name);
+      this.remoteCasa.removeCasaListeners();
       this.remoteCasa.invalidateSources();
       this.remoteCasa.setCasaArea(null);
       delete this.casaSys.remoteCasas[this.remoteCasa.name];

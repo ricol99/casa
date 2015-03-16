@@ -25,6 +25,8 @@ function PeerCasa(_config) {
    this.actions = [];
 
    this.listenersSetUp = false;
+   this.casaListeners = [];
+
    this.connected = false;
    this.socket = null;
    this.intervalID = null;
@@ -37,93 +39,122 @@ function PeerCasa(_config) {
 
    var that = this;
 
-   if (!this.proActiveConnect) {
-      // Listen to Casa for my peer instance to connect
-      this.casa.on('casa-joined', function(_data) {
-      
-         if (_data.peerName == that.name) {
-           console.log(that.name + ': I am connected to my peer. Socket: ' + _data.socket);
+   // Callbacks for event listening
+   this.casaJoinedHandler = function(_data) {
+   
+      if (_data.peerName == that.name) {
+        console.log(that.name + ': I am connected to my peer. Socket: ' + _data.socket);
 
-           if (!that.connected) {
-              that.connected = true;
-              that.socket = _data.socket;
-              console.log(that.name + ': Connected to my peer. Going active.');
+        if (!that.connected) {
+           that.connected = true;
+           that.socket = _data.socket;
+           console.log(that.name + ': Connected to my peer. Going active.');
 
-              if (_data.states) {
-                 console.log(_data.states);
-              }
-
-              // listen for state and activator changes from peer casas
-              that.establishListeners(true);
-              that.establishHeartbeat();
-
-              if (that.unAckedMessages.length > 1) {
-                  resendUnAckedMessages();
-               }
-
-              that.emit('active', { sourceName: that.name });
+           if (_data.states) {
+              console.log(_data.states);
            }
-         }
-      });
 
-      this.casa.on('casa-lost', function(_data) {
+           // listen for state and activator changes from peer casas
+           that.establishListeners(true);
+           that.establishHeartbeat();
 
-         if (_data.peerName == that.name) {
-            // Cope with race between old diconnect and new connect - Ignore is sockets do not match
-            if (!that.socket || (that.socket == _data.socket)) {
+           if (that.unAckedMessages.length > 1) {
+               resendUnAckedMessages();
+            }
 
-               console.log(that.name + ': I have lost my peer!');
+           that.emit('active', { sourceName: that.name });
+        }
+      }
+   };
 
-               if (that.connected) {
-                  console.log(that.name + ': Lost connection to my peer. Going inactive.');
-                  that.connected = false;
-                  clearInterval(that.intervalID);
-                  that.intervalID = null;
-                  that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
-                  that.socket = null;
-                  that.emit('inactive', { sourceName: that.name });
-               }
+   this.casaLostHandler = function(_data) {
+
+      if (_data.peerName == that.name) {
+         // Cope with race between old diconnect and new connect - Ignore is sockets do not match
+         if (!that.socket || (that.socket == _data.socket)) {
+
+            console.log(that.name + ': I have lost my peer!');
+
+            if (that.connected) {
+               console.log(that.name + ': Lost connection to my peer. Going inactive.');
+               that.connected = false;
+               clearInterval(that.intervalID);
+               that.intervalID = null;
+               that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
+               that.socket = null;
+               that.emit('inactive', { sourceName: that.name });
             }
          }
-      });
-   }
+      }
+   };
 
-   // publish state changes in this node (casa object) to remote casas
-   this.casa.on('state-active', function(_data) {
+   this.stateActiveCasaHandler = function(_data) {
+
       if (that.connected) {
          console.log(that.name + ': publishing state ' + _data.sourceName + ' active to peer casa');
          that.unAckedMessages.push( { message: 'state-active', data: _data } );
          that.socket.emit('state-active', _data);
       }
-   });
+   };
 
-   this.casa.on('state-inactive', function(_data) {
+   this.stateInactiveCasaHandler = function(_data) {
+
       if (that.connected) {
          console.log(that.name + ': publishing state ' + _data.sourceName + ' inactive to peer casa');
          that.unAckedMessages.push( { message: 'state-inactive', data: _data } );
          that.socket.emit('state-inactive', _data);
       }
-   });
+   };
 
    // publish activator changes to remote casas
-   this.casa.on('activator-active', function(_data) {
+   this.activatorActiveCasaHandler = function(_data) {
+
       if (that.connected) {
          console.log(that.name + ': publishing activator ' + _data.sourceName + ' active to peer casa');
          that.unAckedMessages.push( { message: 'activator-active', data: _data } );
          that.socket.emit('activator-active', _data);
       }
-   });
+   };
 
-   this.casa.on('activator-inactive', function(_data) {
+   this.activatorInactiveCasaHandler = function(_data) {
+
       if (that.connected) {
          console.log(that.name + ': publishing activator ' + _data.sourceName + ' inactive to peer casa');
          that.unAckedMessages.push( { message: 'activator-inactive', data: _data } );
          that.socket.emit('activator-inactive', _data);
       }
-   });
+   };
+
+   if (!this.proActiveConnect) {
+      // Listen to Casa for my peer instance to connect
+      this.casa.on('casa-joined', this.casaJoinedHandler);
+      this.casa.on('casa-lost', this.casaLostHandler);
+   }
+
+   // publish state changes in this node (casa object) to remote casas
+   this.casa.on('state-active', this.stateActiveCasaHandler);
+   this.casa.on('state-inactive', this.stateInactiveCasaHandler);
+
+   // publish activator changes to remote casas
+   this.casa.on('activator-active', this.activatorActiveCasaHandler);
+   this.casa.on('activator-inactive', this.activatorInactiveCasaHandler);
 }
 
 util.inherits(PeerCasa, Thing);
+
+PeerCasa.prototype.removeCasaListeners = function() {
+   console.log(this.name + ': removing casa listeners');
+
+   if (!this.proActiveConnect) {
+      this.casa.removeListener('casa-joined', this.casaJoinedHandler);
+      this.casa.removeListener('casa-lost', this.casaLostHandler);
+   }
+
+   this.casa.removeListener('state-active', this.stateActiveCasaHandler);
+   this.casa.removeListener('state-inactive', this.stateInactiveCasaHandler);
+   this.casa.removeListener('activator-active', this.activatorActiveCasaHandler);
+   this.casa.removeListener('activator-inactive', this.activatorInactiveCasaHandler);
+}
 
 PeerCasa.prototype.invalidateSources = function() {
 
