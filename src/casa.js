@@ -93,15 +93,19 @@ Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
 }
 
 Casa.prototype.deleteMe = function(_connection) {
+   console.log(this.name + ': deleting server connection object!');
 
    if (_connection.peerName) {
+      console.log(this.name + ': deleting anonymous connection object!');
       delete this.anonymousClients[_connection.socket.id];
    } 
    else {
+      console.log(this.name + ': deleting connection object with name ' + _connection.peerName);
       delete this.clients[_connection.peerName];
    }
 
    if (this.remoteCasa) {
+      console.log(this.name + ': deleting remote casa ' + this.remoteCasa.name);
       this.remoteCasa.invalidateSources();
       this.remoteCasa.setCasaArea(null);
       delete this.casaSys.remoteCasas[this.remoteCasa.name];
