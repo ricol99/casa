@@ -30,7 +30,7 @@ CasaArea.prototype.removeCasa = function(_casa) {
 
    // delete area if empty!
    if (this.casaCount == 0) {
-      this.casasys.deleteCasaArea(this);
+      this.casaSys.deleteCasaArea(this);
    }
 }
 
