@@ -281,8 +281,8 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 
          if (!that.connected) {
             delete that.socket;
-            delete that.casaSys.remoteCasas[that.remoteCasa.name];
-            delete that.casaSys.allObjects[that.remoteCasa.name];
+            delete that.casaSys.remoteCasas[that.name];
+            delete that.casaSys.allObjects[that.name];
             delete that;
          }
       }, this.deathTime * 1000);
