@@ -313,7 +313,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       setTimeout(function() {
 
          if (!that.connected) {
-            delete that.socket;
+            that.socket.close();
             delete that.casaSys.remoteCasas[that.name];
             delete that.casaSys.allObjects[that.name];
             delete that;
