@@ -95,7 +95,7 @@ Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
 Casa.prototype.deleteMe = function(_connection) {
    console.log(this.name + ': deleting server connection object!');
 
-   if (_connection.peerName) {
+   if (!_connection.peerName) {
       console.log(this.name + ': deleting anonymous connection object!');
       delete this.anonymousClients[_connection.socket.id];
    } 
