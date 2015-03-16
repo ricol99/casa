@@ -125,9 +125,9 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
 ChildCasaArea.prototype.removeCasaListeners = function(_casa) {
 
    if (this.casaSys.isUberCasa()) {
-      _casa.removeListeners('broadcast-message', this.broadcastListener);
-      _casa.removeListeners('forward-request', this.forwardRequestListener);
-      _casa.removeListeners('forward-response', this.forwardResponseListener);
+      _casa.removeListener('broadcast-message', this.broadcastListener);
+      _casa.removeListener('forward-request', this.forwardRequestListener);
+      _casa.removeListener('forward-response', this.forwardResponseListener);
    }
 }
 
