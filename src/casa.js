@@ -87,14 +87,15 @@ Casa.prototype.refreshActivatorsAndActions = function() {
 
 }
 
-Casa.prototype.nameClient = function(_connection, _name, _remoteCasa) {
+Casa.prototype.nameClient = function(_connection, _name) {
    this.clients[_name] = _connection;
    delete this.anonymousClients[_connection.id];
-   this.remoteCasa = _remoteCasa;
 }
 
 Casa.prototype.deleteMe = function(_connection) {
    console.log(this.name + ': deleting server connection object!');
+
+   var remoteCasa = _connection.remoteCasa;
 
    if (!_connection.peerName) {
       console.log(this.name + ': deleting anonymous connection object!');
@@ -105,14 +106,14 @@ Casa.prototype.deleteMe = function(_connection) {
       delete this.clients[_connection.peerName];
    }
 
-   if (this.remoteCasa) {
-      console.log(this.name + ': deleting remote casa ' + this.remoteCasa.name);
-      this.remoteCasa.removeCasaListeners();
-      this.remoteCasa.invalidateSources();
-      this.remoteCasa.setCasaArea(null);
-      delete this.casaSys.remoteCasas[this.remoteCasa.name];
-      delete this.casaSys.allObjects[this.remoteCasa.name];
-      delete this.remoteCasa;
+   if (remoteCasa) {
+      console.log(this.name + ': deleting remote casa ' + remoteCasa.name);
+      remoteCasa.removeCasaListeners();
+      remoteCasa.invalidateSources();
+      remoteCasa.setCasaArea(null);
+      delete this.casaSys.remoteCasas[remoteCasa.name];
+      delete this.casaSys.allObjects[remoteCasa.name];
+      delete remoteCasa;
    }
 
    if (this.socket) {
@@ -165,11 +166,11 @@ function Connection(_server, _socket) {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
             that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
             console.log(that.name + ': Establishing new logon session after race with old socket.');
-            var remoteCasa = that.server.createRemoteCasa(_data);
-            that.server.nameClient(that, that.peerName, remoteCasa); 
+            that.remoteCasa = that.server.createRemoteCasa(_data);
+            that.server.nameClient(that, that.peerName); 
 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
-            var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+            var casaList = that.remoteCasa.casaArea.buildCasaForwardingList();
             var casaListLen = casaList.length;
 
             setTimeout(function() {
@@ -184,10 +185,10 @@ function Connection(_server, _socket) {
          }
       }
       else {
-         var remoteCasa = that.server.createRemoteCasa(_data);
-         that.server.nameClient(that, that.peerName, remoteCasa); 
+         that.remoteCasa = that.server.createRemoteCasa(_data);
+         that.server.nameClient(that, that.peerName); 
          that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
-         var casaList = remoteCasa.casaArea.buildCasaForwardingList();
+         var casaList = that.remoteCasa.casaArea.buildCasaForwardingList();
          var casaListLen = casaList.length;
 
          setTimeout(function() {
