@@ -53,7 +53,7 @@ Activator.prototype.establishListeners = function() {
       that.source.removeListener('inactive', inactiveCallback);
       that.source.removeListener('invalid', invalidCallback);
 
-      if (this.inputDebounceTime > 0) {
+      if (that.inputDebounceTime > 0) {
          // restore the source
          delete that.source;
          that.source = that.origSource;
