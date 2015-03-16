@@ -356,7 +356,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          console.log(that.name + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
          that.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: that.name });
 
-         if (!that.casaSys.remoteCasas[_data.sourceName]) {
+         if (!that.casaSys.remoteCasas[_data.sourceName] && _data.sourceName != that.casa.name) {
             // Create a remote casa to represent the newly available casa
             RemoteCasa = require('./remotecasa');
             var remoteCasa = new RemoteCasa(_data.casaConfig, that);
