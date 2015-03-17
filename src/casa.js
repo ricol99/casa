@@ -87,9 +87,9 @@ Casa.prototype.refreshActivatorsAndActions = function() {
 
 }
 
-Casa.prototype.nameClient = function(_connection, _name) {
-   this.clients[_name] = _connection;
-   delete this.anonymousClients[_connection.id];
+Casa.prototype.clientHasBeenNamed = function(_connection) {
+   this.clients[_connection.peerName] = _connection;
+   delete this.anonymousClients[_connection.socket.id];
 }
 
 Casa.prototype.deleteMe = function(_connection) {
@@ -116,8 +116,8 @@ Casa.prototype.deleteMe = function(_connection) {
       delete remoteCasa;
    }
 
-   if (this.socket) {
-      this.socket.close();
+   if (_connection.socket) {
+      _connection.socket.close();
    }
    delete _connection;
 }
@@ -166,40 +166,36 @@ function Connection(_server, _socket) {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
             that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
             console.log(that.name + ': Establishing new logon session after race with old socket.');
+
             that.remoteCasa = that.server.createRemoteCasa(_data);
-            that.server.nameClient(that, that.peerName); 
+            that.server.clientHasBeenNamed(that); 
 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
+            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+
             var casaList = that.remoteCasa.casaArea.buildCasaForwardingList();
             var casaListLen = casaList.length;
-
-            setTimeout(function() {
-
-               // Send info regarding all relevant casas
-               for (var i = 0; i < casaListLen; ++i) {
-                  that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
-               }
-            }, 1000);
-
-            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
-         }
-      }
-      else {
-         that.remoteCasa = that.server.createRemoteCasa(_data);
-         that.server.nameClient(that, that.peerName); 
-         that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
-         var casaList = that.remoteCasa.casaArea.buildCasaForwardingList();
-         var casaListLen = casaList.length;
-
-         setTimeout(function() {
 
             // Send info regarding all relevant casas
             for (var i = 0; i < casaListLen; ++i) {
                that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
             }
-         }, 1000);
+         }
+      }
+      else {
+         that.remoteCasa = that.server.createRemoteCasa(_data);
+         that.server.clientHasBeenNamed(that); 
 
+         that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
          that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+
+         var casaList = that.remoteCasa.casaArea.buildCasaForwardingList();
+         var casaListLen = casaList.length;
+
+         // Send info regarding all relevant casas
+         for (var i = 0; i < casaListLen; ++i) {
+            that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
+         }
       }
    });
 }
