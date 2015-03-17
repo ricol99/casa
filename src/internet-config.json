@@ -64,6 +64,10 @@
          "inputDebounceTime": 60
       },
       {
+         "name": "activator:casa-cctv-status",
+         "source": "casa:cctv"
+      },
+      {
          "name": "activator:debounced-casa-cctv",
          "source": "casa:cctv",
          "inputDebounceTime": 60
