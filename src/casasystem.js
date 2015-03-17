@@ -9,6 +9,7 @@ function CasaSystem(_config) {
    this.config = _config;
    this.uberCasa = false;
    this.users = [];
+   this.things = [];
    this.casaAreas = [];
    this.casa = null;
    this.peerCasas = [];
@@ -32,6 +33,9 @@ function CasaSystem(_config) {
 
    // Extract Users
    this.extractUsers();
+
+   // Extract Things
+   this.extractThings();
 
    // Extract My Casa
    this.extractCasa();
@@ -87,6 +91,23 @@ CasaSystem.prototype.extractUsers = function() {
          that.users[userObj.name] = userObj;
          that.allObjects[userObj.name] = userObj;
          console.log('New user: ' + user.name);
+      });
+   }
+}
+
+// Extract Things
+CasaSystem.prototype.extractThings = function() {
+   var that = this;
+
+   if (this.config.things) {
+
+      this.config.things.forEach(function(_thing) { 
+         var Thing = that.cleverRequire(_thing.name);
+         _thing.owner = that;
+         var thingObj = new Thing(_thing);
+         that.things[thingObj.name] = thingObj;
+         that.allObjects[thingObj.name] = thingObj;
+         console.log('New thing: ' + _thing.name);
       });
    }
 }

@@ -15,6 +15,7 @@
    },
    "listeningPort": 8081,
    "props": {},
+   "things": [],
    "states": [
       {
          "name": "schedulestate:daylight-non-adjusted",

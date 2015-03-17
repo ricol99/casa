@@ -15,6 +15,15 @@
    },
    "listeningPort": 8080,
    "props": {},
+   "things": [
+      {
+         "name": "lightwaverflink:home",
+         "displayName": "LightwaveRF Wifi Link",
+         "props": {
+            "ipAdress": "192.168.1.100"
+         }
+      }
+   ],
    "states": [
       {
          "name": "gpiostate:alarm-tamper-alarm",
