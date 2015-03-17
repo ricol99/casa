@@ -135,7 +135,9 @@ function Connection(_server, _socket) {
          console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
          that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
       }
-      that.server.deleteMe(that);
+      setTimeout(function() {
+         that.server.deleteMe(that);
+      }, 300);
    });
 
    this.socket.on('disconnect', function() {
@@ -144,7 +146,9 @@ function Connection(_server, _socket) {
          console.log(that.name + ': Peer casa ' + that.peerName + ' dropped');
          that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
       }
-      that.server.deleteMe(that);
+      setTimeout(function() {
+         that.server.deleteMe(that);
+      }, 300);
    });
 
    this.socket.on('login', function(_data) {
