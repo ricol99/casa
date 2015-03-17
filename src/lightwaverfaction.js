@@ -5,7 +5,7 @@ var LightwaveRF = require("lightwaverf");
 function LightwaveRfAction(_config) {
 
    this.roomId = _config.roomId;
-   this.deviceId = (_config.deviceId) > _config.deviceId : null;
+   this.deviceId = (_config.deviceId) ? _config.deviceId : null;
    this.dimLevel = (_config.dimLevel) ? _config.dimLevel : null;
 
    Action.call(this, _config);
