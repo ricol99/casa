@@ -55,6 +55,11 @@
          "name": "gpiostate:alarm-lounge-pir",
          "gpioPin": 27,
          "triggerLow": true
+      },
+      {
+         "name": "schedulestate:sunset-for-four-hours",
+         "startRule": "sunset",
+         "activeFor": 14400
       }
    ],
    "activators": [

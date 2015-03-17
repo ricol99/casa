@@ -197,6 +197,15 @@
          "inactiveMessagePriority": 0,
          "source": "schedulestate:daylight-non-adjusted",
          "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:lights-on",
+         "activeMessage": "Lights going on",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "Lights going off. Goodnight!",
+         "inactiveMessagePriority": 0,
+         "source": "schedulestate:sunset-for-four-hours",
+         "target": "usergroup:admins"
       }
    ]
 }
