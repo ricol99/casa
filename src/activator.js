@@ -302,7 +302,7 @@ InputDebouncer.prototype.isActive = function() {
 }
 
 Activator.prototype.isActive = function() {
-   return this.destActivated;
+   return (this.invert) ? !this.destActivated  : this.destActivated;
 }
 
 module.exports = exports = Activator;
