@@ -56,16 +56,20 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    this.config.displayName = _config.displayName;
    if (_config.gang) this.config.gang = _config.gang;
    this.config.states = [];
+   this.config.statesStatus = [];
    this.config.activators = [];
+   this.config.activatorsStatus = [];
 
    var len = _config.states.length;
    for (var i = 0; i < len; ++i) {
       this.config.states[i] = _config.states[i].name;
+      this.config.statesStatus[i] = false;
    }
 
    var len = _config.activators.length;
    for (var j = 0; j < len; ++j) {
       this.config.activators[j] = _config.activators[j].name;
+      this.config.activatorsStatus[j] = false;
    }
 }
 
@@ -170,6 +174,7 @@ function Connection(_server, _socket) {
 
             that.remoteCasa = that.server.createRemoteCasa(_data);
             that.server.clientHasBeenNamed(that); 
+            that.server.refreshConfigWithStateAndActivatorStatus();
 
             that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
             that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
@@ -179,6 +184,7 @@ function Connection(_server, _socket) {
 
             // Send info regarding all relevant casas
             for (var i = 0; i < casaListLen; ++i) {
+               casaList[i].refreshConfigWithStateAndActivatorStatus();
                that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
             }
          }
@@ -199,6 +205,28 @@ function Connection(_server, _socket) {
          }
       }
    });
+}
+
+Casa.prototype.refreshConfigWithStateAndActivatorStatus = function() {
+   delete this.config.statesStatus;
+   delete this.config.activatorsStatus;
+   this.config.statesStatus = [];
+   this.config.activatorsStatus = [];
+
+   var len = this.config.states.length;
+   for (var i = 0; i < len; ++i) {
+      this.config.statesStatus.push(this.states[this.config.states[i]].isActive());
+   }
+
+   var len = this.config.activators.length;
+   for (var j = 0; j < len; ++j) {
+      this.config.activatorsStatus.push(this.activators[this.config.activators[j]].isActive());
+   }
+
+}
+
+Casa.prototype.isActive = function() {
+   return true;
 }
 
 Casa.prototype.createRemoteCasa = function(_data) {

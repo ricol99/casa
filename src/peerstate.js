@@ -5,6 +5,7 @@ var S = require('string');
 function PeerState(_name, _peerCasa) {
    this.name = _name;
    this.peerCasa = _peerCasa;
+   this.active = false;
 
    events.EventEmitter.call(this);
 
@@ -17,11 +18,13 @@ util.inherits(PeerState, events.EventEmitter);
 
 PeerState.prototype.stateHasGoneActive = function(_data) {
    console.log(this.name + ': received active event from peer. Going active!');
+   this.active = true;
    this.emit('active', _data);
 }
 
 PeerState.prototype.stateHasGoneInactive = function(_data) {
    console.log(this.name + ': received inactive event from peer. Going inactive!');
+   this.active = false;
    this.emit('inactive', _data);
 }
 
@@ -36,8 +39,7 @@ PeerState.prototype.setInactive = function(_callback) {
 }
 
 PeerState.prototype.isActive = function(_callback) {
-   console.log(this.name + ': Attempting to get state activity status');
-   this.peerCasa.isStateActive(this, _callback);
+   return this.active;
 }
 
 PeerState.prototype.invalidateSource = function() {

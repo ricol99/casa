@@ -174,4 +174,8 @@ LogicActivator.prototype.emitIfNecessary = function() {
    }
 }
 
+LogicActivator.prototype.isActive = function() {
+   return this.active;
+}
+
 module.exports = exports = LogicActivator;

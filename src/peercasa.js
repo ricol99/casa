@@ -224,6 +224,8 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
       that.establishHeartbeat();
+      that.casa.refreshConfigWithStateAndActivatorStatus();
+
       var messageData = {
          casaName: that.casa.name,
          casaType: that.loginAs,
@@ -322,28 +324,53 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
    }
 }
 
+PeerCasa.prototype.refreshConfigWithStateAndActivatorStatus = function() {
+   delete this.config.statesStatus;
+   delete this.config.activatorsStatus;
+   this.config.statesStatus = [];
+   this.config.activatorsStatus = [];
+
+   var len = this.config.states.length;
+   for (var i = 0; i < len; ++i) {
+      this.config.statesStatus.push(this.states[this.config.states[i]].isActive());
+   }
+
+   var len = this.config.activators.length;
+   for (var j = 0; j < len; ++j) {
+      this.config.activatorsStatus.push(this.activators[this.config.activators[j]].isActive());
+   }  
+}
+
 PeerCasa.prototype.createStatesAndActivators = function(_data, _peerCasa) {
 
    if (_data.casaConfig &&  _data.casaConfig.states) {
       var len = _data.casaConfig.states.length;
+      var settingStates = (_data.casaConfig.statesStatus) ? len == _data.casaConfig.statesStatus.length : false;
       console.log(_peerCasa.name + ': New states found = ' + len);
 
       var PeerState = require('./peerstate');
       for (var i = 0; i < len; ++i) {
          console.log(_peerCasa.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
          var source = new PeerState(_data.casaConfig.states[i], _peerCasa);
+         if (settingStates) {
+            source.active = _data.casaConfig.statesStatus[i];
+         }
          this.casaSys.allObjects[source.name] = source;
       }
    }
 
    if (_data.casaConfig &&  _data.casaConfig.activators) {
       var len = _data.casaConfig.activators.length;
+      var settingActivators = (_data.casaConfig.activatorsStatus) ? len == _data.casaConfig.activatorsStatus.length : false;
       console.log(_peerCasa.name + ': New activators found = ' + len);
 
       var PeerActivator = require('./peeractivator');
       for (i = 0; i < len; ++i) {
          console.log(_peerCasa.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
          var source = new PeerActivator(_data.casaConfig.activators[i], _peerCasa);
+         if (settingActivators) {
+            source.active = _data.casaConfig.activatorsStatus[i];
+         }
          this.casaSys.allObjects[source.name] = source;
       }
    }
@@ -376,6 +403,11 @@ StateRequestor.prototype.isActive = function(_callback) {
    this.state.isActive(function(_result) {
       _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
    });
+}
+
+
+PeerCasa.prototype.isActive = function() {
+   return this.connected;
 }
 
 PeerCasa.prototype.establishListeners = function(_force) {

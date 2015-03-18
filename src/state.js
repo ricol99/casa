@@ -34,9 +34,8 @@ State.prototype.setInactive = function(_callback) {
 }
 
 
-State.prototype.isActive = function(_callback) {
-   console.log(this.name + ': State is read only!');
-   _callback(this.active);
+State.prototype.isActive = function() {
+   return this.active;
 }
 
 module.exports = exports = State;

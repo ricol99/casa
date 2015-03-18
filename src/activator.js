@@ -78,6 +78,7 @@ Activator.prototype.establishListeners = function() {
             console.log(this.name + ': Created input debouncer');
          }
 
+         this.sourceActive = this.source.isActive();
          this.source.on('active', activeCallback);
          this.source.on('inactive', inactiveCallback);
          this.source.on('invalid', invalidCallback);
@@ -160,7 +161,7 @@ function InputDebouncer(_source, _threshold) {
    this.source = _source;
    this.threshold = _threshold;
    this.timeoutObj = null;
-   this.sourceActive = false;
+   this.sourceActive = this.source.isActive();
    this.coldStart = true;
    this.sourceEnabled = true;
 
@@ -169,6 +170,7 @@ function InputDebouncer(_source, _threshold) {
    var that = this;
 
    this.activeCallback = function(_data) {
+      console.log('NNNNNNNNNNNN');
 
       if (that.coldStart) {
          that.coldStart = false;
@@ -176,20 +178,25 @@ function InputDebouncer(_source, _threshold) {
       }
 
       if (!that.sourceActive) {
+         console.log('OOOOOOOOOOOO');
          that.sourceActive = true;
 
          // If a timer is already running, ignore. ELSE create one
          if (that.timeoutObj == null) {
+            console.log('PPPPPPPPPPPP');
 
             // Activating
             that.timeoutObj = setTimeout(function() {
+               console.log('QQQQQQQQQQQQ');
                that.timeoutObj = null;
 
                if (!that.sourceEnabled) {
+                  console.log('RRRRRRRRRRRR');
                   that.debouncingInvalidSource = false;
                   that.emit('invalid', { sourceName: that.source.name });
                } 
                else if (that.sourceActive) {
+                  console.log('SSSSSSSSSSSS');
                   that.emit('active', { sourceName: that.source.name });
                }
             }, that.threshold*1000);
@@ -198,6 +205,7 @@ function InputDebouncer(_source, _threshold) {
    };
 
    this.inactiveCallback = function(_data) {
+      console.log('HHHHHHHHHHHH');
 
       if (that.coldStart) {
          that.coldStart = false;
@@ -205,20 +213,25 @@ function InputDebouncer(_source, _threshold) {
       }
 
       if (that.sourceActive) {
+         console.log('IIIIIIIIIIII');
          that.sourceActive = false;
 
          // If a timer is already running, ignore. ELSE create one
          if (that.timeoutObj == null) {
+            console.log('JJJJJJJJJJJJ');
 
             // Deactivating
             that.timeoutObj = setTimeout(function() {
+               console.log('KKKKKKKKKKKK');
                that.timeoutObj = null;
 
                if (!that.sourceActive) {
+                  console.log('LLLLLLLLLLLL');
                   that.emit('inactive', { sourceName: that.source.name });
                }
 
                if (!that.sourceEnabled) {
+                  console.log('MMMMMMMMMMMM');
                   that.debouncingInvalidSource = false;
                   that.emit('invalid', { sourceName: that.source.name });
                }
@@ -228,25 +241,31 @@ function InputDebouncer(_source, _threshold) {
    };
 
    this.invalidCallback = function(_data) {
-
+      console.log('AAAAAAAAAAAA');
       if (that.sourceEnabled) {
+         console.log('BBBBBBBBBBBB');
          that.sourceEnabled = false;
 
          // If a timer is already running, ignore. ELSE create one
          if (that.timeoutObj == null) {
+            console.log('CCCCCCCCCCCC');
             that.debouncingInvalidSource = true;
 
             that.timeoutObj = setTimeout(function() {
+               console.log('DDDDDDDDDDDD');
                that.timeoutObj = null;
                that.debouncingInvalidSource = false;
 
                if (!that.sourceEnabled) {
+                  console.log('EEEEEEEEEEEE');
                   that.emit('invalid', { sourceName: that.source.name });
                }
                else if (that.sourceActive) {
+                  console.log('FFFFFFFFFFFF');
                   that.emit('active', { sourceName: that.source.name });
                }
                else {
+                  console.log('GGGGGGGGGGGG');
                   that.emit('inactive', { sourceName: that.source.name });
                }
             }, that.threshold*1000);
@@ -270,11 +289,20 @@ InputDebouncer.prototype.refreshSource = function() {
    this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
 
    if (this.sourceEnabled) {
+      this.sourceActive = this.source.isActive();
       this.source.on('active', this.activeCallback);
       this.source.on('inactive', this.inactiveCallback);
       this.source.on('invalid', this.invalidCallback);
    }
    return this.sourceEnabled;
+}
+
+InputDebouncer.prototype.isActive = function() {
+   return this.sourceActive;
+}
+
+Activator.prototype.isActive = function() {
+   return this.destActivated;
 }
 
 module.exports = exports = Activator;
