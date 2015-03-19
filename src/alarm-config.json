@@ -20,7 +20,7 @@
          "name": "lightwaverflink:home",
          "displayName": "LightwaveRF Wifi Link",
          "props": {
-            "ipAddress": "192.168.1.100"
+            "ipAddress": "192.168.1.236"
          }
       }
    ],
@@ -94,51 +94,6 @@
          "password": "carrot99",
          "cameraId": 1,
          "source": "andactivator:lounge-activity"
-      },
-      {
-         "name": "lightwaverfaction:lounge-wall-lights-fire",
-         "roomId": 1,
-         "deviceId": 1,
-         "dimLevel": 40,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:lounge-wall-lights-alcoves",
-         "roomId": 1,
-         "deviceId": 2,
-         "dimLevel": 35,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:dining-room-main-light",
-         "roomId": 2,
-         "deviceId": 1,
-         "dimLevel": 30,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:hall-table-lamp",
-         "roomId": 3,
-         "deviceId": 1,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:study-table-lamp",
-         "roomId": 4,
-         "deviceId": 1,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:snug-table-lamp",
-         "roomId": 5,
-         "deviceId": 1,
-         "source": "schedulestate:sunset-for-four-hours",
-         "target": "lightwaverflink:home"
       }
    ]
 }
