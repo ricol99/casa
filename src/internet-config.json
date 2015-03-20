@@ -169,45 +169,45 @@
       },
       {
          "name": "pushoveraction:alarm-casa-status",
-         "activeMessage": "Casa 'alarm' is active",
+         "activeMessage": "D-Casa 'alarm' is active",
          "activeMessagePriority": 0,
-         "inactiveMessage": "Casa 'alarm' has gone down!",
+         "inactiveMessage": "D-Casa 'alarm' has gone down!",
          "inactiveMessagePriority": 1,
          "source": "activator:debounced-casa-alarm",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:cctv-casa-status",
-         "activeMessage": "Casa 'cctv' is active",
+         "activeMessage": "D-Casa 'cctv' is active",
          "activeMessagePriority": 0,
-         "inactiveMessage": "Casa 'cctv' has gone down!",
+         "inactiveMessage": "D-Casa 'cctv' has gone down!",
          "inactiveMessagePriority": 1,
          "source": "activator:debounced-casa-cctv",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:alarm-lounge",
-         "activeMessage": "Motion in lounge - Started recording!",
+         "activeMessage": "D-Motion in lounge - Started recording!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "Motion in lounge ended - Finished recording",
+         "inactiveMessage": "D-Motion in lounge ended - Finished recording",
          "inactiveMessagePriority": 0,
          "source": "andactivator:lounge-activity",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:daylight-non-adjusted",
-         "activeMessage": "Good morning!",
+         "activeMessage": "D-Good morning!",
          "activeMessagePriority": 0,
-         "inactiveMessage": "Good evening!",
+         "inactiveMessage": "D-Good evening!",
          "inactiveMessagePriority": 0,
          "source": "schedulestate:daylight-non-adjusted",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:lights-on",
-         "activeMessage": "Lights going on",
+         "activeMessage": "D-Lights going on",
          "activeMessagePriority": 0,
-         "inactiveMessage": "Lights going off. Goodnight!",
+         "inactiveMessage": "D-Lights going off. Goodnight!",
          "inactiveMessagePriority": 0,
          "source": "schedulestate:sunset-for-four-hours",
          "target": "usergroup:admins"
