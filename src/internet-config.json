@@ -55,13 +55,13 @@
       {
          "name": "activator:debounced-home-internet-connection",
          "source": "oractivator:home-casas",
-         "inputDebounceTime": 120,
+         "inputDebounceTime": 180,
          "invert": true
       },
       {
          "name": "activator:debounced-casa-alarm",
          "source": "casa:alarm",
-         "inputDebounceTime": 120
+         "inputDebounceTime": 180
       },
       {
          "name": "activator:casa-cctv-status",
@@ -70,7 +70,7 @@
       {
          "name": "activator:debounced-casa-cctv",
          "source": "casa:cctv",
-         "inputDebounceTime": 120
+         "inputDebounceTime": 180
       },
       {
          "name": "andactivator:home-internet-connection-armed",
