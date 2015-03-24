@@ -72,19 +72,15 @@ LogicActivator.prototype.establishListeners = function() {
       }
    };
 
-   // Remove old inputs if all inputs were not found already
-   if (this.inputNames.length != this.inputs.length) {
+   // Remove old inputs
+   this.inputs.forEach(function(_sourceName, _index) {
+      that.inputs[_index].source.removeListener('active', activeCallback);
+      that.inputs[_index].source.removeListener('inactive', inactiveCallback);
+      that.inputs[_index].source.removeListener('invalid', invalidCallback);
+   });
 
-      // Remove old inputs
-      this.inputs.forEach(function(_sourceName, _index) {
-         this.inputs[_index].source.removeListener('active', activeCallback);
-         this.inputs[_index].source.removeListener('inactive', inactiveCallback);
-         this.inputs[_index].source.removeListener('invalid', invalidCallback);
-      });
-
-      // Clear the existing array, this seems to be the way most people like on the web
-      this.inputs.length = 0;
-   }
+   // Clear the existing array, this seems to be the way most people like on the web
+   this.inputs.length = 0;
 
    // Attach sources again, perform the refresh
    var len = this.inputNames.length;
