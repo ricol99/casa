@@ -81,9 +81,11 @@ LogicActivator.prototype.establishListeners = function() {
 
    // Clear the existing array, this seems to be the way most people like on the web
    this.inputs.length = 0;
+   tempSources.length = 0;
 
    // Attach sources again, perform the refresh
    var len = this.inputNames.length;
+
    for (var i = 0; i < len; ++i) {
       var source = this.casaSys.findSource(this.inputNames[i]);
 
@@ -102,10 +104,6 @@ LogicActivator.prototype.establishListeners = function() {
       });
 
       this.sourceEnabled = true;
-   }
-   else {
-      // All inputs required for validity and all are not there, clear the source array
-      that.inputs.length = 0;
    }
 
    return this.sourceEnabled;
