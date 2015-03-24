@@ -165,7 +165,11 @@ function Connection(_server, _socket) {
          if (that.server.clients[that.peerName] == that) {
             // socket has been reused
             console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-            deleteMe(that);
+            // ** TBD ** Work around, Ignore this as it is a bug due to unACKed meesage removal from buffer in client being unpredictable.
+            // Need to fix this with new deploymentment to client and server where messages have unique ID so they can be removed from UNACKed
+            // queue reliably!!
+
+            //deleteMe(that);
          }
          else {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
