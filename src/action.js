@@ -10,6 +10,8 @@ function Action(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.actionEnabled = false;
+   this.actionActive = false;
+   this.coldStart = true;
    this.sourceName = _config.source;
    this.targetName = (_config.target) ? _config.target : null;
 
@@ -42,7 +44,16 @@ Action.prototype.establishListeners = function() {
          console.log(that.name + ': ACTIVATED');
 
          if (that.actionEnabled) {
-            that.emit('activated', _data);
+
+            if (that.coldStart) {
+               that.coldStart = false;
+               that.actionActive = false;
+            }
+
+            if (!that.actionActive) {
+               that.actionActive = true;
+               that.emit('activated', _data);
+            }
          }
       };
 
@@ -50,7 +61,16 @@ Action.prototype.establishListeners = function() {
          console.log(that.name + ': DEACTIVATED');
 
          if (that.actionEnabled) {
-            that.emit('deactivated', _data);
+
+            if (that.coldStart) {
+               that.coldStart = false;
+               that.actionActive = true;
+            }
+
+            if (that.actionActive) {
+               that.actionActive = false;
+               that.emit('deactivated', _data);
+            }
          }
       };
 
@@ -81,6 +101,10 @@ Action.prototype.refreshSources = function() {
       console.log(this.name + ': Refreshed action. result=' + ret);
    }
    return ret;
+}
+
+Action.prototype.isActive = function() {
+   return this.actionActive;
 }
 
 module.exports = exports = Action;

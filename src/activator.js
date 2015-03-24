@@ -128,8 +128,8 @@ Activator.prototype.sourceIsInactive = function(_sourceName) {
 
    if (this.destActivated) {
 
-      // Destination is active. If there is no minOutputTime, deactivate. Else, let the timer do it
-      if (this.minOutputTime == 0) {
+      // Destination is active. If there is no timer, deactivate. Else, let the timer do it
+      if (this.minOutputTimeObj == null) {
          this.deactivateDestination();
       }
    }

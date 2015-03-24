@@ -118,7 +118,7 @@ LogicActivator.prototype.establishListeners = function() {
 LogicActivator.prototype.refreshSources = function() {
    var ret = true;
 
-   if (!this.sourceEnabled) {
+   if (!this.sourceEnabled || !this.allInputsRequiredForValidity) {
       ret = this.establishListeners();
       console.log(this.name + ': Refreshed action. result=' + ret);
    }

@@ -12,37 +12,30 @@ function SetStateAction(_config) {
    this.on('activated', function () {
       console.log(that.name + ': received activated event');
 
-      if (!that.actionActive) {
-         console.log(that.name + ': Going active. Attempting to set state ' + that.target.name + ' to active');
-         that.actionActive = true;
-         that.target.setActive(function(result) {
+      console.log(that.name + ': Going active. Attempting to set state ' + that.target.name + ' to active');
+      that.target.setActive(function(result) {
 
-            if (result) {
-               console.log(that.name + ': Set State ' + that.target.name + ' to active!');
-            }
-            else {
-               console.log(that.name + ': Failed to set State ' + that.target.name + ' to active!');
-            }
-         });
-      }
+         if (result) {
+            console.log(that.name + ': Set State ' + that.target.name + ' to active!');
+         }
+         else {
+            console.log(that.name + ': Failed to set State ' + that.target.name + ' to active!');
+         }
+      });
    });
 
    this.on('deactivated', function () {
       console.log(that.name + ': received deactivated event');
 
-      if (that.actionActive) {
-         that.actionActive = false;
+      that.target.setInactive(function(result) {
 
-         that.target.setInactive(function(result) {
-
-            if (result) {
-               console.log(that.name + ': Set State ' + that.target.name + ' to inactive!');
-            }
-            else {
-               console.log(that.name + ': Failed to set State ' + that.target.name + ' to inactive!');
-            }
-         });
-      }
+         if (result) {
+            console.log(that.name + ': Set State ' + that.target.name + ' to inactive!');
+         }
+         else {
+            console.log(that.name + ': Failed to set State ' + that.target.name + ' to inactive!');
+         }
+      });
    });
 }
 
