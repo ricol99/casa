@@ -1,5 +1,6 @@
 var crypto = require('crypto');
 var fs = require('fs');
+require('console-stamp')(console, '[HH:MM:ss.l]');
 
 var configFile = (process.argv.length >= 3) ? process.argv[2] : 'internet-config.json'; 
 
