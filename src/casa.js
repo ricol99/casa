@@ -196,6 +196,7 @@ function Connection(_server, _socket) {
       else {
          that.remoteCasa = that.server.createRemoteCasa(_data);
          that.server.clientHasBeenNamed(that); 
+         that.server.refreshConfigWithStateAndActivatorStatus();
 
          that.socket.emit('loginAACCKK', { casaName: that.server.name, casaConfig: that.server.config });
          that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
