@@ -60,7 +60,7 @@ function PeerCasa(_config) {
            that.establishHeartbeat();
 
            if (that.unAckedMessages.length > 1) {
-               resendUnAckedMessages();
+               that.resendUnAckedMessages();
             }
 
            that.emit('active', { sourceName: that.name });
