@@ -174,12 +174,16 @@ function Connection(_server, _socket) {
          else {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
             that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
-            console.log(that.name + ': Establishing new logon session after race with old socket.');
 
-            that.remoteCasa = that.server.createRemoteCasa(_data);
-            that.server.clientHasBeenNamed(that); 
-            that.server.refreshConfigWithStateAndActivatorStatus();
-            that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+            setTimeout(function() {
+               that.server.deleteMe(that.server.clients[that.peerName]);
+
+               console.log(that.name + ': Establishing new logon session after race with old socket.');
+               that.remoteCasa = that.server.createRemoteCasa(_data);
+               that.server.clientHasBeenNamed(that); 
+               that.server.refreshConfigWithStateAndActivatorStatus();
+               that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+            }, 300);
          }
       }
       else {
