@@ -68,7 +68,6 @@ function PeerCasa(_config) {
            that.establishHeartbeat();
 
            that.resendUnAckedMessages();
-
            that.emit('active', { sourceName: that.name });
         }
       }
