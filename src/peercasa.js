@@ -51,8 +51,15 @@ function PeerCasa(_config) {
            that.socket = _data.socket;
            console.log(that.name + ': Connected to my peer. Going active.');
 
-           if (_data.states) {
-              console.log(_data.states);
+           that.socket.emit('loginAACCKK', { casaName: that.casa.name, casaConfig: that.casa.config });
+
+           var casaList = that.casaArea.buildCasaForwardingList();
+           var casaListLen = casaList.length;
+
+           // Send info regarding all relevant casas
+           for (var i = 0; i < casaListLen; ++i) {
+              casaList[i].refreshConfigWithStateAndActivatorStatus();
+              that.socket.emit('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
            }
 
            // listen for state and activator changes from peer casas
