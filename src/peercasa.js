@@ -52,32 +52,24 @@ function PeerCasa(_config) {
            that.socket = _data.socket;
            console.log(that.name + ': Connected to my peer. Going active.');
 
-           console.log('AAAAAAAAAA');
            that.ackMessage('login', { messageId: _data.messageId, casaName: that.casa.name, casaConfig: that.casa.config });
-           console.log('AAAAAAAAAA');
 
            var casaList = that.casaArea.buildCasaForwardingList();
-           console.log('AAAAAAAAAA');
            var casaListLen = casaList.length;
 
-           console.log('AAAAAAAAAA');
            // Send info regarding all relevant casas
            for (var i = 0; i < casaListLen; ++i) {
               casaList[i].refreshConfigWithStateAndActivatorStatus();
               that.sendMessage('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
            }
 
-           console.log('AAAAAAAAAA');
            // listen for state and activator changes from peer casas
            that.establishListeners(true);
            that.establishHeartbeat();
 
-           console.log('AAAAAAAAAA');
            that.resendUnAckedMessages();
 
-           console.log('AAAAAAAAAA');
            that.emit('active', { sourceName: that.name });
-           console.log('AAAAAAAAAA');
         }
       }
    };

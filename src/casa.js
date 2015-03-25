@@ -182,9 +182,7 @@ function Connection(_server, _socket) {
             that.server.clientHasBeenNamed(that); 
             that.server.refreshConfigWithStateAndActivatorStatus();
 
-            console.log('AAAAAAAAAA');
             that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
-            console.log('AAAAAAAAAA');
          }
       }
       else {
@@ -192,9 +190,7 @@ function Connection(_server, _socket) {
          that.server.clientHasBeenNamed(that); 
          that.server.refreshConfigWithStateAndActivatorStatus();
 
-         console.log('CCCCCCCCCC');
          that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
-         console.log('CCCCCCCCCC');
       }
    });
 }
