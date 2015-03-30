@@ -37,7 +37,7 @@ function PeerCasa(_config) {
    this.reqId = 0;
 
    this.stateRequests = [];
-   this.lastHeartbeat = new Date();
+   this.lastHeartbeat = Date.now();
 
    var that = this;
 
@@ -741,7 +741,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('heartbeat', function(_data) {
          console.log(that.name + ': Heartbeat received');
 
-         that.lastHeartbeat = new Date();
+         that.lastHeartbeat = Date.now();
       });
 
       this.listenersSetUp = true;
@@ -756,10 +756,9 @@ PeerCasa.prototype.establishHeartbeat = function() {
       this.intervalID = setInterval(function(){
 
          if (that.connected) {
-            // Check if we have received a heartbeat from the other side recently
-            var now = new Date();
 
-            if ((now - that.lastHeartbeat) > 90000) {
+            // Check if we have received a heartbeat from the other side recently
+            if ((Date.now() - that.lastHeartbeat) > 90000) {
                console.log(that.name + ': Know heartbeat received for 1.5 times interval!. Closing socket.');
                that.socket.close();
             }
