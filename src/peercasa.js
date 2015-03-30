@@ -37,6 +37,7 @@ function PeerCasa(_config) {
    this.reqId = 0;
 
    this.stateRequests = [];
+   this.lastHeartbeat = new Date();
 
    var that = this;
 
@@ -225,7 +226,8 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    var that = this;
 
    console.log(this.name + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-   this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
+   this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/',  { transports: ['websocket'] } );
+   //this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
 
    this.socket.on('connect', function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
@@ -286,31 +288,39 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    this.socket.on('error', function(_error) {
       console.log(that.name + ': Error received: ' + _error);
 
+      if (that.intervalID) {
+         clearInterval(that.intervalID);
+         that.intervalID = null;
+      }
+
       if (that.connected) {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
-         clearInterval(that.intervalID);
-         that.intervalID = null;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
-         that.deleteMeIfNeeded();
       }
+
+      that.deleteMeIfNeeded();
    });
 
    this.socket.on('disconnect', function() {
       console.log(that.name + ': Error disconnect');
 
+      if (that.intervalID) {
+         clearInterval(that.intervalID);
+         that.intervalID = null;
+      }
+
       if (that.connected) {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
          that.connected = false;
-         clearInterval(that.intervalID);
-         that.intervalID = null;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
-         that.deleteMeIfNeeded();
       }
+
+      that.deleteMeIfNeeded();
    });
 }
 
@@ -323,8 +333,11 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 
          if (!that.connected) {
             that.socket.close();
-            delete that.casaSys.remoteCasas[that.name];
-            delete that.casaSys.allObjects[that.name];
+
+            if (that.casaSys.remoteCasas[that.name]) {
+               delete that.casaSys.remoteCasas[that.name];
+               delete that.casaSys.allObjects[that.name];
+            }
             delete that;
          }
       }, this.deathTime * 1000);
@@ -726,8 +739,9 @@ PeerCasa.prototype.establishListeners = function(_force) {
       });
 
       this.socket.on('heartbeat', function(_data) {
-         // do nothing!
          console.log(that.name + ': Heartbeat received');
+
+         that.lastHeartbeat = new Date();
       });
 
       this.listenersSetUp = true;
@@ -742,7 +756,16 @@ PeerCasa.prototype.establishHeartbeat = function() {
       this.intervalID = setInterval(function(){
 
          if (that.connected) {
-            that.socket.emit('heartbeat', { casaName: that.casa.name });
+            // Check if we have received a heartbeat from the other side recently
+            var now = new Date();
+
+            if ((now - that.lastHeartbeat) > 90000) {
+               console.log(that.name + ': Know heartbeat received for 1.5 times interval!. Closing socket.');
+               that.socket.close();
+            }
+            else {
+               that.socket.emit('heartbeat', { casaName: that.casa.name });
+            }
          }
       }, 60000);
    }

@@ -5,6 +5,11 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+//var io = require('socket.io')(http, {
+  //allowUpgrades: true,
+  //transports: ['websocket']
+//});
+
 var CasaSystem = require('./casasystem');
 
 function Casa(_config) {
@@ -34,9 +39,9 @@ function Casa(_config) {
 
    this.buildSimpleConfig(_config);
 
-   app.get('/index.html', function(req, res){
-     res.sendFile(__dirname + '/index.html');
-   });
+   //app.get('/index.html', function(req, res){
+     //res.sendFile(__dirname + '/index.html');
+   //});
 
    io.on('connection', function(_socket) {
       console.log('a casa has joined');
