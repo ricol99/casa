@@ -37,7 +37,7 @@ function PeerCasa(_config) {
    this.reqId = 0;
 
    this.stateRequests = [];
-   this.lastHeartbeat = Date.now();
+   this.lastHeartbeat = Date.now() + 10000;
 
    var that = this;
 
@@ -763,6 +763,7 @@ PeerCasa.prototype.establishHeartbeat = function() {
                that.socket.close();
             }
             else {
+               console.log(that.name + ': Last heartbeat time difference = ', Date.now() - that.lastHeartbeat);
                that.socket.emit('heartbeat', { casaName: that.casa.name });
             }
          }
