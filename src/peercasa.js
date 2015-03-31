@@ -39,6 +39,8 @@ function PeerCasa(_config) {
    this.stateRequests = [];
    this.lastHeartbeat = Date.now() + 10000;
 
+   this.manualDisconnect = false;
+
    var that = this;
 
    // Callbacks for event listening
@@ -318,6 +320,12 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
          that.emit('inactive', { sourceName: that.name });
+      }
+
+      if (that.manualDisconnect) {
+         // Recreate socket to attempt reconnection
+         that.manualDisconnect = false;
+         that.socket.connect();
       }
 
       that.deleteMeIfNeeded();
@@ -759,8 +767,9 @@ PeerCasa.prototype.establishHeartbeat = function() {
 
             // Check if we have received a heartbeat from the other side recently
             if ((Date.now() - that.lastHeartbeat) > 90000) {
-               console.log(that.name + ': Know heartbeat received for 1.5 times interval!. Closing socket.');
-               that.socket.close();
+               console.log(that.name + ': No heartbeat received for 1.5 times interval!. Closing socket.');
+               that.manualDisconnect = true;
+               that.socket.disconnect();
             }
             else {
                console.log(that.name + ': Last heartbeat time difference = ', Date.now() - that.lastHeartbeat);
