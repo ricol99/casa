@@ -3,12 +3,12 @@ var Thing = require('./thing');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+//var io = require('socket.io')(http);
 
-//var io = require('socket.io')(http, {
-  //allowUpgrades: true,
-  //transports: ['websocket']
-//});
+var io = require('socket.io')(http, {
+  allowUpgrades: true,
+  transports: ['websocket']
+});
 
 var CasaSystem = require('./casasystem');
 
