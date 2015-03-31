@@ -162,6 +162,12 @@ function Connection(_server, _socket) {
 
    this.socket.on('login', function(_data) {
       console.log(that.name + ': login: ' + _data.casaName);
+
+      if (!_data.messageId) {
+         deleteMe(that);
+         return;
+      }
+
       that.peerName = _data.casaName;
 
       if (that.server.clients[that.peerName]) {
@@ -170,11 +176,7 @@ function Connection(_server, _socket) {
          if (that.server.clients[that.peerName] == that) {
             // socket has been reused
             console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-            // ** TBD ** Work around, Ignore this as it is a bug due to unACKed meesage removal from buffer in client being unpredictable.
-            // Need to fix this with new deploymentment to client and server where messages have unique ID so they can be removed from UNACKed
-            // queue reliably!!
-
-            //deleteMe(that);
+            deleteMe(that);
          }
          else {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
@@ -187,7 +189,7 @@ function Connection(_server, _socket) {
                that.remoteCasa = that.server.createRemoteCasa(_data);
                that.server.clientHasBeenNamed(that); 
                that.server.refreshConfigWithStateAndActivatorStatus();
-               that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+               that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
             }, 300);
          }
       }
@@ -195,7 +197,7 @@ function Connection(_server, _socket) {
          that.remoteCasa = that.server.createRemoteCasa(_data);
          that.server.clientHasBeenNamed(that); 
          that.server.refreshConfigWithStateAndActivatorStatus();
-         that.server.emit('casa-joined', { peerName: that.peerName, socket: that.socket, data: _data });
+         that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
       }
    });
 }
