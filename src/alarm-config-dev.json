@@ -1,0 +1,99 @@
+{
+   "name": "casa:alarm",
+   "displayName": "Casa Collin Texecom Alarm",
+   "gang": "casa-collin",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "casa-dev.elasticbeanstalk.com",
+         "port": 80
+      }
+   },
+   "area": {
+      "name": "casaarea:home",
+      "displayName": "Casa Collin Home"
+   },
+   "listeningPort": 8081,
+   "props": {},
+   "things": [
+      {
+         "name": "lightwaverflink:home",
+         "displayName": "LightwaveRF Wifi Link",
+         "props": {
+            "ipAddress": "192.168.1.236"
+         }
+      }
+   ],
+   "states": [
+      {
+         "name": "gpiostate:alarm-tamper-alarm",
+         "gpioPin": 4,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-mains-failure",
+         "gpioPin": 17,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-fire-alarm",
+         "gpioPin": 18,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-fully-armed",
+         "gpioPin": 22,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-part-armed",
+         "gpioPin": 23,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-in-alarm",
+         "gpioPin": 24,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-confirmed-alarm",
+         "gpioPin": 25,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:alarm-lounge-pir",
+         "gpioPin": 27,
+         "triggerLow": true
+      },
+      {
+         "name": "schedulestate:sunset-for-four-hours",
+         "startRule": "sunset",
+         "activeFor": 14400
+      }
+   ],
+   "activators": [
+      {
+         "name": "activator:alarm-lounge-pir",
+         "source": "gpiostate:alarm-lounge-pir",
+         "minOutputTime": 15
+      },
+      {
+         "name": "andactivator:lounge-activity",
+         "sources": [
+            "activator:alarm-lounge-pir",
+            "gpiostate:alarm-fully-armed"
+         ]
+      }
+   ],
+   "actions": [
+      {
+         "name": "spycameraaction:lounge",
+         "cctvHostname": "192.168.1.245",
+         "cctvPort": 8000,
+         "userId": "ricol99",
+         "password": "carrot99",
+         "cameraId": 1,
+         "source": "andactivator:lounge-activity"
+      }
+   ]
+}
