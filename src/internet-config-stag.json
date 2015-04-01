@@ -1,0 +1,216 @@
+{
+   "name": "casa:internet",
+   "displayName": "Casa Collin Internet Casa",
+   "gang": "casa-collin",
+   "area": {
+      "name": "casaarea:internet",
+      "displayName": "Casa Collin Internet"
+   },
+   "listeningPort": 80,
+   "props": {},
+   "users": [ 
+      {
+         "name": "user:richard",
+         "displayName": "Richard",
+         "props": {}
+      },
+      {
+         "name": "user:natalie",
+         "displayName": "Natalie",
+         "props": {}
+      },
+      {
+         "name": "usergroup:admins",
+         "displayName": "Administrators",
+         "users": [
+           "user:richard"
+         ],
+         "props": {
+            "pushoverDestAddr": "gX5JLc28t775dYr1yjuo4p38t7hziV"
+         }
+      },
+      {
+         "name": "usergroup:key-holders",
+         "displayName": "Key Holders",
+         "users": [
+           "user:richard",
+           "user:natalie"
+         ],
+         "props": {
+            "pushoverDestAddr": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j"
+         }
+      }
+   ],
+   "things": [],
+   "states": [],
+   "activators": [
+      {
+         "name": "oractivator:home-casas",
+         "sources": [
+            "casa:alarm",
+            "casa:cctv",
+            "casa:light"
+         ]
+      },
+      {
+         "name": "activator:debounced-home-internet-connection",
+         "source": "oractivator:home-casas",
+         "inputDebounceTime": 180,
+         "invert": true
+      },
+      {
+         "name": "activator:debounced-casa-alarm",
+         "source": "casa:alarm",
+         "inputDebounceTime": 180
+      },
+      {
+         "name": "activator:casa-cctv-status",
+         "source": "casa:cctv"
+      },
+      {
+         "name": "activator:debounced-casa-cctv",
+         "source": "casa:cctv",
+         "inputDebounceTime": 180
+      },
+      {
+         "name": "andactivator:home-internet-connection-armed",
+         "sources": [
+            "activator:debounced-home-internet-connection",
+            "gpiostate:alarm-fully-armed"
+         ]
+      }
+   ],
+   "actions": [
+      {
+         "name": "setstateaction:test-part-arm",
+         "source": "gpiostate:alarm-part-armed",
+         "target": "teststate:alarm-part-armed"
+      },
+      {
+         "name": "pushoveraction:alarm-tamper-alarm",
+         "activeMessage": "S-Alarm being tampered with!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Alarm no longer in tamper mode",
+         "inactiveMessagePriority": 0,
+         "source": "gpiostate:alarm-tamper-alarm",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:alarm-mains-failure",
+         "activeMessage": "S-Alarm has lost mains power!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Alarm mains power restored",
+         "inactiveMessagePriority": 0,
+         "source": "gpiostate:alarm-mains-failure",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:alarm-fire-alarm",
+         "activeMessage": "S-Fire Alarm!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Fire alarm reset",
+         "inactiveMessagePriority": 0,
+         "source": "gpiostate:alarm-fire-alarm",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:alarm-fully-armed",
+         "activeMessage": "S-Alarm armed",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Alarm disarmed",
+         "inactiveMessagePriority": 0,
+         "source": "gpiostate:alarm-fully-armed",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:alarm-part-armed",
+         "activeMessage": "S-Alarm part armed",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Alarm disarmed",
+         "inactiveMessagePriority": 0,
+         "source": "gpiostate:alarm-part-armed",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:alarm-in-alarm",
+         "activeMessage": "S-Alarm triggered",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Alarm trigger reset",
+         "inactiveMessagePriority": 2,
+         "source": "gpiostate:alarm-in-alarm",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:alarm-confirmed-alarm",
+         "activeMessage": "S-Alarm confirmed - call police!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Confirmed alarm reset",
+         "inactiveMessagePriority": 2,
+         "source": "gpiostate:alarm-confirmed-alarm",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:internet-connection",
+         "activeMessage": "S-Internet connection to home has been lost!",
+         "activeMessagePriority": 1,
+         "inactiveMessage": "S-Internet connection to home restored",
+         "inactiveMessagePriority": 0,
+         "source": "activator:debounced-home-internet-connection",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:internet-connection-armed",
+         "activeMessage": "S-Internet connection to home has been lost while alarm is fully armed!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Internet connection to home restored",
+         "inactiveMessagePriority": 0,
+         "source": "andactivator:home-internet-connection-armed",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:alarm-casa-status",
+         "activeMessage": "S-Casa 'alarm' is active",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Casa 'alarm' has gone down!",
+         "inactiveMessagePriority": 1,
+         "source": "activator:debounced-casa-alarm",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:cctv-casa-status",
+         "activeMessage": "S-Casa 'cctv' is active",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Casa 'cctv' has gone down!",
+         "inactiveMessagePriority": 1,
+         "source": "activator:debounced-casa-cctv",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:alarm-lounge",
+         "activeMessage": "S-Motion in lounge - Started recording!",
+         "activeMessagePriority": 2,
+         "inactiveMessage": "S-Motion in lounge ended - Finished recording",
+         "inactiveMessagePriority": 0,
+         "source": "andactivator:lounge-activity",
+         "target": "usergroup:key-holders"
+      },
+      {
+         "name": "pushoveraction:daylight-non-adjusted",
+         "activeMessage": "S-Good morning!",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Good evening!",
+         "inactiveMessagePriority": 0,
+         "source": "schedulestate:daylight-non-adjusted",
+         "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:lights-on",
+         "activeMessage": "S-Lights going on",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "S-Lights going off. Goodnight!",
+         "inactiveMessagePriority": 0,
+         "source": "schedulestate:sunset-for-four-hours",
+         "target": "usergroup:admins"
+      }
+   ]
+}
