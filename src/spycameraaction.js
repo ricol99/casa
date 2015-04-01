@@ -49,7 +49,7 @@ function SpyCameraAction(_config) {
       activated();
    });
 
-   this.on('deactivated', 'deactivated-from-cold', function () {
+   this.on('deactivated', function () {
       deactivated();
    });
 
