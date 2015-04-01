@@ -4,7 +4,7 @@ var Thing = require('./thing');
 
 var _mainInstance = null;
 
-function CasaSystem(_config) {
+function CasaSystem(_config, _connectToPeers) {
    this.casaName = _config.name;
    this.config = _config;
    this.uberCasa = false;
@@ -66,8 +66,10 @@ function CasaSystem(_config) {
       }, 10000);
    }
 
-   var PeerCasaService = require('./peercasaservice');
-   this.peerCasaService = new PeerCasaService({ gang: _config.gang });
+   if (_connectToPeers) {
+      var PeerCasaService = require('./peercasaservice');
+      this.peerCasaService = new PeerCasaService({ gang: _config.gang });
+   }
 }
 
 util.inherits(CasaSystem, Thing);

@@ -3,6 +3,7 @@ var fs = require('fs');
 require('console-stamp')(console, '[HH:MM:ss.l]');
 
 var configFile = (process.argv.length >= 3) ? process.argv[2] : 'internet-config.json'; 
+var connectToPeers = (process.argv.length >= 4) ? process.argv[3] != '-nopeer' : true; 
 
 console.log('File: ' + configFile);
 var config = require('./' + configFile);
@@ -31,5 +32,5 @@ if (!config.id) {
 
 System = require('./casasystem');
 
-var system = new System(config);
+var system = new System(config, connectToPeers);
 
