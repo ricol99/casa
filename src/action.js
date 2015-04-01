@@ -11,7 +11,6 @@ function Action(_config) {
    this.casa = this.casaSys.casa;
    this.actionEnabled = false;
    this.actionActive = false;
-   this.coldStart = true;
    this.sourceName = _config.source;
    this.targetName = (_config.target) ? _config.target : null;
 
@@ -45,12 +44,11 @@ Action.prototype.establishListeners = function() {
 
          if (that.actionEnabled) {
 
-            if (that.coldStart) {
-               that.coldStart = false;
-               that.actionActive = false;
+            if (_data.coldStart) {
+               that.actionActive = true;
+               that.emit('activated-from-cold', _data);
             }
-
-            if (!that.actionActive) {
+            else if (!that.actionActive) {
                that.actionActive = true;
                that.emit('activated', _data);
             }
@@ -62,12 +60,11 @@ Action.prototype.establishListeners = function() {
 
          if (that.actionEnabled) {
 
-            if (that.coldStart) {
-               that.coldStart = false;
-               that.actionActive = true;
+            if (_data.coldStart) {
+               that.actionActive = false;
+               that.emit('deactivated-from-cold', _data);
             }
-
-            if (that.actionActive) {
+            else if (that.actionActive) {
                that.actionActive = false;
                that.emit('deactivated', _data);
             }

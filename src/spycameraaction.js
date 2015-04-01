@@ -11,7 +11,7 @@ function SpyCameraAction(_config) {
 
    var that = this;
 
-   this.on('activated', function () {
+   function activated() {
       console.log(that.name + ': received activated event');
 
       // https active request
@@ -24,9 +24,9 @@ function SpyCameraAction(_config) {
       }).on('error', function(e) {
          console.log("Got error: " + e.message);
       });
-   });
+   }
 
-   this.on('deactivated', function () {
+   function deactivated() {
       console.log(that.name + ': received deactivated event');
 
       // https passive request
@@ -39,6 +39,22 @@ function SpyCameraAction(_config) {
       }).on('error', function(e) {
          console.log("Got error: " + e.message);
       });
+   }
+
+   this.on('activated', function () {
+      activated();
+   });
+
+   this.on('activated-from-cold', function () {
+      activated();
+   });
+
+   this.on('deactivated', 'deactivated-from-cold', function () {
+      deactivated();
+   });
+
+   this.on('deactivated-from-cold', function () {
+      deactivated();
    });
 }
 

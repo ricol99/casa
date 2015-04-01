@@ -9,7 +9,7 @@ function SetStateAction(_config) {
 
    var that = this;
 
-   this.on('activated', function () {
+   function activated() {
       console.log(that.name + ': received activated event');
 
       console.log(that.name + ': Going active. Attempting to set state ' + that.target.name + ' to active');
@@ -22,9 +22,9 @@ function SetStateAction(_config) {
             console.log(that.name + ': Failed to set State ' + that.target.name + ' to active!');
          }
       });
-   });
+   }
 
-   this.on('deactivated', function () {
+   function deactivated() {
       console.log(that.name + ': received deactivated event');
 
       that.target.setInactive(function(result) {
@@ -36,6 +36,22 @@ function SetStateAction(_config) {
             console.log(that.name + ': Failed to set State ' + that.target.name + ' to inactive!');
          }
       });
+   }
+
+   this.on('activated', function () {
+      activated();
+   });
+
+   this.on('activated-from-cold', function () {
+      activated();
+   });
+
+   this.on('deactivated', function () {
+      deactivated();
+   });
+
+   this.on('deactivated-from-cold', function () {
+      deactivated();
    });
 }
 

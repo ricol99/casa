@@ -33,6 +33,15 @@ State.prototype.setInactive = function(_callback) {
    _callback(false);
 }
 
+State.prototype.coldStart = function() {
+
+   if (this.active) {
+      this.emit('active', { sourceName: this.name, coldStart: true });
+   }
+   else {
+      this.emit('inactive', { sourceName: this.name, coldStart: true });
+   }
+}
 
 State.prototype.isActive = function() {
    return this.active;

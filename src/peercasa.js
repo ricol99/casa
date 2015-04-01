@@ -161,6 +161,18 @@ PeerCasa.prototype.removeCasaListeners = function() {
    this.casa.removeListener('activator-inactive', this.activatorInactiveCasaHandler);
 }
 
+
+PeerCasa.prototype.coldStartPeerStates = function() {
+
+   for(var prop in this.states) {
+
+      if (this.states.hasOwnProperty(prop)){
+         console.log(this.name + ': Cold starting peer state ' + this.states[prop].name);
+         this.states[prop].coldStart();
+      }
+   }
+}
+
 PeerCasa.prototype.invalidateSources = function() {
 
    for(var prop in this.states) {

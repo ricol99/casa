@@ -39,11 +39,11 @@ Activator.prototype.establishListeners = function() {
 
    // Listener callbacks
    var activeCallback = function(_data) {
-      that.sourceIsActive(_data.sourceName);
+      that.sourceIsActive(_data);
    };
 
    var inactiveCallback = function(_data) {
-      that.sourceIsInactive(_data.sourceName);
+      that.sourceIsInactive(_data);
    };
 
    var invalidCallback = function(_data) {
@@ -98,11 +98,10 @@ Activator.prototype.refreshSources = function() {
    return ret;
 }
 
-Activator.prototype.sourceIsActive = function(_sourceName) {
-   console.log('source ' + _sourceName + ' active!');
+Activator.prototype.sourceIsActive = function(_data) {
+   console.log('source ' + _data.sourceName + ' active!');
    
-   if (this.coldStart) {
-      this.coldStart = false;
+   if (_data.coldStart) {
       this.destActivated = false;
    }
 
@@ -112,15 +111,14 @@ Activator.prototype.sourceIsActive = function(_sourceName) {
       this.restartTimer();
    }
    else {
-      this.activateDestination();
+      this.activateDestination(_data);
    }
 }
 
-Activator.prototype.sourceIsInactive = function(_sourceName) {
-   console.log('source ' + _sourceName + ' inactive!');
+Activator.prototype.sourceIsInactive = function(_data) {
+   console.log('source ' + _data.sourceName + ' inactive!');
 
-   if (this.coldStart) {
-      this.coldStart = false;
+   if (_data.coldStart) {
       this.destActivated = true;
    }
 
@@ -130,19 +128,31 @@ Activator.prototype.sourceIsInactive = function(_sourceName) {
 
       // Destination is active. If there is no timer, deactivate. Else, let the timer do it
       if (this.minOutputTimeObj == null) {
-         this.deactivateDestination();
+         this.deactivateDestination(_data);
       }
    }
 }
 
-Activator.prototype.activateDestination = function() {
+Activator.prototype.activateDestination = function(_data) {
    this.destActivated = true;
-   this.emit(this.invert ? 'inactive' : 'active', { sourceName: this.name }); 
+
+   if (_data.coldStart) {
+      this.emit(this.invert ? 'inactive' : 'active', { sourceName: this.name, coldStart: true }); 
+   }
+   else {
+      this.emit(this.invert ? 'inactive' : 'active', { sourceName: this.name }); 
+   }
 }
 
-Activator.prototype.deactivateDestination = function() {
+Activator.prototype.deactivateDestination = function(_data) {
    this.destActivated = false;
-   this.emit(this.invert ? 'active' : 'inactive', { sourceName: this.name }); 
+
+   if (_data.coldStart) {
+      this.emit(this.invert ? 'active' : 'inactive', { sourceName: this.name, coldStart: true }); 
+   }
+   else {
+      this.emit(this.invert ? 'active' : 'inactive', { sourceName: this.name }); 
+   }
 }
 
 Activator.prototype.restartTimer = function() {
@@ -153,7 +163,7 @@ Activator.prototype.restartTimer = function() {
    }
 
    this.minOutputTimeObj = setTimeout(function() {
-      that.deactivateDestination();
+      that.deactivateDestination( { coldStart: false });
       that.minOutputTimeObj = null;
    }, this.minOutputTime*1000);
 }
@@ -165,7 +175,6 @@ function InputDebouncer(_source, _threshold, _activator) {
    this.activator = _activator;
    this.timeoutObj = null;
    this.sourceActive = this.source.isActive();
-   this.coldStart = true;
    this.sourceEnabled = true;
 
    events.EventEmitter.call(this);
@@ -174,12 +183,11 @@ function InputDebouncer(_source, _threshold, _activator) {
 
    this.activeCallback = function(_data) {
 
-      if (that.coldStart) {
-         that.coldStart = false;
-         that.sourceActive = false;
+      if (_data.coldStart) {
+         that.sourceActive = true;
+         that.emit('active', { sourceName: that.source.name, coldStart: true });
       }
-
-      if (!that.sourceActive) {
+      else if (!that.sourceActive) {
          that.sourceActive = true;
 
          // If a timer is already running, ignore. ELSE create one
@@ -203,12 +211,11 @@ function InputDebouncer(_source, _threshold, _activator) {
 
    this.inactiveCallback = function(_data) {
 
-      if (that.coldStart) {
-         that.coldStart = false;
-         that.sourceActive = true;
+      if (_data.coldStart) {
+         that.sourceActive = false;
+         that.emit('inactive', { sourceName: that.source.name, coldStart: true });
       }
-
-      if (that.sourceActive) {
+      else if (that.sourceActive) {
          that.sourceActive = false;
 
          // If a timer is already running, ignore. ELSE create one
@@ -272,7 +279,7 @@ InputDebouncer.prototype.refreshSource = function() {
    this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
 
    if (this.sourceEnabled) {
-      this.sourceActive = this.source.isActive();
+      //this.sourceActive = this.source.isActive();
       console.log(this.source.name + ': Source state is now ' + this.sourceActive);
       this.source.on('active', this.activeCallback);
       this.source.on('inactive', this.inactiveCallback);

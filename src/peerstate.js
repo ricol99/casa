@@ -38,6 +38,16 @@ PeerState.prototype.setInactive = function(_callback) {
    this.peerCasa.setStateInactive(this, _callback);
 }
 
+PeerState.prototype.coldStart = function() {
+
+   if (this.active) {
+      this.emit('active', { sourceName: this.name, coldStart: true });
+   }
+   else {
+      this.emit('inactive', { sourceName: this.name, coldStart: true });
+   }
+}
+
 PeerState.prototype.isActive = function(_callback) {
    return this.active;
 }

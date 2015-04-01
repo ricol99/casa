@@ -15,6 +15,7 @@ function CasaSystem(_config) {
    this.peerCasas = [];
    this.parentCasa = null;
    this.remoteCasas = [];
+   this.states = [];
 
    this.casaArea = null;
    this.parentCasaArea = null;
@@ -54,6 +55,9 @@ function CasaSystem(_config) {
 
    // Create area for peer casas to live in
    this.createPeerCasaArea();
+
+   // Cold start all defined states now that the activators and actions have been created
+   this.coldStartStates();
 
    // start conecting to parent, if it exists
    if (this.parentCasa) {
@@ -146,6 +150,7 @@ CasaSystem.prototype.extractCasaStates = function() {
       var State = that.cleverRequire(state.name);
       state.casa = that.casa.name;
       var stateObj = new State(state);
+      that.states[stateObj.name] = stateObj;
       that.allObjects[stateObj.name] = stateObj;
       console.log('New state: ' + state.name);
    });
@@ -173,6 +178,17 @@ CasaSystem.prototype.extractCasaActions = function() {
       that.allObjects[actionObj.name] = actionObj;
       console.log('New action: ' + action.name);
    });
+}
+
+CasaSystem.prototype.coldStartStates = function() {
+
+   for(var prop in this.states) {
+
+      if (this.states.hasOwnProperty(prop)){
+         console.log(this.name + ': Cold starting state ' + this.states[prop].name);
+         this.states[prop].coldStart();
+      }
+   }
 }
 
 CasaSystem.prototype.createPeerCasaArea = function() {

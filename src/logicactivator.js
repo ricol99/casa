@@ -40,11 +40,11 @@ LogicActivator.prototype.establishListeners = function() {
 
    // Define listening callbacks
    var activeCallback = function(_data) {
-      that.oneSourceIsActive(_data.sourceName);
+      that.oneSourceIsActive(_data);
    };
 
    var inactiveCallback = function(_data) {
-      that.oneSourceIsInactive(_data.sourceName);
+      that.oneSourceIsInactive(_data);
    };
 
    var invalidCallback = function(_data) {
@@ -119,8 +119,8 @@ LogicActivator.prototype.refreshSources = function() {
    return ret;
 }
 
-LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {
-   console.log(this.name + ': Input source ' + _sourceName + ' active!');
+LogicActivator.prototype.oneSourceIsActive = function(_data) {
+   console.log(this.name + ': Input source ' + _data.sourceName + ' active!');
 
    // find the input in my array
    items = this.inputs.filter(function(_item) {
@@ -132,11 +132,11 @@ LogicActivator.prototype.oneSourceIsActive = function(_sourceName) {
       _item.active = true;
    });
 
-   this.emitIfNecessary();
+   this.emitIfNecessary(_data);
 }
 
-LogicActivator.prototype.oneSourceIsInactive = function(_sourceName) {
-   console.log(this.name + ' : Input source ' + _sourceName + ' inactive!');
+LogicActivator.prototype.oneSourceIsInactive = function(_data) {
+   console.log(this.name + ' : Input source ' + _data.sourceName + ' inactive!');
          
    // find the input in my array
    items = this.inputs.filter(function(_item) {
@@ -148,23 +148,34 @@ LogicActivator.prototype.oneSourceIsInactive = function(_sourceName) {
       _item.active = false;
    });
 
-   this.emitIfNecessary();
+   this.emitIfNecessary(_data);
 }
 
-LogicActivator.prototype.emitIfNecessary = function() {
+LogicActivator.prototype.emitIfNecessary = function(_data) {
 
    var res = this.checkActivate();
 
-   if(this.active) {
+   if (this.active) {
 
       if (!res) {
          this.active = false;
-         this.emit('inactive', { sourceName: this.name });
-      }
 
+         if (_data.coldStart) {
+            this.emit('inactive', { sourceName: this.name, coldStart: true });
+         }
+         else {
+            this.emit('inactive', { sourceName: this.name });
+         }
+      }
    } else if (res) {
       this.active = true;
-      this.emit('active', { sourceName: this.name });
+
+      if (_data.coldStart) {
+         this.emit('active', { sourceName: this.name, coldStart: true });
+      }
+      else {
+         this.emit('active', { sourceName: this.name });
+      }
    }
 }
 

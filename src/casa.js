@@ -258,6 +258,9 @@ Casa.prototype.createRemoteCasa = function(_data) {
    // Refresh all inactive activators and actions
    this.refreshActivatorsAndActions();
 
+   // Cold start all the peers states now that everything has been created
+   remoteCasa.coldStartPeerStates();
+
    return remoteCasa;
 }
 

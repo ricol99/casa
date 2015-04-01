@@ -64,7 +64,7 @@ function ScheduleState(_config) {
    }
 
    this.active = false;
-   this.coldStart = true;
+   this.startingFromCold = true;
    this.startJob = null;
    this.endJob = null;
 
@@ -143,8 +143,8 @@ ScheduleState.prototype.resetStartJob = function() {
 
    this.startJob = schedule.scheduleJob(this.startRule, function() {
 
-      if (that.coldStart) {
-         that.coldStart = false;
+      if (that.startingFromCold) {
+         that.startingFromCold = false;
          that.active = false;
       }
 
@@ -173,8 +173,8 @@ ScheduleState.prototype.resetEndJob = function() {
 
       this.endJob = schedule.scheduleJob(this.endRule, function() {
 
-         if (that.coldStart) {
-            that.coldStart = false;
+         if (that.startingFromCold) {
+            that.startingFromCold = false;
             that.active = true;
          }
 
