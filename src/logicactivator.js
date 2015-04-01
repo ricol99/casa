@@ -124,7 +124,7 @@ LogicActivator.prototype.oneSourceIsActive = function(_data) {
 
    // find the input in my array
    items = this.inputs.filter(function(_item) {
-      return (_item.source.name == _sourceName);
+      return (_item.source.name == _data.sourceName);
    });
 
    // set source input to active
@@ -140,7 +140,7 @@ LogicActivator.prototype.oneSourceIsInactive = function(_data) {
          
    // find the input in my array
    items = this.inputs.filter(function(_item) {
-      return (_item.source.name == _sourceName);
+      return (_item.source.name == _data.sourceName);
    });
 
    // set source input to inactive
