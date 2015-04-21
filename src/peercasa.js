@@ -325,12 +325,6 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.emit('inactive', { sourceName: that.name });
       }
 
-      if (that.manualDisconnect) {
-         // Recreate socket to attempt reconnection
-         that.manualDisconnect = false;
-         that.socket.connect();
-      }
-
       that.deleteMeIfNeeded();
    });
 }
@@ -352,6 +346,12 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
             delete that;
          }
       }, this.deathTime * 1000);
+   }
+   else if (this.manualDisconnect) {
+      // Recreate socket to attempt reconnection
+      this.manualDisconnect = false;
+      console.log(this.name + ': Attempting to re-establish connection after manual disconnection');
+      this.socket.connect();
    }
 }
 
