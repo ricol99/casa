@@ -761,6 +761,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
 PeerCasa.prototype.establishHeartbeat = function() {
    var that = this;
+   this.lastHeartbeat = Date.now() + 10000;
 
    if (!this.intervalID) {
       // Establish heartbeat
