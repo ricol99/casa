@@ -3,6 +3,22 @@ var State = require('./state');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 
+var sunScheduler = null;
+
+function SunScheduler() {
+   this.states = [];
+
+   var that = this;
+
+   var refreshJob = schedule.scheduleJob('10 1 * * *', function() {
+      var len = that.states.length;
+
+      for (var i = 0; i < len; ++i) {
+         that.states[i].resetSunTimes();
+      }
+   });
+}
+
 function ScheduleState(_config) {
 
    this.writable = false;
@@ -72,16 +88,11 @@ function ScheduleState(_config) {
 
    if (this.setSunTimes()) {
 
-      this.refreshJob = schedule.scheduleJob('1 1 * * *', function() {
-         that.setSunTimes();
+      if (!sunScheduler) {
+         sunScheduler = new SunScheduler();
+      }
 
-         if (that.startRuleIsSunTime) {
-            that.resetStartJob();
-         }
-         if (that.endRuleIsSunTime) {
-            that.resetEndJob();
-         }
-      });
+      sunScheduler.states.push(this);
 
       if (this.startRuleIsSunTime) {
 
@@ -111,11 +122,24 @@ function ScheduleState(_config) {
 
 util.inherits(ScheduleState, State);
 
+ScheduleState.prototype.resetSunTimes = function() {
+  this.setSunTimes();
+
+  if ((this.startRuleIsSunTime) && (this.startRule > new Date())) {
+     this.resetStartJob();
+  }
+
+  if ((this.endRuleIsSunTime) && (this.endRule > new Date())) {
+     this.resetEndJob();
+  }
+}
+
 ScheduleState.prototype.setSunTimes = function() {
    var result = false;
    this.times = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
 
    if ((typeof this.origStartRule == 'string') && this.times[this.origStartRule]) {
+      console.log(this.name + ': Start rule is a sun time =  ' + this.origStartRule);
       this.startRule = this.times[this.origStartRule];
       this.startRule.setSeconds(this.startRule.getSeconds() + this.startDelta);
       this.startRuleIsSunTime = true;
@@ -124,6 +148,7 @@ ScheduleState.prototype.setSunTimes = function() {
    }
    
    if (this.origEndRule && ((typeof this.origEndRule == 'string') && this.times[this.origEndRule])) {
+      console.log(this.name + ': End rule is a sun time =  ' + this.origEndRule);
       this.endRule = this.times[this.origEndRule];
       this.endRule.setSeconds(this.endRule.getSeconds() + this.endDelta);
       this.endRuleIsSunTime = true;
