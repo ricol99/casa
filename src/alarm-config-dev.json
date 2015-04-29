@@ -81,8 +81,8 @@
          "endRule": "sunset:-900"
       },
       { 
-         "name": "schedulestate:15-mins-before-sunset-to-2230",
-         "startRule": "sunset:-900",
+         "name": "schedulestate:main-lights-evening",
+         "startRule": "sunset:-2700",
          "endRule": "30 22 * * *"
       }
    ],
@@ -115,7 +115,7 @@
          "roomId": 1,
          "deviceId": 2,
          "dimLevel": 50,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "schedulestate:main-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
@@ -123,14 +123,14 @@
          "roomId": 1,
          "deviceId": 3,
          "dimLevel": 50,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "schedulestate:main-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
          "name": "lightwaverfaction:lounge-table-lamp",
          "roomId": 1,
          "deviceId": 1,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "schedulestate:main-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
@@ -144,7 +144,7 @@
          "name": "lightwaverfaction:hall-table-lamp",
          "roomId": 2,
          "deviceId": 1,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "schedulestate:main-lights-evening",
          "target": "lightwaverflink:home"
       }
    ]

@@ -11,6 +11,7 @@ function GpioState(_config) {
    State.call(this, _config);
 
    this.ready = false;
+   this.coldStart = true;
 
    var that = this;
    var direction = (this.writable) ? 'out' : 'in';
@@ -20,25 +21,42 @@ function GpioState(_config) {
       direction: direction,
       interval: 400,
       ready: function() {
-         that.ready = true;
-         that.gpio.on("change", function (value) {
-            console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + value);
-            value = that.triggerLow ? (value == 1 ? 0 : 1) : value;
-
-            if (value == 1) {
-               that.active = true;
-               that.emit('active', { sourceName: that.name });
-            }
-            else {
-               that.active = false;
-               that.emit('inactive', { sourceName: that.name });
-            }
-         });
+         that.ready();
       }
    });
 }
 
 util.inherits(GpioState, State);
+
+GpioState.prototype.ready = function() {
+   var that = this;
+   this.ready = true;
+
+   this.gpio.on("change", function (_value) {
+      console.log(that.name + ': Value changed event received on GPIO Pin ' + that.gpioPin + ' to ' + _value);
+      var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+
+      if (that.coldStart) {
+         that.coldStart = false;
+         that.value = !_value;
+      }
+
+      if (newValue != that.value) {
+         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + _value);
+         that.value = newValue;
+
+         if (newValue == 1) {
+            that.active = true;
+            that.emit('active', { sourceName: that.name });
+         }
+         else {
+            that.active = false;
+            that.emit('inactive', { sourceName: that.name });
+         }
+      }
+   });
+}
+
 
 // *TBD* Could we lose events here?
 GpioState.prototype.setActive = function(_callback) {
