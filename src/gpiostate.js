@@ -11,7 +11,7 @@ function GpioState(_config) {
    State.call(this, _config);
 
    this.ready = false;
-   this.coldStart = true;
+   this.cStart = true;
 
    var that = this;
    var direction = (this.writable) ? 'out' : 'in';
@@ -36,8 +36,8 @@ GpioState.prototype.ready = function() {
       console.log(that.name + ': Value changed event received on GPIO Pin ' + that.gpioPin + ' to ' + _value);
       var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
 
-      if (that.coldStart) {
-         that.coldStart = false;
+      if (that.cStart) {
+         that.cStart = false;
          that.value = !_value;
       }
 
