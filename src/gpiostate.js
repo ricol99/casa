@@ -21,14 +21,14 @@ function GpioState(_config) {
       direction: direction,
       interval: 400,
       ready: function() {
-         that.ready();
+         that.Ready();
       }
    });
 }
 
 util.inherits(GpioState, State);
 
-GpioState.prototype.ready = function() {
+GpioState.prototype.Ready = function() {
    var that = this;
    this.ready = true;
 
