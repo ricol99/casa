@@ -209,7 +209,7 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "D-Lights going off. Goodnight!",
          "inactiveMessagePriority": 0,
-         "source": "schedulestate:sunset-for-four-hours",
+         "source": "schedulestate:main-lights-evening",
          "target": "usergroup:admins"
       }
    ]
