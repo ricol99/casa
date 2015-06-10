@@ -38,11 +38,11 @@ GpioState.prototype.Ready = function() {
 
       if (that.cStart) {
          that.cStart = false;
-         that.value = !_value;
+         that.value = !newValue;
       }
 
       if (newValue != that.value) {
-         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + _value);
+         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
          that.value = newValue;
 
          if (newValue == 1) {
