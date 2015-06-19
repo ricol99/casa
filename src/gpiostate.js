@@ -72,7 +72,7 @@ GpioState.prototype.set = function(_value, _callback) {
 
    if (this.ready && this.writable) {
       this.gpio.set(_value, function (err) {
-         _callback(err != 0);
+         _callback(err == _value);
       });
    }
    else {

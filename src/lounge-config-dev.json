@@ -32,7 +32,7 @@
          "name": "gpiostate:lounge-led-21",
          "gpioPin": 21,
          "writable": true,
-         "triggerLow": false
+         "triggerLow": true
       }
    ],
    "activators": [
