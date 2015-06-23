@@ -1,17 +1,20 @@
 var util = require('util');
+var Source = require('./source');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
 function Activator(_config) {
 
-   this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
    this.sourceName = _config.source;
+   this.sourceType = "activator";
    this.casa = this.casaSys.casa;
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
    this.inputDebounceTime = (_config.inputDebounceTime) ? _config.inputDebounceTime : 0;
    this.invert = (_config.invert) ? _config.invert : false;
+
+   Source.call(this, _config);
 
    if (this.casa) {
       console.log('Activator casa: ' + this.casa.name);
@@ -27,12 +30,11 @@ function Activator(_config) {
 
    var that = this;
 
-   events.EventEmitter.call(this);
 
    this.establishListeners();
 }
 
-util.inherits(Activator, events.EventEmitter);
+util.inherits(Activator, Source);
 
 Activator.prototype.establishListeners = function() {
    var that = this;
@@ -286,6 +288,10 @@ InputDebouncer.prototype.refreshSource = function() {
       this.source.on('invalid', this.invalidCallback);
    }
    return this.sourceEnabled;
+}
+
+Activator.prototype.coldStart = function() {
+   // Do nothing
 }
 
 InputDebouncer.prototype.isActive = function() {

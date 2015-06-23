@@ -22,46 +22,61 @@
          "props": {
             "ipAddress": "192.168.1.236"
          }
+      },
+      {
+         "name": "alarm:home",
+         "displayName": "House Alarm",
+         "props": {
+            "ipAddress": "192.168.1.90"
+         }
       }
    ],
    "states": [
       {
          "name": "gpiostate:alarm-tamper-alarm",
+         "thing": "alarm:home",
          "gpioPin": 4,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-mains-failure",
+         "thing": "alarm:home",
          "gpioPin": 17,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-fire-alarm",
+         "thing": "alarm:home",
          "gpioPin": 18,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-fully-armed",
+         "thing": "alarm:home",
          "gpioPin": 22,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-part-armed",
+         "thing": "alarm:home",
          "gpioPin": 23,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-in-alarm",
+         "thing": "alarm:home",
          "gpioPin": 24,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-confirmed-alarm",
+         "thing": "alarm:home",
          "gpioPin": 25,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-lounge-pir",
+         "thing": "alarm:home",
          "gpioPin": 27,
          "triggerLow": true
       },

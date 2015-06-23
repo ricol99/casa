@@ -1,5 +1,5 @@
 var util = require('util');
-var Thing = require('./thing');
+var events = require('events');
 var PeerCasa = require('./peercasa');
 var CasaSystem = require('./casasystem');
 

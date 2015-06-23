@@ -92,6 +92,7 @@ Action.prototype.establishListeners = function() {
 
 Action.prototype.refreshSources = function() {
    var ret = true;
+   console.log("============= refreshSources");
 
    if (!this.actionEnabled) {
       ret = this.establishListeners();

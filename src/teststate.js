@@ -48,7 +48,7 @@ TestState.prototype.setInactive = function(_callback) {
       }
       else {
          console.log(this.name + ': Not set to inactive as not writable!');
-         _callback(false);
+         _callback(true);
       }
    }
 }

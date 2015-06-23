@@ -1,15 +1,15 @@
 var util = require('util');
 var S = require('string');
-var Thing = require('./thing');
+//var Thing = require('./thing');
 
 var _mainInstance = null;
 
 function CasaSystem(_config, _connectToPeers) {
    this.casaName = _config.name;
    this.config = _config;
+   this.name = _config.name;
    this.uberCasa = false;
    this.users = [];
-   this.things = [];
    this.casaAreas = [];
    this.casa = null;
    this.peerCasas = [];
@@ -27,19 +27,19 @@ function CasaSystem(_config, _connectToPeers) {
 
    this.areaId = 1;
 
-   Thing.call(this, _config);
+   //Thing.call(this, _config);
 
    var that = this;
    _mainInstance = this;
+
+   // Extract My Casa
+   this.extractCasa();
 
    // Extract Users
    this.extractUsers();
 
    // Extract Things
    this.extractThings();
-
-   // Extract My Casa
-   this.extractCasa();
 
    // Extract Parent casa of parent area
    this.extractParentCasa();
@@ -72,7 +72,7 @@ function CasaSystem(_config, _connectToPeers) {
    }
 }
 
-util.inherits(CasaSystem, Thing);
+//util.inherits(CasaSystem, Thing);
 
 CasaSystem.prototype.cleverRequire = function(_name) {
    var str = S(_name).between('', ':').s;
@@ -82,6 +82,24 @@ CasaSystem.prototype.cleverRequire = function(_name) {
       this.constructors[str] = require('./' + str);
    }
    return this.constructors[str];
+}
+
+CasaSystem.prototype.deletePeerCasa = function(_peerCasa) {
+
+  if (remoteCasas[_peerCasa.name]) {
+     delete remoteCasas[_peerCasa.name];
+     delete allObjects[_peerCasa.name];
+
+     if (parentCasa == _peerCasa) {
+     }
+
+     if (childCasas[_peerCasa.name]) {
+        delete childCasas[_peerCasa.name];
+     }
+
+     if (_peerCasa.persistent) {
+     }
+  }
 }
 
 // Extract Users
@@ -109,9 +127,7 @@ CasaSystem.prototype.extractThings = function() {
 
       this.config.things.forEach(function(_thing) { 
          var Thing = that.cleverRequire(_thing.name);
-         _thing.owner = that;
          var thingObj = new Thing(_thing);
-         that.things[thingObj.name] = thingObj;
          that.allObjects[thingObj.name] = thingObj;
          console.log('New thing: ' + _thing.name);
       });

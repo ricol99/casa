@@ -212,13 +212,5 @@ ScheduleState.prototype.resetEndJob = function() {
 }
 
 
-ScheduleState.prototype.setActive = function(_callback) {
-   _callback(false);
-}
-
-ScheduleState.prototype.setInactive = function(_callback) {
-   _callback(false);
-}
-
 module.exports = exports = ScheduleState;
  

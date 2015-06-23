@@ -15,6 +15,7 @@
    },
    "listeningPort": 8081,
    "props": {},
+   "users": [],
    "things": [],
    "states": [
       {
@@ -55,19 +56,27 @@
    ],
    "actions": [
       {
-      "name": "setstateaction:test-scheduling-state-broken",
-      "source": "schedulestate:test-state-not-found",
-      "target": "teststate:schedule-test-not-gonna-find-me-yet"
+         "name": "setstateaction:test-scheduling-state-broken",
+         "source": "schedulestate:test-state-not-found",
+         "target": "teststate:schedule-test-not-gonna-find-me-yet"
       },
       {
-      "name": "setstateaction:test-scheduling-state",
-      "source": "schedulestate:test-state",
-      "target": "teststate:schedule-test"
+         "name": "setstateaction:test-scheduling-state",
+         "source": "schedulestate:test-state",
+         "target": "teststate:schedule-test"
       },
       {
-      "name": "setstateaction:test-daylight-state",
-      "source": "schedulestate:daylight-non-adjusted",
-      "target": "teststate:schedule-test"
+         "name": "setstateaction:test-daylight-state",
+         "source": "schedulestate:daylight-non-adjusted",
+         "target": "teststate:schedule-test"
+      },
+      {
+         "name": "setpropertyaction:test-state",
+         "source": "schedulestate:test-state",
+         "target": "alarm:home",
+         "targetProperty": "colour",
+         "targetPropertyActiveValue": "green",
+         "targetPropertyInactiveValue": "white"
       }
    ]
 }

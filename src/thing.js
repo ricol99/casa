@@ -1,30 +1,29 @@
 var util = require('util');
-var events = require('events');
+var Source = require('./source');
 
 function Thing(_config) {
-   this.name = _config.name;
    this.displayName = _config.displayName;
-   this.owner = _config.owner; // TBD ***** Should this be a string
-   this.props = _config.props;
+   this.sourceType = "thing";
 
-   this.children = {};
-   this.states = {};
+   this.sources = {};
    this.actions = {};
 
-   events.EventEmitter.call(this);
+   Source.call(this, _config);
 
-    if (this.owner) {
-      this.owner.addChild(this);
+   if (this.casa) {
+      console.log('Thing casa: ' + this.casa.name);
+      this.casa.addThing(this);
    }
+
    var that = this;
 
 }
 
-util.inherits(Thing, events.EventEmitter);
+util.inherits(Thing, Source);
 
-Thing.prototype.addChild = function(_child) {
-   this.children[_child.name] = _child;
-}
+Thing.prototype.addSource = function(_source) {
+   this.sources[_source.name] = _source;
+};
 
 Thing.prototype.addAction = function(_action) {
    this.actions[_action.name] = _action;
@@ -38,11 +37,11 @@ Thing.prototype.addAction = function(_action) {
    });
 
    console.log(this.name + ': ' + _action.name + ' associated!');
-}
+};
 
 
-Thing.prototype.getProperty = function(_propName) {
-   return this.props[_propName];
+Thing.prototype.setProperty = function(_propName, _propValue, _callback) {
+   this.changePropertyAndEmit(_propName, _propValue, _callback);
 };
 
 module.exports = exports = Thing;

@@ -60,11 +60,21 @@ GpioState.prototype.Ready = function() {
 
 // *TBD* Could we lose events here?
 GpioState.prototype.setActive = function(_callback) {
-   set(this.triggerLow ? 0 : 1, _callback);
+   if (this.writable) {
+      set(this.triggerLow ? 0 : 1, _callback);
+   }
+   else {
+      _callback(false);
+   }
 }
 
 GpioState.prototype.setInactive = function(_callback) {
-   set(this.triggerLow ? 1 : 0, _callback);
+   if (this.writable) {
+      set(this.triggerLow ? 1 : 0, _callback);
+   }
+   else {
+      _callback(false);
+   }
 }
 
 GpioState.prototype.set = function(_value, _callback) {

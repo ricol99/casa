@@ -1,5 +1,5 @@
 var util = require('util');
-var events = require('events');
+var Source = require('./source');
 var CasaSystem = require('./casasystem');
 
 function LogicActivator(_config) {
@@ -12,8 +12,9 @@ function LogicActivator(_config) {
    this.casa = this.casaSys.casa;
 
    var sources = [];
+   this.sourceType = "activator";
 
-   events.EventEmitter.call(this);
+   Source.call(this, _config);
 
    this.inputs = [];
    this.inputNames = [];
@@ -31,7 +32,7 @@ function LogicActivator(_config) {
    this.establishListeners();
 }
 
-util.inherits(LogicActivator, events.EventEmitter);
+util.inherits(LogicActivator, Source);
 
 LogicActivator.prototype.establishListeners = function() {
    var that = this;
@@ -177,10 +178,6 @@ LogicActivator.prototype.emitIfNecessary = function(_data) {
          this.emit('active', { sourceName: this.name });
       }
    }
-}
-
-LogicActivator.prototype.isActive = function() {
-   return this.active;
 }
 
 module.exports = exports = LogicActivator;

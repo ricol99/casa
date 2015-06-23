@@ -1,16 +1,14 @@
 var util = require('util');
-var events = require('events');
+var Source = require('./source');
 var CasaSystem = require('./casasystem');
 
 function State(_config) {
-   this.name = _config.name;
-   this.active = false;
-   this.sourceEnabled = true;
+   this.sourceType = "state";
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
 
-   events.EventEmitter.call(this);
+   Source.call(this, _config);
 
    var that = this;
 
@@ -20,18 +18,7 @@ function State(_config) {
    }
 }
 
-util.inherits(State, events.EventEmitter);
-
-// Override these two functions if you want to support writable states
-State.prototype.setActive = function(_callback) {
-   console.log(this.name + ': State is read only!');
-   _callback(false);
-}
-
-State.prototype.setInactive = function(_callback) {
-   console.log(this.name + ': State is read only!');
-   _callback(false);
-}
+util.inherits(State, Source);
 
 State.prototype.coldStart = function() {
 
@@ -41,10 +28,6 @@ State.prototype.coldStart = function() {
    else {
       this.emit('inactive', { sourceName: this.name, coldStart: true });
    }
-}
-
-State.prototype.isActive = function() {
-   return this.active;
 }
 
 module.exports = exports = State;

@@ -1,19 +1,19 @@
 var util = require('util');
-var Thing = require('./thing');
+var events = require('events');
 var S = require('string');
 var io = require('socket.io-client');
 var CasaSystem = require('./casasystem');
 
 function RemoteCasa(_config, _peerCasa) {
+   this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.peerCasa = _peerCasa;
 
-   Thing.call(this, _config);
+   events.EventEmitter.call(this);
 
    this.loginAs = 'remote';
-   this.states = [];
-   this.activators = [];
+   this.sources = [];
    this.actions = [];
 
    this.listenersSetUp = false;
@@ -28,7 +28,7 @@ function RemoteCasa(_config, _peerCasa) {
          that.active = true;
          console.log(that.name + ': Connected to my peer. Going active.');
 
-         // listen for state and activator changes from peer casas
+         // listen for source changes from peer casas
          that.establishListeners(true);
          that.emit('active', { sourceName: that.name });
       }
@@ -44,107 +44,65 @@ function RemoteCasa(_config, _peerCasa) {
    });
 }
 
-util.inherits(RemoteCasa, Thing);
+util.inherits(RemoteCasa, events.EventEmitter);
 
 RemoteCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
       var that = this;
 
-      // listen for state changes from peer casas
-      this.peerCasa.on('state-active', function(_data) {
-         console.log(that.name + ': Event received from remote casa. Event name: active, state: ' + _data.sourceName);
+      // listen for sourcechanges from peer casas
+      this.peerCasa.on('source-active', function(_data) {
+         console.log(that.name + ': Event received from remote casa. Event name: active, source: ' + _data.sourceName);
 
-         if (that.states[_data.sourceName]) {
-            that.states[_data.sourceName].stateHasGoneActive(_data);
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasGoneActive(_data);
          }
-         that.emit('state-active', _data);
+         that.emit('source-active', _data);
       });
 
-      this.peerCasa.on('state-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
+      this.peerCasa.on('source-inactive', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, source: ' + _data.sourceName);
 
-         if (that.states[_data.sourceName]) {
-            that.states[_data.sourceName].stateHasGoneInactive(_data);
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasGoneInactive(_data);
          }
-         that.emit('state-inactive', _data);
-      });
-
-      // listen for activator changes from peer casas
-      this.peerCasa.on('activator-active', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
-
-         if (that.activators[_data.sourceName]) {
-            that.activators[_data.sourceName].activatorHasGoneActive(_data);
-         }
-         that.emit('activator-active', _data);
-      });
-
-      this.peerCasa.on('activator-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
-
-         if (that.activators[_data.sourceName]) {
-            that.activators[_data.sourceName].activatorHasGoneInactive(_data);
-         }
-         that.emit('activator-inactive', _data);
+         that.emit('source-inactive', _data);
       });
 
       this.listenersSetUp = true;
    }
 }
 
-RemoteCasa.prototype.addState = function(_state) {
-   // Peer state being added to remote casa
-   console.log(this.name + ': State '  +_state.name + ' added to remote casa ');
-   this.states[_state.name] = _state;
-   console.log(this.name + ': ' + _state.name + ' associated!');
+RemoteCasa.prototype.setSourceActive = function(_source, _callback) {
+   peerCasa.setSourceActive(_source, _callback);
 }
 
-RemoteCasa.prototype.setStateActive = function(_state, _callback) {
-   peerCasa.setStateActive(_state, _callback);
+RemoteCasa.prototype.setSourceInactive = function(_source, _callback) {
+   peerCasa.setSourceInactive(_source, _callback);
 }
 
-RemoteCasa.prototype.setStateInactive = function(_state, _callback) {
-   peerCasa.setStateInactive(_state, _callback);
-}
-
-RemoteCasa.prototype.isStateActive = function(_state, _callback) {
-   peerCasa.isStateActive(_state, _callback);
-}
-
-RemoteCasa.prototype.addActivator = function(_activator) {
-   // Peer acivator being added to peer casa
-   console.log(this.name + ': Activator '  +_activator.name + ' added to remote casa ');
-   this.activators[_activator.name] = _activator;
-   console.log(this.name + ': ' + _activator.name + ' associated!');
+RemoteCasa.prototype.addSource = function(_source) {
+   // Peer source being added to remote casa
+   console.log(this.name + ': Source '  +_source.name + ' added to remote casa ');
+   this.sources[_source.name] = _source;
+   console.log(this.name + ': ' + _source.name + ' associated!');
 }
 
 RemoteCasa.prototype.invalidateSources = function() {
 
-   for(var prop in this.states) {
+   for(var prop in this.sources) {
 
-      if(this.states.hasOwnProperty(prop)){
-         console.log(this.name + ': Invaliding state ' + this.states[prop].name);
-         this.states[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.states[prop].name];
-         delete this.states[prop];
+      if(this.sources.hasOwnProperty(prop)){
+         console.log(this.name + ': Invaliding source ' + this.sources[prop].name);
+         this.sources[prop].invalidateSource();
+         delete this.casaSys.allObjects[this.sources[prop].name];
+         delete this.sources[prop];
       }
    }
 
-   for(var prop in this.activators) {
-
-      if(this.activators.hasOwnProperty(prop)){
-         console.log(this.name + ': Invaliding activator ' + this.activators[prop].name);
-         this.activators[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.activators[prop].name];
-         delete this.activators[prop];
-      }
-   }
-
-   delete this.states;
-   delete this.activators;
-   this.states = [];
-   this.activators = [];
+   delete this.sources;
+   this.sources = [];
 }
 
 module.exports = exports = RemoteCasa;

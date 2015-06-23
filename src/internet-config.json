@@ -41,7 +41,16 @@
          }
       }
    ],
-   "things": [],
+   "things": [
+      {
+         "name": "alarm:home",
+         "displayName": "House Alarm",
+         "props": {
+            "ipAddress": "192.168.1.90",
+            "colour": "white"
+         }
+      }
+   ],
    "states": [],
    "activators": [
       {
