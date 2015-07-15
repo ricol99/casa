@@ -109,12 +109,10 @@ Activator.prototype.sourceIsActive = function(_data) {
 
    this.sourceActive = true;
 
-   if (this.destActivated) {
+   if (this.destActivated && this.minOutputTimeObj != null) {
       this.restartTimer();
    }
-   else {
-      this.activateDestination(_data);
-   }
+   this.activateDestination(_data);
 }
 
 Activator.prototype.sourceIsInactive = function(_data) {
@@ -132,28 +130,32 @@ Activator.prototype.sourceIsInactive = function(_data) {
       if (this.minOutputTimeObj == null) {
          this.deactivateDestination(_data);
       }
+      else {
+         // save data for the timer to use
+         this.latestInactiveData = _data;
+      }
    }
 }
 
 Activator.prototype.activateDestination = function(_data) {
    this.destActivated = true;
 
-   if (_data.coldStart) {
-      this.emit(this.invert ? 'inactive' : 'active', { sourceName: this.name, coldStart: true }); 
+   if (this.invert) {
+       this.goInactive(_data);
    }
    else {
-      this.emit(this.invert ? 'inactive' : 'active', { sourceName: this.name }); 
+       this.goActive(_data);
    }
 }
 
 Activator.prototype.deactivateDestination = function(_data) {
    this.destActivated = false;
 
-   if (_data.coldStart) {
-      this.emit(this.invert ? 'active' : 'inactive', { sourceName: this.name, coldStart: true }); 
+   if (this.invert) {
+       this.goActive(_data);
    }
    else {
-      this.emit(this.invert ? 'active' : 'inactive', { sourceName: this.name }); 
+       this.goInactive(_data);
    }
 }
 
@@ -165,8 +167,11 @@ Activator.prototype.restartTimer = function() {
    }
 
    this.minOutputTimeObj = setTimeout(function() {
-      that.deactivateDestination( { coldStart: false });
       that.minOutputTimeObj = null;
+
+      if (!that.active) {
+         that.deactivateDestination(this.latestInactiveData);
+      }
    }, this.minOutputTime*1000);
 }
 
@@ -187,7 +192,7 @@ function InputDebouncer(_source, _threshold, _activator) {
 
       if (_data.coldStart) {
          that.sourceActive = true;
-         that.emit('active', { sourceName: that.source.name, coldStart: true });
+         that.emit('active', _data);
       }
       else if (!that.sourceActive) {
          that.sourceActive = true;
@@ -204,7 +209,7 @@ function InputDebouncer(_source, _threshold, _activator) {
                   that.emit('invalid', { sourceName: that.source.name });
                } 
                else if (that.sourceActive) {
-                  that.emit('active', { sourceName: that.source.name });
+                  that.emit('active', _data);
                }
             }, that.threshold*1000);
          }
@@ -215,7 +220,7 @@ function InputDebouncer(_source, _threshold, _activator) {
 
       if (_data.coldStart) {
          that.sourceActive = false;
-         that.emit('inactive', { sourceName: that.source.name, coldStart: true });
+         that.emit('inactive', _data);
       }
       else if (that.sourceActive) {
          that.sourceActive = false;
@@ -229,7 +234,7 @@ function InputDebouncer(_source, _threshold, _activator) {
                that.activator.debouncingInvalidSource = false;
 
                if (!that.sourceActive) {
-                  that.emit('inactive', { sourceName: that.source.name });
+                  that.emit('inactive', _data);
                }
 
                if (!that.sourceEnabled) {
@@ -255,10 +260,10 @@ function InputDebouncer(_source, _threshold, _activator) {
                   that.emit('invalid', { sourceName: that.source.name });
                }
                else if (that.sourceActive) {
-                  that.emit('active', { sourceName: that.source.name });
+                  that.emit('active', _data);
                }
                else {
-                  that.emit('inactive', { sourceName: that.source.name });
+                  that.emit('inactive', _data);
                }
             }, that.threshold*1000);
          }

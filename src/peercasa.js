@@ -1,5 +1,6 @@
 var util = require('util');
-var events = require('events');
+//var events = require('events');
+var Source = require('./source');
 var S = require('string');
 var io = require('socket.io-client');
 var CasaSystem = require('./casasystem');
@@ -9,6 +10,7 @@ function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.config = _config;
+   this.sourceType = "peercasa";
    
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
@@ -19,7 +21,8 @@ function PeerCasa(_config) {
    this.persistent = false;
    this.deathTime = 60;
 
-   events.EventEmitter.call(this);
+   Source.call(this, _config);
+   //events.EventEmitter.call(this);
 
    this.sources = [];
    this.actions = [];
@@ -71,7 +74,7 @@ function PeerCasa(_config) {
            that.establishHeartbeat();
 
            that.resendUnAckedMessages();
-           that.emit('active', { sourceName: that.name });
+           that.goActive({ sourceName: that.name });
         }
       }
    };
@@ -91,7 +94,7 @@ function PeerCasa(_config) {
                that.intervalID = null;
                that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
                that.socket = null;
-               that.emit('inactive', { sourceName: that.name });
+               that.goInactive({ sourceName: that.name });
             }
          }
       }
@@ -116,7 +119,7 @@ function PeerCasa(_config) {
    this.sourcePropertyChangedCasaHandler = function(_data) {
 
       if (that.connected) {
-         console.log(that.name + ': publishing source ' + _data.sourceName + ' property changed to peer casa');
+         console.log(that.name + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          that.sendMessage('source-property-changed', _data);
       }
    };
@@ -133,7 +136,7 @@ function PeerCasa(_config) {
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
 }
 
-util.inherits(PeerCasa, events.EventEmitter);
+util.inherits(PeerCasa, Source);
 
 PeerCasa.prototype.removeCasaListeners = function() {
    console.log(this.name + ': removing casa listeners');
@@ -260,7 +263,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.sendMessage('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
       }  
 
-      that.emit('active', { sourceName: that.name });
+      that.goActive({ sourceName: that.name });
    });
 
    this.socket.on('casa-activeAACCKK', function(_data) {
@@ -281,7 +284,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.emit('inactive', { sourceName: that.name });
+         that.goInactive({ sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
@@ -300,7 +303,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.emit('inactive', { sourceName: that.name });
+         that.goInactive({ sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
@@ -358,19 +361,14 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
          var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].sourceType,
                                      _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
-         console.log("============AAAAAA");
 
          source.active = _data.casaConfig.sourcesStatus[i].status;
-         console.log("============BBBBBB");
          this.casaSys.allObjects[source.name] = source;
-         console.log("============CCCCCC");
       }
    }
 
-   console.log("============DDDDDD");
    // Refresh all inactive activators and actions
    this.casaSys.casa.refreshActivatorsAndActions();
-   console.log("============EEEEEE");
 }
 
 function SourceRequestor(_requestId, _source) {

@@ -22,8 +22,7 @@ TestState.prototype.setActive = function(_callback) {
    else {
       if (this.writable) {
          console.log(this.name + ': Set to active!');
-         this.active = true;
-         this.emit('active', { sourceName: this.name });
+         this.goActive({ sourceName: this.name });
          _callback(true);
       }
       else {
@@ -42,13 +41,12 @@ TestState.prototype.setInactive = function(_callback) {
    else {
       if (this.writable) {
          console.log(this.name + ': Set to inactive!');
-         this.active = false;
-         this.emit('inactive', { sourceName: this.name });
+         this.goInactive({ sourceName: this.name });
          _callback(true);
       }
       else {
          console.log(this.name + ': Not set to inactive as not writable!');
-         _callback(true);
+         _callback(false);
       }
    }
 }

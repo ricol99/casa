@@ -20,20 +20,19 @@ function PeerSource(_name, _sourceType, _props, _peerCasa) {
 util.inherits(PeerSource, events.EventEmitter);
 
 PeerSource.prototype.sourceHasGoneActive = function(_data) {
-   console.log(this.name + ': received active event from peer. Going active!');
+   console.log(this.name + ': received active event from peer. Going active!', _data);
    this.active = true;
    this.emit('active', _data);
 }
 
 PeerSource.prototype.sourceHasGoneInactive = function(_data) {
-   console.log(this.name + ': received inactive event from peer. Going inactive!');
+   console.log(this.name + ': received inactive event from peer. Going inactive!', _data);
    this.active = false;
    this.emit('inactive', _data);
 }
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.name + ': received changed-property event from peer.');
-   console.log("=============== _data.propertyName = " + _data.propertyName + " _data.propertyValue = " + _data.propertyValue);
    this.props[_data.propertyName] = _data.propertyValue;
    this.emit('property-changed', _data);
 }

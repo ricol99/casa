@@ -36,7 +36,28 @@
       {
          "name": "schedulestate:test-state",
          "startRule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-         "activeFor": 30
+         "activeFor": 30,
+         "applyProps": {
+            "active" : {
+               "colour": "green"
+            },
+            "inactive" : {
+               "colour": "white"
+            }
+         }
+      },
+      {
+         "name": "schedulestate:test-state2",
+         "startRule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+         "activeFor": 30,
+         "applyProps": {
+            "active" : {
+               "colour": "red"
+            },
+            "inactive" : {
+               "colour": "blue"
+            }
+         }
       },
       {
          "name": "teststate:alarm-part-armed",
@@ -52,6 +73,13 @@
          "name": "activator:night-non-adjusted",
          "source": "schedulestate:daylight-non-adjusted",
          "invert": true
+      },
+      {
+         "name": "oractivator:test-flip-flop",
+         "sources": [
+            "schedulestate:test-state",
+            "schedulestate:test-state2"
+         ]
       }
    ],
    "actions": [
@@ -71,12 +99,10 @@
          "target": "teststate:schedule-test"
       },
       {
-         "name": "setpropertyaction:test-state",
-         "source": "schedulestate:test-state",
+         "name": "setpropertyaction:alarm-action",
+         "source": "oractivator:test-flip-flop",
          "target": "alarm:home",
-         "targetProperty": "colour",
-         "targetPropertyActiveValue": "green",
-         "targetPropertyInactiveValue": "white"
+         "targetProperty": "colour"
       }
    ]
 }

@@ -89,8 +89,6 @@ Casa.prototype.buildSimpleConfig = function(_config) {
       this.config.sourcesStatus.push({ sourceType: "", properties: {}, status: false });
    }
 
-   console.log("============= Sources = ", this.config.sources);
-   console.log("============= SourcesStatus = ", this.config.sourcesStatus);
 }
 
 Casa.prototype.refreshActivatorsAndActions = function() {
@@ -224,7 +222,6 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
    var i = 0;
    for(var prop in this.states) {
 
-      console.log("===========A");
       this.config.sourcesStatus.push({ sourceType: this.states[this.config.sources[i]].sourceType,
                                        properties: this.states[this.config.sources[i]].props,
                                        status: this.states[this.config.sources[i++]].isActive() });
@@ -232,21 +229,18 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
 
    for(var prop in this.activators) {
 
-      console.log("===========B");
       this.config.sourcesStatus.push({ sourceType: this.activators[this.config.sources[i]].sourceType,
                                        properties: this.activators[this.config.sources[i]].props,
                                        status: this.activators[this.config.sources[i++]].isActive() });
    }
 
    for(var prop in this.things) {
-      console.log("===========C");
       this.config.sourcesStatus.push({ sourceType: this.things[this.config.sources[i]].sourceType,
                                        properties: this.things[this.config.sources[i]].props,
                                        status: this.things[this.config.sources[i++]].isActive() });
    }
 
    for(var prop in this.users) {
-      console.log("===========D");
       this.config.sourcesStatus.push({ sourceType: this.users[this.config.sources[i]].sourceType,
                                        properties: this.users[this.config.sources[i]].props,
                                        status: this.users[this.config.sources[i++]].isActive() });

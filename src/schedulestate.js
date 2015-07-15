@@ -174,13 +174,11 @@ ScheduleState.prototype.resetStartJob = function() {
       }
 
       if (!that.active) {
-         that.active = true;
-         that.emit('active', { sourceName: that.name });
+         that.goActive({ sourceName: that.name });
 
          if (that.activeFor) {
             setTimeout(function() {
-               that.active = false;
-               that.emit('inactive', { sourceName: that.name });
+               that.goInactive({ sourceName: that.name });
             }, that.activeFor*1000);
          }
       }
@@ -204,8 +202,7 @@ ScheduleState.prototype.resetEndJob = function() {
          }
 
          if (that.active) {
-            that.active = false;
-            that.emit('inactive', { sourceName: that.name });
+            that.goInactive({ sourceName: that.name });
          }
       });
    }

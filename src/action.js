@@ -40,7 +40,7 @@ Action.prototype.establishListeners = function() {
 
    if (this.actionEnabled) { 
       var activeCallback = function(_data) {
-         console.log(that.name + ': ACTIVATED');
+         console.log(that.name + ': ACTIVATED', _data);
 
          if (that.actionEnabled) {
 
@@ -56,7 +56,7 @@ Action.prototype.establishListeners = function() {
       };
 
       var inactiveCallback = function(_data) {
-         console.log(that.name + ': DEACTIVATED');
+         console.log(that.name + ': DEACTIVATED', _data);
 
          if (that.actionEnabled) {
 
@@ -92,7 +92,6 @@ Action.prototype.establishListeners = function() {
 
 Action.prototype.refreshSources = function() {
    var ret = true;
-   console.log("============= refreshSources");
 
    if (!this.actionEnabled) {
       ret = this.establishListeners();

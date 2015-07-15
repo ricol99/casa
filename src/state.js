@@ -23,10 +23,10 @@ util.inherits(State, Source);
 State.prototype.coldStart = function() {
 
    if (this.active) {
-      this.emit('active', { sourceName: this.name, coldStart: true });
+      this.goActive({ coldStart: true });
    }
    else {
-      this.emit('inactive', { sourceName: this.name, coldStart: true });
+      this.goInactive({ coldStart: true });
    }
 }
 

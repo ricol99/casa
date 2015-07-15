@@ -11,7 +11,6 @@ function LogicActivator(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
 
-   var sources = [];
    this.sourceType = "activator";
 
    Source.call(this, _config);
@@ -36,33 +35,29 @@ util.inherits(LogicActivator, Source);
 
 LogicActivator.prototype.establishListeners = function() {
    var that = this;
-   var tempSources = [];
    this.sourceEnabled = false;
 
    // Define listening callbacks
-   var activeCallback = function(_data) {
+   this.activeCallback = function(_data) {
       that.oneSourceIsActive(_data);
    };
 
-   var inactiveCallback = function(_data) {
+   this.inactiveCallback = function(_data) {
       that.oneSourceIsInactive(_data);
    };
 
-   var invalidCallback = function(_data) {
+   this.invalidCallback = function(_data) {
       var oldSourceEnabled = that.sourceEnabled;
-      var len = that.inputs.length;
+      var input = that.inputs[_data.sourceName];
 
-      for (var i = 0; i < len; ++i) {
+      if (input && input.source) {
+         input.source.removeListener('active', that.activeCallback);
+         input.source.removeListener('inactive', that.inactiveCallback);
+         input.source.removeListener('invalid', that.invalidCallback);
+         that.inputs[_data.sourceName] = {};
 
-         if (that.inputs[i].source.sourceName == _data.sourceName) {
-            that.inputs[i].source.removeListener('active', activeCallback);
-            that.inputs[i].source.removeListener('inactive', inactiveCallback);
-            that.inputs[i].source.removeListener('invalid', invalidCallback);
-            that.inputs[i].splice(i, 1);
-
-            if (that.allInputsRequiredForValidity) {
-               that.sourceEnabled = false;
-            }
+         if (that.allInputsRequiredForValidity) {
+            that.sourceEnabled = false;
          }
       }
 
@@ -73,36 +68,55 @@ LogicActivator.prototype.establishListeners = function() {
       }
    };
 
-   // Remove old inputs
-   this.inputs.forEach(function(_sourceName, _index) {
-      that.inputs[_index].source.removeListener('active', activeCallback);
-      that.inputs[_index].source.removeListener('inactive', inactiveCallback);
-      that.inputs[_index].source.removeListener('invalid', invalidCallback);
-   });
 
-   // Clear the existing array, this seems to be the way most people like on the web
-   this.inputs.length = 0;
-   tempSources.length = 0;
+   // Remove old inputs
+   for(var prop in this.inputs) {
+
+      if(this.inputs.hasOwnProperty(prop) && this.inputs[prop].source) {
+
+         this.inputs[prop].source.removeListener('active', this.activeCallback);
+         this.inputs[prop].source.removeListener('inactive', this.inactiveCallback);
+         this.inputs[prop].source.removeListener('invalid', this.invalidCallback);
+         this.inputs[prop] = {};
+      }
+   }
+
 
    // Attach sources again, perform the refresh
    var len = this.inputNames.length;
+   var allInputsValid = true;
 
    for (var i = 0; i < len; ++i) {
       var source = this.casaSys.findSource(this.inputNames[i]);
 
-      if (source && source.sourceEnabled) {
-         tempSources.push( { source: source, active: false });
+      if (source) {
+        if (source.sourceEnabled) {
+           that.inputs[source.name] = { source: source, active: false, priority: i };
+        }
+        else {
+           allInputsValid = false;
+        }
       }
    }
 
-   if (!this.allInputsRequiredForValidity || tempSources.length == this.inputNames.length) {
-      this.inputs = tempSources;
+   if (this.allInputsRequiredForValidity && !allInputsValid) {
+      // Not valid so remove inputs 
+      for(var prop in this.inputs) {
 
-      this.inputs.forEach(function(_sourceName, _index) {
-         that.inputs[_index].source.on('active', activeCallback);
-         that.inputs[_index].source.on('inactive', inactiveCallback);
-         that.inputs[_index].source.on('invalid', invalidCallback);
-      });
+         if(this.inputs.hasOwnProperty(prop)){
+            this.inputs[prop] = {};
+         }
+      }
+   }
+   else {
+      for(var prop in this.inputs) {
+
+         if(this.inputs.hasOwnProperty(prop)){
+            this.inputs[prop].source.on('active', this.activeCallback);
+            this.inputs[prop].source.on('inactive', this.inactiveCallback);
+            this.inputs[prop].source.on('invalid', this.invalidCallback);
+         }
+      }
 
       this.sourceEnabled = true;
    }
@@ -112,7 +126,6 @@ LogicActivator.prototype.establishListeners = function() {
 
 LogicActivator.prototype.refreshSources = function() {
    var ret = true;
-
    if (!this.sourceEnabled || !this.allInputsRequiredForValidity) {
       ret = this.establishListeners();
       console.log(this.name + ': Refreshed action. result=' + ret);
@@ -123,59 +136,73 @@ LogicActivator.prototype.refreshSources = function() {
 LogicActivator.prototype.oneSourceIsActive = function(_data) {
    console.log(this.name + ': Input source ' + _data.sourceName + ' active!');
 
-   // find the input in my array
-   items = this.inputs.filter(function(_item) {
-      return (_item.source.name == _data.sourceName);
-   });
-
-   // set source input to active
-   items.forEach(function(_item) {
-      _item.active = true;
-   });
-
-   this.emitIfNecessary(_data);
+   if (_data.sourceName && this.inputs[_data.sourceName]) {
+      this.inputs[_data.sourceName].active = true;
+      this.inputs[_data.sourceName].activeData = _data;
+      this.emitIfNecessary(this.inputs[_data.sourceName]);
+   }
 }
 
 LogicActivator.prototype.oneSourceIsInactive = function(_data) {
    console.log(this.name + ' : Input source ' + _data.sourceName + ' inactive!');
          
-   // find the input in my array
-   items = this.inputs.filter(function(_item) {
-      return (_item.source.name == _data.sourceName);
-   });
-
-   // set source input to inactive
-   items.forEach(function(_item) {
-      _item.active = false;
-   });
-
-   this.emitIfNecessary(_data);
+   if (_data.sourceName && this.inputs[_data.sourceName]) {
+      this.inputs[_data.sourceName].active = false;
+      this.inputs[_data.sourceName].inactiveData = _data;
+      this.emitIfNecessary(this.inputs[_data.sourceName]);
+   }
 }
 
-LogicActivator.prototype.emitIfNecessary = function(_data) {
+LogicActivator.prototype.findHighestPriorityInput = function(_outputActive) {
+   var highestPriorityFound = 99999;
+   var highestPriorityInput = null;
 
-   var res = this.checkActivate();
+
+   for(var prop in this.inputs) {
+
+      if(this.inputs.hasOwnProperty(prop)){
+         var input = this.inputs[prop];
+
+         if (input.priority < highestPriorityFound && input.active == _outputActive) {
+            highestPriorityFound = input.priority;
+            highestPriorityInput = input;
+         }
+      }
+   }
+
+   return highestPriorityInput;
+}
+
+LogicActivator.prototype.emitIfNecessary = function(_input) {
+   var outputShouldGoActive = this.checkActivate();
+   var highestPriorityInput = this.findHighestPriorityInput(outputShouldGoActive);
+
+   if (!highestPriorityInput) {
+      //highestPriorityInput = { source: _input, activeData: { sourceName: _input.name }, inactiveData: { sourceName: _input.name }, priority: 0 };
+      highestPriorityInput = _input;
+   }
 
    if (this.active) {
 
-      if (!res) {
-         this.active = false;
-
-         if (_data.coldStart) {
-            this.emit('inactive', { sourceName: this.name, coldStart: true });
+      if (outputShouldGoActive) {
+         // Already active so check priority
+         if (highestPriorityInput.priority > _input.priority) {
+            this.goActive(highestPriorityInput.activeData);
          }
-         else {
-            this.emit('inactive', { sourceName: this.name });
-         }
-      }
-   } else if (res) {
-      this.active = true;
-
-      if (_data.coldStart) {
-         this.emit('active', { sourceName: this.name, coldStart: true });
       }
       else {
-         this.emit('active', { sourceName: this.name });
+         this.goInactive(highestPriorityInput.inactiveData);
+      }
+   }
+   else {
+      if (!outputShouldGoActive) {
+         // Already inactive so check priority
+         if (highestPriorityInput.priority > _input.priority) {
+            this.goInactive(highestPriorityInput.inactiveData);
+         }
+      }
+      else {
+         this.goActive(highestPriorityInput.activeData);
       }
    }
 }

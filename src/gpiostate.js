@@ -46,12 +46,10 @@ GpioState.prototype.Ready = function() {
          that.value = newValue;
 
          if (newValue == 1) {
-            that.active = true;
-            that.emit('active', { sourceName: that.name });
+            that.goActive({ sourceName: that.name });
          }
          else {
-            that.active = false;
-            that.emit('inactive', { sourceName: that.name });
+            that.goInactive({ sourceName: that.name });
          }
       }
    });
