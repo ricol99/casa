@@ -517,22 +517,22 @@ PeerCasa.prototype.establishListeners = function(_force) {
       });
 
       this.socket.on('source-activeAACCKK', function(_data) {
-         console.log(that.name + ': Active Event ACKed by my peer.');
+         console.log(that.name + ': Active Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
       this.socket.on('source-inactiveAACCKK', function(_data) {
-         console.log(that.name + ': Inactive Event ACKed by my peer.');
+         console.log(that.name + ': Inactive Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
       this.socket.on('source-property-changedAACCKK', function(_data) {
-         console.log(that.name + ': Property-changed Event ACKed by my peer.');
+         console.log(that.name + ': Property-changed Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
       this.socket.on('set-source-property-reqAACCKK', function(_data) {
-         console.log(that.name + ': set source property request event ACKed by my peer. *Not confirmed*');
+         console.log(that.name + ': set source property request event ACKed by my peer. *Not confirmed*. Source=' + _data.sourceName);
 
          if (_data.requestor == that.casa.name) {
             // We made the request
@@ -548,7 +548,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
       });
 
       this.socket.on('set-source-property-respAACCKK', function(_data) {
-         console.log(that.name + ': set source property response event ACKed by my peer.');
+         console.log(that.name + ': set source property response event ACKed by my peer. Source=' + _data.sourceName);
 
          if (_data.requestor == that.casa.name) {
             // We made the request

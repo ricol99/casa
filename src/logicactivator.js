@@ -163,7 +163,7 @@ LogicActivator.prototype.findHighestPriorityInput = function(_outputActive) {
       if(this.inputs.hasOwnProperty(prop)){
          var input = this.inputs[prop];
 
-         if (input.priority < highestPriorityFound && input.active == _outputActive) {
+         if (input && input.priority < highestPriorityFound && input.active == _outputActive) {
             highestPriorityFound = input.priority;
             highestPriorityInput = input;
          }
@@ -186,7 +186,7 @@ LogicActivator.prototype.emitIfNecessary = function(_input) {
 
       if (outputShouldGoActive) {
          // Already active so check priority
-         if (highestPriorityInput.priority > _input.priority) {
+         if (highestPriorityInput.priority >= _input.priority) {
             this.goActive(highestPriorityInput.activeData);
          }
       }
@@ -197,7 +197,7 @@ LogicActivator.prototype.emitIfNecessary = function(_input) {
    else {
       if (!outputShouldGoActive) {
          // Already inactive so check priority
-         if (highestPriorityInput.priority > _input.priority) {
+         if (highestPriorityInput.priority >= _input.priority) {
             this.goInactive(highestPriorityInput.inactiveData);
          }
       }
