@@ -30,10 +30,18 @@ function Source(_config) {
 
 util.inherits(Source, events.EventEmitter);
 
+Source.prototype.getProperty = function(_property) {
+   return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
+}
+
 // Override this function if you want to support writable properties
 Source.prototype.setProperty = function(_propName, _propValue, _callback) {
    console.log(this.name + ': Source is read only!');
    _callback(false);
+}
+
+Source.prototype.isActive = function() {
+   return this.active;
 }
 
 // Override these two functions if you want to support writable states
@@ -45,14 +53,6 @@ Source.prototype.setActive = function(_callback) {
 Source.prototype.setInactive = function(_callback) {
    console.log(this.name + ': Source is read only!');
    _callback(false);
-}
-
-Source.prototype.getProperty = function(_property) {
-   return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
-}
-
-Source.prototype.isActive = function() {
-   return this.active;
 }
 
 // Internal functions, only for derived objects

@@ -34,6 +34,21 @@
          "activeFor": 3600
       },
       {
+         "name": "propertystate:test-light-level-prop-state",
+         "triggerProperty": "lightLevel",
+         "triggerCondition": "<",
+         "triggerValue": 50,
+         "triggerInitialValue": 100,
+         "applyProps": {
+            "active" : {
+               "colour": "red"
+            },
+            "inactive" : {
+               "colour": "blue"
+            }
+         }
+      },
+      {
          "name": "schedulestate:test-state",
          "startRule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
          "activeFor": 30,
@@ -52,10 +67,10 @@
          "activeFor": 120,
          "applyProps": {
             "active" : {
-               "colour": "red"
+               "lightLevel": 30
             },
             "inactive" : {
-               "colour": "blue"
+               "lightLevel": 100
             }
          }
       },
@@ -78,7 +93,7 @@
          "name": "oractivator:test-flip-flop",
          "sources": [
             "schedulestate:test-state",
-            "schedulestate:test-state2"
+            "propertystate:test-light-level-prop-state"
          ]
       }
    ],
@@ -97,6 +112,12 @@
          "name": "setstateaction:test-daylight-state",
          "source": "schedulestate:daylight-non-adjusted",
          "target": "teststate:schedule-test"
+      },
+      {
+         "name": "setpropertyaction:test-set-property-state-action",
+         "source": "schedulestate:test-state2",
+         "target": "propertystate:test-light-level-prop-state",
+         "targetProperty": "lightLevel"
       },
       {
          "name": "setpropertyaction:alarm-action",
