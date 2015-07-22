@@ -367,8 +367,8 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       }
    }
 
-   // Refresh all inactive activators and actions
-   this.casaSys.casa.refreshActivatorsAndActions();
+   // Refresh all inactive sources and actions
+   this.casaSys.casa.refreshSourcesAndActions();
 }
 
 function SourceRequestor(_requestId, _source) {

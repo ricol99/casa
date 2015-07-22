@@ -1,34 +1,77 @@
 var util = require('util');
 var State = require('./state');
+var CasaSystem = require('./casasystem');
 
 function PropertyState(_config) {
-   this.triggerProperty = _config.triggerProperty;
+   this.casaSys = CasaSystem.mainInstance();
+   this.sourceName = _config.source;
+   this.casa = this.casaSys.casa;
+   this.property = _config.property;
 
    if (_config.triggerCondition == undefined) {
       this.triggerCondition = "==";
       this.triggerValue = (_config.triggerValue == undefined) ? true : _config.triggerValue;
-      this.triggerInitialValue = (_config.triggerInitialValue == undefined) ? !this.triggerValue : _config.triggerValue;
    }
    else {
       this.triggerCondition = _config.triggerCondition;
       this.triggerValue = _config.triggerValue;
-      this.triggerInitialValue = _config.triggerValue;
    }
 
    State.call(this, _config);
 
-   this.props[this.triggerProperty] = this.triggerInitialValue;
+   this.establishListeners();
 
    var that = this;
 }
 
 util.inherits(PropertyState, State);
 
-PropertyState.prototype.setProperty = function(_propName, _propValue, _callback) {
-   this.props[_propName] = _propValue;
+PropertyState.prototype.establishListeners = function() {
+   var that = this;
 
-   if (_propName == this.triggerProperty) {
-      var a = this.props[this.triggerProperty];
+   // Listener callbacks
+   var propertyChangedCallback = function(_data) {
+      that.sourcePropertyChanged(_data);
+   };
+
+   var invalidCallback = function(_data) {
+      console.log(that.name + ': INVALID');
+
+      that.sourceEnabled = false;
+      that.source.removeListener('property-changed', propertyChangedCallback);
+      that.source.removeListener('invalid', invalidCallback);
+
+      that.emit('invalid', { sourceName: that.name });
+   };
+
+   // refresh source
+   this.source = this.casaSys.findSource(this.sourceName);
+   this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
+
+   if (this.sourceEnabled) {
+      this.source.on('property-changed', propertyChangedCallback);
+      this.source.on('invalid', invalidCallback);
+      this.props[this.property] = this.source.getProperty(this.property);
+   }
+
+   return this.sourceEnabled;
+}
+
+PropertyState.prototype.refreshSources = function() {
+   var ret = true;
+
+   if (!this.sourceEnabled)  {
+      ret = this.establishListeners();
+      console.log(this.name + ': Refreshed action. result=' + ret);
+   }
+   return ret;
+}
+
+PropertyState.prototype.sourcePropertyChanged = function(_data) {
+
+   if (_data.propertyName == this.property) {
+      this.props[this.property] = _data.propertyValue;
+      var a = _data.propertyValue;
       var b = this.triggerValue;
       var evalStr = "a " + this.triggerCondition + " b";
 
@@ -45,7 +88,6 @@ PropertyState.prototype.setProperty = function(_propName, _propValue, _callback)
          }
       }
    }
-   _callback(true);
 }
 
 module.exports = exports = PropertyState;

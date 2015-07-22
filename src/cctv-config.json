@@ -16,7 +16,15 @@
    "listeningPort": 8081,
    "props": {},
    "users": [],
-   "things": [],
+   "things": [
+      {
+         "name": "thing:home-daylight-sensor",
+         "displayName": "Home daylight sensor",
+         "props": {
+            "lightLevel": 100
+         }
+      }
+   ],
    "states": [
       {
          "name": "schedulestate:daylight-non-adjusted",
@@ -35,10 +43,10 @@
       },
       {
          "name": "propertystate:test-light-level-prop-state",
-         "triggerProperty": "lightLevel",
+         "source": "thing:home-daylight-sensor",
+         "property": "lightLevel",
          "triggerCondition": "<",
          "triggerValue": 50,
-         "triggerInitialValue": 100,
          "applyProps": {
             "active" : {
                "colour": "red"
@@ -116,7 +124,7 @@
       {
          "name": "setpropertyaction:test-set-property-state-action",
          "source": "schedulestate:test-state2",
-         "target": "propertystate:test-light-level-prop-state",
+         "target": "thing:home-daylight-sensor",
          "targetProperty": "lightLevel"
       },
       {

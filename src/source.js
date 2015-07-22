@@ -30,6 +30,10 @@ function Source(_config) {
 
 util.inherits(Source, events.EventEmitter);
 
+Source.prototype.refreshSources = function() {
+   // Do Nothing
+}
+
 Source.prototype.getProperty = function(_property) {
    return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
 }

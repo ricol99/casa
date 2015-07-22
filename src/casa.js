@@ -25,10 +25,7 @@ function Casa(_config) {
 
    this.anonymousClients = [];
    this.clients = [];
-   this.users = [];
-   this.things = [];
-   this.states = [];
-   this.activators = [];
+   this.sources = [];
    this.actions = [];
    this.uber = false;
    this.sourceEnabled = true;
@@ -91,12 +88,12 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 
 }
 
-Casa.prototype.refreshActivatorsAndActions = function() {
+Casa.prototype.refreshSourcesAndActions = function() {
 
-   for(var prop in this.activators) {
+   for(var prop in this.sources) {
 
-      if(this.activators.hasOwnProperty(prop)){
-         this.activators[prop].refreshSources();
+      if(this.sources.hasOwnProperty(prop)){
+         this.sources[prop].refreshSources();
       }
    }
 
@@ -220,30 +217,11 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
    this.config.sourcesStatus = [];
 
    var i = 0;
-   for(var prop in this.states) {
+   for(var prop in this.sources) {
 
-      this.config.sourcesStatus.push({ sourceType: this.states[this.config.sources[i]].sourceType,
-                                       properties: this.states[this.config.sources[i]].props,
-                                       status: this.states[this.config.sources[i++]].isActive() });
-   }
-
-   for(var prop in this.activators) {
-
-      this.config.sourcesStatus.push({ sourceType: this.activators[this.config.sources[i]].sourceType,
-                                       properties: this.activators[this.config.sources[i]].props,
-                                       status: this.activators[this.config.sources[i++]].isActive() });
-   }
-
-   for(var prop in this.things) {
-      this.config.sourcesStatus.push({ sourceType: this.things[this.config.sources[i]].sourceType,
-                                       properties: this.things[this.config.sources[i]].props,
-                                       status: this.things[this.config.sources[i++]].isActive() });
-   }
-
-   for(var prop in this.users) {
-      this.config.sourcesStatus.push({ sourceType: this.users[this.config.sources[i]].sourceType,
-                                       properties: this.users[this.config.sources[i]].props,
-                                       status: this.users[this.config.sources[i++]].isActive() });
+      this.config.sourcesStatus.push({ sourceType: this.sources[this.config.sources[i]].sourceType,
+                                       properties: this.sources[this.config.sources[i]].props,
+                                       status: this.sources[this.config.sources[i++]].isActive() });
    }
 }
 
@@ -276,8 +254,8 @@ Casa.prototype.createRemoteCasa = function(_data) {
       this.casaSys.allObjects[source.name] = source;
    }
 
-   // Refresh all inactive activators and actions
-   this.refreshActivatorsAndActions();
+   // Refresh all inactive sources and actions
+   this.refreshSourcesAndActions();
 
    // Cold start all the peers states now that everything has been created
    remoteCasa.coldStartPeerStates();
@@ -287,7 +265,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
 
 Casa.prototype.addUser = function(_user) {
    console.log(this.name + ': User '  + _user.name + ' added to casa ');
-   this.users[_user.name] = _user;
+   this.sources[_user.name] = _user;
    var that = this;
 
    _user.on('active', function (_data) {
@@ -310,7 +288,7 @@ Casa.prototype.addUser = function(_user) {
 
 Casa.prototype.addThing = function(_thing) {
    console.log(this.name + ': Thing '  + _thing.name + ' added to casa ');
-   this.things[_thing.name] = _thing;
+   this.sources[_thing.name] = _thing;
    var that = this;
 
    _thing.on('active', function (_data) {
@@ -333,7 +311,7 @@ Casa.prototype.addThing = function(_thing) {
 
 Casa.prototype.addState = function(_state) {
    console.log(this.name + ': State '  + _state.name + ' added to casa ');
-   this.states[_state.name] = _state;
+   this.sources[_state.name] = _state;
    var that = this;
 
    _state.on('active', function (_data) {
@@ -356,7 +334,7 @@ Casa.prototype.addState = function(_state) {
 
 Casa.prototype.addActivator = function(_activator) {
    console.log(this.name + ': Activator '  + _activator.name + ' added to casa ');
-   this.activators[_activator.name] = _activator;
+   this.sources[_activator.name] = _activator;
    var that = this;
 
    _activator.on('active', function (_data) {
@@ -384,7 +362,7 @@ Casa.prototype.addAction = function(_action) {
 }
 
 Casa.prototype.findState = function(_stateName) {
-   return this.states[_stateName];
+   return this.sources[_stateName];
 }
 
 Casa.prototype.setUber = function(_uber) {
