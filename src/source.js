@@ -6,10 +6,11 @@ function Source(_config) {
    this.name = _config.name;
    this.active = false;
    this.sourceEnabled = true;
-   this.props = (_config.props) ? _config.props : [];
+   this.props = (_config.props) ? _config.props : {};
    this.applyProps = {};
    this.applyProps.active = (_config.applyProps) ? ((_config.applyProps.active) ? _config.applyProps.active : null) : null;
    this.applyProps.inactive = (_config.applyProps) ? ((_config.applyProps.inactive) ? _config.applyProps.inactive : null) : null;
+   this.writable = (_config.writable) ? _config.writable : true;
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
@@ -25,6 +26,11 @@ function Source(_config) {
 
    events.EventEmitter.call(this);
 
+   if (this.casa) {
+      console.log(this.name + ': Source casa: ' + this.casa.name);
+      this.casa.addSource(this);
+   }
+
    var that = this;
 }
 
@@ -38,10 +44,19 @@ Source.prototype.getProperty = function(_property) {
    return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
 }
 
-// Override this function if you want to support writable properties
 Source.prototype.setProperty = function(_propName, _propValue, _callback) {
-   console.log(this.name + ': Source is read only!');
-   _callback(false);
+
+   if (this.writable) {
+      console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
+      var oldValue = this.props[_propName];
+      this.props[_propName] = _propValue;
+      this.emit('property-changed', { sourceName: this.name, propertyName: _propName, propertyOldValue: oldValue, propertyValue: _propValue });
+      _callback(true);
+   }
+   else {
+      console.log(this.name + ': Source is read only!');
+      _callback(false);
+   }
 }
 
 Source.prototype.isActive = function() {
@@ -57,14 +72,6 @@ Source.prototype.setActive = function(_callback) {
 Source.prototype.setInactive = function(_callback) {
    console.log(this.name + ': Source is read only!');
    _callback(false);
-}
-
-// Internal functions, only for derived objects
-Source.prototype.changePropertyAndEmit = function(_propName, _propValue, _callback) {
-   var oldValue = this.props[_propName];
-   this.props[_propName] = _propValue;
-   this.emit('property-changed', { sourceName: this.name, propertyName: _propName, propertyOldValue: oldValue, propertyValue: _propValue });
-   _callback(true);
 }
 
 Source.prototype.mergeActiveApplyProps = function(_sourceData) {
@@ -121,6 +128,21 @@ Source.prototype.goInactive = function(_sourceData) {
    this.active = false;
    console.log(this.name + ": Emitting inactive! send data=", sendData);
    this.emit('inactive', sendData);
+}
+
+Source.prototype.goInvalid = function(_sourceData) {
+   console.log(this.name + ": Going invalid! Previously active state=" + this.active);
+
+   var sendData = _sourceData;
+   sendData.sourceName = this.name;
+   sendData.oldState = this.active;
+   this.active = false;
+   console.log(this.name + ": Emitting invalid! send data=", sendData);
+   this.emit('invalid', sendData);
+}
+
+Source.prototype.coldStart = function() {
+   // ** DO NOTHING BY DEFAULT - Only States are cold started
 }
 
 

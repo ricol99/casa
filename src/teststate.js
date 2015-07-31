@@ -3,8 +3,6 @@ var State = require('./state');
 
 function TestState(_config) {
 
-   this.writable = (_config.writable) ? _config.writable : false;
-
    State.call(this, _config);
 
    var that = this;

@@ -65,25 +65,25 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    var len = _config.states.length;
    for (var i = 0; i < len; ++i) {
       this.config.sources.push(_config.states[i].name);
-      this.config.sourcesStatus.push({ sourceType: "", properties: {}, status: false });
+      this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
    var len = _config.activators.length;
    for (var j = i; j < len + i; ++j) {
       this.config.sources.push(_config.activators[j-i].name);
-      this.config.sourcesStatus.push({ sourceType: "", properties: {}, status: false });
+      this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
    var len = _config.things.length;
    for (var k = j; k < len + j; ++k) {
       this.config.sources.push(_config.things[k-j].name);
-      this.config.sourcesStatus.push({ sourceType: "", properties: {}, status: false });
+      this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
    var len = _config.users.length;
    for (var l = k; l < len + k; ++l) {
       this.config.sources.push(_config.users[l-k].name);
-      this.config.sourcesStatus.push({ sourceType: "", properties: {}, status: false });
+      this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
 }
@@ -216,11 +216,12 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
    delete this.config.sourcesStatus;
    this.config.sourcesStatus = [];
 
+   console.log(this.name + ':====================== AAAA Config Sources ', this.config.sources);
    var i = 0;
-   for(var prop in this.sources) {
+   for(var prop in this.config.sources) {
+   console.log(this.name + ':====================== BBBB this.config.sources[i] ', this.config.sources[i]);
 
-      this.config.sourcesStatus.push({ sourceType: this.sources[this.config.sources[i]].sourceType,
-                                       properties: this.sources[this.config.sources[i]].props,
+      this.config.sourcesStatus.push({ properties: this.sources[this.config.sources[i]].props,
                                        status: this.sources[this.config.sources[i++]].isActive() });
    }
 }
@@ -246,9 +247,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
    var PeerSource = require('./peersource');
    for (var i = 0; i < len; ++i) {
       console.log(this.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
-      console.log(_data.casaConfig.sources[i] + " " +  _data.casaConfig.sourcesStatus[i].sourceType);
-      var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].sourceType,
-                                  _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
+      var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
 
       source.active = _data.casaConfig.sourcesStatus[i].status;
       this.casaSys.allObjects[source.name] = source;
@@ -258,101 +257,32 @@ Casa.prototype.createRemoteCasa = function(_data) {
    this.refreshSourcesAndActions();
 
    // Cold start all the peers states now that everything has been created
-   remoteCasa.coldStartPeerStates();
+   remoteCasa.coldStartPeerSources();
 
    return remoteCasa;
 }
 
-Casa.prototype.addUser = function(_user) {
-   console.log(this.name + ': User '  + _user.name + ' added to casa ');
-   this.sources[_user.name] = _user;
+Casa.prototype.addSource = function(_source) {
+   console.log(this.name + ': Source '  + _source.name + ' added to casa ');
+   this.sources[_source.name] = _source;
    var that = this;
 
-   _user.on('active', function (_data) {
+   _source.on('active', function (_data) {
       console.log(that.name + ': ' + _data.sourceName + ' has become active');
       that.emit('source-active', _data);
    });
 
-   _user.on('inactive', function (_data) {
+   _source.on('inactive', function (_data) {
       console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
       that.emit('source-inactive', _data);
    });
 
-   _user.on('property-changed', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
+   _source.on('property-changed', function (_data) {
+      console.log(that.name + ': ' + _data.sourceName + ' has had a property chnage');
       that.emit('source-property-changed', _data);
    });
 
-   console.log(this.name + ': ' + _user.name + ' associated!');
-}
-
-Casa.prototype.addThing = function(_thing) {
-   console.log(this.name + ': Thing '  + _thing.name + ' added to casa ');
-   this.sources[_thing.name] = _thing;
-   var that = this;
-
-   _thing.on('active', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-active', _data);
-   });
-
-   _thing.on('inactive', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
-      that.emit('source-inactive', _data);
-   });
-
-   _thing.on('property-changed', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-property-changed', _data);
-   });
-
-   console.log(this.name + ': ' + _thing.name + ' associated!');
-}
-
-Casa.prototype.addState = function(_state) {
-   console.log(this.name + ': State '  + _state.name + ' added to casa ');
-   this.sources[_state.name] = _state;
-   var that = this;
-
-   _state.on('active', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-active', _data);
-   });
-
-   _state.on('inactive', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
-      that.emit('source-inactive', _data);
-   });
-
-   _state.on('property-changed', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-property-changed', _data);
-   });
-
-   console.log(this.name + ': ' + _state.name + ' associated!');
-}
-
-Casa.prototype.addActivator = function(_activator) {
-   console.log(this.name + ': Activator '  + _activator.name + ' added to casa ');
-   this.sources[_activator.name] = _activator;
-   var that = this;
-
-   _activator.on('active', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-active', _data);
-   });
-
-   _activator.on('inactive', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
-      that.emit('source-inactive', _data);
-   });
-
-   _activator.on('property-changed', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-property-changed', _data);
-   });
-
-   console.log(this.name + ': ' + _activator.name + ' associated!');
+   console.log(this.name + ': ' + _source.name + ' associated!');
 }
 
 Casa.prototype.addAction = function(_action) {

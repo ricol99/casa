@@ -10,7 +10,6 @@ function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.config = _config;
-   this.sourceType = "peercasa";
    
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
@@ -22,7 +21,6 @@ function PeerCasa(_config) {
    this.deathTime = 60;
 
    Source.call(this, _config);
-   //events.EventEmitter.call(this);
 
    this.sources = [];
    this.actions = [];
@@ -152,16 +150,13 @@ PeerCasa.prototype.removeCasaListeners = function() {
 }
 
 
-PeerCasa.prototype.coldStartPeerStates = function() {
+PeerCasa.prototype.coldStartPeerSources = function() {
 
    for(var prop in this.sources) {
 
       if (this.sources.hasOwnProperty(prop)){
-
-         if (this.sources[prop].sourceType == "state") {
-            console.log(this.name + ': Cold starting peer state ' + this.sources[prop].name);
-            this.sources[prop].coldStart();
-         }
+         console.log(this.name + ': Cold starting peer source ' + this.sources[prop].name);
+         this.sources[prop].coldStart();
       }
    }
 }
@@ -194,7 +189,7 @@ PeerCasa.prototype.invalidateSources = function() {
    }
    delete this.remoteCasas;
    this.remoteCasas = [];
-   this.emit('invalid', { sourceName: this.name });
+   this.goInvalid({ sourceName: this.name });
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -342,8 +337,7 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
 
    var len = this.config.sources.length;
    for (var i = 0; i < len; ++i) {
-      this.config.sourcesStatus.push({ sourceType: this.sources[this.config.sources[i]].sourceType,
-                                       properties: this.sources[this.config.sources[i]].props,
+      this.config.sourcesStatus.push({ properties: this.sources[this.config.sources[i]].props,
                                        status: this.sources[this.config.sources[i]].isActive() });
    }
 }
@@ -359,8 +353,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       for (var i = 0; i < len; ++i) {
          console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
 
-         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].sourceType,
-                                     _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
+         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
 
          source.active = _data.casaConfig.sourcesStatus[i].status;
          this.casaSys.allObjects[source.name] = source;

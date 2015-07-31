@@ -7,22 +7,14 @@ function Activator(_config) {
 
    this.casaSys = CasaSystem.mainInstance();
    this.sourceName = _config.source;
-   this.sourceType = "activator";
    this.casa = this.casaSys.casa;
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
-   this.inputDebounceTime = (_config.inputDebounceTime) ? _config.inputDebounceTime : 0;
    this.invert = (_config.invert) ? _config.invert : false;
 
    Source.call(this, _config);
 
-   if (this.casa) {
-      console.log('Activator casa: ' + this.casa.name);
-      this.casa.addActivator(this);
-   }
-
    this.coldStart = true;
-   this.debouncingInvalidSource = false;
 
    this.destActivated = false;
    this.sourceActive = false;
@@ -64,29 +56,17 @@ Activator.prototype.establishListeners = function() {
       that.emit('invalid', { sourceName: that.name });
    };
 
-   if ((this.inputDebounceTime > 0) && this.debouncingInvalidSource) {
-      this.debouncingInvalidSource = false;
-      return this.source.refreshSource();
+   // refresh source
+   this.source = this.casaSys.findSource(this.sourceName);
+   this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
+
+   if (this.sourceEnabled) {
+      this.sourceActive = this.source.isActive();
+      this.source.on('active', activeCallback);
+      this.source.on('inactive', inactiveCallback);
+      this.source.on('invalid', invalidCallback);
    }
-   else {
-      // refresh source
-      this.source = this.casaSys.findSource(this.sourceName);
-      this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
 
-      if (this.sourceEnabled) {
-
-         if (this.inputDebounceTime > 0) {
-            this.origSource = this.source;
-            this.source = new InputDebouncer(this.source, this.inputDebounceTime, this);
-            console.log(this.name + ': Created input debouncer');
-         }
-
-         this.sourceActive = this.source.isActive();
-         this.source.on('active', activeCallback);
-         this.source.on('inactive', inactiveCallback);
-         this.source.on('invalid', invalidCallback);
-      }
-   }
    return this.sourceEnabled;
 }
 
@@ -101,7 +81,7 @@ Activator.prototype.refreshSources = function() {
 }
 
 Activator.prototype.sourceIsActive = function(_data) {
-   console.log('source ' + _data.sourceName + ' active!');
+   console.log(this.name + ': source ' + _data.sourceName + ' active!');
    
    if (_data.coldStart) {
       this.destActivated = false;
@@ -116,7 +96,7 @@ Activator.prototype.sourceIsActive = function(_data) {
 }
 
 Activator.prototype.sourceIsInactive = function(_data) {
-   console.log('source ' + _data.sourceName + ' inactive!');
+   console.log(this.name + ': source ' + _data.sourceName + ' inactive!');
 
    if (_data.coldStart) {
       this.destActivated = true;
@@ -175,132 +155,8 @@ Activator.prototype.restartTimer = function() {
    }, this.minOutputTime*1000);
 }
 
-function InputDebouncer(_source, _threshold, _activator) {
-   this.source = _source;
-   this.sourceName = _source.name;
-   this.threshold = _threshold;
-   this.activator = _activator;
-   this.timeoutObj = null;
-   this.sourceActive = this.source.isActive();
-   this.sourceEnabled = true;
-
-   events.EventEmitter.call(this);
-
-   var that = this;
-
-   this.activeCallback = function(_data) {
-
-      if (_data.coldStart) {
-         that.sourceActive = true;
-         that.emit('active', _data);
-      }
-      else if (!that.sourceActive) {
-         that.sourceActive = true;
-
-         // If a timer is already running, ignore. ELSE create one
-         if (that.timeoutObj == null) {
-
-            // Activating
-            that.timeoutObj = setTimeout(function() {
-               that.timeoutObj = null;
-               that.activator.debouncingInvalidSource = false;
-
-               if (!that.sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name });
-               } 
-               else if (that.sourceActive) {
-                  that.emit('active', _data);
-               }
-            }, that.threshold*1000);
-         }
-      }
-   };
-
-   this.inactiveCallback = function(_data) {
-
-      if (_data.coldStart) {
-         that.sourceActive = false;
-         that.emit('inactive', _data);
-      }
-      else if (that.sourceActive) {
-         that.sourceActive = false;
-
-         // If a timer is already running, ignore. ELSE create one
-         if (that.timeoutObj == null) {
-
-            // Deactivating
-            that.timeoutObj = setTimeout(function() {
-               that.timeoutObj = null;
-               that.activator.debouncingInvalidSource = false;
-
-               if (!that.sourceActive) {
-                  that.emit('inactive', _data);
-               }
-
-               if (!that.sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name });
-               }
-            }, that.threshold*1000);
-         }
-      }
-   };
-
-   this.invalidCallback = function(_data) {
-      if (that.sourceEnabled) {
-         that.sourceEnabled = false;
-         that.activator.debouncingInvalidSource = true;
-
-         // If a timer is already running, ignore. ELSE create one
-         if (that.timeoutObj == null) {
-
-            that.timeoutObj = setTimeout(function() {
-               that.timeoutObj = null;
-
-               if (!that.sourceEnabled) {
-                  that.emit('invalid', { sourceName: that.source.name });
-               }
-               else if (that.sourceActive) {
-                  that.emit('active', _data);
-               }
-               else {
-                  that.emit('inactive', _data);
-               }
-            }, that.threshold*1000);
-         }
-      }
-      that.source.removeListener('active', that.activeCallback);
-      that.source.removeListener('inactive', that.inactiveCallback);
-      that.source.removeListener('invalid', that.invalidCallback);
-   };
-
-   this.source.on('active', this.activeCallback);
-   this.source.on('inactive', this.inactiveCallback);
-   this.source.on('invalid', this.invalidCallback);
-}
-
-util.inherits(InputDebouncer, events.EventEmitter);
-
-
-InputDebouncer.prototype.refreshSource = function() {
-   this.source = this.activator.casaSys.findSource(this.sourceName);
-   this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
-
-   if (this.sourceEnabled) {
-      //this.sourceActive = this.source.isActive();
-      console.log(this.source.name + ': Source state is now ' + this.sourceActive);
-      this.source.on('active', this.activeCallback);
-      this.source.on('inactive', this.inactiveCallback);
-      this.source.on('invalid', this.invalidCallback);
-   }
-   return this.sourceEnabled;
-}
-
 Activator.prototype.coldStart = function() {
    // Do nothing
-}
-
-InputDebouncer.prototype.isActive = function() {
-   return this.sourceActive;
 }
 
 Activator.prototype.isActive = function() {

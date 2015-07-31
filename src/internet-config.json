@@ -62,29 +62,28 @@
          ]
       },
       {
-         "name": "activator:debounced-home-internet-connection",
+         "name": "debounceactivator:debounced-home-casas",
          "source": "oractivator:home-casas",
-         "inputDebounceTime": 180,
-         "invert": true
+         "threshold": 60
       },
       {
-         "name": "activator:debounced-casa-alarm",
+         "name": "inverteractivator:debounced-home-internet-connection",
+         "source": "debounceactivator:debounced-home-casas"
+      },
+      {
+         "name": "debounceactivator:debounced-casa-alarm",
          "source": "casa:alarm",
-         "inputDebounceTime": 180
+         "threshold": 60
       },
       {
-         "name": "activator:casa-cctv-status",
-         "source": "casa:cctv"
-      },
-      {
-         "name": "activator:debounced-casa-cctv",
+         "name": "debounceactivator:debounced-casa-cctv",
          "source": "casa:cctv",
-         "inputDebounceTime": 180
+         "threshold": 60
       },
       {
          "name": "andactivator:home-internet-connection-armed",
          "sources": [
-            "activator:debounced-home-internet-connection",
+            "inverteractivator:debounced-home-internet-connection",
             "gpiostate:alarm-fully-armed"
          ]
       }
@@ -164,7 +163,7 @@
          "activeMessagePriority": 1,
          "inactiveMessage": "D-Internet connection to home restored",
          "inactiveMessagePriority": 0,
-         "source": "activator:debounced-home-internet-connection",
+         "source": "inverteractivator:debounced-home-internet-connection",
          "target": "usergroup:admins"
       },
       {
@@ -182,7 +181,7 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "D-Casa 'alarm' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "activator:debounced-casa-alarm",
+         "source": "debouncedactivator:debounced-casa-alarm",
          "target": "usergroup:admins"
       },
       {
@@ -191,7 +190,7 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "D-Casa 'cctv' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "activator:debounced-casa-cctv",
+         "source": "debouncedactivator:debounced-casa-cctv",
          "target": "usergroup:admins"
       },
       {

@@ -6,7 +6,6 @@ function GpioState(_config) {
 
    this.gpioPin = _config.gpioPin;
    this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
-   this.writable = (_config.writable) ? _config.writable : false;
 
    State.call(this, _config);
 
@@ -54,7 +53,6 @@ GpioState.prototype.Ready = function() {
       }
    });
 }
-
 
 // *TBD* Could we lose events here?
 GpioState.prototype.setActive = function(_callback) {

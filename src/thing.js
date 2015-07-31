@@ -3,17 +3,11 @@ var Source = require('./source');
 
 function Thing(_config) {
    this.displayName = _config.displayName;
-   this.sourceType = "thing";
 
    this.sources = {};
    this.actions = {};
 
    Source.call(this, _config);
-
-   if (this.casa) {
-      console.log('Thing casa: ' + this.casa.name);
-      this.casa.addThing(this);
-   }
 
    var that = this;
 
@@ -37,11 +31,6 @@ Thing.prototype.addAction = function(_action) {
    });
 
    console.log(this.name + ': ' + _action.name + ' associated!');
-};
-
-
-Thing.prototype.setProperty = function(_propName, _propValue, _callback) {
-   this.changePropertyAndEmit(_propName, _propValue, _callback);
 };
 
 module.exports = exports = Thing;

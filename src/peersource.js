@@ -2,9 +2,8 @@ var util = require('util');
 var events = require('events');
 var S = require('string');
 
-function PeerSource(_name, _sourceType, _props, _peerCasa) {
+function PeerSource(_name, _props, _peerCasa) {
    this.name = _name;
-   this.sourceType = _sourceType;
    this.props = _props;
    this.peerCasa = _peerCasa;
    

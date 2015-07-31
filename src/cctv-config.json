@@ -9,10 +9,6 @@
          "port": 80
       }
    },
-   "area": {
-      "name": "casaarea:home",
-      "displayName": "Casa Collin Home"
-   },
    "listeningPort": 8081,
    "props": {},
    "users": [],
@@ -93,9 +89,8 @@
    ],
    "activators": [
       {
-         "name": "activator:night-non-adjusted",
-         "source": "schedulestate:daylight-non-adjusted",
-         "invert": true
+         "name": "inverteractivator:night-non-adjusted",
+         "source": "schedulestate:daylight-non-adjusted"
       },
       {
          "name": "oractivator:test-flip-flop",

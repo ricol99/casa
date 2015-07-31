@@ -11,14 +11,12 @@ function LogicActivator(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
 
-   this.sourceType = "activator";
-
    Source.call(this, _config);
 
    this.inputs = [];
    this.inputNames = [];
 
-   this.casa.addActivator(this);
+   this.casa.addSource(this);
 
    this.active = false;
 
@@ -54,7 +52,7 @@ LogicActivator.prototype.establishListeners = function() {
          input.source.removeListener('active', that.activeCallback);
          input.source.removeListener('inactive', that.inactiveCallback);
          input.source.removeListener('invalid', that.invalidCallback);
-         that.inputs[_data.sourceName] = {};
+         that.inputs[_data.sourceName] = null;
 
          if (that.allInputsRequiredForValidity) {
             that.sourceEnabled = false;
@@ -77,7 +75,7 @@ LogicActivator.prototype.establishListeners = function() {
          this.inputs[prop].source.removeListener('active', this.activeCallback);
          this.inputs[prop].source.removeListener('inactive', this.inactiveCallback);
          this.inputs[prop].source.removeListener('invalid', this.invalidCallback);
-         this.inputs[prop] = {};
+         this.inputs[prop] = null;
       }
    }
 
@@ -104,7 +102,7 @@ LogicActivator.prototype.establishListeners = function() {
       for(var prop in this.inputs) {
 
          if(this.inputs.hasOwnProperty(prop)){
-            this.inputs[prop] = {};
+            this.inputs[prop] = null;
          }
       }
    }
