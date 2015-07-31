@@ -19,6 +19,7 @@ function LightwaveRfAction(_config) {
          var chosenDimLevel = (_data.applyProps && _data.applyProps.dimLevel) ? _data.applyProps.dimLevel : that.dimLevel;
 
          that.target.setDeviceDim(that.roomId, that.deviceId, chosenDimLevel, function(_error, _content) {
+
             if (_error) {
                console.log(that.name + ': Error turning room off ' + _error.message);
             } else {
@@ -28,6 +29,7 @@ function LightwaveRfAction(_config) {
       }
       else {
          that.target.turnDeviceOn(that.roomId, that.deviceId, function(_error, _content) {
+
             if (_error) {
                console.log(that.name + ': Error turning room off ' + _error.message);
             } else {
@@ -37,16 +39,30 @@ function LightwaveRfAction(_config) {
       }
    });
 
-   this.on('deactivated', function () {
+   this.on('deactivated', function (_data) {
       console.log(that.name + ': received deactivated event');
 
-      that.target.turnDeviceOff(that.roomId, that.deviceId, function(_error, _content) {
-         if (_error) {
-            console.log(that.name + ': Error turning room off ' + _error.message);
-         } else {
-            console.log(that.name + ': Response: ' + _content);
-         }
-      });
+      if (_data.applyProps && _data.applyProps.dimLevel) {
+
+         that.target.setDeviceDim(that.roomId, that.deviceId, _data.applyProps.dimLevel, function(_error, _content) {
+
+            if (_error) {
+               console.log(that.name + ': Error turning room off ' + _error.message);
+            } else {
+               console.log(that.name + ': Response: ' + _content);
+            }
+         });
+      }
+      else {
+         that.target.turnDeviceOff(that.roomId, that.deviceId, function(_error, _content) {
+
+            if (_error) {
+               console.log(that.name + ': Error turning room off ' + _error.message);
+            } else {
+               console.log(that.name + ': Response: ' + _content);
+            }
+         });
+      }
    });
 }
 
