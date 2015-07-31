@@ -59,7 +59,7 @@ LogicActivator.prototype.establishListeners = function() {
       // Has the enabled stated changed from true to false?
       if (oldSourceEnabled && !that.sourceEnabled) {
          // If so, tell the others guys that I am now invalid
-         that.emit('invalid', { sourceName: that.name });
+         that.goInvalid({ sourceName: that.name });
       }
    };
 
@@ -67,7 +67,7 @@ LogicActivator.prototype.establishListeners = function() {
    // Remove old inputs
    for(var prop in this.inputs) {
 
-      if(this.inputs.hasOwnProperty(prop) && this.inputs[prop].source) {
+      if(this.inputs.hasOwnProperty(prop) && this.inputs[prop] && this.inputs[prop].source) {
 
          this.inputs[prop].source.removeListener('active', this.activeCallback);
          this.inputs[prop].source.removeListener('inactive', this.inactiveCallback);
@@ -106,7 +106,7 @@ LogicActivator.prototype.establishListeners = function() {
    else {
       for(var prop in this.inputs) {
 
-         if(this.inputs.hasOwnProperty(prop)){
+         if (this.inputs.hasOwnProperty(prop) && this.inputs[prop]){
             this.inputs[prop].source.on('active', this.activeCallback);
             this.inputs[prop].source.on('inactive', this.inactiveCallback);
             this.inputs[prop].source.on('invalid', this.invalidCallback);

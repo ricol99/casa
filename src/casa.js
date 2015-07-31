@@ -91,7 +91,6 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 Casa.prototype.refreshSourcesAndActions = function() {
 
    for(var prop in this.sources) {
-
       if(this.sources.hasOwnProperty(prop)){
          this.sources[prop].refreshSources();
       }
