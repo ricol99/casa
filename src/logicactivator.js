@@ -9,14 +9,11 @@ function LogicActivator(_config) {
    console.log(this.name + ': All inputs for validity = ' + this.allInputsRequiredForValidity);
 
    this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
 
    Source.call(this, _config);
 
    this.inputs = [];
    this.inputNames = [];
-
-   this.casa.addSource(this);
 
    this.active = false;
 

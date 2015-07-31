@@ -44,12 +44,12 @@ Action.prototype.establishListeners = function() {
 
          if (that.actionEnabled) {
 
+            that.actionActive = true;
+
             if (_data.coldStart) {
-               that.actionActive = true;
                that.emit('activated-from-cold', _data);
             }
-            else if (!that.actionActive) {
-               that.actionActive = true;
+            else {
                that.emit('activated', _data);
             }
          }
@@ -59,13 +59,12 @@ Action.prototype.establishListeners = function() {
          console.log(that.name + ': DEACTIVATED', _data);
 
          if (that.actionEnabled) {
+            that.actionActive = false;
 
             if (_data.coldStart) {
-               that.actionActive = false;
                that.emit('deactivated-from-cold', _data);
             }
-            else if (that.actionActive) {
-               that.actionActive = false;
+            else {
                that.emit('deactivated', _data);
             }
          }
