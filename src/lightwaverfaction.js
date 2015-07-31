@@ -12,11 +12,13 @@ function LightwaveRfAction(_config) {
 
    var that = this;
 
-   this.on('activated', function () {
+   this.on('activated', function (_data) {
       console.log(that.name + ': received activated event');
 
-      if (that.dimLevel) {
-         that.target.setDeviceDim(that.roomId, that.deviceId, that.dimLevel, function(_error, _content) {
+      if ((_data.applyProps && _data.applyProps.dimLevel) || that.dimLevel) {
+         var chosenDimLevel = (_data.applyProps && _data.applyProps.dimLevel) ? _data.applyProps.dimLevel : that.dimLevel;
+
+         that.target.setDeviceDim(that.roomId, that.deviceId, chosenDimLevel, function(_error, _content) {
             if (_error) {
                console.log(that.name + ': Error turning room off ' + _error.message);
             } else {
