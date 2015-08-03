@@ -9,10 +9,6 @@
          "port": 80
       }
    },
-   "area": {
-      "name": "casaarea:home",
-      "displayName": "Casa Collin Home"
-   },
    "listeningPort": 8082,
    "props": {},
    "things": [
@@ -37,7 +33,7 @@
    ],
    "activators": [
       {
-         "name": "activator:lounge-debounced-sound-sensor",
+         "name": "latchingactivator:lounge-debounced-sound-sensor",
          "source": "gpiostate:lounge-sound-sensor",
          "minOutputTime": 15
       }
@@ -45,7 +41,7 @@
    "actions": [
       {
          "name": "setstateaction:lounge-turn-on-led",
-         "source": "activator:lounge-debounced-sound-sensor",
+         "source": "latchingactivator:lounge-debounced-sound-sensor",
          "target": "gpiostate:lounge-led-21"
       },
       {

@@ -13,7 +13,7 @@
       "name": "casaarea:home",
       "displayName": "Casa Collin Home"
    },
-   "listeningPort": 8080,
+   "listeningPort": 8081,
    "props": {},
    "things": [
       {
@@ -22,46 +22,61 @@
          "props": {
             "ipAddress": "192.168.1.236"
          }
+      },
+      {
+         "name": "alarm:home",
+         "displayName": "House Alarm",
+         "props": {
+            "ipAddress": "192.168.1.90"
+         }
       }
    ],
    "states": [
       {
          "name": "gpiostate:alarm-tamper-alarm",
+         "thing": "alarm:home",
          "gpioPin": 4,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-mains-failure",
+         "thing": "alarm:home",
          "gpioPin": 17,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-fire-alarm",
+         "thing": "alarm:home",
          "gpioPin": 18,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-fully-armed",
+         "thing": "alarm:home",
          "gpioPin": 22,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-part-armed",
+         "thing": "alarm:home",
          "gpioPin": 23,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-in-alarm",
+         "thing": "alarm:home",
          "gpioPin": 24,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-confirmed-alarm",
+         "thing": "alarm:home",
          "gpioPin": 25,
          "triggerLow": true
       },
       {
          "name": "gpiostate:alarm-lounge-pir",
+         "thing": "alarm:home",
          "gpioPin": 27,
          "triggerLow": true
       },
@@ -81,22 +96,69 @@
          "endRule": "sunset:-900"
       },
       { 
-         "name": "schedulestate:15-mins-before-sunset-to-2230",
-         "startRule": "sunset:-900",
-         "endRule": "30 22 * * *"
+         "name": "schedulestate:main-lights-evening",
+         "startRule": "sunset:-2700",
+         "endRule": "30 22 * * *",
+         "applyProps": {
+            "active" : {
+               "dimLevel": 65 
+            },
+            "inactive" : {
+               "dimLevel": 0
+            }
+         }
+      },
+      { 
+         "name": "schedulestate:main-lights-evening-early",
+         "startRule": "sunset:-4500",
+         "endRule": "sunset:-2600"
+      },
+      { 
+         "name": "schedulestate:main-lights-evening-late",
+         "startRule": "29 22 * * *",
+         "endRule": "59 23 * * *"
       }
    ],
    "activators": [
       {
-         "name": "activator:alarm-lounge-pir",
+         "name": "latchingactivator:alarm-lounge-pir",
          "source": "gpiostate:alarm-lounge-pir",
-         "minOutputTime": 15
+         "minOutputTime": 180
       },
       {
-         "name": "andactivator:lounge-activity",
+         "name": "andactivator:lounge-activity-armed",
          "sources": [
-            "activator:alarm-lounge-pir",
+            "latchingactivator:alarm-lounge-pir",
             "gpiostate:alarm-fully-armed"
+         ]
+      },
+      {
+         "name": "oractivator:lounge-lights-movement-slots",
+         "sources": [
+            "schedulestate:main-lights-evening-early",
+            "schedulestate:main-lights-evening-late"
+         ]
+      },
+      {
+         "name": "andactivator:lounge-activity-lights",
+         "sources": [
+            "latchingactivator:alarm-lounge-pir",
+            "oractivator:lounge-lights-movement-slots"
+         ],
+         "applyProps": {
+            "active" : {
+               "dimLevel": 40 
+            },
+            "inactive" : {
+               "dimLevel": 0
+            }
+         }
+      },
+      {
+         "name": "oractivator:lounge-lights-evening",
+         "sources": [
+            "schedulestate:main-lights-evening",
+            "andactivator:lounge-activity-lights",
          ]
       }
    ],
@@ -115,7 +177,7 @@
          "roomId": 1,
          "deviceId": 2,
          "dimLevel": 50,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "oractivator:lounge-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
@@ -123,14 +185,14 @@
          "roomId": 1,
          "deviceId": 3,
          "dimLevel": 50,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "oractivator:lounge-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
          "name": "lightwaverfaction:lounge-table-lamp",
          "roomId": 1,
          "deviceId": 1,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "oractivator:lounge-lights-evening",
          "target": "lightwaverflink:home"
       },
       {
@@ -144,7 +206,7 @@
          "name": "lightwaverfaction:hall-table-lamp",
          "roomId": 2,
          "deviceId": 1,
-         "source": "schedulestate:15-mins-before-sunset-to-2230",
+         "source": "oractivator:lounge-lights-evening",
          "target": "lightwaverflink:home"
       }
    ]
