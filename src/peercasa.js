@@ -361,7 +361,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
    }
 
    // Refresh all inactive sources and actions
-   this.casaSys.casa.refreshSourcesAndActions();
+   this.casaSys.casa.refreshSourceListeners();
 }
 
 function SourceRequestor(_requestId, _source) {
@@ -665,7 +665,7 @@ RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
    }
    else {
       if (this.timeout) {
-         clearTimeout(this,timeout);
+         clearTimeout(this.timeout);
       }
 
       this.socket.emit(this.message.message, this.message.data);

@@ -9,96 +9,267 @@
          "port": 80
       }
    },
-   "area": {
-      "name": "casaarea:home",
-      "displayName": "Casa Collin Home"
-   },
    "listeningPort": 8081,
-   "props": {},
+   "props": [],
    "things": [
       {
          "name": "lightwaverflink:home",
          "displayName": "LightwaveRF Wifi Link",
-         "props": {
-            "ipAddress": "192.168.1.236"
-         }
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.236",
+               "writable": false
+            }
+         ]
       },
+      {
+         "name": "room:lounge",
+         "displayName": "Lounge Room",
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": true
+            }
+         ]
       {
          "name": "alarm:home",
          "displayName": "House Alarm",
-         "props": {
-            "ipAddress": "192.168.1.90"
-         }
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.90",
+               "writable": false
+            },
+            {
+               "name": "tamper-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:alarm-tamper",
+                  "gpioPin": 4,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "mains-failure",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:mains-failure",
+                  "gpioPin": 17,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "fire-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:fire-alarm",
+                  "gpioPin": 18,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "fully-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:fully-armed",
+                  "gpioPin": 22,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "part-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:part-armed",
+                  "gpioPin": 23,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "alarm-triggered",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:alarm-triggered",
+                  "gpioPin": 24,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "confirmed-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:confirmed-alarm",
+                  "gpioPin": 25,
+                  "triggerLow": true
+               }
+            }
+            {
+               "name": "lounge-pir",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:lounge-pir",
+                  "gpioPin": 27,
+                  "triggerLow": true
+               }
+            }
+         ]
+      },
+      {
+         "name": "room:master-bedroom",
+         "displayName": "Master Bedroom",
+         "props": [
+            {
+               "name": "lights",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:master-bedroom-lights",
+                  "events": [
+                     {
+                        "rule": "20 22 * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "15 23 * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            }
+         ]
+      },
+      {
+         "name": "thing:environment",
+         "displayName": "Environment",
+         "props": [
+            {
+               "name": "sunset-for-four-hours",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-sunset-for-four-hours",
+                  "events": [
+                     {
+                        "rule": "sunset",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset:14400",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "lengthened-daylight",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-lengthened-daylight",
+                  "events": [
+                     {
+                        "rule": "sunrise:-900",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset:900",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-daylight",
+                  "events": [
+                     {
+                        "rule": "sunrise",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "living-area-lights-early",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-living-area-lights-early",
+                  "events": [
+                     {
+                        "rule": "30 2 * * *",
+                        "propertyValue": false 
+                     },
+                     {
+                        "rule": "sunset:-4500",
+                        "propertyValue": true
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "living-area-lights-late",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-living-area-lights-late",
+                  "events": [
+                     {
+                        "rule": "sunset:-2600",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "30 22 * * *",
+                        "propertyValue": false 
+                     }
+                  ]
+               }
+            }
+         ]
       }
    ],
-   "states": [
+   "states": [],
+   "activators": [
       {
-         "name": "gpiostate:alarm-tamper-alarm",
-         "thing": "alarm:home",
-         "gpioPin": 4,
-         "triggerLow": true
-      },
-      {
-         "name": "gpiostate:alarm-mains-failure",
-         "thing": "alarm:home",
-         "gpioPin": 17,
-         "triggerLow": true
-      },
-      {
-         "name": "gpiostate:alarm-fire-alarm",
-         "thing": "alarm:home",
-         "gpioPin": 18,
-         "triggerLow": true
+         "name": "propertyactivator:alarm-home-lounge-pir",
+         "source": "alarm:home",
+         "property": "lounge-pir",
+         "applyProps": {
+            "active" : {
+               "movement": true 
+            },
+            "inactive" : {
+               "movement": false
+            }
+         }
       },
       {
-         "name": "gpiostate:alarm-fully-armed",
-         "thing": "alarm:home",
-         "gpioPin": 22,
-         "triggerLow": true
+         "name": "setpropertyaction:update-lounge-movement",
+         "source": "propertyactivator:alarm-home-lounge-pir",
+         "target": "room:lounge",
+         "targetProperty": "movement"
       },
       {
-         "name": "gpiostate:alarm-part-armed",
-         "thing": "alarm:home",
-         "gpioPin": 23,
-         "triggerLow": true
-      },
-      {
-         "name": "gpiostate:alarm-in-alarm",
-         "thing": "alarm:home",
-         "gpioPin": 24,
-         "triggerLow": true
-      },
-      {
-         "name": "gpiostate:alarm-confirmed-alarm",
-         "thing": "alarm:home",
-         "gpioPin": 25,
-         "triggerLow": true
-      },
-      {
-         "name": "gpiostate:alarm-lounge-pir",
-         "thing": "alarm:home",
-         "gpioPin": 27,
-         "triggerLow": true
-      },
-      {
-         "name": "schedulestate:master-bedroom-lights",
-         "startRule": "20 22 * * *",
-         "endRule": "15 23 * * *"
-      },
-      {
-         "name": "schedulestate:sunset-for-four-hours",
-         "startRule": "sunset",
-         "activeFor": 14400
-      },
-      { 
-         "name": "schedulestate:lengthened-daylight",
-         "startRule": "sunrise:-900",
-         "endRule": "sunset:-900"
-      },
-      { 
-         "name": "schedulestate:main-lights-evening",
-         "startRule": "sunset:-2700",
-         "endRule": "30 22 * * *",
+         "name": "propertyactivator:main-lights-evening-early",
+         "source": "thing:environment",
+         "property": "living-area-lights-early",
          "applyProps": {
             "active" : {
                "dimLevel": 65 
@@ -108,21 +279,10 @@
             }
          }
       },
-      { 
-         "name": "schedulestate:main-lights-evening-early",
-         "startRule": "sunset:-4500",
-         "endRule": "sunset:-2600"
-      },
-      { 
-         "name": "schedulestate:main-lights-evening-late",
-         "startRule": "29 22 * * *",
-         "endRule": "59 23 * * *"
-      }
-   ],
-   "activators": [
       {
-         "name": "latchingactivator:alarm-lounge-pir",
-         "source": "gpiostate:alarm-lounge-pir",
+         "name": "latchingactivator:lounge-movement",
+         "source": "alarm:home",
+         "property": "lounge-pir",
          "minOutputTime": 180
       },
       {

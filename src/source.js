@@ -6,23 +6,36 @@ function Source(_config) {
    this.name = _config.name;
    this.active = false;
    this.sourceEnabled = true;
-   this.props = (_config.props) ? _config.props : {};
-   this.applyProps = {};
-   this.applyProps.active = (_config.applyProps) ? ((_config.applyProps.active) ? _config.applyProps.active : null) : null;
-   this.applyProps.inactive = (_config.applyProps) ? ((_config.applyProps.inactive) ? _config.applyProps.inactive : null) : null;
-   this.writable = (_config.writable) ? _config.writable : true;
+   this.props = {};
+   this.propAttributes = {};
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
 
-   if (_config.thing) {
-      var thing = casaSys.findSource(_config.thing);
+   if (_config.props) {
+      var propLen = _config.props.length;
 
-      if (thing && thing != this) {
-         this.thing = thing;
-         this.thing.addSource(this);
+      for (var i = 0; i < propLen; ++i) {
+         this.props[_config.props[i].name] = _config.props[i].initialValue;
+         this.propAttributes[_config.props[i].name] = { writeable: (_config.props[i].writeable) ? _config.props[i].writeable : true };
+
+         if (_config.props[i].binder) {
+            var PropertyBinder = casaSys.cleverRequire(_config.props[i].binder.name);
+
+            if (PropertyBinder) {
+               _config.props[i].binder.source = this.name;
+               _config.props[i].binder.propertyName = _config.props[i].name;
+               _config.props[i].binder.writable = this.propAttributes[_config.props[i].name].writable;
+               this.propAttributes[_config.props[i].name].binder = new PropertyBinder(_config.props[i].binder, this);
+            }
+         }
       }
    }
+
+   this.applyProps = {};
+   this.applyProps.active = (_config.applyProps) ? ((_config.applyProps.active) ? _config.applyProps.active : null) : null;
+   this.applyProps.inactive = (_config.applyProps) ? ((_config.applyProps.inactive) ? _config.applyProps.inactive : null) : null;
+   this.writable = (_config.writable) ? _config.writable : true;
 
    events.EventEmitter.call(this);
 
@@ -36,27 +49,35 @@ function Source(_config) {
 
 util.inherits(Source, events.EventEmitter);
 
-Source.prototype.refreshSources = function() {
-   // Do Nothing
-}
-
 Source.prototype.getProperty = function(_property) {
    return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
 }
 
 Source.prototype.setProperty = function(_propName, _propValue, _callback) {
+   console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
-   if (this.writable) {
-      console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
-      var oldValue = this.props[_propName];
-      this.props[_propName] = _propValue;
-      this.emit('property-changed', { sourceName: this.name, propertyName: _propName, propertyOldValue: oldValue, propertyValue: _propValue });
-      _callback(true);
+   if (this.propAttributes[_propName] && this.propAttributes[_propName].writeable) {
+
+      if (this.propAttributes[_propName].binder) {
+         this.propAttributes[_propName].binder.setProperty(_propValue, _callback);
+      }
+      else {
+         this.updateProperty(_propName, _propValue);
+         _callback(true);
+      }
    }
    else {
       console.log(this.name + ': Source is read only!');
       _callback(false);
    }
+}
+
+// INTERNAL METHOD AND FOR USE BY PROPERTY BINDERS
+Source.prototype.updateProperty = function(_propName, _propValue) {
+   console.log(this.name + ': Setting Property ' + _propName + ' to ' + _propValue);
+   var oldValue = this.props[_propName];
+   this.props[_propName] = _propValue;
+   this.emit('property-changed', { sourceName: this.name, propertyName: _propName, propertyOldValue: oldValue, propertyValue: _propValue });
 }
 
 Source.prototype.isActive = function() {

@@ -16,29 +16,61 @@
       {
          "name": "thing:home-daylight-sensor",
          "displayName": "Home daylight sensor",
-         "props": {
-            "lightLevel": 100
-         }
+         "props": [
+            {
+               "name": "lightLevel",
+               "initialValue": 100,
+               "writable": true
+            }
+         ]
+      },
+      {
+         "name": "thing:test-cctv",
+         "displayName": "Test CCTV Config",
+         "props": [
+            {
+               "name": "test-prop-1",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-1",
+                  "events": [
+                     {
+                        "rule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "test-prop-2",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-2",
+                  "events": [
+                     {
+                        "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            }
+         ]
       }
    ],
-   "states": [
+   "states": [],
+   "activators": [
       {
-         "name": "schedulestate:daylight-non-adjusted",
-         "startRule": "sunriseEnd",
-         "endRule": "sunsetStart"
-      },
-      {
-         "name": "schedulestate:lengthened-daylight",
-         "startRule": "sunrise:-900",
-         "endRule": "sunset:+900"
-      },
-      {
-         "name": "schedulestate:sunrise-for-one-hour",
-         "startRule": "sunriseEnd",
-         "activeFor": 3600
-      },
-      {
-         "name": "propertystate:test-light-level-prop-state",
+         "name": "propertyactivator:test-light-level-prop",
          "source": "thing:home-daylight-sensor",
          "property": "lightLevel",
          "triggerCondition": "<",
@@ -53,9 +85,9 @@
          }
       },
       {
-         "name": "schedulestate:test-state",
-         "startRule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
-         "activeFor": 30,
+         "name": "propertyactivator:test-property-1",
+         "source": "thing:test-cctv",
+         "property": "test-prop-1",
          "applyProps": {
             "active" : {
                "colour": "green"
@@ -66,9 +98,9 @@
          }
       },
       {
-         "name": "schedulestate:test-state2",
-         "startRule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-         "activeFor": 120,
+         "name": "propertyactivator:test-property-2",
+         "source": "thing:test-cctv",
+         "property": "test-prop-2",
          "applyProps": {
             "active" : {
                "lightLevel": 30
@@ -79,46 +111,22 @@
          }
       },
       {
-         "name": "teststate:alarm-part-armed",
-         "writable": true
-      },
-      {
-         "name": "teststate:schedule-test",
-         "writable": true
-      }
-   ],
-   "activators": [
-      {
-         "name": "inverteractivator:night-non-adjusted",
-         "source": "schedulestate:daylight-non-adjusted"
-      },
-      {
          "name": "oractivator:test-flip-flop",
          "sources": [
-            "schedulestate:test-state",
-            "propertystate:test-light-level-prop-state"
+            "propertyactivator:test-property-1",
+            "propertyactivator:test-light-level-prop"
          ]
       }
    ],
    "actions": [
       {
          "name": "setstateaction:test-scheduling-state-broken",
-         "source": "schedulestate:test-state-not-found",
+         "source": "propertyactivator:test-state-not-found",
          "target": "teststate:schedule-test-not-gonna-find-me-yet"
       },
       {
-         "name": "setstateaction:test-scheduling-state",
-         "source": "schedulestate:test-state",
-         "target": "teststate:schedule-test"
-      },
-      {
-         "name": "setstateaction:test-daylight-state",
-         "source": "schedulestate:daylight-non-adjusted",
-         "target": "teststate:schedule-test"
-      },
-      {
          "name": "setpropertyaction:test-set-property-state-action",
-         "source": "schedulestate:test-state2",
+         "source": "propertyactivator:test-property-2",
          "target": "thing:home-daylight-sensor",
          "targetProperty": "lightLevel"
       },

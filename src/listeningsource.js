@@ -1,5 +1,6 @@
 var util = require('util');
 var Source = require('./source');
+var SourceListener = require('./sourcelistener');
 var CasaSystem = require('./casasystem');
 
 function ListeningSource(_config) {
@@ -9,67 +10,43 @@ function ListeningSource(_config) {
 
    Source.call(this, _config);
 
-   this.establishListeners();
+   this.sourceEnabled = false;
+   this.sourceListener = new SourceListener(_config, this);
+   this.source = this.sourceListener.source;
 
    var that = this;
 }
 
 util.inherits(ListeningSource, Source);
 
-ListeningSource.prototype.establishListeners = function() {
-   var that = this;
+ListeningSource.prototype.sourceIsValid = function() {
+   this.sourceEnabled = true;
 
-   // Listener callbacks
-   this.activeCallback = function(_data) {
-      that.sourceIsActive(_data);
-   };
-
-   this.inactiveCallback = function(_data) {
-      that.sourceIsInactive(_data);
-   };
-
-   this.propertyChangedCallback = function(_data) {
-      that.sourcePropertyChanged(_data);
-   };
-
-   this.invalidCallback = function(_data) {
-      that.sourceIsInvalid(_data);
-   };
-
-   // refresh source
-   this.source = this.casaSys.findSource(this.sourceName);
-   this.sourceEnabled = (this.source != null && this.source.sourceEnabled);
-
-   if (this.sourceEnabled) {
-      this.source.on('active', this.activeCallback);
-      this.source.on('inactive', this.inactiveCallback);
-      this.source.on('property-changed', this.propertyChangedCallback);
-      this.source.on('invalid', this.invalidCallback);
+   // Cope with constructor calling back so sourceListener is not yet defined!
+   if (this.sourceListener) {
+     this.source = this.sourceListener.source;
    }
-
-   return this.sourceEnabled;
 }
 
-ListeningSource.prototype.refreshSources = function() {
-   var ret = true;
-
-   if (!this.sourceEnabled)  {
-      ret = this.establishListeners();
-      console.log(this.name + ': Refreshed action. result=' + ret);
-   }
-   return ret;
-}
-
-ListeningSource.prototype.sourceIsInvalid = function() {
+ListeningSource.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
    this.sourceEnabled = false;
-   this.source.removeListener('active', this.activeCallback);
-   this.source.removeListener('inactive', this.inactiveCallback);
-   this.source.removeListener('property-changed', this.propertyChangedCallback);
-   this.source.removeListener('invalid', this.invalidCallback);
+   this.source = null;
 
    this.goInvalid({ sourceName: this.name });
+}
+
+ListeningSource.prototype.sourceIsActive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+ListeningSource.prototype.sourceIsInactive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+ListeningSource.prototype.sourcePropertyChanged = function() {
+   // DO NOTHING BY DEFAULT
 }
 
 module.exports = exports = ListeningSource;

@@ -103,11 +103,6 @@ DebounceActivator.prototype.sourceIsInvalid = function(_data) {
             }
          }, this.threshold*1000);
       }
-
-      this.source.removeListener('active', this.activeCallback);
-      this.source.removeListener('inactive', this.inactiveCallback);
-      this.source.removeListener('property-changed', this.propertyChangedCallback);
-      this.source.removeListener('invalid', this.invalidCallback);
    }
 };
 

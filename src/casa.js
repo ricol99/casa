@@ -26,6 +26,7 @@ function Casa(_config) {
    this.anonymousClients = [];
    this.clients = [];
    this.sources = [];
+   this.sourceListeners = {};
    this.actions = [];
    this.uber = false;
    this.sourceEnabled = true;
@@ -88,11 +89,11 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 
 }
 
-Casa.prototype.refreshSourcesAndActions = function() {
+Casa.prototype.refreshSourceListeners = function() {
 
-   for(var prop in this.sources) {
-      if(this.sources.hasOwnProperty(prop)){
-         this.sources[prop].refreshSources();
+   for(var prop in this.sourceListeners) {
+      if(this.sourceListeners.hasOwnProperty(prop)){
+         this.sourceListeners[prop].refreshSources();
       }
    }
 
@@ -250,7 +251,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
    }
 
    // Refresh all inactive sources and actions
-   this.refreshSourcesAndActions();
+   this.refreshSourceListeners();
 
    // Cold start all the peers states now that everything has been created
    remoteCasa.coldStartPeerSources();
@@ -274,11 +275,15 @@ Casa.prototype.addSource = function(_source) {
    });
 
    _source.on('property-changed', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has had a property chnage');
+      console.log(that.name + ': ' + _data.sourceName + ' has had a property change');
       that.emit('source-property-changed', _data);
    });
 
    console.log(this.name + ': ' + _source.name + ' associated!');
+}
+
+Casa.prototype.addSourceListener = function(_sourceListener) {
+   this.sourceListeners[_sourceListener.name] = _sourceListener;
 }
 
 Casa.prototype.addAction = function(_action) {

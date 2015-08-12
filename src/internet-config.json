@@ -7,17 +7,17 @@
       "displayName": "Casa Collin Internet"
    },
    "listeningPort": 80,
-   "props": {},
+   "props": [],
    "users": [ 
       {
          "name": "user:richard",
          "displayName": "Richard",
-         "props": {}
+         "props": []
       },
       {
          "name": "user:natalie",
          "displayName": "Natalie",
-         "props": {}
+         "props": []
       },
       {
          "name": "usergroup:admins",
@@ -25,9 +25,17 @@
          "users": [
            "user:richard"
          ],
-         "props": {
-            "pushoverDestAddr": "gX5JLc28t775dYr1yjuo4p38t7hziV"
-         }
+         "props": [
+            {
+               "name": "pushoverDestAddr",
+               "initialValue": "gX5JLc28t775dYr1yjuo4p38t7hziV",
+               "writable": false,
+               "binder": {
+                  "name": "i2cpropertybinder:pushoverDestAddr",
+                  "address": 24
+               }
+            }
+         ]
       },
       {
          "name": "usergroup:key-holders",
@@ -36,19 +44,31 @@
            "user:richard",
            "user:natalie"
          ],
-         "props": {
-            "pushoverDestAddr": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j"
-         }
+         "props": [
+            {
+               "name": "pushoverDestAddr",
+               "initialValue": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j",
+               "writable": false
+            }
+         ]
       }
    ],
    "things": [
       {
          "name": "alarm:home",
          "displayName": "House Alarm",
-         "props": {
-            "ipAddress": "192.168.1.90",
-            "colour": "white"
-         }
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.90",
+               "writable": false
+            },
+            {
+               "name": "colour",
+               "initialValue": "white",
+               "writable": true
+            }
+         ]
       }
    ],
    "states": [],
