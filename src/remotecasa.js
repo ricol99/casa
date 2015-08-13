@@ -14,7 +14,7 @@ function RemoteCasa(_config, _peerCasa) {
 
    this.loginAs = 'remote';
    this.sources = [];
-   this.actions = [];
+   this.workers = [];
 
    this.listenersSetUp = false;
    this.active = false;

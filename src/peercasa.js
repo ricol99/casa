@@ -23,7 +23,7 @@ function PeerCasa(_config) {
    Source.call(this, _config);
 
    this.sources = [];
-   this.actions = [];
+   this.workers = [];
 
    this.listenersSetUp = false;
    this.casaListeners = [];
@@ -360,7 +360,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       }
    }
 
-   // Refresh all inactive sources and actions
+   // Refresh all inactive sources and workers
    this.casaSys.casa.refreshSourceListeners();
 }
 
@@ -723,10 +723,9 @@ PeerCasa.prototype.addSource = function(_source) {
    console.log(this.name + ': ' + _source.name + ' associated!');
 }
 
-PeerCasa.prototype.addAction = function(_action) {
-   console.log(this.name + ': Action '  + _action.name + ' added to peercasa ');
-   this.actions[_action.name] = _action;
-   var that = this;
+PeerCasa.prototype.addWorker = function(_worker) {
+   console.log(this.name + ': Worker '  + _worker.name + ' added to peercasa ');
+   this.workers[_worker.name] = _worker;
 }
 
 PeerCasa.prototype.setCasaArea = function(_casaArea) {

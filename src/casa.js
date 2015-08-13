@@ -27,7 +27,7 @@ function Casa(_config) {
    this.clients = [];
    this.sources = [];
    this.sourceListeners = {};
-   this.actions = [];
+   this.workers = [];
    this.uber = false;
    this.sourceEnabled = true;
 
@@ -236,7 +236,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
       this.casaSys.allObjects[source.name] = source;
    }
 
-   // Refresh all inactive sources and actions
+   // Refresh all inactive sources and workers
    this.refreshSourceListeners();
 
    // Cold start all the peers sources now that everything has been created
@@ -272,9 +272,9 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
    this.sourceListeners[_sourceListener.name] = _sourceListener;
 }
 
-Casa.prototype.addAction = function(_action) {
-   console.log(this.name + ': Action '  + _action.name + ' added to casa ');
-   this.actions[_action.name] = _action;
+Casa.prototype.addWorker = function(_worker) {
+   console.log(this.name + ': Worker '  + _worker.name + ' added to casa ');
+   this.workers[_worker.name] = _worker;
    var that = this;
 }
 
