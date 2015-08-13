@@ -67,7 +67,7 @@
          ]
       }
    ],
-   "states": [],
+   "transforms" : [],
    "activators": [
       {
          "name": "propertyactivator:test-light-level-prop",
@@ -120,12 +120,13 @@
    ],
    "actions": [
       {
-         "name": "setstateaction:test-scheduling-state-broken",
-         "source": "propertyactivator:test-state-not-found",
-         "target": "teststate:schedule-test-not-gonna-find-me-yet"
+         "name": "setpropertyaction:test-property-broken",
+         "source": "propertyactivator:test-activator-not-found",
+         "target": "thing:-test-not-gonna-find-me-yet",
+         "targetProperty": "nothing"
       },
       {
-         "name": "setpropertyaction:test-set-property-state-action",
+         "name": "setpropertyaction:test-set-property-action",
          "source": "propertyactivator:test-property-2",
          "target": "thing:home-daylight-sensor",
          "targetProperty": "lightLevel"

@@ -10,7 +10,7 @@ function SourceListener(_config, _owner) {
    this.owner = _owner;
 
    if (_config.sourceProperty) {
-      this.property = _config.property;
+      this.property = _config.sourceProperty;
 
       if (_config.triggerCondition == undefined) {
          this.triggerCondition = "==";

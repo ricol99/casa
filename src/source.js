@@ -163,7 +163,7 @@ Source.prototype.goInvalid = function(_sourceData) {
 }
 
 Source.prototype.coldStart = function() {
-   // ** DO NOTHING BY DEFAULT - Only States are cold started
+   // ** DO NOTHING BY DEFAULT - Only Things are cold started
 }
 
 

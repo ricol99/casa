@@ -63,15 +63,9 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    this.config.sources = [];
    this.config.sourcesStatus = [];
 
-   var len = _config.states.length;
-   for (var i = 0; i < len; ++i) {
-      this.config.sources.push(_config.states[i].name);
-      this.config.sourcesStatus.push({ properties: {}, status: false });
-   }
-
    var len = _config.activators.length;
-   for (var j = i; j < len + i; ++j) {
-      this.config.sources.push(_config.activators[j-i].name);
+   for (var j = 0; j < len; ++j) {
+      this.config.sources.push(_config.activators[j].name);
       this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
@@ -229,7 +223,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
       remoteCasa = this.casaSys.createPeerCasa(_data.casaConfig);
    }
 
-   // Build states and Activators
+   // Build Sources
    var len = _data.casaConfig.sourcesStatus.length;
    console.log(this.name + ': New sources found = ' + len);
 
@@ -245,7 +239,7 @@ Casa.prototype.createRemoteCasa = function(_data) {
    // Refresh all inactive sources and actions
    this.refreshSourceListeners();
 
-   // Cold start all the peers states now that everything has been created
+   // Cold start all the peers sources now that everything has been created
    remoteCasa.coldStartPeerSources();
 
    return remoteCasa;
@@ -282,10 +276,6 @@ Casa.prototype.addAction = function(_action) {
    console.log(this.name + ': Action '  + _action.name + ' added to casa ');
    this.actions[_action.name] = _action;
    var that = this;
-}
-
-Casa.prototype.findState = function(_stateName) {
-   return this.sources[_stateName];
 }
 
 Casa.prototype.setUber = function(_uber) {

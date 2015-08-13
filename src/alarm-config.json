@@ -24,16 +24,6 @@
          ]
       },
       {
-         "name": "room:lounge",
-         "displayName": "Lounge Room",
-         "props": [
-            {
-               "name": "movement",
-               "initialValue": false,
-               "writable": true
-            }
-         ]
-      {
          "name": "alarm:home",
          "displayName": "House Alarm",
          "props": [
@@ -125,6 +115,22 @@
          ]
       },
       {
+         "name": "room:lounge",
+         "displayName": "Lounge Room",
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": true
+            },
+            {
+               "name": "lightLevel",
+               "initialValue": 0,
+               "writable": true
+            }
+         ]
+      },
+      {
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
          "props": [
@@ -207,7 +213,7 @@
                }
             },
             {
-               "name": "living-area-lights-early",
+               "name": "living-area-lights-with-movement-times",
                "initialValue": false,
                "writable": false,
                "binder": {
@@ -225,7 +231,7 @@
                }
             },
             {
-               "name": "living-area-lights-late",
+               "name": "living-area-lights-normal-times",
                "initialValue": false,
                "writable": false,
                "binder": {
@@ -245,12 +251,13 @@
          ]
       }
    ],
-   "states": [],
+   "transforms" : [],
    "activators": [
       {
-         "name": "propertyactivator:alarm-home-lounge-pir",
+         "name": "latchingactivator:lounge-movement",
          "source": "alarm:home",
-         "property": "lounge-pir",
+         "sourceProperty": "lounge-pir",
+         "minOutputTime": 180,
          "applyProps": {
             "active" : {
                "movement": true 
@@ -261,50 +268,9 @@
          }
       },
       {
-         "name": "setpropertyaction:update-lounge-movement",
-         "source": "propertyactivator:alarm-home-lounge-pir",
-         "target": "room:lounge",
-         "targetProperty": "movement"
-      },
-      {
-         "name": "propertyactivator:main-lights-evening-early",
+         "name": "propertyactivator:holiday-background-lights",
          "source": "thing:environment",
-         "property": "living-area-lights-early",
-         "applyProps": {
-            "active" : {
-               "dimLevel": 65 
-            },
-            "inactive" : {
-               "dimLevel": 0
-            }
-         }
-      },
-      {
-         "name": "latchingactivator:lounge-movement",
-         "source": "alarm:home",
-         "property": "lounge-pir",
-         "minOutputTime": 180
-      },
-      {
-         "name": "andactivator:lounge-activity-armed",
-         "sources": [
-            "latchingactivator:alarm-lounge-pir",
-            "gpiostate:alarm-fully-armed"
-         ]
-      },
-      {
-         "name": "oractivator:lounge-lights-movement-slots",
-         "sources": [
-            "schedulestate:main-lights-evening-early",
-            "schedulestate:main-lights-evening-late"
-         ]
-      },
-      {
-         "name": "andactivator:lounge-activity-lights",
-         "sources": [
-            "latchingactivator:alarm-lounge-pir",
-            "oractivator:lounge-lights-movement-slots"
-         ],
+         "sourceProperty": "living-area-lights-normal-times",
          "applyProps": {
             "active" : {
                "dimLevel": 40 
@@ -315,14 +281,38 @@
          }
       },
       {
+         "name": "andactivator:lounge-lights-with-movement",
+         "sources": [
+            {
+               "source": "room:lounge",
+               "sourceProperty": "movement"
+            },
+            {
+               "source": "thing:environment"
+               "sourceProperty": "living-area-lights-with-movement-times"
+            }
+         ],
+         "applyProps": {
+            "active" : {
+               "dimLevel": 60 
+            }
+         }
+      },
+      {
          "name": "oractivator:lounge-lights-evening",
          "sources": [
-            "schedulestate:main-lights-evening",
-            "andactivator:lounge-activity-lights",
+            "andactivator:lounge-lights-with-movement",
+            "propertyactivator:holiday-background-lights"
          ]
       }
    ],
    "actions": [
+      {
+         "name": "setpropertyaction:update-lounge-movement",
+         "source": "latchingactivator:lounge-movement",
+         "target": "room:lounge",
+         "targetProperty": "movement"
+      },
       {
          "name": "spycameraaction:lounge",
          "cctvHostname": "192.168.1.245",
@@ -359,14 +349,8 @@
          "name": "lightwaverfaction:natalie-bedroom-table-lamp",
          "roomId": 3,
          "deviceId": 1,
-         "source": "schedulestate:master-bedroom-lights",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:hall-table-lamp",
-         "roomId": 2,
-         "deviceId": 1,
-         "source": "oractivator:lounge-lights-evening",
+         "source": "room:master-bedroom",
+         "sourceProperty": "lights",
          "target": "lightwaverflink:home"
       }
    ]
