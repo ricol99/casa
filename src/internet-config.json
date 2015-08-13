@@ -208,7 +208,7 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "Casa 'alarm' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "debouncedactivator:debounced-casa-alarm",
+         "source": "debounceactivator:debounced-casa-alarm",
          "target": "usergroup:admins"
       },
       {
@@ -217,7 +217,7 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "Casa 'cctv' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "debouncedactivator:debounced-casa-cctv",
+         "source": "debounceactivator:debounced-casa-cctv",
          "target": "usergroup:admins"
       },
       {

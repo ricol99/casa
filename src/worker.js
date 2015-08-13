@@ -43,7 +43,7 @@ Worker.prototype.sourceIsInvalid = function(_data) {
    this.workerEnabled = false;
    this.source = null;
    this.target = null;
-   this.emit('invalid', { sourceName: that.name });
+   this.emit('invalid', { sourceName: this.name });
 }
 
 Worker.prototype.sourceIsValid = function(_data) {

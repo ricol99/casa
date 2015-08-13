@@ -14,6 +14,8 @@ function ListeningSource(_config) {
    this.sourceListener = new SourceListener(_config, this);
    this.source = this.sourceListener.source;
 
+   this.sourceEnabled = (this.source != null);
+
    var that = this;
 }
 
