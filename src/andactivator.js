@@ -14,9 +14,9 @@ util.inherits(AndActivator, LogicActivator);
 
 AndActivator.prototype.checkActivate = function() {
    // all inputs active
-   for(var prop in this.inputs) {
+   for(var prop in this.multiSourceListener.sourceAttributes) {
 
-      if(this.inputs.hasOwnProperty(prop) && this.inputs[prop] && !this.inputs[prop].active) {
+      if(this.multiSourceListener.sourceAttributes.hasOwnProperty(prop) && this.multiSourceListener.sourceAttributes[prop] && !this.multiSourceListener.sourceAttributes[prop].active) {
          return false;
       }
    }

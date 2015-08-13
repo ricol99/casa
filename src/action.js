@@ -1,5 +1,6 @@
 var util = require('util');
 var events = require('events');
+var MultiSourceListener = require('./multisourcelistener');
 var CasaSystem = require('./casasystem');
 
 function Action(_config) {
@@ -18,85 +19,72 @@ function Action(_config) {
 
    var that = this;
 
-   this.casa.addAction(this);
+   var configSources = [];
+   configSources.push(_config.source);
 
-   this.establishListeners();
+   if (_config.target) {
+      configSources.push(_config.target);
+   }
+
+   this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: configSources, allInputsRequiredForValidity: true }, this);
+
+   this.source = this.multiSourceListener.sourceListeners[this.sourceName].source;
+   this.target = this.multiSourceListener.sourceListeners[this.targetName].source;
+
+   this.casa.addAction(this);
 }
 
 util.inherits(Action, events.EventEmitter);
 
-Action.prototype.establishListeners = function() {
-   var that = this;
-   this.source = this.casaSys.findSource(this.sourceName);
-   this.actionEnabled = (this.source != null);
-
-   if (this.targetName) {
-      this.target = this.casaSys.resolveObject(this.targetName);
-      this.actionEnabled = (this.target != null) && (this.source != null);
-   }
-   else {
-      this.target = null;
-   }
-
-   if (this.actionEnabled) { 
-      var activeCallback = function(_data) {
-         console.log(that.name + ': ACTIVATED', _data);
-
-         if (that.actionEnabled) {
-
-            that.actionActive = true;
-
-            if (_data.coldStart) {
-               that.emit('activated-from-cold', _data);
-            }
-            else {
-               that.emit('activated', _data);
-            }
-         }
-      };
-
-      var inactiveCallback = function(_data) {
-         console.log(that.name + ': DEACTIVATED', _data);
-
-         if (that.actionEnabled) {
-            that.actionActive = false;
-
-            if (_data.coldStart) {
-               that.emit('deactivated-from-cold', _data);
-            }
-            else {
-               that.emit('deactivated', _data);
-            }
-         }
-      };
-
-      var invalidCallback = function(_data) {
-         console.log(that.name + ': INVALID');
-
-         that.actionEnabled = false;
-         that.source.removeListener('active', activeCallback);
-         that.source.removeListener('inactive', inactiveCallback);
-         that.source.removeListener('invalid', invalidCallback);
-         that.emit('invalid', { sourceName: that.name });
-      };
-
-
-      this.source.on('active', activeCallback);
-      this.source.on('inactive', inactiveCallback);
-      this.source.on('invalid', invalidCallback);
-
-   }
-   return this.actionEnabled;
+Action.prototype.sourceIsInvalid = function(_data) {
+   this.actionEnabled = false;
+   this.source = null;
+   this.target = null;
+   that.emit('invalid', { sourceName: that.name });
 }
 
-Action.prototype.refreshSources = function() {
-   var ret = true;
+Action.prototype.sourceIsValid = function(_data) {
+   this.actionEnabled = true;
 
-   if (!this.actionEnabled) {
-      ret = this.establishListeners();
-      console.log(this.name + ': Refreshed action. result=' + ret);
+   if (this.multiSourceListener) {
+      this.source = this.multiSourceListener.sourceListeners[this.sourceName].source;
+      this.target = this.multiSourceListener.sourceListeners[this.targetName].source;
    }
-   return ret;
+}
+
+Action.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
+   console.log(this.name + ': ACTIVATED', _data);
+
+   if (_data.sourceName == this.sourceName && this.actionEnabled) {
+
+      this.actionActive = true;
+
+      if (_data.coldStart) {
+         this.emit('activated-from-cold', _data);
+      }
+      else {
+         this.emit('activated', _data);
+      }
+   }
+}
+
+Action.prototype.oneSourceIsInactive = function(_data, sourceListener, _sourceAttributes) {
+   console.log(this.name + ': DEACTIVATED', _data);
+
+   if (_data.sourceName == this.sourceName && this.actionEnabled) {
+      this.actionActive = false;
+
+      if (_data.coldStart) {
+         this.emit('deactivated-from-cold', _data);
+      }
+      else {
+         this.emit('deactivated', _data);
+      }
+   }
+}
+
+Action.prototype.oneSourcePropertyChanged = function(_data, sourceListener, _sourceAttributes) {
+   // DO NOTHING BY DEFAULT
 }
 
 Action.prototype.isActive = function() {

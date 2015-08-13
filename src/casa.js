@@ -96,14 +96,6 @@ Casa.prototype.refreshSourceListeners = function() {
          this.sourceListeners[prop].refreshSources();
       }
    }
-
-   for(var prop in this.actions) {
-
-      if(this.actions.hasOwnProperty(prop)){
-         this.actions[prop].refreshSources();
-      }
-  }
-
 }
 
 Casa.prototype.clientHasBeenNamed = function(_connection) {

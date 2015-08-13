@@ -6,6 +6,7 @@ function PeerSource(_name, _props, _peerCasa) {
    this.name = _name;
    this.props = _props;
    this.peerCasa = _peerCasa;
+   this.sourceEnabled = true;
    
    this.active = false;
 

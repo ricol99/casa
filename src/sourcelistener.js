@@ -22,6 +22,8 @@ function SourceListener(_config, _owner) {
       }
    }
 
+   this.sourceListenerEnabled = false;
+
    if (this.establishListeners()) {
       this.owner.sourceIsValid({ sourceName: this.sourceName });
    }
@@ -80,6 +82,7 @@ SourceListener.prototype.refreshSources = function() {
    if (!this.sourceListenerEnabled)  {
       ret = this.establishListeners();
       console.log(this.name + ': Refreshed action. result=' + ret);
+
       if (ret) {
          this.owner.sourceIsValid({ sourceName: this.sourceName });
       }
