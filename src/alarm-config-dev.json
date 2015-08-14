@@ -134,6 +134,20 @@
          "target": "lightwaverflink:home"
       },
       {
+         "name": "lightwaverfaction:lounge-tree-lamp",
+         "roomId": 1,
+         "deviceId": 4,
+         "source": "schedulestate:main-lights-evening",
+         "target": "lightwaverflink:home"
+      },
+      {
+         "name": "lightwaverfaction:lounge-centre-lamp",
+         "roomId": 1,
+         "deviceId": 5,
+         "source": "schedulestate:main-lights-evening",
+         "target": "lightwaverflink:home"
+      },
+      {
          "name": "lightwaverfaction:natalie-bedroom-table-lamp",
          "roomId": 3,
          "deviceId": 1,
