@@ -7,17 +7,17 @@
       "displayName": "Casa Collin Internet"
    },
    "listeningPort": 80,
-   "props": {},
+   "props": [],
    "users": [ 
       {
          "name": "user:richard",
          "displayName": "Richard",
-         "props": {}
+         "props": []
       },
       {
          "name": "user:natalie",
          "displayName": "Natalie",
-         "props": {}
+         "props": []
       },
       {
          "name": "usergroup:admins",
@@ -25,9 +25,17 @@
          "users": [
            "user:richard"
          ],
-         "props": {
-            "pushoverDestAddr": "gX5JLc28t775dYr1yjuo4p38t7hziV"
-         }
+         "props": [
+            {
+               "name": "pushoverDestAddr",
+               "initialValue": "gX5JLc28t775dYr1yjuo4p38t7hziV",
+               "writable": false,
+               "binder": {
+                  "name": "i2cpropertybinder:pushoverDestAddr",
+                  "address": 24
+               }
+            }
+         ]
       },
       {
          "name": "usergroup:key-holders",
@@ -36,13 +44,34 @@
            "user:richard",
            "user:natalie"
          ],
-         "props": {
-            "pushoverDestAddr": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j"
-         }
+         "props": [
+            {
+               "name": "pushoverDestAddr",
+               "initialValue": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j",
+               "writable": false
+            }
+         ]
       }
    ],
-   "things": [],
-   "states": [],
+   "things": [
+      {
+         "name": "alarm:home",
+         "displayName": "House Alarm",
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.90",
+               "writable": false
+            },
+            {
+               "name": "colour",
+               "initialValue": "white",
+               "writable": true
+            }
+         ]
+      }
+   ],
+   "transforms" : [],
    "activators": [
       {
          "name": "oractivator:home-casas",
@@ -53,163 +82,161 @@
          ]
       },
       {
-         "name": "activator:debounced-home-internet-connection",
+         "name": "debounceactivator:debounced-home-casas",
          "source": "oractivator:home-casas",
-         "inputDebounceTime": 180,
-         "invert": true
+         "threshold": 60
       },
       {
-         "name": "activator:debounced-casa-alarm",
+         "name": "inverteractivator:debounced-home-internet-connection",
+         "source": "debounceactivator:debounced-home-casas"
+      },
+      {
+         "name": "debounceactivator:debounced-casa-alarm",
          "source": "casa:alarm",
-         "inputDebounceTime": 180
+         "threshold": 60
       },
       {
-         "name": "activator:casa-cctv-status",
-         "source": "casa:cctv"
-      },
-      {
-         "name": "activator:debounced-casa-cctv",
+         "name": "debounceactivator:debounced-casa-cctv",
          "source": "casa:cctv",
-         "inputDebounceTime": 180
+         "threshold": 60
       },
       {
          "name": "andactivator:home-internet-connection-armed",
          "sources": [
-            "activator:debounced-home-internet-connection",
-            "gpiostate:alarm-fully-armed"
+            {
+               "source": "inverteractivator:debounced-home-internet-connection"
+            },
+            {
+               "source": "alarm:home",
+               "sourceProperty": "alarm-fully-armed"
+            }
          ]
       }
    ],
    "actions": [
       {
-         "name": "setstateaction:test-part-arm",
-         "source": "gpiostate:alarm-part-armed",
-         "target": "teststate:alarm-part-armed"
-      },
-      {
          "name": "pushoveraction:alarm-tamper-alarm",
-         "activeMessage": "D-Alarm being tampered with!",
+         "activeMessage": "Alarm being tampered with!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm no longer in tamper mode",
+         "inactiveMessage": "Alarm no longer in tamper mode",
          "inactiveMessagePriority": 0,
-         "source": "gpiostate:alarm-tamper-alarm",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-tamper-alarm",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:alarm-mains-failure",
-         "activeMessage": "D-Alarm has lost mains power!",
+         "activeMessage": "Alarm has lost mains power!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm mains power restored",
+         "inactiveMessage": "Alarm mains power restored",
          "inactiveMessagePriority": 0,
-         "source": "gpiostate:alarm-mains-failure",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-mains-failure",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:alarm-fire-alarm",
-         "activeMessage": "D-Fire Alarm!",
+         "activeMessage": "Fire Alarm!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Fire alarm reset",
+         "inactiveMessage": "Fire alarm reset",
          "inactiveMessagePriority": 0,
-         "source": "gpiostate:alarm-fire-alarm",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-fire-alarm",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:alarm-fully-armed",
-         "activeMessage": "D-Alarm armed",
+         "activeMessage": "Alarm armed",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Alarm disarmed",
+         "inactiveMessage": "Alarm disarmed",
          "inactiveMessagePriority": 0,
-         "source": "gpiostate:alarm-fully-armed",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-fully-armed",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:alarm-part-armed",
-         "activeMessage": "D-Alarm part armed",
+         "activeMessage": "Alarm part armed",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Alarm disarmed",
+         "inactiveMessage": "Alarm disarmed",
          "inactiveMessagePriority": 0,
-         "source": "gpiostate:alarm-part-armed",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-part-armed",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:alarm-in-alarm",
-         "activeMessage": "D-Alarm triggered",
+         "activeMessage": "Alarm triggered",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm trigger reset",
+         "inactiveMessage": "Alarm trigger reset",
          "inactiveMessagePriority": 2,
-         "source": "gpiostate:alarm-in-alarm",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-in-alarm",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:alarm-confirmed-alarm",
-         "activeMessage": "D-Alarm confirmed - call police!",
+         "activeMessage": "Alarm confirmed - call police!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Confirmed alarm reset",
+         "inactiveMessage": "Confirmed alarm reset",
          "inactiveMessagePriority": 2,
-         "source": "gpiostate:alarm-confirmed-alarm",
+         "source": "alarm:home",
+         "sourceProperty": "alarm-confirmed-alarm",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:internet-connection",
-         "activeMessage": "D-Internet connection to home has been lost!",
+         "activeMessage": "Internet connection to home has been lost!",
          "activeMessagePriority": 1,
-         "inactiveMessage": "D-Internet connection to home restored",
+         "inactiveMessage": "Internet connection to home restored",
          "inactiveMessagePriority": 0,
-         "source": "activator:debounced-home-internet-connection",
+         "source": "inverteractivator:debounced-home-internet-connection",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:internet-connection-armed",
-         "activeMessage": "D-Internet connection to home has been lost while alarm is fully armed!",
+         "activeMessage": "Internet connection to home has been lost while alarm is fully armed!",
          "activeMessagePriority": 2,
-         "inactiveMessage": "D-Internet connection to home restored",
+         "inactiveMessage": "Internet connection to home restored",
          "inactiveMessagePriority": 0,
          "source": "andactivator:home-internet-connection-armed",
          "target": "usergroup:key-holders"
       },
       {
          "name": "pushoveraction:alarm-casa-status",
-         "activeMessage": "D-Casa 'alarm' is active",
+         "activeMessage": "Casa 'alarm' is active",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Casa 'alarm' has gone down!",
+         "inactiveMessage": "Casa 'alarm' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "activator:debounced-casa-alarm",
+         "source": "debounceactivator:debounced-casa-alarm",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:cctv-casa-status",
-         "activeMessage": "D-Casa 'cctv' is active",
+         "activeMessage": "Casa 'cctv' is active",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Casa 'cctv' has gone down!",
+         "inactiveMessage": "Casa 'cctv' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "activator:debounced-casa-cctv",
+         "source": "debounceactivator:debounced-casa-cctv",
          "target": "usergroup:admins"
       },
       {
-         "name": "pushoveraction:alarm-lounge",
-         "activeMessage": "D-Motion in lounge - Started recording!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Motion in lounge ended - Finished recording",
-         "inactiveMessagePriority": 0,
-         "source": "andactivator:lounge-activity",
-         "target": "usergroup:key-holders"
-      },
-      {
          "name": "pushoveraction:daylight-non-adjusted",
-         "activeMessage": "D-Good morning!",
+         "activeMessage": "Good morning!",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Good evening!",
+         "inactiveMessage": "Good evening!",
          "inactiveMessagePriority": 0,
-         "source": "schedulestate:daylight-non-adjusted",
+         "source": "thing:environment",
+         "sourceProperty": "daylight",
          "target": "usergroup:admins"
       },
       {
          "name": "pushoveraction:lights-on",
-         "activeMessage": "D-Lights going on",
+         "activeMessage": "Lights going on",
          "activeMessagePriority": 0,
-         "inactiveMessage": "D-Lights going off. Goodnight!",
+         "inactiveMessage": "Lights going off. Goodnight!",
          "inactiveMessagePriority": 0,
-         "source": "schedulestate:main-lights-evening",
+         "source": "propertyactivator:holiday-background-lights",
          "target": "usergroup:admins"
       }
    ]

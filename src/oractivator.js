@@ -13,9 +13,15 @@ function OrActivator(_config) {
 util.inherits(OrActivator, LogicActivator);
 
 OrActivator.prototype.checkActivate = function() {
-   return this.inputs.some(function (_input) {
-      return _input.active;
-   });
+   // any input active
+   for(var prop in this.multiSourceListener.sourceAttributes) {
+
+      if (this.multiSourceListener.sourceAttributes.hasOwnProperty(prop) && this.multiSourceListener.sourceAttributes[prop] && this.multiSourceListener.sourceAttributes[prop].active) {
+         return true;
+      }
+   }
+
+   return false;
 };
 
 module.exports = exports = OrActivator;
