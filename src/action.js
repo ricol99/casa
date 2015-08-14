@@ -12,39 +12,30 @@ function Action(_config) {
 
 util.inherits(Action, Worker);
 
-Action.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
+Action.prototype.sourceIsActive = function(_data) {
    console.log(this.name + ': ACTIVATED', _data);
 
-   if (_data.sourceName == this.sourceName && this.workerEnabled) {
+   this.actionActive = true;
 
-      this.actionActive = true;
-
-      if (_data.coldStart) {
-         this.emit('activated-from-cold', _data);
-      }
-      else {
-         this.emit('activated', _data);
-      }
+   if (_data.coldStart) {
+      this.emit('activated-from-cold', _data);
+   }
+   else {
+      this.emit('activated', _data);
    }
 }
 
-Action.prototype.oneSourceIsInactive = function(_data, sourceListener, _sourceAttributes) {
+Action.prototype.sourceIsInactive = function(_data) {
    console.log(this.name + ': DEACTIVATED', _data);
 
-   if (_data.sourceName == this.sourceName && this.workerEnabled) {
-      this.actionActive = false;
+   this.actionActive = false;
 
-      if (_data.coldStart) {
-         this.emit('deactivated-from-cold', _data);
-      }
-      else {
-         this.emit('deactivated', _data);
-      }
+   if (_data.coldStart) {
+      this.emit('deactivated-from-cold', _data);
    }
-}
-
-Action.prototype.oneSourcePropertyChanged = function(_data, sourceListener, _sourceAttributes) {
-   // DO NOTHING BY DEFAULT
+   else {
+      this.emit('deactivated', _data);
+   }
 }
 
 Action.prototype.isActive = function() {

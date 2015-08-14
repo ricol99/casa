@@ -25,6 +25,17 @@
          ]
       },
       {
+         "name": "thing:test-daylight-sensor",
+         "displayName": "Test daylight sensor",
+         "props": [
+            {
+               "name": "smallerLightLevel",
+               "initialValue": 0,
+               "writable": true
+            }
+         ]
+      },
+      {
          "name": "thing:test-cctv",
          "displayName": "Test CCTV Config",
          "props": [
@@ -67,7 +78,19 @@
          ]
       }
    ],
-   "transforms" : [],
+   "transforms" : [
+      {
+         "name": "lineartransform:test-light-level-transform",
+         "inputMin": 0,
+         "inputMax": 100,
+         "outputMin": 10,
+         "outputMax": 0,
+         "source": "thing:home-daylight-sensor",
+         "sourceProperty": "lightLevel",
+         "target": "thing:test-daylight-sensor",
+         "targetProperty": "smallerLightLevel"
+      }
+   ],
    "activators": [
       {
          "name": "propertyactivator:test-light-level-prop",
