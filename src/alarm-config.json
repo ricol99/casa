@@ -101,7 +101,7 @@
                   "gpioPin": 25,
                   "triggerLow": true
                }
-            }
+            },
             {
                "name": "lounge-pir",
                "initialValue": false,
