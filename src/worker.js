@@ -59,14 +59,35 @@ Worker.prototype.sourceIsValid = function(_data) {
 }
 
 Worker.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
-   // DO NOTHING BY DEFAULT
+
+   if (_data.sourceName == this.sourceName) {
+      this.sourceIsActive(_data);
+   }
 }
 
 Worker.prototype.oneSourceIsInactive = function(_data, sourceListener, _sourceAttributes) {
-   // DO NOTHING BY DEFAULT
+
+   if (_data.sourceName == this.sourceName) {
+      this.sourceIsInactive(_data);
+   }
 }
 
 Worker.prototype.oneSourcePropertyChanged = function(_data, sourceListener, _sourceAttributes) {
+
+   if (_data.sourceName == this.sourceName) {
+      this.sourcePropertyChanged(_data);
+   }
+}
+
+Worker.prototype.sourceIsActive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+Worker.prototype.sourceIsInactive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+Worker.prototype.sourcePropertyChanged = function(_data) {
    // DO NOTHING BY DEFAULT
 }
 

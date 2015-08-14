@@ -60,12 +60,10 @@ SourceListener.prototype.establishListeners = function() {
    };
 
    // refresh source
-   console.log('=============AAAAAA');
    this.source = this.casaSys.findSource(this.sourceName);
    this.sourceListenerEnabled = (this.source != null && this.source.sourceEnabled);
 
    if (this.sourceListenerEnabled) {
-   console.log('=============BBBBBB');
 
       if (!this.property) {
          this.source.on('active', this.activeCallback);
