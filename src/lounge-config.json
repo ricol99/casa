@@ -1,0 +1,53 @@
+{
+   "name": "casa:lounge",
+   "displayName": "Casa Collin Lounge",
+   "gang": "casa-collin",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "casa-dev.elasticbeanstalk.com",
+         "port": 80
+      }
+   },
+   "listeningPort": 8082,
+   "props": {},
+   "things": [
+   ],
+   "states": [
+      {
+         "name": "gpiostate:lounge-sound-sensor",
+         "gpioPin": 4,
+         "triggerLow": false
+      },
+      {
+         "name": "gpiostate:lounge-sound-button",
+         "gpioPin": 17,
+         "triggerLow": true
+      },
+      {
+         "name": "gpiostate:lounge-led-21",
+         "gpioPin": 21,
+         "writable": true,
+         "triggerLow": true
+      }
+   ],
+   "activators": [
+      {
+         "name": "latchingactivator:lounge-debounced-sound-sensor",
+         "source": "gpiostate:lounge-sound-sensor",
+         "minOutputTime": 15
+      }
+   ],
+   "actions": [
+      {
+         "name": "setstateaction:lounge-turn-on-led",
+         "source": "latchingactivator:lounge-debounced-sound-sensor",
+         "target": "gpiostate:lounge-led-21"
+      },
+      {
+         "name": "setstateaction:lounge-turn-on-led-2",
+         "source": "gpiostate:lounge-sound-button",
+         "target": "gpiostate:lounge-led-21"
+      }
+   ]
+}

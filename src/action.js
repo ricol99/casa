@@ -1,103 +1,50 @@
 var util = require('util');
-var events = require('events');
-var CasaSystem = require('./casasystem');
+var Worker = require('./worker');
 
 function Action(_config) {
 
-   this.name = _config.name;
-
-   // Resolve source and target
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
-   this.actionEnabled = false;
    this.actionActive = false;
-   this.sourceName = _config.source;
-   this.targetName = (_config.target) ? _config.target : null;
 
-   events.EventEmitter.call(this);
+   Worker.call(this, _config);
 
    var that = this;
-
-   this.casa.addAction(this);
-
-   this.establishListeners();
 }
 
-util.inherits(Action, events.EventEmitter);
+util.inherits(Action, Worker);
 
-Action.prototype.establishListeners = function() {
-   var that = this;
-   this.source = this.casaSys.findSource(this.sourceName);
-   this.actionEnabled = (this.source != null);
+Action.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
+   console.log(this.name + ': ACTIVATED', _data);
 
-   if (this.targetName) {
-      this.target = this.casaSys.resolveObject(this.targetName);
-      this.actionEnabled = (this.target != null) && (this.source != null);
+   if (_data.sourceName == this.sourceName && this.workerEnabled) {
+
+      this.actionActive = true;
+
+      if (_data.coldStart) {
+         this.emit('activated-from-cold', _data);
+      }
+      else {
+         this.emit('activated', _data);
+      }
    }
-   else {
-      this.target = null;
-   }
-
-   if (this.actionEnabled) { 
-      var activeCallback = function(_data) {
-         console.log(that.name + ': ACTIVATED');
-
-         if (that.actionEnabled) {
-
-            if (_data.coldStart) {
-               that.actionActive = true;
-               that.emit('activated-from-cold', _data);
-            }
-            else if (!that.actionActive) {
-               that.actionActive = true;
-               that.emit('activated', _data);
-            }
-         }
-      };
-
-      var inactiveCallback = function(_data) {
-         console.log(that.name + ': DEACTIVATED');
-
-         if (that.actionEnabled) {
-
-            if (_data.coldStart) {
-               that.actionActive = false;
-               that.emit('deactivated-from-cold', _data);
-            }
-            else if (that.actionActive) {
-               that.actionActive = false;
-               that.emit('deactivated', _data);
-            }
-         }
-      };
-
-      var invalidCallback = function(_data) {
-         console.log(that.name + ': INVALID');
-
-         that.actionEnabled = false;
-         that.source.removeListener('active', activeCallback);
-         that.source.removeListener('inactive', inactiveCallback);
-         that.source.removeListener('invalid', invalidCallback);
-         that.emit('invalid', { sourceName: that.name });
-      };
-
-
-      this.source.on('active', activeCallback);
-      this.source.on('inactive', inactiveCallback);
-      this.source.on('invalid', invalidCallback);
-
-   }
-   return this.actionEnabled;
 }
 
-Action.prototype.refreshSources = function() {
-   var ret = true;
+Action.prototype.oneSourceIsInactive = function(_data, sourceListener, _sourceAttributes) {
+   console.log(this.name + ': DEACTIVATED', _data);
 
-   if (!this.actionEnabled) {
-      ret = this.establishListeners();
-      console.log(this.name + ': Refreshed action. result=' + ret);
+   if (_data.sourceName == this.sourceName && this.workerEnabled) {
+      this.actionActive = false;
+
+      if (_data.coldStart) {
+         this.emit('deactivated-from-cold', _data);
+      }
+      else {
+         this.emit('deactivated', _data);
+      }
    }
-   return ret;
+}
+
+Action.prototype.oneSourcePropertyChanged = function(_data, sourceListener, _sourceAttributes) {
+   // DO NOTHING BY DEFAULT
 }
 
 Action.prototype.isActive = function() {

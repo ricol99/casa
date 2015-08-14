@@ -13,9 +13,15 @@ function AndActivator(_config) {
 util.inherits(AndActivator, LogicActivator);
 
 AndActivator.prototype.checkActivate = function() {
-   return this.inputs.every(function (_input) {
-      return _input.active;
-   });
+   // all inputs active
+   for(var prop in this.multiSourceListener.sourceAttributes) {
+
+      if(this.multiSourceListener.sourceAttributes.hasOwnProperty(prop) && this.multiSourceListener.sourceAttributes[prop] && !this.multiSourceListener.sourceAttributes[prop].active) {
+         return false;
+      }
+   }
+
+   return true;
 };
 
 module.exports = exports = AndActivator;

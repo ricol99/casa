@@ -9,65 +9,133 @@
          "port": 80
       }
    },
-   "area": {
-      "name": "casaarea:home",
-      "displayName": "Casa Collin Home"
-   },
    "listeningPort": 8081,
    "props": {},
-   "things": [],
-   "states": [
+   "users": [],
+   "things": [
       {
-         "name": "schedulestate:daylight-non-adjusted",
-         "startRule": "sunriseEnd",
-         "endRule": "sunsetStart"
+         "name": "thing:home-daylight-sensor",
+         "displayName": "Home daylight sensor",
+         "props": [
+            {
+               "name": "lightLevel",
+               "initialValue": 100,
+               "writable": true
+            }
+         ]
       },
       {
-         "name": "schedulestate:lengthened-daylight",
-         "startRule": "sunrise:-900",
-         "endRule": "sunset:+900"
-      },
-      {
-         "name": "schedulestate:sunrise-for-one-hour",
-         "startRule": "sunriseEnd",
-         "activeFor": 3600
-      },
-      {
-         "name": "schedulestate:test-state",
-         "startRule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-         "activeFor": 30
-      },
-      {
-         "name": "teststate:alarm-part-armed",
-         "writable": true
-      },
-      {
-         "name": "teststate:schedule-test",
-         "writable": true
+         "name": "thing:test-cctv",
+         "displayName": "Test CCTV Config",
+         "props": [
+            {
+               "name": "test-prop-1",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-1",
+                  "events": [
+                     {
+                        "rule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "test-prop-2",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-2",
+                  "events": [
+                     {
+                        "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            }
+         ]
       }
    ],
+   "transforms" : [],
    "activators": [
       {
-         "name": "activator:night-non-adjusted",
-         "source": "schedulestate:daylight-non-adjusted",
-         "invert": true
+         "name": "propertyactivator:test-light-level-prop",
+         "source": "thing:home-daylight-sensor",
+         "property": "lightLevel",
+         "triggerCondition": "<",
+         "triggerValue": 50,
+         "applyProps": {
+            "active" : {
+               "colour": "red"
+            },
+            "inactive" : {
+               "colour": "blue"
+            }
+         }
+      },
+      {
+         "name": "propertyactivator:test-property-1",
+         "source": "thing:test-cctv",
+         "property": "test-prop-1",
+         "applyProps": {
+            "active" : {
+               "colour": "green"
+            },
+            "inactive" : {
+               "colour": "white"
+            }
+         }
+      },
+      {
+         "name": "propertyactivator:test-property-2",
+         "source": "thing:test-cctv",
+         "property": "test-prop-2",
+         "applyProps": {
+            "active" : {
+               "lightLevel": 30
+            },
+            "inactive" : {
+               "lightLevel": 100
+            }
+         }
+      },
+      {
+         "name": "oractivator:test-flip-flop",
+         "sources": [
+            "propertyactivator:test-property-1",
+            "propertyactivator:test-light-level-prop"
+         ]
       }
    ],
    "actions": [
       {
-      "name": "setstateaction:test-scheduling-state-broken",
-      "source": "schedulestate:test-state-not-found",
-      "target": "teststate:schedule-test-not-gonna-find-me-yet"
+         "name": "setpropertyaction:test-property-broken",
+         "source": "propertyactivator:test-activator-not-found",
+         "target": "thing:-test-not-gonna-find-me-yet",
+         "targetProperty": "nothing"
       },
       {
-      "name": "setstateaction:test-scheduling-state",
-      "source": "schedulestate:test-state",
-      "target": "teststate:schedule-test"
+         "name": "setpropertyaction:test-set-property-action",
+         "source": "propertyactivator:test-property-2",
+         "target": "thing:home-daylight-sensor",
+         "targetProperty": "lightLevel"
       },
       {
-      "name": "setstateaction:test-daylight-state",
-      "source": "schedulestate:daylight-non-adjusted",
-      "target": "teststate:schedule-test"
+         "name": "setpropertyaction:alarm-action",
+         "source": "oractivator:test-flip-flop",
+         "target": "alarm:home",
+         "targetProperty": "colour"
       }
    ]
 }

@@ -1,14 +1,13 @@
 var util = require('util');
 var Gpio = require('gpio');
-var State = require('./state');
+var PropertyBinder = require('./propertybinder');
 
-function GpioState(_config) {
+function GPIOPropertyBinder(_config, _source) {
 
    this.gpioPin = _config.gpioPin;
    this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
-   this.writable = (_config.writable) ? _config.writable : false;
 
-   State.call(this, _config);
+   PropertyBinder.call(this, _config, _source);
 
    this.ready = false;
    this.cStart = true;
@@ -26,9 +25,9 @@ function GpioState(_config) {
    });
 }
 
-util.inherits(GpioState, State);
+util.inherits(GPIOPropertyBinder, PropertyBinder);
 
-GpioState.prototype.Ready = function() {
+GPIOPropertyBinder.prototype.Ready = function() {
    var that = this;
    this.ready = true;
 
@@ -38,41 +37,27 @@ GpioState.prototype.Ready = function() {
 
       if (that.cStart) {
          that.cStart = false;
-         that.value = !_value;
+         that.value = !newValue;
       }
 
       if (newValue != that.value) {
-         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + _value);
+         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
          that.value = newValue;
-
-         if (newValue == 1) {
-            that.active = true;
-            that.emit('active', { sourceName: that.name });
-         }
-         else {
-            that.active = false;
-            that.emit('inactive', { sourceName: that.name });
-         }
+         that.updatePropertyAfterRead(newValue == 1);
       }
    });
 }
 
-
-// *TBD* Could we lose events here?
-GpioState.prototype.setActive = function(_callback) {
-   set(this.triggerLow ? 0 : 1, _callback);
+PropertyBinder.prototype.setProperty = function(_propValue, _callback) {
+   this.set((_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _callback);
 }
 
-GpioState.prototype.setInactive = function(_callback) {
-   set(this.triggerLow ? 1 : 0, _callback);
-}
-
-GpioState.prototype.set = function(_value, _callback) {
+GPIOPropertyBinder.prototype.set = function(_value, _callback) {
    var that = this;
 
    if (this.ready && this.writable) {
-      this.gpio.set(value, function (err) {
-         _callback(err != 0);
+      this.gpio.set(_value, function (err) {
+         _callback(err == _value);
       });
    }
    else {
@@ -80,5 +65,5 @@ GpioState.prototype.set = function(_value, _callback) {
    }
 }
 
-module.exports = exports = GpioState;
+module.exports = exports = GPIOPropertyBinder;
  

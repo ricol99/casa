@@ -3,12 +3,12 @@ var Thing = require('./thing');
 var CasaSystem = require('./casasystem');
 
 function CasaArea(_config) {
+   this.casaSys = CasaSystem.mainInstance();
+   this.casa = this.casaSys.casa;
+
    this.casas = [];
    this.casaCount = 0;
-
-   this.casaSys = CasaSystem.mainInstance();
-
-   Thing.call(this, _config);
+   this.name = _config.name;
 
    var that = this;
 }

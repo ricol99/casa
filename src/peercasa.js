@@ -1,10 +1,12 @@
 var util = require('util');
-var Thing = require('./thing');
+//var events = require('events');
+var Source = require('./source');
 var S = require('string');
 var io = require('socket.io-client');
 var CasaSystem = require('./casasystem');
 
 function PeerCasa(_config) {
+   this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.config = _config;
@@ -18,11 +20,10 @@ function PeerCasa(_config) {
    this.persistent = false;
    this.deathTime = 60;
 
-   Thing.call(this, _config);
+   Source.call(this, _config);
 
-   this.states = [];
-   this.activators = [];
-   this.actions = [];
+   this.sources = [];
+   this.workers = [];
 
    this.listenersSetUp = false;
    this.casaListeners = [];
@@ -37,7 +38,7 @@ function PeerCasa(_config) {
    this.incompleteRequests = [];
    this.reqId = 0;
 
-   this.stateRequests = [];
+   this.sourceRequests = [];
    this.lastHeartbeat = Date.now() + 10000;
 
    this.manualDisconnect = false;
@@ -62,16 +63,16 @@ function PeerCasa(_config) {
 
            // Send info regarding all relevant casas
            for (var i = 0; i < casaListLen; ++i) {
-              casaList[i].refreshConfigWithStateAndActivatorStatus();
+              casaList[i].refreshConfigWithSourcesStatus();
               that.sendMessage('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
            }
 
-           // listen for state and activator changes from peer casas
+           // listen for source changes from peer casas
            that.establishListeners(true);
            that.establishHeartbeat();
 
            that.resendUnAckedMessages();
-           that.emit('active', { sourceName: that.name });
+           that.goActive({ sourceName: that.name });
         }
       }
    };
@@ -91,42 +92,33 @@ function PeerCasa(_config) {
                that.intervalID = null;
                that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
                that.socket = null;
-               that.emit('inactive', { sourceName: that.name });
+               that.goInactive({ sourceName: that.name });
             }
          }
       }
    };
 
-   this.stateActiveCasaHandler = function(_data) {
+   this.sourceActiveCasaHandler = function(_data) {
 
       if (that.connected) {
-         console.log(that.name + ': publishing state ' + _data.sourceName + ' active to peer casa');
-         that.sendMessage('state-active', _data);
+         console.log(that.name + ': publishing source ' + _data.sourceName + ' active to peer casa');
+         that.sendMessage('source-active', _data);
       }
    };
 
-   this.stateInactiveCasaHandler = function(_data) {
+   this.sourceInactiveCasaHandler = function(_data) {
 
       if (that.connected) {
-         console.log(that.name + ': publishing state ' + _data.sourceName + ' inactive to peer casa');
-         that.sendMessage('state-inactive', _data);
+         console.log(that.name + ': publishing source ' + _data.sourceName + ' inactive to peer casa');
+         that.sendMessage('source-inactive', _data);
       }
    };
 
-   // publish activator changes to remote casas
-   this.activatorActiveCasaHandler = function(_data) {
+   this.sourcePropertyChangedCasaHandler = function(_data) {
 
       if (that.connected) {
-         console.log(that.name + ': publishing activator ' + _data.sourceName + ' active to peer casa');
-         that.sendMessage('activator-active', _data);
-      }
-   };
-
-   this.activatorInactiveCasaHandler = function(_data) {
-
-      if (that.connected) {
-         console.log(that.name + ': publishing activator ' + _data.sourceName + ' inactive to peer casa');
-         that.sendMessage('activator-inactive', _data);
+         console.log(that.name + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
+         that.sendMessage('source-property-changed', _data);
       }
    };
 
@@ -136,16 +128,13 @@ function PeerCasa(_config) {
       this.casa.on('casa-lost', this.casaLostHandler);
    }
 
-   // publish state changes in this node (casa object) to remote casas
-   this.casa.on('state-active', this.stateActiveCasaHandler);
-   this.casa.on('state-inactive', this.stateInactiveCasaHandler);
-
-   // publish activator changes to remote casas
-   this.casa.on('activator-active', this.activatorActiveCasaHandler);
-   this.casa.on('activator-inactive', this.activatorInactiveCasaHandler);
+   // publish source changes in this node (casa object) to remote casas
+   this.casa.on('source-active', this.sourceActiveCasaHandler);
+   this.casa.on('source-inactive', this.sourceInactiveCasaHandler);
+   this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
 }
 
-util.inherits(PeerCasa, Thing);
+util.inherits(PeerCasa, Source);
 
 PeerCasa.prototype.removeCasaListeners = function() {
    console.log(this.name + ': removing casa listeners');
@@ -155,50 +144,37 @@ PeerCasa.prototype.removeCasaListeners = function() {
       this.casa.removeListener('casa-lost', this.casaLostHandler);
    }
 
-   this.casa.removeListener('state-active', this.stateActiveCasaHandler);
-   this.casa.removeListener('state-inactive', this.stateInactiveCasaHandler);
-   this.casa.removeListener('activator-active', this.activatorActiveCasaHandler);
-   this.casa.removeListener('activator-inactive', this.activatorInactiveCasaHandler);
+   this.casa.removeListener('source-active', this.sourceActiveCasaHandler);
+   this.casa.removeListener('source-inactive', this.sourceInactiveCasaHandler);
+   this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
 }
 
 
-PeerCasa.prototype.coldStartPeerStates = function() {
+PeerCasa.prototype.coldStartPeerSources = function() {
 
-   for(var prop in this.states) {
+   for(var prop in this.sources) {
 
-      if (this.states.hasOwnProperty(prop)){
-         console.log(this.name + ': Cold starting peer state ' + this.states[prop].name);
-         this.states[prop].coldStart();
+      if (this.sources.hasOwnProperty(prop)){
+         console.log(this.name + ': Cold starting peer source ' + this.sources[prop].name);
+         this.sources[prop].coldStart();
       }
    }
 }
 
 PeerCasa.prototype.invalidateSources = function() {
 
-   for(var prop in this.states) {
+   for(var prop in this.sources) {
 
-      if(this.states.hasOwnProperty(prop)){
-         console.log(this.name + ': Invaliding state ' + this.states[prop].name);
-         this.states[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.states[prop].name];
-         delete this.states[prop];
+      if(this.sources.hasOwnProperty(prop)){
+         console.log(this.name + ': Invaliding source ' + this.sources[prop].name);
+         this.sources[prop].invalidateSource();
+         delete this.casaSys.allObjects[this.sources[prop].name];
+         delete this.sources[prop];
       }
    }
 
-   for(var prop in this.activators) {
-
-      if(this.activators.hasOwnProperty(prop)){
-         console.log(this.name + ': Invaliding activator ' + this.activators[prop].name);
-         this.activators[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.activators[prop].name];
-         delete this.activators[prop];
-      }
-   }
-
-   delete this.states;
-   delete this.activators;
-   this.states = [];
-   this.activators = [];
+   delete this.sources;
+   this.sources = [];
 
    for (var prop in this.remoteCasas) {
       if (this.remoteCasas.hasOwnProperty(prop)){
@@ -213,7 +189,7 @@ PeerCasa.prototype.invalidateSources = function() {
    }
    delete this.remoteCasas;
    this.remoteCasas = [];
-   this.emit('invalid', { sourceName: this.name });
+   this.goInvalid({ sourceName: this.name });
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -241,7 +217,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       console.log(that.name + ': Connected to my peer. Logging in...');
       that.establishListeners();
       that.establishHeartbeat();
-      that.casa.refreshConfigWithStateAndActivatorStatus();
+      that.casa.refreshConfigWithSourcesStatus();
 
       var messageData = {
          casaName: that.casa.name,
@@ -271,7 +247,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 
       that.resendUnAckedMessages();
 
-      that.createStatesAndActivators(_data, that);
+      that.createSources(_data, that);
       that.connected = true;
 
       var casaList = that.casaArea.buildCasaForwardingList();
@@ -282,7 +258,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.sendMessage('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
       }  
 
-      that.emit('active', { sourceName: that.name });
+      that.goActive({ sourceName: that.name });
    });
 
    this.socket.on('casa-activeAACCKK', function(_data) {
@@ -303,7 +279,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.emit('inactive', { sourceName: that.name });
+         that.goInactive({ sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
@@ -322,7 +298,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.emit('inactive', { sourceName: that.name });
+         that.goInactive({ sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
@@ -355,87 +331,65 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
    }
 }
 
-PeerCasa.prototype.refreshConfigWithStateAndActivatorStatus = function() {
-   delete this.config.statesStatus;
-   delete this.config.activatorsStatus;
-   this.config.statesStatus = [];
-   this.config.activatorsStatus = [];
+PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
+   delete this.config.sourcesStatus;
+   this.config.sourcesStatus = [];
 
-   var len = this.config.states.length;
+   var len = this.config.sources.length;
    for (var i = 0; i < len; ++i) {
-      this.config.statesStatus.push(this.states[this.config.states[i]].isActive());
+      this.config.sourcesStatus.push({ properties: this.sources[this.config.sources[i]].props,
+                                       status: this.sources[this.config.sources[i]].isActive() });
    }
-
-   var len = this.config.activators.length;
-   for (var j = 0; j < len; ++j) {
-      this.config.activatorsStatus.push(this.activators[this.config.activators[j]].isActive());
-   }  
 }
 
-PeerCasa.prototype.createStatesAndActivators = function(_data, _peerCasa) {
+PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
-   if (_data.casaConfig &&  _data.casaConfig.states) {
-      var len = _data.casaConfig.states.length;
-      var settingStates = (_data.casaConfig.statesStatus) ? len == _data.casaConfig.statesStatus.length : false;
-      console.log(_peerCasa.name + ': New states found = ' + len);
+   if (_data.casaConfig &&  _data.casaConfig.sources && _data.casaConfig.sourcesStatus) {
+      var len = _data.casaConfig.sources.length;
+      console.log(_peerCasa.name + ': New sources found = ' + len);
+      console.log(_peerCasa.name + ': New sources status found = ' + _data.casaConfig.sourcesStatus.length);
 
-      var PeerState = require('./peerstate');
+      var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.name + ': Creating peer state named ' + _data.casaConfig.states[i]);
-         var source = new PeerState(_data.casaConfig.states[i], _peerCasa);
-         if (settingStates) {
-            source.active = _data.casaConfig.statesStatus[i];
-         }
+         console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
+
+         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
+
+         source.active = _data.casaConfig.sourcesStatus[i].status;
          this.casaSys.allObjects[source.name] = source;
       }
    }
 
-   if (_data.casaConfig &&  _data.casaConfig.activators) {
-      var len = _data.casaConfig.activators.length;
-      var settingActivators = (_data.casaConfig.activatorsStatus) ? len == _data.casaConfig.activatorsStatus.length : false;
-      console.log(_peerCasa.name + ': New activators found = ' + len);
-
-      var PeerActivator = require('./peeractivator');
-      for (i = 0; i < len; ++i) {
-         console.log(_peerCasa.name + ': Creating peer activator named ' + _data.casaConfig.activators[i]);
-         var source = new PeerActivator(_data.casaConfig.activators[i], _peerCasa);
-         if (settingActivators) {
-            source.active = _data.casaConfig.activatorsStatus[i];
-         }
-         this.casaSys.allObjects[source.name] = source;
-      }
-   }
-
-   // Refresh all inactive activators and actions
-   this.casaSys.casa.refreshActivatorsAndActions();
+   // Refresh all inactive sources and workers
+   this.casaSys.casa.refreshSourceListeners();
 }
 
-function StateRequestor(_requestId, _state) {
+function SourceRequestor(_requestId, _source) {
    this.requestId = _requestId;
-   this.state = _state;
+   this.source = _source;
 }
 
-StateRequestor.prototype.setActive = function(_callback) {
+SourceRequestor.prototype.setProperty = function(_property, _value, _callback) {
    var that = this;
-   this.state.setActive(function(_result) {
-      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
-   });
-}
 
-StateRequestor.prototype.setInactive = function(_callback) {
-   var that = this;
-   this.state.setInactive(function(_result) {
-      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
-   });
+   if (_property == "ACTIVE") {
+      if (_value) {
+         this.source.setActive(function(_result) {
+            _callback( { sourceName: that.source.name, requestId: that.requestId, result: _result });
+         });
+      }
+      else {
+         this.source.setInactive(function(_result) {
+            _callback( { sourceName: that.source.name, requestId: that.requestId, result: _result });
+         });
+      }
+   }
+   else {
+      this.source.setProperty(_property, _value, function(_result) {
+         _callback( { sourceName: that.source.name, requestId: that.requestId, result: _result });
+      });
+   }
 }
-
-StateRequestor.prototype.isActive = function(_callback) {
-   var that = this;
-   this.state.isActive(function(_result) {
-      _callback( { stateName: that.state.name, requestId: that.requestId, result: _result });
-   });
-}
-
 
 PeerCasa.prototype.isActive = function() {
    return this.connected;
@@ -459,7 +413,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
             that.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casaSys.remoteCasas[remoteCasa.name] = remoteCasa;
             that.casaSys.allObjects[remoteCasa.name] = remoteCasa;
-            that.createStatesAndActivators(_data, remoteCasa);
+            that.createSources(_data, remoteCasa);
          }
          that.emit('casa-active', _data);
          that.ackMessage('casa-active', _data);
@@ -482,116 +436,67 @@ PeerCasa.prototype.establishListeners = function(_force) {
          that.ackMessage('casa-inactive', _data);
       });
 
-      // listen for state changes from peer casas
-      this.socket.on('state-active', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: active, state: ' + _data.sourceName);
-         that.emit('state-active', _data);
-         that.emit('broadcast-message', { message: 'state-active', data:_data, sourceCasa: that.name });
+      // listen for source changes from peer casas
+      this.socket.on('source-active', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: active, source: ' + _data.sourceName);
+         that.emit('source-active', _data);
+         that.emit('broadcast-message', { message: 'source-active', data:_data, sourceCasa: that.name });
 
-         if (that.states[_data.sourceName]) {
-            that.states[_data.sourceName].stateHasGoneActive(_data);
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasGoneActive(_data);
          }
-         that.ackMessage('state-active', _data);
+         that.ackMessage('source-active', _data);
       });
 
-      this.socket.on('state-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, state: ' + _data.sourceName);
-         that.emit('state-inactive', _data);
-         that.emit('broadcast-message', { message: 'state-inactive', data:_data, sourceCasa: that.name });
+      this.socket.on('source-inactive', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: inactive, source: ' + _data.sourceName);
+         that.emit('source-inactive', _data);
+         that.emit('broadcast-message', { message: 'source-inactive', data:_data, sourceCasa: that.name });
 
-         if (that.states[_data.sourceName]) {
-            that.states[_data.sourceName].stateHasGoneInactive(_data);
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasGoneInactive(_data);
          }
-         that.ackMessage('state-inactive', _data);
+         that.ackMessage('source-inactive', _data);
       });
 
-      // listen for activator changes from peer casas
-      this.socket.on('activator-active', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: active, activator: ' + _data.sourceName);
-         that.emit('activator-active', _data);
-         that.emit('broadcast-message', { message: 'activator-active', data:_data, sourceCasa: that.name });
+      this.socket.on('source-property-changed', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: property-changed, source: ' + _data.sourceName);
+         that.emit('source-property-changed', _data);
+         that.emit('broadcast-message', { message: 'source-property-changed', data:_data, sourceCasa: that.name });
 
-         if (that.activators[_data.sourceName]) {
-            that.activators[_data.sourceName].activatorHasGoneActive(_data);
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasChangedProperty(_data);
          }
-         that.ackMessage('activator-active', _data);
+         that.ackMessage('source-property-changed', _data);
       });
 
-      this.socket.on('activator-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, activator: ' + _data.sourceName);
-         that.emit('activator-inactive', _data);
-         that.emit('broadcast-message', { message: 'activator-inactive', data:_data, sourceCasa: that.name });
+      this.socket.on('set-source-property-req', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
+         var source = that.casaSys.findSource(_data.sourceName);
 
-         if (that.activators[_data.sourceName]) {
-            that.activators[_data.sourceName].activatorHasGoneInactive(_data);
-         }
-         that.ackMessage('activator-inactive', _data);
-      });
-
-      this.socket.on('set-state-active-req', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-req, state: ' + _data.stateName);
-         var state = that.casa.findState(_data.stateName);
-
-         if (state) {
+         if (source) {
             _data.acker = that.casa.name;
-            that.ackMessage('set-state-active-req', _data);
-            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
-            that.stateRequests[_data.requestId].setActive(function(_resp) {
-               that.socket.emit('set-state-active-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
-               delete that.stateRequests[ _resp.requestId];
+            that.ackMessage('set-source-property-req', _data);
+
+            that.sourceRequests[_data.requestId] = new SourceRequestor(_data.requestId, source);
+            that.sourceRequests[_data.requestId].setProperty(_data.property, _data.value, function(_resp) {
+               that.socket.emit('set-source-property-resp', { sourceName: _resp.sourceName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
+               delete that.sourceRequests[ _resp.requestId];
             });
          } 
          else {
-            // TBD Find the casa that ownes the state and work out how to foward the request
-            that.emit('forward-request', { message: 'set-state-active-req', data: _data, sourceCasa: that.name });
+            // TBD Find the casa that ownes the source and work out how to foward the request
+            that.emit('forward-request', { message: 'set-source-property-req', data: _data, sourceCasa: that.name });
          }
       });
 
-      this.socket.on('set-state-inactive-req', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-req, state: ' + _data.stateName);
-         var state = that.casa.findState(_data.stateName);
-
-         if (state) {
-            _data.acker = that.casa.name;
-            that.ackMessage('set-state-inactive-req', _data);
-            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
-            that.stateRequests[_data.requestId].setInactive(function(_resp) {
-               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
-               delete that.stateRequests[ _resp.requestId];
-            });
-         }
-         else {
-            // TBD Find the casa that ownes the state and work out how to foward the request
-            that.emit('forward-request', { message: 'set-state-inactive-req', data: _data, sourceCasa: that.name });
-         }
-      });
-
-      this.socket.on('get-state-active-req', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: get-state-active-req, state: ' + _data.stateName);
-         var state = that.casa.findState(_data.stateName);
-
-         if (state) {
-            _data.acker = that.casa.name;
-            that.ackMessage('get-state-active-req', _data);
-            that.stateRequests[_data.requestId] = new StateRequestor(_data.requestId, state);
-            that.stateRequests[_data.requestId].isActive(function(_resp) {
-               that.socket.emit('set-state-inactive-resp', { stateName: _resp.stateName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
-               delete that.stateRequests[ _resp.requestId];
-            });
-         }
-         else {
-            // TBD Find the casa that ownes the state and work out how to foward the request
-            that.emit('forward-request', { message: 'get-state-active-req', data: _data, sourceCasa: that.name });
-         }
-      });
-
-      this.socket.on('set-state-active-resp', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-active-resp, state: ' + _data.stateName);
+      this.socket.on('set-source-property-resp', function(_data) {
+         console.log(that.name + ': Event received from my peer. Event name: set-source-property-resp, source: ' + _data.sourceName);
 
          if (_data.requestor == that.casa.name) {
             // Request origniated from here
             _data.acker = that.casa.name;
-            that.ackMessage('set-state-active-resp', _data);
+            that.ackMessage('set-source-property-resp', _data);
 
             if (that.incompleteRequests[_data.requestId]) {
                that.incompleteRequests[_data.requestId].completeRequest(_data.result);
@@ -600,70 +505,27 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'set-state-active-resp', data: _data, sourceCasa: that.name });
+            that.emit('forward-response', { message: 'set-source-property-resp', data: _data, sourceCasa: that.name });
          }
       });
 
-      this.socket.on('set-state-inactive-resp', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: set-state-inactive-resp, state: ' + _data.stateName);
-
-         if (_data.requestor == that.casa.name) {
-            // Request origniated from here
-            _data.acker = that.casa.name;
-            that.ackMessage('set-state-inactive-resp', _data);
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
-               delete that.incompleteRequests[_data.requestId];
-            }
-         }
-         else {
-            // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'set-state-inactive-resp', data: _data, sourceCasa: that.name });
-         }
-      });
-
-      this.socket.on('get-state-active-resp', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: get-state-active-resp, state: ' + _data.stateName);
-
-         if (_data.requestor == that.casa.name) {
-            // Request origniated from here
-            _data.acker = that.casa.name;
-            that.ackMessage('get-state-active-resp', _data);
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
-               delete that.incompleteRequests[_data.requestId];
-            }
-         }
-         else {
-            // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'get-state-active-resp', data: _data, sourceCasa: that.name });
-         }
-      });
-
-      this.socket.on('state-activeAACCKK', function(_data) {
-         console.log(that.name + ': Active Event ACKed by my peer.');
+      this.socket.on('source-activeAACCKK', function(_data) {
+         console.log(that.name + ': Active Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
-      this.socket.on('state-inactiveAACCKK', function(_data) {
-         console.log(that.name + ': Inactive Event ACKed by my peer.');
+      this.socket.on('source-inactiveAACCKK', function(_data) {
+         console.log(that.name + ': Inactive Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
-      this.socket.on('activator-activeAACCKK', function(_data) {
-         console.log(that.name + ': Active Event ACKed by my peer.');
+      this.socket.on('source-property-changedAACCKK', function(_data) {
+         console.log(that.name + ': Property-changed Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 
-      this.socket.on('activator-inactiveAACCKK', function(_data) {
-         console.log(that.name + ': Inactive Event ACKed by my peer.');
-         that.messageHasBeenAcked(_data);
-      });
-
-      this.socket.on('set-state-active-reqAACCKK', function(_data) {
-         console.log(that.name + ': set state active request event ACKed by my peer. *Not confirmed*');
+      this.socket.on('set-source-property-reqAACCKK', function(_data) {
+         console.log(that.name + ': set source property request event ACKed by my peer. *Not confirmed*. Source=' + _data.sourceName);
 
          if (_data.requestor == that.casa.name) {
             // We made the request
@@ -674,44 +536,12 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.emit('forward-request', { message: 'set-state-active-reqAACCKK', data: _data});
+            that.emit('forward-request', { message: 'set-source-property-reqAACCKK', data: _data});
          }
       });
 
-      this.socket.on('set-state-inactive-reqAACCKK', function(_data) {
-         console.log(that.name + ': set state inactive request event ACKed by my peer. *Not confirmed*');
-
-         if (_data.requestor == that.casa.name) {
-            // We made the request
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].ackRequest();
-            }
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-request', { message: 'set-state-inactive-reqAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('get-state-active-reqAACCKK', function(_data) {
-         console.log(that.name + ': get state active request event ACKed by my peer. *Not confirmed*');
-
-         if (_data.requestor == that.casa.name) {
-            // We made the request
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].ackRequest();
-            }
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-request', { message: 'get-state-active-reqAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('set-state-active-respAACCKK', function(_data) {
-         console.log(that.name + ': set state active response event ACKed by my peer.');
+      this.socket.on('set-source-property-respAACCKK', function(_data) {
+         console.log(that.name + ': set source property response event ACKed by my peer. Source=' + _data.sourceName);
 
          if (_data.requestor == that.casa.name) {
             // We made the request
@@ -719,33 +549,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          }
          else {
             // we didn't make the request, so forward the ACK
-            that.emit('forward-response', { message: 'set-state-active-respAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('set-state-inactive-respAACCKK', function(_data) {
-         console.log(that.name + ': set state inactive response event ACKed by my peer.' );
-
-         if (_data.requestor == that.casa.name) {
-            // We made the request
-            that.messageHasBeenAcked(_data);
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-response', { message: 'set-state-inactive-respAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('get-state-active-respAACCKK', function(_data) {
-         console.log(that.name + ': get state active response event ACKed by my peer.' );
-
-         if (_data.requestor == that.casa.name) {
-            // We made the request
-            that.messageHasBeenAcked(_data);
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-response', { message: 'get-state-active-respAACCKK', data: _data});
+            that.emit('forward-response', { message: 'set-source-property-respAACCKK', data: _data});
          }
       });
 
@@ -832,13 +636,6 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
 
 }
 
-PeerCasa.prototype.addState = function(_state) {
-   // Peer state being added to peer casa
-   console.log(this.name + ': State '  +_state.name + ' added to peercasa ');
-   this.states[_state.name] = _state;
-   console.log(this.name + ': ' + _state.name + ' associated!');
-}
-
 function RemoteCasaRequestor(_requestId, _callback, _socket) {
    this.requestId = _requestId;
    this.callback = _callback;
@@ -868,7 +665,7 @@ RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
    }
    else {
       if (this.timeout) {
-         clearTimeout(this,timeout);
+         clearTimeout(this.timeout);
       }
 
       this.socket.emit(this.message.message, this.message.data);
@@ -889,17 +686,28 @@ RemoteCasaRequestor.prototype.completeRequest = function(_result) {
    this.callback(_result);
 }
 
-PeerCasa.prototype.setStateActive = function(_state, _callback) {
+PeerCasa.prototype.setSourceActive = function(_source, _callback) {
+   this.setSourceProperty(_source, "ACTIVE", true, _callback);
+}
+
+PeerCasa.prototype.setSourceInactive = function(_source, _callback) {
+   this.setSourceProperty(_source, "ACTIVE", false, _callback);
+}
+
+PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _callback) {
    var that = this;
 
    if (this.connected) {
-      console.log(this.name + ': requesting state change to active from peer casa. State ' + _state.name);
-      var id = this.name + ':active:' + this.reqId;
+      console.log(this.name + ': requesting source change property ' + _propName + ' to ' + _propValue + ' from peer casa. Source ' + _source.name);
+      var id = this.name + ':changeprop:' + this.reqId;
       this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'set-state-active-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
+      var message = { message: 'set-source-property-req', data: { casaName: this.name, sourceName: _source.name,
+                                                                  property: _propName, value: _propValue,
+                                                                  requestId: id, requestor: this.casa.name } };
+
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
+         console.log(that.name + ': Timeout occurred sending a changeProperty request for source ' + _source.name);
          delete that.incompleteRequests[_requestId];
       });
    }
@@ -908,55 +716,16 @@ PeerCasa.prototype.setStateActive = function(_state, _callback) {
    }
 }
 
-PeerCasa.prototype.setStateInactive = function(_state, _callback) {
-   var that = this;
-
-   if (this.connected) {
-      console.log(this.name + ': requesting state change to inactive from peer casa. State ' + _state.name);
-      var id = this.name + ':inactive:' + this.reqId;
-      this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'set-state-inactive-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
-      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         console.log(that.name + ': Timeout occurred sending a setActive request for state ' + _state.name);
-         delete that.incompleteRequests[_requestId];
-      });
-   }
-   else {
-      _callback(false);
-   }
+PeerCasa.prototype.addSource = function(_source) {
+   // Peer source being added to peer casa
+   console.log(this.name + ': Source '  +_source.name + ' added to peercasa ');
+   this.sources[_source.name] = _source;
+   console.log(this.name + ': ' + _source.name + ' associated!');
 }
 
-PeerCasa.prototype.isStateActive = function(_state, _callback) {
-   var that = this;
-
-   if (this.connected) {
-      console.log(this.name + ': requesting is state active from peer casa. State ' + _state.name);
-      var id = this.name + ':isactive:' + this.reqId;
-      this.reqId = (this.reqId +  1) % 10000;
-      var message = { message: 'get-state-active-req', data: { casaName: this.name, stateName: _state.name, requestId: id, requestor: this.casa.name } };
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
-      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         console.log(that.name + ': Timeout occurred sending a isActive request for state ' + _state.name);
-         delete that.incompleteRequests[_requestId];
-      });
-   }
-   else {
-      _callback(false);
-   }
-}
-
-PeerCasa.prototype.addActivator = function(_activator) {
-   // Peer acivator being added to peer casa
-   console.log(this.name + ': Activator '  +_activator.name + ' added to peercasa ');
-   this.activators[_activator.name] = _activator;
-   console.log(this.name + ': ' + _activator.name + ' associated!');
-}
-
-PeerCasa.prototype.addAction = function(_action) {
-   console.log(this.name + ': Action '  + _action.name + ' added to peercasa ');
-   this.actions[_action.name] = _action;
-   var that = this;
+PeerCasa.prototype.addWorker = function(_worker) {
+   console.log(this.name + ': Worker '  + _worker.name + ' added to peercasa ');
+   this.workers[_worker.name] = _worker;
 }
 
 PeerCasa.prototype.setCasaArea = function(_casaArea) {

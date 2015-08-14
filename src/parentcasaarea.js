@@ -21,11 +21,11 @@ function ParentCasaArea(_config) {
    };
 
    this.forwardRequestListener = function(_data) {
-      console.log(that.name + ': Forward event request from parent. State: ' + _data.data.stateName);
+      console.log(that.name + ': Forward event request from parent. Source: ' + _data.data.sourceName);
    };
 
    this.forwardResponseListener = function(_data) {
-      console.log(that.name + ': Forward event response from parent. State: ' + _data.data.stateName);
+      console.log(that.name + ': Forward event response from parent. Source: ' + _data.data.sourceName);
    };
 
 
@@ -70,7 +70,7 @@ ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
 
    if (this.casaSys.isUberCasa()) {
 
-      // BROADCASTING local broadcast (this casa's peer states and activators) already done by peer casa class
+      // BROADCASTING local broadcast (this casa's peer sources) already done by peer casa class
       // BROADCASTING Broadcast to area this casa is running in (not the child casa area);
       // BROADCASTING Broadcast to parent area (Uber casa) of the casa we are running in (not the the parent area of this child casa area);
       // BROADCASTING Broadcast to child areas (Uber casa) of the casa we are running in except source area (not the the parent area of this child casa area);
