@@ -10,6 +10,7 @@
       }
    },
    "listeningPort": 8081,
+   "users": [],
    "props": [],
    "things": [
       {
@@ -43,11 +44,11 @@
                }
             },
             {
-               "name": "mains-failure",
+               "name": "kitchen-pir",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "gpiopropertybinder:mains-failure",
+                  "name": "gpiopropertybinder:kitchen-pir",
                   "gpioPin": 17,
                   "triggerLow": true
                }
@@ -288,7 +289,7 @@
                "sourceProperty": "movement"
             },
             {
-               "source": "thing:environment"
+               "source": "thing:environment",
                "sourceProperty": "living-area-lights-with-movement-times"
             }
          ],
