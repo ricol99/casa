@@ -1,0 +1,46 @@
+var util = require('util');
+var PropertyBinder = require('./propertybinder');
+var LightwaveRF = require("lightwaverf");
+
+function LightwaveRFPropertyBinder(_config) {
+
+   this.roomID = _config.roomID;
+   this.deviceID = _config.deviceID;
+
+   PropertyBinder.call(this, _config);
+
+   this.cStart = true;
+
+   var that = this;
+}
+
+util.inherits(LightwaveRFPropertyBinder, PropertyBinder);
+
+LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback) {
+   var that = this;
+
+   var callbackHandler = function(_error, _content) {
+      if (_error) {
+         console.log(that.name + ': Error turning room off ' + _error.message);
+         _callback(false);
+      } else {
+         _callback(true);
+      }
+   };
+
+   if (typeof _config.sources[index] == "boolean") {
+
+      if (_propValue) {
+         this.target.turnDeviceOn(this.roomId, this.deviceId, callbackHandler);
+      }
+      else {
+         this.target.turnDeviceOff(this.roomId, this.deviceId, callbackHandler);
+      }
+   }
+   else {
+      this.target.setDeviceDim(this.roomId, this.deviceId, _propValue, callbackHandler);
+   }
+}
+
+module.exports = exports = LightwaveRFPropertyBinder;
+

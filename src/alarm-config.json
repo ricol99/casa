@@ -124,9 +124,64 @@
                "writable": true
             },
             {
-               "name": "lightLevel",
+               "name": "room-light-Level",
                "initialValue": 0,
                "writable": true
+            },
+            {
+               "name": "lounge-fire-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-fire-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 3
+               }
+            },
+            {
+               "name": "lounge-alcoves-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-alcoves-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 2
+               }
+            },
+            {
+               "name": "lounge-table-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-table-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 2
+               }
+            },
+            {
+               "name": "lounge-centre-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-centre-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 4
+               }
+            },
+            {
+               "name": "lounge-tree-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-tree-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 5
+               }
             }
          ]
       },
