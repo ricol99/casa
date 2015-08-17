@@ -2,12 +2,12 @@ var util = require('util');
 var PropertyBinder = require('./propertybinder');
 var LightwaveRF = require("lightwaverf");
 
-function LightwaveRFPropertyBinder(_config) {
+function LightwaveRFPropertyBinder(_config, _source) {
 
    this.roomID = _config.roomID;
    this.deviceID = _config.deviceID;
 
-   PropertyBinder.call(this, _config);
+   PropertyBinder.call(this, _config, _source);
 
    this.cStart = true;
 
