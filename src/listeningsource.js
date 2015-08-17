@@ -47,7 +47,7 @@ ListeningSource.prototype.sourceIsInactive = function(_data) {
    // DO NOTHING BY DEFAULT
 }
 
-ListeningSource.prototype.sourcePropertyChanged = function() {
+ListeningSource.prototype.sourcePropertyChanged = function(_data) {
    // DO NOTHING BY DEFAULT
 }
 

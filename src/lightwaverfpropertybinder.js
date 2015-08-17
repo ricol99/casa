@@ -28,17 +28,20 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback
       }
    };
 
-   if (typeof _config.sources[index] == "boolean") {
+   if (this.target) {
 
-      if (_propValue) {
-         this.target.turnDeviceOn(this.roomId, this.deviceId, callbackHandler);
+      if (typeof _config.sources[index] == "boolean") {
+
+         if (_propValue) {
+            this.target.turnDeviceOn(this.roomId, this.deviceId, callbackHandler);
+         }
+         else {
+            this.target.turnDeviceOff(this.roomId, this.deviceId, callbackHandler);
+         }
       }
       else {
-         this.target.turnDeviceOff(this.roomId, this.deviceId, callbackHandler);
+         this.target.setDeviceDim(this.roomId, this.deviceId, _propValue, callbackHandler);
       }
-   }
-   else {
-      this.target.setDeviceDim(this.roomId, this.deviceId, _propValue, callbackHandler);
    }
 }
 
