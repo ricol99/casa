@@ -66,7 +66,7 @@ LogicActivator.prototype.emitIfNecessary = function(_sourceListener, _sourceAttr
       if (!outputShouldGoActive) {
 
          // Already inactive so check priority
-         if (highestPrioritySource.priority >= __sourceAttributes.priority) {
+         if (highestPrioritySource.priority >= _sourceAttributes.priority) {
             this.goInactive(highestPrioritySource.inactiveData);
          }
       }
