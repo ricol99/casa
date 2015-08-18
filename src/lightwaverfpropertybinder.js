@@ -30,7 +30,7 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback
 
    if (this.target) {
 
-      if (typeof _config.sources[index] == "boolean") {
+      if (typeof _propValue == "boolean") {
 
          if (_propValue) {
             this.target.turnDeviceOn(this.roomId, this.deviceId, callbackHandler);
