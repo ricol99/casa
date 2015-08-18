@@ -5,7 +5,7 @@ var CasaSystem = require('./casasystem');
 function SourceListener(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
    this.sourceName = _config.source;
-   this.name = _config.source;
+   this.name = "sourcelistener:" + _owner.name + ":" + _config.source;
    this.casa = this.casaSys.casa;
    this.owner = _owner;
 
@@ -81,7 +81,7 @@ SourceListener.prototype.refreshSources = function() {
 
    if (!this.sourceListenerEnabled)  {
       ret = this.establishListeners();
-      console.log(this.name + ': Refreshed action. result=' + ret);
+      console.log(this.name + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
          this.owner.sourceIsValid({ sourceName: this.sourceName });
