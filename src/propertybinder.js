@@ -56,7 +56,9 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
-   this.targetPropertyChanged(_data);
+   if (this.target && _data.sourceName == this.target.name) {
+      this.targetPropertyChanged(_data);
+   }
 }
 
 PropertyBinder.prototype.targetPropertyChanged = function(_data) {
