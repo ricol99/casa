@@ -21,9 +21,7 @@ LatchingActivator.prototype.sourceIsActive = function(_data) {
    
    this.sourceActive = true;
 
-   if (this.active && this.minOutputTimeObj != null) {
-      this.restartTimer();
-   }
+   this.restartTimer();
    this.goActive(_data);
 }
 
@@ -54,7 +52,10 @@ LatchingActivator.prototype.restartTimer = function() {
 
    this.minOutputTimeObj = setTimeout(function() {
       that.minOutputTimeObj = null;
-      that.goInactive(this.latestInactiveData);
+
+      if (!that.active) {
+         that.goInactive(this.latestInactiveData);
+      }
    }, this.minOutputTime*1000);
 }
 
