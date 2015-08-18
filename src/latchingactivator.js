@@ -10,6 +10,7 @@ function LatchingActivator(_config) {
 
    this.sourceActive = false;
    this.minOutputTimeObj = null;
+   this.latestInactiveData = { sourceName: this.name };
    var that = this;
 }
 
@@ -53,10 +54,7 @@ LatchingActivator.prototype.restartTimer = function() {
 
    this.minOutputTimeObj = setTimeout(function() {
       that.minOutputTimeObj = null;
-
-      if (!that.active) {
-         that.deactivateDestination(this.latestInactiveData);
-      }
+      that.goInactive(this.latestInactiveData);
    }, this.minOutputTime*1000);
 }
 

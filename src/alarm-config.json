@@ -10,6 +10,7 @@
       }
    },
    "listeningPort": 8081,
+   "users": [],
    "props": [],
    "things": [
       {
@@ -43,11 +44,11 @@
                }
             },
             {
-               "name": "mains-failure",
+               "name": "kitchen-pir",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "gpiopropertybinder:mains-failure",
+                  "name": "gpiopropertybinder:kitchen-pir",
                   "gpioPin": 17,
                   "triggerLow": true
                }
@@ -124,9 +125,64 @@
                "writable": true
             },
             {
-               "name": "lightLevel",
+               "name": "room-light-Level",
                "initialValue": 0,
                "writable": true
+            },
+            {
+               "name": "lounge-fire-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-fire-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 3
+               }
+            },
+            {
+               "name": "lounge-alcoves-light-level",
+               "initialValue": 0,
+               "writable": 0,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-alcoves-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 2
+               }
+            },
+            {
+               "name": "lounge-table-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-table-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 2
+               }
+            },
+            {
+               "name": "lounge-centre-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-centre-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 4
+               }
+            },
+            {
+               "name": "lounge-tree-light-level",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-tree-light",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 5
+               }
             }
          ]
       },
@@ -251,7 +307,21 @@
          ]
       }
    ],
-   "transforms" : [],
+   "transforms" : [
+      {
+         "name": "fantransform:lounge-lights",
+         "source": "room:lounge",
+         "sourceProperty": "room-light-level",
+         "target": "room:lounge",
+         "targetProperties": [
+            "lounge-fire-light-level",
+            "lounge-alcoves-light-level",
+            "lounge-table-light-level",
+            "lounge-centre-light-level",
+            "lounge-tree-light-level"
+         ]
+      }
+   ],
    "activators": [
       {
          "name": "latchingactivator:lounge-movement",
@@ -273,10 +343,10 @@
          "sourceProperty": "living-area-lights-normal-times",
          "applyProps": {
             "active" : {
-               "dimLevel": 40 
+               "room-light-level": 40 
             },
             "inactive" : {
-               "dimLevel": 0
+               "room-light-level": 0
             }
          }
       },
@@ -288,13 +358,16 @@
                "sourceProperty": "movement"
             },
             {
-               "source": "thing:environment"
+               "source": "thing:environment",
                "sourceProperty": "living-area-lights-with-movement-times"
             }
          ],
          "applyProps": {
             "active" : {
-               "dimLevel": 60 
+               "room-light-level": 60 
+            },
+            "inactive" : {
+               "room-light-level": 0 
             }
          }
       },
@@ -314,6 +387,12 @@
          "targetProperty": "movement"
       },
       {
+         "name": "setpropertyaction:update-lounge-light-level",
+         "source": "oractivator:lounge-lights-evening",
+         "target": "room:lounge",
+         "targetProperty": "room-light-level"
+      },
+      {
          "name": "spycameraaction:lounge",
          "cctvHostname": "192.168.1.245",
          "cctvPort": 8000,
@@ -321,29 +400,6 @@
          "password": "carrot99",
          "cameraId": 1,
          "source": "andactivator:lounge-activity"
-      },
-      {
-         "name": "lightwaverfaction:lounge-alcoves-50",
-         "roomId": 1,
-         "deviceId": 2,
-         "dimLevel": 50,
-         "source": "oractivator:lounge-lights-evening",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:lounge-fire-50",
-         "roomId": 1,
-         "deviceId": 3,
-         "dimLevel": 50,
-         "source": "oractivator:lounge-lights-evening",
-         "target": "lightwaverflink:home"
-      },
-      {
-         "name": "lightwaverfaction:lounge-table-lamp",
-         "roomId": 1,
-         "deviceId": 1,
-         "source": "oractivator:lounge-lights-evening",
-         "target": "lightwaverflink:home"
       },
       {
          "name": "lightwaverfaction:natalie-bedroom-table-lamp",

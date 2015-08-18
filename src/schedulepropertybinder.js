@@ -1,5 +1,5 @@
 var util = require('util');
-var PropertyBinder = require('./propertyBinder');
+var PropertyBinder = require('./propertybinder');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 

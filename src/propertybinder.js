@@ -1,4 +1,5 @@
 var util = require('util');
+var SourceListener = require('./sourcelistener');
 
 function PropertyBinder(_config, _source) {
    this.name = _config.name;
@@ -8,6 +9,16 @@ function PropertyBinder(_config, _source) {
    this.source = _source;
 
    var that = this;
+
+   if (_config.target) {
+      this.targetListener = new SourceListener(_config, this);
+      this.target = this.targetListener.source;
+      this.targetEnabled = (this.target != null);
+   }
+   else {
+      this.targetEnabled = false;
+      this.target = null;
+   }
 }
 
 // INTERNAL METHOD
@@ -18,6 +29,40 @@ PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue) {
 // Override this to actually update what ever the property is bound to
 PropertyBinder.prototype.setProperty = function(_propValue, _callback) {
    _callback(false);
+}
+
+PropertyBinder.prototype.sourceIsValid = function() {
+   this.targetEnabled = true;
+
+   // Cope with constructor calling back so sourceListener is not yet defined!
+   if (this.targetListener) {
+     this.target = this.targetListener.source;
+   }
+}
+
+PropertyBinder.prototype.sourceIsInvalid = function(_data) {
+   console.log(this.name + ': INVALID');
+
+   this.targetEnabled = false;
+   this.target = null;
+}
+
+PropertyBinder.prototype.sourceIsActive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.sourceIsInactive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
+   if (this.target && _data.sourceName == this.target.name) {
+      this.targetPropertyChanged(_data);
+   }
+}
+
+PropertyBinder.prototype.targetPropertyChanged = function(_data) {
+   // DO NOTHING BY DEFAULT
 }
 
 module.exports = exports = PropertyBinder;
