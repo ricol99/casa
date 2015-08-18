@@ -33,14 +33,14 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback
       if (typeof _propValue == "boolean") {
 
          if (_propValue) {
-            this.target.turnDeviceOn(this.roomId, this.deviceId, callbackHandler);
+            this.target.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
          }
          else {
-            this.target.turnDeviceOff(this.roomId, this.deviceId, callbackHandler);
+            this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
          }
       }
       else {
-         this.target.setDeviceDim(this.roomId, this.deviceId, _propValue, callbackHandler);
+         this.target.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
       }
    }
 }
