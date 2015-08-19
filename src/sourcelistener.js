@@ -38,19 +38,24 @@ SourceListener.prototype.establishListeners = function() {
 
    // Listener callbacks
    this.activeCallback = function(_data) {
+      console.log("===========================BBBBBB " +this.name + ": Active Callback from " + _data.sourceName);
       that.owner.sourceIsActive(_data);
    };
 
    this.inactiveCallback = function(_data) {
+      console.log("===========================CCCCCC " +this.name + ": Inactive Callback from " + _data.sourceName);
       that.owner.sourceIsInactive(_data);
    };
 
    this.propertyChangedCallback = function(_data) {
+      console.log("===========================DDDDDD " +this.name + ": Property Changed Callback from " + _data.sourceName);
 
       if (that.property) {
+      console.log("===========================EEEEEE ");
          that.internalSourcePropertyChanged(_data);
       }
       else {
+      console.log("===========================FFFFFF ");
          that.owner.sourcePropertyChanged(_data);
       }
    };
@@ -71,6 +76,9 @@ SourceListener.prototype.establishListeners = function() {
       }
       this.source.on('property-changed', this.propertyChangedCallback);
       this.source.on('invalid', this.invalidCallback);
+   }
+   else {
+      console.log(this.name + ": Source listener is not currrently valid so not registering to listen to source=" + this.sourceName);
    }
 
    return this.sourceListenerEnabled;
@@ -107,8 +115,10 @@ SourceListener.prototype.internalSourceIsInvalid = function() {
 
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
+   console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
    if (_data.propertyName == this.property) {
+      console.log("===========================AAAAAA");
       var a = _data.propertyValue;
       var b = this.triggerValue;
       var evalStr = "a " + this.triggerCondition + " b";

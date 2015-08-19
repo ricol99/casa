@@ -23,7 +23,7 @@ function PropertyActivator(_config) {
 util.inherits(PropertyActivator, ListeningSource);
 
 PropertyActivator.prototype.sourcePropertyChanged = function(_data) {
-
+   console.log("===============GGGGGG " + this.name, _data);
    if (_data.propertyName == this.property) {
       this.props[this.property] = _data.propertyValue;
       var a = _data.propertyValue;
@@ -31,14 +31,18 @@ PropertyActivator.prototype.sourcePropertyChanged = function(_data) {
       var evalStr = "a " + this.triggerCondition + " b";
 
       if (this.active) {
+   console.log("===============HHHHHH " + this.name, _data);
 
          if (!eval(evalStr)) {
+   console.log("===============IIIIII " + this.name, _data);
             this.goInactive({ sourceName: this.name });
          }
       }
       else { // inactive
 
+   console.log("===============JJJJJJ " + this.name, _data);
          if (eval(evalStr)) {
+   console.log("===============KKKKKK " + this.name, _data);
             this.goActive({ sourceName: this.name });
          }
       }

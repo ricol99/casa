@@ -50,7 +50,7 @@ function Source(_config) {
 util.inherits(Source, events.EventEmitter);
 
 Source.prototype.getProperty = function(_property) {
-   return (_property == 'ACTIVE') ? this.isActive() : this.props[_property];
+   return this.props[_property];
 }
 
 Source.prototype.setProperty = function(_propName, _propValue, _callback) {
