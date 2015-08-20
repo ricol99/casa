@@ -125,7 +125,7 @@
                "writable": true
             },
             {
-               "name": "room-light-Level",
+               "name": "room-light-level",
                "initialValue": 0,
                "writable": true
             },

@@ -139,6 +139,11 @@
             "propertyactivator:test-property-1",
             "propertyactivator:test-light-level-prop"
          ]
+      },
+      {
+         "name": "latchingactivator:latched-test-flip-flop",
+         "source": "oractivator:test-flip-flop",
+         "minOutputTime": 210
       }
    ],
    "actions": [
