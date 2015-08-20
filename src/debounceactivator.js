@@ -18,7 +18,7 @@ DebounceActivator.prototype.sourceIsActive = function(_data) {
    var that = this;
    console.log(this.name + ':source ' + _data.sourceName + ' active!');
 
-   if (_data.coldStart || this.active) {
+   if (_data.coldStart || this.isActive()) {
       this.sourceActive = true;
       this.goActive(_data);
    }
@@ -50,7 +50,7 @@ DebounceActivator.prototype.sourceIsInactive = function(_data) {
    var that = this;
    console.log(this.name + ': source ' + _data.sourceName + ' inactive!');
 
-   if (_data.coldStart || !this.active) {
+   if (_data.coldStart || !this.isActive()) {
       this.sourceActive = false;
       this.goInactive(_data);
    }

@@ -1,5 +1,5 @@
 var util = require('util');
-var events = require('events');
+var Source = require('./source');
 var S = require('string');
 var io = require('socket.io-client');
 var CasaSystem = require('./casasystem');
@@ -10,41 +10,39 @@ function RemoteCasa(_config, _peerCasa) {
    this.casa = this.casaSys.casa;
    this.peerCasa = _peerCasa;
 
-   events.EventEmitter.call(this);
+   Source..call(this, _config);
 
    this.loginAs = 'remote';
    this.sources = [];
    this.workers = [];
 
    this.listenersSetUp = false;
-   this.active = false;
 
    var that = this;
 
    // Listen to Casa for my remote instance to connect
    this.peerCasa.on('casa-active', function(_data) {
 
-      if (!that.active) {
-         that.active = true;
+      if (!that.isActive()) {
          console.log(that.name + ': Connected to my peer. Going active.');
 
          // listen for source changes from peer casas
          that.establishListeners(true);
-         that.emit('active', { sourceName: that.name });
+
+         that.goActive({ sourceName: that.name });
       }
    });
 
    this.peerCasa.on('casa-inactive', function(_data) {
 
-      if (that.active) {
+      if (that.isActive()) {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
-         that.active = false;
-         that.emit('inactive', { sourceName: that.name });
+         that.goInactive({ sourceName: that.name });
       }
    });
 }
 
-util.inherits(RemoteCasa, events.EventEmitter);
+util.inherits(RemoteCasa, Source);
 
 RemoteCasa.prototype.establishListeners = function(_force) {
 
@@ -52,22 +50,13 @@ RemoteCasa.prototype.establishListeners = function(_force) {
       var that = this;
 
       // listen for sourcechanges from peer casas
-      this.peerCasa.on('source-active', function(_data) {
-         console.log(that.name + ': Event received from remote casa. Event name: active, source: ' + _data.sourceName);
+      this.peerCasa.on('source-property-changed', function(_data) {
+         console.log(that.name + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
 
          if (that.sources[_data.sourceName]) {
-            that.sources[_data.sourceName].sourceHasGoneActive(_data);
+            that.sources[_data.sourceName].sourceHasChangedProperty(_data);
          }
-         that.emit('source-active', _data);
-      });
-
-      this.peerCasa.on('source-inactive', function(_data) {
-         console.log(that.name + ': Event received from my peer. Event name: inactive, source: ' + _data.sourceName);
-
-         if (that.sources[_data.sourceName]) {
-            that.sources[_data.sourceName].sourceHasGoneInactive(_data);
-         }
-         that.emit('source-inactive', _data);
+         that.emit('source-property-chnaged', _data);
       });
 
       this.listenersSetUp = true;

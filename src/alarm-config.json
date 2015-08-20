@@ -122,11 +122,17 @@
             {
                "name": "movement",
                "initialValue": false,
-               "writable": true
+               "writable": false,
+               "binder" : {
+                  "name": "latchingpropertybinder:lounge-movement",
+                  "source": "alarm:home",
+                  "sourceProperty": "lounge-pir",
+                  "minOutputTime": 180
+               }
             },
             {
                "name": "room-light-level",
-               "initialValue": 0,
+               "initialValue": "low",
                "writable": true
             },
             {

@@ -12,14 +12,19 @@ function SourceListener(_config, _owner) {
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
 
-      if (_config.triggerCondition == undefined) {
-         this.triggerCondition = "==";
-         this.triggerValue = (_config.triggerValue == undefined) ? true : _config.triggerValue;
-      }
-      else {
+      if (_config.triggerCondition) {
          this.triggerCondition = _config.triggerCondition;
          this.triggerValue = _config.triggerValue;
       }
+      else {
+         this.triggerCondition = null;
+         this.triggerValue = null;
+      }
+   }
+   else {
+      this.property = "ACTIVE";
+      this.triggerCondition = "==";
+      this.triggerValue = true;
    }
 
    this.sourceListenerEnabled = false;
@@ -36,23 +41,8 @@ function SourceListener(_config, _owner) {
 SourceListener.prototype.establishListeners = function() {
    var that = this;
 
-   // Listener callbacks
-   this.activeCallback = function(_data) {
-      that.owner.sourceIsActive(_data);
-   };
-
-   this.inactiveCallback = function(_data) {
-      that.owner.sourceIsInactive(_data);
-   };
-
    this.propertyChangedCallback = function(_data) {
-
-      if (that.property) {
-         that.internalSourcePropertyChanged(_data);
-      }
-      else {
-         that.owner.sourcePropertyChanged(_data);
-      }
+      that.internalSourcePropertyChanged(_data);
    };
 
    this.invalidCallback = function(_data) {
@@ -64,11 +54,6 @@ SourceListener.prototype.establishListeners = function() {
    this.sourceListenerEnabled = (this.source != null && this.source.sourceEnabled);
 
    if (this.sourceListenerEnabled) {
-
-      if (!this.property) {
-         this.source.on('active', this.activeCallback);
-         this.source.on('inactive', this.inactiveCallback);
-      }
       this.source.on('property-changed', this.propertyChangedCallback);
       this.source.on('invalid', this.invalidCallback);
    }
@@ -95,10 +80,6 @@ SourceListener.prototype.internalSourceIsInvalid = function() {
 
    this.sourceListenerEnabled = false;
 
-   if (!this.property) {
-      this.source.removeListener('active', this.activeCallback);
-      this.source.removeListener('inactive', this.inactiveCallback);
-   }
    this.source.removeListener('property-changed', this.propertyChangedCallback);
    this.source.removeListener('invalid', this.invalidCallback);
 
@@ -109,18 +90,22 @@ SourceListener.prototype.internalSourceIsInvalid = function() {
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
    if (_data.propertyName == this.property) {
-      var a = _data.propertyValue;
-      var b = this.triggerValue;
-      var evalStr = "a " + this.triggerCondition + " b";
+      console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
-      if (eval(evalStr)) {
-         this.owner.sourceIsActive(_data);
-      }
-      else {
-         this.owner.sourceIsInactive(_data);
-      }
+      if (this.triggerCondition) {
+         var a = _data.propertyValue;
+         var b = this.triggerValue;
+         var evalStr = "a " + this.triggerCondition + " b";
 
-      this.owner.sourcePropertyChanged(_data);
+         if (eval(evalStr)) {
+            this.owner.sourceIsActive(_data);
+         }
+         else {
+            this.owner.sourceIsInactive(_data);
+         }
+
+         this.owner.sourcePropertyChanged(_data);
+      }
    }
 }
 

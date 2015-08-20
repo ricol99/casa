@@ -15,10 +15,12 @@ Transform.prototype.sourcePropertyChanged = function(_data) {
    // DO NOTHING BY DEFAULT
 }
 
-Transform.prototype.setTargetProperty = function(_propertyValue) {
+Transform.prototype.setTargetProperty = function(_propertyValue, _data) {
    var that = this;
 
-   this.target.setProperty(this.targetProperty, _propertyValue, function(_result) {
+   _data["sourceName"] = this.name;
+
+   this.target.setProperty(this.targetProperty, _propertyValue, _data, function(_result) {
 
       if (!_result) {
          console.log(that.name + ': Unable to set property ' + that.targetProperty + ' to value ' + _propertyValue);

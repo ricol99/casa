@@ -16,8 +16,6 @@ function MultiListeningSource(_config) {
    this.sourceEnabled = false;
    this.multiSourceListener = new MultiSourceListener(_config, this);
 
-   this.active = false;
-
    var that = this;
 }
 

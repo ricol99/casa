@@ -95,7 +95,7 @@
       {
          "name": "propertyactivator:test-light-level-prop",
          "source": "thing:home-daylight-sensor",
-         "property": "lightLevel",
+         "sourceProperty": "lightLevel",
          "triggerCondition": "<",
          "triggerValue": 50,
          "applyProps": {
@@ -110,7 +110,7 @@
       {
          "name": "propertyactivator:test-property-1",
          "source": "thing:test-cctv",
-         "property": "test-prop-1",
+         "sourceProperty": "test-prop-1",
          "applyProps": {
             "active" : {
                "colour": "green"
@@ -123,7 +123,7 @@
       {
          "name": "propertyactivator:test-property-2",
          "source": "thing:test-cctv",
-         "property": "test-prop-2",
+         "sourceProperty": "test-prop-2",
          "applyProps": {
             "active" : {
                "lightLevel": 30

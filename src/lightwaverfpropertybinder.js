@@ -16,7 +16,7 @@ function LightwaveRFPropertyBinder(_config, _source) {
 
 util.inherits(LightwaveRFPropertyBinder, PropertyBinder);
 
-LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback) {
+LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    var that = this;
 
    var callbackHandler = function(_error, _content) {
@@ -24,6 +24,7 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _callback
          console.log(that.name + ': Error turning room off ' + _error.message);
          _callback(false);
       } else {
+         this.updatePropertyAfterRead(_propValue, _data);
          _callback(true);
       }
    };

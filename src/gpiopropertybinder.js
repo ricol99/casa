@@ -43,21 +43,27 @@ GPIOPropertyBinder.prototype.Ready = function() {
       if (newValue != that.value) {
          console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
          that.value = newValue;
-         that.updatePropertyAfterRead(newValue == 1);
+         that.updatePropertyAfterRead(that.triggerLow ? (newValue == 1 ? false : true) : newValue == 1, { sourceName: this.sourceName });
       }
    });
 }
 
-PropertyBinder.prototype.setProperty = function(_propValue, _callback) {
-   this.set((_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _callback);
+PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
+   this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data, _callback);
 }
 
-GPIOPropertyBinder.prototype.set = function(_value, _callback) {
+GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data, _callback) {
    var that = this;
 
    if (this.ready && this.writable) {
       this.gpio.set(_value, function (err) {
-         _callback(err == _value);
+         if (err == _value) {
+            this.updatePropertyAfterRead(_propValue, _data);
+            _callback(true);
+         }
+         else {
+            _callback(false);
+         }
       });
    }
    else {
