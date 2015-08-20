@@ -52,16 +52,16 @@ Source.prototype.getProperty = function(_property) {
    return this.props[_property];
 }
 
-Source.prototype.setProperty = function(_propName, _propValue, _callback) {
+Source.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
    if (this.propAttributes[_propName] && this.propAttributes[_propName].writeable) {
 
       if (this.propAttributes[_propName].binder) {
-         this.propAttributes[_propName].binder.setProperty(_propValue, _callback);
+         this.propAttributes[_propName].binder.setProperty(_propValue, _data, _callback);
       }
       else {
-         this.updateProperty(_propName, _propValue);
+         this.updateProperty(_propName, _propValue, _data);
          _callback(true);
       }
    }
@@ -77,10 +77,10 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    var oldValue = this.props[_propName];
    this.props[_propName] = _propValue;
    var sendData = (_data) ? _data : {};
-   sendData['sourceName'] = this.name;
-   sendData['propertyName'] = _propName;
-   sendData['propertyOldValue'] = oldValue;
-   sendData['propertyValue'] = _propValue;
+   sendData.sourceName = this.name;
+   sendData.propertyName = _propName;
+   sendData.propertyOldValue = oldValue;
+   sendData.propertyValue = _propValue;
    this.emit('property-changed', sendData);
 }
 
@@ -88,16 +88,29 @@ Source.prototype.isActive = function() {
    return this.props['ACTIVE'];
 }
 
-Source.prototype.setActive = function(_callback) {
-   this.setProperty('ACTIVE', true, _callback);
+Source.prototype.setActive = function(_data, _callback) {
+   this.setProperty('ACTIVE', true, _data, _callback);
 }
 
-Source.prototype.setInactive = function(_callback) {
-   this.setProperty('ACTIVE', false, _callback);
+Source.prototype.setInactive = function(_data, _callback) {
+   this.setProperty('ACTIVE', false, _data, _callback);
+}
+
+Source.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
 }
 
 Source.prototype.mergeActiveApplyProps = function(_sourceData) {
-   var dataToSend = _sourceData;
+   var dataToSend = this.copyData(_sourceData);
 
    if (dataToSend) {
 
@@ -114,7 +127,7 @@ Source.prototype.mergeActiveApplyProps = function(_sourceData) {
 }
 
 Source.prototype.mergeInactiveApplyProps = function(_sourceData) {
-   var dataToSend = _sourceData;
+   var dataToSend = this.copyData(_sourceData);
 
    if (dataToSend) {
       if (this.applyProps.inactive) {
@@ -131,29 +144,30 @@ Source.prototype.mergeInactiveApplyProps = function(_sourceData) {
 }
 
 Source.prototype.goActive = function(_sourceData) {
-   console.log(this.name + ": Going active! Previously active state=" + this.active);
+   console.log(this.name + ": Going active! Previously active state=" + this.props['ACTIVE']);
 
    var sendData = this.mergeActiveApplyProps(_sourceData);
    sendData.sourceName = this.name;
-   sendData.oldState = this.active;
+   sendData.oldState = this.props['ACTIVE'];
+   console.log(this.name+": Data=", sendData);
    this.updateProperty('ACTIVE', true, sendData);
 }
 
 Source.prototype.goInactive = function(_sourceData) {
-   console.log(this.name + ": Going inactive! Previously active state=" + this.active);
+   console.log(this.name + ": Going inactive! Previously active state=" + this.props['ACTIVE']);
 
    var sendData = this.mergeInactiveApplyProps(_sourceData);
    sendData.sourceName = this.name;
-   sendData.oldState = this.active;
+   sendData.oldState = this.props['ACTIVE'];
    this.updateProperty('ACTIVE', false, sendData);
 }
 
 Source.prototype.goInvalid = function(_sourceData) {
-   console.log(this.name + ": Going invalid! Previously active state=" + this.active);
+   console.log(this.name + ": Going invalid! Previously active state=" + this.props['ACTIVE']);
 
    var sendData = _sourceData;
    sendData.sourceName = this.name;
-   sendData.oldState = this.active;
+   sendData.oldState = this.props['ACTIVE'];
    this.props['ACTIVE'] = false;
    console.log(this.name + ": Emitting invalid! send data=", sendData);
    this.emit('invalid', sendData);

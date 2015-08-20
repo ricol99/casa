@@ -342,15 +342,16 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
    this.casaSys.casa.refreshSourceListeners();
 }
 
-function SourceRequestor(_requestId, _source) {
+function SourceRequestor(_requestId, _source, _data) {
    this.requestId = _requestId;
    this.source = _source;
+   this.data = _data;
 }
 
-SourceRequestor.prototype.setProperty = function(_property, _value, _callback) {
+SourceRequestor.prototype.setProperty = function(_property, _value, _data, _callback) {
    var that = this;
 
-   this.source.setProperty(_property, _value, function(_result) {
+   this.source.setProperty(_property, _value, _data, function(_result) {
       _callback( { sourceName: that.source.name, requestId: that.requestId, result: _result });
    });
 }
@@ -419,8 +420,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
             _data.acker = that.casa.name;
             that.ackMessage('set-source-property-req', _data);
 
-            that.sourceRequests[_data.requestId] = new SourceRequestor(_data.requestId, source);
-            that.sourceRequests[_data.requestId].setProperty(_data.property, _data.value, function(_resp) {
+            that.sourceRequests[_data.requestId] = new SourceRequestor(_data.requestId, source, _data);
+            that.sourceRequests[_data.requestId].setProperty(_data.property, _data.value, _data, function(_resp) {
                that.socket.emit('set-source-property-resp', { sourceName: _resp.sourceName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
                delete that.sourceRequests[ _resp.requestId];
             });
@@ -617,15 +618,15 @@ RemoteCasaRequestor.prototype.completeRequest = function(_result) {
    this.callback(_result);
 }
 
-PeerCasa.prototype.setSourceActive = function(_source, _callback) {
-   this.setSourceProperty(_source, "ACTIVE", true, _callback);
+PeerCasa.prototype.setSourceActive = function(_source, _data, _callback) {
+   this.setSourceProperty(_source, "ACTIVE", true, _data, _callback);
 }
 
-PeerCasa.prototype.setSourceInactive = function(_source, _callback) {
-   this.setSourceProperty(_source, "ACTIVE", false, _callback);
+PeerCasa.prototype.setSourceInactive = function(_source, _data, _callback) {
+   this.setSourceProperty(_source, "ACTIVE", false, _data, _callback);
 }
 
-PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _callback) {
+PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _data, _callback) {
    var that = this;
 
    if (this.connected) {

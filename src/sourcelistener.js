@@ -12,13 +12,13 @@ function SourceListener(_config, _owner) {
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
 
-      if (_config.triggerCondition == undefined) {
-         this.triggerCondition = "==";
-         this.triggerValue = (_config.triggerValue == undefined) ? true : _config.triggerValue;
-      }
-      else {
+      if (_config.triggerCondition) {
          this.triggerCondition = _config.triggerCondition;
          this.triggerValue = _config.triggerValue;
+      }
+      else {
+         this.triggerCondition = null;
+         this.triggerValue = null;
       }
    }
    else {
@@ -42,16 +42,7 @@ SourceListener.prototype.establishListeners = function() {
    var that = this;
 
    this.propertyChangedCallback = function(_data) {
-      console.log("===========================DDDDDD " +this.name + ": Property Changed Callback from " + _data.sourceName);
-
-      if (that.property) {
-      console.log("===========================EEEEEE ");
-         that.internalSourcePropertyChanged(_data);
-      }
-      else {
-      console.log("===========================FFFFFF ");
-         that.owner.sourcePropertyChanged(_data);
-      }
+      that.internalSourcePropertyChanged(_data);
    };
 
    this.invalidCallback = function(_data) {
@@ -65,9 +56,6 @@ SourceListener.prototype.establishListeners = function() {
    if (this.sourceListenerEnabled) {
       this.source.on('property-changed', this.propertyChangedCallback);
       this.source.on('invalid', this.invalidCallback);
-   }
-   else {
-      console.log(this.name + ": Source listener is not currrently valid so not registering to listen to source=" + this.sourceName);
    }
 
    return this.sourceListenerEnabled;
@@ -100,24 +88,25 @@ SourceListener.prototype.internalSourceIsInvalid = function() {
 
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
-   console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
    if (_data.propertyName == this.property) {
-      console.log("===========================AAAAAA");
-      var a = _data.propertyValue;
-      var b = this.triggerValue;
-      var evalStr = "a " + this.triggerCondition + " b";
+      console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
-      if (eval(evalStr)) {
-         this.owner.sourceIsActive(_data);
-      }
-      else {
-         this.owner.sourceIsInactive(_data);
-      }
+      if (this.triggerCondition) {
+         var a = _data.propertyValue;
+         var b = this.triggerValue;
+         var evalStr = "a " + this.triggerCondition + " b";
 
+         if (eval(evalStr)) {
+            this.owner.sourceIsActive(_data);
+         }
+         else {
+            this.owner.sourceIsInactive(_data);
+         }
+
+         this.owner.sourcePropertyChanged(_data);
+      }
    }
-
-   this.owner.sourcePropertyChanged(_data);
 }
 
 module.exports = exports = SourceListener;

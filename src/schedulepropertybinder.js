@@ -129,7 +129,7 @@ SchedulePropertyBinder.prototype.resetJob = function(_event) {
    }
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
-      that.updatePropertyAfterRead(_event.propertyValue);
+      that.updatePropertyAfterRead(_event.propertyValue , { sourceName: this.sourceName });
    });
 }
 

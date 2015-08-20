@@ -26,7 +26,7 @@ LinearTransform.prototype.sourcePropertyChanged = function(_data) {
       var outputVal = (this.outputRange * placeInRange) + this.outputMin;
       console.log(this.name + ': attempting to set property ' + this.targetProperty + ' in target ' + this.target.name + ' to ' + outputVal);
 
-      this.setTargetProperty(outputVal);
+      this.setTargetProperty(outputVal, _data);
    }
 }
 

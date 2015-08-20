@@ -30,7 +30,7 @@ FanTransform.prototype.setTargetProperties = function(_propertyValue) {
             console.log(that.name + ': Unable to set property to value ' + _propertyValue);
          }
       });
-      this.target.setProperty(this.targetProperties[i], _propertyValue, callbacks[i]);
+      this.target.setProperty(this.targetProperties[i], _propertyValue, { sourceName: this.name }, callbacks[i]);
    }
 }
 

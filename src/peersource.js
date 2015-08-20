@@ -23,19 +23,19 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    this.emit('property-changed', _data);
 }
 
-PeerSource.prototype.setActive = function(_callback) {
+PeerSource.prototype.setActive = function(_data, _callback) {
    console.log(this.name + ': Attempting to set source to active');
-   this.peerCasa.setSourceActive(this, _callback);
+   this.peerCasa.setSourceActive(this, _data, _callback);
 }
 
-PeerSource.prototype.setInactive = function(_callback) {
+PeerSource.prototype.setInactive = function(_data, _callback) {
    console.log(this.name + ': Attempting to set source to inactive');
-   this.peerCasa.setSourceInactive(this, _callback);
+   this.peerCasa.setSourceInactive(this, _data, _callback);
 }
 
-PeerSource.prototype.setProperty = function(_propName, _propValue, _callback) {
+PeerSource.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set source property');
-   this.peerCasa.setSourceProperty(this, _propName, _propValue, _callback);
+   this.peerCasa.setSourceProperty(this, _propName, _propValue, _data, _callback);
 }
 
 PeerSource.prototype.getProperty = function(_propName) {

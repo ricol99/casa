@@ -13,7 +13,7 @@ function I2CPropertyBinder(_config, _source) {
 
 util.inherits(I2CPropertyBinder, PropertyBinder);
 
-I2CPropertyBinder.prototype.setProperty = function(_propValue, _callback) {
+I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set property ' + this.propertyName + ' to ' + _propValue);
    _callback(false);
 }

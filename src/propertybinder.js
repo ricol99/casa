@@ -21,13 +21,17 @@ function PropertyBinder(_config, _source) {
    }
 }
 
-// INTERNAL METHOD
-PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue) {
-   this.source.updateProperty(this.propertyName, _propValue);
+// INTERNAL METHODS
+PropertyBinder.prototype.myPropertyValue = function() {
+   return this.source.props[this.propertyName];
+}
+
+PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
+   this.source.updateProperty(this.propertyName, _propValue, _data);
 }
 
 // Override this to actually update what ever the property is bound to
-PropertyBinder.prototype.setProperty = function(_propValue, _callback) {
+PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    _callback(false);
 }
 

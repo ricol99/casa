@@ -18,7 +18,7 @@ function SetPropertyAction(_config) {
          var targetValue = _data.applyProps[that.targetProperty];
          console.log(that.name + ': Going active. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + targetValue);
 
-         that.target.setProperty(that.targetProperty, targetValue, function(result) {
+         that.target.setProperty(that.targetProperty, targetValue, _data, function(result) {
 
             if (result) {
                console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
@@ -37,7 +37,7 @@ function SetPropertyAction(_config) {
          var targetValue = _data.applyProps[that.targetProperty];
          console.log(that.name + ': Going inactive. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + targetValue);
 
-         that.target.setProperty(that.targetProperty, targetValue, function(result) {
+         that.target.setProperty(that.targetProperty, targetValue, _data, function(result) {
 
             if (result) {
                console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
