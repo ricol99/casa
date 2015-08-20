@@ -152,19 +152,19 @@
                }
             },
             {
-               "name": "lounge-table-light-level",
-               "initialValue": 0,
+               "name": "lounge-table-light",
+               "initialValue": false,
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-table-light",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
-                  "deviceID": 2
+                  "deviceID": 1
                }
             },
             {
-               "name": "lounge-centre-light-level",
-               "initialValue": 0,
+               "name": "lounge-centre-light",
+               "initialValue": false,
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-centre-light",
@@ -174,8 +174,8 @@
                }
             },
             {
-               "name": "lounge-tree-light-level",
-               "initialValue": 0,
+               "name": "lounge-tree-light",
+               "initialValue": false,
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-tree-light",
@@ -307,33 +307,21 @@
          ]
       }
    ],
-   "transforms" : [
-      {
-         "name": "fantransform:lounge-lights",
-         "source": "room:lounge",
-         "sourceProperty": "room-light-level",
-         "target": "room:lounge",
-         "targetProperties": [
-            "lounge-fire-light-level",
-            "lounge-alcoves-light-level",
-            "lounge-table-light-level",
-            "lounge-centre-light-level",
-            "lounge-tree-light-level"
-         ]
-      }
-   ],
+   "transforms" : [],
    "activators": [
       {
          "name": "latchingactivator:lounge-movement",
          "source": "alarm:home",
          "sourceProperty": "lounge-pir",
-         "minOutputTime": 180,
+         "minOutputTime": 10,
          "applyProps": {
             "active" : {
-               "movement": true 
+               "movement": true,
+               "lounge-centre-light": true 
             },
             "inactive" : {
-               "movement": false
+               "movement": false,
+               "lounge-centre-light": false 
             }
          }
       },
@@ -351,7 +339,7 @@
          }
       },
       {
-         "name": "andactivator:lounge-lights-with-movement",
+         "name": "oractivator:lounge-lights-with-movement",
          "sources": [
             {
                "source": "room:lounge",
@@ -374,12 +362,18 @@
       {
          "name": "oractivator:lounge-lights-evening",
          "sources": [
-            "andactivator:lounge-lights-with-movement",
+            "oractivator:lounge-lights-with-movement",
             "propertyactivator:holiday-background-lights"
          ]
       }
    ],
    "actions": [
+      {
+         "name": "setpropertyaction:update-lounge-centre-light",
+         "source": "latchingactivator:lounge-movement",
+         "target": "room:lounge",
+         "targetProperty": "lounge-centre-light"
+      },
       {
          "name": "setpropertyaction:update-lounge-movement",
          "source": "latchingactivator:lounge-movement",

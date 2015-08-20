@@ -11,7 +11,10 @@ function PropertyBinder(_config, _source) {
    var that = this;
 
    if (_config.target) {
-      this.targetListener = new SourceListener(_config, this);
+      this.targetConfig = { source: _config.target, sourceProperty: _config.targetProperty,
+                            triggerCondition: _config.triggerCondition, triggerValue: _config.triggerValue };
+
+      this.targetListener = new SourceListener(this.targetConfig, this);
       this.target = this.targetListener.source;
       this.targetEnabled = (this.target != null);
    }
@@ -56,8 +59,12 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
+
    if (this.target && _data.sourceName == this.target.name) {
-      this.targetPropertyChanged(_data);
+
+      if (this.targetConfig.sourceProperty == _data.propertyName) {
+         this.targetPropertyChanged(_data);
+      }
    }
 }
 

@@ -58,16 +58,22 @@ Source.prototype.setProperty = function(_propName, _propValue, _callback) {
 
    if (this.propAttributes[_propName] && this.propAttributes[_propName].writeable) {
 
-      if (this.propAttributes[_propName].binder) {
-         this.propAttributes[_propName].binder.setProperty(_propValue, _callback);
+      if (this.props[_propName] != _propValue) {
+
+         if (this.propAttributes[_propName].binder) {
+            this.propAttributes[_propName].binder.setProperty(_propValue, _callback);
+         }
+         else {
+            this.updateProperty(_propName, _propValue);
+            _callback(true);
+         }
       }
       else {
-         this.updateProperty(_propName, _propValue);
          _callback(true);
       }
    }
    else {
-      console.log(this.name + ': Source is read only!');
+      console.log(this.name + ': Uanble to set property because it is read only!');
       _callback(false);
    }
 }
