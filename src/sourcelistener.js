@@ -21,6 +21,11 @@ function SourceListener(_config, _owner) {
          this.triggerValue = _config.triggerValue;
       }
    }
+   else {
+      this.property = "ACTIVE";
+      this.triggerCondition = "==";
+      this.triggerValue = true;
+   }
 
    this.sourceListenerEnabled = false;
 
@@ -35,17 +40,6 @@ function SourceListener(_config, _owner) {
 
 SourceListener.prototype.establishListeners = function() {
    var that = this;
-
-   // Listener callbacks
-   this.activeCallback = function(_data) {
-      console.log("===========================BBBBBB " +this.name + ": Active Callback from " + _data.sourceName);
-      that.owner.sourceIsActive(_data);
-   };
-
-   this.inactiveCallback = function(_data) {
-      console.log("===========================CCCCCC " +this.name + ": Inactive Callback from " + _data.sourceName);
-      that.owner.sourceIsInactive(_data);
-   };
 
    this.propertyChangedCallback = function(_data) {
       console.log("===========================DDDDDD " +this.name + ": Property Changed Callback from " + _data.sourceName);
@@ -69,11 +63,6 @@ SourceListener.prototype.establishListeners = function() {
    this.sourceListenerEnabled = (this.source != null && this.source.sourceEnabled);
 
    if (this.sourceListenerEnabled) {
-
-      if (!this.property) {
-         this.source.on('active', this.activeCallback);
-         this.source.on('inactive', this.inactiveCallback);
-      }
       this.source.on('property-changed', this.propertyChangedCallback);
       this.source.on('invalid', this.invalidCallback);
    }
@@ -103,10 +92,6 @@ SourceListener.prototype.internalSourceIsInvalid = function() {
 
    this.sourceListenerEnabled = false;
 
-   if (!this.property) {
-      this.source.removeListener('active', this.activeCallback);
-      this.source.removeListener('inactive', this.inactiveCallback);
-   }
    this.source.removeListener('property-changed', this.propertyChangedCallback);
    this.source.removeListener('invalid', this.invalidCallback);
 
@@ -130,8 +115,9 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
          this.owner.sourceIsInactive(_data);
       }
 
-      this.owner.sourcePropertyChanged(_data);
    }
+
+   this.owner.sourcePropertyChanged(_data);
 }
 
 module.exports = exports = SourceListener;

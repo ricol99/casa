@@ -21,7 +21,7 @@ LatchingActivator.prototype.sourceIsActive = function(_data) {
    
    this.sourceActive = true;
 
-   if (this.active && this.minOutputTimeObj != null) {
+   if (this.isActive() && this.minOutputTimeObj != null) {
       this.restartTimer();
    }
    this.goActive(_data);
@@ -32,7 +32,7 @@ LatchingActivator.prototype.sourceIsInactive = function(_data) {
 
    this.sourceActive = false;
 
-   if (this.active) {
+   if (this.isActive()) {
 
       // Destination is active. If there is no timer, deactivate. Else, let the timer do it
       if (this.minOutputTimeObj == null) {

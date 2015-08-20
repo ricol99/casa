@@ -49,7 +49,7 @@ LogicActivator.prototype.emitIfNecessary = function(_sourceListener, _sourceAttr
       highestPrioritySource = _sourceAttributes;
    }
 
-   if (this.active) {
+   if (this.isActive()) {
 
       if (outputShouldGoActive) {
 

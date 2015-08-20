@@ -227,13 +227,17 @@ Casa.prototype.createRemoteCasa = function(_data) {
    var len = _data.casaConfig.sourcesStatus.length;
    console.log(this.name + ': New sources found = ' + len);
 
+   console.log('======== AAAA');
    var PeerSource = require('./peersource');
+   console.log('======== AAAA');
    for (var i = 0; i < len; ++i) {
+   console.log('======== AAAA');
       console.log(this.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
+   console.log('======== AAAA');
       var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
-
-      source.active = _data.casaConfig.sourcesStatus[i].status;
+   console.log('======== AAAA');
       this.casaSys.allObjects[source.name] = source;
+   console.log('======== AAAA');
    }
 
    // Refresh all inactive sources and workers
@@ -249,16 +253,6 @@ Casa.prototype.addSource = function(_source) {
    console.log(this.name + ': Source '  + _source.name + ' added to casa ');
    this.sources[_source.name] = _source;
    var that = this;
-
-   _source.on('active', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become active');
-      that.emit('source-active', _data);
-   });
-
-   _source.on('inactive', function (_data) {
-      console.log(that.name + ': ' + _data.sourceName + ' has become inactive');
-      that.emit('source-inactive', _data);
-   });
 
    _source.on('property-changed', function (_data) {
       console.log(that.name + ': ' + _data.sourceName + ' has had a property change');

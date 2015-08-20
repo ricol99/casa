@@ -30,7 +30,7 @@ PropertyActivator.prototype.sourcePropertyChanged = function(_data) {
       var b = this.triggerValue;
       var evalStr = "a " + this.triggerCondition + " b";
 
-      if (this.active) {
+      if (this.props['ACTIVE']) {
    console.log("===============HHHHHH " + this.name, _data);
 
          if (!eval(evalStr)) {
