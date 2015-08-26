@@ -2,6 +2,7 @@ var util = require('util');
 var PropertyBinder = require('./propertybinder');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
+var parser = require('cron-parser');
 
 var sunScheduler = null;
 
@@ -42,7 +43,7 @@ function SchedulePropertyBinder(_config, _source) {
    }
 
    sunScheduler.states.push(this);
-   this.resetAllJobs();
+   this.scheduleAllJobs();
 }
 
 util.inherits(SchedulePropertyBinder, PropertyBinder);
@@ -76,7 +77,60 @@ SchedulePropertyBinder.prototype.createEventsFromConfig = function(_eventsConfig
    }
 }
 
-SchedulePropertyBinder.prototype.resetAllJobs = function() {
+SchedulePropertyBinder.prototype.lastEventScheduledBeforeNow = function(_now, _event) {
+
+   //var startDate = new Date(_now.getYear(), _now.getMonth(), _now.getDay(), 0, 0, 0, 0);
+   var startDate = new Date();
+   startDate.setTime(startDate.getTime()-(_now.getHours()*60*60*1000)-(_now.getSeconds()*60*1000));
+
+   var options = {
+      currentDate: startDate,
+      endDate: _now,
+      iterator: true
+    };
+   var lastScheduled = null;
+
+   try {
+      var interval = parser.parseExpression(_event.rule, options);
+      do {
+         try {
+            lastScheduled = interval.next();
+         } catch (e) {
+            break;
+         }
+      } while (!lastScheduled.done);
+
+    } catch (err) {
+       // Not scheduled during time period
+       console.log(this.name + ': Error: ' + err.message);
+    }
+
+    return (lastScheduled) ? lastScheduled.value : null;
+}
+
+// Returns null if it is not closer or the new closestSchedule
+SchedulePropertyBinder.prototype.determineClosestEvent = function(_now, _currentClosestEventSchedule, _event) {
+
+   var lastScheduled = (_event.sunTime) ? _event.rule : this.lastEventScheduledBeforeNow(_now, _event);
+
+   if (lastScheduled && lastScheduled < _now) {
+
+      if (_currentClosestEventSchedule) {
+         var currentClosestDelta = _now.getTime() - _currentClosestEventSchedule.getTime();
+         var delta = _now.getTime() - lastScheduled.getTime();
+
+         return (delta < currentClosestDelta) ? lastScheduled : null;
+      }
+      else {
+         return lastScheduled;
+      }
+   }
+   else {
+      return null;
+   }
+}
+
+SchedulePropertyBinder.prototype.scheduleAllJobs = function() {
    this.setSunTimes();
 
    for (var index = 0; index < this.events.length; ++index) {
@@ -131,6 +185,27 @@ SchedulePropertyBinder.prototype.resetJob = function(_event) {
    _event.job = schedule.scheduleJob(_event.rule, function() {
       that.updatePropertyAfterRead(_event.propertyValue , { sourceName: this.sourceName });
    });
+}
+
+SchedulePropertyBinder.prototype.coldStart = function(_event) {
+   var closestEvent = null;
+   var closestEventSchedule = null;
+   var now = new Date();
+
+   for (var index = 0; index < this.events.length; ++index) {
+      var tempClosestSchedule = this.determineClosestEvent(now, closestEventSchedule, this.events[index]);
+
+      if (tempClosestSchedule) {
+         closestEvent = this.events[index];
+         closestEventSchedule = new Date(tempClosestSchedule);
+      }
+   }
+
+   // Set Initial Value
+   if (closestEvent) {
+      console.log(this.name + ": Closest event is "+closestEvent.rule);
+      this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.source.name, coldStart: true });
+   }
 }
 
 module.exports = exports = SchedulePropertyBinder;

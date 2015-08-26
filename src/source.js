@@ -180,7 +180,24 @@ Source.prototype.goInvalid = function(_sourceData) {
 }
 
 Source.prototype.coldStart = function() {
-   // ** DO NOTHING BY DEFAULT - Only Things are cold started
+
+   for(var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop)) {
+
+         if (this.propAttributes[prop] && this.propAttributes[prop].binder) {
+            this.propAttributes[prop].binder.coldStart();
+         }
+         else {
+            var sendData = {};
+            sendData.sourceName = this.name;
+            sendData.propertyName = prop;
+            sendData.propertyValue = this.props[prop];
+            sendData.coldStart = true;
+            this.emit('property-changed', sendData);
+         }
+      }
+   }
 }
 
 

@@ -1,4 +1,4 @@
-var util = require('util');
+Var util = require('util');
 var SourceListener = require('./sourcelistener');
 
 function PropertyBinder(_config, _source) {
@@ -70,6 +70,12 @@ PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
          this.targetPropertyChanged(_data);
       }
    }
+}
+
+// Override this if you listen to a source that is not "Source".
+// If you listen to a "Source" you will be fired by that Source cold starting
+PropertyBinder.prototype.coldStart = function(_data) {
+   // DO NOTHING BY DEFAULT
 }
 
 PropertyBinder.prototype.targetPropertyChanged = function(_data) {

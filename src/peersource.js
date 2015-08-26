@@ -44,11 +44,14 @@ PeerSource.prototype.getProperty = function(_propName) {
 
 PeerSource.prototype.coldStart = function() {
 
-   if (this.props['ACTIVE']) {
-      this.emit('active', { sourceName: this.name, coldStart: true });
-   }
-   else {
-      this.emit('inactive', { sourceName: this.name, coldStart: true });
+   for(var prop in this.props) {
+
+      var sendData = {};
+      sendData.sourceName = this.name;
+      sendData.propertyName = prop;
+      sendData.propertyValue = this.props[prop];
+      sendData.coldStart = true;
+      this.emit('property-changed', sendData);
    }
 }
 
