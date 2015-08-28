@@ -2,12 +2,12 @@ var util = require('util');
 var Gpio = require('gpio');
 var PropertyBinder = require('./propertybinder');
 
-function GPIOPropertyBinder(_config, _source) {
+function GPIOPropertyBinder(_config, _owner) {
 
    this.gpioPin = _config.gpioPin;
    this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
 
-   PropertyBinder.call(this, _config, _source);
+   PropertyBinder.call(this, _config, _owner);
 
    this.ready = false;
    this. direction = (this.writable) ? 'out' : 'in';
@@ -24,7 +24,7 @@ GPIOPropertyBinder.prototype.Ready = function() {
 
    this.gpio.read( function(_err, _value) {
        that.value = _value;
-       this.updatePropertyAfterRead(_value, { sourceName: this.source.name, coldStart: true });
+       this.updatePropertyAfterRead(_value, { sourceName: this.owner.name, coldStart: true });
    });
 
    this.gpio.on("change", function (_value) {
@@ -34,7 +34,7 @@ GPIOPropertyBinder.prototype.Ready = function() {
       if (newValue != that.value) {
          console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
          that.value = newValue;
-         that.updatePropertyAfterRead(that.triggerLow ? (newValue == 1 ? false : true) : newValue == 1, { sourceName: this.sourceName });
+         that.updatePropertyAfterRead(that.triggerLow ? (newValue == 1 ? false : true) : newValue == 1, { sourceName: this.ownerName });
       }
    });
 }

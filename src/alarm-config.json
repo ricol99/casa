@@ -282,7 +282,7 @@
                   "name": "schedulepropertybinder:env-living-area-lights-early",
                   "events": [
                      {
-                        "rule": "30 2 * * *",
+                        "rule": "sunrise:+1800",
                         "propertyValue": false 
                      },
                      {

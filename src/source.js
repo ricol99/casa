@@ -6,7 +6,7 @@ function Source(_config) {
    this.name = _config.name;
    this.sourceEnabled = true;
    this.props = { ACTIVE: false };
-   this.propAttributes = {};
+   this.propBinders = { ACTIVE: null };
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
@@ -16,7 +16,6 @@ function Source(_config) {
 
       for (var i = 0; i < propLen; ++i) {
          this.props[_config.props[i].name] = _config.props[i].initialValue;
-         this.propAttributes[_config.props[i].name] = { writeable: (_config.props[i].writeable) ? _config.props[i].writeable : true };
 
          if (_config.props[i].binder) {
             var PropertyBinder = casaSys.cleverRequire(_config.props[i].binder.name);
@@ -24,8 +23,8 @@ function Source(_config) {
             if (PropertyBinder) {
                _config.props[i].binder.source = this.name;
                _config.props[i].binder.propertyName = _config.props[i].name;
-               _config.props[i].binder.writable = this.propAttributes[_config.props[i].name].writable;
-               this.propAttributes[_config.props[i].name].binder = new PropertyBinder(_config.props[i].binder, this);
+               _config.props[i].binder.writable = (_config.props[i].writeable) ? _config.props[i].writeable : true;
+               this.propBinders[_config.props[i].name] = new PropertyBinder(_config.props[i].binder, this);
             }
          }
       }
@@ -55,25 +54,25 @@ Source.prototype.getProperty = function(_property) {
 Source.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
-   if (this.propAttributes[_propName] && this.propAttributes[_propName].writeable) {
+   if (this.props[_propName] != _propValue) {
 
-      if (this.props[_propName] != _propValue) {
+      if (this.propBinders[_propName]) {
 
-         if (this.propAttributes[_propName].binder) {
-            this.propAttributes[_propName].binder.setProperty(_propValue, _data, _callback);
+         if (this.propBinders[_propName].writeable) {
+            this.propBinders[_propName].setProperty(_propValue, _data, _callback);
          }
          else {
-            this.updateProperty(_propName, _propValue, _data);
-            _callback(true);
+            console.log(this.name + ': Uanble to set property because it is read only!');
+            _callback(false);
          }
       }
       else {
+         this.updateProperty(_propName, _propValue, _data);
          _callback(true);
       }
    }
    else {
-      console.log(this.name + ': Uanble to set property because it is read only!');
-      _callback(false);
+      _callback(true);
    }
 }
 
@@ -185,8 +184,8 @@ Source.prototype.coldStart = function() {
 
       if (this.props.hasOwnProperty(prop)) {
 
-         if (this.propAttributes[prop] && this.propAttributes[prop].binder) {
-            this.propAttributes[prop].binder.coldStart();
+         if (this.propBinders[prop]) {
+            this.propBinders[prop].coldStart();
          }
          else {
             var sendData = {};

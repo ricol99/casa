@@ -20,7 +20,7 @@ function SunScheduler() {
    });
 }
 
-function SchedulePropertyBinder(_config, _source) {
+function SchedulePropertyBinder(_config, _owner) {
 
    // Defaults to London
    this.latitude = (_config.latitude) ? _config.latitude : 51.5;
@@ -29,7 +29,7 @@ function SchedulePropertyBinder(_config, _source) {
    this.startRuleIsSunTime = false;
    this.endRuleIsSunTime = false;
 
-   PropertyBinder.call(this, _config, _source);
+   PropertyBinder.call(this, _config, _owner);
 
    this.writable = false;
    this.events = [];
@@ -183,7 +183,7 @@ SchedulePropertyBinder.prototype.resetJob = function(_event) {
    }
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
-      that.updatePropertyAfterRead(_event.propertyValue , { sourceName: this.sourceName });
+      that.updatePropertyAfterRead(_event.propertyValue , { sourceName: this.ownerName });
    });
 }
 
@@ -204,7 +204,7 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
    // Set Initial Value
    if (closestEvent) {
       console.log(this.name + ": Closest event is "+closestEvent.rule);
-      this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.source.name, coldStart: true });
+      this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.owner.name, coldStart: true });
    }
 }
 

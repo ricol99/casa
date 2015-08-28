@@ -69,6 +69,21 @@
                "writable": true
             }
          ]
+      },
+      {
+         "name": "thing:home-internet-connection",
+         "displayName": "Home Internet Connection",
+         "props": [
+            {
+               "name": "ACTIVE",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "invertingpropertybinder:home-casas",
+                  "target": "debounceactivator:debounced-home-casas"
+               }
+            }
+         ]
       }
    ],
    "transforms" : [],
@@ -87,10 +102,6 @@
          "threshold": 60
       },
       {
-         "name": "inverteractivator:debounced-home-internet-connection",
-         "source": "debounceactivator:debounced-home-casas"
-      },
-      {
          "name": "debounceactivator:debounced-casa-alarm",
          "source": "casa:alarm",
          "threshold": 60
@@ -104,7 +115,7 @@
          "name": "andactivator:home-internet-connection-armed",
          "sources": [
             {
-               "source": "inverteractivator:debounced-home-internet-connection"
+               "source": "thing:home-internet-connection"
             },
             {
                "source": "alarm:home",
@@ -190,7 +201,7 @@
          "activeMessagePriority": 1,
          "inactiveMessage": "Internet connection to home restored",
          "inactiveMessagePriority": 0,
-         "source": "inverteractivator:debounced-home-internet-connection",
+         "source": "thing:home-internet-connection",
          "target": "usergroup:admins"
       },
       {
