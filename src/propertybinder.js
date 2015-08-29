@@ -59,6 +59,10 @@ PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
    this.owner.updateProperty(this.propertyName, _propValue, _data);
 }
 
+PropertyBinder.prototype.goInvalid = function(_data) {
+   this.owner.goInvalid(this.propertyName, _data);
+}
+
 // Override this to actually update what ever the property is bound to
 PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    _callback(false);
@@ -72,6 +76,7 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
    this.binderEnabled = false;
+   this.goInvalid(_data);
 }
 
 // Methods to override

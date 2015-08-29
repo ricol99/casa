@@ -9,14 +9,14 @@ function SourceMergePropertyBinder(_config, _owner) {
    var that = this;
 }
 
-util.inherits(SourceMergePropertBinder, PropertyBinder);
+util.inherits(SourceMergePropertyBinder, PropertyBinder);
 
-SourceMergePropertBinder.prototype.oneSourcePropertyChanged = function(_sourceListener, _sourceAttributes, _data) {
+SourceMergePropertyBinder.prototype.oneSourcePropertyChanged = function(_sourceListener, _sourceAttributes, _data) {
    console.log(this.name + ': Input source ' + _data.sourceName + ' has chnaged property ' + _data.propertyName + ' to ' + _data.propertyValue + '!');
    this.processSourcePropertyChange(_sourceListener, _sourceAttributes, _data);
 }
 
-SourceMergePropertBinder.prototype.findHighestPrioritySource = function(_outputActive) {
+SourceMergePropertyBinder.prototype.findHighestPrioritySource = function(_outputActive) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
@@ -36,7 +36,7 @@ SourceMergePropertBinder.prototype.findHighestPrioritySource = function(_outputA
    return highestPrioritySource;
 }
 
-SourceMergePropertBinder.prototype.processSourcePropertyChange = function(_sourceListener, _sourceAttributes, _data) {
+SourceMergePropertyBinder.prototype.processSourcePropertyChange = function(_sourceListener, _sourceAttributes, _data) {
    var outputShouldGoActive = this.checkActivate();
    var highestPrioritySource = this.findHighestPrioritySource(outputShouldGoActive);
 
@@ -77,4 +77,4 @@ SourceMergePropertyBinder.prototype.checkActivate = function() {
    return false;
 }
 
-module.exports = exports = LogicActivator;
+module.exports = exports = SourceMergePropertyBinder;

@@ -21,7 +21,6 @@ function Source(_config) {
             var PropertyBinder = casaSys.cleverRequire(_config.props[i].binder.name);
 
             if (PropertyBinder) {
-               _config.props[i].binder.source = this.name;
                _config.props[i].binder.propertyName = _config.props[i].name;
                _config.props[i].binder.writable = (_config.props[i].writeable) ? _config.props[i].writeable : true;
                this.propBinders[_config.props[i].name] = new PropertyBinder(_config.props[i].binder, this);
@@ -46,6 +45,16 @@ function Source(_config) {
 }
 
 util.inherits(Source, events.EventEmitter);
+
+Source.prototype.isPropertyEnabled = function(_property) {
+
+   if (this.propBinders[_property]) {
+      return this.propBinders[_property].binderEnabled;
+   }
+   else {
+      return true;
+   }
+}
 
 Source.prototype.getProperty = function(_property) {
    return this.props[_property];
@@ -167,13 +176,14 @@ Source.prototype.goInactive = function(_sourceData) {
    this.updateProperty('ACTIVE', false, sendData);
 }
 
-Source.prototype.goInvalid = function(_sourceData) {
+Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.name + ": Going invalid! Previously active state=" + this.props['ACTIVE']);
 
    var sendData = _sourceData;
    sendData.sourceName = this.name;
    sendData.oldState = this.props['ACTIVE'];
    this.props['ACTIVE'] = false;
+   sendData.propertyName = _propName;
    console.log(this.name + ": Emitting invalid! send data=", sendData);
    this.emit('invalid', sendData);
 }

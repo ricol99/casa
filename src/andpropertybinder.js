@@ -11,7 +11,7 @@ function AndPropertyBinder(_config, _owner) {
 
 util.inherits(AndPropertyBinder, SourceMergePropertyBinder);
 
-AndActivator.prototype.checkActivate = function() {
+AndPropertyBinder.prototype.checkActivate = function() {
    // all inputs active
    for (var prop in this.multiSourceListener.sourceAttributes) {
 

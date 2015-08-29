@@ -80,7 +80,49 @@
                "writable": false,
                "binder": {
                   "name": "invertingpropertybinder:home-casas",
-                  "target": "debounceactivator:debounced-home-casas"
+                  "source": "thing:home-internet-connection",
+                  "sourceProperty": "debounced-home-casas"
+               }
+            },
+            {
+               "name": "home-casas",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:home-casas",
+                  "sources": [
+                     "casa:alarm",
+                     "casa:cctv",
+                     "casa:light"
+                  ]
+               }
+            },
+            {
+               "name": "debounced-home-casas",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "debouncingpropertybinder:home-casas",
+                  "source": "thing:home-internet-connection",
+                  "sourceProperty": "home-casas",
+                  "threshold": 60
+               }
+            },
+            {
+               "name": "home-internet-while-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "andpropertybinder:home-internet-while-armed",
+                  "sources": [
+                     {
+                        "source": "thing:home-internet-connection"
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "alarm-fully-armed"
+                     }
+                  ]
                }
             }
          ]
@@ -88,19 +130,6 @@
    ],
    "transforms" : [],
    "activators": [
-      {
-         "name": "oractivator:home-casas",
-         "sources": [
-            "casa:alarm",
-            "casa:cctv",
-            "casa:light"
-         ]
-      },
-      {
-         "name": "debounceactivator:debounced-home-casas",
-         "source": "oractivator:home-casas",
-         "threshold": 60
-      },
       {
          "name": "debounceactivator:debounced-casa-alarm",
          "source": "casa:alarm",
@@ -110,18 +139,6 @@
          "name": "debounceactivator:debounced-casa-cctv",
          "source": "casa:cctv",
          "threshold": 60
-      },
-      {
-         "name": "andactivator:home-internet-connection-armed",
-         "sources": [
-            {
-               "source": "thing:home-internet-connection"
-            },
-            {
-               "source": "alarm:home",
-               "sourceProperty": "alarm-fully-armed"
-            }
-         ]
       }
    ],
    "actions": [
@@ -197,10 +214,10 @@
       },
       {
          "name": "pushoveraction:internet-connection",
-         "activeMessage": "Internet connection to home has been lost!",
-         "activeMessagePriority": 1,
-         "inactiveMessage": "Internet connection to home restored",
-         "inactiveMessagePriority": 0,
+         "activeMessage": "Internet connection to home restored",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "Internet connection to home has been lost!",
+         "inactiveMessagePriority": 1,
          "source": "thing:home-internet-connection",
          "target": "usergroup:admins"
       },

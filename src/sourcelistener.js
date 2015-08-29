@@ -30,7 +30,7 @@ function SourceListener(_config, _owner) {
    this.sourceListenerEnabled = false;
 
    if (this.establishListeners()) {
-      this.owner.sourceIsValid({ sourceName: this.sourceName });
+      this.owner.sourceIsValid({ sourceName: this.sourceName, propertyName: this.property });
    }
 
    this.casa.addSourceListener(this);
@@ -51,7 +51,9 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
-   this.sourceListenerEnabled = (this.source != null && this.source.sourceEnabled);
+   if (this.source != undefined) {
+      this.sourceListenerEnabled = (this.source == undefined) ? false : this.source.isPropertyEnabled();
+   }
 
    if (this.sourceListenerEnabled) {
       this.source.on('property-changed', this.propertyChangedCallback);
@@ -69,21 +71,23 @@ SourceListener.prototype.refreshSources = function() {
       console.log(this.name + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
-         this.owner.sourceIsValid({ sourceName: this.sourceName });
+         this.owner.sourceIsValid({ sourceName: this.sourceName, propertyName: this.property });
       }
    }
    return ret;
 }
 
-SourceListener.prototype.internalSourceIsInvalid = function() {
+SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
-   this.sourceListenerEnabled = false;
+   if (_data.propertyName == this.property) {
+      this.sourceListenerEnabled = false;
 
-   this.source.removeListener('property-changed', this.propertyChangedCallback);
-   this.source.removeListener('invalid', this.invalidCallback);
+      this.source.removeListener('property-changed', this.propertyChangedCallback);
+      this.source.removeListener('invalid', this.invalidCallback);
 
-   this.owner.sourceIsInvalid({ sourceName: this.sourceName });
+      this.owner.sourceIsInvalid({ sourceName: this.sourceName, propertyName: this.property });
+   }
 }
 
 
@@ -104,8 +108,9 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
             this.owner.sourceIsInactive(_data);
          }
 
-         this.owner.sourcePropertyChanged(_data);
       }
+
+      this.owner.sourcePropertyChanged(_data);
    }
 }
 

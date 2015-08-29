@@ -23,7 +23,7 @@ util.inherits(MultiListeningSource, Source);
 
 MultiListeningSource.prototype.sourceIsInvalid = function(_data) {
    this.sourceEnabled = false;
-   this.goInvalid(_data);
+   this.goInvalid('ACTIVE', _data);
 }
 
 MultiListeningSource.prototype.sourceIsValid = function(_data) {

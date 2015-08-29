@@ -36,7 +36,7 @@ ListeningSource.prototype.sourceIsInvalid = function(_data) {
    this.sourceEnabled = false;
    this.source = null;
 
-   this.goInvalid({ sourceName: this.name });
+   this.goInvalid('ACTIVE', { sourceName: this.name });
 }
 
 ListeningSource.prototype.sourceIsActive = function(_data) {

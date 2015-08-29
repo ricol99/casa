@@ -33,6 +33,10 @@ PeerSource.prototype.setInactive = function(_data, _callback) {
    this.peerCasa.setSourceInactive(this, _data, _callback);
 }
 
+PeerSource.prototype.isPropertyEnabled = function(_property) {
+   return true;
+}
+
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set source property');
    this.peerCasa.setSourceProperty(this, _propName, _propValue, _data, _callback);
@@ -44,14 +48,16 @@ PeerSource.prototype.getProperty = function(_propName) {
 
 PeerSource.prototype.coldStart = function() {
 
-   for(var prop in this.props) {
+   for (var prop in this.props) {
 
-      var sendData = {};
-      sendData.sourceName = this.name;
-      sendData.propertyName = prop;
-      sendData.propertyValue = this.props[prop];
-      sendData.coldStart = true;
-      this.emit('property-changed', sendData);
+      if (this.props.hasOwnProperty(prop)) {
+         var sendData = {};
+         sendData.sourceName = this.name;
+         sendData.propertyName = prop;
+         sendData.propertyValue = this.props[prop];
+         sendData.coldStart = true;
+         this.emit('property-changed', sendData);
+      }
    }
 }
 
@@ -61,7 +67,13 @@ PeerSource.prototype.isActive = function(_callback) {
 
 PeerSource.prototype.invalidateSource = function() {
    this.sourceEnabled = false;
-   this.emit('invalid', { sourceName: this.name });
+
+   for(var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop)) {
+         this.emit('invalid', { sourceName: this.name, propertyName: this.props[prop] });
+      }
+   }
 }
 
 module.exports = exports = PeerSource;
