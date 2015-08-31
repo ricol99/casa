@@ -125,8 +125,10 @@
                "writable": false,
                "binder" : {
                   "name": "latchingpropertybinder:lounge-movement",
-                  "source": "alarm:home",
-                  "sourceProperty": "lounge-pir",
+                  "target": "alarm:home",
+                  "targetProperty": "lounge-pir",
+                  "triggerCondition": "==",
+                  "triggerValue": true,
                   "minOutputTime": 180
                }
             },

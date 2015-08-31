@@ -64,10 +64,13 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
 
+   console.log('==============DDDDDDD');
    if (this.target && _data.sourceName == this.target.name) {
+   console.log('==============EEEEEEE');
 
       if (this.targetConfig.sourceProperty == _data.propertyName) {
-         this.targetPropertyChanged(_data);
+   console.log('==============FFFFFFF');
+         this.targetPropertyChanged(_data.propertyValue, _data);
       }
    }
 }

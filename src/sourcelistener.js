@@ -93,14 +93,17 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
       if (this.triggerCondition) {
+         console.log("================AAAAA");
          var a = _data.propertyValue;
          var b = this.triggerValue;
          var evalStr = "a " + this.triggerCondition + " b";
 
          if (eval(evalStr)) {
+         console.log("================BBBBB");
             this.owner.sourceIsActive(_data);
          }
          else {
+         console.log("================CCCCC");
             this.owner.sourceIsInactive(_data);
          }
 

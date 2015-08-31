@@ -15,16 +15,16 @@ function LatchingPropertyBinder(_config, _source) {
 
 util.inherits(LatchingPropertyBinder, PropertyBinder);
 
-PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-
+LatchingPropertyBinder.prototype.targetPropertyChanged = function(_propValue, _data) {
+   console.log('==================HHHHHH');
    if (_propValue) {
-      console.log(this.name + ': source ' + _data.sourceName + ' active!');
+      console.log(this.name + ': target ' + _data.sourceName + ' active!');
    
       this.restartTimer();
       this.updatePropertyAfterRead(true, _data);
    }
    else {
-      console.log(this.name + ': source ' + _data.sourceName + ' inactive!');
+      console.log(this.name + ': target ' + _data.sourceName + ' inactive!');
 
       if (this.myPropertyValue()) {
 

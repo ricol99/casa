@@ -43,7 +43,7 @@ GPIOPropertyBinder.prototype.Ready = function() {
       if (newValue != that.value) {
          console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
          that.value = newValue;
-         that.updatePropertyAfterRead(that.triggerLow ? (newValue == 1 ? false : true) : newValue == 1, { sourceName: this.sourceName });
+         that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.sourceName });
       }
    });
 }
