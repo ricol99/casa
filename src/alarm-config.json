@@ -116,6 +116,36 @@
          ]
       },
       {
+         "name": "room:kitchen",
+         "displayName": "Kitchen / Diner Room",
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "latchingpropertybinder:kitchen-movement",
+                  "source": "alarm:home",
+                  "sourceProperty": "kitchen-pir",
+                  "triggerCondition": "==",
+                  "triggerValue": true,
+                  "minOutputTime": 20
+               }
+            },
+            {
+               "name": "kitchen-downlights-main-1",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:kitchen-downlights-main-1",
+                  "source": "lightwaverflink:home",
+                  "roomID": 6,
+                  "deviceID": 1
+               }
+            }
+         ]
+      },
+      {
          "name": "room:lounge",
          "displayName": "Lounge Room",
          "props": [
@@ -365,6 +395,15 @@
          "source": "oractivator:lounge-lights-evening",
          "target": "room:lounge",
          "targetProperty": "room-light-level"
+      },
+      {
+         "name": "setpropertyaction:update-kitchen-light-level",
+         "source": "room:kitchen",
+         "sourceProperty": "movement",
+         "target": "room:kitchen",
+         "targetProperty": "kitchen-downlights-main-1",
+         "targetActiveValue": 50,
+         "targetInactiveValue": 0
       },
       {
          "name": "spycameraaction:lounge",

@@ -6,47 +6,60 @@ var CasaSystem = require('./casasystem');
 function SetPropertyAction(_config) {
 
    this.targetProperty = _config.targetProperty;
+   this.targetActiveValue = (_config.targetActiveValue) ? _config.targetActiveValue : null;
+   this.targetInactiveValue = (_config.targetInactiveValue) ? _config.targetInactiveValue : null;
+   this.tempTargetValue;
 
    Action.call(this, _config);
 
    var that = this;
 
+   function callback(_result) {
+
+      if (_result) {
+         console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + this.tempTargetValue);
+      }
+      else {
+         console.log(that.name + ': Failed to set property ' + that.targetProperty + " of " + that.target.name + ' to ' + this.tempTargetValue);
+      }
+   }
+
    function activated(_data) {
       console.log(that.name + ': received activated event', _data);
 
-      if (_data.applyProps && _data.applyProps.hasOwnProperty(that.targetProperty)) {
-         var targetValue = _data.applyProps[that.targetProperty];
-         console.log(that.name + ': Going active. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + targetValue);
-
-         that.target.setProperty(that.targetProperty, targetValue, _data, function(result) {
-
-            if (result) {
-               console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
-            }
-            else {
-               console.log(that.name + ': Failed to set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
-            }
-         });
+      if (that.targetActiveValue != null) {
+         that.tempTargetValue = that.targetActiveValue;
+         that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
       }
+      else if (_data.applyProps && _data.applyProps.hasOwnProperty(that.targetProperty)) {
+         that.tempTargetValue = _data.applyProps[that.targetProperty];
+      }
+      else {
+         console.log(this.name + ": Unable to set property as no value defined and no apply prop found!");
+         return;
+      }
+
+      console.log(that.name + ': Going active. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + this.tempTargetValue);
+      that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
    }
 
    function deactivated(_data) {
       console.log(that.name + ': received deactivated event', _data);
 
-      if (_data.applyProps && _data.applyProps.hasOwnProperty(that.targetProperty)) {
-         var targetValue = _data.applyProps[that.targetProperty];
-         console.log(that.name + ': Going inactive. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + targetValue);
-
-         that.target.setProperty(that.targetProperty, targetValue, _data, function(result) {
-
-            if (result) {
-               console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
-            }
-            else {
-               console.log(that.name + ': Failed to set property ' + that.targetProperty + " of " + that.target.name + ' to ' + targetValue);
-            }
-         });
+      if (that.targetInactiveValue != null) {
+         that.tempTargetValue = that.targetInactiveValue;
+         that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
       }
+      else if (_data.applyProps && _data.applyProps.hasOwnProperty(that.targetProperty)) {
+         that.tempTargetValue = _data.applyProps[that.targetProperty];
+      }
+      else {
+         console.log(this.name + ": Unable to set property as no value defined and no apply prop found!");
+         return;
+      }
+
+      console.log(that.name + ': Going inactive. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + this.tempTargetValue);
+      that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
    }
 
    this.on('activated', function (_data) {
