@@ -1,26 +1,22 @@
 var util = require('util');
-var MultiListeningSource = require('./multilisteningsource');
+var PropertyBinder = require('./propertybinder');
 
-function LogicActivator(_config) {
+function SourceMergePropertyBinder(_config, _owner) {
 
-   MultiListeningSource.call(this, _config);
+   _config.allowMultipleSources = true;
+   PropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(LogicActivator, MultiListeningSource);
+util.inherits(SourceMergePropertyBinder, PropertyBinder);
 
-LogicActivator.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
-   console.log(this.name + ': Input source ' + _data.sourceName + ' active!');
-   this.emitIfNecessary(_sourceListener, _sourceAttributes);
+SourceMergePropertyBinder.prototype.oneSourcePropertyChanged = function(_sourceListener, _sourceAttributes, _data) {
+   console.log(this.name + ': Input source ' + _data.sourceName + ' has chnaged property ' + _data.propertyName + ' to ' + _data.propertyValue + '!');
+   this.processSourcePropertyChange(_sourceListener, _sourceAttributes, _data);
 }
 
-LogicActivator.prototype.oneSourceIsInactive = function(_sourceListener, _sourceAttributes, _data) {
-   console.log(this.name + ' : Input source ' + _data.sourceName + ' inactive!');
-   this.emitIfNecessary(_sourceListener, _sourceAttributes);
-}
-
-LogicActivator.prototype.findHighestPrioritySource = function(_outputActive) {
+SourceMergePropertyBinder.prototype.findHighestPrioritySource = function(_outputActive) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
@@ -40,7 +36,7 @@ LogicActivator.prototype.findHighestPrioritySource = function(_outputActive) {
    return highestPrioritySource;
 }
 
-LogicActivator.prototype.emitIfNecessary = function(_sourceListener, _sourceAttributes) {
+SourceMergePropertyBinder.prototype.processSourcePropertyChange = function(_sourceListener, _sourceAttributes, _data) {
    var outputShouldGoActive = this.checkActivate();
    var highestPrioritySource = this.findHighestPrioritySource(outputShouldGoActive);
 
@@ -49,17 +45,17 @@ LogicActivator.prototype.emitIfNecessary = function(_sourceListener, _sourceAttr
       highestPrioritySource = _sourceAttributes;
    }
 
-   if (this.isActive()) {
+   if (this.myPropertyValue()) {
 
       if (outputShouldGoActive) {
 
          // Already active so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.goActive(highestPrioritySource.activeData);
+            this.updatePropertyAfterRead(true, highestPrioritySource.activeData);
          }
       }
       else {
-         this.goInactive(highestPrioritySource.inactiveData);
+         this.updatePropertyAfterRead(false, highestPrioritySource.inactiveData);
       }
    }
    else {
@@ -67,13 +63,18 @@ LogicActivator.prototype.emitIfNecessary = function(_sourceListener, _sourceAttr
 
          // Already inactive so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.goInactive(highestPrioritySource.inactiveData);
+            this.updatePropertyAfterRead(false, highestPrioritySource.inactiveData);
          }
       }
       else {
-         this.goActive(highestPrioritySource.activeData);
+         this.updatePropertyAfterRead(true, highestPrioritySource.activeData);
       }
    }
 }
 
-module.exports = exports = LogicActivator;
+// Override this with required logic behaviour
+SourceMergePropertyBinder.prototype.checkActivate = function() {
+   return false;
+}
+
+module.exports = exports = SourceMergePropertyBinder;

@@ -1,36 +1,69 @@
 var util = require('util');
+var MultiSourceListener = require('./multisourcelistener');
 var SourceListener = require('./sourcelistener');
 
-function PropertyBinder(_config, _source) {
+function PropertyBinder(_config, _owner) {
    this.name = _config.name;
    this.propertyName = _config.propertyName;
-   this.writeable = _config.writeable;
-   this.sourceName = _source.name;
-   this.source = _source;
+   this.ownerName = _owner.name;
+   this.writeable = (_config.writeable) ? _config.writeable : true;
+   this.owner = _owner;
+   this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : false;
+   this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : true;
+   this.allowMultipleSources = (_config.allowMultipleSources) ? _config.allowMultipleSources : false;
+
+   this.binderEnabled = false;
 
    var that = this;
 
-   if (_config.target) {
-      this.targetConfig = { source: _config.target, sourceProperty: _config.targetProperty,
-                            triggerCondition: _config.triggerCondition, triggerValue: _config.triggerValue };
+   this.sourceName = _config.source;
 
-      this.targetListener = new SourceListener(this.targetConfig, this);
-      this.target = this.targetListener.source;
-      this.targetEnabled = (this.target != null);
+   if (this.allowMultipleSources && _config.sources) {
+      console.log(this.name+': =============BBBB');
+
+      if (this.captiveProperty) {
+         // Don't allow the main property to be set from outside as we have mulitple sources we
+         // are listening to and the property is captivated by these sources
+      console.log(this.name+': =============CCCC');
+         this.writeable = false;
+      }
+
+      this.binderEnabled = false;
+      this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: _config.sources,
+                                                           allInputsRequiredForValidity: this.allSourcesRequiredForValidity }, this);
+   }
+   else if (_config.source) {
+
+      if (this.captiveProperty) {
+         // Don't allow the main property to be set from outside as we have a source we
+         // are listening to and the property is captivated by that source
+         this.writeable = false;
+      }
+      console.log(this.name+': =============AAAA');
+
+      this.binderEnabled = false;
+      this.sourceListener = new SourceListener(_config, this);
    }
    else {
-      this.targetEnabled = false;
-      this.target = null;
+      this.binderEnabled = true;
+      this.mulitSourceListener = null;
+      this.sourceListener = null;
    }
+
+   var that = this;
 }
 
 // INTERNAL METHODS
 PropertyBinder.prototype.myPropertyValue = function() {
-   return this.source.props[this.propertyName];
+   return this.owner.props[this.propertyName];
 }
 
 PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
-   this.source.updateProperty(this.propertyName, _propValue, _data);
+   this.owner.updateProperty(this.propertyName, _propValue, _data);
+}
+
+PropertyBinder.prototype.goInvalid = function(_data) {
+   this.owner.goInvalid(this.propertyName, _data);
 }
 
 // Override this to actually update what ever the property is bound to
@@ -39,19 +72,27 @@ PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
 }
 
 PropertyBinder.prototype.sourceIsValid = function() {
-   this.targetEnabled = true;
-
-   // Cope with constructor calling back so sourceListener is not yet defined!
-   if (this.targetListener) {
-     this.target = this.targetListener.source;
-   }
+   this.binderEnabled = true;
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
-   this.targetEnabled = false;
-   this.target = null;
+   this.binderEnabled = false;
+   this.goInvalid(_data);
+}
+
+// Methods to override
+PropertyBinder.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.oneSourceIsInactive = function(sourceListener, _sourceAttributes, _data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.oneSourcePropertyChanged = function(sourceListener, _sourceAttributes, _data) {
+   // DO NOTHING BY DEFAULT
 }
 
 PropertyBinder.prototype.sourceIsActive = function(_data) {
@@ -63,19 +104,13 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
-
-   console.log('==============DDDDDDD');
-   if (this.target && _data.sourceName == this.target.name) {
-   console.log('==============EEEEEEE');
-
-      if (this.targetConfig.sourceProperty == _data.propertyName) {
-   console.log('==============FFFFFFF');
-         this.targetPropertyChanged(_data.propertyValue, _data);
-      }
-   }
+   // Copy functionality by default
+   this.updatePropertyAfterRead(_data.propertyValue, _data);
 }
 
-PropertyBinder.prototype.targetPropertyChanged = function(_data) {
+// Override this if you listen to a source that is not "Source".
+// If you listen to a "Source" you will be fired by that Source cold starting
+PropertyBinder.prototype.coldStart = function(_data) {
    // DO NOTHING BY DEFAULT
 }
 

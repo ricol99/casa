@@ -6,7 +6,8 @@ function Source(_config) {
    this.name = _config.name;
    this.sourceEnabled = true;
    this.props = { ACTIVE: false };
-   this.propAttributes = {};
+   this.propBinders = { ACTIVE: null };
+   this.setMaxListeners(50);
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
@@ -16,16 +17,14 @@ function Source(_config) {
 
       for (var i = 0; i < propLen; ++i) {
          this.props[_config.props[i].name] = _config.props[i].initialValue;
-         this.propAttributes[_config.props[i].name] = { writeable: (_config.props[i].writeable) ? _config.props[i].writeable : true };
 
          if (_config.props[i].binder) {
             var PropertyBinder = casaSys.cleverRequire(_config.props[i].binder.name);
 
             if (PropertyBinder) {
-               _config.props[i].binder.source = this.name;
                _config.props[i].binder.propertyName = _config.props[i].name;
-               _config.props[i].binder.writable = this.propAttributes[_config.props[i].name].writable;
-               this.propAttributes[_config.props[i].name].binder = new PropertyBinder(_config.props[i].binder, this);
+               _config.props[i].binder.writable = (_config.props[i].writeable) ? _config.props[i].writeable : true;
+               this.propBinders[_config.props[i].name] = new PropertyBinder(_config.props[i].binder, this);
             }
          }
       }
@@ -48,6 +47,16 @@ function Source(_config) {
 
 util.inherits(Source, events.EventEmitter);
 
+Source.prototype.isPropertyEnabled = function(_property) {
+
+   if (this.propBinders[_property]) {
+      return this.propBinders[_property].binderEnabled;
+   }
+   else {
+      return true;
+   }
+}
+
 Source.prototype.getProperty = function(_property) {
    return this.props[_property];
 }
@@ -55,25 +64,25 @@ Source.prototype.getProperty = function(_property) {
 Source.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
-   if (this.propAttributes[_propName] && this.propAttributes[_propName].writeable) {
+   if (this.props[_propName] != _propValue) {
 
-      if (this.props[_propName] != _propValue) {
+      if (this.propBinders[_propName]) {
 
-         if (this.propAttributes[_propName].binder) {
-            this.propAttributes[_propName].binder.setProperty(_propValue, _data, _callback);
+         if (this.propBinders[_propName].writeable) {
+            this.propBinders[_propName].setProperty(_propValue, _data, _callback);
          }
          else {
-            this.updateProperty(_propName, _propValue, _data);
-            _callback(true);
+            console.log(this.name + ': Uanble to set property because it is read only!');
+            _callback(false);
          }
       }
       else {
+         this.updateProperty(_propName, _propValue, _data);
          _callback(true);
       }
    }
    else {
-      console.log(this.name + ': Uanble to set property because it is read only!');
-      _callback(false);
+      _callback(true);
    }
 }
 
@@ -168,19 +177,37 @@ Source.prototype.goInactive = function(_sourceData) {
    this.updateProperty('ACTIVE', false, sendData);
 }
 
-Source.prototype.goInvalid = function(_sourceData) {
+Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.name + ": Going invalid! Previously active state=" + this.props['ACTIVE']);
 
    var sendData = _sourceData;
    sendData.sourceName = this.name;
    sendData.oldState = this.props['ACTIVE'];
    this.props['ACTIVE'] = false;
+   sendData.propertyName = _propName;
    console.log(this.name + ": Emitting invalid! send data=", sendData);
    this.emit('invalid', sendData);
 }
 
 Source.prototype.coldStart = function() {
-   // ** DO NOTHING BY DEFAULT - Only Things are cold started
+
+   for(var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop)) {
+
+         if (this.propBinders[prop]) {
+            this.propBinders[prop].coldStart();
+         }
+         else {
+            var sendData = {};
+            sendData.sourceName = this.name;
+            sendData.propertyName = prop;
+            sendData.propertyValue = this.props[prop];
+            sendData.coldStart = true;
+            this.emit('property-changed', sendData);
+         }
+      }
+   }
 }
 
 

@@ -1,17 +1,17 @@
 var util = require('util');
-var events = require('events');
-var LogicActivator = require('./logicactivator');
+var SourceMergePropertyBinder = require('./sourcemergepropertybinder');
 
-function XorActivator(_config) {
+function XorPropertyBinder(_config, _owner) {
 
-   LogicActivator.call(this, _config);
+   _config.allInputsRequiredForValidity = false;
+   SourceMergePropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(XorActivator, LogicActivator);
+util.inherits(XorPropertyBinder, SourceMergePropertyBinder);
 
-XorActivator.prototype.checkActivate = function() {
+XorPropertyBinder.prototype.checkActivate = function() {
    var allInputsActive = true;
    var oneInputActive = false;
 
@@ -29,4 +29,4 @@ XorActivator.prototype.checkActivate = function() {
    return (allInputsActive) ? false : oneInputActive;
 };
 
-module.exports = exports = XorActivator;
+module.exports = exports = XorPropertyBinder;

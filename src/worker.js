@@ -43,7 +43,7 @@ Worker.prototype.sourceIsInvalid = function(_data) {
    this.workerEnabled = false;
    this.source = null;
    this.target = null;
-   this.emit('invalid', { sourceName: this.name });
+   this.emit('invalid', { sourceName: this.name, propertyName: 'ACTIVE' });
 }
 
 Worker.prototype.sourceIsValid = function(_data) {
@@ -58,21 +58,21 @@ Worker.prototype.sourceIsValid = function(_data) {
    }
 }
 
-Worker.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
+Worker.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
 
    if (_data.sourceName == this.sourceName) {
       this.sourceIsActive(_data);
    }
 }
 
-Worker.prototype.oneSourceIsInactive = function(_data, sourceListener, _sourceAttributes) {
+Worker.prototype.oneSourceIsInactive = function(sourceListener, _sourceAttributes, _data) {
 
    if (_data.sourceName == this.sourceName) {
       this.sourceIsInactive(_data);
    }
 }
 
-Worker.prototype.oneSourcePropertyChanged = function(_data, sourceListener, _sourceAttributes) {
+Worker.prototype.oneSourcePropertyChanged = function(sourceListener, _sourceAttributes, _data) {
 
    if (_data.sourceName == this.sourceName) {
       this.sourcePropertyChanged(_data);

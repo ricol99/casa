@@ -2,9 +2,9 @@ var util = require('util');
 var PropertyBinder = require('./propertybinder');
 //var i2c = require('i2c');
 
-function I2CPropertyBinder(_config, _source) {
+function I2CPropertyBinder(_config, _owner) {
 
-   PropertyBinder.call(this, _config, _source);
+   PropertyBinder.call(this, _config, _owner);
 
    this.address = _config.address;
    //this.wire = new i2c(address, { device: '/dev/i2c-1' }); // point to your i2c address, debug provides REPL interface  

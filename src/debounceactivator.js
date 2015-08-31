@@ -34,7 +34,7 @@ DebounceActivator.prototype.sourceIsActive = function(_data) {
             that.timeoutObj = null;
 
             if (!that.source || !that.sourceEnabled) {
-               that.goInvalid({ sourceName: that.name });
+               that.goInvalid('ACTIVE', { sourceName: that.name });
             }
             else if (that.sourceActive) {
                that.goActive(that.storedActiveData);
@@ -71,7 +71,7 @@ DebounceActivator.prototype.sourceIsInactive = function(_data) {
             }
 
             if (!that.sourceEnabled) {
-               that.goInvalid({ sourceName: that.name });
+               that.goInvalid('ACTIVE', { sourceName: that.name });
             }
 
          }, this.threshold*1000);
@@ -93,7 +93,7 @@ DebounceActivator.prototype.sourceIsInvalid = function(_data) {
             that.timeoutObj = null;
 
             if (!that.sourceEnabled) {
-               that.goInvalid({ sourceName: that.name });
+               that.goInvalid('ACTIVE', { sourceName: that.name });
             }
             else if (that.sourceActive) {
                that.goActive(that.storedActiveData);

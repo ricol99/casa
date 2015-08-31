@@ -134,7 +134,7 @@
             },
             {
                "name": "room-light-level",
-               "initialValue": "low",
+               "initialValue": "off",
                "writable": true
             },
             {
@@ -284,7 +284,7 @@
                   "name": "schedulepropertybinder:env-living-area-lights-early",
                   "events": [
                      {
-                        "rule": "30 2 * * *",
+                        "rule": "sunrise:+1800",
                         "propertyValue": false 
                      },
                      {
@@ -317,22 +317,6 @@
    ],
    "transforms" : [],
    "activators": [
-      {
-         "name": "latchingactivator:lounge-movement",
-         "source": "alarm:home",
-         "sourceProperty": "lounge-pir",
-         "minOutputTime": 10,
-         "applyProps": {
-            "active" : {
-               "movement": true,
-               "lounge-centre-light": true 
-            },
-            "inactive" : {
-               "movement": false,
-               "lounge-centre-light": false 
-            }
-         }
-      },
       {
          "name": "propertyactivator:holiday-background-lights",
          "source": "thing:environment",
@@ -378,15 +362,10 @@
    "actions": [
       {
          "name": "setpropertyaction:update-lounge-centre-light",
-         "source": "latchingactivator:lounge-movement",
+         "source": "room:lounge",
+         "sourceProperty": "movement",
          "target": "room:lounge",
          "targetProperty": "lounge-centre-light"
-      },
-      {
-         "name": "setpropertyaction:update-lounge-movement",
-         "source": "latchingactivator:lounge-movement",
-         "target": "room:lounge",
-         "targetProperty": "movement"
       },
       {
          "name": "setpropertyaction:update-lounge-light-level",

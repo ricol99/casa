@@ -169,7 +169,7 @@ PeerCasa.prototype.invalidateSources = function() {
    }
    delete this.remoteCasas;
    this.remoteCasas = [];
-   this.goInvalid({ sourceName: this.name });
+   this.goInvalid('ACTIVE', { sourceName: this.name });
 }
 
 PeerCasa.prototype.getHostname = function() {

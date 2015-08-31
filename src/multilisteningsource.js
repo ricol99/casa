@@ -23,22 +23,22 @@ util.inherits(MultiListeningSource, Source);
 
 MultiListeningSource.prototype.sourceIsInvalid = function(_data) {
    this.sourceEnabled = false;
-   this.goInvalid(_data);
+   this.goInvalid('ACTIVE', _data);
 }
 
 MultiListeningSource.prototype.sourceIsValid = function(_data) {
    this.sourceEnabled = true;
 }
 
-MultiListeningSource.prototype.oneSourceIsActive = function(_data, _sourceListener, _sourceAttributes) {
+MultiListeningSource.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
    // DO NOTHING BY DEFAULT
 }
 
-MultiListeningSource.prototype.oneSourceIsInactive = function(_data, _sourceListener, _sourceAttributes) {
+MultiListeningSource.prototype.oneSourceIsInactive = function(_sourceListener, _sourceAttributes, _data) {
    // DO NOTHING BY DEFAULT
 }
 
-MultiListeningSource.prototype.oneSourcePropertyChanged = function(_data, _sourceListener, _sourceAttributes) {
+MultiListeningSource.prototype.oneSourcePropertyChanged = function(_sourceListener, _sourceAttributes, _data) {
    // DO NOTHING BY DEFAULT
 }
 
