@@ -5,9 +5,12 @@ var CasaSystem = require('./casasystem');
 function SourceListener(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
    this.sourceName = _config.source;
-   this.name = "sourcelistener:" + _owner.name + ":" + _config.source;
    this.casa = this.casaSys.casa;
    this.owner = _owner;
+
+   console.log(this.name+": ======== config.triggerCondition="+_config.triggerCondition);
+   console.log(this.name+": ======== config.triggerValue="+_config.triggerValue);
+   console.log(this.name+": ======== config.sourceProperty="+_config.sourceProperty);
 
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
@@ -27,6 +30,11 @@ function SourceListener(_config, _owner) {
       this.triggerValue = true;
    }
 
+   this.name = "sourcelistener:" + _owner.name + ":" + _config.source + ":" + this.property;
+   console.log(this.name+": ======== this.triggerCondition="+this.triggerCondition);
+   console.log(this.name+": ======== this.triggerValue="+this.triggerValue);
+   console.log(this.name+": ======== this.property="+this.property);
+
    this.sourceListenerEnabled = false;
 
    if (this.establishListeners()) {
@@ -42,6 +50,7 @@ SourceListener.prototype.establishListeners = function() {
    var that = this;
 
    this.propertyChangedCallback = function(_data) {
+      console.log(that.name+": ===================== Processing property change!");
       that.internalSourcePropertyChanged(_data);
    };
 
@@ -51,9 +60,8 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
-   if (this.source != undefined) {
-      this.sourceListenerEnabled = (this.source == undefined) ? false : this.source.isPropertyEnabled();
-   }
+   this.sourceListenerEnabled = (this.source) ? true : false;
+   console.log(this.name+': ============= sourceListenerEnabled='+this.sourceListenerEnabled);
 
    if (this.sourceListenerEnabled) {
       this.source.on('property-changed', this.propertyChangedCallback);
@@ -93,18 +101,24 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
+   console.log(this.name + ": ===========processing source property change, property=" + _data.propertyName);
+
    if (_data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
+      console.log(this.name + ": ======= Trigger Condition " + this.triggerCondition);
 
       if (this.triggerCondition) {
+      console.log(this.name + ": ==================== AAASSSSS");
          var a = _data.propertyValue;
          var b = this.triggerValue;
          var evalStr = "a " + this.triggerCondition + " b";
 
          if (eval(evalStr)) {
+      console.log(this.name + ": ==================== AAATTTTT");
             this.owner.sourceIsActive(_data);
          }
          else {
+      console.log(this.name + ": ==================== AAAUUUUU");
             this.owner.sourceIsInactive(_data);
          }
 

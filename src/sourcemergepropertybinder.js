@@ -3,7 +3,7 @@ var PropertyBinder = require('./propertybinder');
 
 function SourceMergePropertyBinder(_config, _owner) {
 
-   _config.allowMulitpleSources = true;
+   _config.allowMultipleSources = true;
    PropertyBinder.call(this, _config, _owner);
 
    var that = this;

@@ -19,10 +19,12 @@ function PropertyBinder(_config, _owner) {
    this.sourceName = _config.source;
 
    if (this.allowMultipleSources && _config.sources) {
+      console.log(this.name+': =============BBBB');
 
       if (this.captiveProperty) {
          // Don't allow the main property to be set from outside as we have mulitple sources we
          // are listening to and the property is captivated by these sources
+      console.log(this.name+': =============CCCC');
          this.writeable = false;
       }
 
@@ -37,6 +39,7 @@ function PropertyBinder(_config, _owner) {
          // are listening to and the property is captivated by that source
          this.writeable = false;
       }
+      console.log(this.name+': =============AAAA');
 
       this.binderEnabled = false;
       this.sourceListener = new SourceListener(_config, this);
@@ -101,7 +104,8 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
-   // DO NOTHING BY DEFAULT
+   // Copy functionality by default
+   this.updatePropertyAfterRead(_data.propertyValue, _data);
 }
 
 // Override this if you listen to a source that is not "Source".

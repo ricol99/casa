@@ -79,7 +79,7 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "invertingpropertybinder:home-casas",
+                  "name": "propertybinder:home-casas",
                   "source": "thing:home-internet-connection",
                   "sourceProperty": "debounced-home-casas"
                }
@@ -105,7 +105,7 @@
                   "name": "debouncingpropertybinder:home-casas",
                   "source": "thing:home-internet-connection",
                   "sourceProperty": "home-casas",
-                  "threshold": 60
+                  "threshold": 20
                }
             },
             {

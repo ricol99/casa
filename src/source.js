@@ -7,6 +7,7 @@ function Source(_config) {
    this.sourceEnabled = true;
    this.props = { ACTIVE: false };
    this.propBinders = { ACTIVE: null };
+   this.setMaxListeners(50);
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;

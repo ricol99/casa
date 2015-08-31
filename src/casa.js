@@ -258,13 +258,13 @@ Casa.prototype.addSource = function(_source) {
 }
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
+   console.log(this.name + ': Source listener ' + _sourceListener.name + ' added to casa');
    this.sourceListeners[_sourceListener.name] = _sourceListener;
 }
 
 Casa.prototype.addWorker = function(_worker) {
    console.log(this.name + ': Worker '  + _worker.name + ' added to casa ');
    this.workers[_worker.name] = _worker;
-   var that = this;
 }
 
 Casa.prototype.setUber = function(_uber) {

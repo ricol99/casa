@@ -18,7 +18,7 @@ DebouncingPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
    console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _data.propertyValue + '!');
 
-   if (_data.coldStart || this.myProperty() == _data.propertyValue) {
+   if (_data.coldStart || this.myPropertyValue() == _data.propertyValue) {
       this.sourceActive = _data.propertyValue;
       this.updatePropertyAfterRead(_data.propertyValue, _data);
    }
