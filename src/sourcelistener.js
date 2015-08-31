@@ -8,10 +8,6 @@ function SourceListener(_config, _owner) {
    this.casa = this.casaSys.casa;
    this.owner = _owner;
 
-   console.log(this.name+": ======== config.triggerCondition="+_config.triggerCondition);
-   console.log(this.name+": ======== config.triggerValue="+_config.triggerValue);
-   console.log(this.name+": ======== config.sourceProperty="+_config.sourceProperty);
-
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
 
@@ -31,9 +27,6 @@ function SourceListener(_config, _owner) {
    }
 
    this.name = "sourcelistener:" + _owner.name + ":" + _config.source + ":" + this.property;
-   console.log(this.name+": ======== this.triggerCondition="+this.triggerCondition);
-   console.log(this.name+": ======== this.triggerValue="+this.triggerValue);
-   console.log(this.name+": ======== this.property="+this.property);
 
    this.sourceListenerEnabled = false;
 
@@ -50,7 +43,6 @@ SourceListener.prototype.establishListeners = function() {
    var that = this;
 
    this.propertyChangedCallback = function(_data) {
-      console.log(that.name+": ===================== Processing property change!");
       that.internalSourcePropertyChanged(_data);
    };
 
@@ -100,8 +92,6 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
-
-   console.log(this.name + ": ===========processing source property change, property=" + _data.propertyName);
 
    if (_data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);

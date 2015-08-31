@@ -6,9 +6,9 @@ var CasaSystem = require('./casasystem');
 function SetPropertyAction(_config) {
 
    this.targetProperty = _config.targetProperty;
-   this.targetActiveValue = (_config.targetActiveValue) ? _config.targetActiveValue : null;
-   this.targetInactiveValue = (_config.targetInactiveValue) ? _config.targetInactiveValue : null;
-   this.tempTargetValue;
+   this.targetActiveValue = (_config.targetActiveValue == undefined) ? null : _config.targetActiveValue;
+   this.targetInactiveValue = (_config.targetInactiveValue == undefined) ? null : _config.targetInactiveValue;
+   this.tempTargetValue = 0;
 
    Action.call(this, _config);
 
@@ -17,10 +17,10 @@ function SetPropertyAction(_config) {
    function callback(_result) {
 
       if (_result) {
-         console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + this.tempTargetValue);
+         console.log(that.name + ': Set property ' + that.targetProperty + " of " + that.target.name + ' to ' + that.tempTargetValue);
       }
       else {
-         console.log(that.name + ': Failed to set property ' + that.targetProperty + " of " + that.target.name + ' to ' + this.tempTargetValue);
+         console.log(that.name + ': Failed to set property ' + that.targetProperty + " of " + that.target.name + ' to ' + that.tempTargetValue);
       }
    }
 
@@ -35,11 +35,11 @@ function SetPropertyAction(_config) {
          that.tempTargetValue = _data.applyProps[that.targetProperty];
       }
       else {
-         console.log(this.name + ": Unable to set property as no value defined and no apply prop found!");
+         console.log(that.name + ": Unable to set property as no value defined and no apply prop found!");
          return;
       }
 
-      console.log(that.name + ': Going active. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + this.tempTargetValue);
+      console.log(that.name + ': Going active. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + that.tempTargetValue);
       that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
    }
 
@@ -54,11 +54,11 @@ function SetPropertyAction(_config) {
          that.tempTargetValue = _data.applyProps[that.targetProperty];
       }
       else {
-         console.log(this.name + ": Unable to set property as no value defined and no apply prop found!");
+         console.log(that.name + ": Unable to set property as no value defined and no apply prop found!");
          return;
       }
 
-      console.log(that.name + ': Going inactive. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + this.tempTargetValue);
+      console.log(that.name + ': Going inactive. Attempting to set property ' + that.targetProperty + ' of ' + that.target.name + ' to ' + that.tempTargetValue);
       that.target.setProperty(that.targetProperty, that.tempTargetValue, _data, callback);
    }
 

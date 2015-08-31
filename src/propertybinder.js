@@ -43,6 +43,7 @@ function PropertyBinder(_config, _owner) {
 
       this.binderEnabled = false;
       this.sourceListener = new SourceListener(_config, this);
+      this.source = this.sourceListener.source;
    }
    else {
       this.binderEnabled = true;
@@ -73,12 +74,14 @@ PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
 
 PropertyBinder.prototype.sourceIsValid = function() {
    this.binderEnabled = true;
+   this.source = (this.sourceListener) ? this.sourceListener.source : null;
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
    this.binderEnabled = false;
+   this.source = null;
    this.goInvalid(_data);
 }
 

@@ -8,6 +8,7 @@ function LightwaveRFPropertyBinder(_config, _owner) {
    this.deviceID = _config.deviceID;
 
    PropertyBinder.call(this, _config, _owner);
+   this.writeable = true;
 
    this.cStart = true;
 
@@ -24,23 +25,30 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
          console.log(that.name + ': Error turning room off ' + _error.message);
          _callback(false);
       } else {
-         this.updatePropertyAfterRead(_propValue, _data);
+         that.updatePropertyAfterRead(_propValue, _data);
          _callback(true);
       }
    };
 
+   console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
+
    if (this.source) {
+      console.log("====================== ASAAAASSDKJH");
 
       if (typeof _propValue == "boolean") {
+      console.log("====================== BBBBBBSSDKJH");
 
          if (_propValue) {
+      console.log("====================== CCCCCCCSDKJH");
             this.source.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
          }
          else {
+      console.log("====================== DDDDDDDSDKJH");
             this.source.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
          }
       }
       else {
+      console.log("====================== EEEEEEEEDKJH");
          this.source.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
       }
    }

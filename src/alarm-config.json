@@ -400,6 +400,8 @@
          "name": "setpropertyaction:update-kitchen-light-level",
          "source": "room:kitchen",
          "sourceProperty": "movement",
+         "triggerCondition": "==",
+         "triggerValue": true,
          "target": "room:kitchen",
          "targetProperty": "kitchen-downlights-main-1",
          "targetActiveValue": 50,

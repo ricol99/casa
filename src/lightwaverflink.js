@@ -44,7 +44,7 @@ LightwaveRfLink.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel,
    var that = this;
 
    this.addToQueue(function(_params, _callback) {
-      console.log(that.name + ': turning device on with dim level, roomId: ' + _params.roomId + ', deviceId: ' + _params.deviceId + ', dimLevel: ' + _params.dimLevel);
+      console.log(that.name + ': turning device on with dim level, roomId: ' + _params.roomId + ', _deviceId: ' + _params.deviceId + ', dimLevel: ' + _params.dimLevel);
       that.lightwaveRf.setDeviceDim(_params.roomId, _params.deviceId, _params.dimLevel, _callback);
    }, { roomId: _roomId, deviceId: _deviceId, dimLevel: _dimLevel } , _callback);
 
