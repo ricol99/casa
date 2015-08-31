@@ -1,6 +1,14 @@
 var util = require('util');
-var Gpio = require('gpio');
+var Gpio = require('onoff').Gpio;
 var PropertyBinder = require('./propertybinder');
+
+var Gpio = require('onoff').Gpio,
+  led = new Gpio(14, 'out'),
+  button = new Gpio(4, 'in', 'both');
+ 
+button.watch(function(err, value) {
+  led.writeSync(value);
+});
 
 function GPIOPropertyBinder(_config, _owner) {
 
@@ -10,7 +18,7 @@ function GPIOPropertyBinder(_config, _owner) {
    PropertyBinder.call(this, _config, _owner);
 
    this.ready = false;
-   this. direction = (this.writable) ? 'out' : 'in';
+   this.direction = (this.writable) ? 'out' : 'in';
 
    var that = this;
  
@@ -24,17 +32,23 @@ GPIOPropertyBinder.prototype.Ready = function() {
 
    this.gpio.read( function(_err, _value) {
        that.value = _value;
-       this.updatePropertyAfterRead(_value, { sourceName: this.owner.name, coldStart: true });
+       that.updatePropertyAfterRead(_value, { sourceName: this.ownerName, coldStart: true });
    });
 
-   this.gpio.on("change", function (_value) {
-      console.log(that.name + ': Value changed event received on GPIO Pin ' + that.gpioPin + ' to ' + _value);
-      var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+   this.gpio.watch(function (_err, _value) {
 
-      if (newValue != that.value) {
-         console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
-         that.value = newValue;
-         that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.sourceName });
+      if (_err) {
+         console.log(this.name + ": Error from gpio library! Error = " + _err);
+      }
+      else {
+         console.log(that.name + ': Value changed event received on GPIO Pin ' + that.gpioPin + ' to ' + _value);
+         var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+
+         if (newValue != that.value) {
+            console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
+            that.value = newValue;
+            that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.sourceName });
+         }
       }
    });
 }
@@ -47,13 +61,13 @@ GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data, _callback
    var that = this;
 
    if (this.ready && this.writable) {
-      this.gpio.set(_value, function (err) {
-         if (err == _value) {
-            this.updatePropertyAfterRead(_propValue, _data);
-            _callback(true);
+      this.gpio.write(_value, function (err) {
+         if (err) {
+            _callback(false);
          }
          else {
-            _callback(false);
+            this.updatePropertyAfterRead(_propValue, _data);
+            _callback(true);
          }
       });
    }
@@ -62,16 +76,19 @@ GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data, _callback
    }
 }
 
-GPIOPropertyBinder.prototype.coldStart() {
+GPIOPropertyBinder.prototype.coldStart = function() {
    var that = this;
 
-   this.gpio = Gpio.export(this.gpioPin, {
-      direction: this.direction,
-      interval: 100,
-      ready: function() {
-         that.Ready();
-      }
-   });
+   this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
+   this.Ready();
+
+   //this.gpio = Gpio.export(this.gpioPin, {
+      //direction: this.direction,
+      //interval: 100,
+      //ready: function() {
+         //that.Ready();
+      //}
+   //});
 }
 module.exports = exports = GPIOPropertyBinder;
  
