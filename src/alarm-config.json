@@ -132,7 +132,7 @@
             },
             {
                "name": "room-light-level",
-               "initialValue": "low",
+               "initialValue": "off",
                "writable": true
             },
             {
