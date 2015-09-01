@@ -11,6 +11,7 @@ function PropertyBinder(_config, _owner) {
    this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : false;
    this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : true;
    this.allowMultipleSources = (_config.allowMultipleSources) ? _config.allowMultipleSources : false;
+   this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
 
    this.binderEnabled = false;
 
@@ -29,7 +30,7 @@ function PropertyBinder(_config, _owner) {
       }
 
       this.binderEnabled = false;
-      this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: _config.sources,
+      this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: _config.sources, defaultTriggerConditions: this.defaultTriggerConditions,
                                                            allInputsRequiredForValidity: this.allSourcesRequiredForValidity }, this);
    }
    else if (_config.source) {

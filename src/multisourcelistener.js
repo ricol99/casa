@@ -6,6 +6,8 @@ function MultiSourceListener(_config, _owner) {
 
    this.name = _config.name;
    this.allInputsRequiredForValidity = _config.hasOwnProperty('allInputsRequiredForValidity') ? _config.allInputsRequiredForValidity : true;
+   this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
+
    console.log(this.name + ': All inputs for validity = ' + this.allInputsRequiredForValidity);
 
    this.casaSys = CasaSystem.mainInstance();
@@ -20,11 +22,12 @@ function MultiSourceListener(_config, _owner) {
    for (var index = 0; index < _config.sources.length; ++index) {
 
       if (typeof _config.sources[index] == "string") {
-         this.sourceListeners[_config.sources[index]] = new SourceListener({ source: _config.sources[index] }, this);
+         this.sourceListeners[_config.sources[index]] = new SourceListener({ source: _config.sources[index], defaultTriggerConditions: this.defaultTriggerConditions }, this);
          this.sourceAttributes[_config.sources[index]] = { priority: index, active: false };
       }
       else {
          // Assume object
+         _config.sources[index].defaultTriggerConditions = this.defaultTriggerConditions;
          this.sourceListeners[_config.sources[index].source] = new SourceListener(_config.sources[index], this);
          this.sourceAttributes[_config.sources[index].source] = { priority: index, active: false };
       }

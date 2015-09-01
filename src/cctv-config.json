@@ -74,6 +74,17 @@
                      }
                   ]
                }
+            },
+            {
+               "name": "latching-test-prop-2",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "latchingpropertybinder:latching-test-prop-2",
+                  "source": "thing:test-cctv",
+                  "sourceProperty": "test-prop-2",
+                  "minOutputTime": 150
+               }
             }
          ]
       }

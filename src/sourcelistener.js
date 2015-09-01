@@ -7,6 +7,7 @@ function SourceListener(_config, _owner) {
    this.sourceName = _config.source;
    this.casa = this.casaSys.casa;
    this.owner = _owner;
+   this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
 
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
@@ -14,6 +15,10 @@ function SourceListener(_config, _owner) {
       if (_config.triggerCondition) {
          this.triggerCondition = _config.triggerCondition;
          this.triggerValue = _config.triggerValue;
+      }
+      else if (this.defaultTriggerConditions) {
+         this.triggerCondition = "==";
+         this.triggerValue = true;
       }
       else {
          this.triggerCondition = null;

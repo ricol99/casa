@@ -6,6 +6,7 @@ function DebouncingPropertyBinder(_config, _owner) {
    this.threshold = _config.threshold;
    this.timeoutObj = null;
    this.sourceActive = false;
+   _config.defaultTriggerConditions = true;
 
    PropertyBinder.call(this, _config, _owner);
 

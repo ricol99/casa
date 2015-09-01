@@ -4,6 +4,7 @@ var PropertyBinder = require('./propertybinder');
 function LatchingPropertyBinder(_config, _owner) {
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
+   _config.defaultTriggerConditions = true;
 
    PropertyBinder.call(this, _config, _owner);
 
@@ -11,6 +12,7 @@ function LatchingPropertyBinder(_config, _owner) {
    this.latestInactiveData = { sourceName: this.name };
    var that = this;
    this.cStart = true;
+   this.sourceActive = false;
 }
 
 util.inherits(LatchingPropertyBinder, PropertyBinder);
@@ -19,12 +21,14 @@ LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _call
 
    if (_propValue) {
       console.log(this.name + ': target ' + _data.sourceName + ' active!');
+      this.sourceActive = true;
    
       this.restartTimer();
       this.updatePropertyAfterRead(true, _data);
    }
    else {
       console.log(this.name + ': target ' + _data.sourceName + ' inactive!');
+      this.sourceActive = false;
 
       if (this.myPropertyValue()) {
 
@@ -51,7 +55,7 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
    this.minOutputTimeObj = setTimeout(function() {
       that.minOutputTimeObj = null;
 
-      if (!that.myPropertyValue()) {
+      if (!that.sourceActive) {
          that.updatePropertyAfterRead(false, this.latestInactiveData);
       }
    }, this.minOutputTime*1000);

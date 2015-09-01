@@ -2,8 +2,7 @@ var util = require('util');
 var PropertyBinder = require('./propertybinder');
 
 function InvertingPropertyBinder(_config, _owner) {
-
-   this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
+   _config.defaultTriggerConditions = true;
 
    PropertyBinder.call(this, _config, _owner);
 
