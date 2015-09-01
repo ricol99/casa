@@ -26,7 +26,7 @@ function Worker(_config) {
       this.targetName = _config.target;
    }
 
-   this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: configSources, allInputsRequiredForValidity: true }, this);
+   this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: configSources, allInputsRequiredForValidity: true, defaultTriggerConditions: true }, this);
 
    this.source = this.multiSourceListener.sourceListeners[this.sourceName].source;
 

@@ -127,9 +127,7 @@
                   "name": "latchingpropertybinder:kitchen-movement",
                   "source": "alarm:home",
                   "sourceProperty": "kitchen-pir",
-                  "triggerCondition": "==",
-                  "triggerValue": true,
-                  "minOutputTime": 20
+                  "minOutputTime": 60
                }
             },
             {
@@ -141,6 +139,17 @@
                   "source": "lightwaverflink:home",
                   "roomID": 6,
                   "deviceID": 1
+               }
+            },
+            {
+               "name": "kitchen-downlights-main-2",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:kitchen-downlights-main-2",
+                  "source": "lightwaverflink:home",
+                  "roomID": 6,
+                  "deviceID": 2
                }
             }
          ]
@@ -353,10 +362,10 @@
          "sourceProperty": "living-area-lights-normal-times",
          "applyProps": {
             "active" : {
-               "room-light-level": 40 
+               "room-light-level": "low" 
             },
             "inactive" : {
-               "room-light-level": 0
+               "room-light-level": "off"
             }
          }
       },
@@ -374,10 +383,10 @@
          ],
          "applyProps": {
             "active" : {
-               "room-light-level": 60 
+               "room-light-level": "normal" 
             },
             "inactive" : {
-               "room-light-level": 0 
+               "room-light-level": "off" 
             }
          }
       },
@@ -400,12 +409,19 @@
          "name": "setpropertyaction:update-kitchen-light-level",
          "source": "room:kitchen",
          "sourceProperty": "movement",
-         "triggerCondition": "==",
-         "triggerValue": true,
          "target": "room:kitchen",
-         "targetProperty": "kitchen-downlights-main-1",
-         "targetActiveValue": 50,
-         "targetInactiveValue": 0
+         "targetProperties": [
+            {
+               "name": "kitchen-downlights-main-1",
+               "activeValue": 50,
+               "inactiveValue": 10
+            },
+            {
+               "name": "kitchen-downlights-main-2",
+               "activeValue": 50,
+               "inactiveValue": 10
+            }
+         ]
       },
       {
          "name": "spycameraaction:lounge",

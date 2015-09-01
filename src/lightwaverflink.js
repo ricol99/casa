@@ -74,7 +74,7 @@ LightwaveRfLink.prototype.makeNextRequest = function() {
 
          that.timeoutObj = setTimeout(function() {
             that.makeNextRequest();
-         }, 2000);
+         }, 200);
       });
    }
 }
