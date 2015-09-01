@@ -1,12 +1,12 @@
 var util = require('util');
-var ListeningSource = require('./listeningsource');
+var Activator = require('./activator');
 
 function LatchingActivator(_config) {
 
    this.sourceName = _config.source;
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
 
-   ListeningSource.call(this, _config);
+   Activator.call(this, _config);
 
    this.sourceActive = false;
    this.minOutputTimeObj = null;
@@ -14,7 +14,7 @@ function LatchingActivator(_config) {
    var that = this;
 }
 
-util.inherits(LatchingActivator, ListeningSource);
+util.inherits(LatchingActivator, Activator);
 
 LatchingActivator.prototype.sourceIsActive = function(_data) {
    console.log(this.name + ': source ' + _data.sourceName + ' active!');

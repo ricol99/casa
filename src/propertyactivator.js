@@ -1,21 +1,21 @@
 var util = require('util');
-var ListeningSource = require('./listeningsource');
+var Activator = require('./activator');
 var CasaSystem = require('./casasystem');
 
 function PropertyActivator(_config) {
    this.sourceActive = false;
 
-   if (_config.triggerCondition == undefined) {
-      _config.triggerCondition = '==';
-      _config.triggerValue = true;
-   }
+   //if (_config.triggerCondition == undefined) {
+      //_config.triggerCondition = '==';
+      //_config.triggerValue = true;
+   //}
 
-   ListeningSource.call(this, _config);
+   Activator.call(this, _config);
 
    var that = this;
 }
 
-util.inherits(PropertyActivator, ListeningSource);
+util.inherits(PropertyActivator, Activator);
 
 PropertyActivator.prototype.sourceIsActive = function(_data) {
    this.goActive(_data);

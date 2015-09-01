@@ -1,30 +1,37 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var LogicPropertyBinder = require('./logicpropertybinder');
 
 function DebouncingPropertyBinder(_config, _owner) {
 
    this.threshold = _config.threshold;
    this.timeoutObj = null;
    this.sourceActive = false;
-   _config.defaultTriggerConditions = true;
 
-   PropertyBinder.call(this, _config, _owner);
+   LogicPropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(DebouncingPropertyBinder, PropertyBinder);
+util.inherits(DebouncingPropertyBinder, LogicPropertyBinder);
 
-DebouncingPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
+DebouncingPropertyBinder.prototype.sourceIsActive = function(_data) {
+   this.processSourceStateChange(true, _data);
+}
+
+DebouncingPropertyBinder.prototype.sourceIsInactive = function(_data) {
+   this.processSourceStateChange(false, _data);
+}
+
+DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, _data) {
    var that = this;
-   console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _data.propertyValue + '!');
+   console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _active + '!');
 
-   if (_data.coldStart || this.myPropertyValue() == _data.propertyValue) {
-      this.sourceActive = _data.propertyValue;
-      this.updatePropertyAfterRead(_data.propertyValue, _data);
+   if (_data.coldStart || this.myPropertyValue() == _active) {
+      this.sourceActive = _active;
+      this.updatePropertyAfterRead(_active, _data);
    }
-   else if (this.sourceActive != _data.propertyValue) {
-      this.sourceActive = _data.propertyValue;
+   else if (this.sourceActive != _active) {
+      this.sourceActive = _active;
       this.storedActiveData = _data;
 
 
@@ -46,7 +53,7 @@ DebouncingPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
          }, this.threshold*1000);
       }
    }
-   else if (_data.propertyValue) {
+   else if (_active) {
       this.storedActiveData = _data;
    }
    else {

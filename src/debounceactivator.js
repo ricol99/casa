@@ -1,5 +1,5 @@
 var util = require('util');
-var ListeningSource = require('./listeningsource');
+var Activator = require('./activator');
 
 function DebounceActivator(_config) {
 
@@ -7,12 +7,12 @@ function DebounceActivator(_config) {
    this.timeoutObj = null;
    this.sourceActive = false;
 
-   ListeningSource.call(this, _config);
+   Activator.call(this, _config);
 
    var that = this;
 }
 
-util.inherits(DebounceActivator, ListeningSource);
+util.inherits(DebounceActivator, Activator);
 
 DebounceActivator.prototype.sourceIsActive = function(_data) {
    var that = this;

@@ -1,12 +1,11 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var LogicPropertyBinder = require('./logicpropertybinder');
 
 function LatchingPropertyBinder(_config, _owner) {
 
    this.minOutputTime = (_config.minOutputTime) ? _config.minOutputTime : 0;
-   _config.defaultTriggerConditions = true;
 
-   PropertyBinder.call(this, _config, _owner);
+   LogicPropertyBinder.call(this, _config, _owner);
 
    this.minOutputTimeObj = null;
    this.latestInactiveData = { sourceName: this.name };
@@ -15,7 +14,7 @@ function LatchingPropertyBinder(_config, _owner) {
    this.sourceActive = false;
 }
 
-util.inherits(LatchingPropertyBinder, PropertyBinder);
+util.inherits(LatchingPropertyBinder, LogicPropertyBinder);
 
 LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
 
@@ -61,8 +60,12 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
    }, this.minOutputTime*1000);
 }
 
-LatchingPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
-   this.setProperty(_data.propertyValue, _data, function() {});
+LatchingPropertyBinder.prototype.sourceIsActive = function(_data) {
+   this.setProperty(true, _data, function() {});
+}
+
+LatchingPropertyBinder.prototype.sourceIsInactive = function(_data) {
+   this.setProperty(false, _data, function() {});
 }
 
 module.exports = exports = LatchingPropertyBinder;

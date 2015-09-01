@@ -1,15 +1,15 @@
 var util = require('util');
-var SourceMergePropertyBinder = require('./sourcemergepropertybinder');
+var MultiLogicPropertyBinder = require('./multilogicpropertybinder');
 
 function OrPropertyBinder(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   SourceMergePropertyBinder.call(this, _config, _owner);
+   MulitLogicPropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(OrPropertyBinder, SourceMergePropertyBinder);
+util.inherits(OrPropertyBinder, MulitLogicPropertyBinder);
 
 OrPropertyBinder.prototype.checkActivate = function() {
    // any input active

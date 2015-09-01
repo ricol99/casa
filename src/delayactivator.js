@@ -1,5 +1,5 @@
 var util = require('util');
-var ListeningSource = require('./listeningsource');
+var Activator = require('./activator');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
@@ -8,12 +8,12 @@ function DelayActivator(_config) {
    this.delay = (_config.delay) ? _config.delay : 0;
    this.delayedEvents = [];
 
-   ListeningSource.call(this, _config);
+   Activator.call(this, _config);
 
    var that = this;
 }
 
-util.inherits(DelayActivator, ListeningSource);
+util.inherits(DelayActivator, Activator);
 
 DelayActivator.prototype.sourceIsActive = function(_data) {
    console.log('source ' + _data.sourceName + ' active!');

@@ -1,7 +1,7 @@
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
 
-function SourceMergePropertyBinder(_config, _owner) {
+function MultiLogicPropertyBinder(_config, _owner) {
 
    _config.allowMultipleSources = true;
    _config.defaultTriggerConditions = true;
@@ -10,14 +10,19 @@ function SourceMergePropertyBinder(_config, _owner) {
    var that = this;
 }
 
-util.inherits(SourceMergePropertyBinder, PropertyBinder);
+util.inherits(MultiLogicPropertyBinder, PropertyBinder);
 
-SourceMergePropertyBinder.prototype.oneSourcePropertyChanged = function(_sourceListener, _sourceAttributes, _data) {
-   console.log(this.name + ': Input source ' + _data.sourceName + ' has chnaged property ' + _data.propertyName + ' to ' + _data.propertyValue + '!');
-   this.processSourcePropertyChange(_sourceListener, _sourceAttributes, _data);
+MultiLogicPropertyBinder.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
+   console.log(this.name + ': Input source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to true!');
+   this.processSourceStateChange(true, _sourceListener, _sourceAttributes, _data);
 }
 
-SourceMergePropertyBinder.prototype.findHighestPrioritySource = function(_outputActive) {
+MultiLogicPropertyBinder.prototype.oneSourceIsInactive = function(_sourceListener, _sourceAttributes, _data) {
+   console.log(this.name + ': Input source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to false!');
+   this.processSourceStateChange(false, _sourceListener, _sourceAttributes, _data);
+}
+
+MultiLogicPropertyBinder.prototype.findHighestPrioritySource = function(_outputActive) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
@@ -37,7 +42,7 @@ SourceMergePropertyBinder.prototype.findHighestPrioritySource = function(_output
    return highestPrioritySource;
 }
 
-SourceMergePropertyBinder.prototype.processSourcePropertyChange = function(_sourceListener, _sourceAttributes, _data) {
+MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, _sourceListener, _sourceAttributes, _data) {
    var outputShouldGoActive = this.checkActivate();
    var highestPrioritySource = this.findHighestPrioritySource(outputShouldGoActive);
 
@@ -74,8 +79,8 @@ SourceMergePropertyBinder.prototype.processSourcePropertyChange = function(_sour
 }
 
 // Override this with required logic behaviour
-SourceMergePropertyBinder.prototype.checkActivate = function() {
+MultiLogicPropertyBinder.prototype.checkActivate = function() {
    return false;
 }
 
-module.exports = exports = SourceMergePropertyBinder;
+module.exports = exports = MultiLogicPropertyBinder;

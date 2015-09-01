@@ -1,15 +1,15 @@
 var util = require('util');
-var SourceMergePropertyBinder = require('./sourcemergepropertybinder');
+var MulitLogicPropertyBinder = require('./multilogicpropertybinder');
 
 function XorPropertyBinder(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   SourceMergePropertyBinder.call(this, _config, _owner);
+   MultiLogicPropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(XorPropertyBinder, SourceMergePropertyBinder);
+util.inherits(XorPropertyBinder, MultiLogicPropertyBinder);
 
 XorPropertyBinder.prototype.checkActivate = function() {
    var allInputsActive = true;

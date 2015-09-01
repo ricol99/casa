@@ -2,14 +2,6 @@ var util = require('util');
 var Gpio = require('onoff').Gpio;
 var PropertyBinder = require('./propertybinder');
 
-var Gpio = require('onoff').Gpio,
-  led = new Gpio(14, 'out'),
-  button = new Gpio(4, 'in', 'both');
- 
-button.watch(function(err, value) {
-  led.writeSync(value);
-});
-
 function GPIOPropertyBinder(_config, _owner) {
 
    this.gpioPin = _config.gpioPin;
@@ -21,6 +13,12 @@ function GPIOPropertyBinder(_config, _owner) {
    this.direction = (this.writable) ? 'out' : 'in';
 
    var that = this;
+
+   process.on('SIGINT', function() {
+      if (that.gpio) {
+         that.gpio.unexport();
+      }
+   });
  
 }
 
@@ -90,5 +88,6 @@ GPIOPropertyBinder.prototype.coldStart = function() {
       //}
    //});
 }
+
 module.exports = exports = GPIOPropertyBinder;
  

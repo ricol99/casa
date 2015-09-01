@@ -1,16 +1,16 @@
 var util = require('util');
-var ListeningSource = require('./listeningsource');
+var Activator = require('./activator');
 
 function InverterActivator(_config) {
 
    this.sourceActive = false;
 
-   ListeningSource.call(this, _config);
+   Activator.call(this, _config);
 
    var that = this;
 }
 
-util.inherits(InverterActivator, ListeningSource);
+util.inherits(InverterActivator, Activator);
 
 InverterActivator.prototype.sourceIsActive = function(_data) {
    console.log(this.name + ': source ' + _data.sourceName + ' active!');
