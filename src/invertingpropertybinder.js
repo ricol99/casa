@@ -3,7 +3,7 @@ var LogicPropertyBinder = require('./logicpropertybinder');
 
 function InvertingPropertyBinder(_config, _owner) {
 
-   LogicePropertyBinder.call(this, _config, _owner);
+   LogicPropertyBinder.call(this, _config, _owner);
 
    var that = this;
    this.cStart = true;

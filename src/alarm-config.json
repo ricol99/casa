@@ -139,7 +139,7 @@
                   "sources": [
                      {
                         "source": "thing:environment",
-                        "sourceProperty": "living-area-lights-with-movement-times"
+                        "sourceProperty": "dark"
                      },
                      {
                         "source": "room:kitchen",
@@ -441,70 +441,20 @@
                         "propertyValue": true
                      },
                      {
-                        "rule": "sunset",
+                        "rule": "sunset:-1800",
                         "propertyValue": false
                      }
                   ]
                }
             },
             {
-               "name": "living-area-lights-with-movement-times",
+               "name": "dark",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-living-area-lights-early",
-                  "events": [
-                     {
-                        "rule": "sunrise:+1800",
-                        "propertyValue": false 
-                     },
-                     {
-                        "rule": "sunset:-4500",
-                        "propertyValue": true
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "living-area-lights-normal-times",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-living-area-lights-late",
-                  "events": [
-                     {
-                        "rule": "sunset:-2600",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "30 22 * * *",
-                        "propertyValue": false 
-                     }
-                  ]
-               }
-            }
-         ]
-      },
-      {
-         "name": "thing:holiday-controller",
-         "displayName": "Holiday Controller",
-         "props": [
-            {
-               "name": "background-lights",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "logicpropertybinder:follow-living-area-lights-normal",
+                  "name": "invertingpropertybinder:env-dark",
                   "source": "thing:environment",
-                  "sourceProperty": "living-area-lights-normal-times",
-               },
-               "applyProps": {
-                  "active" : {
-                     "room-light-level": "low" 
-                  },
-                  "inactive" : {
-                     "room-light-level": "off"
-                  }
+                  "sourceProperty": "daylight"
                }
             }
          ]
@@ -547,19 +497,6 @@
          "source": "oractivator:lounge-lights-evening",
          "target": "room:lounge",
          "targetProperty": "room-light-level"
-      },
-      {
-         "name": "setpropertyaction:update-kitchen-light-level",
-         "source": "room:kitchen",
-         "sourceProperty": "movement",
-         "target": "room:kitchen",
-         "targetProperties": [
-            {
-               "name": "room-light-level",
-               "activeValue": "medium",
-               "inactiveValue": "low"
-            }
-         ]
       },
       {
          "name": "spycameraaction:lounge",

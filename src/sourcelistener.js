@@ -117,9 +117,8 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
             this.owner.sourceIsInactive(_data);
          }
       }
-      else {
-         this.owner.sourcePropertyChanged(_data);
-      }
+
+      this.owner.sourcePropertyChanged(_data);
    }
 }
 
