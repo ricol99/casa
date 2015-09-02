@@ -20,18 +20,20 @@ function Worker(_config) {
 
    var configSources = [];
    configSources.push(_config);
+   this.sourcePropertyName = _config.source + '::' + ((_config.sourceProperty == undefined) ? 'ACTIVE' : _config.sourceProperty );
 
    if (_config.target) {
       configSources.push({ source: _config.target });
       this.targetName = _config.target;
+      this.targetPropertyName = _config.target + '::ACTIVE';
    }
 
    this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: configSources, allInputsRequiredForValidity: true, defaultTriggerConditions: true }, this);
 
-   this.source = this.multiSourceListener.sourceListeners[this.sourceName].source;
+   this.source = this.multiSourceListener.sourceListeners[this.sourcePropertyName].source;
 
    if (this.targetName) {
-      this.target = this.multiSourceListener.sourceListeners[this.targetName].source;
+      this.target = this.multiSourceListener.sourceListeners[this.targetPropertyName].source;
    }
 
    this.casa.addWorker(this);
@@ -50,10 +52,10 @@ Worker.prototype.sourceIsValid = function(_data) {
    this.workerEnabled = true;
 
    if (this.multiSourceListener) {
-      this.source = this.multiSourceListener.sourceListeners[this.sourceName].source;
+      this.source = this.multiSourceListener.sourceListeners[this.sourcePropertyName].source;
 
       if (this.targetName) {
-         this.target = this.multiSourceListener.sourceListeners[this.targetName].source;
+         this.target = this.multiSourceListener.sourceListeners[this.targetPropertyName].source;
       }
    }
 }

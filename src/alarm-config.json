@@ -131,9 +131,44 @@
                }
             },
             {
+               "name": "movement-in-dark",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "andpropertybinder:kitchen-movement-in-dark",
+                  "sources": [
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "living-area-lights-with-movement-times"
+                     },
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "movement"
+                     }
+                  ]
+               }
+            },
+            {
                "name": "room-light-level",
                "initialValue": "off",
-               "writable": true
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:room-light-level",
+                  "sources": [
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "movement-in-dark",
+                        "outputActiveValue": "medium",
+                        "outputInactiveValue": "off"
+                     },
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "living-area-lights-normal-times",
+                        "outputActiveValue": "low",
+                        "outputInactiveValue": "off"
+                     }
+                  ]
+               }
             },
             {
                "name": "kitchen-downlights-main-1",

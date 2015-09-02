@@ -5,9 +5,8 @@ function MultiLogicPropertyBinder(_config, _owner) {
 
    _config.allowMultipleSources = true;
    _config.defaultTriggerConditions = true;
-   PropertyBinder.call(this, _config, _owner);
 
-   var that = this;
+   PropertyBinder.call(this, _config, _owner);
 }
 
 util.inherits(MultiLogicPropertyBinder, PropertyBinder);
@@ -42,12 +41,21 @@ MultiLogicPropertyBinder.prototype.findHighestPrioritySource = function(_outputA
    return highestPrioritySource;
 }
 
+MultiLogicPropertyBinder.prototype.getOutputValue = function(_active, _sourceAttributes) {
+
+   if (_active) {
+      return (_sourceAttributes.outputActiveValue == undefined) ? true : _sourceAttributes.outputActiveValue;
+   }
+   else {
+      return (_sourceAttributes.outputInactiveValue == undefined) ? false : _sourceAttributes.outputInactiveValue;
+   }
+}
+
 MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, _sourceListener, _sourceAttributes, _data) {
    var outputShouldGoActive = this.checkActivate();
    var highestPrioritySource = this.findHighestPrioritySource(outputShouldGoActive);
 
    if (!highestPrioritySource) {
-      //highestPriorityInput = { source: _input, activeData: { sourceName: _input.name }, inactiveData: { sourceName: _input.name }, priority: 0 };
       highestPrioritySource = _sourceAttributes;
    }
 
@@ -57,11 +65,11 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already active so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.updatePropertyAfterRead(true, highestPrioritySource.activeData);
+            this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
          }
       }
       else {
-         this.updatePropertyAfterRead(false, highestPrioritySource.inactiveData);
+         this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
       }
    }
    else {
@@ -69,11 +77,11 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already inactive so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.updatePropertyAfterRead(false, highestPrioritySource.inactiveData);
+            this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
          }
       }
       else {
-         this.updatePropertyAfterRead(true, highestPrioritySource.activeData);
+         this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
       }
    }
 }

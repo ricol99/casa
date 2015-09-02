@@ -4,12 +4,12 @@ var MultiLogicPropertyBinder = require('./multilogicpropertybinder');
 function OrPropertyBinder(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   MulitLogicPropertyBinder.call(this, _config, _owner);
+   MultiLogicPropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(OrPropertyBinder, MulitLogicPropertyBinder);
+util.inherits(OrPropertyBinder, MultiLogicPropertyBinder);
 
 OrPropertyBinder.prototype.checkActivate = function() {
    // any input active

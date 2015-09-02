@@ -22,14 +22,18 @@ function MultiSourceListener(_config, _owner) {
    for (var index = 0; index < _config.sources.length; ++index) {
 
       if (typeof _config.sources[index] == "string") {
-         this.sourceListeners[_config.sources[index]] = new SourceListener({ source: _config.sources[index], defaultTriggerConditions: this.defaultTriggerConditions }, this);
-         this.sourceAttributes[_config.sources[index]] = { priority: index, active: false };
+         var sourcePropertyName = _config.sources[index] + '::ACTIVE';
+         this.sourceListeners[sourcePropertyName] = new SourceListener({ source: _config.sources[index], defaultTriggerConditions: this.defaultTriggerConditions }, this);
+         this.sourceAttributes[sourcePropertyName] = { priority: index, active: false };
       }
       else {
          // Assume object
+         var sourcePropertyName = _config.sources[index].source + '::' + ((_config.sources[index].sourceProperty) ? _config.sources[index].sourceProperty : 'ACTIVE');
          _config.sources[index].defaultTriggerConditions = this.defaultTriggerConditions;
-         this.sourceListeners[_config.sources[index].source] = new SourceListener(_config.sources[index], this);
-         this.sourceAttributes[_config.sources[index].source] = { priority: index, active: false };
+         this.sourceListeners[sourcePropertyName] = new SourceListener(_config.sources[index], this);
+         this.sourceAttributes[sourcePropertyName] = { priority: index, active: false,
+                                                       outputActiveValue: _config.sources[index].outputActiveValue,
+                                                       outputInactiveValue: _config.sources[index].outputInactiveValue };
       }
    };
 
@@ -43,33 +47,38 @@ function MultiSourceListener(_config, _owner) {
 }
 
 MultiSourceListener.prototype.sourceIsActive = function(_data) {
+   var sourcePropertyName = _data.sourceName + '::' + _data.propertyName;
 
-   if (this.sourceListenerEnabled && this.sourceListeners[_data.sourceName]) {
-      this.sourceAttributes[_data.sourceName].active = true;
-      this.sourceAttributes[_data.sourceName].activeData = _data;
-      this.owner.oneSourceIsActive(this.sourceListeners[_data.sourceName], this.sourceAttributes[_data.sourceName], _data);
+   if (this.sourceListenerEnabled && this.sourceListeners[sourcePropertyName]) {
+      this.sourceAttributes[sourcePropertyName].active = true;
+      this.sourceAttributes[sourcePropertyName].activeData = _data;
+      this.owner.oneSourceIsActive(this.sourceListeners[sourcePropertyName], this.sourceAttributes[sourcePropertyName], _data);
    }
 }
 
 MultiSourceListener.prototype.sourceIsInactive = function(_data) {
+   var sourcePropertyName = _data.sourceName + '::' + _data.propertyName;
 
-   if (this.sourceListenerEnabled && this.sourceListeners[_data.sourceName]) {
-      this.sourceAttributes[_data.sourceName].active = false;
-      this.sourceAttributes[_data.sourceName].inactiveData = _data;
-      this.owner.oneSourceIsInactive(this.sourceListeners[_data.sourceName], this.sourceAttributes[_data.sourceName], _data);
+   if (this.sourceListenerEnabled && this.sourceListeners[sourcePropertyName]) {
+      this.sourceAttributes[sourcePropertyName].active = false;
+      this.sourceAttributes[sourcePropertyName].inactiveData = _data;
+      this.owner.oneSourceIsInactive(this.sourceListeners[sourcePropertyName], this.sourceAttributes[sourcePropertyName], _data);
    }
 }
 
 MultiSourceListener.prototype.sourcePropertyChanged = function(_data) {
+   var sourcePropertyName = _data.sourceName + '::' + _data.propertyName;
 
-   if (this.sourceListenerEnabled && this.sourceListeners[_data.sourceName]) {
-      this.owner.oneSourcePropertyChanged(this.sourceListeners[_data.sourceName], this.sourceAttributes[_data.sourceName], _data);
+   if (this.sourceListenerEnabled && this.sourceListeners[sourcePropertyName]) {
+      this.owner.oneSourcePropertyChanged(this.sourceListeners[sourcePropertyName], this.sourceAttributes[sourcePropertyName], _data);
    }
 }
 
 MultiSourceListener.prototype.sourceIsInvalid = function(_data) {
+   var sourcePropertyName = _data.sourceName + '::' + _data.propertyName;
+
    var oldSourceListenerEnabled = this.sourceListenerEnabled;
-   var sourceListener = this.sourceListeners[_data.sourceName];
+   var sourceListener = this.sourceListeners[sourcePropertyName];
 
    if (sourceListener) {
 
