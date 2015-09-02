@@ -1,9 +1,7 @@
 var util = require('util');
-var Action = require('./action');
-var push = require( 'pushover-notifications' );
-var CasaSystem = require('./casasystem');
+var LogicPropertyBinder = require('./logicpropertybinder');
 
-function SetPropertyAction(_config) {
+function SettingPropertyBinder(_config, _owner) {
    this.targetProperties = {};
 
    if (_config.targetProperty != undefined) {
@@ -24,30 +22,12 @@ function SetPropertyAction(_config) {
       }
    }
 
-   Action.call(this, _config);
-
-   var that = this;
-
-   this.on('activated', function (_data) {
-      that.activated(_data);
-   });
-
-   this.on('activated-from-cold', function (_data) {
-      that.activated(_data);
-   });
-
-   this.on('deactivated', function (_data) {
-      that.deactivated(_data);
-   });
-
-   this.on('deactivated-from-cold', function (_data) {
-      that.deactivated(_data);
-   });
+   LogicPropertyBinder.call(this, _config, _owner);
 }
 
-util.inherits(SetPropertyAction, Action);
+util.inherits(SettingPropertyBinder, LogicPropertyBinder);
 
-SetPropertyAction.prototype.setProperty = function(_propertyName, _active, _data) {
+SettingPropertyBinder.prototype.processSourceStateChange = function(_propertyName, _active, _data) {
    var tempValue;
 
    if (_active && this.targetProperties[_propertyName].activeValue != null) {
@@ -73,28 +53,28 @@ SetPropertyAction.prototype.setProperty = function(_propertyName, _active, _data
    });
 }
 
-SetPropertyAction.prototype.activated = function(_data) {
-   console.log(this.name + ': received activated event', _data);
+SettingPropertyBinder.prototype.sourceIsActive = function(_data) {
+   console.log(this.name + ': source has gone active', _data);
 
    for (var prop in this.targetProperties) {
 
       if (this.targetProperties.hasOwnProperty(prop)){
-         this.setProperty(prop, true, _data);
+         this.processSourceStateChange(prop, true, _data);
       }
    }
 
 }
 
-SetPropertyAction.prototype.deactivated = function(_data) {
+SettingPropertyBinder.prototype.sourceIsInactive = function(_data) {
    console.log(this.name + ': received deactivated event', _data);
 
    for (var prop in this.targetProperties) {
 
       if (this.targetProperties.hasOwnProperty(prop)){
-         this.setProperty(prop, false, _data);
+         this.processSourceStateChange(prop, false, _data);
       }
    }
 }
 
-module.exports = exports = SetPropertyAction;
+module.exports = exports = SettingPropertyBinder;
 

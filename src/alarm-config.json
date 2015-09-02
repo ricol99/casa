@@ -131,6 +131,11 @@
                }
             },
             {
+               "name": "room-light-level",
+               "initialValue": "off",
+               "writable": true
+            },
+            {
                "name": "kitchen-downlights-main-1",
                "initialValue": 0,
                "writable": true,
@@ -150,6 +155,98 @@
                   "source": "lightwaverflink:home",
                   "roomID": 6,
                   "deviceID": 2
+               }
+            },
+            {
+               "name": "kitchen-downlights-wolf",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:kitchen-downlights-wolf",
+                  "source": "lightwaverflink:home",
+                  "roomID": 6,
+                  "deviceID": 3
+               }
+            },
+            {
+               "name": "kitchen-lights-off",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:kitchen-lights-off",
+                  "source": "room:kitchen",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "off",
+                  "target": "room:kitchen",
+                  "targetProperties": [
+                     {
+                        "name": "kitchen-downlights-main-1",
+                        "activeValue": 0
+                     },
+                     {
+                        "name": "kitchen-downlights-main-2",
+                        "activeValue": 0
+                     },
+                     {
+                        "name": "kitchen-downlights-wolf",
+                        "activeValue": 0
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "kitchen-lights-low",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:kitchen-lights-low",
+                  "source": "room:kitchen",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "low",
+                  "target": "room:kitchen",
+                  "targetProperties": [
+                     {
+                        "name": "kitchen-downlights-main-1",
+                        "activeValue": 10
+                     },
+                     {
+                        "name": "kitchen-downlights-main-2",
+                        "activeValue": 10
+                     },
+                     {
+                        "name": "kitchen-downlights-wolf",
+                        "activeValue": 10
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "kitchen-lights-medium",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:kitchen-lights-medium",
+                  "source": "room:kitchen",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "medium",
+                  "target": "room:kitchen",
+                  "targetProperties": [
+                     {
+                        "name": "kitchen-downlights-main-1",
+                        "activeValue": 50
+                     },
+                     {
+                        "name": "kitchen-downlights-main-2",
+                        "activeValue": 50
+                     },
+                     {
+                        "name": "kitchen-downlights-wolf",
+                        "activeValue": 50
+                     }
+                  ]
                }
             }
          ]
@@ -352,25 +449,36 @@
                }
             }
          ]
+      },
+      {
+         "name": "thing:holiday-controller",
+         "displayName": "Holiday Controller",
+         "props": [
+            {
+               "name": "background-lights",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "logicpropertybinder:follow-living-area-lights-normal",
+                  "source": "thing:environment",
+                  "sourceProperty": "living-area-lights-normal-times",
+               },
+               "applyProps": {
+                  "active" : {
+                     "room-light-level": "low" 
+                  },
+                  "inactive" : {
+                     "room-light-level": "off"
+                  }
+               }
+            }
+         ]
       }
    ],
    "transforms" : [],
    "activators": [
       {
-         "name": "propertyactivator:holiday-background-lights",
-         "source": "thing:environment",
-         "sourceProperty": "living-area-lights-normal-times",
-         "applyProps": {
-            "active" : {
-               "room-light-level": "low" 
-            },
-            "inactive" : {
-               "room-light-level": "off"
-            }
-         }
-      },
-      {
-         "name": "oractivator:lounge-lights-with-movement",
+         "name": "andactivator:lounge-lights-with-movement",
          "sources": [
             {
                "source": "room:lounge",
@@ -412,14 +520,9 @@
          "target": "room:kitchen",
          "targetProperties": [
             {
-               "name": "kitchen-downlights-main-1",
-               "activeValue": 50,
-               "inactiveValue": 10
-            },
-            {
-               "name": "kitchen-downlights-main-2",
-               "activeValue": 50,
-               "inactiveValue": 10
+               "name": "room-light-level",
+               "activeValue": "medium",
+               "inactiveValue": "low"
             }
          ]
       },

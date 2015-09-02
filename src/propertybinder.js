@@ -100,11 +100,13 @@ PropertyBinder.prototype.oneSourcePropertyChanged = function(sourceListener, _so
 }
 
 PropertyBinder.prototype.sourceIsActive = function(_data) {
-   // DO NOTHING BY DEFAULT
+   // Copy functionality by default
+   this.updatePropertyAfterRead(true, _data);
 }
 
 PropertyBinder.prototype.sourceIsInactive = function(_data) {
-   // DO NOTHING BY DEFAULT
+   // Copy functionality by default
+   this.updatePropertyAfterRead(false, _data);
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
