@@ -57,6 +57,9 @@ function CasaSystem(_config, _connectToPeers) {
    // Create area for peer casas to live in
    this.createPeerCasaArea();
 
+   // Make sure all listeners are refreshed now that all sources are available
+   this.casa.refreshSourceListeners();
+
    // Cold start all defined things now that the activators and actions have been created
    this.coldStartThings();
 

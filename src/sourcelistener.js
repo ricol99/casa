@@ -97,23 +97,21 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
+   console.log(this.name+": ======================== internalSourcePropertyChange prop="+_data.propertyName);
 
    if (_data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
       console.log(this.name + ": ======= Trigger Condition " + this.triggerCondition);
 
       if (this.triggerCondition) {
-      console.log(this.name + ": ==================== AAASSSSS");
          var a = _data.propertyValue;
          var b = this.triggerValue;
          var evalStr = "a " + this.triggerCondition + " b";
 
          if (eval(evalStr)) {
-      console.log(this.name + ": ==================== AAATTTTT");
             this.owner.sourceIsActive(_data);
          }
          else {
-      console.log(this.name + ": ==================== AAAUUUUU");
             this.owner.sourceIsInactive(_data);
          }
       }

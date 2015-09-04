@@ -20,7 +20,20 @@
             {
                "name": "lightLevel",
                "initialValue": 100,
-               "writable": true
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:light-level",
+                  "sources": [
+                     {
+                        "source": "thing:test-cctv",
+                        "sourceProperty": "test-prop-2",
+                        "triggerCondition": "==",
+                        "triggerValue": true,
+                        "outputActiveValue": 30,
+                        "outputInactiveValue": 100
+                     }
+                  ]
+               }
             }
          ]
       },
@@ -29,9 +42,69 @@
          "displayName": "Test daylight sensor",
          "props": [
             {
+               "name": "alarm-status",
+               "initialValue": "white",
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:test-flip-flop",
+                  "sources": [
+                     {
+                        "source": "thing:test-cctv",
+                        "sourceProperty": "test-prop-1",
+                        "outputActiveValue": "green",
+                        "outputInactiveValue": "white"
+                     },
+                     {
+                        "source": "thing:home-daylight-sensor",
+                        "sourceProperty": "lightLevel",
+                        "triggerCondition": "<",
+                        "triggerValue": 50,
+                        "outputActiveValue": "red",
+                        "outputInactiveValue": "blue"
+                     }
+                  ]
+               }
+            },
+            {
                "name": "smallerLightLevel",
                "initialValue": 0,
                "writable": true
+            },
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-daylight",
+                  "events": [
+                     {
+                        "rule": "sunrise",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset:-1800",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "dark",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-daylight",
+                  "events": [
+                     {
+                        "rule": "sunrise",
+                        "propertyValue": false
+                     },
+                     {
+                        "rule": "sunset:-1800",
+                        "propertyValue": true
+                     }
+                  ]
+               }
             }
          ]
       },
@@ -77,8 +150,8 @@
             },
             {
                "name": "latching-test-prop-2",
-               "initialValue": 0,
-               "writable": true,
+               "initialValue": false,
+               "writable": false,
                "binder": {
                   "name": "latchingpropertybinder:latching-test-prop-2",
                   "source": "thing:test-cctv",
@@ -102,74 +175,13 @@
          "targetProperty": "smallerLightLevel"
       }
    ],
-   "activators": [
-      {
-         "name": "propertyactivator:test-light-level-prop",
-         "source": "thing:home-daylight-sensor",
-         "sourceProperty": "lightLevel",
-         "triggerCondition": "<",
-         "triggerValue": 50,
-         "applyProps": {
-            "active" : {
-               "colour": "red"
-            },
-            "inactive" : {
-               "colour": "blue"
-            }
-         }
-      },
-      {
-         "name": "propertyactivator:test-property-1",
-         "source": "thing:test-cctv",
-         "sourceProperty": "test-prop-1",
-         "applyProps": {
-            "active" : {
-               "colour": "green"
-            },
-            "inactive" : {
-               "colour": "white"
-            }
-         }
-      },
-      {
-         "name": "propertyactivator:test-property-2",
-         "source": "thing:test-cctv",
-         "sourceProperty": "test-prop-2",
-         "applyProps": {
-            "active" : {
-               "lightLevel": 30
-            },
-            "inactive" : {
-               "lightLevel": 100
-            }
-         }
-      },
-      {
-         "name": "oractivator:test-flip-flop",
-         "sources": [
-            "propertyactivator:test-property-1",
-            "propertyactivator:test-light-level-prop"
-         ]
-      }
-   ],
+   "activators": [],
    "actions": [
       {
          "name": "setpropertyaction:test-property-broken",
          "source": "propertyactivator:test-activator-not-found",
          "target": "thing:-test-not-gonna-find-me-yet",
          "targetProperty": "nothing"
-      },
-      {
-         "name": "setpropertyaction:test-set-property-action",
-         "source": "propertyactivator:test-property-2",
-         "target": "thing:home-daylight-sensor",
-         "targetProperty": "lightLevel"
-      },
-      {
-         "name": "setpropertyaction:alarm-action",
-         "source": "oractivator:test-flip-flop",
-         "target": "alarm:home",
-         "targetProperty": "colour"
       }
    ]
 }
