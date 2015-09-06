@@ -33,22 +33,20 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
    console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
 
    if (this.source) {
-      console.log("====================== ASAAAASSDKJH");
 
       if (typeof _propValue == "boolean") {
-      console.log("====================== BBBBBBSSDKJH");
 
          if (_propValue) {
-      console.log("====================== CCCCCCCSDKJH");
             this.source.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
          }
          else {
-      console.log("====================== DDDDDDDSDKJH");
             this.source.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
          }
       }
+      else if (_propValue == 0) {
+         this.source.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
+      }
       else {
-      console.log("====================== EEEEEEEEDKJH");
          this.source.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
       }
    }

@@ -52,6 +52,11 @@ function PropertyBinder(_config, _owner) {
       this.sourceListener = null;
    }
 
+   if (_config.target) {
+      this.targetListener = new SourceListener({ source: _config.target, targetListener: true }, this);
+      this.target = this.targetListener.source;
+   }
+
    var that = this;
 }
 
@@ -76,6 +81,7 @@ PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
 PropertyBinder.prototype.sourceIsValid = function() {
    this.binderEnabled = true;
    this.source = (this.sourceListener) ? this.sourceListener.source : null;
+   this.target = (this.targetListener) ? this.targetListener.source : null;
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {

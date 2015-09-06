@@ -163,7 +163,7 @@
                      },
                      {
                         "source": "thing:environment",
-                        "sourceProperty": "living-area-lights-normal-times",
+                        "sourceProperty": "holiday-lights",
                         "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      }
@@ -244,15 +244,15 @@
                   "targetProperties": [
                      {
                         "name": "kitchen-downlights-main-1",
-                        "activeValue": 10
+                        "activeValue": 4
                      },
                      {
                         "name": "kitchen-downlights-main-2",
-                        "activeValue": 10
+                        "activeValue": 4
                      },
                      {
                         "name": "kitchen-downlights-wolf",
-                        "activeValue": 10
+                        "activeValue": 4
                      }
                   ]
                }
@@ -448,6 +448,24 @@
                }
             },
             {
+               "name": "holiday-lights",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-daylight",
+                  "events": [
+                     {
+                        "rule": "sunset:900",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "30 22 * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
                "name": "dark",
                "initialValue": false,
                "writable": false,
@@ -461,43 +479,8 @@
       }
    ],
    "transforms" : [],
-   "activators": [
-      {
-         "name": "andactivator:lounge-lights-with-movement",
-         "sources": [
-            {
-               "source": "room:lounge",
-               "sourceProperty": "movement"
-            },
-            {
-               "source": "thing:environment",
-               "sourceProperty": "living-area-lights-with-movement-times"
-            }
-         ],
-         "applyProps": {
-            "active" : {
-               "room-light-level": "normal" 
-            },
-            "inactive" : {
-               "room-light-level": "off" 
-            }
-         }
-      },
-      {
-         "name": "oractivator:lounge-lights-evening",
-         "sources": [
-            "oractivator:lounge-lights-with-movement",
-            "propertyactivator:holiday-background-lights"
-         ]
-      }
-   ],
+   "activators": [],
    "actions": [
-      {
-         "name": "setpropertyaction:update-lounge-light-level",
-         "source": "oractivator:lounge-lights-evening",
-         "target": "room:lounge",
-         "targetProperty": "room-light-level"
-      },
       {
          "name": "spycameraaction:lounge",
          "cctvHostname": "192.168.1.245",

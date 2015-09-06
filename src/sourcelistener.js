@@ -8,6 +8,7 @@ function SourceListener(_config, _owner) {
    this.casa = this.casaSys.casa;
    this.owner = _owner;
    this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
+   this.targetListener = (_config.targetListener == undefined) ? false : _config.targetListener;
 
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
@@ -99,7 +100,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
    console.log(this.name+": ======================== internalSourcePropertyChange prop="+_data.propertyName);
 
-   if (_data.propertyName == this.property) {
+   if (!this.targetListener && _data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
       console.log(this.name + ": ======= Trigger Condition " + this.triggerCondition);
 
