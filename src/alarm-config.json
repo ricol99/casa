@@ -149,6 +149,35 @@
                }
             },
             {
+               "name": "movement-in-early-evening",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "andpropertybinder:kitchen-movement-in-early-evening",
+                  "sources": [
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "early-evening"
+                     },
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "movement"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "latched-movement-in-early-evening",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "latchingpropertybinder:latched-early-evening-movement",
+                  "source": "room:kitchen",
+                  "sourceProperty": "movement-in-early-evening",
+                  "minOutputTime": 2730
+               }
+            },
+            {
                "name": "room-light-level",
                "initialValue": "off",
                "writable": false,
@@ -159,6 +188,12 @@
                         "source": "room:kitchen",
                         "sourceProperty": "movement-in-dark",
                         "outputActiveValue": "medium",
+                        "outputInactiveValue": "off"
+                     },
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "latched-movement-in-early-evening",
+                        "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      },
                      {
@@ -473,6 +508,24 @@
                   "name": "invertingpropertybinder:env-dark",
                   "source": "thing:environment",
                   "sourceProperty": "daylight"
+               }
+            },
+            {
+               "name": "early-evening",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-early-evening",
+                  "events": [
+                     {
+                        "rule": "sunset:-1800",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset:930",
+                        "propertyValue": false
+                     }
+                  ]
                }
             }
          ]
