@@ -127,7 +127,7 @@
                   "name": "latchingpropertybinder:kitchen-movement",
                   "source": "alarm:home",
                   "sourceProperty": "kitchen-pir",
-                  "minOutputTime": 60
+                  "minOutputTime": 300
                }
             },
             {
