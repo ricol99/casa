@@ -55,22 +55,6 @@
    ],
    "things": [
       {
-         "name": "alarm:home",
-         "displayName": "House Alarm",
-         "props": [
-            {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.90",
-               "writable": false
-            },
-            {
-               "name": "colour",
-               "initialValue": "white",
-               "writable": true
-            }
-         ]
-      },
-      {
          "name": "thing:home-internet-connection",
          "displayName": "Home Internet Connection",
          "props": [
@@ -105,7 +89,27 @@
                   "name": "debouncingpropertybinder:home-casas",
                   "source": "thing:home-internet-connection",
                   "sourceProperty": "home-casas",
-                  "threshold": 20
+                  "threshold": 120
+               }
+            },
+            {
+               "name": "casa-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "debouncingpropertybinder:casa-alarm",
+                  "source": "casa:alarm",
+                  "threshold": 120
+               }
+            },
+            {
+               "name": "casa-cctv",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "debouncingpropertybinder:casa-cctv",
+                  "source": "casa:cctv",
+                  "threshold": 120
                }
             },
             {
@@ -129,18 +133,7 @@
       }
    ],
    "transforms" : [],
-   "activators": [
-      {
-         "name": "debounceactivator:debounced-casa-alarm",
-         "source": "casa:alarm",
-         "threshold": 60
-      },
-      {
-         "name": "debounceactivator:debounced-casa-cctv",
-         "source": "casa:cctv",
-         "threshold": 60
-      }
-   ],
+   "activators": [],
    "actions": [
       {
          "name": "pushoveraction:alarm-tamper-alarm",
@@ -149,7 +142,7 @@
          "inactiveMessage": "Alarm no longer in tamper mode",
          "inactiveMessagePriority": 0,
          "source": "alarm:home",
-         "sourceProperty": "alarm-tamper-alarm",
+         "sourceProperty": "tamper-alarm",
          "target": "usergroup:key-holders"
       },
       {
@@ -159,7 +152,7 @@
          "inactiveMessage": "Alarm mains power restored",
          "inactiveMessagePriority": 0,
          "source": "alarm:home",
-         "sourceProperty": "alarm-mains-failure",
+         "sourceProperty": "mains-failure",
          "target": "usergroup:key-holders"
       },
       {
@@ -169,7 +162,7 @@
          "inactiveMessage": "Fire alarm reset",
          "inactiveMessagePriority": 0,
          "source": "alarm:home",
-         "sourceProperty": "alarm-fire-alarm",
+         "sourceProperty": "fire-alarm",
          "target": "usergroup:key-holders"
       },
       {
@@ -179,7 +172,7 @@
          "inactiveMessage": "Alarm disarmed",
          "inactiveMessagePriority": 0,
          "source": "alarm:home",
-         "sourceProperty": "alarm-fully-armed",
+         "sourceProperty": "fully-armed",
          "target": "usergroup:admins"
       },
       {
@@ -189,7 +182,7 @@
          "inactiveMessage": "Alarm disarmed",
          "inactiveMessagePriority": 0,
          "source": "alarm:home",
-         "sourceProperty": "alarm-part-armed",
+         "sourceProperty": "part-armed",
          "target": "usergroup:admins"
       },
       {
@@ -199,7 +192,7 @@
          "inactiveMessage": "Alarm trigger reset",
          "inactiveMessagePriority": 2,
          "source": "alarm:home",
-         "sourceProperty": "alarm-in-alarm",
+         "sourceProperty": "alarm-triggered",
          "target": "usergroup:key-holders"
       },
       {
@@ -209,7 +202,7 @@
          "inactiveMessage": "Confirmed alarm reset",
          "inactiveMessagePriority": 2,
          "source": "alarm:home",
-         "sourceProperty": "alarm-confirmed-alarm",
+         "sourceProperty": "confirmed-alarm",
          "target": "usergroup:key-holders"
       },
       {
@@ -236,7 +229,8 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "Casa 'alarm' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "debounceactivator:debounced-casa-alarm",
+         "source": "thing:home-internet-connection",
+         "sourceProperty": "casa-alarm",
          "target": "usergroup:admins"
       },
       {
@@ -245,7 +239,8 @@
          "activeMessagePriority": 0,
          "inactiveMessage": "Casa 'cctv' has gone down!",
          "inactiveMessagePriority": 1,
-         "source": "debounceactivator:debounced-casa-cctv",
+         "source": "thing:home-internet-connection",
+         "sourceProperty": "casa-cctv",
          "target": "usergroup:admins"
       },
       {
