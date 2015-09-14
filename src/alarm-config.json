@@ -174,7 +174,7 @@
                   "name": "latchingpropertybinder:latched-early-evening-movement",
                   "source": "room:kitchen",
                   "sourceProperty": "movement-in-early-evening",
-                  "minOutputTime": 2730
+                  "minOutputTime": 600
                }
             },
             {
@@ -239,6 +239,17 @@
                }
             },
             {
+               "name": "kitchen-dresser-lights",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:kitchen-dresser-lights",
+                  "source": "lightwaverflink:home",
+                  "roomID": 6,
+                  "deviceID": 4
+               }
+            },
+            {
                "name": "kitchen-lights-off",
                "initialValue": false,
                "writable": false,
@@ -261,6 +272,10 @@
                      {
                         "name": "kitchen-downlights-wolf",
                         "activeValue": 0
+                     },
+                     {
+                        "name": "kitchen-dresser-lights",
+                        "activeValue": false
                      }
                   ]
                }
@@ -288,6 +303,10 @@
                      {
                         "name": "kitchen-downlights-wolf",
                         "activeValue": 4
+                     },
+                     {
+                        "name": "kitchen-dresser-lights",
+                        "activeValue": true
                      }
                   ]
                }
@@ -315,6 +334,10 @@
                      {
                         "name": "kitchen-downlights-wolf",
                         "activeValue": 50
+                     },
+                     {
+                        "name": "kitchen-dresser-lights",
+                        "activeValue": true
                      }
                   ]
                }
