@@ -15,6 +15,10 @@ util.inherits(Action, Worker);
 Action.prototype.sourceIsActive = function(_data) {
    console.log(this.name + ': ACTIVATED', _data);
 
+   if (_data.coldStart) {
+      this.actionActive = false;
+   }
+
    if (!this.actionActive) {
       this.actionActive = true;
 
@@ -28,11 +32,14 @@ Action.prototype.sourceIsActive = function(_data) {
    else {
       console.log(this.name + ': Already Active. Not need to activate Action!');
    }
-
 }
 
 Action.prototype.sourceIsInactive = function(_data) {
    console.log(this.name + ': DEACTIVATED', _data);
+
+   if (_data.coldStart) {
+      this.actionActive = true;
+   }
 
    if (this.actionActive) {
       this.actionActive = false;

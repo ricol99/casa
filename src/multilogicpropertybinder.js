@@ -1,15 +1,14 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var LogicPropertyBinder = require('./logicpropertybinder');
 
 function MultiLogicPropertyBinder(_config, _owner) {
 
    _config.allowMultipleSources = true;
-   _config.defaultTriggerConditions = true;
 
-   PropertyBinder.call(this, _config, _owner);
+   LogicPropertyBinder.call(this, _config, _owner);
 }
 
-util.inherits(MultiLogicPropertyBinder, PropertyBinder);
+util.inherits(MultiLogicPropertyBinder, LogicPropertyBinder);
 
 MultiLogicPropertyBinder.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
    console.log(this.name + ': Input source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to true!');
@@ -65,11 +64,13 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already active so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
+            //this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
+            this.goActive(highestPrioritySource.activeData, highestPrioritySource.outputActiveValue);
          }
       }
       else {
-         this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
+         //this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
+         this.goInactive(highestPrioritySource.inactiveData, highestPrioritySource.outputInactiveValue);
       }
    }
    else {
@@ -77,11 +78,13 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already inactive so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
+            //this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
+            this.goInactive(highestPrioritySource.inactiveData, highestPrioritySource.outputInactiveValue);
          }
       }
       else {
-         this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
+         //this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
+         this.goActive(highestPrioritySource.activeData, highestPrioritySource.outputActiveValue);
       }
    }
 }

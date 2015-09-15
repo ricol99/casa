@@ -1,0 +1,4 @@
+DONE 1) Should multilogicpropertybinder inherit from logicpropertybinder instead of propertybinder? - YES!
+DONE 2) Should we have outputActiveValue and outputInactiveValue on logicpropertybinder? - YES!
+DONE 3) Cold start on actions - do we check and avoid initial active check?
+

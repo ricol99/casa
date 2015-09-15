@@ -9,11 +9,26 @@ function LogicPropertyBinder(_config, _owner) {
    this.applyProps = {};
    this.applyProps.active = (_config.applyProps) ? ((_config.applyProps.active) ? _config.applyProps.active : null) : null;
    this.applyProps.inactive = (_config.applyProps) ? ((_config.applyProps.inactive) ? _config.applyProps.inactive : null) : null;
+   this.outputActiveValue = _config.outputActiveValue;
+   this.outputInactiveValue = _config.outputInactiveValue;
 
    var that = this;
 }
 
 util.inherits(LogicPropertyBinder, PropertyBinder);
+
+LogicPropertyBinder.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
 
 LogicPropertyBinder.prototype.mergeApplyProps = function(_sourceData, _applyProps) {
    var dataToSend = this.copyData(_sourceData);
@@ -32,24 +47,28 @@ LogicPropertyBinder.prototype.mergeApplyProps = function(_sourceData, _applyProp
    return dataToSend;
 }
 
-LogicPropertyBinder.prototype.goActive = function(_sourceData) {
+LogicPropertyBinder.prototype.goActive = function(_sourceData, _outputValue) {
    console.log(this.name + ": Going active! Previously active state=" + this.myPropertyValue());
 
    var sendData = this.mergeApplyProps(_sourceData, this.applyProps.active);
    sendData.sourceName = this.name;
    sendData.oldState = this.myPropertyValue();;
    console.log(this.name+": Data=", sendData);
-   this.updatePropertyAfterRead(true, sendData);
+
+   var outputValue = (_outputValue != undefined) ? outputValue : ((this.outputActiveValue == undefined) ? true : this.outputActiveValue);
+   this.updatePropertyAfterRead(outputValue, sendData);
 }
 
-LogicPropertyBinder.prototype.goInactive = function(_sourceData) {
+LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
    console.log(this.name + ": Going inactive! Previously active state=" + this.myPropertyValue());
 
    var sendData = this.mergeApplyProps(_sourceData, this.applyProps.inactive);
    sendData.sourceName = this.name;
    sendData.oldState = this.myPropertyValue();;
    console.log(this.name+": Data=", sendData);
-   this.updatePropertyAfterRead(false, sendData);
+
+   var outputValue = (_outputValue != undefined) ? outputValue : ((this.outputInactiveValue == undefined) ? false : this.outputInactiveValue);
+   this.updatePropertyAfterRead(outputValue, sendData);
 }
 
 // Override these methods

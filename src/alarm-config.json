@@ -358,7 +358,25 @@
                   "sourceProperty": "lounge-pir",
                   "triggerCondition": "==",
                   "triggerValue": true,
-                  "minOutputTime": 180
+                  "minOutputTime": 300
+               }
+            },
+            {
+               "name": "movement-in-dark",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "andpropertybinder:lounge-movement-in-dark",
+                  "sources": [
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "dark"
+                     },
+                     {
+                        "source": "room:lounge",
+                        "sourceProperty": "movement"
+                     }
+                  ]
                }
             },
             {
@@ -428,21 +446,14 @@
          "displayName": "Master Bedroom",
          "props": [
             {
-               "name": "lights",
+               "name": "natalie-bed-lamp",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:master-bedroom-lights",
-                  "events": [
-                     {
-                        "rule": "20 22 * * *",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "15 23 * * *",
-                        "propertyValue": false
-                     }
-                  ]
+                  "name": "lightwaverfpropertybinder:master-bedroom-natalie-bed-lamp",
+                  "target": "lightwaverflink:home",
+                  "roomID": 3,
+                  "deviceID": 1
                }
             }
          ]
@@ -546,6 +557,24 @@
                      },
                      {
                         "rule": "sunset:930",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "bedtime",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-bedtime",
+                  "events": [
+                     {
+                        "rule": "30 22 * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "15 23 * * *",
                         "propertyValue": false
                      }
                   ]
