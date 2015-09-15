@@ -84,16 +84,10 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 }
 
 Casa.prototype.refreshSourceListeners = function() {
-   console.log("================ REFRESHING SOURCES =======================");
    for (var prop in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(prop)){
-         console.log("================ REFRESHING SOURCE " +prop+"  =======================");
+      if (this.sourceListeners.hasOwnProperty(prop)) {
          this.sourceListeners[prop].refreshSources();
-
-         if (this.sourceListeners[prop].sourceListenerEnabled) {
-            console.log("================ SOURCELISTENER "+prop+" SOURCE "+this.sourceListeners[prop].source.name);
-         }
       }
    }
 }
@@ -266,8 +260,7 @@ Casa.prototype.addSource = function(_source) {
 Casa.prototype.addSourceListener = function(_sourceListener) {
 
    if (this.sourceListeners[_sourceListener.name]) {
-      console.log("==============*********************SOURCELISTENER NAME CONFLICT***************=======================");
-      console.log("==============="+_sourceListener.name+"============");
+      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.name);
       process.exit();
    }
 

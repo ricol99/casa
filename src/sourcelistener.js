@@ -59,7 +59,6 @@ SourceListener.prototype.establishListeners = function() {
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
    this.sourceListenerEnabled = (this.source) ? true : false;
-   console.log(this.name+': ============= sourceListenerEnabled='+this.sourceListenerEnabled);
 
    if (this.sourceListenerEnabled) {
       this.source.on('property-changed', this.propertyChangedCallback);
@@ -98,11 +97,9 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
-   console.log(this.name+": ======================== internalSourcePropertyChange prop="+_data.propertyName);
 
    if (!this.targetListener && _data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
-      console.log(this.name + ": ======= Trigger Condition " + this.triggerCondition);
 
       if (this.triggerCondition) {
          var a = _data.propertyValue;

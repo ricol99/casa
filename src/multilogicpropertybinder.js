@@ -64,12 +64,10 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already active so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            //this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
             this.goActive(highestPrioritySource.activeData, highestPrioritySource.outputActiveValue);
          }
       }
       else {
-         //this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
          this.goInactive(highestPrioritySource.inactiveData, highestPrioritySource.outputInactiveValue);
       }
    }
@@ -78,12 +76,10 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
 
          // Already inactive so check priority
          if (highestPrioritySource.priority >= _sourceAttributes.priority) {
-            //this.updatePropertyAfterRead(this.getOutputValue(false, highestPrioritySource), highestPrioritySource.inactiveData);
             this.goInactive(highestPrioritySource.inactiveData, highestPrioritySource.outputInactiveValue);
          }
       }
       else {
-         //this.updatePropertyAfterRead(this.getOutputValue(true, highestPrioritySource), highestPrioritySource.activeData);
          this.goActive(highestPrioritySource.activeData, highestPrioritySource.outputActiveValue);
       }
    }
