@@ -55,7 +55,7 @@ LogicPropertyBinder.prototype.goActive = function(_sourceData, _outputValue) {
    sendData.oldState = this.myPropertyValue();;
    console.log(this.name+": Data=", sendData);
 
-   var outputValue = (_outputValue != undefined) ? outputValue : ((this.outputActiveValue == undefined) ? true : this.outputActiveValue);
+   var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputActiveValue == undefined) ? true : this.outputActiveValue);
    this.updatePropertyAfterRead(outputValue, sendData);
 }
 
@@ -67,7 +67,7 @@ LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
    sendData.oldState = this.myPropertyValue();;
    console.log(this.name+": Data=", sendData);
 
-   var outputValue = (_outputValue != undefined) ? outputValue : ((this.outputInactiveValue == undefined) ? false : this.outputInactiveValue);
+   var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputInactiveValue == undefined) ? false : this.outputInactiveValue);
    this.updatePropertyAfterRead(outputValue, sendData);
 }
 
