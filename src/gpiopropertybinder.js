@@ -29,8 +29,9 @@ GPIOPropertyBinder.prototype.Ready = function() {
    this.ready = true;
 
    this.gpio.read( function(_err, _value) {
-       that.value = _value;
-       that.updatePropertyAfterRead(_value, { sourceName: this.ownerName, coldStart: true });
+       var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+       that.value = newValue;
+       that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.ownerName, coldStart: true });
    });
 
    this.gpio.watch(function (_err, _value) {
