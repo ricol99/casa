@@ -19,6 +19,7 @@ util.inherits(PeerSource, events.EventEmitter);
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.name + ': received changed-property event from peer.');
+   console.info('Property Changed: ' + this.name + ':' + _data.propertyName + ': ' + _data.propertyValue);
    this.props[_data.propertyName] = _data.propertyValue;
    this.emit('property-changed', _data);
 }

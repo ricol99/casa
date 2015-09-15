@@ -1,6 +1,6 @@
 var crypto = require('crypto');
 var fs = require('fs');
-require('console-stamp')(console, '[HH:MM:ss.l]');
+require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: false, info: true });
 
 var configFile = (process.argv.length >= 3) ? process.argv[2] : 'internet-config.json'; 
 var connectToPeers = (process.argv.length >= 4) ? process.argv[3] != '-nopeer' : true; 

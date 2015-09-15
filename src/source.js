@@ -90,6 +90,7 @@ Source.prototype.setProperty = function(_propName, _propValue, _data, _callback)
 // INTERNAL METHOD AND FOR USE BY PROPERTY BINDERS
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    console.log(this.name + ': Setting Property ' + _propName + ' to ' + _propValue);
+   console.info('Property Changed: ' + this.name + ':' + _propName + ': ' + _propValue);
    var oldValue = this.props[_propName];
    this.props[_propName] = _propValue;
    var sendData = (_data) ? this.copyData(_data) : {};

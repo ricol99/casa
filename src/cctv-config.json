@@ -68,7 +68,16 @@
             {
                "name": "smallerLightLevel",
                "initialValue": 0,
-               "writable": true
+               "writable": false,
+               "binder": {
+                  "name": "lineartransformpropertybinder:test-light-level-transform",
+                  "inputMin": 0,
+                  "inputMax": 100,
+                  "outputMin": 10,
+                  "outputMax": 0,
+                  "source": "thing:home-daylight-sensor",
+                  "sourceProperty": "lightLevel"
+               }
             },
             {
                "name": "daylight",
@@ -162,19 +171,7 @@
          ]
       }
    ],
-   "transforms" : [
-      {
-         "name": "lineartransform:test-light-level-transform",
-         "inputMin": 0,
-         "inputMax": 100,
-         "outputMin": 10,
-         "outputMax": 0,
-         "source": "thing:home-daylight-sensor",
-         "sourceProperty": "lightLevel",
-         "target": "thing:test-daylight-sensor",
-         "targetProperty": "smallerLightLevel"
-      }
-   ],
+   "transforms" : [],
    "activators": [],
    "actions": [
       {

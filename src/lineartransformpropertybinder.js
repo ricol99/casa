@@ -21,13 +21,10 @@ util.inherits(LinearTransformPropertyBinder, PropertyBinder);
 LinearTransformPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    console.log(this.name + ': property ' + _data.propertyName + ' has changed to ' + _data.propertyValue);
 
-   if (this.target) {
-      var placeInRange = (_data.propertyValue - this.inputMin) / this.inputRange;
-      var outputVal = (this.outputRange * placeInRange) + this.outputMin;
-      console.log(this.name + ': attempting to set property ' + this.targetProperty + ' in target ' + this.target.name + ' to ' + outputVal);
+   var placeInRange = (_data.propertyValue - this.inputMin) / this.inputRange;
+   var outputVal = (this.outputRange * placeInRange) + this.outputMin;
 
-      this.updatePropertyAfterRead(outputVal, _data);
-   }
+   this.updatePropertyAfterRead(outputVal, _data);
 }
 
 module.exports = exports = LinearTransformPropertyBinder;
