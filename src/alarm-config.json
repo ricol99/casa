@@ -438,6 +438,111 @@
                   "roomID": 1,
                   "deviceID": 5
                }
+            },
+            {
+               "name": "lounge-lights-off",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:lounge-lights-off",
+                  "source": "room:lounge",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "off",
+                  "target": "room:lounge",
+                  "targetProperties": [
+                     {
+                        "name": "lounge-fire-light-level",
+                        "activeValue": 0
+                     },
+                     {
+                        "name": "lounge-alcoves-light-level",
+                        "activeValue": 0
+                     },
+                     {
+                        "name": "lounge-table-light",
+                        "activeValue": false
+                     },
+                     {
+                        "name": "lounge-centre-light",
+                        "activeValue": false
+                     },
+                     {
+                        "name": "lounge-tree-light",
+                        "activeValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "lounge-lights-low",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:lounge-lights-low",
+                  "source": "room:lounge",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "low",
+                  "target": "room:lounge",
+                  "targetProperties": [
+                     {
+                        "name": "lounge-fire-light-level",
+                        "activeValue": 20
+                     },
+                     {
+                        "name": "lounge-alcoves-light-level",
+                        "activeValue": 20
+                     },
+                     {
+                        "name": "lounge-table-light",
+                        "activeValue": true
+                     },
+                     {
+                        "name": "lounge-centre-light",
+                        "activeValue": true
+                     },
+                     {
+                        "name": "lounge-tree-light",
+                        "activeValue": true
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "lounge-lights-medium",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "settingpropertybinder:lounge-lights-medium",
+                  "source": "room:lounge",
+                  "sourceProperty": "room-light-level",
+                  "triggerCondition": "==",
+                  "triggerValue": "medium",
+                  "target": "room:lounge",
+                  "targetProperties": [
+                     {
+                        "name": "lounge-fire-light-level",
+                        "activeValue": 50
+                     },
+                     {
+                        "name": "lounge-alcoves-light-level",
+                        "activeValue": 50
+                     },
+                     {
+                        "name": "lounge-table-light",
+                        "activeValue": true
+                     },
+                     {
+                        "name": "lounge-centre-light",
+                        "activeValue": true
+                     },
+                     {
+                        "name": "lounge-tree-light",
+                        "activeValue": true
+                     }
+                  ]
+               }
             }
          ]
       },
