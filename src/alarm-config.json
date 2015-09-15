@@ -442,7 +442,7 @@
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-fire-light",
-                  "target": "lightwaverflink:home",
+                  "source": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 3
                }
@@ -450,10 +450,10 @@
             {
                "name": "lounge-alcoves-light-level",
                "initialValue": 0,
-               "writable": 0,
+               "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-alcoves-light",
-                  "target": "lightwaverflink:home",
+                  "source": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 2
                }
@@ -464,7 +464,7 @@
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-table-light",
-                  "target": "lightwaverflink:home",
+                  "source": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 1
                }
@@ -475,7 +475,7 @@
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-centre-light",
-                  "target": "lightwaverflink:home",
+                  "source": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 4
                }
@@ -486,7 +486,7 @@
                "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:lounge-tree-light",
-                  "target": "lightwaverflink:home",
+                  "source": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 5
                }
