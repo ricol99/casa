@@ -235,6 +235,17 @@
                }
             },
             {
+               "name": "kitchen-island-lights",
+               "initialValue": 0,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:kitchen-dresser-lights",
+                  "source": "lightwaverflink:home",
+                  "roomID": 6,
+                  "deviceID": 5
+               }
+            },
+            {
                "name": "kitchen-lights-off",
                "initialValue": false,
                "writable": false,
@@ -261,6 +272,10 @@
                      {
                         "name": "kitchen-dresser-lights",
                         "activeValue": false
+                     },
+                     {
+                        "name": "kitchen-island-lights",
+                        "activeValue": 0
                      }
                   ]
                }
@@ -279,11 +294,11 @@
                   "targetProperties": [
                      {
                         "name": "kitchen-downlights-main-1",
-                        "activeValue": 4
+                        "activeValue": 0
                      },
                      {
                         "name": "kitchen-downlights-main-2",
-                        "activeValue": 4
+                        "activeValue": 0
                      },
                      {
                         "name": "kitchen-downlights-wolf",
@@ -292,6 +307,10 @@
                      {
                         "name": "kitchen-dresser-lights",
                         "activeValue": true
+                     },
+                     {
+                        "name": "kitchen-island-lights",
+                        "activeValue": 50
                      }
                   ]
                }
@@ -323,6 +342,10 @@
                      {
                         "name": "kitchen-dresser-lights",
                         "activeValue": true
+                     },
+                     {
+                        "name": "kitchen-island-lights",
+                        "activeValue": 75
                      }
                   ]
                }
