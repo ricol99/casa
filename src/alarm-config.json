@@ -239,7 +239,7 @@
                "initialValue": 0,
                "writable": true,
                "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-dresser-lights",
+                  "name": "lightwaverfpropertybinder:kitchen-island-lights",
                   "source": "lightwaverflink:home",
                   "roomID": 6,
                   "deviceID": 5
