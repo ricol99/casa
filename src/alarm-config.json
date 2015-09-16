@@ -149,15 +149,15 @@
                }
             },
             {
-               "name": "movement-in-early-evening",
+               "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "andpropertybinder:kitchen-movement-in-early-evening",
+                  "name": "andpropertybinder:kitchen-movement-in-low-light",
                   "sources": [
                      {
                         "source": "thing:environment",
-                        "sourceProperty": "early-evening"
+                        "sourceProperty": "low-light"
                      },
                      {
                         "source": "room:kitchen",
@@ -167,13 +167,13 @@
                }
             },
             {
-               "name": "latched-movement-in-early-evening",
+               "name": "latched-movement-in-low-light",
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "latchingpropertybinder:latched-early-evening-movement",
+                  "name": "latchingpropertybinder:latched-low-light-movement",
                   "source": "room:kitchen",
-                  "sourceProperty": "movement-in-early-evening",
+                  "sourceProperty": "movement-in-low-light",
                   "minOutputTime": 600
                }
             },
@@ -192,7 +192,7 @@
                      },
                      {
                         "source": "room:kitchen",
-                        "sourceProperty": "latched-movement-in-early-evening",
+                        "sourceProperty": "latched-movement-in-low-light",
                         "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      },
@@ -380,15 +380,15 @@
                }
             },
             {
-               "name": "movement-in-early-evening",
+               "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "andpropertybinder:lounge-movement-in-early-evening",
+                  "name": "andpropertybinder:lounge-movement-in-low-light",
                   "sources": [
                      {
                         "source": "thing:environment",
-                        "sourceProperty": "early-evening"
+                        "sourceProperty": "low-light"
                      },
                      {
                         "source": "room:lounge",
@@ -398,13 +398,13 @@
                }
             },
             {
-               "name": "latched-movement-in-early-evening",
+               "name": "latched-movement-in-low-light",
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "latchingpropertybinder:latched-lounge-early-evening-movement",
+                  "name": "latchingpropertybinder:latched-lounge-low-light-movement",
                   "source": "room:lounge",
-                  "sourceProperty": "movement-in-early-evening",
+                  "sourceProperty": "movement-in-low-light",
                   "minOutputTime": 600
                }
             },
@@ -423,7 +423,7 @@
                      },
                      {
                         "source": "room:lounge",
-                        "sourceProperty": "latched-movement-in-early-evening",
+                        "sourceProperty": "latched-movement-in-low-light",
                         "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      },
@@ -702,12 +702,20 @@
                }
             },
             {
-               "name": "early-evening",
+               "name": "low-light",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-early-evening",
+                  "name": "schedulepropertybinder:env-low-light",
                   "events": [
+                     {
+                        "rule": "sunrise:-1800",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunrise:930",
+                        "propertyValue": false
+                     },
                      {
                         "rule": "sunset:-1800",
                         "propertyValue": true
