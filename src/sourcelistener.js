@@ -8,7 +8,8 @@ function SourceListener(_config, _owner) {
    this.casa = this.casaSys.casa;
    this.owner = _owner;
    this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
-   this.targetListener = (_config.targetListener == undefined) ? false : _config.targetListener;
+   this.ignoreSourceUpdates = (_config.ignoreSourceUpdates == undefined) ? false : _config.ignoreSourceUpdates;
+   this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
 
    if (_config.sourceProperty) {
       this.property = _config.sourceProperty;
@@ -98,7 +99,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
-   if (!this.targetListener && _data.propertyName == this.property) {
+   if (!this.ignoreSourceUpdates && _data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
       if (this.triggerCondition) {
@@ -107,14 +108,30 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
          var evalStr = "a " + this.triggerCondition + " b";
 
          if (eval(evalStr)) {
-            this.owner.sourceIsActive(_data);
+
+            if (this.isTarget) {
+               this.owner.targetIsActive(_data);
+            }
+            else {
+               this.owner.sourceIsActive(_data);
+            }
          }
          else {
-            this.owner.sourceIsInactive(_data);
+            if (this.isTarget) {
+               this.owner.targetIsInactive(_data);
+            }
+            else {
+               this.owner.sourceIsInactive(_data);
+            }
          }
       }
 
-      this.owner.sourcePropertyChanged(_data);
+      if (this.isTarget) {
+         this.owner.targetPropertyChanged(_data);
+      }
+      else {
+         this.owner.sourcePropertyChanged(_data);
+      }
    }
 }
 

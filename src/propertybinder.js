@@ -50,7 +50,11 @@ function PropertyBinder(_config, _owner) {
    }
 
    if (_config.target) {
-      this.targetListener = new SourceListener({ source: _config.target, targetListener: true }, this);
+      this.targetProperty = _config.targetProperty;
+      this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? false : _config.ignoreTargetUpdates;
+      this.targetListener = new SourceListener({ source: _config.target, sourceProperty: this.targetProperty, isTarget: true,
+                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, triggerCondition: _config.targetTriggerCondition,
+                                                 triggerValue: _config.targetTriggerValue, defaultTriggerConditions: _config.targetDefaultTriggerConditions }, this);
       this.target = this.targetListener.source;
    }
 
@@ -86,6 +90,7 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
    this.binderEnabled = false;
    this.source = null;
+   this.target = null;
    this.goInvalid(_data);
 }
 
@@ -115,6 +120,18 @@ PropertyBinder.prototype.sourceIsInactive = function(_data) {
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    // Copy functionality by default
    this.updatePropertyAfterRead(_data.propertyValue, _data);
+}
+
+PropertyBinder.prototype.targetIsActive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.targetIsInactive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.targetPropertyChanged = function(_data) {
+   // DO NOTHING BY DEFAULT
 }
 
 // Override this if you listen to a source that is not "Source".

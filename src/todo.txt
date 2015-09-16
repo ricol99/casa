@@ -1,4 +1,5 @@
 DONE 1) Should multilogicpropertybinder inherit from logicpropertybinder instead of propertybinder? - YES!
 DONE 2) Should we have outputActiveValue and outputInactiveValue on logicpropertybinder? - YES!
-DONE 3) Cold start on actions - do we check and avoid initial active check?
+DONE 3) Cold start on actions - do we check and avoid initial active check? NO!
+4) Review Target behaviour is sourceListener - should we have a targetIsInvalid etc.?
 

@@ -153,28 +153,13 @@
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "andpropertybinder:kitchen-movement-in-low-light",
-                  "sources": [
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "low-light"
-                     },
-                     {
-                        "source": "room:kitchen",
-                        "sourceProperty": "movement"
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "latched-movement-in-low-light",
-               "initialValue": false,
-               "writable": false,
-               "binder" : {
                   "name": "latchingpropertybinder:latched-low-light-movement",
                   "source": "room:kitchen",
-                  "sourceProperty": "movement-in-low-light",
-                  "minOutputTime": 600
+                  "sourceProperty": "movement",
+                  "controller" : {
+                     "source": "thing:environment",
+                     "sourceProperty": "low-light"
+                  }
                }
             },
             {
@@ -192,7 +177,7 @@
                      },
                      {
                         "source": "room:kitchen",
-                        "sourceProperty": "latched-movement-in-low-light",
+                        "sourceProperty": "movement-in-low-light",
                         "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      },

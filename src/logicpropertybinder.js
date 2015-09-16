@@ -85,9 +85,21 @@ LogicPropertyBinder.prototype.sourceIsInactive = function(_data) {
    this.goInactive(_data);
 }
 
-// Do not override this
+// Do not override this method
 LogicPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    // DO NOTHING
+}
+
+LogicPropertyBinder.prototype.targetIsActive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+LogicPropertyBinder.prototype.targetIsInactive = function(_data) {
+   // DO NOTHING BY DEFAULT
+}
+
+LogicPropertyBinder.prototype.targetPropertyChanged = function(_data) {
+   // DO NOTHING BY DEFAULT
 }
 
 module.exports = exports = LogicPropertyBinder;
