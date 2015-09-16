@@ -127,7 +127,7 @@
                   "name": "latchingpropertybinder:kitchen-movement",
                   "source": "alarm:home",
                   "sourceProperty": "kitchen-pir",
-                  "minOutputTime": 300
+                  "minOutputTime": 600
                }
             },
             {
@@ -358,7 +358,7 @@
                   "sourceProperty": "lounge-pir",
                   "triggerCondition": "==",
                   "triggerValue": true,
-                  "minOutputTime": 300
+                  "minOutputTime": 600
                }
             },
             {
