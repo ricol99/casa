@@ -168,7 +168,8 @@ SchedulePropertyBinder.prototype.setSunTimes = function() {
       if ((typeof this.events[index].originalRule == 'string') && this.times[this.events[index].originalRule]) {
          console.log(this.name + ': Rule ' + this.events[index].originalRule + ' is a sun time');
          this.events[index].rule = this.times[this.events[index].originalRule];
-         this.events[index].rule.setSeconds(this.events[index].rule.getSeconds() + this.events[index].ruleDelta);
+         this.events[index].rule.setTime(this.events[index].rule.getTime() + (this.events[index].ruleDelta * 1000));
+         //this.events[index].rule.setSeconds(this.events[index].rule.getSeconds() + this.events[index].ruleDelta);
          this.events[index].sunTime = true;
          console.log(this.name + ': Sun time ' + this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + this.events[index].rule);
       }
