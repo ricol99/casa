@@ -206,6 +206,9 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
       console.info(this.name + ": Closest event is "+closestEvent.rule + " " + closestEvent.propertyValue);
       this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.owner.name, coldStart: true });
    }
+   else {
+      this.updatePropertyAfterRead(this.events[this.events.length-1].propertyValue, { sourceName: this.owner.name, coldStart: true });
+   }
 }
 
 module.exports = exports = SchedulePropertyBinder;
