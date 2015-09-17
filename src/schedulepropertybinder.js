@@ -72,14 +72,13 @@ SchedulePropertyBinder.prototype.createEventsFromConfig = function(_eventsConfig
          eventRuleDelta = 0;
       }
 
-      this.events[index] = { rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                             sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue };
+      this.events.push({ rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                             sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue });
    }
 }
 
 SchedulePropertyBinder.prototype.lastEventScheduledBeforeNow = function(_now, _event) {
 
-   //var startDate = new Date(_now.getYear(), _now.getMonth(), _now.getDay(), 0, 0, 0, 0);
    var startDate = new Date();
    startDate.setTime(startDate.getTime()-(_now.getHours()*60*60*1000)-(_now.getSeconds()*60*1000));
 
@@ -87,7 +86,7 @@ SchedulePropertyBinder.prototype.lastEventScheduledBeforeNow = function(_now, _e
       currentDate: startDate,
       endDate: _now,
       iterator: true
-    };
+   };
    var lastScheduled = null;
 
    try {
@@ -167,9 +166,8 @@ SchedulePropertyBinder.prototype.setSunTimes = function() {
 
       if ((typeof this.events[index].originalRule == 'string') && this.times[this.events[index].originalRule]) {
          console.log(this.name + ': Rule ' + this.events[index].originalRule + ' is a sun time');
-         this.events[index].rule = this.times[this.events[index].originalRule];
+         this.events[index].rule = new Date(this.times[this.events[index].originalRule]);
          this.events[index].rule.setTime(this.events[index].rule.getTime() + (this.events[index].ruleDelta * 1000));
-         //this.events[index].rule.setSeconds(this.events[index].rule.getSeconds() + this.events[index].ruleDelta);
          this.events[index].sunTime = true;
          console.log(this.name + ': Sun time ' + this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + this.events[index].rule);
       }
@@ -205,6 +203,7 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
    // Set Initial Value
    if (closestEvent) {
       console.log(this.name + ": Closest event is "+closestEvent.rule);
+      console.info(this.name + ": Closest event is "+closestEvent.rule + " " + closestEvent.propertyValue);
       this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.owner.name, coldStart: true });
    }
 }
