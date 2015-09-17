@@ -21,6 +21,7 @@ function SettingPropertyBinder(_config, _owner) {
          this.targetProperties[_config.targetProperties[i].name].currentValue = 0;
       }
    }
+   _config.ignoreTargetUpdates = true;
 
    LogicPropertyBinder.call(this, _config, _owner);
 }
@@ -28,6 +29,7 @@ function SettingPropertyBinder(_config, _owner) {
 util.inherits(SettingPropertyBinder, LogicPropertyBinder);
 
 SettingPropertyBinder.prototype.processSourceStateChange = function(_propertyName, _active, _data) {
+   console.log("=======================", _propertyName + " " +  _active +  " " + _data.sourceName);
    var tempValue;
 
    if (_active && this.targetProperties[_propertyName].activeValue != null) {
@@ -40,7 +42,7 @@ SettingPropertyBinder.prototype.processSourceStateChange = function(_propertyNam
       tempValue = _data.applyProps[_propertyName];
    }
    else {
-      console.log(this.name + ": Unable to set property as no value defined and no apply prop found!");
+      // Nothing to set
       return;
    }
 

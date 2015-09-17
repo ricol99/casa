@@ -7,6 +7,7 @@ function LatchingPropertyBinder(_config, _owner) {
 
    if (_config.controller) {
       _config.targetDefaultTriggerConditions = true;
+      _config.ignoreTargetUpdates = false;
 
       if (typeof _config.controller == "string") {
          _config.target = _config.controller;

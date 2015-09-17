@@ -125,12 +125,14 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
             }
          }
       }
-
-      if (this.isTarget) {
-         this.owner.targetPropertyChanged(_data);
-      }
       else {
-         this.owner.sourcePropertyChanged(_data);
+
+         if (this.isTarget) {
+            this.owner.targetPropertyChanged(_data);
+         }
+         else {
+            this.owner.sourcePropertyChanged(_data);
+         }
       }
    }
 }

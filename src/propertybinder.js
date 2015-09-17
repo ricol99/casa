@@ -51,7 +51,7 @@ function PropertyBinder(_config, _owner) {
 
    if (_config.target) {
       this.targetProperty = _config.targetProperty;
-      this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? false : _config.ignoreTargetUpdates;
+      this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? true : _config.ignoreTargetUpdates;
       this.targetListener = new SourceListener({ source: _config.target, sourceProperty: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, triggerCondition: _config.targetTriggerCondition,
                                                  triggerValue: _config.targetTriggerValue, defaultTriggerConditions: _config.targetDefaultTriggerConditions }, this);

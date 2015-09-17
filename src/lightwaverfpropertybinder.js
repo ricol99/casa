@@ -32,24 +32,33 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
 
    console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
 
-   if (this.source) {
+   if (this.target) {
 
       if (typeof _propValue == "boolean") {
 
          if (_propValue) {
-            this.source.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
+            this.target.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
          }
          else {
-            this.source.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
+            this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
          }
       }
       else if (_propValue == 0) {
-         this.source.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
+         this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
       }
       else {
-         this.source.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
+         this.target.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
       }
    }
+}
+
+LightwaveRFPropertyBinder.prototype.sourceIsActive = function(_data) {
+}
+
+LightwaveRFPropertyBinder.prototype.sourceIsInactive = function(_data) {
+}
+
+LightwaveRFPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
 }
 
 module.exports = exports = LightwaveRFPropertyBinder;
