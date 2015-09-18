@@ -25,6 +25,7 @@ function LatchingPropertyBinder(_config, _owner) {
 
    this.minOutputTimeObj = null;
    this.latestInactiveData = { sourceName: this.name };
+   this.latestActiveData = { sourceName: this.name };
    var that = this;
    this.cStart = true;
    this.sourceActive = false;
@@ -54,11 +55,14 @@ LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _call
    
       if (this.minOutputTime != undefined) {
          this.restartTimer();
-         this.updatePropertyAfterRead(true, _data);
+         this.goActive(_data);
       }
       else {
          if (this.controllerActive) {
-            this.updatePropertyAfterRead(true, _data);
+            this.goActive(_data);
+         }
+         else {
+            this.lastActiveData = this.copyData(_data);
          }
       }
    }
@@ -66,12 +70,12 @@ LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _call
       console.log(this.name + ': target ' + _data.sourceName + ' inactive!');
       this.sourceActive = false;
 
-      if (this.myPropertyValue()) {
+      if (this.active) {
 
          if (this.minOutputTime != undefined) {
             // Destination is active. If there is no timer, deactivate. Else, let the timer do it
             if (this.minOutputTimeObj == null) {
-               this.updatePropertyAfterRead(false, _data);
+               this.goInactive(_data);
             }
             else {
                // save data for the timer to use
@@ -84,7 +88,7 @@ LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _call
          }
       }
       else {
-         this.updatePropertyAfterRead(false, _data);
+         this.goInactive(_data);
       }
    }
    _callback(true);
@@ -101,8 +105,8 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
       that.minOutputTimeObj = null;
 
       if (!that.sourceActive) {
-         that.updatePropertyAfterRead(false, that.latestInactiveData);
-         that.latestInactiveData = { sourceName: this.name };
+         this.goInactive(that.latestInactiveData);
+         that.latestInactiveData = { sourceName: that.name };
       }
    }, this.minOutputTime*1000);
 }
@@ -117,14 +121,19 @@ LatchingPropertyBinder.prototype.sourceIsInactive = function(_data) {
 
 LatchingPropertyBinder.prototype.targetIsActive = function(_data) {
    this.controllerActive = true;
+
+   if (!this.active && this.sourceActive) {
+      this.goActive(this.latestActiveData);
+      this.latestActiveData = { sourceName: this.name };
+   }
 }
 
 LatchingPropertyBinder.prototype.targetIsInactive = function(_data) {
    this.controllerActive = false;
 
-   if (this.myPropertyValue()) {
-      that.updatePropertyAfterRead(false, that.latestInactiveData);
-      that.latestInactiveData = { sourceName: this.name };
+   if (this.active) {
+      this.goInactive(this.latestInactiveData);
+      this.latestInactiveData = { sourceName: this.name };
    }
 }
 

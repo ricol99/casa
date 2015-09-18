@@ -19,6 +19,12 @@ function Source(_config) {
          this.props[_config.props[i].name] = _config.props[i].initialValue;
 
          if (_config.props[i].binder) {
+
+            if (this.propBinders[_config.props[i].binder]) {
+               console.log("***********PROPERTYBINDER NAME CONFLICT***************" + _config.props[i].binder);
+               process.exit();
+            }
+
             var PropertyBinder = casaSys.cleverRequire(_config.props[i].binder.name);
 
             if (PropertyBinder) {

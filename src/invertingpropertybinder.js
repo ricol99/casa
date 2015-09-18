@@ -12,7 +12,7 @@ function InvertingPropertyBinder(_config, _owner) {
 util.inherits(InvertingPropertyBinder, LogicPropertyBinder);
 
 InvertingPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-   this.updatePropertyAfterRead(!propValue, _data);
+   this.processSourceStateChange(_propValue, _data);
    _callback(true);
 }
 
@@ -25,7 +25,13 @@ InvertingPropertyBinder.prototype.sourceIsInactive = function(_data) {
 }
 
 InvertingPropertyBinder.prototype.processSourceStateChange = function(_active, _data) {
-   this.updatePropertyAfterRead(!_active, _data);
+
+   if (_active) {
+      this.goInactive(_data);
+   }
+   else {
+      this.goActive(_data);
+   }
 }
 
 

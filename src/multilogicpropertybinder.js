@@ -58,7 +58,7 @@ MultiLogicPropertyBinder.prototype.processSourceStateChange = function(_active, 
       highestPrioritySource = _sourceAttributes;
    }
 
-   if (this.myPropertyValue()) {
+   if (this.active) {
 
       if (outputShouldGoActive) {
 

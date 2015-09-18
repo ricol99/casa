@@ -133,7 +133,6 @@
                         "propertyValue": true
                      },
                      {
-                        "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
                         "propertyValue": false
                      }
                   ]
@@ -158,6 +157,24 @@
                }
             },
             {
+               "name": "test-prop-3",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-3",
+                  "events": [
+                     {
+                        "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
                "name": "latching-test-prop-2",
                "initialValue": false,
                "writable": false,
@@ -165,7 +182,10 @@
                   "name": "latchingpropertybinder:latching-test-prop-2",
                   "source": "thing:test-cctv",
                   "sourceProperty": "test-prop-2",
-                  "minOutputTime": 150
+                  "controller": {
+                     "source": "thing:test-cctv",
+                     "sourceProperty": "test-prop-3"
+                  }
                }
             }
          ]

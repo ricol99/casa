@@ -26,9 +26,15 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
    var that = this;
    console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _active + '!');
 
-   if (_data.coldStart || this.myPropertyValue() == _active) {
+   if (_data.coldStart || this.active == _active) {
       this.sourceActive = _active;
-      this.updatePropertyAfterRead(_active, _data);
+
+      if (_active) {
+         this.goActive(_data);
+      }
+      else {
+         this.goInactive(_data);
+      }
    }
    else if (this.sourceActive != _active) {
       this.sourceActive = _active;
@@ -45,10 +51,10 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
                that.goInvalid({ sourceName: that.name });
             }
             else if (that.sourceActive) {
-               that.updatePropertyAfterRead(true, that.storedActiveData);
+               that.goActive(that.storedActiveData);
             }
             else {
-               that.updatePropertyAfterRead(false, that.storedInactiveData);
+               that.goInactive(that.storedInactiveData);
             }
          }, this.threshold*1000);
       }
@@ -78,10 +84,10 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
                that.goInvalid({ sourceName: that.name });
             }
             else if (that.sourceActive) {
-               that.updatePropertyAfterRead(true, that.storedActiveData);
+               that.goActive(that.storedActiveData);
             }
             else {
-               that.updatePropertyAfterRead(false, that.storedInactiveData);
+               that.goInactive(that.storedInactiveData);
             }
          }, this.threshold*1000);
       }

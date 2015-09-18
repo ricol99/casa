@@ -12,6 +12,8 @@ function LogicPropertyBinder(_config, _owner) {
    this.outputActiveValue = _config.outputActiveValue;
    this.outputInactiveValue = _config.outputInactiveValue;
 
+   this.active = false;
+
    var that = this;
 }
 
@@ -48,7 +50,7 @@ LogicPropertyBinder.prototype.mergeApplyProps = function(_sourceData, _applyProp
 }
 
 LogicPropertyBinder.prototype.goActive = function(_sourceData, _outputValue) {
-   console.log(this.name + ": Going active! Previously active state=" + this.myPropertyValue());
+   console.log(this.name + ": Going active! Previously property value=" + this.myPropertyValue());
 
    var sendData = this.mergeApplyProps(_sourceData, this.applyProps.active);
    sendData.sourceName = this.name;
@@ -56,11 +58,12 @@ LogicPropertyBinder.prototype.goActive = function(_sourceData, _outputValue) {
    console.log(this.name+": Data=", sendData);
 
    var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputActiveValue == undefined) ? true : this.outputActiveValue);
+   this.active = true;
    this.updatePropertyAfterRead(outputValue, sendData);
 }
 
 LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
-   console.log(this.name + ": Going inactive! Previously active state=" + this.myPropertyValue());
+   console.log(this.name + ": Going inactive! Previously property value=" + this.myPropertyValue());
 
    var sendData = this.mergeApplyProps(_sourceData, this.applyProps.inactive);
    sendData.sourceName = this.name;
@@ -68,6 +71,7 @@ LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
    console.log(this.name+": Data=", sendData);
 
    var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputInactiveValue == undefined) ? false : this.outputInactiveValue);
+   this.active = false;
    this.updatePropertyAfterRead(outputValue, sendData);
 }
 
