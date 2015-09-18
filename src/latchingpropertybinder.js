@@ -105,7 +105,7 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
       that.minOutputTimeObj = null;
 
       if (!that.sourceActive) {
-         this.goInactive(that.latestInactiveData);
+         that.goInactive(that.latestInactiveData);
          that.latestInactiveData = { sourceName: that.name };
       }
    }, this.minOutputTime*1000);
