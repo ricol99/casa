@@ -59,7 +59,7 @@ LogicPropertyBinder.prototype.goActive = function(_sourceData, _outputValue) {
 
    var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputActiveValue == undefined) ? true : this.outputActiveValue);
    this.active = true;
-   this.updatePropertyAfterRead(outputValue, sendData);
+   PropertyBinder.prototype.updatePropertyAfterRead.call(this, outputValue, sendData);
 }
 
 LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
@@ -72,7 +72,17 @@ LogicPropertyBinder.prototype.goInactive = function(_sourceData, _outputValue) {
 
    var outputValue = (_outputValue != undefined) ? _outputValue : ((this.outputInactiveValue == undefined) ? false : this.outputInactiveValue);
    this.active = false;
-   this.updatePropertyAfterRead(outputValue, sendData);
+   PropertyBinder.prototype.updatePropertyAfterRead.call(this, outputValue, sendData);
+}
+
+LogicPropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
+
+   if (_propValue) {
+      this.goActive(_data);
+   }
+   else {
+      this.goInactive(_data);
+   }
 }
 
 // Override these methods

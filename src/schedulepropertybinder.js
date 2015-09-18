@@ -203,7 +203,6 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
    // Set Initial Value
    if (closestEvent) {
       console.log(this.name + ": Closest event is "+closestEvent.rule);
-      console.info(this.name + ": Closest event is "+closestEvent.rule + " " + closestEvent.propertyValue);
       this.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: this.owner.name, coldStart: true });
    }
    else {
