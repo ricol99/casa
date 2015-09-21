@@ -613,42 +613,6 @@
          "displayName": "Environment",
          "props": [
             {
-               "name": "sunset-for-four-hours",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-sunset-for-four-hours",
-                  "events": [
-                     {
-                        "rule": "sunset",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:14400",
-                        "propertyValue": false
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "lengthened-daylight",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-lengthened-daylight",
-                  "events": [
-                     {
-                        "rule": "sunrise:-900",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:900",
-                        "propertyValue": false
-                     }
-                  ]
-               }
-            },
-            {
                "name": "daylight",
                "initialValue": false,
                "writable": false,

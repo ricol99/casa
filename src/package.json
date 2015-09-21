@@ -12,6 +12,7 @@
     "cron-parser": "^0.7.0",
     "dateformat": "^1.0.11",
     "express": "~4.10.2",
+    "forecast.io": "0.0.9",
     "lightwaverf": "0.0.1",
     "node-schedule": "~0.1.16",
     "pushover-notifications": "~0.2.2",
