@@ -294,11 +294,11 @@
                   "targetProperties": [
                      {
                         "name": "kitchen-downlights-main-1",
-                        "activeValue": 0
+                        "activeValue": 4
                      },
                      {
                         "name": "kitchen-downlights-main-2",
-                        "activeValue": 0
+                        "activeValue": 4
                      },
                      {
                         "name": "kitchen-downlights-wolf",
@@ -392,28 +392,13 @@
                "initialValue": false,
                "writable": false,
                "binder" : {
-                  "name": "andpropertybinder:lounge-movement-in-low-light",
-                  "sources": [
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "low-light"
-                     },
-                     {
-                        "source": "room:lounge",
-                        "sourceProperty": "movement"
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "latched-movement-in-low-light",
-               "initialValue": false,
-               "writable": false,
-               "binder" : {
-                  "name": "latchingpropertybinder:latched-lounge-low-light-movement",
+                  "name": "latchingpropertybinder:lounge-latched-low-light-movement",
                   "source": "room:lounge",
-                  "sourceProperty": "movement-in-low-light",
-                  "minOutputTime": 600
+                  "sourceProperty": "movement",
+                  "controller" : {
+                     "source": "thing:environment",
+                     "sourceProperty": "low-light"
+                  }
                }
             },
             {
@@ -431,7 +416,7 @@
                      },
                      {
                         "source": "room:lounge",
-                        "sourceProperty": "latched-movement-in-low-light",
+                        "sourceProperty": "movement-in-low-light",
                         "outputActiveValue": "low",
                         "outputInactiveValue": "off"
                      },
@@ -452,7 +437,7 @@
                   "name": "lightwaverfpropertybinder:lounge-fire-light",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
-                  "deviceID": 3
+                  "deviceID": 6
                }
             },
             {
