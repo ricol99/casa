@@ -55,11 +55,11 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
             }
          }
     
-         if (_data.hourly.data[sunriseIndex].cloudCover > 0.4) {
+         if (_data.hourly.data[sunriseIndex].cloudCover > 0.2) {
             sunriseDelta = _data.hourly.data[sunriseIndex].cloudCover * 3600;
          }
 
-         if (_data.hourly.data[sunsetIndex].cloudCover > 0.4) {
+         if (_data.hourly.data[sunsetIndex].cloudCover > 0.2) {
             sunsetDelta = _data.hourly.data[sunsetIndex].cloudCover * 3600;
          }
 
@@ -67,7 +67,8 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
          sunTimes["sunriseEnd"].setTime(sunTimes["sunriseEnd"].getTime() + (sunriseDelta * 1000));
          sunTimes["sunsetStart"].setTime(sunTimes["sunsetStart"].getTime() - (sunsetDelta * 1000));
          sunTimes["sunset"].setTime(sunTimes["sunset"].getTime() - (sunsetDelta * 1000));
-         console.info("Sunrise Delta = " + sunsetDelta + " Sunset Delta = " + sunsetDelta);
+         console.info("Sunrise Cloud Cover = " + _data.hourly.data[sunriseIndex].cloudCover + " Sunrise Delta = " + sunriseDelta);
+         console.info("Sunset Cloud Cover = " + _data.hourly.data[sunsetIndex].cloudCover + " Sunset Delta = " + sunsetDelta);
       }
       else {
          console.info("SCHEDULER unable to get sunrise time! Error = ", _err.code);

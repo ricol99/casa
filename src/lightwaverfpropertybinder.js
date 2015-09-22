@@ -53,12 +53,15 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
 }
 
 LightwaveRFPropertyBinder.prototype.sourceIsActive = function(_data) {
+   this.setProperty(true, _data, function() {} );
 }
 
 LightwaveRFPropertyBinder.prototype.sourceIsInactive = function(_data) {
+   this.setProperty(false, _data, function() {} );
 }
 
 LightwaveRFPropertyBinder.prototype.sourcePropertyChanged = function(_data) {
+   this.setProperty(_data.propertyValue, _data, function() {} );
 }
 
 module.exports = exports = LightwaveRFPropertyBinder;

@@ -437,7 +437,7 @@
                   "name": "lightwaverfpropertybinder:lounge-fire-light",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
-                  "deviceID": 6
+                  "deviceID": 3
                }
             },
             {
@@ -598,9 +598,11 @@
             {
                "name": "natalie-bed-lamp",
                "initialValue": false,
-               "writable": false,
+               "writable": true,
                "binder": {
                   "name": "lightwaverfpropertybinder:master-bedroom-natalie-bed-lamp",
+                  "source": "thing:environment",
+                  "sourceProperty": "bedtime",
                   "target": "lightwaverflink:home",
                   "roomID": 3,
                   "deviceID": 1
@@ -666,11 +668,11 @@
                   "name": "schedulepropertybinder:env-low-light",
                   "events": [
                      {
-                        "rule": "sunrise:-1800",
+                        "rule": "sunrise:-930",
                         "propertyValue": true
                      },
                      {
-                        "rule": "sunrise:930",
+                        "rule": "sunrise:3600",
                         "propertyValue": false
                      },
                      {
@@ -716,14 +718,6 @@
          "password": "carrot99",
          "cameraId": 1,
          "source": "andactivator:lounge-activity"
-      },
-      {
-         "name": "lightwaverfaction:natalie-bedroom-table-lamp",
-         "roomId": 3,
-         "deviceId": 1,
-         "source": "room:master-bedroom",
-         "sourceProperty": "lights",
-         "target": "lightwaverflink:home"
       }
    ]
 }
