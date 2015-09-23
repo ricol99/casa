@@ -53,6 +53,32 @@ LightwaveRfLink.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel,
    }
 }
 
+LightwaveRfLink.prototype.setRoomMood = function(_roomId, _moodId, _callback) {
+   var that = this;
+
+   this.addToQueue(function(_params, _callback) {
+      console.log(that.name + ': setting room mood, roomId: ' + _params.roomId + ' moodId:' + _params.moodId);
+      that.lightwaveRf.setMood(_params.roomId, _params.moodId, _callback);
+   }, { roomId: _roomId, moodId: _moodId } , _callback);
+
+   if (!this.requestPending) {
+      this.makeNextRequest();
+   }
+}
+
+LightwaveRfLink.prototype.turnRoomOff = function(_roomId, _callback) {
+   var that = this;
+
+   this.addToQueue(function(_params, _callback) {
+      console.log(that.name + ': turning room off, roomId: ' + _params.roomId);
+      that.lightwaveRf.turnRoomOff(_params.roomId, _callback);
+   }, { roomId: _roomId } , _callback);
+
+   if (!this.requestPending) {
+      this.makeNextRequest();
+   }
+}
+
 LightwaveRfLink.prototype.addToQueue = function(_request, _params, _callback) {
    this.queue.push({ request: _request, params: _params, callback: _callback });
 }

@@ -163,11 +163,11 @@
                }
             },
             {
-               "name": "room-light-level",
+               "name": "lighting-mood",
                "initialValue": "off",
                "writable": false,
                "binder": {
-                  "name": "orpropertybinder:room-light-level",
+                  "name": "orpropertybinder:lighting-mood",
                   "sources": [
                      {
                         "source": "room:kitchen",
@@ -191,161 +191,27 @@
                }
             },
             {
-               "name": "kitchen-downlights-main-1",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-downlights-main-1",
-                  "target": "lightwaverflink:home",
-                  "roomID": 6,
-                  "deviceID": 1
-               }
-            },
-            {
-               "name": "kitchen-downlights-main-2",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-downlights-main-2",
-                  "target": "lightwaverflink:home",
-                  "roomID": 6,
-                  "deviceID": 2
-               }
-            },
-            {
-               "name": "kitchen-downlights-wolf",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-downlights-wolf",
-                  "target": "lightwaverflink:home",
-                  "roomID": 6,
-                  "deviceID": 3
-               }
-            },
-            {
-               "name": "kitchen-dresser-lights",
-               "initialValue": false,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-dresser-lights",
-                  "target": "lightwaverflink:home",
-                  "roomID": 6,
-                  "deviceID": 4
-               }
-            },
-            {
-               "name": "kitchen-island-lights",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:kitchen-island-lights",
-                  "target": "lightwaverflink:home",
-                  "roomID": 6,
-                  "deviceID": 5
-               }
-            },
-            {
-               "name": "kitchen-lights-off",
-               "initialValue": false,
+               "name": "lights",
+               "initialValue": "off",
                "writable": false,
                "binder": {
-                  "name": "settingpropertybinder:kitchen-lights-off",
+                  "name": "lightwaverfpropertybinder:kitchen-lights",
                   "source": "room:kitchen",
-                  "sourceProperty": "room-light-level",
-                  "triggerCondition": "==",
-                  "triggerValue": "off",
-                  "target": "room:kitchen",
-                  "targetProperties": [
+                  "sourceProperty": "lighting-mood",
+                  "target": "lightwaverflink:home",
+                  "roomID": 6,
+                  "moods": [
                      {
-                        "name": "kitchen-downlights-main-1",
-                        "activeValue": 0
+                        "name": "low",
+                        "moodID": 1
                      },
                      {
-                        "name": "kitchen-downlights-main-2",
-                        "activeValue": 0
+                        "name": "medium",
+                        "moodID": 2
                      },
                      {
-                        "name": "kitchen-downlights-wolf",
-                        "activeValue": 0
-                     },
-                     {
-                        "name": "kitchen-dresser-lights",
-                        "activeValue": false
-                     },
-                     {
-                        "name": "kitchen-island-lights",
-                        "activeValue": 0
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "kitchen-lights-low",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "settingpropertybinder:kitchen-lights-low",
-                  "source": "room:kitchen",
-                  "sourceProperty": "room-light-level",
-                  "triggerCondition": "==",
-                  "triggerValue": "low",
-                  "target": "room:kitchen",
-                  "targetProperties": [
-                     {
-                        "name": "kitchen-downlights-main-1",
-                        "activeValue": 4
-                     },
-                     {
-                        "name": "kitchen-downlights-main-2",
-                        "activeValue": 4
-                     },
-                     {
-                        "name": "kitchen-downlights-wolf",
-                        "activeValue": 4
-                     },
-                     {
-                        "name": "kitchen-dresser-lights",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "kitchen-island-lights",
-                        "activeValue": 50
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "kitchen-lights-medium",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "settingpropertybinder:kitchen-lights-medium",
-                  "source": "room:kitchen",
-                  "sourceProperty": "room-light-level",
-                  "triggerCondition": "==",
-                  "triggerValue": "medium",
-                  "target": "room:kitchen",
-                  "targetProperties": [
-                     {
-                        "name": "kitchen-downlights-main-1",
-                        "activeValue": 50
-                     },
-                     {
-                        "name": "kitchen-downlights-main-2",
-                        "activeValue": 50
-                     },
-                     {
-                        "name": "kitchen-downlights-wolf",
-                        "activeValue": 50
-                     },
-                     {
-                        "name": "kitchen-dresser-lights",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "kitchen-island-lights",
-                        "activeValue": 75
+                        "name": "high",
+                        "moodID": 3
                      }
                   ]
                }
@@ -402,11 +268,11 @@
                }
             },
             {
-               "name": "room-light-level",
+               "name": "lighting-mood",
                "initialValue": "off",
                "writable": false,
                "binder": {
-                  "name": "orpropertybinder:lounge-room-light-level",
+                  "name": "orpropertybinder:lounge-lighting-mood",
                   "sources": [
                      {
                         "source": "room:lounge",
@@ -491,7 +357,7 @@
                "binder": {
                   "name": "settingpropertybinder:lounge-lights-off",
                   "source": "room:lounge",
-                  "sourceProperty": "room-light-level",
+                  "sourceProperty": "lighting-mood",
                   "triggerCondition": "==",
                   "triggerValue": "off",
                   "target": "room:lounge",
@@ -526,7 +392,7 @@
                "binder": {
                   "name": "settingpropertybinder:lounge-lights-low",
                   "source": "room:lounge",
-                  "sourceProperty": "room-light-level",
+                  "sourceProperty": "lighting-mood",
                   "triggerCondition": "==",
                   "triggerValue": "low",
                   "target": "room:lounge",
@@ -561,7 +427,7 @@
                "binder": {
                   "name": "settingpropertybinder:lounge-lights-medium",
                   "source": "room:lounge",
-                  "sourceProperty": "room-light-level",
+                  "sourceProperty": "lighting-mood",
                   "triggerCondition": "==",
                   "triggerValue": "medium",
                   "target": "room:lounge",

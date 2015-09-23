@@ -5,7 +5,17 @@ var LightwaveRF = require("lightwaverf");
 function LightwaveRFPropertyBinder(_config, _owner) {
 
    this.roomID = _config.roomID;
-   this.deviceID = _config.deviceID;
+   this.moods = {};
+
+   if (_config.moods != undefined) {
+
+      for (var index = 0; index < _config.moods.length; ++index) {
+         this.moods[_config.moods[index].name] = _config.moods[index].moodID;
+      }
+   }
+   else {
+      this.deviceID = _config.deviceID;
+   }
 
    PropertyBinder.call(this, _config, _owner);
    this.writeable = true;
@@ -34,20 +44,29 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
 
    if (this.target) {
 
-      if (typeof _propValue == "boolean") {
+      if (this.deviceID != undefined) {
 
-         if (_propValue) {
-            this.target.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
+         if (typeof _propValue == "boolean") {
+
+            if (_propValue) {
+               this.target.turnDeviceOn(this.roomID, this.deviceID, callbackHandler);
+            }
+            else {
+               this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
+            }
          }
-         else {
+         else if (_propValue == 0) {
             this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
          }
+         else {
+            this.target.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
+         }
       }
-      else if (_propValue == 0) {
-         this.target.turnDeviceOff(this.roomID, this.deviceID, callbackHandler);
+      else if (_propValue == "off") {
+         this.target.turnRoomOff(this.roomId, callbackHandler);
       }
       else {
-         this.target.setDeviceDim(this.roomID, this.deviceID, _propValue, callbackHandler);
+         this.target.setRoomMood(this.roomId, this.moods[_propValue], callbackHandler);
       }
    }
 }
