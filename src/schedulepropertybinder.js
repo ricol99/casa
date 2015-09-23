@@ -10,7 +10,6 @@ var sunScheduler = null;
 function SunScheduler(_latitude, _longitude, _apiKey) {
    this.states = [];
    var that = this;
-   this.sunTimesRetrievedLast = null;
 
    var refreshJob = schedule.scheduleJob('10 1 * * *', function() {
 
@@ -28,7 +27,7 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
    var sunriseDelta = 0;
    var sunsetDelta = 0;
 
-   var options = { APIKey: _apiKey, timeout: 5000, exclude: 'minutely,daily,flags,alerts' };
+   var options = { APIKey: _apiKey, timeout: 5000 };
    var forecast = new Forecast(options);
 
    var sunTimes = SunCalc.getTimes(new Date(), _latitude, _longitude);
@@ -37,7 +36,7 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
       var sunriseIndex = 0;
       var sunsetIndex = 0;
 
-      if (!_err) {
+      if (!_err && _data.hourly && _data.hourly.data) {
 
          for (var index = 0; index < _data.hourly.data.length; ++index) {
 
