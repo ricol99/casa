@@ -210,7 +210,7 @@
                         "moodID": 2
                      },
                      {
-                        "name": "high",
+                        "name": "full",
                         "moodID": 3
                      }
                   ]
@@ -296,161 +296,27 @@
                }
             },
             {
-               "name": "lounge-fire-light-level",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-fire-light",
-                  "target": "lightwaverflink:home",
-                  "roomID": 1,
-                  "deviceID": 3
-               }
-            },
-            {
-               "name": "lounge-alcoves-light-level",
-               "initialValue": 0,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-alcoves-light",
-                  "target": "lightwaverflink:home",
-                  "roomID": 1,
-                  "deviceID": 2
-               }
-            },
-            {
-               "name": "lounge-table-light",
-               "initialValue": false,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-table-light",
-                  "target": "lightwaverflink:home",
-                  "roomID": 1,
-                  "deviceID": 1
-               }
-            },
-            {
-               "name": "lounge-centre-light",
-               "initialValue": false,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-centre-light",
-                  "target": "lightwaverflink:home",
-                  "roomID": 1,
-                  "deviceID": 4
-               }
-            },
-            {
-               "name": "lounge-tree-light",
-               "initialValue": false,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-tree-light",
-                  "target": "lightwaverflink:home",
-                  "roomID": 1,
-                  "deviceID": 5
-               }
-            },
-            {
-               "name": "lounge-lights-off",
-               "initialValue": false,
+               "name": "lights",
+               "initialValue": "off",
                "writable": false,
                "binder": {
-                  "name": "settingpropertybinder:lounge-lights-off",
+                  "name": "lightwaverfpropertybinder:lounge-lights",
                   "source": "room:lounge",
                   "sourceProperty": "lighting-mood",
-                  "triggerCondition": "==",
-                  "triggerValue": "off",
-                  "target": "room:lounge",
-                  "targetProperties": [
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "moods": [
                      {
-                        "name": "lounge-fire-light-level",
-                        "activeValue": 0
+                        "name": "low",
+                        "moodID": 1
                      },
                      {
-                        "name": "lounge-alcoves-light-level",
-                        "activeValue": 0
+                        "name": "medium",
+                        "moodID": 2
                      },
                      {
-                        "name": "lounge-table-light",
-                        "activeValue": false
-                     },
-                     {
-                        "name": "lounge-centre-light",
-                        "activeValue": false
-                     },
-                     {
-                        "name": "lounge-tree-light",
-                        "activeValue": false
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "lounge-lights-low",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "settingpropertybinder:lounge-lights-low",
-                  "source": "room:lounge",
-                  "sourceProperty": "lighting-mood",
-                  "triggerCondition": "==",
-                  "triggerValue": "low",
-                  "target": "room:lounge",
-                  "targetProperties": [
-                     {
-                        "name": "lounge-fire-light-level",
-                        "activeValue": 20
-                     },
-                     {
-                        "name": "lounge-alcoves-light-level",
-                        "activeValue": 20
-                     },
-                     {
-                        "name": "lounge-table-light",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "lounge-centre-light",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "lounge-tree-light",
-                        "activeValue": true
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "lounge-lights-medium",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "settingpropertybinder:lounge-lights-medium",
-                  "source": "room:lounge",
-                  "sourceProperty": "lighting-mood",
-                  "triggerCondition": "==",
-                  "triggerValue": "medium",
-                  "target": "room:lounge",
-                  "targetProperties": [
-                     {
-                        "name": "lounge-fire-light-level",
-                        "activeValue": 50
-                     },
-                     {
-                        "name": "lounge-alcoves-light-level",
-                        "activeValue": 50
-                     },
-                     {
-                        "name": "lounge-table-light",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "lounge-centre-light",
-                        "activeValue": true
-                     },
-                     {
-                        "name": "lounge-tree-light",
-                        "activeValue": true
+                        "name": "full",
+                        "moodID": 3
                      }
                   ]
                }

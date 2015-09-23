@@ -40,11 +40,11 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
       }
    };
 
-   console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
 
    if (this.target) {
 
       if (this.deviceID != undefined) {
+         console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
 
          if (typeof _propValue == "boolean") {
 
@@ -63,10 +63,12 @@ LightwaveRFPropertyBinder.prototype.setProperty = function(_propValue, _data, _c
          }
       }
       else if (_propValue == "off") {
-         this.target.turnRoomOff(this.roomId, callbackHandler);
+         console.log(this.name + ": Attempting to turn off LightwaveRF room ID=" + this.roomID);
+         this.target.turnRoomOff(this.roomID, callbackHandler);
       }
       else {
-         this.target.setRoomMood(this.roomId, this.moods[_propValue], callbackHandler);
+         console.log(this.name + ": Attempting to apply mood " + _propValue + " change to LightwaveRF room ID=" + this.roomID);
+         this.target.setRoomMood(this.roomID, this.moods[_propValue], callbackHandler);
       }
    }
 }
