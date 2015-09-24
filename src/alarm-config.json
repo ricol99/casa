@@ -296,11 +296,11 @@
                }
             },
             {
-               "name": "lights",
+               "name": "wall-lights",
                "initialValue": "off",
                "writable": false,
                "binder": {
-                  "name": "lightwaverfpropertybinder:lounge-lights",
+                  "name": "lightwaverfpropertybinder:lounge-wall-lights",
                   "source": "room:lounge",
                   "sourceProperty": "lighting-mood",
                   "target": "lightwaverflink:home",
@@ -319,6 +319,51 @@
                         "moodID": 3
                      }
                   ]
+               }
+            },
+            {
+               "name": "lounge-table-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-table-light",
+                  "source": "room:lounge",
+                  "sourceProperty": "lighting-mood",
+                  "triggerCondition": "!=",
+                  "triggerValue": "off",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 1
+               }
+            },
+            {
+               "name": "lounge-centre-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-centre-light",
+                  "source": "room:lounge",
+                  "sourceProperty": "lighting-mood",
+                  "triggerCondition": "!=",
+                  "triggerValue": "off",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 4
+               }
+            },
+            {
+               "name": "lounge-tree-light",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:lounge-tree-light",
+                  "source": "room:lounge",
+                  "sourceProperty": "lighting-mood",
+                  "triggerCondition": "!=",
+                  "triggerValue": "off",
+                  "target": "lightwaverflink:home",
+                  "roomID": 1,
+                  "deviceID": 5
                }
             }
          ]
@@ -354,7 +399,7 @@
                   "name": "schedulepropertybinder:env-daylight",
                   "events": [
                      {
-                        "rule": "sunrise",
+                        "rule": "sunrise:1800",
                         "propertyValue": true
                      },
                      {
@@ -400,7 +445,7 @@
                   "name": "schedulepropertybinder:env-low-light",
                   "events": [
                      {
-                        "rule": "sunrise:-930",
+                        "rule": "sunrise:1750",
                         "propertyValue": true
                      },
                      {
@@ -408,11 +453,11 @@
                         "propertyValue": false
                      },
                      {
-                        "rule": "sunset:-1800",
+                        "rule": "sunset:-3600",
                         "propertyValue": true
                      },
                      {
-                        "rule": "sunset:930",
+                        "rule": "sunset:-1750",
                         "propertyValue": false
                      }
                   ]

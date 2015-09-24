@@ -10,7 +10,7 @@ function RemoteCasa(_config, _peerCasa) {
    this.casa = this.casaSys.casa;
    this.peerCasa = _peerCasa;
 
-   Source..call(this, _config);
+   Source.call(this, _config);
 
    this.loginAs = 'remote';
    this.sources = [];
