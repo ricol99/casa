@@ -91,7 +91,7 @@ LightwaveRfLink.prototype.makeNextRequest = function() {
 
       this.queue[0].request(this.queue[0].params, function(_error, _content) {
          console.log(that.name + ': Request done!');
-         that.queue().shift().callback(_error, _content);
+         that.queue.shift().callback(_error, _content);
 
          if (that.queue.length > 0) {
 
