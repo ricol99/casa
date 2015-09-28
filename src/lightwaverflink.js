@@ -83,10 +83,6 @@ LightwaveRfLink.prototype.addToQueue = function(_request, _params, _callback) {
    this.queue.push({ request: _request, params: _params, callback: _callback });
 }
 
-LightwaveRfLink.prototype.shiftQueue = function() {
-   return this.queue.shift();
-}
-
 LightwaveRfLink.prototype.makeNextRequest = function() {
    var that = this;
 
@@ -94,14 +90,20 @@ LightwaveRfLink.prototype.makeNextRequest = function() {
       this.requestPending = true;
 
       this.queue[0].request(this.queue[0].params, function(_error, _content) {
-         clearTimeout(that.timeout);
          console.log(that.name + ': Request done!');
-         that.requestPending = false;
-         that.shiftQueue().callback(_error, _content);
+         that.queue().shift().callback(_error, _content);
 
-         var delay = setTimeout(function() {
-            that.makeNextRequest();
-         }, 400);
+         if (that.queue.length > 0) {
+
+            // More in the queue, so reschedule after the link has had time to settle down
+            var delay = setTimeout(function() {
+               that.requestPending = false;
+               that.makeNextRequest();
+            }, 400);
+         }
+         else {
+            that.requestPending = false;
+         }
       });
    }
 }
