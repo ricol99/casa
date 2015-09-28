@@ -87,20 +87,33 @@ LightwaveRfLink.prototype.shiftQueue = function() {
    return this.queue.shift();
 }
 
+LightwaveRfLink.prototype.scheduleNextRequest = function() {
+   var that = this;
+
+   var delay = setTimeout(function() {
+      that.makeNextRequest();
+   }, 400);
+}
+
 LightwaveRfLink.prototype.makeNextRequest = function() {
    var that = this;
 
    if (this.queue.length > 0) {
       this.requestPending = true;
 
+      this.timeout = setTimeout(function() {
+         console.log(that.name + ': Request timed out!');
+         that.requestPending = false;
+         that.shiftQueue().callback({ message: "Request Timed Out" });
+         that.scheduleNextRequest();
+      }, 5000);
+
       this.queue[0].request(this.queue[0].params, function(_error, _content) {
+         clearTimeout(that.timeout);
          console.log(that.name + ': Request done!');
          that.requestPending = false;
          that.shiftQueue().callback(_error, _content);
-
-         that.timeoutObj = setTimeout(function() {
-            that.makeNextRequest();
-         }, 400);
+         that.scheduleNextRequest();
       });
    }
 }
