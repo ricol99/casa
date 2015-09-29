@@ -22,6 +22,19 @@ DebouncingPropertyBinder.prototype.sourceIsInactive = function(_data) {
    this.processSourceStateChange(false, _data);
 }
 
+DebouncingPropertyBinder.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
 DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, _data) {
    var that = this;
    console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _active + '!');
@@ -38,7 +51,7 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
    }
    else if (this.sourceActive != _active) {
       this.sourceActive = _active;
-      this.storedActiveData = _data;
+      this.storedActiveData = this.copyData(_data);
 
 
       // If a timer is already running, ignore. ELSE create one
@@ -60,10 +73,10 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
       }
    }
    else if (_active) {
-      this.storedActiveData = _data;
+      this.storedActiveData = this.copyData(_data);
    }
    else {
-      this.storedInactiveData = _data;
+      this.storedInactiveData = this.copyData(_data);
    }
 };
 
@@ -80,14 +93,15 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
          this.timeoutObj = setTimeout(function() {
             that.timeoutObj = null;
 
-            if (!that.binderEnabled) {
-               that.goInvalid({ sourceName: that.name });
-            }
-            else if (that.sourceActive) {
+            if (that.sourceActive) {
                that.goActive(that.storedActiveData);
             }
             else {
                that.goInactive(that.storedInactiveData);
+            }
+
+            if (!that.binderEnabled) {
+               that.goInvalid({ sourceName: that.name });
             }
          }, this.threshold*1000);
       }

@@ -14,6 +14,19 @@ function DebounceActivator(_config) {
 
 util.inherits(DebounceActivator, Activator);
 
+DebounceActivator.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
 DebounceActivator.prototype.sourceIsActive = function(_data) {
    var that = this;
    console.log(this.name + ':source ' + _data.sourceName + ' active!');
@@ -24,7 +37,7 @@ DebounceActivator.prototype.sourceIsActive = function(_data) {
    }
    else if (!this.sourceActive) {
       this.sourceActive = true;
-      this.storedActiveData = _data;
+      this.storedActiveData = this.copyData(_data);
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -42,7 +55,7 @@ DebounceActivator.prototype.sourceIsActive = function(_data) {
          }, this.threshold*1000);
       }
    } else {
-      this.storedActiveData = _data;
+      this.storedActiveData = this.copyData(_data);
    }
 };
 
@@ -56,7 +69,7 @@ DebounceActivator.prototype.sourceIsInactive = function(_data) {
    }
    else if (this.sourceActive) {
       this.sourceActive = false;
-      this.storedInactiveData = _data;
+      this.storedInactiveData = this.copyData(_data);
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -76,6 +89,9 @@ DebounceActivator.prototype.sourceIsInactive = function(_data) {
 
          }, this.threshold*1000);
       }
+   }
+   } else {
+      this.storedInactiveData = this.copyData(_data);
    }
 };
 

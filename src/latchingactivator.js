@@ -16,6 +16,19 @@ function LatchingActivator(_config) {
 
 util.inherits(LatchingActivator, Activator);
 
+LatchingActivator.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
 LatchingActivator.prototype.sourceIsActive = function(_data) {
    console.log(this.name + ': source ' + _data.sourceName + ' active!');
    
@@ -37,7 +50,7 @@ LatchingActivator.prototype.sourceIsInactive = function(_data) {
       }
       else {
          // save data for the timer to use
-         this.latestInactiveData = _data;
+         this.latestInactiveData = this.copyData(_data);
       }
    }
 }

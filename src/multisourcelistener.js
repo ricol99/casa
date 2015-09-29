@@ -46,12 +46,25 @@ function MultiSourceListener(_config, _owner) {
    }
 }
 
+MultiSourceListener.prototype.copyData = function(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
 MultiSourceListener.prototype.sourceIsActive = function(_data) {
    var sourcePropertyName = _data.sourceName + '::' + _data.propertyName;
 
    if (this.sourceListenerEnabled && this.sourceListeners[sourcePropertyName]) {
       this.sourceAttributes[sourcePropertyName].active = true;
-      this.sourceAttributes[sourcePropertyName].activeData = _data;
+      this.sourceAttributes[sourcePropertyName].activeData = this.copyData(_data);
       this.owner.oneSourceIsActive(this.sourceListeners[sourcePropertyName], this.sourceAttributes[sourcePropertyName], _data);
    }
 }
@@ -61,7 +74,7 @@ MultiSourceListener.prototype.sourceIsInactive = function(_data) {
 
    if (this.sourceListenerEnabled && this.sourceListeners[sourcePropertyName]) {
       this.sourceAttributes[sourcePropertyName].active = false;
-      this.sourceAttributes[sourcePropertyName].inactiveData = _data;
+      this.sourceAttributes[sourcePropertyName].inactiveData = this.copyData(_data);
       this.owner.oneSourceIsInactive(this.sourceListeners[sourcePropertyName], this.sourceAttributes[sourcePropertyName], _data);
    }
 }

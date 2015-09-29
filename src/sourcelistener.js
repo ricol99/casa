@@ -11,7 +11,7 @@ function SourceListener(_config, _owner) {
    this.ignoreSourceUpdates = (_config.ignoreSourceUpdates == undefined) ? false : _config.ignoreSourceUpdates;
    this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
 
-   if (_config.sourceProperty) {
+   if (_config.sourceProperty != undefined) {
       this.property = _config.sourceProperty;
 
       if (_config.triggerCondition) {
@@ -21,10 +21,6 @@ function SourceListener(_config, _owner) {
       else if (this.defaultTriggerConditions) {
          this.triggerCondition = "==";
          this.triggerValue = true;
-      }
-      else {
-         this.triggerCondition = null;
-         this.triggerValue = null;
       }
    }
    else {
@@ -102,7 +98,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
    if (!this.ignoreSourceUpdates && _data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
 
-      if (this.triggerCondition) {
+      if (this.triggerCondition != undefined) {
          var a = _data.propertyValue;
          var b = this.triggerValue;
          var evalStr = "a " + this.triggerCondition + " b";

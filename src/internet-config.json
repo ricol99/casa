@@ -99,7 +99,7 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-alarm",
                   "source": "casa:alarm",
-                  "threshold": 120
+                  "threshold": 30
                }
             },
             {
