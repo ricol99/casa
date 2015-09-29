@@ -29,7 +29,6 @@ function SettingPropertyBinder(_config, _owner) {
 util.inherits(SettingPropertyBinder, LogicPropertyBinder);
 
 SettingPropertyBinder.prototype.processSourceStateChange = function(_propertyName, _active, _data) {
-   console.log("=======================", _propertyName + " " +  _active +  " " + _data.sourceName);
    var tempValue;
 
    if (_active && this.targetProperties[_propertyName].activeValue != null) {
