@@ -40,7 +40,6 @@ GPIOPropertyBinder.prototype.Ready = function() {
          console.log(this.name + ": Error from gpio library! Error = " + _err);
       }
       else {
-         console.log(that.name + ': Value changed event received on GPIO Pin ' + that.gpioPin + ' to ' + _value);
          var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
 
          if (newValue != that.value) {
