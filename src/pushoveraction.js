@@ -18,6 +18,7 @@ function PushoverAction(_config) {
 
    this.on('activated', function () {
       console.log(that.name + ': received activated event');
+      console.info(that.name + ':====== received activated event');
 
       var _title = 'Casa Collin' + ((that.messageActPriority > 0) ? ' Alarm' : ' Update');
 
@@ -33,6 +34,7 @@ function PushoverAction(_config) {
       that.pushService.send( msg, function( err, result ) {
          if ( err ) {
             console.log('Error logging into Pushover: ' + err);
+            console.info('==========Error logging into Pushover: ' + err);
          }
       });
    });

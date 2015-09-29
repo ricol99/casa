@@ -109,7 +109,7 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-cctv",
                   "source": "casa:cctv",
-                  "threshold": 120
+                  "threshold": 30
                }
             },
             {

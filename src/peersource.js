@@ -57,6 +57,7 @@ PeerSource.prototype.coldStart = function() {
          sendData.propertyName = prop;
          sendData.propertyValue = this.props[prop];
          sendData.coldStart = true;
+         console.info('Property Changed: ' + this.name + ':' + prop + ': ' + sendData.propertyValue);
          this.emit('property-changed', sendData);
       }
    }
