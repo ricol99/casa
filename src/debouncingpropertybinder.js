@@ -51,8 +51,13 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
    }
    else if (this.sourceActive != _active) {
       this.sourceActive = _active;
-      this.storedActiveData = this.copyData(_data);
 
+      if (_active) {
+         this.storedActiveData = this.copyData(_data);
+      }
+      else {
+         this.storedInactiveData = this.copyData(_data);
+      }
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -60,14 +65,15 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
          this.timeoutObj = setTimeout(function() {
             that.timeoutObj = null;
 
-            if (!that.binderEnabled) {
-               that.goInvalid({ sourceName: that.name });
-            }
-            else if (that.sourceActive) {
+            if (that.sourceActive) {
                that.goActive(that.storedActiveData);
             }
             else {
                that.goInactive(that.storedInactiveData);
+            }
+
+            if (!that.binderEnabled) {
+               that.goInvalid({ sourceName: that.name });
             }
          }, this.threshold*1000);
       }

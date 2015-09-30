@@ -63,33 +63,17 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "propertybinder:home-casas",
-                  "source": "thing:home-internet-connection",
-                  "sourceProperty": "debounced-home-casas"
-               }
-            },
-            {
-               "name": "home-casas",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
                   "name": "orpropertybinder:home-casas",
                   "sources": [
-                     "casa:alarm",
-                     "casa:cctv",
-                     "casa:light"
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-alarm"
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-cctv"
+                     }
                   ]
-               }
-            },
-            {
-               "name": "debounced-home-casas",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "debouncingpropertybinder:home-casas",
-                  "source": "thing:home-internet-connection",
-                  "sourceProperty": "home-casas",
-                  "threshold": 120
                }
             },
             {
@@ -99,7 +83,7 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-alarm",
                   "source": "casa:alarm",
-                  "threshold": 30
+                  "threshold": 120
                }
             },
             {
@@ -109,22 +93,54 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-cctv",
                   "source": "casa:cctv",
+                  "threshold": 120
+               }
+            },
+            {
+               "name": "alarm-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:alarm-armed",
+                  "sources": [
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "fully-armed"
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "part-armed"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "debounced-alarm-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "debouncingpropertybinder:alarm-armed",
+                  "source": "thing:home-internet-connection",
+                  "sourceProperty": "alarm-armed",
                   "threshold": 30
                }
             },
             {
-               "name": "home-internet-while-armed",
+               "name": "lost-while-armed",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "andpropertybinder:home-internet-while-armed",
+                  "name": "andpropertybinder:home-internet-lost-while-armed",
                   "sources": [
                      {
-                        "source": "thing:home-internet-connection"
+                        "source": "casa-alarm",
+                        "sourceProperty": "ACTIVE",
+                        "triggerCondition": "==",
+                        "triggerValue": false
                      },
                      {
-                        "source": "alarm:home",
-                        "sourceProperty": "alarm-fully-armed"
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "debounced-alarm-armed"
                      }
                   ]
                }
@@ -220,7 +236,8 @@
          "activeMessagePriority": 2,
          "inactiveMessage": "Internet connection to home restored",
          "inactiveMessagePriority": 0,
-         "source": "andactivator:home-internet-connection-armed",
+         "source": "thing:home-internet-connection",
+         "sourceProperty": "lost-while-armed",
          "target": "usergroup:key-holders"
       },
       {
@@ -244,22 +261,13 @@
          "target": "usergroup:admins"
       },
       {
-         "name": "pushoveraction:daylight-non-adjusted",
+         "name": "pushoveraction:daylight",
          "activeMessage": "Good morning!",
          "activeMessagePriority": 0,
          "inactiveMessage": "Good evening!",
          "inactiveMessagePriority": 0,
          "source": "thing:environment",
          "sourceProperty": "daylight",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:lights-on",
-         "activeMessage": "Lights going on",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "Lights going off. Goodnight!",
-         "inactiveMessagePriority": 0,
-         "source": "propertyactivator:holiday-background-lights",
          "target": "usergroup:admins"
       }
    ]

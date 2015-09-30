@@ -32,7 +32,7 @@ function PushoverAction(_config) {
 
       that.pushService.send( msg, function( err, result ) {
          if ( err ) {
-            console.log('Error logging into Pushover: ' + err);
+            console.info(that.name + ': Error logging into Pushover: ' + err);
          }
       });
    });
@@ -53,7 +53,7 @@ function PushoverAction(_config) {
 
       that.pushService.send( msg, function( err, result ) {
          if ( err ) {
-            console.log('Error logging into Pushover: ' + err);
+            console.info(that.name + ': Error logging into Pushover: ' + err);
          }
       });
    });
