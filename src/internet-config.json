@@ -269,6 +269,16 @@
          "source": "thing:environment",
          "sourceProperty": "daylight",
          "target": "usergroup:admins"
+      },
+      {
+         "name": "pushoveraction:test-cctv",
+         "activeMessage": "Test CCTV ACTIVE!",
+         "activeMessagePriority": 0,
+         "inactiveMessage": "Test CCTV INACTIVE!",
+         "inactiveMessagePriority": 0,
+         "source": "thing:test-cctv",
+         "sourceProperty": "test-prop-2",
+         "target": "usergroup:admins"
       }
    ]
 }
