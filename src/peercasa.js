@@ -331,10 +331,15 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
       var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
 
-         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
-         this.casaSys.allObjects[source.name] = source;
+         if (this.casaSys.findSource(_data.casaConfig.sources[i])) {
+            console.info(_peerCasa.name + ': Source ' + _data.casaConfig.sources[i] + ' already exists in local casa. Not creating Peer Source');
+         }
+         else {
+            console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
+            var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
+            this.casaSys.allObjects[source.name] = source;
+         }
       }
    }
 
@@ -461,6 +466,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
          if (_data.requestor == that.casa.name) {
             // We made the request
+            that.messageHasBeenAcked(_data);
 
             if (that.incompleteRequests[_data.requestId]) {
                that.incompleteRequests[_data.requestId].ackRequest();
@@ -538,6 +544,7 @@ PeerCasa.prototype.messageHasBeenAcked = function(_data) {
 
    if (_data.messageId && this.unAckedMessages[_data.messageId]) {
       delete this.unAckedMessages[_data.messageId];
+      this.unAckedMessages[_data.messageId] = undefined;
    }
 }
 

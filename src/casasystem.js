@@ -1,6 +1,5 @@
 var util = require('util');
 var S = require('string');
-//var Thing = require('./thing');
 
 var _mainInstance = null;
 
@@ -27,8 +26,6 @@ function CasaSystem(_config, _connectToPeers) {
    this.allObjects = [];
 
    this.areaId = 1;
-
-   //Thing.call(this, _config);
 
    var that = this;
    _mainInstance = this;
@@ -75,8 +72,6 @@ function CasaSystem(_config, _connectToPeers) {
       this.peerCasaService = new PeerCasaService({ gang: _config.gang });
    }
 }
-
-//util.inherits(CasaSystem, Thing);
 
 CasaSystem.prototype.cleverRequire = function(_name) {
    var str = S(_name).between('', ':').s;
