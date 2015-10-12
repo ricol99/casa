@@ -1,13 +1,12 @@
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
-//var i2c = require('i2c');
+var i2c = require('i2c');
 
 function I2CPropertyBinder(_config, _owner) {
 
    PropertyBinder.call(this, _config, _owner);
 
    this.address = _config.address;
-   //this.wire = new i2c(address, { device: '/dev/i2c-1' }); // point to your i2c address, debug provides REPL interface  
    var that = this;
 }
 
@@ -16,6 +15,11 @@ util.inherits(I2CPropertyBinder, PropertyBinder);
 I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    console.log(this.name + ': Attempting to set property ' + this.propertyName + ' to ' + _propValue);
    _callback(false);
+}
+
+I2CPropertyBinder.prototype.coldStart = function() {
+   var that = this;
+   this.wire = new i2c(this.address, { device: '/dev/i2c-1' }); // point to your i2c address, debug provides REPL interface  
 }
 
 //wire.scan(function(err, data) {
