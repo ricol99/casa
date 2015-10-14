@@ -11,7 +11,6 @@
    },
    "listeningPort": 8081,
    "props": {},
-   "users": [],
    "things": [
       {
          "name": "thing:home-daylight-sensor",
@@ -195,6 +194,15 @@
    "transforms" : [],
    "activators": [],
    "actions": [
+      {
+         "name": "setpropertyaction:test-ghost-object-sync",
+         "source": "thing:test-cctv",
+         "sourceProperty": "test-prop-2",
+         "target": "thing:test-duplicate",
+         "targetProperty": "duplicate-normal-property",
+         "targetActiveValue": true,
+         "targetInactiveValue": false
+      },
       {
          "name": "setpropertyaction:test-property-broken",
          "source": "propertyactivator:test-activator-not-found",

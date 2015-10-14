@@ -92,6 +92,21 @@ Source.prototype.setProperty = function(_propName, _propValue, _data, _callback)
    }
 }
 
+// Only called by ghost peer source
+Source.prototype.sourceHasChangedProperty = function(_data) {
+   console.log(this.name + ': received changed-property event from peer (duplicate) source');
+
+   // Only update if the property has a different value
+   if (this.props[_data.propertyName] != _data.propertyValue) {
+
+      // Only update if the property is not bound
+      if (!this.propBinders[_data.propertyName]) {
+         this.updateProperty(_data.propertyName, _data.propertyValue, _data);
+         return true;
+      }
+   }
+   return false;
+}
 
 // INTERNAL METHOD AND FOR USE BY PROPERTY BINDERS
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {

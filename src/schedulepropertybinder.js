@@ -40,7 +40,7 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
 
          for (var index = 0; index < _data.hourly.data.length; ++index) {
 
-            if (_data.hourly.data[index].time > sunTimes["sunrise"].getTime() && index > 0) {
+            if (_data.hourly.data[index].time*1000 > sunTimes["sunrise"].getTime() && index > 0) {
                sunriseIndex = index - 1;
                break;
             }
@@ -48,7 +48,7 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
 
          for (var index2 = index; index2 < _data.hourly.data.length; ++index2) {
 
-            if (_data.hourly.data[index2].time > sunTimes["sunsetStart"].getTime() && index2 > 0) {
+            if (_data.hourly.data[index2].time*1000 > sunTimes["sunsetStart"].getTime() && index2 > 0) {
                sunsetIndex = index2 - 1;
                break;
             }

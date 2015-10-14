@@ -230,9 +230,15 @@ Casa.prototype.createRemoteCasa = function(_data) {
    var PeerSource = require('./peersource');
 
    for (var i = 0; i < len; ++i) {
-      console.log(this.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
-      var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
-      this.casaSys.allObjects[source.name] = source;
+
+      //if (this.casaSys.findSource(_data.casaConfig.sources[i])) {
+         //console.log(this.name + ': Source ' + _data.casaConfig.sources[i] + ' already exists in local casa. Not creating Peer Source');
+      //}
+      //else {
+         console.log(this.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
+         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
+         //this.casaSys.allObjects[source.name] = source;
+      //}
    }
 
    // Refresh all inactive sources and workers

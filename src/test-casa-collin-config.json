@@ -1,5 +1,11 @@
 {
+   "name": "casa-collin",
+   "displayName": "Casa Collin Home Automation System",
    "gang": "casa-collin",
+   "location": {
+      "latitude": 51.5,
+      "longitude": -0.1
+   },
    "props": [],
    "users": [ 
       {
@@ -47,6 +53,35 @@
       }
    ],
    "things": [ 
+      {
+         "name": "thing:test-duplicate",
+         "displayName": "Test Duplicate",
+         "props": [
+            {
+               "name": "duplicate-schedule",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-duplicate-scheduler",
+                  "events": [
+                     {
+                        "rule": "0 * * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "30 * * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "duplicate-normal-property",
+               "initialValue": false,
+               "writable": false
+            }
+         ]
+      },
       {
          "name": "thing:environment",
          "displayName": "Environment",

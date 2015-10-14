@@ -3,10 +3,12 @@ var S = require('string');
 
 var _mainInstance = null;
 
-function CasaSystem(_config, _connectToPeers) {
+function CasaSystem(_systemConfig, _config, _connectToPeers) {
    this.casaName = _config.name;
    this.config = _config;
-   this.name = _config.name;
+   this.systemConfig = _systemConfig;
+   this.name = _systemConfig.name;
+
    this.uberCasa = false;
    this.users = [];
    this.things = [];
@@ -30,7 +32,10 @@ function CasaSystem(_config, _connectToPeers) {
    var that = this;
    _mainInstance = this;
 
-   // Extract My Casa
+   // Merge Configs
+   this.mergeConfigs();
+
+   // Extract Casa
    this.extractCasa();
 
    // Extract Users
@@ -131,6 +136,14 @@ CasaSystem.prototype.extractThings = function() {
          that.allObjects[thingObj.name] = thingObj;
          console.log('New thing: ' + _thing.name);
       });
+   }
+}
+
+CasaSystem.prototype.mergeConfigs = function() {
+   this.config.users = this.systemConfig.users;
+
+   for (var i = 0; i < this.systemConfig.things.length; ++i) {
+      this.config.things.push(this.systemConfig.things[i]);
    }
 }
 

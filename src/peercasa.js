@@ -100,7 +100,7 @@ function PeerCasa(_config) {
 
    this.sourcePropertyChangedCasaHandler = function(_data) {
 
-      if (that.connected) {
+      if (that.connected && (_data.sourcePeerCasa != that.name)) {
          console.log(that.name + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          that.sendMessage('source-property-changed', _data);
       }
@@ -332,14 +332,14 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
 
-         if (this.casaSys.findSource(_data.casaConfig.sources[i])) {
-            console.info(_peerCasa.name + ': Source ' + _data.casaConfig.sources[i] + ' already exists in local casa. Not creating Peer Source');
-         }
-         else {
+         // ====if (this.casaSys.findSource(_data.casaConfig.sources[i])) {
+            // ====console.log(_peerCasa.name + ': Source ' + _data.casaConfig.sources[i] + ' already exists in local casa. Not creating Peer Source');
+         // ====}
+         // ====else {
             console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
             var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
-            this.casaSys.allObjects[source.name] = source;
-         }
+            // ====this.casaSys.allObjects[source.name] = source;
+         // ====}
       }
    }
 
@@ -412,6 +412,7 @@ PeerCasa.prototype.establishListeners = function(_force) {
          that.emit('broadcast-message', { message: 'source-property-changed', data:_data, sourceCasa: that.name });
 
          if (that.sources[_data.sourceName]) {
+            _data.sourcePeerCasa = that.name;
             that.sources[_data.sourceName].sourceHasChangedProperty(_data);
          }
          that.ackMessage('source-property-changed', _data);
@@ -553,7 +554,7 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
 
    for(var prop in this.unAckedMessages) {
 
-      if(this.unAckedMessages.hasOwnProperty(prop)){
+      if(this.unAckedMessages.hasOwnProperty(prop) && this.unAckedMessages[prop]) {
          that.socket.emit(this.unAckedMessages[prop].message, this.unAckedMessages[prop].data);
       }
    }

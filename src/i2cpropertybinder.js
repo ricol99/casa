@@ -1,6 +1,6 @@
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
-var i2c = require('i2c');
+//var i2c = require('i2c');
 
 function I2CPropertyBinder(_config, _owner) {
 

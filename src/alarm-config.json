@@ -10,7 +10,6 @@
       }
    },
    "listeningPort": 8081,
-   "users": [],
    "props": [],
    "things": [
       {
@@ -383,102 +382,6 @@
                   "target": "lightwaverflink:home",
                   "roomID": 3,
                   "deviceID": 1
-               }
-            }
-         ]
-      },
-      {
-         "name": "thing:environment",
-         "displayName": "Environment",
-         "props": [
-            {
-               "name": "daylight",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-daylight",
-                  "events": [
-                     {
-                        "rule": "sunrise:1800",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:-1800",
-                        "propertyValue": false
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "holiday-lights",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-daylight",
-                  "events": [
-                     {
-                        "rule": "sunset:900",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "30 22 * * *",
-                        "propertyValue": false
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "dark",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "invertingpropertybinder:env-dark",
-                  "source": "thing:environment",
-                  "sourceProperty": "daylight"
-               }
-            },
-            {
-               "name": "low-light",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-low-light",
-                  "events": [
-                     {
-                        "rule": "sunrise:1750",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunrise:3600",
-                        "propertyValue": false
-                     },
-                     {
-                        "rule": "sunset:-3600",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:-1750",
-                        "propertyValue": false
-                     }
-                  ]
-               }
-            },
-            {
-               "name": "bedtime",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-bedtime",
-                  "events": [
-                     {
-                        "rule": "30 22 * * *",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "15 23 * * *",
-                        "propertyValue": false
-                     }
-                  ]
                }
             }
          ]
