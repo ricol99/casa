@@ -331,15 +331,8 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
       var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
-
-         // ====if (this.casaSys.findSource(_data.casaConfig.sources[i])) {
-            // ====console.log(_peerCasa.name + ': Source ' + _data.casaConfig.sources[i] + ' already exists in local casa. Not creating Peer Source');
-         // ====}
-         // ====else {
-            console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
-            var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
-            // ====this.casaSys.allObjects[source.name] = source;
-         // ====}
+         console.log(_peerCasa.name + ': Creating peer source named ' + _data.casaConfig.sources[i]);
+         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
       }
    }
 

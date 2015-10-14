@@ -15,7 +15,7 @@ function PeerSource(_name, _props, _peerCasa) {
    if (source) {
       this.ghostMode = true;
       this.myRealSource = source;
-      console.info(this.name + ': ============= Creating a ghost peer source!');
+      console.log(this.name + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
    }
    else {
       casaSys.allObjects[this.name] = this;
