@@ -98,6 +98,12 @@ Casa.prototype.clientHasBeenNamed = function(_connection) {
 }
 
 Casa.prototype.deleteMe = function(_connection) {
+
+   // Deal with race conditions
+   if (_connection.deleted) {
+      return;
+   }
+
    console.log(this.name + ': deleting server connection object!');
 
    var remoteCasa = _connection.remoteCasa;
@@ -121,6 +127,7 @@ Casa.prototype.deleteMe = function(_connection) {
       delete remoteCasa;
    }
 
+   _connection.deleted = true;
    delete _connection;
 }
 
@@ -160,7 +167,20 @@ function Connection(_server, _socket) {
       console.log(that.name + ': login: ' + _data.casaName);
 
       if (!_data.messageId) {
-         deleteMe(that);
+         console.log("=============fjhjhdjfh");
+         setTimeout(function() {
+            that.server.deleteMe(that);
+         }, 300);
+         return;
+      }
+
+      if (_data.casaVersion && _data.casaVersion < parseFloat(that.server.casaSys.version)) {
+         console.info(that.name + ': rejecting login from casa' + _data.casaName + '. Version mismatch!');
+         that.socket.emit('loginRREEJJ', { messageId: _data.messageId, casaName: that.server.name, reason: "version-mismatch" });
+
+         setTimeout(function() {
+            that.server.deleteMe(that);
+         }, 300);
          return;
       }
 
@@ -172,7 +192,10 @@ function Connection(_server, _socket) {
          if (that.server.clients[that.peerName] == that) {
             // socket has been reused
             console.log(that.name + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-            deleteMe(that);
+
+            setTimeout(function() {
+               that.server.deleteMe(that);
+            }, 300);
          }
          else {
             console.log(that.name + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');

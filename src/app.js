@@ -1,6 +1,7 @@
+var version = 0.001;
 var crypto = require('crypto');
 var fs = require('fs');
-require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: false, info: true });
+require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true });
 
 var systemConfigFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.json'; 
 var configFile = (process.argv.length >= 4) ? process.argv[3] : 'internet-config.json'; 
@@ -35,5 +36,5 @@ if (!config.id) {
 
 System = require('./casasystem');
 
-var system = new System(systemConfig, config, connectToPeers);
+var system = new System(systemConfig, config, connectToPeers, version);
 

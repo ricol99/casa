@@ -3,11 +3,12 @@ var S = require('string');
 
 var _mainInstance = null;
 
-function CasaSystem(_systemConfig, _config, _connectToPeers) {
+function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
    this.casaName = _config.name;
    this.config = _config;
    this.systemConfig = _systemConfig;
    this.name = _systemConfig.name;
+   this.version = _version;
 
    this.uberCasa = false;
    this.users = [];

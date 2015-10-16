@@ -202,7 +202,8 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       var messageData = {
          casaName: that.casa.name,
          casaType: that.loginAs,
-         casaConfig: that.casa.config
+         casaConfig: that.casa.config,
+         casaVersion: that.casaSys.version
       };
 
       if (that.loginAs == 'child') {
@@ -224,9 +225,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       console.log(that.name + ': Login Event ACKed by my peer. Going active.');
 
       that.messageHasBeenAcked(_data);
-
       that.resendUnAckedMessages();
-
       that.createSources(_data, that);
       that.connected = true;
 
@@ -239,6 +238,11 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       }  
 
       that.goActive({ sourceName: that.name });
+   });
+
+   this.socket.on('loginRREEJJ', function(_data) {
+      console.info(that.name + ': Login Event REJed by my peer. Exiting.');
+      process.exit(2);
    });
 
    this.socket.on('casa-activeAACCKK', function(_data) {
