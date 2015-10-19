@@ -40,7 +40,8 @@
          "name": "usergroup:key-holders",
          "displayName": "Key Holders",
          "users": [
-           "user:richard"
+           "user:richard",
+           "user:natalie"
          ],
          "props": [
             {
