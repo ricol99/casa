@@ -1,63 +1,39 @@
 var util = require('util');
-var LogicPropertyBinder = require('./logicpropertybinder');
+var PropertyBinder = require('./propertybinder');
 
 function DebouncingPropertyBinder(_config, _owner) {
 
    this.threshold = _config.threshold;
    this.timeoutObj = null;
    this.sourceActive = false;
+   this.active = false;
 
-   LogicPropertyBinder.call(this, _config, _owner);
+   PropertyBinder.call(this, _config, _owner);
+}
 
+util.inherits(DebouncingPropertyBinder, PropertyBinder);
+
+DebouncingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
    var that = this;
-}
+   this.lastCallback = _callback;
 
-util.inherits(DebouncingPropertyBinder, LogicPropertyBinder);
+   var propValue = _data.propertyValue;
+   console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
 
-DebouncingPropertyBinder.prototype.sourceIsActive = function(_data) {
-   this.processSourceStateChange(true, _data);
-}
+   if (_data.coldStart || this.active == propValue) {
+      this.sourceActive = propValue;
 
-DebouncingPropertyBinder.prototype.sourceIsInactive = function(_data) {
-   this.processSourceStateChange(false, _data);
-}
-
-DebouncingPropertyBinder.prototype.copyData = function(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
-
-DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, _data) {
-   var that = this;
-   console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + _active + '!');
-
-   if (_data.coldStart || this.active == _active) {
-      this.sourceActive = _active;
-
-      if (_active) {
-         this.goActive(_data);
+      if (propValue) {
+         this.active = true;
+         return _callback(null, true);
       }
       else {
-         this.goInactive(_data);
+         this.active = false;
+         return _callback(null, false);
       }
    }
-   else if (this.sourceActive != _active) {
-      this.sourceActive = _active;
-
-      if (_active) {
-         this.storedActiveData = this.copyData(_data);
-      }
-      else {
-         this.storedInactiveData = this.copyData(_data);
-      }
+   else if (this.sourceActive != propValue) {
+      this.sourceActive = propValue;
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -66,10 +42,12 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
             that.timeoutObj = null;
 
             if (that.sourceActive) {
-               that.goActive(that.storedActiveData);
+               that.active = true;
+               return _callback(null, true);
             }
             else {
-               that.goInactive(that.storedInactiveData);
+               this.active = false;
+               return _callback(null, false);
             }
 
             if (!that.binderEnabled) {
@@ -77,12 +55,6 @@ DebouncingPropertyBinder.prototype.processSourceStateChange = function(_active, 
             }
          }, this.threshold*1000);
       }
-   }
-   else if (_active) {
-      this.storedActiveData = this.copyData(_data);
-   }
-   else {
-      this.storedInactiveData = this.copyData(_data);
    }
 };
 
@@ -99,11 +71,17 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
          this.timeoutObj = setTimeout(function() {
             that.timeoutObj = null;
 
-            if (that.sourceActive) {
-               that.goActive(that.storedActiveData);
-            }
-            else {
-               that.goInactive(that.storedInactiveData);
+            if (that.lastCallback) {
+
+               if (that.sourceActive) {
+                  that.active = true;
+                  _callback(null, true);
+               }
+               else {
+                  that.active = false;
+                  _callback(null, false);
+               }
+               that.lastCallback = null;
             }
 
             if (!that.binderEnabled) {

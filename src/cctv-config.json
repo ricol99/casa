@@ -9,7 +9,7 @@
          "port": 80
       }
    },
-   "listeningPort": 8081,
+   "listeningPort": 8082,
    "props": {},
    "things": [
       {
@@ -26,10 +26,10 @@
                      {
                         "source": "thing:test-cctv",
                         "sourceProperty": "test-prop-2",
-                        "triggerCondition": "==",
-                        "triggerValue": true,
-                        "outputActiveValue": 30,
-                        "outputInactiveValue": 100
+                        "outputValues": {
+                           "true": 30,
+                           "false": 100
+                        }
                      }
                   ]
                }
@@ -50,16 +50,19 @@
                      {
                         "source": "thing:test-cctv",
                         "sourceProperty": "test-prop-1",
-                        "outputActiveValue": "green",
-                        "outputInactiveValue": "white"
+                        "outputValues": {
+                           "true": "green",
+                           "false": "white"
+                        }
                      },
                      {
                         "source": "thing:home-daylight-sensor",
                         "sourceProperty": "lightLevel",
-                        "triggerCondition": "<",
-                        "triggerValue": 50,
-                        "outputActiveValue": "red",
-                        "outputInactiveValue": "blue"
+                        "inputTransform": "$value<50",
+                        "outputValues": {
+                           "true": "red",
+                           "false": "blue"
+                        }
                      }
                   ]
                }
@@ -187,27 +190,18 @@
                      "sourceProperty": "test-prop-3"
                   }
                }
+            },
+            {
+               "name": "test-property-broken",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "propertybinder:broken-binder-test",
+                  "source": "propertyactivator:test-source-not-found",
+                  "sourceProperty": "test-prop-not-found"
+               }
             }
          ]
-      }
-   ],
-   "transforms" : [],
-   "activators": [],
-   "actions": [
-      {
-         "name": "setpropertyaction:test-ghost-object-sync",
-         "source": "thing:test-cctv",
-         "sourceProperty": "test-prop-2",
-         "target": "thing:test-duplicate",
-         "targetProperty": "duplicate-normal-property",
-         "targetActiveValue": true,
-         "targetInactiveValue": false
-      },
-      {
-         "name": "setpropertyaction:test-property-broken",
-         "source": "propertyactivator:test-activator-not-found",
-         "target": "thing:-test-not-gonna-find-me-yet",
-         "targetProperty": "nothing"
       }
    ]
 }

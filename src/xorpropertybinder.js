@@ -1,24 +1,25 @@
 var util = require('util');
-var MulitLogicPropertyBinder = require('./multilogicpropertybinder');
+var PropertyBinder = require('./propertybinder');
 
 function XorPropertyBinder(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   MultiLogicPropertyBinder.call(this, _config, _owner);
+   PropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(XorPropertyBinder, MultiLogicPropertyBinder);
+util.inherits(XorPropertyBinder, PropertyBinder);
 
-XorPropertyBinder.prototype.checkActivate = function() {
+XorPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
    var allInputsActive = true;
    var oneInputActive = false;
 
-   // any input active, but not all of them
-   for (var prop in this.multiSourceListener.sourceAttributes) {
+   // all inputs active
+   for (var prop in this.sourceListeners) {
 
-      if (this.multiSourceListener.sourceAttributes.hasOwnProperty(prop) && this.multiSourceListener.sourceAttributes[prop] && this.multiSourceListener.sourceAttributes[prop].active) {
+      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners.[prop].sourcePropertyValue) {
+         return _callback(null, false);
          oneInputActive = true;
       }
       else {
@@ -26,7 +27,7 @@ XorPropertyBinder.prototype.checkActivate = function() {
       }
    }
 
-   return (allInputsActive) ? false : oneInputActive;
+   return (allInputsActive) ? _callback(null, false) : _callback(null, oneInputActive);
 };
 
 module.exports = exports = XorPropertyBinder;

@@ -18,7 +18,6 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
    this.peerCasas = [];
    this.parentCasa = null;
    this.remoteCasas = [];
-   this.transforms = [];
 
    this.casaArea = null;
    this.parentCasaArea = null;
@@ -48,22 +47,13 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
    // Extract Parent casa of parent area
    this.extractParentCasa();
 
-   // Extract all transforms hosted by this casa
-   this.extractCasaTransforms();
-
-   // Extract all activators hosted by this casa
-   this.extractCasaActivators();
-
-   // Extract all actions hosted by this casa
-   this.extractCasaActions();
-
    // Create area for peer casas to live in
    this.createPeerCasaArea();
 
    // Make sure all listeners are refreshed now that all sources are available
    this.casa.refreshSourceListeners();
 
-   // Cold start all defined things now that the activators and actions have been created
+   // Cold start all defined things now that everything has been created
    this.coldStartThings();
 
    // start conecting to parent, if it exists
@@ -173,43 +163,6 @@ CasaSystem.prototype.extractParentCasa = function() {
 
       this.parentCasa.setCasaArea(this.parentCasaArea);
    }
-}
-
-CasaSystem.prototype.extractCasaTransforms = function() {
-   var that = this;
-
-   this.config.transforms.forEach(function(transform) { 
-      var Transform = that.cleverRequire(transform.name);
-      transform.casa = that.casa.name;
-      var transformObj = new Transform(transform);
-      that.transforms[transformObj.name] = transformObj;
-      that.allObjects[transformObj.name] = transformObj;
-      console.log('New transform: ' + transform.name);
-   });
-}
-
-CasaSystem.prototype.extractCasaActivators = function() {
-   var that = this;
-
-   this.config.activators.forEach(function(activator) { 
-      var Activator = that.cleverRequire(activator.name);
-      activator.casa = that.casa.name;
-      var activatorObj = new Activator(activator);
-      that.allObjects[activatorObj.name] = activatorObj;
-      console.log('New activator: ' + activator.name);
-   });
-}
-
-CasaSystem.prototype.extractCasaActions = function() {
-   var that = this;
-
-   this.config.actions.forEach(function(action) { 
-      var Action = that.cleverRequire(action.name);
-      action.casa = that.casa.name;
-      var actionObj = new Action(action);
-      that.allObjects[actionObj.name] = actionObj;
-      console.log('New action: ' + action.name);
-   });
 }
 
 CasaSystem.prototype.coldStartThings = function() {
@@ -349,14 +302,6 @@ CasaSystem.prototype.findUser = function (_userName) {
 
 CasaSystem.prototype.findRemoteCasa = function (_casaName) {
    return this.remoteCasas[_casaName];
-}
-
-CasaSystem.prototype.findCasaActivator = function (_casa, _activatorName) {
-   return _casa.activators[_activatorName];
-}
-
-CasaSystem.prototype.findActivator = function (_activatorName) {
-    return this.allObjects[_activatorName];
 }
 
 CasaSystem.prototype.findSource = function (_sourceName) {

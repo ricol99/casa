@@ -1,38 +1,21 @@
 var util = require('util');
-var LogicPropertyBinder = require('./logicpropertybinder');
+var PropertyBinder = require('./propertybinder');
 
 function InvertingPropertyBinder(_config, _owner) {
-
-   LogicPropertyBinder.call(this, _config, _owner);
-
-   var that = this;
-   this.cStart = true;
+   PropertyBinder.call(this, _config, _owner);
 }
 
-util.inherits(InvertingPropertyBinder, LogicPropertyBinder);
+util.inherits(InvertingPropertyBinder, PropertyBinder);
 
-InvertingPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-   this.processSourceStateChange(_propValue, _data);
-   _callback(true);
-}
+InvertingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
 
-InvertingPropertyBinder.prototype.sourceIsActive = function(_data) {
-   this.processSourceStateChange(true, _data);
-}
+   if (typeof _data.propertyValue === "boolean") {
+      return _callback(null, !(_data.propertyValue));
 
-InvertingPropertyBinder.prototype.sourceIsInactive = function(_data) {
-   this.processSourceStateChange(false, _data);
-}
-
-InvertingPropertyBinder.prototype.processSourceStateChange = function(_active, _data) {
-
-   if (_active) {
-      this.goInactive(_data);
    }
-   else {
-      this.goActive(_data);
+   else if (typeof _data.propertyValue === "number") {
+      return _callback(null, -(_data.propertyValue));
    }
 }
-
 
 module.exports = exports = InvertingPropertyBinder;

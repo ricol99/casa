@@ -29,7 +29,7 @@ function RemoteCasa(_config, _peerCasa) {
          // listen for source changes from peer casas
          that.establishListeners(true);
 
-         that.goActive({ sourceName: that.name });
+         that.updateProperty('ACTIVE', true, { sourceName: that.name });
       }
    });
 
@@ -37,7 +37,7 @@ function RemoteCasa(_config, _peerCasa) {
 
       if (that.isActive()) {
          console.log(that.name + ': Lost connection to my peer. Going inactive.');
-         that.goInactive({ sourceName: that.name });
+         that.updateProperty('ACTIVE', false, { sourceName: that.name });
       }
    });
 }

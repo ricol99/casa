@@ -1,40 +1,30 @@
 var util = require('util');
-var LogicPropertyBinder = require('./logicpropertybinder');
+var PropertyBinder = require('./propertybinder');
 
 function LatchingPropertyBinder(_config, _owner) {
 
    this.minOutputTime = _config.minOutputTime;
 
    if (_config.controller) {
-      _config.targetDefaultTriggerConditions = true;
       _config.ignoreTargetUpdates = false;
-
-      if (typeof _config.controller == "string") {
-         _config.target = _config.controller;
-      }
-      else {
-         // Assume object
-         _config.target = _config.controller.source;
-         _config.targetProperty = _config.controller.sourceProperty;
-         _config.targetTriggerCondition = _config.controller.triggerCondition;
-         _config.targetTriggerValue = _config.controller.triggerValue;
-      }
+      _config.target = _config.controller.source;
+      _config.targetProperty = _config.controller.sourceProperty;
+      _config.inputTransform = _config.controller.inputTransform;
+      _config.inputMap = _config.controller.inputMap;
   }
 
-   LogicPropertyBinder.call(this, _config, _owner);
+   PropertyBinder.call(this, _config, _owner);
 
    this.minOutputTimeObj = null;
-   this.latestInactiveData = { sourceName: this.name };
-   this.latestActiveData = { sourceName: this.name };
-   var that = this;
-   this.cStart = true;
    this.sourceActive = false;
    this.controllerActive = false;
+   this.active = false;
+   this.lastSourceListener = null;
 }
 
-util.inherits(LatchingPropertyBinder, LogicPropertyBinder);
+util.inherits(LatchingPropertyBinder, PropertyBinder);
 
-LatchingPropertyBinder.prototype.copyData = function(_sourceData) {
+function copyData(_sourceData) {
    var newData = {};
 
    for (var prop in _sourceData) {
@@ -47,23 +37,25 @@ LatchingPropertyBinder.prototype.copyData = function(_sourceData) {
    return newData;
 }
 
-LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
+LatchingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+   var propValue = _data.propertyValue;
+   this.lastSourceListener = _sourceListener;
+   this.lastCallback = _callback;
 
-   if (_propValue) {
+   console.log("CCCCCCC ", _data);
+
+   if (propValue) {
       console.log(this.name + ': target ' + _data.sourceName + ' active!');
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
          this.restartTimer();
-         this.goActive(_data);
+         this.active = true;
+         return _callback(null, propValue);
       }
-      else {
-         if (this.controllerActive) {
-            this.goActive(_data);
-         }
-         else {
-            this.lastActiveData = this.copyData(_data);
-         }
+      else if (this.controllerActive) {
+         this.active = true;
+         return _callback(null, propValue);
       }
    }
    else {
@@ -73,25 +65,19 @@ LatchingPropertyBinder.prototype.setProperty = function(_propValue, _data, _call
       if (this.active) {
 
          if (this.minOutputTime != undefined) {
+
             // Destination is active. If there is no timer, deactivate. Else, let the timer do it
             if (this.minOutputTimeObj == null) {
-               this.goInactive(_data);
+               this.active = false;
+               return _callback(null, false);
             }
-            else {
-               // save data for the timer to use
-               this.latestInactiveData = this.copyData(_data);
-            }
-         }
-         else {
-            // save data for the timer to use
-            this.latestInactiveData = this.copyData(_data);
          }
       }
       else {
-         this.goInactive(_data);
+         this.active = false;
+         return _callback(null, false);
       }
    }
-   _callback(true);
 }
 
 LatchingPropertyBinder.prototype.restartTimer = function() {
@@ -105,36 +91,44 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
       that.minOutputTimeObj = null;
 
       if (!that.sourceActive) {
-         that.goInactive(that.latestInactiveData);
-         that.latestInactiveData = { sourceName: that.name };
+         that.active = false;
+
+         if (that.lastCallback) {
+            that.lastCallback(null, false);
+            that.lastCallback = null;
+            return;
+         }
       }
    }, this.minOutputTime*1000);
 }
 
-LatchingPropertyBinder.prototype.sourceIsActive = function(_data) {
-   this.setProperty(true, _data, function() {});
-}
+LatchingPropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
+   console.log("HHHHHH ", _data);
 
-LatchingPropertyBinder.prototype.sourceIsInactive = function(_data) {
-   this.setProperty(false, _data, function() {});
-}
+   this.controllerActive = _data.propertyValue;
 
-LatchingPropertyBinder.prototype.targetIsActive = function(_data) {
-   this.controllerActive = true;
+   if (this.controllerActive) {
+      if (!this.active && this.sourceActive) {
 
-   if (!this.active && this.sourceActive) {
-      this.goActive(this.latestActiveData);
-      this.latestActiveData = { sourceName: this.name };
+         if (this.lastCallback) {
+            this.active = true;
+            this.lastCallback(null, true);
+            this.lastCallback = null;
+            return;
+         }
+      }
+   }
+   else {
+      if (this.active) {
+
+         if (this.lastCallback) {
+            this.active = false;
+            this.lastCallback(null, false);
+            this.lastCallback = null;
+            return;
+         }
+      }
    }
 }
-
-LatchingPropertyBinder.prototype.targetIsInactive = function(_data) {
-   this.controllerActive = false;
-
-   if (this.active) {
-      this.goInactive(this.latestInactiveData);
-      this.latestInactiveData = { sourceName: this.name };
-   }
-}
-
+   
 module.exports = exports = LatchingPropertyBinder;

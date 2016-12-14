@@ -6,7 +6,7 @@ function Source(_config) {
    this.name = _config.name;
    this.sourceEnabled = true;
    this.props = { ACTIVE: false };
-   this.propBinders = { ACTIVE: null };
+   this.propBinders = {};
    this.setMaxListeners(50);
 
    var casaSys = CasaSystem.mainInstance();
@@ -36,9 +36,6 @@ function Source(_config) {
       }
    }
 
-   this.applyProps = {};
-   this.applyProps.active = (_config.applyProps) ? ((_config.applyProps.active) ? _config.applyProps.active : null) : null;
-   this.applyProps.inactive = (_config.applyProps) ? ((_config.applyProps.inactive) ? _config.applyProps.inactive : null) : null;
    this.writable = (_config.writable) ? _config.writable : true;
 
    events.EventEmitter.call(this);
@@ -52,6 +49,10 @@ function Source(_config) {
 }
 
 util.inherits(Source, events.EventEmitter);
+
+Source.prototype.isActive = function() {
+   return this.props['ACTIVE'];
+}
 
 Source.prototype.isPropertyEnabled = function(_property) {
 
@@ -114,7 +115,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    console.info('Property Changed: ' + this.name + ':' + _propName + ': ' + _propValue);
    var oldValue = this.props[_propName];
    this.props[_propName] = _propValue;
-   var sendData = (_data) ? this.copyData(_data) : {};
+   var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.name;
    sendData.propertyName = _propName;
    sendData.propertyOldValue = oldValue;
@@ -122,19 +123,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    this.emit('property-changed', sendData);
 }
 
-Source.prototype.isActive = function() {
-   return this.props['ACTIVE'];
-}
-
-Source.prototype.setActive = function(_data, _callback) {
-   this.setProperty('ACTIVE', true, _data, _callback);
-}
-
-Source.prototype.setInactive = function(_data, _callback) {
-   this.setProperty('ACTIVE', false, _data, _callback);
-}
-
-Source.prototype.copyData = function(_sourceData) {
+function copyData(_sourceData) {
    var newData = {};
 
    for (var prop in _sourceData) {
@@ -145,59 +134,6 @@ Source.prototype.copyData = function(_sourceData) {
    }
 
    return newData;
-}
-
-Source.prototype.mergeActiveApplyProps = function(_sourceData) {
-   var dataToSend = this.copyData(_sourceData);
-
-   if (dataToSend) {
-
-      if (this.applyProps.active) {
-
-         if (!dataToSend.applyProps) { dataToSend.applyProps = {}; }
-         for (var attrname in this.applyProps.active) { dataToSend.applyProps[attrname] = this.applyProps.active[attrname]; }
-      }
-   }
-   else {
-      dataToSend.applyProps = this.applyProps.active;
-   }
-   return dataToSend;
-}
-
-Source.prototype.mergeInactiveApplyProps = function(_sourceData) {
-   var dataToSend = this.copyData(_sourceData);
-
-   if (dataToSend) {
-      if (this.applyProps.inactive) {
-
-         if (!dataToSend.applyProps) { dataToSend.applyProps = {}; }
-         for (var attrname in this.applyProps.inactive) { dataToSend.applyProps[attrname] = this.applyProps.inactive[attrname]; }
-      }
-   }
-   else {
-      dataToSend = {};
-      dataToSend.applyProps = this.applyProps.inactive;
-   }
-   return dataToSend;
-}
-
-Source.prototype.goActive = function(_sourceData) {
-   console.log(this.name + ": Going active! Previously active state=" + this.props['ACTIVE']);
-
-   var sendData = this.mergeActiveApplyProps(_sourceData);
-   sendData.sourceName = this.name;
-   sendData.oldState = this.props['ACTIVE'];
-   console.log(this.name+": Data=", sendData);
-   this.updateProperty('ACTIVE', true, sendData);
-}
-
-Source.prototype.goInactive = function(_sourceData) {
-   console.log(this.name + ": Going inactive! Previously active state=" + this.props['ACTIVE']);
-
-   var sendData = this.mergeInactiveApplyProps(_sourceData);
-   sendData.sourceName = this.name;
-   sendData.oldState = this.props['ACTIVE'];
-   this.updateProperty('ACTIVE', false, sendData);
 }
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {

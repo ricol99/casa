@@ -1,5 +1,4 @@
 var util = require('util');
-var MultiSourceListener = require('./multisourcelistener');
 var SourceListener = require('./sourcelistener');
 
 function PropertyBinder(_config, _owner) {
@@ -10,16 +9,18 @@ function PropertyBinder(_config, _owner) {
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : false;
    this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : true;
-   this.allowMultipleSources = (_config.allowMultipleSources) ? _config.allowMultipleSources : false;
-   this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
+  
+   this.outputTransform = _config.outputTransform; 
+   this.outputMap = (_config.outputMap) ? copyData(_config.outputMap) : undefined;
 
    this.binderEnabled = false;
 
    var that = this;
 
-   this.sourceName = _config.source;
+   this.sourceListeners = {};
+   this.noOfSources = 0;
 
-   if (this.allowMultipleSources && _config.sources) {
+   if (_config.sources) {
 
       if (this.captiveProperty) {
          // Don't allow the main property to be set from outside as we have mulitple sources we
@@ -28,8 +29,24 @@ function PropertyBinder(_config, _owner) {
       }
 
       this.binderEnabled = false;
-      this.multiSourceListener = new MultiSourceListener({ name: this.name, sources: _config.sources, defaultTriggerConditions: this.defaultTriggerConditions,
-                                                           allInputsRequiredForValidity: this.allSourcesRequiredForValidity }, this);
+
+      this.constructing = true;
+
+      var that = this;
+
+      for (var index = 0; index < _config.sources.length; ++index) {
+
+         if (_config.sources[index].priority == undefined) {
+            _config.sources[index].priority = index;
+         }
+
+         var sourceListener = new SourceListener(_config.sources[index], this);
+         this.sourceListeners[sourceListener.sourcePropertyName] = sourceListener;
+         this.noOfSources++;
+      };
+
+      this.constructing = false;
+
    }
    else if (_config.source) {
 
@@ -40,8 +57,9 @@ function PropertyBinder(_config, _owner) {
       }
 
       this.binderEnabled = false;
-      this.sourceListener = new SourceListener(_config, this);
-      this.source = this.sourceListener.source;
+      var sourceListener = new SourceListener(_config, this);
+      this.sourceListeners[sourceListener.sourcePropertyName] = sourceListener;
+      this.noOfSources++;
    }
    else {
       this.binderEnabled = true;
@@ -53,8 +71,8 @@ function PropertyBinder(_config, _owner) {
       this.targetProperty = _config.targetProperty;
       this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? true : _config.ignoreTargetUpdates;
       this.targetListener = new SourceListener({ source: _config.target, sourceProperty: this.targetProperty, isTarget: true,
-                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, triggerCondition: _config.targetTriggerCondition,
-                                                 triggerValue: _config.targetTriggerValue, defaultTriggerConditions: _config.targetDefaultTriggerConditions }, this);
+                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, inputTransform: _config.target.inputTransform,
+                                                 inputMap:_config.target.inputMap}, this);
       this.target = this.targetListener.source;
    }
 
@@ -67,6 +85,7 @@ PropertyBinder.prototype.myPropertyValue = function() {
 }
 
 PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
+   console.log("BBBBB " + _data);
    this.owner.updateProperty(this.propertyName, _propValue, _data);
 }
 
@@ -80,8 +99,13 @@ PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
 }
 
 PropertyBinder.prototype.sourceIsValid = function() {
-   this.binderEnabled = true;
-   this.source = (this.sourceListener) ? this.sourceListener.source : null;
+
+   if (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
+         return _sourceListener.sourceListenerEnabled;
+   })) {
+      this.binderEnabled = true;
+   }
+
    this.target = (this.targetListener) ? this.targetListener.source : null;
 }
 
@@ -89,48 +113,118 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
    this.binderEnabled = false;
-   this.source = null;
    this.target = null;
    this.goInvalid(_data);
 }
 
-// Methods to override
-PropertyBinder.prototype.oneSourceIsActive = function(_sourceListener, _sourceAttributes, _data) {
-   // DO NOTHING BY DEFAULT
+function transformOutput(_instance, _currentOutputValue) {
+   var output = _currentOutputValue;
+   var newOutput = output;
+
+   if (_instance.outputTransform) {
+      var exp = _instance.outputTransform.replace("$value", "output");
+      newOutput = eval(exp);
+   }
+
+   if (_instance.outputMap && _instance.outputMap[newInput] != undefined) {
+      newOutput = _instance.outputMap[newOutput];
+   }
+
+   return newOutput;
 }
 
-PropertyBinder.prototype.oneSourceIsInactive = function(sourceListener, _sourceAttributes, _data) {
-   // DO NOTHING BY DEFAULT
+function copyData(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
 }
 
-PropertyBinder.prototype.oneSourcePropertyChanged = function(sourceListener, _sourceAttributes, _data) {
-   // DO NOTHING BY DEFAULT
-}
+function allAssocArrayElementsDo(_obj, _func) {
+   
+   for (var prop in _obj) {
 
-PropertyBinder.prototype.sourceIsActive = function(_data) {
-   // Copy functionality by default
-   this.updatePropertyAfterRead(true, _data);
-}
-
-PropertyBinder.prototype.sourceIsInactive = function(_data) {
-   // Copy functionality by default
-   this.updatePropertyAfterRead(false, _data);
+      if (_obj.hasOwnProperty(prop)){
+         if (!_func(_obj[prop])) {
+            return false;
+         }
+      }
+   }
+   return true;
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
-   // Copy functionality by default
-   this.updatePropertyAfterRead(_data.propertyValue, _data);
-}
+   var that = this;
 
-PropertyBinder.prototype.targetIsActive = function(_data) {
-   // DO NOTHING BY DEFAULT
-}
+   console.log('FFFF sourcePropertyChanged', _data);
+   if (this.binderEnabled && this.sourceListeners[_data.sourcePropertyName]) {
+   console.log('FFFF sourcePropertyChanged', _data);
 
-PropertyBinder.prototype.targetIsInactive = function(_data) {
-   // DO NOTHING BY DEFAULT
+      this.calculateNewOutputValue(this.sourceListeners[_data.sourcePropertyName], _data, function(_err, _newOutputValue) {
+         if (!_err) {
+            that.internalProcessSourcePropertyChange(that.sourceListeners[_data.sourcePropertyName], that.sourceListeners[_data.sourcePropertyName].lastData, _newOutputValue);
+         }
+      });
+   }
 }
 
 PropertyBinder.prototype.targetPropertyChanged = function(_data) {
+
+   console.log('GGGG targetPropertyChanged', _data);
+   if (this.binderEnabled && this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
+   console.log('GGGG targetPropertyChanged', _data);
+      this.processTargetPropertyChange(this.targetListener, _data);
+   }
+}
+
+PropertyBinder.prototype.internalProcessSourcePropertyChange = function(_sourceListener, _data, _newOutputValue) {
+   var highestPrioritySource = this.findHighestPrioritySource(_newOutputValue);
+
+   if (!highestPrioritySource || (highestPrioritySource.priority < _sourceListener.priority)) {
+      highestPrioritySource = _sourceListener;
+   }
+
+   var actualOutputValue = (highestPrioritySource.outputValues[_newOutputValue] == undefined) ? _newOutputValue : highestPrioritySource.outputValues[_newOutputValue];
+
+   if (this.outputTransform || this.outputMap) {
+      actualOutputValue = transformOutput(this, actualOutputValue);
+   }
+
+   if ((this.myPropertyValue() != actualOutputValue) || (highestPrioritySource.priority > _sourceListener.priority)) {
+      this.updatePropertyAfterRead(actualOutputValue, highestPrioritySource.lastData);
+   }
+}
+
+PropertyBinder.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
+   var highestPriorityFound = 99999;
+   var highestPrioritySource = null;
+
+   for (var prop in this.sourceListeners) {
+
+      if(this.sourceListeners.hasOwnProperty(prop)){
+         var sourceListener = this.sourceListeners[prop];
+
+         if (sourceListener && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+            highestPriorityFound = sourceListener.priority;
+            highestPrioritySource = sourceListener;
+         }
+      }
+   }
+
+   return highestPrioritySource;
+}
+
+PropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+   return _callback(null, _data.propertyValue);
+}
+
+PropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
    // DO NOTHING BY DEFAULT
 }
 

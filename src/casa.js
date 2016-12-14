@@ -63,24 +63,17 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    this.config.sources = [];
    this.config.sourcesStatus = [];
 
-   var len = _config.activators.length;
-   for (var j = 0; j < len; ++j) {
-      this.config.sources.push(_config.activators[j].name);
-      this.config.sourcesStatus.push({ properties: {}, status: false });
-   }
-
    var len = _config.things.length;
-   for (var k = j; k < len + j; ++k) {
-      this.config.sources.push(_config.things[k-j].name);
+   for (var j = 0; j < len; ++j) {
+      this.config.sources.push(_config.things[j].name);
       this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
    var len = _config.users.length;
-   for (var l = k; l < len + k; ++l) {
-      this.config.sources.push(_config.users[l-k].name);
+   for (var k = j; k < len + j; ++k) {
+      this.config.sources.push(_config.users[k-j].name);
       this.config.sourcesStatus.push({ properties: {}, status: false });
    }
-
 }
 
 Casa.prototype.refreshSourceListeners = function() {
@@ -167,7 +160,6 @@ function Connection(_server, _socket) {
       console.log(that.name + ': login: ' + _data.casaName);
 
       if (!_data.messageId) {
-         console.log("=============fjhjhdjfh");
          setTimeout(function() {
             that.server.deleteMe(that);
          }, 300);

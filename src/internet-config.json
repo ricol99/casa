@@ -83,6 +83,7 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-alarm",
                   "source": "casa:alarm",
+                  "sourceProperty": "ACTIVE",
                   "threshold": 120
                }
             },
@@ -93,6 +94,7 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-cctv",
                   "source": "casa:cctv",
+                  "sourceProperty": "ACTIVE",
                   "threshold": 120
                }
             },
@@ -146,139 +148,152 @@
                }
             }
          ]
-      }
-   ],
-   "transforms" : [],
-   "activators": [],
-   "actions": [
-      {
-         "name": "pushoveraction:alarm-tamper-alarm",
-         "activeMessage": "D-Alarm being tampered with!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm no longer in tamper mode",
-         "inactiveMessagePriority": 0,
-         "source": "alarm:home",
-         "sourceProperty": "tamper-alarm",
-         "target": "usergroup:key-holders"
       },
       {
-         "name": "pushoveraction:alarm-mains-failure",
-         "activeMessage": "D-Alarm has lost mains power!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm mains power restored",
-         "inactiveMessagePriority": 0,
-         "source": "alarm:home",
-         "sourceProperty": "mains-failure",
-         "target": "usergroup:key-holders"
-      },
-      {
-         "name": "pushoveraction:alarm-fire-alarm",
-         "activeMessage": "D-Fire Alarm!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Fire alarm reset",
-         "inactiveMessagePriority": 0,
-         "source": "alarm:home",
-         "sourceProperty": "fire-alarm",
-         "target": "usergroup:key-holders"
-      },
-      {
-         "name": "pushoveraction:alarm-fully-armed",
-         "activeMessage": "D-Alarm armed",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Alarm disarmed",
-         "inactiveMessagePriority": 0,
-         "source": "alarm:home",
-         "sourceProperty": "fully-armed",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:alarm-part-armed",
-         "activeMessage": "D-Alarm part armed",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Alarm disarmed",
-         "inactiveMessagePriority": 0,
-         "source": "alarm:home",
-         "sourceProperty": "part-armed",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:alarm-in-alarm",
-         "activeMessage": "D-Alarm triggered",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Alarm trigger reset",
-         "inactiveMessagePriority": 2,
-         "source": "alarm:home",
-         "sourceProperty": "alarm-triggered",
-         "target": "usergroup:key-holders"
-      },
-      {
-         "name": "pushoveraction:alarm-confirmed-alarm",
-         "activeMessage": "D-Alarm confirmed - call police!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Confirmed alarm reset",
-         "inactiveMessagePriority": 2,
-         "source": "alarm:home",
-         "sourceProperty": "confirmed-alarm",
-         "target": "usergroup:key-holders"
-      },
-      {
-         "name": "pushoveraction:internet-connection",
-         "activeMessage": "D-Internet connection to home restored",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Internet connection to home has been lost!",
-         "inactiveMessagePriority": 1,
-         "source": "thing:home-internet-connection",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:internet-connection-armed",
-         "activeMessage": "D-Internet connection to home has been lost while alarm is fully armed!",
-         "activeMessagePriority": 2,
-         "inactiveMessage": "D-Internet connection to home restored",
-         "inactiveMessagePriority": 0,
-         "source": "thing:home-internet-connection",
-         "sourceProperty": "lost-while-armed",
-         "target": "usergroup:key-holders"
-      },
-      {
-         "name": "pushoveraction:alarm-casa-status",
-         "activeMessage": "D-Casa 'alarm' is active",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Casa 'alarm' has gone down!",
-         "inactiveMessagePriority": 1,
-         "source": "thing:home-internet-connection",
-         "sourceProperty": "casa-alarm",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:cctv-casa-status",
-         "activeMessage": "D-Casa 'cctv' is active",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Casa 'cctv' has gone down!",
-         "inactiveMessagePriority": 1,
-         "source": "thing:home-internet-connection",
-         "sourceProperty": "casa-cctv",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:daylight",
-         "activeMessage": "D-Good morning!",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Good evening!",
-         "inactiveMessagePriority": 0,
-         "source": "thing:environment",
-         "sourceProperty": "daylight",
-         "target": "usergroup:admins"
-      },
-      {
-         "name": "pushoveraction:test-cctv",
-         "activeMessage": "D-Test CCTV ACTIVE!",
-         "activeMessagePriority": 0,
-         "inactiveMessage": "D-Test CCTV INACTIVE!",
-         "inactiveMessagePriority": 0,
-         "source": "thing:test-cctv",
-         "sourceProperty": "test-prop-2",
-         "target": "usergroup:admins"
+         "name": "thing:pushover-messenger",
+         "displayName": "Pushover Messenger",
+         "props": [
+            {
+               "name": "priority-message",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "pushoverbinder:priority-message",
+                  "priority": 2,
+                  "target": "usergroup:key-holders",
+                  "sources": [
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "tamper-alarm",
+                        "outputValues": {
+                           "true": "D-Alarm being tampered with!",
+                           "false": "D-Alarm no longer in tamper mode"
+                        }
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "mains-failure",
+                        "outputValues": {
+                           "true": "D-Alarm has lost mains power!",
+                           "false": "D-Alarm mains power restored"
+                        }
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "fire-alarm",
+                        "outputValues": {
+                           "true": "D-Fire Alarm!",
+                           "false": "D-Fire alarm reset"
+                        }
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "alarm-triggered",
+                        "outputValues": {
+                           "true": "D-Alarm triggered",
+                           "false": "D-Alarm trigger reset"
+                        }
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "confirmed-alarm",
+                        "outputValues": {
+                           "true": "D-Alarm confirmed - call police!",
+                           "false": "D-Confirmed alarm reset"
+                        }
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-alarm",
+                        "outputValues": {
+                           "true": "D-Internet connection to home has been lost while alarm is fully armed!",
+                           "false": "D-Internet connection to home restored"
+                        }
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "urgent-message",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "pushoverbinder:urgent-message",
+                  "priority": 1,
+                  "target": "usergroup:admins",
+                  "sources": [
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "ACTIVE",
+                        "outputValues": {
+                           "true": "D-Internet connection to home restored",
+                           "false": "D-Internet connection to home has been lost!"
+                        }
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-alarm",
+                        "outputValues": {
+                           "true": "D-Casa 'alarm' is active",
+                           "false": "D-Casa 'alarm' has gone down!"
+                        }
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-cctv",
+                        "outputValues": {
+                           "true": "D-Casa 'cctv' is active",
+                           "false": "D-Casa 'cctv' has gone down!"
+                        }
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "normal-message",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "pushoverbinder:normal-message",
+                  "priority": 0,
+                  "target": "usergroup:admins",
+                  "sources": [
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "fully-armed",
+                        "outputValues": {
+                           "true": "D-Alarm armed",
+                           "false": "D-Alarm disarmed"
+                        }
+                     },
+                     {
+                        "source": "alarm:home",
+                        "sourceProperty": "part-armed",
+                        "outputValues": {
+                           "true": "D-Alarm part armed",
+                           "false": "D-Alarm disarmed"
+                        }
+                     },
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "daylight",
+                        "outputValues": {
+                           "true": "D-Good morning!",
+                           "false": "D-Good evening!"
+                        }
+                     },
+                     {
+                        "source": "thing:test-cctv",
+                        "sourceProperty": "test-prop-2",
+                        "outputValues": {
+                           "true": "D-Test CCTV ACTIVE!",
+                           "false": "D-Test CCTV INACTIVE!"
+                        }
+                     }
+                  ]
+               }
+            }
+         ]
       }
    ]
 }

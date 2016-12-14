@@ -4,30 +4,21 @@ var CasaSystem = require('./casasystem');
 
 function SourceListener(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
-   this.sourceName = _config.source;
    this.casa = this.casaSys.casa;
    this.owner = _owner;
-   this.defaultTriggerConditions = (_config.defaultTriggerConditions == undefined) ? false : _config.defaultTriggerConditions;
+   this.sourceName = _config.source;
+
+   this.inputTransform = _config.inputTransform; 
+   this.inputMap = (_config.inputMap) ? copyData(_config.inputMap) : undefined;
+
    this.ignoreSourceUpdates = (_config.ignoreSourceUpdates == undefined) ? false : _config.ignoreSourceUpdates;
    this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
+   this.priority = (_config.priority == undefined) ? 0 : _config.priority;
+   this.outputValues = (_config.outputValues == undefined) ? {} : copyData(_config.outputValues);
+   this.property = _config.sourceProperty;
 
-   if (_config.sourceProperty != undefined) {
-      this.property = _config.sourceProperty;
-
-      if (_config.triggerCondition) {
-         this.triggerCondition = _config.triggerCondition;
-         this.triggerValue = _config.triggerValue;
-      }
-      else if (this.defaultTriggerConditions) {
-         this.triggerCondition = "==";
-         this.triggerValue = true;
-      }
-   }
-   else {
-      this.property = "ACTIVE";
-      this.triggerCondition = "==";
-      this.triggerValue = true;
-   }
+   this.sourcePropertyValue = 0;
+   this.sourcePropertyName = this.sourceName + ":" + this.property;
 
    this.name = "sourcelistener:" + _owner.name + ":" + _config.source + ":" + this.property;
 
@@ -46,6 +37,7 @@ SourceListener.prototype.establishListeners = function() {
    var that = this;
 
    this.propertyChangedCallback = function(_data) {
+      console.log('AAAAA ' + _data);
       that.internalSourcePropertyChanged(_data);
    };
 
@@ -94,43 +86,56 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    }
 }
 
+function transformInput(_instance, _data) {
+   var input = _data.propertyValue;
+   var newInput = input;
+
+   if (_instance.inputTransform) {
+      var exp = _instance.inputTransform.replace("$value", "input");
+      newInput = eval(exp);
+   }
+
+   if (_instance.inputMap && _instance.inputMap[newInput] != undefined) {
+      newInput = _instance.inputMap[newInput];
+   }
+
+   return newInput;
+}
+
+function copyData(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
    if (!this.ignoreSourceUpdates && _data.propertyName == this.property) {
       console.log(this.name + ": processing source property change, property=" + _data.propertyName);
+      this.sourcePropertyValue = _data.propertyValue;
 
-      if (this.triggerCondition != undefined) {
-         var a = _data.propertyValue;
-         var b = this.triggerValue;
-         var evalStr = "a " + this.triggerCondition + " b";
+      // ** TODO Do we need to cache data based on the propertyValue? Not done so far
+      this.lastData = copyData(_data);
+      this.lastData.sourcePropertyName = this.sourcePropertyName;
 
-         if (eval(evalStr)) {
+      console.log("EEEEE", this.lastData);
 
-            if (this.isTarget) {
-               this.owner.targetIsActive(_data);
-            }
-            else {
-               this.owner.sourceIsActive(_data);
-            }
-         }
-         else {
-            if (this.isTarget) {
-               this.owner.targetIsInactive(_data);
-            }
-            else {
-               this.owner.sourceIsInactive(_data);
-            }
-         }
+      if (this.inputTransform || this.inputMap) {
+         this.lastData.propertyValue = transformInput(this, _data);
+      }
+
+      if (this.isTarget) {
+         this.owner.targetPropertyChanged(copyData(this.lastData));
       }
       else {
-
-         if (this.isTarget) {
-            this.owner.targetPropertyChanged(_data);
-         }
-         else {
-            this.owner.sourcePropertyChanged(_data);
-         }
+         this.owner.sourcePropertyChanged(copyData(this.lastData));
       }
    }
 }

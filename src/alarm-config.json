@@ -171,20 +171,26 @@
                      {
                         "source": "room:kitchen",
                         "sourceProperty": "movement-in-dark",
-                        "outputActiveValue": "medium",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "medium",
+                           "false": "off"
+                        }
                      },
                      {
                         "source": "room:kitchen",
                         "sourceProperty": "movement-in-low-light",
-                        "outputActiveValue": "low",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "low",
+                           "false": "off"
+                        }
                      },
                      {
                         "source": "thing:environment",
                         "sourceProperty": "holiday-lights",
-                        "outputActiveValue": "low",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "low",
+                           "false": "off"
+                        }
                      }
                   ]
                }
@@ -229,8 +235,6 @@
                   "name": "latchingpropertybinder:lounge-movement",
                   "source": "alarm:home",
                   "sourceProperty": "lounge-pir",
-                  "triggerCondition": "==",
-                  "triggerValue": true,
                   "minOutputTime": 600
                }
             },
@@ -276,20 +280,26 @@
                      {
                         "source": "room:lounge",
                         "sourceProperty": "movement-in-dark",
-                        "outputActiveValue": "medium",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "medium",
+                           "false": "off"
+                        }
                      },
                      {
                         "source": "room:lounge",
                         "sourceProperty": "movement-in-low-light",
-                        "outputActiveValue": "low",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "low",
+                           "false": "off"
+                        }
                      },
                      {
                         "source": "thing:environment",
                         "sourceProperty": "holiday-lights",
-                        "outputActiveValue": "low",
-                        "outputInactiveValue": "off"
+                        "outputValues": {
+                           "true": "low",
+                           "false": "off"
+                        }
                      }
                   ]
                }
@@ -328,8 +338,7 @@
                   "name": "lightwaverfpropertybinder:lounge-table-light",
                   "source": "room:lounge",
                   "sourceProperty": "lighting-mood",
-                  "triggerCondition": "!=",
-                  "triggerValue": "off",
+                  "inputTransform": "$value!=\"off\"",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 1
@@ -343,8 +352,7 @@
                   "name": "lightwaverfpropertybinder:lounge-centre-light",
                   "source": "room:lounge",
                   "sourceProperty": "lighting-mood",
-                  "triggerCondition": "!=",
-                  "triggerValue": "off",
+                  "inputTransform": "$value!=\"off\"",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 4
@@ -358,8 +366,7 @@
                   "name": "lightwaverfpropertybinder:lounge-tree-light",
                   "source": "room:lounge",
                   "sourceProperty": "lighting-mood",
-                  "triggerCondition": "!=",
-                  "triggerValue": "off",
+                  "inputTransform": "$value!=\"off\"",
                   "target": "lightwaverflink:home",
                   "roomID": 1,
                   "deviceID": 5
@@ -385,19 +392,27 @@
                }
             }
          ]
-      }
-   ],
-   "transforms" : [],
-   "activators": [],
-   "actions": [
+      },
       {
-         "name": "spycameraaction:lounge",
-         "cctvHostname": "192.168.1.245",
-         "cctvPort": 8000,
-         "userId": "ricol99",
-         "password": "carrot99",
-         "cameraId": 1,
-         "source": "andactivator:lounge-activity"
+         "name": "thing:camera-lounge",
+         "displayName": "Camera Lounge",
+         "props": [
+            {
+               "name": "lounge-recording",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "spycamerabinder:camera-lounge",
+                  "source": "room:lounge",
+                  "sourceProperty": "movement",
+                  "cctvHostname": "192.168.1.245",
+                  "cctvPort": 8000,
+                  "userId": "ricol99",
+                  "password": "carrot99",
+                  "cameraId": 1,
+               }
+            }
+         ]
       }
    ]
 }

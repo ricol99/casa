@@ -1,26 +1,26 @@
 var util = require('util');
-var MultiLogicPropertyBinder = require('./multilogicpropertybinder');
+var PropertyBinder = require('./propertybinder');
 
 function AndPropertyBinder(_config, _owner) {
 
    _config.allInputsRequiredForValidity = true;
-   MultiLogicPropertyBinder.call(this, _config, _owner);
+   PropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(AndPropertyBinder, MultiLogicPropertyBinder);
+util.inherits(AndPropertyBinder, PropertyBinder);
 
-AndPropertyBinder.prototype.checkActivate = function() {
+AndPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
    // all inputs active
-   for (var prop in this.multiSourceListener.sourceAttributes) {
+   for (var prop in this.sourceListeners) {
 
-      if (this.multiSourceListener.sourceAttributes.hasOwnProperty(prop) && this.multiSourceListener.sourceAttributes[prop] && !this.multiSourceListener.sourceAttributes[prop].active) {
-         return false;
+      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && !this.sourceListeners[prop].sourcePropertyValue) {
+         return _callback(null, false);
       }
    }
 
-   return true;
+   return _callback(null, true);
 };
 
 module.exports = exports = AndPropertyBinder;

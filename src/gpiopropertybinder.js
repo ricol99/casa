@@ -79,14 +79,6 @@ GPIOPropertyBinder.prototype.coldStart = function() {
 
    this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
    this.Ready();
-
-   //this.gpio = Gpio.export(this.gpioPin, {
-      //direction: this.direction,
-      //interval: 100,
-      //ready: function() {
-         //that.Ready();
-      //}
-   //});
 }
 
 module.exports = exports = GPIOPropertyBinder;

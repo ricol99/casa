@@ -43,18 +43,21 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    else {
       console.info('Property Changed: ' + this.name + ':' + _data.propertyName + ': ' + _data.propertyValue);
       this.props[_data.propertyName] = _data.propertyValue;
-      this.emit('property-changed', _data);
+      this.emit('property-changed', copyData(_data));
    }
 }
 
-PeerSource.prototype.setActive = function(_data, _callback) {
-   console.log(this.name + ': Attempting to set source to active');
-   this.peerCasa.setSourceActive(this, _data, _callback);
-}
+function copyData(_sourceData) {
+   var newData = {};
 
-PeerSource.prototype.setInactive = function(_data, _callback) {
-   console.log(this.name + ': Attempting to set source to inactive');
-   this.peerCasa.setSourceInactive(this, _data, _callback);
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
 }
 
 PeerSource.prototype.isPropertyEnabled = function(_property) {
@@ -87,10 +90,6 @@ PeerSource.prototype.coldStart = function() {
          }
       }
    }
-}
-
-PeerSource.prototype.isActive = function(_callback) {
-   return this.props['ACTIVE'];
 }
 
 PeerSource.prototype.invalidateSource = function() {

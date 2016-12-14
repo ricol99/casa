@@ -72,7 +72,7 @@ function PeerCasa(_config) {
            that.establishHeartbeat();
 
            that.resendUnAckedMessages();
-           that.goActive({ sourceName: that.name });
+           that.updateProperty('ACTIVE', true, { sourceName: that.name });
         }
       }
    };
@@ -92,7 +92,7 @@ function PeerCasa(_config) {
                that.intervalID = null;
                that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
                that.socket = null;
-               that.goInactive({ sourceName: that.name });
+               that.updateProperty('ACTIVE', false, { sourceName: that.name });
             }
          }
       }
@@ -236,8 +236,8 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       for (var i = 0; i < casaListLen; ++i) {
          that.sendMessage('casa-active', { sourceName: casaList[i].name, casaConfig: casaList[i].config });
       }  
-
-      that.goActive({ sourceName: that.name });
+  
+      that.updateProperty('ACTIVE', true, { sourceName: that.name });
    });
 
    this.socket.on('loginRREEJJ', function(_data) {
@@ -263,7 +263,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.goInactive({ sourceName: that.name });
+         that.updateProperty('ACTIVE', false, { sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
@@ -282,7 +282,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.connected = false;
          that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.name }, sourceCasa: that.name });
          that.invalidateSources();
-         that.goInactive({ sourceName: that.name });
+         that.updateProperty('ACTIVE', false, { sourceName: that.name });
       }
 
       that.deleteMeIfNeeded();
