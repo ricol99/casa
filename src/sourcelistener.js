@@ -17,7 +17,6 @@ function SourceListener(_config, _owner) {
    this.outputValues = (_config.outputValues == undefined) ? {} : copyData(_config.outputValues);
    this.property = _config.sourceProperty;
 
-   this.sourcePropertyValue = 0;
    this.sourcePropertyName = this.sourceName + ":" + this.property;
 
    this.name = "sourcelistener:" + _owner.name + ":" + _config.source + ":" + this.property;
@@ -37,7 +36,6 @@ SourceListener.prototype.establishListeners = function() {
    var that = this;
 
    this.propertyChangedCallback = function(_data) {
-      console.log('AAAAA ' + _data);
       that.internalSourcePropertyChanged(_data);
    };
 
@@ -113,6 +111,10 @@ function copyData(_sourceData) {
    }
 
    return newData;
+}
+
+SourceListener.prototype.getPropertyValue = function() {
+   return this.sourcePropertyValue;
 }
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {

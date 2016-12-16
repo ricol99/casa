@@ -6,10 +6,10 @@ function LightwaveRfLink(_config) {
 
    Thing.call(this, _config);
 
+   this.thingType = 'lightwave-controller';
    this.lightwaveRf = new LightwaveRF({ ip: this.getProperty('ipAddress') });
    this.queue = [];
    this.requestPending = false;
-   var that = this;
 }
 
 util.inherits(LightwaveRfLink, Thing);

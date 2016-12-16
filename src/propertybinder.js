@@ -14,6 +14,7 @@ function PropertyBinder(_config, _owner) {
    this.outputMap = (_config.outputMap) ? copyData(_config.outputMap) : undefined;
 
    this.binderEnabled = false;
+   this.manualMode = false;
 
    var that = this;
 
@@ -29,10 +30,7 @@ function PropertyBinder(_config, _owner) {
       }
 
       this.binderEnabled = false;
-
       this.constructing = true;
-
-      var that = this;
 
       for (var index = 0; index < _config.sources.length; ++index) {
 
@@ -46,7 +44,6 @@ function PropertyBinder(_config, _owner) {
       };
 
       this.constructing = false;
-
    }
    else if (_config.source) {
 
@@ -68,15 +65,24 @@ function PropertyBinder(_config, _owner) {
    }
 
    if (_config.target) {
-      this.targetProperty = _config.targetProperty;
+      this.targetProperty = (_config.targetProperty) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? true : _config.ignoreTargetUpdates;
       this.targetListener = new SourceListener({ source: _config.target, sourceProperty: this.targetProperty, isTarget: true,
-                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, inputTransform: _config.target.inputTransform,
-                                                 inputMap:_config.target.inputMap}, this);
+                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, inputTransform: _config.targetInputTransform,
+                                                 inputMap:_config.targetInputMap}, this);
       this.target = this.targetListener.source;
    }
 
-   var that = this;
+   if (_config.listenController) {
+      this.listenControllerProperty = (_config.listenControllerProperty) ? _config.listenControllerProperty : "ACTIVE";
+      this.listenControllerListener = new SourceListener({ source: _config.listenController, sourceProperty: this.listenControllerProperty, isTarget: true,
+                                                         ignoreSourceUpdates: false, inputTransform: _config.listenControllerInputTransform,
+                                                         inputMap:_config.listenControllerInputMap}, this);
+
+      this.listenController = this.listenControllerListener.source;
+   }
+
+   this.listening = true;
 }
 
 // INTERNAL METHODS
@@ -85,7 +91,6 @@ PropertyBinder.prototype.myPropertyValue = function() {
 }
 
 PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
-   console.log("BBBBB " + _data);
    this.owner.updateProperty(this.propertyName, _propValue, _data);
 }
 
@@ -98,6 +103,22 @@ PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
    _callback(false);
 }
 
+PropertyBinder.prototype.setManualMode = function(_manualMode) {
+   this.manualMode = _manualMode;
+
+   if (_manualMode) {
+      this.listening = false;
+   }
+   else {
+      if (this.listenController &&  listenControllerListener.getProperty() != undefined) {
+         this.listening = listenControllerListener.getProperty();
+      }
+      else {
+         this.listening = true;
+      }
+   }
+}
+
 PropertyBinder.prototype.sourceIsValid = function() {
 
    if (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
@@ -107,6 +128,14 @@ PropertyBinder.prototype.sourceIsValid = function() {
    }
 
    this.target = (this.targetListener) ? this.targetListener.source : null;
+   this.listenController = (this.listenControllerListener) ? this.listenControllerListener.source : null;
+
+   if (this.listenController &&  listenControllerListener.getProperty() != undefined) {
+      this.listening = listenControllerListener.getProperty();
+   }
+   else {
+      this.listening = true;
+   }
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {
@@ -114,6 +143,7 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
    this.binderEnabled = false;
    this.target = null;
+   this.listenController = null;
    this.goInvalid(_data);
 }
 
@@ -162,9 +192,7 @@ function allAssocArrayElementsDo(_obj, _func) {
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
 
-   console.log('FFFF sourcePropertyChanged', _data);
-   if (this.binderEnabled && this.sourceListeners[_data.sourcePropertyName]) {
-   console.log('FFFF sourcePropertyChanged', _data);
+   if (this.binderEnabled && this.listening && this.sourceListeners[_data.sourcePropertyName]) {
 
       this.calculateNewOutputValue(this.sourceListeners[_data.sourcePropertyName], _data, function(_err, _newOutputValue) {
          if (!_err) {
@@ -176,10 +204,13 @@ PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
 
 PropertyBinder.prototype.targetPropertyChanged = function(_data) {
 
-   console.log('GGGG targetPropertyChanged', _data);
-   if (this.binderEnabled && this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
-   console.log('GGGG targetPropertyChanged', _data);
-      this.processTargetPropertyChange(this.targetListener, _data);
+   if (this.binderEnabled) {
+      if (this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
+         this.processTargetPropertyChange(this.targetListener, _data);
+      }
+      else if (this.listenControllerListener.sourcePropertyName == _data.sourcePropertyName && !this.manualMode) {
+         this.processListenControllerPropertyChange(this.listenControllerListener, _data);
+      }
    }
 }
 
@@ -226,6 +257,10 @@ PropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _da
 
 PropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
    // DO NOTHING BY DEFAULT
+}
+
+PropertyBinder.prototype.processListenControllerPropertyChange = function(_listenControllerListener, _data) {
+   this.listening = _data.sourcePropertyValue;
 }
 
 // Override this if you listen to a source that is not "Source".

@@ -136,6 +136,18 @@ function copyData(_sourceData) {
    return newData;
 }
 
+Source.prototype.setManualMode = function(_mode) {
+   console.log(this.name + ': Source is moving manual mode to ' + _mode);
+
+   for (var binder in this.propBinders) {
+
+      if (binder != "manual-mode" && this.propBinders.hasOwnProperty(binder)) {
+         this.propBinders[binder].setManualMode(_mode);
+      }
+   }
+
+}
+
 Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.name + ": Going invalid! Previously active state=" + this.props['ACTIVE']);
 

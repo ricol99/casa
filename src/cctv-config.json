@@ -41,6 +41,20 @@
          "displayName": "Test daylight sensor",
          "props": [
             {
+               "name": "manual-mode",
+               "initialValue": "false",
+               "writable": false,
+               "binder": {
+                  "name": "propertybinder:copy-property",
+                  "sources": [
+                     {
+                        "source": "thing:test-cctv",
+                        "sourceProperty": "test-prop-4"
+                     }
+                  ]
+               }
+            },
+            {
                "name": "alarm-status",
                "initialValue": "white",
                "writable": false,
@@ -172,6 +186,24 @@
                      },
                      {
                         "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "test-prop-4",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-prop-binder-4",
+                  "events": [
+                     {
+                        "rule": "0,20,40 * * * *",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "10,30,50 * * * *",
                         "propertyValue": false
                      }
                   ]
