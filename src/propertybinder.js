@@ -100,7 +100,20 @@ PropertyBinder.prototype.goInvalid = function(_data) {
 
 // Override this to actually update what ever the property is bound to
 PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-   _callback(false);
+
+   if (this.manualMode) {
+      
+      if (this.myPropertyValue() != _propValue) {
+         this.updatePropertyAfterRead(_propName, _propValue, _data);
+         _callback(true);         
+      }
+      else {
+         _callback(true);                  
+      }
+   }
+   else {
+      _callback(false);
+   }
 }
 
 PropertyBinder.prototype.setManualMode = function(_manualMode) {

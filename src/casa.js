@@ -39,9 +39,9 @@ function Casa(_config) {
 
    this.buildSimpleConfig(_config);
 
-   //app.get('/index.html', function(req, res){
-     //res.sendFile(__dirname + '/index.html');
-   //});
+   app.get('/index.html', function(req, res){
+     res.sendFile(__dirname + '/index.html');
+   });
 
    io.on('connection', function(_socket) {
       console.log('a casa has joined');

@@ -6,7 +6,7 @@
       "name": "casaarea:internet",
       "displayName": "Casa Collin Internet"
    },
-   "listeningPort": 80,
+   "listeningPort": 8096,
    "props": [],
    "users": [ 
       {
