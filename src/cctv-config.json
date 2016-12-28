@@ -5,8 +5,8 @@
    "parentCasa": {
       "name": "casa:internet",
       "address": {
-         "hostname": "localhost",
-         "port": 8096
+         "hostname": "199.245.56.152",
+         "port": 80
       }
    },
    "listeningPort": 8082,
