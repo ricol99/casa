@@ -1,6 +1,6 @@
 var http = require('http');
 var util = require('util');
-var PropertyBinder = require('./action');
+var PropertyBinder = require('./propertybinder');
 
 function SpyCameraBinder(_config) {
 
