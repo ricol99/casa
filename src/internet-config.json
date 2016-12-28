@@ -166,48 +166,48 @@
                         "source": "alarm:home",
                         "sourceProperty": "tamper-alarm",
                         "outputValues": {
-                           "true": "D-Alarm being tampered with!",
-                           "false": "D-Alarm no longer in tamper mode"
+                           "true": "H-Alarm being tampered with!",
+                           "false": "H-Alarm no longer in tamper mode"
                         }
                      },
                      {
                         "source": "alarm:home",
                         "sourceProperty": "mains-failure",
                         "outputValues": {
-                           "true": "D-Alarm has lost mains power!",
-                           "false": "D-Alarm mains power restored"
+                           "true": "H-Alarm has lost mains power!",
+                           "false": "H-Alarm mains power restored"
                         }
                      },
                      {
                         "source": "alarm:home",
                         "sourceProperty": "fire-alarm",
                         "outputValues": {
-                           "true": "D-Fire Alarm!",
-                           "false": "D-Fire alarm reset"
+                           "true": "H-Fire Alarm!",
+                           "false": "H-Fire alarm reset"
                         }
                      },
                      {
                         "source": "alarm:home",
                         "sourceProperty": "alarm-triggered",
                         "outputValues": {
-                           "true": "D-Alarm triggered",
-                           "false": "D-Alarm trigger reset"
+                           "true": "H-Alarm triggered",
+                           "false": "H-Alarm trigger reset"
                         }
                      },
                      {
                         "source": "alarm:home",
                         "sourceProperty": "confirmed-alarm",
                         "outputValues": {
-                           "true": "D-Alarm confirmed - call police!",
-                           "false": "D-Confirmed alarm reset"
+                           "true": "H-Alarm confirmed - call police!",
+                           "false": "H-Confirmed alarm reset"
                         }
                      },
                      {
                         "source": "thing:home-internet-connection",
                         "sourceProperty": "casa-alarm",
                         "outputValues": {
-                           "true": "D-Internet connection to home has been lost while alarm is fully armed!",
-                           "false": "D-Internet connection to home restored"
+                           "true": "H-Internet connection to home has been lost while alarm is fully armed!",
+                           "false": "H-Internet connection to home restored"
                         }
                      }
                   ]
@@ -226,24 +226,24 @@
                         "source": "thing:home-internet-connection",
                         "sourceProperty": "ACTIVE",
                         "outputValues": {
-                           "true": "D-Internet connection to home restored",
-                           "false": "D-Internet connection to home has been lost!"
+                           "true": "H-Internet connection to home restored",
+                           "false": "H-Internet connection to home has been lost!"
                         }
                      },
                      {
                         "source": "thing:home-internet-connection",
                         "sourceProperty": "casa-alarm",
                         "outputValues": {
-                           "true": "D-Casa 'alarm' is active",
-                           "false": "D-Casa 'alarm' has gone down!"
+                           "true": "H-Casa 'alarm' is active",
+                           "false": "H-Casa 'alarm' has gone down!"
                         }
                      },
                      {
                         "source": "thing:home-internet-connection",
                         "sourceProperty": "casa-cctv",
                         "outputValues": {
-                           "true": "D-Casa 'cctv' is active",
-                           "false": "D-Casa 'cctv' has gone down!"
+                           "true": "H-Casa 'cctv' is active",
+                           "false": "H-Casa 'cctv' has gone down!"
                         }
                      }
                   ]
@@ -262,32 +262,32 @@
                         "source": "alarm:home",
                         "sourceProperty": "fully-armed",
                         "outputValues": {
-                           "true": "D-Alarm armed",
-                           "false": "D-Alarm disarmed"
+                           "true": "H-Alarm armed",
+                           "false": "H-Alarm disarmed"
                         }
                      },
                      {
                         "source": "alarm:home",
                         "sourceProperty": "part-armed",
                         "outputValues": {
-                           "true": "D-Alarm part armed",
-                           "false": "D-Alarm disarmed"
+                           "true": "H-Alarm part armed",
+                           "false": "H-Alarm disarmed"
                         }
                      },
                      {
                         "source": "thing:environment",
                         "sourceProperty": "daylight",
                         "outputValues": {
-                           "true": "D-Good morning!",
-                           "false": "D-Good evening!"
+                           "true": "H-Good morning!",
+                           "false": "H-Good evening!"
                         }
                      },
                      {
                         "source": "thing:test-cctv",
                         "sourceProperty": "test-prop-2",
                         "outputValues": {
-                           "true": "D-Test CCTV ACTIVE!",
-                           "false": "D-Test CCTV INACTIVE!"
+                           "true": "H-Test CCTV ACTIVE!",
+                           "false": "H-Test CCTV INACTIVE!"
                         }
                      }
                   ]
