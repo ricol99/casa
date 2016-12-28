@@ -2,17 +2,17 @@ var http = require('http');
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
 
-function SpyCameraBinder(_config) {
+function SpyCameraBinder(_config, _owner) {
 
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };
    this.id = _config.cameraId;
 
-   PropertyBinder.call(this, _config);
+   PropertyBinder.call(this, _config, _owner);
 
    var that = this;
 }
 
-PushoverBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data) {
+SpyCameraBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data) {
    console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
 
    // https active request

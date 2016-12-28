@@ -61,8 +61,8 @@ LightwaveRFPropertyBinder.prototype.calculateNewOutputValue = function(_sourceLi
          this.target.turnRoomOff(this.roomID, callbackHandler);
       }
       else {
-         console.log(this.name + ": Attempting to apply mood " + _propValue + " change to LightwaveRF room ID=" + this.roomID);
-         this.target.setRoomMood(this.roomID, this.moods[_propValue], callbackHandler);
+         console.log(this.name + ": Attempting to apply mood " + propValue + " change to LightwaveRF room ID=" + this.roomID);
+         this.target.setRoomMood(this.roomID, this.moods[propValue], callbackHandler);
       }
    }
 }
