@@ -137,8 +137,7 @@
                      {
                         "source": "casa-alarm",
                         "sourceProperty": "ACTIVE",
-                        "triggerCondition": "==",
-                        "triggerValue": false
+                        "inputTransform": "!$value"
                      },
                      {
                         "source": "thing:home-internet-connection",
