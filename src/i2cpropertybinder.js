@@ -1,6 +1,24 @@
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
 //var i2c = require('i2c');
+var i2c = require('ABElectronics_NodeJS_Libraries/lib/adcpi/adcpi');
+
+
+var adc = new ADCPi(0x68, 0x69, 18);
+
+
+while (1) {
+    console.log('Reading 1: ' + adc.readVoltage(1));
+    console.log('Reading 2: ' + adc.readVoltage(2));
+    console.log('Reading 3: ' + adc.readVoltage(3));
+    console.log('Reading 4: ' + adc.readVoltage(4));
+    console.log('Reading 5: ' + adc.readVoltage(5));
+    console.log('Reading 6: ' + adc.readVoltage(6));
+    console.log('Reading 7: ' + adc.readVoltage(7));
+    console.log('Reading 8: ' + adc.readVoltage(8));
+
+}
+
 
 var i2c = require('i2c-bus');
 
@@ -33,7 +51,9 @@ function I2CPropertyBinder(_config, _owner) {
 
    PropertyBinder.call(this, _config, _owner);
 
-   this.address = _config.address;
+   this.address1 = _config.address1;
+   this.address2 = _config.address2;
+   this.channel = _config.channel;
    var that = this;
 
    process.on('SIGINT', function() {
@@ -53,21 +73,12 @@ I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback)
 
 I2CPropertyBinder.prototype.coldStart = function() {
    var that = this;
-   this.wire = i2c.openSync(1);
+   this.wire = new ADCPi(this.address1, this.address2, 18);
 
-   //this.wire = new i2c(this.address, { device: '/dev/i2c-1' }); // point to your i2c address, debug provides REPL interface  
    setInterval(function() {
-	rawTemp = that.wire.readWordSync(that.address, CMD_READ_TEMP);
-	console.log("Read byte for i2c bus: " + rawTemp);
-	//that.wire.readByte(function(_err, _result) {
-		//if (_err) {
-			//console.error("Error for i2c bus: " + _err);
-		//}
-		//else {
-			//console.log("Read byte for i2c bus: " + _result);
-		//}
-	//});
+      console.log('Reading 1: ' + that.wire.readVoltage(that.channel));
    }, 1000);
+   //this.wire = new i2c(this.address, { device: '/dev/i2c-1' }); // point to your i2c address, debug provides REPL interface  
 }
 
 //wire.scan(function(err, data) {
