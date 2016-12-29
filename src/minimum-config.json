@@ -36,7 +36,15 @@
                "writable": false,
                "binder": {
                   "name": "i2cpropertybinder:light-channel-1",
-                  "address": 104
+                  "address1": 104,
+		  "address2": 105,
+                  "channel": 1,
+                  "interval": 1,
+                  "inputMin": 3.24,
+                  "inputMax": 0,
+                  "outputMin": 0,
+                  "outputMax": 100,
+                  "floorOutput": true
                }
             }
          ]

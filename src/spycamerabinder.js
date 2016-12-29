@@ -12,7 +12,7 @@ function SpyCameraBinder(_config, _owner) {
    var that = this;
 }
 
-SpyCameraBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data) {
+SpyCameraBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
    console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
 
    // https active request

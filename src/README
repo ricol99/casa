@@ -1,0 +1,9 @@
+#MDNS fix
+sudo apt-get install libavahi-compat-libdnssd-dev
+
+# Additional packages for pi (from src directory)
+npm install mdns
+npm install onoff
+npm install spi
+npm install rpio
+git clone git@github.com:abelectronicsuk/ABElectronics_NodeJS_Libraries.git
