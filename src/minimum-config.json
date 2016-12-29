@@ -1,0 +1,45 @@
+{
+   "name": "casa:test",
+   "displayName": "Casa Collin Test Casa",
+   "gang": "casa-collin-test",
+   "area": {
+      "name": "casaarea:test",
+      "displayName": "Casa Collin Test"
+   },
+   "listeningPort": 8096,
+   "props": [],
+   "users": [ 
+      {
+         "name": "user:richard",
+         "displayName": "Richard",
+         "props": []
+      }
+   ],
+   "things": [
+      {
+         "name": "thing:test-thing",
+         "displayName": "Test Thing",
+         "props": [
+            {
+               "name": "tamper-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:alarm-tamper",
+                  "gpioPin": 4,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "light-sensor",
+               "initialValue": 0,
+               "writable": false,
+               "binder": {
+                  "name": "i2cpropertybinder:light-channel-1",
+                  "address": 104
+               }
+            }
+         ]
+      }
+   ]
+}

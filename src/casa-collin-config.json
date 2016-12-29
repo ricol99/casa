@@ -28,11 +28,7 @@
             {
                "name": "pushoverDestAddr",
                "initialValue": "gX5JLc28t775dYr1yjuo4p38t7hziV",
-               "writable": false,
-               "binder": {
-                  "name": "i2cpropertybinder:pushoverDestAddr",
-                  "address": 24
-               }
+               "writable": false
             }
          ]
       },
