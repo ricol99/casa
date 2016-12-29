@@ -203,7 +203,7 @@
                      },
                      {
                         "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-alarm",
+                        "sourceProperty": "lost-while-armed",
                         "outputValues": {
                            "true": "H-Internet connection to home has been lost while alarm is fully armed!",
                            "false": "H-Internet connection to home restored"
