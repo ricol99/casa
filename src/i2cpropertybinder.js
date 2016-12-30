@@ -45,6 +45,10 @@ function startScanning(_this) {
    var p = (v - that.inputMin) / that.inputRange;
    that.previousValue = (that.outputRange * p) + that.outputMin;
 
+   if (that.floorOutput) {
+      that.previousValue = Math.floor(that.previousValue);
+   }
+
    that.intervalTimerId = setInterval(function() {
       var voltage = that.wire.readVoltage(that.channel);
       var placeInRange = (voltage - that.inputMin) / that.inputRange;
