@@ -35,7 +35,7 @@
                   "interval": 5,
                   "maxChange": 5,
                   "maxIgnoreIntervals": 18,
-                  "inputMin": 3.276,
+                  "inputMin": 3.285,
                   "inputMax": 0,
                   "outputMin": 0,
                   "outputMax": 100,
