@@ -1,0 +1,26 @@
+{
+   "name": "casa:test",
+   "displayName": "Casa Collin Test Casa",
+   "gang": "casa-collin",
+   "area": {
+      "name": "casaarea:test",
+      "displayName": "Casa Collin Test"
+   },
+   "listeningPort": 8096,
+   "props": [],
+   "users": [ 
+      {
+         "name": "user:richard",
+         "displayName": "Richard",
+         "props": []
+      }
+   ],
+   "things": [
+      {
+         "name": "thing:test-thing",
+         "displayName": "Test Thing",
+         "props": [
+         ]
+      }
+   ]
+}
