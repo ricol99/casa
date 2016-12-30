@@ -38,7 +38,7 @@
                   "channel": 1,
                   "interval": 1,
                   "maxChange": 5,
-                  "inputMin": 3.24,
+                  "inputMin": 3.276,
                   "inputMax": 0,
                   "outputMin": 0,
                   "outputMax": 100,
