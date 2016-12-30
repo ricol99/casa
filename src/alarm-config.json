@@ -1,7 +1,7 @@
 {
    "name": "casa:alarm",
    "displayName": "Casa Collin Texecom Alarm",
-   "gang": "casa-collin",
+   "gang": "casa-collin-v2",
    "parentCasa": {
       "name": "casa:internet",
       "address": {
