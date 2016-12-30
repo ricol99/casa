@@ -72,6 +72,10 @@
                      {
                         "source": "thing:home-internet-connection",
                         "sourceProperty": "casa-cctv"
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-env"
                      }
                   ]
                }
@@ -94,6 +98,17 @@
                "binder": {
                   "name": "debouncingpropertybinder:casa-cctv",
                   "source": "casa:cctv",
+                  "sourceProperty": "ACTIVE",
+                  "threshold": 120
+               }
+            },
+            {
+               "name": "casa-env",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "debouncingpropertybinder:casa-env",
+                  "source": "casa:env",
                   "sourceProperty": "ACTIVE",
                   "threshold": 120
                }
@@ -244,6 +259,14 @@
                            "true": "H-Casa 'cctv' is active",
                            "false": "H-Casa 'cctv' has gone down!"
                         }
+                     },
+                     {
+                        "source": "thing:home-internet-connection",
+                        "sourceProperty": "casa-env",
+                        "outputValues": {
+                           "true": "H-Casa 'env' is active",
+                           "false": "H-Casa 'env' has gone down!"
+                        }
                      }
                   ]
                }
@@ -285,8 +308,8 @@
                         "source": "thing:test-cctv",
                         "sourceProperty": "test-prop-2",
                         "outputValues": {
-                           "true": "H-Test CCTV ACTIVE!",
-                           "false": "H-Test CCTV INACTIVE!"
+                           "true": "H-Test CCTV TEST PROP 2 TRUE!",
+                           "false": "H-Test CCTV TEST PROP 2 FALSE!"
                         }
                      }
                   ]
