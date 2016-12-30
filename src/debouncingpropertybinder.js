@@ -75,11 +75,11 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
                if (that.sourceActive) {
                   that.active = true;
-                  _callback(null, true);
+                  that.updatePropertyAfterRead(true , { sourceName: that.ownerName });
                }
                else {
                   that.active = false;
-                  _callback(null, false);
+                  that.updatePropertyAfterRead(false , { sourceName: that.ownerName });
                }
                that.lastCallback = null;
             }
