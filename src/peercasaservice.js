@@ -5,6 +5,13 @@ var CasaSystem = require('./casasystem');
 
 if (!process.env.INTERNETCASA) {
    var mdns = require('mdns');
+
+   // workaround for raspberry pi
+   var sequence = [
+       mdns.rst.DNSServiceResolve(),
+       'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({families:[4]}),
+       mdns.rst.makeAddressesUnique()
+   ];
 }
 
 function PeerCasaService(_config) {
@@ -20,7 +27,8 @@ function PeerCasaService(_config) {
    if (!process.env.INTERNETCASA) {
       this.createAdvertisement();
 
-      this.browser = mdns.createBrowser(mdns.tcp('casa'));
+      this.browser = mdns.createBrowser(mdns.tcp('casa'), {resolverSequence: sequence});
+      //this.browser = mdns.createBrowser(mdns.tcp('casa'));
 
       var that = this;
 

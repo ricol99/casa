@@ -1,7 +1,7 @@
 {
    "name": "casa:test",
    "displayName": "Casa Collin Test Casa",
-   "gang": "casa-collin-test",
+   "gang": "casa-collin-v2",
    "area": {
       "name": "casaarea:test",
       "displayName": "Casa Collin Test"
@@ -21,16 +21,6 @@
          "displayName": "Test Thing",
          "props": [
             {
-               "name": "tamper-alarm",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:alarm-tamper",
-                  "gpioPin": 4,
-                  "triggerLow": true
-               }
-            },
-            {
                "name": "light-sensor",
                "initialValue": 0,
                "writable": false,
@@ -40,6 +30,7 @@
 		  "address2": 105,
                   "channel": 1,
                   "interval": 1,
+                  "maxChange": 5,
                   "inputMin": 3.24,
                   "inputMax": 0,
                   "outputMin": 0,

@@ -10,6 +10,7 @@ function I2CPropertyBinder(_config, _owner) {
    this.address2 = _config.address2;
    this.channel = _config.channel;
    this.interval = (_config.interval != undefined) ? _config.interval : 5;
+   this.maxChange = (_config.maxChange != undefined) ? _config.maxChange : 10;
 
    this.inputMin = (_config.inputMin != undefined) ? _config.inputMin : 0;
    this.inputMax = (_config.inputMax != undefined) ? _config.inputMax : 5;
@@ -21,8 +22,6 @@ function I2CPropertyBinder(_config, _owner) {
    this.outputRange = this.outputMax - this.outputMin;
 
    this.scanning = false;
-
-   var that = this;
 }
 
 util.inherits(I2CPropertyBinder, PropertyBinder);
@@ -42,7 +41,9 @@ I2CPropertyBinder.prototype.coldStart = function() {
 function startScanning(_this) {
    var that = _this;
    that.scanning = true;
-   that.currentValue = 0;
+   var v = that.wire.readVoltage(that.channel);
+   var p = (v - that.inputMin) / that.inputRange;
+   that.previousValue = (that.outputRange * p) + that.outputMin;
 
    that.intervalTimerId = setInterval(function() {
       var voltage = that.wire.readVoltage(that.channel);
@@ -53,10 +54,21 @@ function startScanning(_this) {
          outputVal = Math.floor(outputVal);
       }
 
-      if (outputVal != that.currentValue) {
-         console.log('Reading 1: ' + voltage + 'V = ' + outputVal + '%');
-         that.currentValue = outputVal;
-         that.updatePropertyAfterRead(outputVal , { sourceName: this.ownerName });
+      if (outputVal != that.previousValue) {
+
+         var diff = outputVal-that.previousValue;
+         diff = Math.abs(diff);
+         console.log('Difference is: '+diff);
+
+         if (diff < that.maxChange) {
+            console.log('It\'s a small change,it\'s ok!');
+            console.log('Reading 1: ' + voltage + 'V = ' + outputVal + '%');
+            that.previousValue = outputVal;
+            that.updatePropertyAfterRead(outputVal , { sourceName: this.ownerName });
+         }
+         else {
+            console.log('Difference is too large! Ignoring!');
+         }
       }
    }, _this.interval*1000);
 }
