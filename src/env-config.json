@@ -1,0 +1,48 @@
+{
+   "name": "casa:env",
+   "displayName": "Casa Collin Environment Casa",
+   "gang": "casa-collin-v2",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "199.245.56.152",
+         "port": 80
+      }
+   },
+   "listeningPort": 8097,
+   "props": [],
+   "users": [ 
+      {
+         "name": "user:richard",
+         "displayName": "Richard",
+         "props": []
+      }
+   ],
+   "things": [
+      {
+         "name": "thing:dumgoyne-environment",
+         "displayName": "Environment Sensors in Dumgoyne",
+         "props": [
+            {
+               "name": "light-sensor",
+               "initialValue": 0,
+               "writable": false,
+               "binder": {
+                  "name": "i2cpropertybinder:light-channel-1",
+                  "address1": 104,
+		  "address2": 105,
+                  "channel": 1,
+                  "interval": 5,
+                  "maxChange": 5,
+                  "maxIgnoreIntervals": 18,
+                  "inputMin": 3.276,
+                  "inputMax": 0,
+                  "outputMin": 0,
+                  "outputMax": 100,
+                  "floorOutput": true
+               }
+            }
+         ]
+      }
+   ]
+}
