@@ -152,12 +152,24 @@ PropertyBinder.prototype.sourceIsValid = function() {
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.name + ': INVALID');
 
-   this.binderEnabled = false;
-   this.target = null;
-   this.listenController = null;
-   this.goInvalid(_data);
+   var oldBinderEnabled = this.binderEnabled;
+   var sourceListener = this.sourceListeners[_data.sourcePropertyName];
+
+   if (sourceListener && this.allSourcesRequiredForValidity) {
+      this.binderEnabled = false;
+   }
+
+   // Has the enabled stated changed from true to false?
+   if (oldBinderEnabled && !this.binderEnabled) {
+      // If so, tell the others guys that I am now invalid
+      console.log(this.name + ': INVALID');
+
+      this.target = null;
+      this.listenController = null;
+      this.goInvalid(_data);
+   }
+
 }
 
 function transformOutput(_instance, _currentOutputValue) {

@@ -500,27 +500,26 @@ PeerCasa.prototype.establishListeners = function(_force) {
 }
 
 PeerCasa.prototype.establishHeartbeat = function() {
-   var that = this;
    this.lastHeartbeat = Date.now() + 10000;
 
    if (!this.intervalID) {
       // Establish heartbeat
-      this.intervalID = setInterval(function(){
+      this.intervalID = setInterval(function(_that){
 
-         if (that.connected) {
+         if (_that.connected) {
 
             // Check if we have received a heartbeat from the other side recently
-            if ((Date.now() - that.lastHeartbeat) > 90000) {
-               console.log(that.name + ': No heartbeat received for 1.5 times interval!. Closing socket.');
-               that.manualDisconnect = true;
-               that.socket.disconnect();
+            if ((Date.now() - _that.lastHeartbeat) > 90000) {
+               console.log(_that.name + ': No heartbeat received for 1.5 times interval!. Closing socket.');
+               _that.manualDisconnect = true;
+               _that.socket.disconnect();
             }
             else {
-               console.log(that.name + ': Last heartbeat time difference = ', Date.now() - that.lastHeartbeat);
-               that.socket.emit('heartbeat', { casaName: that.casa.name });
+               console.log(_that.name + ': Last heartbeat time difference = ', Date.now() - _that.lastHeartbeat);
+               _that.socket.emit('heartbeat', { casaName: _that.casa.name });
             }
          }
-      }, 60000);
+      }, 60000, this);
    }
 }
 
@@ -552,7 +551,7 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
    for(var prop in this.unAckedMessages) {
 
       if(this.unAckedMessages.hasOwnProperty(prop) && this.unAckedMessages[prop]) {
-         that.socket.emit(this.unAckedMessages[prop].message, this.unAckedMessages[prop].data);
+         this.socket.emit(this.unAckedMessages[prop].message, this.unAckedMessages[prop].data);
       }
    }
 

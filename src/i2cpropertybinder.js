@@ -32,56 +32,53 @@ I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback)
 }
 
 I2CPropertyBinder.prototype.coldStart = function() {
-   var that = this;
    this.wire = new ADCPi(this.address1, this.address2, 18);
 
    startScanning(this);
 }
 
 function startScanning(_this) {
-   var that = _this;
-   that.scanning = true;
-   var v = that.wire.readVoltage(that.channel);
-   var p = (v - that.inputMin) / that.inputRange;
-   that.previousValue = (that.outputRange * p) + that.outputMin;
+   _this.scanning = true;
+   var v = _this.wire.readVoltage(_this.channel);
+   var p = (v - _this.inputMin) / _this.inputRange;
+   _this.previousValue = (_this.outputRange * p) + _this.outputMin;
 
-   if (that.floorOutput) {
-      that.previousValue = Math.floor(that.previousValue);
+   if (_this.floorOutput) {
+      _this.previousValue = Math.floor(_this.previousValue);
    }
 
-   that.intervalTimerId = setInterval(function() {
-      var voltage = that.wire.readVoltage(that.channel);
-      var placeInRange = (voltage - that.inputMin) / that.inputRange;
-      var outputVal = (that.outputRange * placeInRange) + that.outputMin;
+   _this.intervalTimerId = setInterval(function(_that) {
+      var voltage = _that.wire.readVoltage(_that.channel);
+      var placeInRange = (voltage - _that.inputMin) / _that.inputRange;
+      var outputVal = (_that.outputRange * placeInRange) + _that.outputMin;
 
-      if (that.floorOutput) {
+      if (_that.floorOutput) {
          outputVal = Math.floor(outputVal);
       }
 
-      if (outputVal != that.previousValue) {
+      if (outputVal != _that.previousValue) {
 
-         var diff = outputVal-that.previousValue;
+         var diff = outputVal-_that.previousValue;
          diff = Math.abs(diff);
          console.log('Difference is: '+diff);
 
-         if (diff < that.maxChange) {
+         if (diff < _that.maxChange) {
             console.log('It\'s a small change,it\'s ok!');
             console.log('Reading 1: ' + voltage + 'V = ' + outputVal + '%');
-            that.previousValue = outputVal;
-            that.updatePropertyAfterRead(outputVal , { sourceName: this.ownerName });
+            _that.previousValue = outputVal;
+            _that.updatePropertyAfterRead(outputVal , { sourceName: _that.ownerName });
          }
          else {
             console.log('Difference is too large! Ignoring!');
          }
       }
-   }, _this.interval*1000);
+   }, _this.interval*1000, _this);
 }
 
 function stopScanning(_this) {
-   var that = _this;
 
-   if (that.scanning) {
-      clearTimeout(that.intervalTimerId);
+   if (_this.scanning) {
+      clearTimeout(_this.intervalTimerId);
    }
 }
 
