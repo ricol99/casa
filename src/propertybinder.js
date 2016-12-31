@@ -132,12 +132,15 @@ PropertyBinder.prototype.setManualMode = function(_manualMode) {
    }
 }
 
-PropertyBinder.prototype.sourceIsValid = function() {
+PropertyBinder.prototype.sourceIsValid = function(_data) {
 
-   if (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-         return _sourceListener.sourceListenerEnabled;
-   })) {
-      this.binderEnabled = true;
+   if (!this.binderEnabled) {
+
+      if (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
+            return _sourceListener.sourceListenerEnabled;
+      })) {
+         this.binderEnabled = true;
+      }
    }
 
    this.target = (this.targetListener) ? this.targetListener.source : null;

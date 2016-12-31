@@ -24,7 +24,7 @@ function SourceListener(_config, _owner) {
    this.sourceListenerEnabled = false;
 
    if (this.establishListeners()) {
-      this.owner.sourceIsValid({ sourceName: this.sourceName, propertyName: this.property });
+      this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
    }
 
    this.casa.addSourceListener(this);
@@ -64,7 +64,7 @@ SourceListener.prototype.refreshSources = function() {
       console.log(this.name + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
-         this.owner.sourceIsValid({ sourceName: this.sourceName, propertyName: this.property });
+         this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
       }
    }
    return ret;
@@ -80,7 +80,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.source.removeListener('property-changed', this.propertyChangedCallback);
       this.source.removeListener('invalid', this.invalidCallback);
 
-      this.owner.sourceIsInvalid({ sourceName: this.sourceName, propertyName: this.property });
+      this.owner.sourceIsInvalid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
    }
 }
 
