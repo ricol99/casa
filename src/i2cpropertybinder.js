@@ -70,7 +70,6 @@ function trimInputReading(_this, _inputReading) {
 function inputResolutionThresholdExceeded(_this, _inputReading) {
 
    if (_this.inputDeltaMinimum != undefined) {
-      console.log('***************** DELTA '+ Math.abs(_this.previousInputReading - _inputReading));
       return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputDeltaMinimum);
    }
    else {
@@ -120,8 +119,9 @@ function startScanning(_this) {
                console.log('It\'s a small change, it\'s ok!');
                publishNewPropertyValue(_that, inputReading, outputValue);
             }
-            else if (_that.maxIgnore != undefined || (++(_that.ignoreCounter) < _that.maxIgnore)) {
-               console.log('Output difference is too large! Ignoring!');
+            else if (_that.maxIgnore != undefined && ((_that.ignoreCounter + 1) < _that.maxIgnore)) {
+                _that.ignoreCounter += 1;
+               console.log('Output difference is too large! Ignoring! Ignored ' + _that.ignoreCounter + ' times...');
             }
             else {
                _that.ignoreCounter = 0;
