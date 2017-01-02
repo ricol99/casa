@@ -6,28 +6,41 @@ function I2CPropertyBinder(_config, _owner) {
 
    PropertyBinder.call(this, _config, _owner);
 
+   this.writable = false;
    this.address1 = _config.address1;
    this.address2 = _config.address2;
    this.channel = _config.channel;
    this.interval = (_config.interval != undefined) ? _config.interval : 5;
-   this.maxChange = (_config.maxChange != undefined) ? _config.maxChange : 10;
+   this.maxChange = _config.maxChange;
+   this.maxIgnore = _config.maxIgnore;
 
-   this.inputMin = (_config.inputMin != undefined) ? _config.inputMin : 0;
-   this.inputMax = (_config.inputMax != undefined) ? _config.inputMax : 5;
-   this.outputMin = (_config.outputMin != undefined) ? _config.outputMin : 0;
-   this.outputMax = (_config.outputMax != undefined) ? _config.outputMax : 100;
+   this.transforming = _config.inputMin != undefined;
+   this.outputResolution = _config.outputResolution;
+   this.inputResolution = _config.inputResolution;
    this.floorOutput = _config.floorOutput;
 
-   this.inputRange = this.inputMax - this.inputMin;
-   this.outputRange = this.outputMax - this.outputMin;
+   if (this.transforming) {
+      this.inputMin = _config.inputMin;
+      this.inputMax = _config.inputMax;
+      this.outputMin = (_config.outputMin != undefined) ? _config.outputMin : 0;
+      this.outputMax = (_config.outputMax != undefined) ? _config.outputMax : 100;
+
+      this.inputRange = this.inputMax - this.inputMin;
+      this.outputRange = this.outputMax - this.outputMin;
+
+      if (this.outputResolution != undefined) {
+         this.inputResolution = (this.outputRange / this.outputResolution) * this.inputRange;
+      }
+   }
 
    this.scanning = false;
+   this.ignoreCounter = 0;
 }
 
 util.inherits(I2CPropertyBinder, PropertyBinder);
 
 I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-   console.log(this.name + ': Attempting to set property ' + this.propertyName + ' to ' + _propValue);
+   console.log(this.name + ': Not allowed to set property ' + this.propertyName + ' to ' + _propValue);
    _callback(false);
 }
 
@@ -37,39 +50,81 @@ I2CPropertyBinder.prototype.coldStart = function() {
    startScanning(this);
 }
 
-function startScanning(_this) {
-   _this.scanning = true;
-   var v = _this.wire.readVoltage(_this.channel);
-   var p = (v - _this.inputMin) / _this.inputRange;
-   _this.previousValue = (_this.outputRange * p) + _this.outputMin;
+function trimInputReading(_this, _inputReading) {
 
-   if (_this.floorOutput) {
-      _this.previousValue = Math.floor(_this.previousValue);
+   if (_this.transforming) {
+
+      if (_this.inputMax > this.inputMin) {
+         return (_inputReading > _this.inputMax) ? _this.inputMax : (_inputReading < _this.inputMin) ? _this.inputMin : _inputReading;
+      }
+      else {
+         return (_inputReading < _this.inputMax) ? _this.inputMax : (_inputReading > _this.inputMin) ? _this.inputMin : _inputReading;
+      }
+   }
+   else {
+      return _inputReading;
+   }
+}
+
+function inputResoutionThresholdExceeded(_this, _inputReading) {
+
+   if (_this.inputResolution) {
+      return (Math.abs(_this.previousValue - _inputReading) > _this.inputResolution);
+   }
+   else {
+      return (_inputReading != _this.previousReading);
+   }
+}
+
+function transformInputReading(_this, _inputReading) {
+   var outputReading = _inputReading;
+
+   if (_this.transforming) {
+      var placeInRange = (_inputReading - _this.inputMin) / _this.inputRange;
+      var outputReading = (_this.outputRange * placeInRange) + _this.outputMin;
    }
 
+   if (_this.floorOutput) {
+      outputReading = Math.floor(outputReading);
+   }
+
+   return outputReading;
+}
+
+function publishNewPropertyValue(_this, _inputReading, _propertyValue) {
+   console.log(_this.name + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
+   _this.previousValue = _propertyValue;
+   _this.updatePropertyAfterRead(_propertyValue, { sourceName: _this.ownerName });
+}
+
+function startScanning(_this) {
+   _this.scanning = true;
+   _this.previousValue = trimInputReading(_this, _this.wire.readVoltage(_this.channel));
+
    _this.intervalTimerId = setInterval(function(_that) {
-      var voltage = _that.wire.readVoltage(_that.channel);
-      var placeInRange = (voltage - _that.inputMin) / _that.inputRange;
-      var outputVal = (_that.outputRange * placeInRange) + _that.outputMin;
+      var inputReading = trimInputReading(_that, _that.wire.readVoltage(_that.channel));
 
-      if (_that.floorOutput) {
-         outputVal = Math.floor(outputVal);
-      }
+      if (inputResoutionThresholdExceeded(_that, inputReading)) {
+         var outputValue = transformInputReading(_that, inputReading);
+         var diff = Math.abs(outputValue - _that.previousValue);
+         console.log('Output difference is: ' + diff);
 
-      if (outputVal != _that.previousValue) {
+         if (_that.maxChange != undefined) {
 
-         var diff = outputVal-_that.previousValue;
-         diff = Math.abs(diff);
-         console.log('Difference is: '+diff);
-
-         if (diff < _that.maxChange) {
-            console.log('It\'s a small change,it\'s ok!');
-            console.log('Reading 1: ' + voltage + 'V = ' + outputVal + '%');
-            _that.previousValue = outputVal;
-            _that.updatePropertyAfterRead(outputVal , { sourceName: _that.ownerName });
+            if (diff < _that.maxChange) {
+               console.log('It\'s a small change, it\'s ok!');
+               publishNewPropertyValue(_that, inputReading, outputValue);
+            }
+            else if (_that.maxIgnore != undefined || (++(_that.ignoreCounter) < _that.maxIgnore)) {
+               console.log('Output difference is too large! Ignoring!');
+            else {
+               _that.ignoreCounter = 0;
+               console.log(_that.name + ': Ignored reading for too many intervals, accepting new value');
+               publishNewPropertyValue(_that, inputReading, outputValue);
+            }
          }
          else {
-            console.log('Difference is too large! Ignoring!');
+            publishNewPropertyValue(_that, inputReading, outputValue);
          }
       }
    }, _this.interval*1000, _this);
