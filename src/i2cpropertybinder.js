@@ -29,7 +29,7 @@ function I2CPropertyBinder(_config, _owner) {
       this.outputRange = this.outputMax - this.outputMin;
 
       if (this.outputResolution != undefined) {
-         this.inputDeltaMinimum = (Math.abs(this.inputRange / this.outputResolution);
+         this.inputDeltaMinimum = Math.abs(this.inputRange / this.outputResolution);
          console.log('***************** Input Delta Minimum: ' + this.inputDeltaMinimum + ' Output Res: ' + this.outputResolution);
       }
    }
