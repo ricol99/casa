@@ -117,6 +117,7 @@ function startScanning(_this) {
             }
             else if (_that.maxIgnore != undefined || (++(_that.ignoreCounter) < _that.maxIgnore)) {
                console.log('Output difference is too large! Ignoring!');
+            }
             else {
                _that.ignoreCounter = 0;
                console.log(_that.name + ': Ignored reading for too many intervals, accepting new value');
