@@ -303,14 +303,6 @@
                            "true": "H-Good morning!",
                            "false": "H-Good evening!"
                         }
-                     },
-                     {
-                        "source": "thing:test-cctv",
-                        "sourceProperty": "test-prop-2",
-                        "outputValues": {
-                           "true": "H-Test CCTV TEST PROP 2 TRUE!",
-                           "false": "H-Test CCTV TEST PROP 2 FALSE!"
-                        }
                      }
                   ]
                }
