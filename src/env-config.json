@@ -34,11 +34,12 @@
                   "channel": 1,
                   "interval": 5,
                   "maxChange": 5,
-                  "maxIgnoreIntervals": 18,
+                  "maxIgnore": 18,
                   "inputMin": 3.291,
                   "inputMax": 0,
                   "outputMin": 0,
                   "outputMax": 100,
+                  "outputResolution": 1,
                   "floorOutput": true
                }
             }
