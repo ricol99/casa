@@ -69,7 +69,7 @@ function trimInputReading(_this, _inputReading) {
 function inputResoutionThresholdExceeded(_this, _inputReading) {
 
    if (_this.inputResolution) {
-      return (Math.abs(_this.previousInputValue - _inputReading) > _this.inputResolution);
+      return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputResolution);
    }
    else {
       return (_inputReading != _this.previousReading);
@@ -93,7 +93,7 @@ function transformInputReading(_this, _inputReading) {
 
 function publishNewPropertyValue(_this, _inputReading, _propertyValue) {
    console.log(_this.name + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
-   _this.previousInputValue = _inputValue;
+   _this.previousInputReading = _inputReading;
    _this.previousOutputValue = _propertyValue;
    _this.updatePropertyAfterRead(_propertyValue, { sourceName: _this.ownerName });
 }
