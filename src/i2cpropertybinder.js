@@ -67,13 +67,14 @@ function trimInputReading(_this, _inputReading) {
    }
 }
 
-function inputResoutionThresholdExceeded(_this, _inputReading) {
+function inputResolutionThresholdExceeded(_this, _inputReading) {
 
-   if (_this.inputDeltaMinimum) {
-      return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputDeltaMin);
+   if (_this.inputDeltaMinimum != undefined) {
+      console.log('***************** DELTA '+ Math.abs(_this.previousInputReading - _inputReading));
+      return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputDeltaMinimum);
    }
    else {
-      return (_inputReading != _this.previousReading);
+      return (_inputReading != _this.previousInputReading);
    }
 }
 
@@ -108,7 +109,7 @@ function startScanning(_this) {
    _this.intervalTimerId = setInterval(function(_that) {
       var inputReading = trimInputReading(_that, _that.wire.readVoltage(_that.channel));
 
-      if (inputResoutionThresholdExceeded(_that, inputReading)) {
+      if (inputResolutionThresholdExceeded(_that, inputReading)) {
          var outputValue = transformInputReading(_that, inputReading);
          var outputDifference = Math.abs(outputValue - _that.previousOutputValue);
          console.log('Output difference is: ' + outputDifference);
