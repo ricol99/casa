@@ -16,7 +16,7 @@ function I2CPropertyBinder(_config, _owner) {
 
    this.transforming = _config.inputMin != undefined;
    this.outputResolution = _config.outputResolution;
-   this.inputResolution = _config.inputResolution;
+   this.inputDeltaMinimum = _config.inputDeltaMinimum;
    this.floorOutput = _config.floorOutput;
 
    if (this.transforming) {
@@ -29,7 +29,8 @@ function I2CPropertyBinder(_config, _owner) {
       this.outputRange = this.outputMax - this.outputMin;
 
       if (this.outputResolution != undefined) {
-         this.inputResolution = (this.outputRange / this.outputResolution) * this.inputRange;
+         this.inputDeltaMinimum = (Math.abs(this.inputRange / this.outputResolution);
+         console.log('***************** Input Delta Minimum: ' + this.inputDeltaMinimum + ' Output Res: ' + this.outputResolution);
       }
    }
 
@@ -68,8 +69,8 @@ function trimInputReading(_this, _inputReading) {
 
 function inputResoutionThresholdExceeded(_this, _inputReading) {
 
-   if (_this.inputResolution) {
-      return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputResolution);
+   if (_this.inputDeltaMinimum) {
+      return (Math.abs(_this.previousInputReading - _inputReading) > _this.inputDeltaMin);
    }
    else {
       return (_inputReading != _this.previousReading);

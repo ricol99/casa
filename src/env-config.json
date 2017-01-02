@@ -39,7 +39,7 @@
                   "inputMax": 0,
                   "outputMin": 0,
                   "outputMax": 100,
-                  "outputResolution": 1,
+                  "outputResolution": 100,
                   "floorOutput": true
                }
             }
