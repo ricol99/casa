@@ -100,7 +100,7 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
-         if (sourceListener && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+         if (sourceListener && sourceListener.sourceListenerEnabled && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
          }
@@ -235,7 +235,6 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
       this.listenController = null;
       this.goInvalid(_data);
    }
-
 }
 
 function copyData(_sourceData) {
