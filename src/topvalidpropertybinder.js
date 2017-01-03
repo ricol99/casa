@@ -35,7 +35,7 @@ TopValidPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_
    this.highestValidSource = findHighestPriorityValidSource(this);
 
    if (_sourceListener == this.highestValidSource) {
-      this.updatePropertyAfterRead(data.propertyValue, _data);
+      this.updatePropertyAfterRead(_data.propertyValue, _data);
    }
 };
 

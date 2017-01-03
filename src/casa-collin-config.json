@@ -49,8 +49,8 @@
    ],
    "things": [ 
       {
-         "name": "thing:environment",
-         "displayName": "Environment",
+         "name": "thing:timed-environment",
+         "displayName": "Timed Environment",
          "props": [
             {
                "name": "daylight",
@@ -75,7 +75,7 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-daylight",
+                  "name": "schedulepropertybinder:env-holiday-lights",
                   "events": [
                      {
                         "rule": "sunset:900",
@@ -86,16 +86,6 @@
                         "propertyValue": false
                      }
                   ]
-               }
-            },
-            {
-               "name": "dark",
-               "initialValue": false,
-               "writable": false,
-               "binder": {
-                  "name": "invertingpropertybinder:env-dark",
-                  "source": "thing:environment",
-                  "sourceProperty": "daylight"
                }
             },
             {
@@ -138,6 +128,86 @@
                      {
                         "rule": "15 23 * * *",
                         "propertyValue": false
+                     }
+                  ]
+               }
+            }
+         ]
+      },
+      {
+         "name": "thing:environment",
+         "displayName": "Environment",
+         "props": [
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "topvalidpropertybinder:env-daylight",
+                  "sources": [
+                     {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "light-sensor"
+                     },
+                     {
+                        "source": "thing:timed-environment",
+                        "sourceProperty": "daylight"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "holiday-lights",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "topvalidpropertybinder:env-holiday-lights",
+                  "sources": [
+                     {
+                        "source": "thing:timed-environment",
+                        "sourceProperty": "holiday-lights"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "dark",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "invertingpropertybinder:env-dark",
+                  "source": "thing:environment",
+                  "sourceProperty": "daylight"
+               }
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "topvalidpropertybinder:env-low-light",
+                  "sources": [
+                     {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "low-light"
+                     },
+                     {
+                        "source": "thing:timed-environment",
+                        "sourceProperty": "low-light"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "bedtime",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "topvalidpropertybinder:env-bedtime",
+                  "sources": [
+                     {
+                        "source": "thing:timed-environment",
+                        "sourceProperty": "bedtime"
                      }
                   ]
                }

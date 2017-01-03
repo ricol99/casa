@@ -20,7 +20,7 @@
    ],
    "things": [
       {
-         "name": "thing:dumgoyne-environment",
+         "name": "thing:dumgoyne-sensors",
          "displayName": "Environment Sensors in Dumgoyne",
          "props": [
             {
@@ -41,6 +41,42 @@
                   "outputMax": 100,
                   "outputResolution": 100,
                   "floorOutput": true
+               }
+            }
+         ]
+      },
+      {
+         "name": "thing:dumgoyne-environment",
+         "displayName": "Environment Based on Sensors in Dumgoyne",
+         "props": [
+            {
+               "name": "daytime",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "propertybinder:daytime-env",
+                  "sources": [
+                     {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "light-sensor",
+                        "inputTransform": "$value>50"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "propertybinder:low-light-env",
+                  "sources": [
+                     {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "light-sensor",
+                        "inputTransform": "$value<55&&$value>45"
+                     }
+                  ]
                }
             }
          ]
