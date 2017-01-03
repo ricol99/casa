@@ -111,7 +111,6 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
 }
 
 function transformNewPropertyValue(_this, _newPropValue, _data) {
-   console.log('************** ' + _newPropValue);
    var actualOutputValue = _newPropValue;
    var sourceListener = (_data.sourcePropertyName != undefined) ? _this.sourceListeners[_data.sourcePropertyName] : undefined;
 
@@ -132,18 +131,15 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
    }
 
    if (_this.outputTransform || _this.outputMap) {
-      console.log('************ ' + _this.outputTransform + ' ' + _this.outputMap);
       var output = actualOutputValue;
       var newOutput = output;
 
       if (_this.outputTransform) {
-         console.log('************ TRANSFORM');
          var exp = _this.outputTransform.replace("$value", "output");
          newOutput = eval(exp);
       }
 
       if (_this.outputMap && _this.outputMap[newOutput] != undefined) {
-         console.log('************ TRANSFORM');
          newOutput = _this.outputMap[newOutput];
       }
 
