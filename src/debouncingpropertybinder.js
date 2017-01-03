@@ -15,7 +15,7 @@ util.inherits(DebouncingPropertyBinder, PropertyBinder);
 
 DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var that = this;
-   this.lastCallback = _callback;
+   this.lastdata = _data;
 
    var propValue = _data.propertyValue;
    console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
@@ -75,7 +75,7 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
          this.timeoutObj = setTimeout(function() {
             that.timeoutObj = null;
 
-            if (that.lastCallback) {
+            if (that.lastData) {
 
                if (that.sourceActive) {
                   that.active = true;
@@ -85,7 +85,7 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
                   that.active = false;
                   that.updatePropertyAfterRead(false , { sourceName: that.ownerName });
                }
-               that.lastCallback = null;
+               that.lastData = null;
             }
 
             if (!that.binderEnabled) {
