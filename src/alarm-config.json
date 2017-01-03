@@ -167,6 +167,7 @@
                "writable": false,
                "binder": {
                   "name": "orpropertybinder:lighting-mood",
+                  "prioritiseSources": true,
                   "sources": [
                      {
                         "source": "room:kitchen",
@@ -276,6 +277,7 @@
                "writable": false,
                "binder": {
                   "name": "orpropertybinder:lounge-lighting-mood",
+                  "prioritiseSources": true,
                   "sources": [
                      {
                         "source": "room:lounge",

@@ -13,7 +13,7 @@ function DebouncingPropertyBinder(_config, _owner) {
 
 util.inherits(DebouncingPropertyBinder, PropertyBinder);
 
-DebouncingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var that = this;
    this.lastCallback = _callback;
 
@@ -25,11 +25,13 @@ DebouncingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceLis
 
       if (propValue) {
          this.active = true;
-         return _callback(null, true);
+         this.updatePropertyAfterRead(true, _data);
+         return;
       }
       else {
          this.active = false;
-         return _callback(null, false);
+         this.updatePropertyAfterRead(false, _data);
+         return;
       }
    }
    else if (this.sourceActive != propValue) {
@@ -43,11 +45,13 @@ DebouncingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceLis
 
             if (that.sourceActive) {
                that.active = true;
-               return _callback(null, true);
+               that.updatePropertyAfterRead(true, _data);
+               return;
             }
             else {
                this.active = false;
-               return _callback(null, false);
+               that.updatePropertyAfterRead(false, _data);
+               return;
             }
 
             if (!that.binderEnabled) {

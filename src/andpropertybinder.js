@@ -11,16 +11,18 @@ function AndPropertyBinder(_config, _owner) {
 
 util.inherits(AndPropertyBinder, PropertyBinder);
 
-AndPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+AndPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    // all inputs active
    for (var prop in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && !this.sourceListeners[prop].sourcePropertyValue) {
-         return _callback(null, false);
+         this.updatePropertyAfterRead(false, _data);
+         return;
       }
    }
 
-   return _callback(null, true);
+   this.updatePropertyAfterRead(true, _data);
+
 };
 
 module.exports = exports = AndPropertyBinder;

@@ -11,16 +11,18 @@ function OrPropertyBinder(_config, _owner) {
 
 util.inherits(OrPropertyBinder, PropertyBinder);
 
-OrPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+OrPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+
    // any input active
    for (var prop in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners[prop].sourcePropertyValue) {
-         return _callback(null, true);
+         this.updatePropertyAfterRead(true, _data);
+         return;
       }
    }
 
-   return _callback(null, false);
+   this.updatePropertyAfterRead(false, _data);
 };
 
 module.exports = exports = OrPropertyBinder;

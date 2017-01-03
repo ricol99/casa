@@ -18,13 +18,13 @@ function LinearTransformPropertyBinder(_config, _owner) {
 
 util.inherits(LinearTransformPropertyBinder, PropertyBinder);
 
-LinearTransformPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+LinearTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.name + ': property ' + _data.propertyName + ' has changed to ' + _data.propertyValue);
 
    var placeInRange = (_data.propertyValue - this.inputMin) / this.inputRange;
    var outputVal = (this.outputRange * placeInRange) + this.outputMin;
 
-   return _callback(null, outputVal);
+   this.updatePropertyAfterRead(outputVal, _data);
 }
 
 module.exports = exports = LinearTransformPropertyBinder;

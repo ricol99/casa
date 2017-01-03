@@ -14,7 +14,7 @@ function PushoverBinder(_config, _owner) {
    var that = this;
 }
 
-PushoverBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+PushoverBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
 
    var _title = 'Casa Collin' + ((this.messagePriority > 0) ? ' Alarm' : ' Update');
@@ -35,12 +35,10 @@ PushoverBinder.prototype.calculateNewOutputValue = function(_sourceListener, _da
    this.pushService.send(msg, function(_err, _result ) {
       if (_err) {
          console.info(that.name + ': Error logging into Pushover: ' + _err);
-         return _callback(_err, _result);
-      }
-      else {
-         return _callback(null, _data.propertyValue);
       }
    });
+
+   this.updatePropertyAfterRead(_data.propertyValue, _data);
 }
 
 util.inherits(PushoverBinder, PropertyBinder);

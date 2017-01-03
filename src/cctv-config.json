@@ -60,6 +60,7 @@
                "writable": false,
                "binder": {
                   "name": "orpropertybinder:test-flip-flop",
+                  "prioritiseSources": true,
                   "sources": [
                      {
                         "source": "thing:test-cctv",

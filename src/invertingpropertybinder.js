@@ -7,14 +7,13 @@ function InvertingPropertyBinder(_config, _owner) {
 
 util.inherits(InvertingPropertyBinder, PropertyBinder);
 
-InvertingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+InvertingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
 
    if (typeof _data.propertyValue === "boolean") {
-      return _callback(null, !(_data.propertyValue));
-
+      this.updatePropertyAfterRead(!(_data.propertyValue), _data);
    }
    else if (typeof _data.propertyValue === "number") {
-      return _callback(null, -(_data.propertyValue));
+      this.updatePropertyAfterRead(-(_data.propertyValue), _data);
    }
 }
 

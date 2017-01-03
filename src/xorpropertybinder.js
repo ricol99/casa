@@ -11,7 +11,7 @@ function XorPropertyBinder(_config, _owner) {
 
 util.inherits(XorPropertyBinder, PropertyBinder);
 
-XorPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+XorPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var allInputsActive = true;
    var oneInputActive = false;
 
@@ -19,7 +19,7 @@ XorPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, 
    for (var prop in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners.[prop].sourcePropertyValue) {
-         return _callback(null, false);
+         return false;
          oneInputActive = true;
       }
       else {
@@ -27,7 +27,7 @@ XorPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, 
       }
    }
 
-   return (allInputsActive) ? _callback(null, false) : _callback(null, oneInputActive);
+   this.updatePropertyAfterRead((allInputsActive) ? false : oneInputActive, _data);
 };
 
 module.exports = exports = XorPropertyBinder;

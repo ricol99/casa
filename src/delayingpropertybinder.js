@@ -13,9 +13,9 @@ function DelayingPropertyBinder(_config, _owner) {
 
 util.inherits(DelayingPropertyBinder, PropertyBinder);
 
-DebouncingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    console.log('source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to ' + _data.propertyValue + '!');
-   this.delayEvents.add(new DelayedEvent(_data, _data.propertyValue, _callback, this);
+   this.delayEvents.add(new DelayedEvent(_data, _data.propertyValue, this);
 }
 
 DelayingPropertyBinder.prototype.deleteDelayedEvent = function(_delayedEvent) {
@@ -23,17 +23,14 @@ DelayingPropertyBinder.prototype.deleteDelayedEvent = function(_delayedEvent) {
    this.delayedEvents.splice(0,1);
 }
 
-function DelayedEvent(_eventData, _value, _callback, _binder) {
+function DelayedEvent(_eventData, _value, _binder) {
    this.eventData = _eventData;
    this.value = _value;
-   this.callback = _callback;
    this.binder = _binder;
 
    var that = this;
    this.timeoutObj = setTimeout(function() {
-      // ** TODO Delayed data will be wrong!
-      return _callback(null, _value);
-//      that.updatePropertyAfterRead(that.value, that.eventData);
+      that.updatePropertyAfterRead(that.value, that.eventData);
    }, this.delay*1000);
 }
 

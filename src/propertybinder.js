@@ -9,6 +9,7 @@ function PropertyBinder(_config, _owner) {
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : false;
    this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : true;
+   this.prioritiseSources = _config.prioritiseSources;
   
    this.outputTransform = _config.outputTransform; 
    this.outputMap = (_config.outputMap) ? copyData(_config.outputMap) : undefined;
@@ -90,8 +91,74 @@ PropertyBinder.prototype.myPropertyValue = function() {
    return this.owner.props[this.propertyName];
 }
 
-PropertyBinder.prototype.updatePropertyAfterRead = function(_propValue, _data) {
-   this.owner.updateProperty(this.propertyName, _propValue, _data);
+function findHighestPrioritySource(_this, _sourcePropertyValue) {
+   var highestPriorityFound = 99999;
+   var highestPrioritySource = null;
+
+   for (var sourcePropertyName in _this.sourceListeners) {
+
+      if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
+         var sourceListener = _this.sourceListeners[sourcePropertyName];
+
+         if (sourceListener && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+            highestPriorityFound = sourceListener.priority;
+            highestPrioritySource = sourceListener;
+         }
+      }
+   }
+
+   return highestPrioritySource;
+}
+
+function transformNewPropertyValue(_this, _newPropValue, _data) {
+   console.log('************** ' + _newPropValue);
+   var actualOutputValue = _newPropValue;
+   var sourceListener = (_data.sourcePropertyName != undefined) ? _this.sourceListeners[_data.sourcePropertyName] : undefined;
+
+   if (sourceListener) {
+      var sourceListenerInCharge = sourceListener;
+
+      if (_this.prioritiseSources) {
+         var highestPrioritySource = findHighestPrioritySource(_this, _newPropValue);
+
+         if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
+            sourceListenerInCharge = highestPrioritySource;
+         }
+      }
+
+      if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
+         actualOutputValue = sourceListenerInCharge.outputValues[actualOutputValue];
+      }
+   }
+
+   if (_this.outputTransform || _this.outputMap) {
+      console.log('************ ' + _this.outputTransform + ' ' + _this.outputMap);
+      var output = actualOutputValue;
+      var newOutput = output;
+
+      if (_this.outputTransform) {
+         console.log('************ TRANSFORM');
+         var exp = _this.outputTransform.replace("$value", "output");
+         newOutput = eval(exp);
+      }
+
+      if (_this.outputMap && _this.outputMap[newOutput] != undefined) {
+         console.log('************ TRANSFORM');
+         newOutput = _this.outputMap[newOutput];
+      }
+
+      actualOutputValue = newOutput;
+   }
+
+   return actualOutputValue;
+}
+
+PropertyBinder.prototype.updatePropertyAfterRead = function(_newPropValue, _data) {
+   var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
+
+   if (this.myPropertyValue() != actualOutputValue) {
+      this.owner.updateProperty(this.propertyName, actualOutputValue, _data);
+   }
 }
 
 PropertyBinder.prototype.goInvalid = function(_data) {
@@ -175,22 +242,6 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
 }
 
-function transformOutput(_instance, _currentOutputValue) {
-   var output = _currentOutputValue;
-   var newOutput = output;
-
-   if (_instance.outputTransform) {
-      var exp = _instance.outputTransform.replace("$value", "output");
-      newOutput = eval(exp);
-   }
-
-   if (_instance.outputMap && _instance.outputMap[newInput] != undefined) {
-      newOutput = _instance.outputMap[newOutput];
-   }
-
-   return newOutput;
-}
-
 function copyData(_sourceData) {
    var newData = {};
 
@@ -221,12 +272,7 @@ PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
 
    if (this.binderEnabled && this.listening && this.sourceListeners[_data.sourcePropertyName]) {
-
-      this.calculateNewOutputValue(this.sourceListeners[_data.sourcePropertyName], _data, function(_err, _newOutputValue) {
-         if (!_err) {
-            that.internalProcessSourcePropertyChange(that.sourceListeners[_data.sourcePropertyName], that.sourceListeners[_data.sourcePropertyName].lastData, _newOutputValue);
-         }
-      });
+      this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
    }
 }
 
@@ -242,45 +288,8 @@ PropertyBinder.prototype.targetPropertyChanged = function(_data) {
    }
 }
 
-PropertyBinder.prototype.internalProcessSourcePropertyChange = function(_sourceListener, _data, _newOutputValue) {
-   var highestPrioritySource = this.findHighestPrioritySource(_newOutputValue);
-
-   if (!highestPrioritySource || (highestPrioritySource.priority < _sourceListener.priority)) {
-      highestPrioritySource = _sourceListener;
-   }
-
-   var actualOutputValue = (highestPrioritySource.outputValues[_newOutputValue] == undefined) ? _newOutputValue : highestPrioritySource.outputValues[_newOutputValue];
-
-   if (this.outputTransform || this.outputMap) {
-      actualOutputValue = transformOutput(this, actualOutputValue);
-   }
-
-   if ((this.myPropertyValue() != actualOutputValue) || (highestPrioritySource.priority > _sourceListener.priority)) {
-      this.updatePropertyAfterRead(actualOutputValue, highestPrioritySource.lastData);
-   }
-}
-
-PropertyBinder.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
-   var highestPriorityFound = 99999;
-   var highestPrioritySource = null;
-
-   for (var prop in this.sourceListeners) {
-
-      if(this.sourceListeners.hasOwnProperty(prop)){
-         var sourceListener = this.sourceListeners[prop];
-
-         if (sourceListener && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
-            highestPriorityFound = sourceListener.priority;
-            highestPrioritySource = sourceListener;
-         }
-      }
-   }
-
-   return highestPrioritySource;
-}
-
-PropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
-   return _callback(null, _data.propertyValue);
+PropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+   this.updatePropertyAfterRead(_data.propertyValue, _data);
 }
 
 PropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {

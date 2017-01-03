@@ -19,7 +19,7 @@ function LatchingPropertyBinder(_config, _owner) {
    this.sourceActive = false;
    this.controllerActive = false;
    this.active = false;
-   this.lastSourceListener = null;
+   this.lastData = null;
 }
 
 util.inherits(LatchingPropertyBinder, PropertyBinder);
@@ -37,12 +37,9 @@ function copyData(_sourceData) {
    return newData;
 }
 
-LatchingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+LatchingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.propertyValue;
-   this.lastSourceListener = _sourceListener;
-   this.lastCallback = _callback;
-
-   console.log("CCCCCCC ", _data);
+   this.lastData = _data;
 
    if (propValue) {
       console.log(this.name + ': target ' + _data.sourceName + ' active!');
@@ -51,11 +48,13 @@ LatchingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListe
       if (this.minOutputTime != undefined) {
          this.restartTimer();
          this.active = true;
-         return _callback(null, propValue);
+         this.updatePropertyAfterRead(propValue, _data);
+         return;
       }
       else if (this.controllerActive) {
          this.active = true;
-         return _callback(null, propValue);
+         this.updatePropertyAfterRead(propValue, _data);
+         return;
       }
    }
    else {
@@ -69,13 +68,15 @@ LatchingPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListe
             // Destination is active. If there is no timer, deactivate. Else, let the timer do it
             if (this.minOutputTimeObj == null) {
                this.active = false;
-               return _callback(null, false);
+               this.updatePropertyAfterRead(false, _data);
+               return;
             }
          }
       }
       else {
          this.active = false;
-         return _callback(null, false);
+         this.updatePropertyAfterRead(false, _data);
+         return;
       }
    }
 }
@@ -93,9 +94,9 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
       if (!that.sourceActive) {
          that.active = false;
 
-         if (that.lastCallback) {
-            that.lastCallback(null, false);
-            that.lastCallback = null;
+         if (that.lastData) {
+            that.updatePropertyAfterRead(false, that.lastData);
+            that.lastData = null;
             return;
          }
       }
@@ -103,17 +104,15 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
 }
 
 LatchingPropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
-   console.log("HHHHHH ", _data);
-
    this.controllerActive = _data.propertyValue;
 
    if (this.controllerActive) {
       if (!this.active && this.sourceActive) {
 
-         if (this.lastCallback) {
+         if (this.lastData) {
             this.active = true;
-            this.lastCallback(null, true);
-            this.lastCallback = null;
+            this.updatePropertyAfterRead(true, this.lastData);
+            this.lastData = null;
             return;
          }
       }
@@ -121,10 +120,10 @@ LatchingPropertyBinder.prototype.processTargetPropertyChange = function(_targetL
    else {
       if (this.active) {
 
-         if (this.lastCallback) {
+         if (this.lastData) {
             this.active = false;
-            this.lastCallback(null, false);
-            this.lastCallback = null;
+            this.updatePropertyAfterRead(false, this.lastData);
+            this.lastData = null;
             return;
          }
       }

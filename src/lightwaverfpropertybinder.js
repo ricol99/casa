@@ -22,16 +22,13 @@ function LightwaveRFPropertyBinder(_config, _owner) {
 
 util.inherits(LightwaveRFPropertyBinder, PropertyBinder);
 
-LightwaveRFPropertyBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+LightwaveRFPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var that = this;
    var propValue = _data.propertyValue;
 
    var callbackHandler = function(_error, _content) {
       if (_error) {
          console.log(that.name + ': Error turning room off ' + _error.message);
-         _callback(_error);
-      } else {
-         _callback(null, propValue);
       }
    };
 
@@ -64,6 +61,8 @@ LightwaveRFPropertyBinder.prototype.calculateNewOutputValue = function(_sourceLi
          console.log(this.name + ": Attempting to apply mood " + propValue + " change to LightwaveRF room ID=" + this.roomID);
          this.target.setRoomMood(this.roomID, this.moods[propValue], callbackHandler);
       }
+
+      this.updatePropertyAfterRead(propValue, _data);
    }
 }
 

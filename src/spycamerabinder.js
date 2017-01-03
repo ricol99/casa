@@ -12,7 +12,7 @@ function SpyCameraBinder(_config, _owner) {
    var that = this;
 }
 
-SpyCameraBinder.prototype.calculateNewOutputValue = function(_sourceListener, _data, _callback) {
+SpyCameraBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
 
    // https active request
@@ -26,11 +26,11 @@ SpyCameraBinder.prototype.calculateNewOutputValue = function(_sourceListener, _d
    http.get(this.options, function(res) {
       console.log('STATUS: ' + res.statusCode);
       console.log('HEADERS: ' + JSON.stringify(res.headers));
-      return _callback(null, _data.propertyValue);
    }).on('error', function(e) {
       console.log("Got error: " + e.message);
-      return _callback(e, null);
    });
+
+   this.updatePropertyAfterRead(_data.propertyValue, _data);
 }
 
 
