@@ -3,6 +3,7 @@ var events = require('events');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+ 
 //var io = require('socket.io')(http);
 
 var io = require('socket.io')(http, {
@@ -41,6 +42,11 @@ function Casa(_config) {
 
    app.get('/index.html', function(req, res){
      res.sendFile(__dirname + '/index.html');
+   });
+
+   app.get('/source/:source', function(req, res){
+      var s = (that.casaSys.allObjects[req.params.source]) ? that.casaSys.allObjects[req.params.source].props : {};
+      res.json(s);
    });
 
    io.on('connection', function(_socket) {

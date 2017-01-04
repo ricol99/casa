@@ -59,7 +59,7 @@
                      {
                         "source": "thing:dumgoyne-environment",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value>50"
+                        "inputTransform": "$value>40"
                      }
                   ]
                }
@@ -74,7 +74,7 @@
                      {
                         "source": "thing:dumgoyne-environment",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value<55&&$value>45"
+                        "inputTransform": "$value<45&&$value>35"
                      }
                   ]
                }
