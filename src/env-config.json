@@ -57,7 +57,7 @@
                   "name": "propertybinder:daytime-env",
                   "sources": [
                      {
-                        "source": "thing:dumgoyne-environment",
+                        "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
                         "inputTransform": "$value>40"
                      }
@@ -72,7 +72,7 @@
                   "name": "propertybinder:low-light-env",
                   "sources": [
                      {
-                        "source": "thing:dumgoyne-environment",
+                        "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
                         "inputTransform": "$value<45&&$value>35"
                      }

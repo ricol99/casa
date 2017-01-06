@@ -73,7 +73,6 @@ SourceListener.prototype.refreshSources = function() {
 SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    console.log(this.name + ': INVALID');
 
-   //if ((_data.propertyName == this.property) && this.sourceListenerEnabled) {
    if (this.sourceListenerEnabled) {
       this.sourceListenerEnabled = false;
 
@@ -84,17 +83,17 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    }
 }
 
-function transformInput(_instance, _data) {
+function transformInput(_this, _data) {
    var input = _data.propertyValue;
    var newInput = input;
 
-   if (_instance.inputTransform) {
-      var exp = _instance.inputTransform.replace("$value", "input");
+   if (_this.inputTransform) {
+      var exp = _this.inputTransform.replace(/\$value/g, "input");
       newInput = eval(exp);
    }
 
-   if (_instance.inputMap && _instance.inputMap[newInput] != undefined) {
-      newInput = _instance.inputMap[newInput];
+   if (_this.inputMap && _this.inputMap[newInput] != undefined) {
+      newInput = _this.inputMap[newInput];
    }
 
    return newInput;
