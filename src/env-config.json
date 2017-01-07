@@ -54,12 +54,14 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "propertybinder:daylight-env",
+                  "name": "thresholdpropertybinder:daylight-env",
+                  "threshold" : 45,
+                  "buffer": 5,
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value>40"
+                        "inputTransform": "$value>=45"
                      }
                   ]
                }
@@ -69,12 +71,17 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "propertybinder:low-light-env",
+                  "name": "thresholdpropertybinder:low-light-env",
+                  "thresholds" : [
+                     40,
+                     50
+                  ],
+                  "buffer": 5,
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value<45&&$value>35"
+                        "inputTransform": "$value<=50&&$value>=40"
                      }
                   ]
                }
