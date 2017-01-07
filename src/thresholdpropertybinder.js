@@ -21,7 +21,7 @@ ThresholdPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(
       for (var index = 0; index < this.thresholds.length; ++index) {
 
          if (((this.myPropertyValue >= this.thresholds[index]) && (_data.propertyValue <= this.thresholds[index])) ||
-         if  ((this.myPropertyValue <= this.thresholds[index]) && (_data.propertyValue >= this.thresholds[index]))) {
+             ((this.myPropertyValue <= this.thresholds[index]) && (_data.propertyValue >= this.thresholds[index]))) {
 
             this.activeThreshold = index;
             break;
