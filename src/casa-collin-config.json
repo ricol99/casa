@@ -147,7 +147,7 @@
                   "sources": [
                      {
                         "source": "thing:dumgoyne-environment",
-                        "sourceProperty": "light-sensor"
+                        "sourceProperty": "daylight"
                      },
                      {
                         "source": "thing:timed-environment",

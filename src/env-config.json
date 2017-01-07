@@ -50,11 +50,11 @@
          "displayName": "Environment Based on Sensors in Dumgoyne",
          "props": [
             {
-               "name": "daytime",
+               "name": "daylight",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "propertybinder:daytime-env",
+                  "name": "propertybinder:daylight-env",
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
