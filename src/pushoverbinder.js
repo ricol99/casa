@@ -21,6 +21,10 @@ PushoverBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceLi
    var _message = (_sourceListener.outputValues[_data.propertyValue] != undefined) ?
                  _sourceListener.outputValues[_data.propertyValue] : _data.propertyValue;
 
+   if (!this.target) {
+      return;
+   }
+
    var msg = {
       user: this.target.getProperty('pushoverDestAddr'),
       message: _message,    // required
