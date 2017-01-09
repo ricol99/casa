@@ -30,6 +30,20 @@ function findHighestPriorityValidSource(_this) {
    return highestPrioritySource;
 }
 
+TopValidPropertyBinder.prototype.sourceIsInvalid = function(_data) {
+
+   if (this.highestValidSource && (this.highestValidSource.sourcePropertyName == _data.sourcePropertyName)) {
+      // Current output is based off a now invalid source - rescan
+      this.highestValidSource = findHighestPriorityValidSource(this);
+
+      if (this.highestValidSource) {
+         this.updatePropertyAfterRead(this.highestValidSource.getPropertyValue(), { sourceName: this.name });
+      }
+   }
+
+   PropertyBinder.prototype.sourceIsInvalid.call(this, _data);
+}
+
 TopValidPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
 
    this.highestValidSource = findHighestPriorityValidSource(this);
