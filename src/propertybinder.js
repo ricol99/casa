@@ -129,6 +129,9 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
          if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
             sourceListenerInCharge = highestPrioritySource;
          }
+         if (highestPrioritySource) {
+            console.log(this.name+": AAAAAAAAAAAAAAA High="+highestPrioritySource.name+", sourceListener="+sourceListener.name);
+         }
       }
 
       if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
