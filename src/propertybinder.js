@@ -78,7 +78,6 @@ function PropertyBinder(_config, _owner) {
                                                  inputMap:_config.targetInputMap}, this);
 
       this.target = this.targetListener.source;
-      console.log(this.name+": AAAAAAAAAA Target="+this.target.name);
    }
 
    if (_config.listenController) {
