@@ -20,9 +20,14 @@ function findHighestPriorityValidSource(_this) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
+         if (sourceListener) {
+            console.log("AAAAAAAAAAAAAA Source Listener " + sourceListener.name + ", Priority: " + sourceListener.priority + " Enabled: " + sourceListener.sourceListenerEnabled);
+         }
+
          if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.sourceListenerEnabled) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
+            console.log("BBBBBBBBBBBBB Highest Priority Source: " + highestPrioritySource.name + ", Priority: " + highestPriorityFound);
          }
       }
    }
