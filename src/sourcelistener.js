@@ -23,9 +23,9 @@ function SourceListener(_config, _owner) {
 
    this.sourceListenerEnabled = false;
 
-   if (this.establishListeners()) {
-      this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
-   }
+   //if (this.establishListeners()) {
+      //this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
+   //}
 
    this.casa.addSourceListener(this);
 
@@ -45,7 +45,7 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
-   this.sourceListenerEnabled = (this.source) ? true : false;
+   this.sourceListenerEnabled = (this.source != undefined) ? true : false;
 
 
    if (this.sourceListenerEnabled) {
@@ -64,8 +64,8 @@ SourceListener.prototype.refreshSources = function() {
       console.log(this.name + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
-         this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
-                                    propertyName: this.property, propertyValue: this.source.getProperty(this.property) });
+         this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
+                                    propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
       }
    }
    return ret;
@@ -80,7 +80,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.source.removeListener('property-changed', this.propertyChangedCallback);
       this.source.removeListener('invalid', this.invalidCallback);
 
-      this.owner.sourceIsInvalid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
+      this.owner.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
    }
 }
 

@@ -82,25 +82,24 @@ LatchingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_
 }
 
 LatchingPropertyBinder.prototype.restartTimer = function() {
-   var that = this;
 
    if (this.minOutputTimeObj) {
       clearTimeout(this.minOutputTimeObj);
    }
 
-   this.minOutputTimeObj = setTimeout(function() {
-      that.minOutputTimeObj = null;
+   this.minOutputTimeObj = setTimeout(function(_this) {
+      _this.minOutputTimeObj = null;
 
-      if (!that.sourceActive) {
-         that.active = false;
+      if (!_this.sourceActive) {
+         _this.active = false;
 
-         if (that.lastData) {
-            that.updatePropertyAfterRead(false, that.lastData);
-            that.lastData = null;
+         if (_this.lastData) {
+            _this.updatePropertyAfterRead(false, _this.lastData);
+            _this.lastData = null;
             return;
          }
       }
-   }, this.minOutputTime*1000);
+   }, this.minOutputTime*1000, this);
 }
 
 LatchingPropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {

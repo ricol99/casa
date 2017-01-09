@@ -56,9 +56,13 @@ function PropertyBinder(_config, _owner) {
       }
 
       this.binderEnabled = false;
+      this.constructing = true;
+
       var sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListener.sourcePropertyName] = sourceListener;
       this.noOfSources++;
+
+      this.constructing = false;
    }
    else {
       this.binderEnabled = true;
@@ -291,6 +295,7 @@ function isBinderValid(_this) {
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
 
+   console.log(this.name+": BBBBBBBBBBB binderEnabled="+this.binderEnabled);
    if (this.binderEnabled && this.listening && this.sourceListeners[_data.sourcePropertyName]) {
       this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
    }
@@ -313,6 +318,13 @@ PropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceLi
 }
 
 PropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
+
+   if (this.binderEnabled) {
+      this.newPropertyValueReceivedFromTarget(_targetListener, _data);
+   }
+}
+
+PropertyBinder.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
    // DO NOTHING BY DEFAULT
 }
 
