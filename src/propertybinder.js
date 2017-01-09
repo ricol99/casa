@@ -76,7 +76,9 @@ function PropertyBinder(_config, _owner) {
       this.targetListener = new SourceListener({ source: _config.target, sourceProperty: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, inputTransform: _config.targetInputTransform,
                                                  inputMap:_config.targetInputMap}, this);
+
       this.target = this.targetListener.source;
+      console.log(this.name+": AAAAAAAAAA Target="+this.target.name);
    }
 
    if (_config.listenController) {
@@ -208,6 +210,7 @@ PropertyBinder.prototype.sourceIsValid = function(_data) {
    this.binderEnabled = isBinderValid(this);
 
    this.target = (this.targetListener) ? this.targetListener.source : null;
+
    this.listenController = (this.listenControllerListener) ? this.listenControllerListener.source : null;
 
    if (this.listenController &&  listenControllerListener.getProperty() != undefined) {
@@ -295,7 +298,6 @@ function isBinderValid(_this) {
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
 
-   console.log(this.name+": BBBBBBBBBBB binderEnabled="+this.binderEnabled);
    if (this.binderEnabled && this.listening && this.sourceListeners[_data.sourcePropertyName]) {
       this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
    }
@@ -305,7 +307,7 @@ PropertyBinder.prototype.targetPropertyChanged = function(_data) {
 
    if (this.binderEnabled) {
       if (this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
-         this.processTargetPropertyChange(this.targetListener, _data);
+         this.newPropertyValueReceivedFromTarget(this.targetListener, _data);
       }
       else if (this.listenControllerListener.sourcePropertyName == _data.sourcePropertyName && !this.manualMode) {
          this.processListenControllerPropertyChange(this.listenControllerListener, _data);
@@ -315,13 +317,6 @@ PropertyBinder.prototype.targetPropertyChanged = function(_data) {
 
 PropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyAfterRead(_data.propertyValue, _data);
-}
-
-PropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
-
-   if (this.binderEnabled) {
-      this.newPropertyValueReceivedFromTarget(_targetListener, _data);
-   }
 }
 
 PropertyBinder.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {

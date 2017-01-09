@@ -23,9 +23,10 @@ function SourceListener(_config, _owner) {
 
    this.sourceListenerEnabled = false;
 
-   //if (this.establishListeners()) {
-      //this.owner.sourceIsValid({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property });
-   //}
+   if (this.establishListeners()) {
+      this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
+                                          propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
+   }
 
    this.casa.addSourceListener(this);
 

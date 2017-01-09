@@ -102,7 +102,7 @@ LatchingPropertyBinder.prototype.restartTimer = function() {
    }, this.minOutputTime*1000, this);
 }
 
-LatchingPropertyBinder.prototype.processTargetPropertyChange = function(_targetListener, _data) {
+LatchingPropertyBinder.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
    this.controllerActive = _data.propertyValue;
 
    if (this.controllerActive) {
