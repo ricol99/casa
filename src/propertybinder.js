@@ -16,6 +16,7 @@ function PropertyBinder(_config, _owner) {
 
    this.binderEnabled = false;
    this.manualMode = false;
+   this.cold = true;
 
    var that = this;
 
@@ -152,7 +153,8 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
 PropertyBinder.prototype.updatePropertyAfterRead = function(_newPropValue, _data) {
    var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
 
-   if (this.myPropertyValue() != actualOutputValue) {
+   if (this.myPropertyValue() != actualOutputValue || this.cold) {
+      this.cold = false;
       this.owner.updateProperty(this.propertyName, actualOutputValue, _data);
    }
 }
@@ -195,16 +197,11 @@ PropertyBinder.prototype.setManualMode = function(_manualMode) {
    }
 }
 
+
 PropertyBinder.prototype.sourceIsValid = function(_data) {
 
-   if (!this.binderEnabled) {
-
-      if (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-            return _sourceListener.sourceListenerEnabled;
-      })) {
-         this.binderEnabled = true;
-      }
-   }
+   var oldBinderEnabled = this.binderEnabled;
+   this.binderEnabled = isBinderValid(this);
 
    this.target = (this.targetListener) ? this.targetListener.source : null;
    this.listenController = (this.listenControllerListener) ? this.listenControllerListener.source : null;
@@ -215,16 +212,16 @@ PropertyBinder.prototype.sourceIsValid = function(_data) {
    else {
       this.listening = true;
    }
+
+   if (!oldBinderEnabled && this.binderEnabled) {
+      this.sourcePropertyChanged(_data);
+   }
 }
 
 PropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
    var oldBinderEnabled = this.binderEnabled;
-   var sourceListener = this.sourceListeners[_data.sourcePropertyName];
-
-   if (sourceListener && this.allSourcesRequiredForValidity) {
-      this.binderEnabled = false;
-   }
+   this.binderEnabled = isBinderValid(this);
 
    // Has the enabled stated changed from true to false?
    if (oldBinderEnabled && !this.binderEnabled) {
@@ -261,6 +258,34 @@ function allAssocArrayElementsDo(_obj, _func) {
       }
    }
    return true;
+}
+
+function anyAssocArrayElementsDo(_obj, _func) {
+
+   for (var prop in _obj) {
+
+      if (_obj.hasOwnProperty(prop)){
+         if (_func(_obj[prop])) {
+            return true;
+         }
+      }
+   }
+   return false;
+}
+
+function isBinderValid(_this) {
+
+   if (_this.allSourcesRequiredForValidity) {
+
+      return (allAssocArrayElementsDo(_this.sourceListeners, function(_sourceListener) {
+            return _sourceListener.sourceListenerEnabled;
+      }));
+   }
+   else {
+      return (anyAssocArrayElementsDo(_this.sourceListeners, function(_sourceListener) {
+            return _sourceListener.sourceListenerEnabled;
+      }));
+   }
 }
 
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {

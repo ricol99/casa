@@ -5,7 +5,6 @@ function Room(_config) {
 
    Thing.call(this, _config);
 
-   this.setMaxListeners(20);
    this.thingType = "room";
 }
 

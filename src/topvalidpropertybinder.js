@@ -21,13 +21,13 @@ function findHighestPriorityValidSource(_this) {
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
          if (sourceListener) {
-            console.log("AAAAAAAAAAAAAA Source Listener " + sourceListener.name + ", Priority: " + sourceListener.priority + " Enabled: " + sourceListener.sourceListenerEnabled);
+            console.info(_this.name + ": AAAAAAAAAAAAAA Source Listener " + sourceListener.name + ", Priority: " + sourceListener.priority + " Enabled: " + sourceListener.sourceListenerEnabled);
          }
 
          if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.sourceListenerEnabled) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
-            console.log("BBBBBBBBBBBBB Highest Priority Source: " + highestPrioritySource.name + ", Priority: " + highestPriorityFound);
+            console.info(_this.name + ": BBBBBBBBBBBBB Highest Priority Source: " + highestPrioritySource.name + ", Priority: " + highestPriorityFound);
          }
       }
    }
@@ -42,7 +42,7 @@ TopValidPropertyBinder.prototype.sourceIsInvalid = function(_data) {
       this.highestValidSource = findHighestPriorityValidSource(this);
 
       if (this.highestValidSource) {
-         this.updatePropertyAfterRead(this.highestValidSource.getPropertyValue(), { sourceName: this.name });
+         this.updatePropertyAfterRead(this.highestValidSource.getPropertyValue(), { sourceName: this.owner.name });
       }
    }
 
@@ -50,11 +50,14 @@ TopValidPropertyBinder.prototype.sourceIsInvalid = function(_data) {
 }
 
 TopValidPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+   console.info(this.name + ": WWWWWWWWWWWWWWWWWWW ", _data);
 
    this.highestValidSource = findHighestPriorityValidSource(this);
+   console.info(this.name + ": VVVVVVVVVVVVVVVVVV source = "+ _sourceListener.name + ", highest source = "+this.highestValidSource.name);
 
    if (_sourceListener == this.highestValidSource) {
       this.updatePropertyAfterRead(_data.propertyValue, _data);
+      console.info(this.name + ": CCCCCCCCCCCCCCCCCCC Property Value " + _data.propertyValue);
    }
 };
 
