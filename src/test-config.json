@@ -21,6 +21,20 @@
          "displayName": "Test Thing",
          "props": [
          ]
+      },
+      {
+         "name": "hklightaccessory:test-light-accessory-1",
+         "displayName": "Test Lounge Light",
+         "pincode": "031-45-154",
+         "username": "CC:22:3D:E3:CE:31",
+         "manufacturer": "Test Light Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
+         "brightnessSupported": true,
+         "saturationSupported": true,
+         "hueSupported": true,
+         "props": [
+         ]
       }
    ]
 }

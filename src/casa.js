@@ -3,6 +3,7 @@ var events = require('events');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+var storage = require('node-persist');
  
 //var io = require('socket.io')(http);
 
@@ -16,6 +17,9 @@ var CasaSystem = require('./casasystem');
 function Casa(_config) {
    this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
+   this.portStart = 50000;
+   this.nextPortToAllocate = this.portStart;
+   this.ports = {};
 
    this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
@@ -31,6 +35,8 @@ function Casa(_config) {
    this.workers = [];
    this.uber = false;
    this.sourceEnabled = true;
+
+   storage.initSync({ dir: "/tmp/" });
 
    var that = this;
 
@@ -306,6 +312,11 @@ Casa.prototype.setUber = function(_uber) {
 
 Casa.prototype.isUber = function() {
    return this.uber;
+}
+
+Casa.prototype.allocatePort = function(_name) {
+   this.ports[_name] = this.nextPortToAllocate;
+   return this.nextPortToAllocate++;
 }
 
 module.exports = exports = Casa;
