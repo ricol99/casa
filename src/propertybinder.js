@@ -80,13 +80,14 @@ function PropertyBinder(_config, _owner) {
       this.target = this.targetListener.source;
    }
 
-   if (_config.listenController) {
-      this.listenControllerProperty = (_config.listenControllerProperty) ? _config.listenControllerProperty : "ACTIVE";
-      this.listenControllerListener = new SourceListener({ source: _config.listenController, sourceProperty: this.listenControllerProperty, isTarget: true,
-                                                         ignoreSourceUpdates: false, inputTransform: _config.listenControllerInputTransform,
-                                                         inputMap:_config.listenControllerInputMap}, this);
+   if (_config.manualOverrideSource) {
+      this.manualOverrideSourceProperty = (_config.manualOverrideSourceProperty) ? _config.manualOverrideSourceProperty : "ACTIVE";
+      this.manualOverrideListener = new SourceListener({ source: _config.manualOverrideSource, sourceProperty: this.manualOverrideSourceProperty, isTarget: false,
+                                                         ignoreSourceUpdates: false, inputTransform: _config.manualOverrideSourceInputTransform,
+                                                         inputMap:_config.manualOverrideSourceInputMap}, this);
 
-      this.listenController = this.listenControllerListener.source;
+      this.manualOverrideSource = this.manualOverrideListener.source;
+      this.manualOverrideTimeout = (_config.manualOverrideTimeout) ? _config.manualOverrideTimeout : 3600;
    }
 
    this.listening = true;
@@ -194,17 +195,33 @@ PropertyBinder.prototype.setManualMode = function(_manualMode) {
 
    if (_manualMode) {
       this.listening = false;
+      this.restartManualOverrideTimer();
    }
    else {
-      if (this.listenController &&  listenControllerListener.getProperty() != undefined) {
-         this.listening = listenControllerListener.getProperty();
+      this.listening = true;
+
+      if (this.manualOverrideTimer) {
+         clearTimeout(this.manualOverrideTimer);
       }
-      else {
-         this.listening = true;
+
+      if (this.lastData) {
+         this.newPropertyValueReceivedFromSource(this.sourceListeners[this.lastData.sourcePropertyName], this.lastData);
+         this.lastData = null;
       }
    }
 }
 
+PropertyBinder.prototype.restartManualOverrideTimer = function() {
+
+   if (this.manualOverrideTimer) {
+      clearTimeout(this.manualOverrideTimer);
+   }
+
+   this.manualOverrideTimer = setTimeout(function(_this) {
+      _this.manualOverrideTimer = null;
+      _this.setManualMode(false);
+   }, this.manualOverrideTimeout*1000, this);
+}
 
 PropertyBinder.prototype.sourceIsValid = function(_data) {
 
@@ -213,12 +230,10 @@ PropertyBinder.prototype.sourceIsValid = function(_data) {
 
    this.target = (this.targetListener) ? this.targetListener.source : null;
 
-   this.listenController = (this.listenControllerListener) ? this.listenControllerListener.source : null;
+   this.manualOverrideSource = (this.manualOverrideListener) ? this.manualOverrideListener.source : null;
 
-   if (this.listenController &&  listenControllerListener.getProperty() != undefined) {
-      this.listening = listenControllerListener.getProperty();
-   }
-   else {
+   if (!this.manualOverrideSource) {
+      this.setMan
       this.listening = true;
    }
 
@@ -238,7 +253,7 @@ PropertyBinder.prototype.sourceIsInvalid = function(_data) {
       console.log(this.name + ': INVALID');
 
       this.target = null;
-      this.listenController = null;
+      this.manualOverrideSource = null;
       this.goInvalid(_data);
    }
 }
@@ -300,19 +315,38 @@ function isBinderValid(_this) {
 PropertyBinder.prototype.sourcePropertyChanged = function(_data) {
    var that = this;
 
-   if (this.binderEnabled && this.listening && this.sourceListeners[_data.sourcePropertyName]) {
-      this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
+   if (this.binderEnabled) {
+
+      if (!this.listening) {  // In manual override mode
+
+         if (this.sourceListeners[_data.sourcePropertyName]) {
+            this.lastData = copyData(_data);
+         }
+         else {  // Must have come from manual override source
+            this.restartManualOverrideTimer();
+            this.updatePropertyAfterRead(_data.propertyValue, { sourceName : this.name } );
+         }
+      }
+      else {
+         if (this.sourceListeners[_data.sourcePropertyName]) {
+            this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
+         }
+         else {  // Must have come from manual override source
+            this.setManualMode(true);
+            this.updatePropertyAfterRead(_data.propertyValue, { sourceName : this.name } );
+         }
+      }
    }
 }
 
 PropertyBinder.prototype.targetPropertyChanged = function(_data) {
 
    if (this.binderEnabled) {
-      if (this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
+      if (this.targetListener && this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
          this.newPropertyValueReceivedFromTarget(this.targetListener, _data);
       }
-      else if (this.listenControllerListener.sourcePropertyName == _data.sourcePropertyName && !this.manualMode) {
-         this.processListenControllerPropertyChange(this.listenControllerListener, _data);
+      else if (this.manualOverrideListener.sourcePropertyName == _data.sourcePropertyName && !this.manualMode) {
+         this.processManualOverridePropertyChange(this.manualOverrideListener, _data);
       }
    }
 }
@@ -325,7 +359,7 @@ PropertyBinder.prototype.newPropertyValueReceivedFromTarget = function(_targetLi
    // DO NOTHING BY DEFAULT
 }
 
-PropertyBinder.prototype.processListenControllerPropertyChange = function(_listenControllerListener, _data) {
+PropertyBinder.prototype.processManualOverridePropertyChange = function(_manualOverrideListener, _data) {
    this.listening = _data.sourcePropertyValue;
 }
 

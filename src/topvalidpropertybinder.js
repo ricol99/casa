@@ -20,14 +20,9 @@ function findHighestPriorityValidSource(_this) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
-         if (sourceListener) {
-            console.info(_this.name + ": AAAAAAAAAAAAAA Source Listener " + sourceListener.name + ", Priority: " + sourceListener.priority + " Enabled: " + sourceListener.sourceListenerEnabled);
-         }
-
          if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.sourceListenerEnabled) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
-            console.info(_this.name + ": BBBBBBBBBBBBB Highest Priority Source: " + highestPrioritySource.name + ", Priority: " + highestPriorityFound);
          }
       }
    }
@@ -50,14 +45,11 @@ TopValidPropertyBinder.prototype.sourceIsInvalid = function(_data) {
 }
 
 TopValidPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   console.info(this.name + ": WWWWWWWWWWWWWWWWWWW ", _data);
 
    this.highestValidSource = findHighestPriorityValidSource(this);
-   console.info(this.name + ": VVVVVVVVVVVVVVVVVV source = "+ _sourceListener.name + ", highest source = "+this.highestValidSource.name);
 
    if (_sourceListener == this.highestValidSource) {
       this.updatePropertyAfterRead(_data.propertyValue, _data);
-      console.info(this.name + ": CCCCCCCCCCCCCCCCCCC Property Value " + _data.propertyValue);
    }
 };
 

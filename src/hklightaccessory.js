@@ -78,7 +78,6 @@ function HomekitLightAccessory(_config) {
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
-   console.log(this.name + ": Changing power status to " + _status ? "on" : "off");
    this.updateProperty("power", _status ? true : false);
 };
 

@@ -17,12 +17,6 @@
    ],
    "things": [
       {
-         "name": "thing:test-thing",
-         "displayName": "Test Thing",
-         "props": [
-         ]
-      },
-      {
          "name": "hklightaccessory:test-light-accessory-1",
          "displayName": "Test Lounge Light",
          "pincode": "031-45-154",
@@ -34,6 +28,50 @@
          "saturationSupported": true,
          "hueSupported": true,
          "props": [
+         ]
+      },
+      {
+         "name": "thing:test-thing-source",
+         "displayName": "Test Thing Source",
+         "props": [
+            {
+               "name": "light-brightness-auto"
+            },
+            {
+               "name": "light-power-auto"
+            }
+         ]
+      },
+      {
+         "name": "thing:test-thing",
+         "displayName": "Test Thing",
+         "props": [
+            {
+               "name": "light-brightness",
+               "initialValue": 0,
+               "writable": 0,
+               "binder": {
+                  "name": "propertybinder:light",
+                  "manualOverrideSource": "hklightaccessory:test-light-accessory-1",
+                  "manualOverrideSourceProperty": "brightness",
+                  "manualOverrideTimeout": 10,
+                  "source": "thing:test-thing-source",
+                  "sourceProperty": "light-brightness-auto"
+               }
+            },
+            {
+               "name": "light-power",
+               "initialValue": false,
+               "writable": 0,
+               "binder": {
+                  "name": "propertybinder:power",
+                  "manualOverrideSource": "hklightaccessory:test-light-accessory-1",
+                  "manualOverrideSourceProperty": "power",
+                  "manualOverrideTimeout": 10,
+                  "source": "thing:test-thing-source",
+                  "sourceProperty": "light-power-auto"
+               }
+            }
          ]
       }
    ]
