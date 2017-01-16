@@ -406,10 +406,10 @@
                "binder": {
                   "name": "lightwaverfpropertybinder:do-not-know-lamp",
                   "source": "hklightaccessory:do-not-know-switch",
-                  "sourceProperty": "power",
+                  "sourceProperty": "brightness",
                   "target": "lightwaverflink:home",
-                  "roomID": 4,
-                  "deviceID": 1
+                  "roomID": 1,
+                  "deviceID": 2
                }
             }
          ]
