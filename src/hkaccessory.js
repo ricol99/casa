@@ -5,6 +5,7 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 var uuid = require('hap-nodejs').uuid;
+"use strict"
 
 function HomekitAccessory(_config) {
 

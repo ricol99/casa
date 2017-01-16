@@ -396,18 +396,6 @@
          ]
       },
       {
-         "name": "hklightaccessory:do-not-know-switch",
-         "displayName": "Do Not Know Light",
-         "pincode": "111-11-111",
-         "username": "CC:22:3D:E3:CE:32",
-         "manufacturer": "Test Light Ltd",
-         "model": "V0.1",
-         "serialNumber": "1234567890",
-         "brightnessSupported": true,
-         "props": [
-         ]
-      },
-      {
          "name": "room:do-not-know",
          "displayName": "Do Not Know Room",
          "props": [

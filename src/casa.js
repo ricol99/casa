@@ -36,7 +36,7 @@ function Casa(_config) {
    this.uber = false;
    this.sourceEnabled = true;
 
-   storage.initSync({ dir: "/tmp/" });
+   storage.initSync();
 
    var that = this;
 
