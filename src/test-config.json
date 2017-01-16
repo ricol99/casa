@@ -31,15 +31,17 @@
          ]
       },
       {
-         "name": "thing:test-thing-source",
-         "displayName": "Test Thing Source",
+         "name": "hklightaccessory:override-test-light-accessory-1",
+         "displayName": "Override Test Lounge Light",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E3:CE:32",
+         "manufacturer": "Test Light Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
+         "brightnessSupported": true,
+         "saturationSupported": true,
+         "hueSupported": true,
          "props": [
-            {
-               "name": "light-brightness-auto"
-            },
-            {
-               "name": "light-power-auto"
-            }
          ]
       },
       {
@@ -52,11 +54,11 @@
                "writable": 0,
                "binder": {
                   "name": "propertybinder:light",
-                  "manualOverrideSource": "hklightaccessory:test-light-accessory-1",
+                  "manualOverrideSource": "hklightaccessory:override-test-light-accessory-1",
                   "manualOverrideSourceProperty": "brightness",
                   "manualOverrideTimeout": 10,
-                  "source": "thing:test-thing-source",
-                  "sourceProperty": "light-brightness-auto"
+                  "source": "hklightaccessory:test-light-accessory-1",
+                  "sourceProperty": "brightness"
                }
             },
             {
@@ -65,11 +67,11 @@
                "writable": 0,
                "binder": {
                   "name": "propertybinder:power",
-                  "manualOverrideSource": "hklightaccessory:test-light-accessory-1",
+                  "manualOverrideSource": "hklightaccessory:override-test-light-accessory-1",
                   "manualOverrideSourceProperty": "power",
                   "manualOverrideTimeout": 10,
-                  "source": "thing:test-thing-source",
-                  "sourceProperty": "light-power-auto"
+                  "source": "hklightaccessory:test-light-accessory-1",
+                  "sourceProperty": "power"
                }
             }
          ]
