@@ -396,6 +396,37 @@
          ]
       },
       {
+         "name": "hklightaccessory:do-not-know-switch",
+         "displayName": "Do Not Know Light",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E3:CE:322,
+         "manufacturer": "Test Light Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
+         "brightnessSupported": true,
+         "props": [
+         ]
+      },
+      {
+         "name": "room:do-not-know",
+         "displayName": "Do Not Know Room",
+         "props": [
+            {
+               "name": "lamp",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:do-not-know-lamp",
+                  "source": "hklightaccessory:do-not-know-switch",
+                  "sourceProperty": "power",
+                  "target": "lightwaverflink:home",
+                  "roomID": 4,
+                  "deviceID": 1
+               }
+            }
+         ]
+      },
+      {
          "name": "thing:camera-lounge",
          "displayName": "Camera Lounge",
          "props": [
