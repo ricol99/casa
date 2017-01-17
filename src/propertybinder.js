@@ -160,7 +160,7 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
 PropertyBinder.prototype.updatePropertyAfterRead = function(_newPropValue, _data) {
    var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
 
-   if (this.myPropertyValue() != actualOutputValue || this.cold) {
+   if (this.myPropertyValue() !== actualOutputValue || this.cold) {
       this.cold = false;
       this.owner.updateProperty(this.propertyName, actualOutputValue, _data);
    }

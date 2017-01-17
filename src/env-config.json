@@ -54,11 +54,11 @@
                   "name": "thresholdpropertybinder:dumgoyne-env-daylight",
                   "threshold" : 40,
                   "buffer": 5,
+                  "outputTransform": "$value>=40",
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
-                        "sourceProperty": "light-sensor",
-                        "inputTransform": "$value>=40"
+                        "sourceProperty": "light-sensor"
                      }
                   ]
                }
@@ -71,11 +71,11 @@
                   "name": "thresholdpropertybinder:dumgoyne-env-low-light",
                   "threshold" : 55,
                   "buffer": 5,
+                  "outputTransform": "$value<=55",
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
-                        "sourceProperty": "light-sensor",
-                        "inputTransform": "$value<=55"
+                        "sourceProperty": "light-sensor"
                      }
                   ]
                }
