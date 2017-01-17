@@ -227,8 +227,27 @@
                      "name": "lightwaverfaccessory:kitchen-lights-cupboard",
                      "displayName": "Kitchen Lights Cupboard",
                      "roomID": 6,
-                     "deviceID": 16,
                      "lightwaveRfLink": "lightwaverflink:home",
+                     "moods": [
+                        {
+                           "name": "low",
+                           "id": 1,
+                           "low": 0,
+                           "high": 50
+                        },
+                        {
+                           "name": "medium",
+                           "id": 2,
+                           "low": 34,
+                           "high": 76
+                        },
+                        {
+                           "name": "full",
+                           "id": 3,
+                           "low": 77,
+                           "high": 100
+                        }
+                     ],
                      "props": [
                      ]
                   }

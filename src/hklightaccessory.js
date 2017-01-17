@@ -121,24 +121,28 @@ HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue,
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.On)
         .updateValue(_propValue ? 1 : 0);
+      console.info(this.name+": AAAAAAAAAAA updateProperty() propName=" + _propName + " propValue=" + _propValue);
    }
    else if (_propName == "brightness") {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.Brightness)
         .updateValue(_propValue);
+      console.info(this.name+": AAAAAAAAAAA updateProperty() propName=" + _propName + " propValue=" + _propValue);
    }
    else if (_propName == "saturation") {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.Saturation)
         .updateValue(_propValue);
+      console.info(this.name+": AAAAAAAAAAA updateProperty() propName=" + _propName + " propValue=" + _propValue);
    }
    else if (_propName == "hue") {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.Hue)
         .updateValue(_propValue);
+      console.info(this.name+": AAAAAAAAAAA updateProperty() propName=" + _propName + " propValue=" + _propValue);
    }
 
    HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
