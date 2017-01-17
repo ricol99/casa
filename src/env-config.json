@@ -222,6 +222,15 @@
                      ],
                      "props": [
                      ]
+                  },
+                  {
+                     "name": "lightwaverfaccessory:kitchen-lights-cupboard",
+                     "displayName": "Kitchen Lights Cupboard",
+                     "roomID": 6,
+                     "deviceID": 16,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
                   }
                ]
             }

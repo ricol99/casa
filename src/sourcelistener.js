@@ -91,7 +91,7 @@ function transformInput(_this, _data) {
 
    if (_this.inputTransform) {
       var exp = _this.inputTransform.replace(/\$value/g, "input");
-      newInput = eval(exp);
+      eval("newInput = " + exp);
    }
 
    if (_this.inputMap && _this.inputMap[newInput] != undefined) {

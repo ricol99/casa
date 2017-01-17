@@ -144,7 +144,7 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
 
       if (_this.outputTransform) {
          var exp = _this.outputTransform.replace(/\$value/g, "output");
-         newOutput = eval(exp);
+         eval("newOutput = " + exp);
       }
 
       if (_this.outputMap && _this.outputMap[newOutput] != undefined) {
