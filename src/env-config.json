@@ -175,7 +175,7 @@
          "things": [
             {
                "name": "hklightaccessory:kitchen-lights",
-               "displayName": "Kitchen Room Lights",
+               "displayName": "Kitchen Lights",
                "pincode": "111-11-111",
                "username": "CC:22:3D:E3:CE:33",
                "manufacturer": "Lightwave RF Ltd",
@@ -291,7 +291,7 @@
          "things": [
             {
                "name": "hklightaccessory:lounge-lights",
-               "displayName": "Lounge Room Lights",
+               "displayName": "Lounge Lights",
                "pincode": "111-11-111",
                "username": "CC:22:3D:E3:CE:31",
                "manufacturer": "Lounge Light Ltd",
