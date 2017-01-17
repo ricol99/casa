@@ -75,7 +75,7 @@
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "value>=55"
+                        "inputTransform": "$value>=55"
                      }
                   ]
                }
