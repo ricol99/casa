@@ -120,7 +120,7 @@ HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue,
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.On)
-        .updateValue(_propValue);
+        .updateValue(_propValue ? 1 : 0);
    }
    else if (_propName == "brightness") {
       this.hkAccessory
