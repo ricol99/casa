@@ -36,7 +36,8 @@
          "name": "usergroup:key-holders",
          "displayName": "Key Holders",
          "users": [
-           "user:richard"
+           "user:richard",
+           "user:natalie"
          ],
          "props": [
             {
@@ -57,7 +58,7 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-daylight",
+                  "name": "schedulepropertybinder:timed-env-daylight",
                   "events": [
                      {
                         "rule": "sunrise:1800",
@@ -71,11 +72,11 @@
                }
             },
             {
-               "name": "holiday-lights",
+               "name": "background-lights",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-holiday-lights",
+                  "name": "schedulepropertybinder:timed-env-background-lights",
                   "events": [
                      {
                         "rule": "sunset:900",
@@ -93,7 +94,7 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-low-light",
+                  "name": "schedulepropertybinder:timed-env-low-light",
                   "events": [
                      {
                         "rule": "sunrise:1750",
@@ -119,7 +120,7 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "schedulepropertybinder:env-bedtime",
+                  "name": "schedulepropertybinder:timed-env-bedtime",
                   "events": [
                      {
                         "rule": "30 22 * * *",
@@ -157,15 +158,19 @@
                }
             },
             {
-               "name": "holiday-lights",
+               "name": "background-lights",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "topvalidpropertybinder:env-holiday-lights",
+                  "name": "topvalidpropertybinder:env-background-lights",
                   "sources": [
                      {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "background-lights"
+                     },
+                     {
                         "source": "thing:timed-environment",
-                        "sourceProperty": "holiday-lights"
+                        "sourceProperty": "background-lights"
                      }
                   ]
                }

@@ -2,25 +2,22 @@
    "name": "casa:env",
    "displayName": "Casa Collin Environment Casa",
    "gang": "casa-collin-v2",
-   "parentCasa": {
-      "name": "casa:internet",
-      "address": {
-         "hostname": "199.245.56.152",
-         "port": 80
-      }
-   },
    "listeningPort": 8097,
    "props": [],
-   "users": [ 
-      {
-         "name": "user:richard",
-         "displayName": "Richard",
-         "props": []
-      }
-   ],
    "things": [
       {
-         "name": "thing:dumgoyne-sensors-2",
+         "name": "lightwaverflink:home",
+         "displayName": "LightwaveRF Wifi Link",
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.236",
+               "writable": false
+            }
+         ]
+      },
+      {
+         "name": "thing:dumgoyne-sensors",
          "displayName": "Environment Sensors in Dumgoyne",
          "props": [
             {
@@ -30,7 +27,7 @@
                "binder": {
                   "name": "i2cpropertybinder:light-channel-1",
                   "address1": 104,
-		  "address2": 105,
+                  "address2": 105,
                   "channel": 1,
                   "interval": 5,
                   "maxChange": 5,
@@ -46,7 +43,7 @@
          ]
       },
       {
-         "name": "thing:dumgoyne-environment-2",
+         "name": "thing:dumgoyne-environment",
          "displayName": "Environment Based on Sensors in Dumgoyne",
          "props": [
             {
@@ -54,14 +51,14 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "thresholdpropertybinder:daylight-env",
-                  "threshold" : 45,
+                  "name": "thresholdpropertybinder:dumgoyne-env-daylight",
+                  "threshold" : 40,
                   "buffer": 5,
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value>=45"
+                        "inputTransform": "$value>=40"
                      }
                   ]
                }
@@ -71,17 +68,31 @@
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "thresholdpropertybinder:low-light-env",
-                  "thresholds" : [
-                     40,
-                     50
-                  ],
+                  "name": "thresholdpropertybinder:dumgoyne-env-low-light",
+                  "threshold" : 55,
                   "buffer": 5,
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor",
-                        "inputTransform": "$value<=50&&$value>=40"
+                        "inputTransform": "value>=55"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "background-lights",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:dumgoyne-env-background-lights",
+                  "source": "thing:dumgoyne-environment",
+                  "sourceProperty": "daylight",
+                  "inputTransform": "!$value",
+                  "events": [
+                     {
+                        "rule": "30 22 * * *",
+                        "propertyValue": false
                      }
                   ]
                }
@@ -89,19 +100,8 @@
          ]
       },
       {
-         "name": "lightwaverflink:home",
-         "displayName": "LightwaveRF Wifi Link",
-         "props": [
-            {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.236",
-               "writable": false
-            }
-         ]
-      },
-      {
-         "name": "hklightaccessory:do-not-know-switch",
-         "displayName": "Do Not Know Light",
+         "name": "hklightaccessory:automated-lounge-lights",
+         "displayName": "Automated Lounge Lights",
          "pincode": "111-11-111",
          "username": "CC:22:3D:E3:CE:32",
          "manufacturer": "Test Light Ltd",
@@ -109,6 +109,313 @@
          "serialNumber": "1234567890",
          "brightnessSupported": true,
          "props": [
+         ]
+      },
+      {
+         "name": "room:kitchen",
+         "displayName": "Kitchen Room",
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "latchingpropertybinder:kitchen-movement",
+                  "source": "alarm:home",
+                  "sourceProperty": "kitchen-pir",
+                  "minOutputTime": 600
+               }
+            },
+            {
+               "name": "movement-in-low-light",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "andpropertybinder:kitchen-movement-in-low-light",
+                  "sources": [
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "low-light"
+                     },
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "movement"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "automated-lighting-mood",
+               "initialValue": "off",
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:kitchen-lighting-mood",
+                  "prioritiseSources": true,
+                  "sources": [
+                     {
+                        "source": "room:kitchen",
+                        "sourceProperty": "movement-in-low-light",
+                        "outputValues": {
+                           "true": "medium",
+                           "false": "off"
+                        }
+                     },
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "background-lights",
+                        "outputValues": {
+                           "true": "low",
+                           "false": "off"
+                        }
+                     }
+                  ]
+               }
+            }
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:kitchen-lights",
+               "displayName": "Kitchen Room Lights",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:33",
+               "manufacturer": "Lightwave RF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "props": [
+                  {
+                     "name": "mood",
+                     "initialValue": "off",
+                     "writeable": true,
+                     "binder": {
+                        "name": "propertybinder:automated-kitchen-lights-mood",
+                        "source": "room:kitchen",
+                        "sourceProperty": "automated-lighting-mood"
+                     }
+                  }
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:kitchen-lights-mood",
+                     "displayName": "Kitchen Lights Mood",
+                     "roomID": 6,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "moods": [
+                        {
+                           "name": "low",
+                           "id": 1,
+                           "low": 0,
+                           "high": 50
+                        },
+                        {
+                           "name": "medium",
+                           "id": 2,
+                           "low": 34,
+                           "high": 76
+                        },
+                        {
+                           "name": "full",
+                           "id": 3,
+                           "low": 77,
+                           "high": 100
+                        }
+                     ],
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:lounge",
+         "displayName": "Lounge Room",
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "latchingpropertybinder:lounge-movement",
+                  "source": "alarm:home",
+                  "sourceProperty": "lounge-pir",
+                  "minOutputTime": 600
+               }
+            },
+            {
+               "name": "movement-in-low-light",
+               "initialValue": false,
+               "writable": false,
+               "binder" : {
+                  "name": "andpropertybinder:lounge-movement-in-low-light",
+                  "sources": [
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "low-light"
+                     },
+                     {
+                        "source": "room:lounge",
+                        "sourceProperty": "movement"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "automated-lighting-brightness",
+               "initialValue": "off",
+               "writable": false,
+               "binder": {
+                  "name": "orpropertybinder:auto-lounge-lighting-brightness",
+                  "prioritiseSources": true,
+                  "sources": [
+                     {
+                        "source": "room:lounge",
+                        "sourceProperty": "movement-in-low-light",
+                        "outputValues": {
+                           "true": 60,
+                           "false": 0
+                        }
+                     },
+                     {
+                        "source": "thing:environment",
+                        "sourceProperty": "background-lights",
+                        "outputValues": {
+                           "true": 40,
+                           "false": 0
+                        }
+                     }
+                  ]
+               }
+            }
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:lounge-lights",
+               "displayName": "Lounge Room Lights",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:31",
+               "manufacturer": "Lounge Light Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "props": [
+                  {
+                     "name": "brightness",
+                     "initialValue": 100,
+                     "writeable": true,
+                     "binder": {
+                        "name": "propertybinder:automated-lounge-lights-brightness",
+                        "source": "room:lounge",
+                        "sourceProperty": "automated-lighting-brightness"
+                     }
+                  }
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:wall-lights-fire",
+                     "displayName": "Fire Wall Lights",
+                     "roomID": 1,
+                     "deviceID": 3,
+                     "brightnessSupported": true,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  },
+                  {
+                     "name": "lightwaverfaccessory:wall-lights-alcoves",
+                     "displayName": "Alcove Wall Lights",
+                     "roomID": 1,
+                     "deviceID": 2,
+                     "brightnessSupported": true,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  },
+                  {
+                     "name": "lightwaverfaccessory:centre-table-lamp",
+                     "displayName": "Centre Table Lamp",
+                     "roomID": 1,
+                     "deviceID": 5,
+                     "brightnessThreshold": 30,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  },
+                  {
+                     "name": "lightwaverfaccessory:tree-lamp",
+                     "displayName": "Tree Lamp",
+                     "roomID": 1,
+                     "deviceID": 1,
+                     "brightnessThreshold": 30,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  },
+                  {
+                     "name": "lightwaverfaccessory:table-lamp",
+                     "displayName": "Table Lamp",
+                     "roomID": 1,
+                     "deviceID": 4,
+                     "brightnessThreshold": 30,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:master-bedroom",
+         "displayName": "Master Bedroom",
+         "props": [
+            {
+               "name": "natalie-bed-lamp",
+               "initialValue": false,
+               "writable": true,
+               "binder": {
+                  "name": "lightwaverfpropertybinder:master-bedroom-natalie-bed-lamp",
+                  "source": "thing:environment",
+                  "sourceProperty": "bedtime",
+                  "target": "lightwaverflink:home",
+                  "roomID": 3,
+                  "deviceID": 1
+               }
+            }
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:master-bedroom-lights",
+               "displayName": "Bedroom Lights",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:36",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+                  {
+                     "name": "power",
+                     "initialValue": false,
+                     "writeable": true,
+                     "binder": {
+                        "name": "propertybinder:automated-master-bedroom-lights-power",
+                        "source": "thing:environment",
+                        "sourceProperty": "bedtime"
+                     }
+                  }
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:natalie-table-lamp",
+                     "displayName": "Natalie Table Lamp",
+                     "roomID": 1,
+                     "deviceID": 3,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            }
          ]
       }
    ]
