@@ -198,7 +198,7 @@
                   {
                      "name": "lightwaverfaccessory:kitchen-lights-mood",
                      "displayName": "Kitchen Lights Mood",
-                     "roomID": 6,
+                     "roomID": 2,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "moods": [
                         {
@@ -312,19 +312,73 @@
                ],
                "things": [
                   {
-                     "name": "lightwaverfaccessory:wall-lights-fire",
-                     "displayName": "Fire Wall Lights",
+                     "name": "lightwaverfaccessory:wall-lights",
+                     "displayName": "Lounge Wall Lights",
                      "roomID": 1,
-                     "deviceID": 3,
+                     "deviceID": 1,
                      "brightnessSupported": true,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   },
                   {
-                     "name": "lightwaverfaccessory:wall-lights-alcoves",
-                     "displayName": "Alcove Wall Lights",
+                     "name": "lightwaverfaccessory:table-lamps",
+                     "displayName": "Lounge Table Lamps",
                      "roomID": 1,
+                     "deviceID": 2,
+                     "brightnessThreshold": 30,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:outside",
+         "displayName": "Outside",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:back-door-outside-light",
+               "displayName": "Back Door Outside Light",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:37",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:back-door-outside-light",
+                     "displayName": "Back Door Outside Light",
+                     "roomID": 3,
+                     "deviceID": 1,
+                     "brightnessSupported": true,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "hklightaccessory:rear-garden-outside-lights",
+               "displayName": "Rear Garden Outside Lights",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:38",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:bifold-outside-light",
+                     "displayName": "Bifold Outside Light",
+                     "roomID": 3,
                      "deviceID": 2,
                      "brightnessSupported": true,
                      "lightwaveRfLink": "lightwaverflink:home",
@@ -332,31 +386,118 @@
                      ]
                   },
                   {
-                     "name": "lightwaverfaccessory:centre-table-lamp",
-                     "displayName": "Centre Table Lamp",
-                     "roomID": 1,
-                     "deviceID": 5,
-                     "brightnessThreshold": 30,
+                     "name": "lightwaverfaccessory:lounge-outside-light",
+                     "displayName": "Lounge Outside Light",
+                     "roomID": 3,
+                     "deviceID": 3,
+                     "brightnessSupported": true,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
-                  },
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:hall-landing-snug",
+         "displayName": "Hall, Landing and Snug Rooms",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:hall-table-lamp",
+               "displayName": "Hall Table Lamp",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:39",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
                   {
-                     "name": "lightwaverfaccessory:tree-lamp",
-                     "displayName": "Tree Lamp",
-                     "roomID": 1,
+                     "name": "lightwaverfaccessory:hall-table-lamp",
+                     "displayName": "Hall Table Lamp",
+                     "roomID": 4,
                      "deviceID": 1,
-                     "brightnessThreshold": 30,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
-                  },
+                  }
+               ]
+            },
+            {
+               "name": "hklightaccessory:loo-main-light",
+               "displayName": "Loo Main Light",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3A",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
                   {
-                     "name": "lightwaverfaccessory:table-lamp",
-                     "displayName": "Table Lamp",
-                     "roomID": 1,
-                     "deviceID": 4,
-                     "brightnessThreshold": 30,
+                     "name": "lightwaverfaccessory:loo-main-light",
+                     "displayName": "Loo Main Light",
+                     "roomID": 4,
+                     "deviceID": 2,
+                     "brightnessSupported": true,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "hklightaccessory:snug-main-light",
+               "displayName": "Snug Main Light",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3B",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:snug-main-light",
+                     "displayName": "Snug Main Light",
+                     "roomID": 4,
+                     "deviceID": 3,
+                     "brightnessSupported": true,
+                     "lightwaveRfLink": "lightwaverflink:home",
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:utility-room",
+         "displayName": "Utility Room",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:utility-lights",
+               "displayName": "Utility Lights",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3C",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:utility-main-light",
+                     "displayName": "Utility Light",
+                     "roomID": 2,
+                     "deviceID": 3,
+                     "brightnessSupported": true,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
@@ -369,19 +510,6 @@
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
          "props": [
-            {
-               "name": "natalie-bed-lamp",
-               "initialValue": false,
-               "writable": true,
-               "binder": {
-                  "name": "lightwaverfpropertybinder:master-bedroom-natalie-bed-lamp",
-                  "source": "thing:environment",
-                  "sourceProperty": "bedtime",
-                  "target": "lightwaverflink:home",
-                  "roomID": 3,
-                  "deviceID": 1
-               }
-            }
          ],
          "things": [
             {
