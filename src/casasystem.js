@@ -12,7 +12,8 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
 
    this.uberCasa = false;
    this.users = [];
-   this.things = [];
+   this.things = {};
+   this.topLevelThings = [];
    this.casaAreas = [];
    this.casa = null;
    this.peerCasas = [];
@@ -42,7 +43,7 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
    this.extractUsers();
 
    // Extract Things
-   this.extractThings();
+   this.extractThings(this.config.things);
 
    // Extract Parent casa of parent area
    this.extractParentCasa();
@@ -115,18 +116,31 @@ CasaSystem.prototype.extractUsers = function() {
 }
 
 // Extract Things
-CasaSystem.prototype.extractThings = function() {
-   var that = this;
+CasaSystem.prototype.createThing = function(_config, _parent) {
+   var Thing = this.cleverRequire(_config.name);
+   var thingObj = new Thing(_config);
+   thingObj.setParent(_parent);
+   this.things[thingObj.name] = thingObj;
+   this.allObjects[thingObj.name] = thingObj;
+   console.log('New thing: ' + _config.name);
+   return thingObj;
+};
 
-   if (this.config.things) {
+CasaSystem.prototype.extractThings = function(_config, _parent) {
 
-      this.config.things.forEach(function(_thing) { 
-         var Thing = that.cleverRequire(_thing.name);
-         var thingObj = new Thing(_thing);
-         that.things[thingObj.name] = thingObj;
-         that.allObjects[thingObj.name] = thingObj;
-         console.log('New thing: ' + _thing.name);
-      });
+   if (_config) {
+
+      for (var index = 0; index < _config.length; ++index) {
+         var thingObj = this.createThing(_config[index], _parent);
+
+         if (_config[index].things) {
+
+            if (_parent == undefined) {
+               this.topLevelThings.push(thingObj);
+            }
+            this.extractThings(_config[index].things, thingObj);
+         }
+      }
    }
 }
 

@@ -40,9 +40,9 @@ function I2CPropertyBinder(_config, _owner) {
 
 util.inherits(I2CPropertyBinder, PropertyBinder);
 
-I2CPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
+I2CPropertyBinder.prototype.setProperty = function(_propValue, _data) {
    console.log(this.name + ': Not allowed to set property ' + this.propertyName + ' to ' + _propValue);
-   _callback(false);
+   return false;
 }
 
 I2CPropertyBinder.prototype.coldStart = function() {

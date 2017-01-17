@@ -48,6 +48,8 @@ HomekitAccessory.prototype.coldStart = function() {
     username: this.username,
     pincode: this.pincode
   });
+
+  Thing.prototype.coldStart.call(this);
 };
 
 HomekitAccessory.prototype.identify = function() {

@@ -1,8 +1,8 @@
 var util = require('util');
 var PropertyBinder = require('./propertybinder');
-var LightwaveRF = require("lightwaverf");
+var LightwaveRf = require("lightwaverf");
 
-function LightwaveRFPropertyBinder(_config, _owner) {
+function LightwaveRfPropertyBinder(_config, _owner) {
 
    this.roomID = _config.roomID;
    this.moods = {};
@@ -20,9 +20,9 @@ function LightwaveRFPropertyBinder(_config, _owner) {
    PropertyBinder.call(this, _config, _owner);
 }
 
-util.inherits(LightwaveRFPropertyBinder, PropertyBinder);
+util.inherits(LightwaveRfPropertyBinder, PropertyBinder);
 
-LightwaveRFPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+LightwaveRfPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var that = this;
    var propValue = _data.propertyValue;
 
@@ -35,7 +35,7 @@ LightwaveRFPropertyBinder.prototype.newPropertyValueReceivedFromSource = functio
    if (this.target) {
 
       if (this.deviceID != undefined) {
-         console.log(this.name + ": Attempting to apply property change to LightwaveRF device ID=" + this.deviceID);
+         console.log(this.name + ": Attempting to apply property change to LightwaveRf device ID=" + this.deviceID);
 
          if (typeof propValue == "boolean") {
 
@@ -54,11 +54,11 @@ LightwaveRFPropertyBinder.prototype.newPropertyValueReceivedFromSource = functio
          }
       }
       else if (propValue == "off") {
-         console.log(this.name + ": Attempting to turn off LightwaveRF room ID=" + this.roomID);
+         console.log(this.name + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
          this.target.turnRoomOff(this.roomID, callbackHandler);
       }
       else {
-         console.log(this.name + ": Attempting to apply mood " + propValue + " change to LightwaveRF room ID=" + this.roomID);
+         console.log(this.name + ": Attempting to apply mood " + propValue + " change to LightwaveRf room ID=" + this.roomID);
          this.target.setRoomMood(this.roomID, this.moods[propValue], callbackHandler);
       }
 
@@ -66,5 +66,5 @@ LightwaveRFPropertyBinder.prototype.newPropertyValueReceivedFromSource = functio
    }
 }
 
-module.exports = exports = LightwaveRFPropertyBinder;
+module.exports = exports = LightwaveRfPropertyBinder;
 

@@ -64,9 +64,9 @@ PeerSource.prototype.isPropertyEnabled = function(_property) {
    return true;
 }
 
-PeerSource.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
+PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.name + ': Attempting to set source property');
-   this.peerCasa.setSourceProperty(this, _propName, _propValue, _data, _callback);
+   return this.peerCasa.setSourceProperty(this, _propName, _propValue, _data);
 }
 
 PeerSource.prototype.getProperty = function(_propName) {

@@ -14,6 +14,8 @@ function HomekitLightAccessory(_config) {
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
 
+   this.props["power"] = false;
+
    var that = this;
 
    this.hkAccessory
@@ -30,7 +32,7 @@ function HomekitLightAccessory(_config) {
       });
 
    if (this.brightnessSupported) {
-      this.props["brightness"] = 0; 
+      this.props["brightness"] = 100; 
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -45,7 +47,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.saturationSupported) {
-      this.props["hue"] = 0; 
+      this.props["saturation"] = 0; 
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -60,7 +62,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.hueSupported) {
-      this.props["saturation"] = 0; 
+      this.props["hue"] = 0; 
 
       this.hkAccessory
          .getService(Service.Lightbulb)
@@ -78,7 +80,7 @@ function HomekitLightAccessory(_config) {
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
-   this.updateProperty("power", _status ? true : false);
+   this.setProperty("power", _status ? true : false, { sourceName: this.name });
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
@@ -87,7 +89,7 @@ HomekitLightAccessory.prototype.getPower = function() {
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
    console.log(this.name + ": Changing brightness to " + _status);
-   this.updateProperty("brightness", _status);
+   this.setProperty("brightness", _status, { sourceName: this.name });
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
@@ -96,7 +98,7 @@ HomekitLightAccessory.prototype.getBrightness = function() {
 
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
    console.log(this.name + ": Changing saturation to " + _status);
-   this.updateProperty("saturation", _status);
+   this.setProperty("saturation", _status, { sourceName: this.name });
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
@@ -105,16 +107,44 @@ HomekitLightAccessory.prototype.getSaturation = function() {
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
    console.log(this.name + ": Changing hue to " + _status);
-   this.updateProperty("hue", _status);
+   this.setProperty("hue", _status, { sourceName: this.name });
 };
 
 HomekitLightAccessory.prototype.getHue = function() {
    return this.props["hue"];
 }
 
-module.exports = exports = HomekitLightAccessory;
+HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-//****var lightAccessory = exports.accessory = new Accessory(LightController.name, lightUUID);
+   if (_propName == "power") {
+      this.hkAccessory
+        .getService(Service.Lightbulb)
+        .getCharacteristic(Characteristic.On)
+        .updateValue(_propValue);
+   }
+   else if (_propName == "brightness") {
+      this.hkAccessory
+        .getService(Service.Lightbulb)
+        .getCharacteristic(Characteristic.Brightness)
+        .updateValue(_propValue);
+   }
+   else if (_propName == "saturation") {
+      this.hkAccessory
+        .getService(Service.Lightbulb)
+        .getCharacteristic(Characteristic.Saturation)
+        .updateValue(_propValue);
+   }
+   else if (_propName == "hue") {
+      this.hkAccessory
+        .getService(Service.Lightbulb)
+        .getCharacteristic(Characteristic.Hue)
+        .updateValue(_propValue);
+   }
+
+   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
+};
+
+module.exports = exports = HomekitLightAccessory;
 
 // To inform HomeKit about changes occurred outside of HomeKit (like user physically turn on the light)
 // Please use Characteristic.updateValue

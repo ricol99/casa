@@ -68,29 +68,28 @@ Source.prototype.getProperty = function(_property) {
    return this.props[_property];
 }
 
-Source.prototype.setProperty = function(_propName, _propValue, _data, _callback) {
+Source.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.name + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
-   if (this.props[_propName] != _propValue) {
+   if (this.props[_propName] != undefined) {
 
-      if (this.propBinders[_propName]) {
+      if (this.props[_propName] != _propValue) {
 
-         if (this.propBinders[_propName].writeable) {
-            this.propBinders[_propName].setProperty(_propValue, _data, _callback);
+         if (this.propBinders[_propName]) {
+            return this.propBinders[_propName].setProperty(_propValue, _data);
          }
          else {
-            console.log(this.name + ': Uanble to set property because it is read only!');
-            _callback(false);
+            this.updateProperty(_propName, _propValue, _data);
+            return true;
          }
       }
       else {
-         this.updateProperty(_propName, _propValue, _data);
-         _callback(true);
+         return true;
       }
    }
    else {
-      _callback(true);
-   }
+      return false;
+   } 
 }
 
 // Only called by ghost peer source
@@ -134,18 +133,6 @@ function copyData(_sourceData) {
    }
 
    return newData;
-}
-
-Source.prototype.setManualMode = function(_mode) {
-   console.log(this.name + ': Source is moving manual mode to ' + _mode);
-
-   for (var binder in this.propBinders) {
-
-      if (binder != "manual-mode" && this.propBinders.hasOwnProperty(binder)) {
-         this.propBinders[binder].setManualMode(_mode);
-      }
-   }
-
 }
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {

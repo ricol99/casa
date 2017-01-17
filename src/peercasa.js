@@ -38,7 +38,6 @@ function PeerCasa(_config) {
    this.incompleteRequests = [];
    this.reqId = 0;
 
-   this.sourceRequests = [];
    this.lastHeartbeat = Date.now() + 10000;
 
    this.manualDisconnect = false;
@@ -344,20 +343,6 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
    this.casaSys.casa.refreshSourceListeners();
 }
 
-function SourceRequestor(_requestId, _source, _data) {
-   this.requestId = _requestId;
-   this.source = _source;
-   this.data = _data;
-}
-
-SourceRequestor.prototype.setProperty = function(_property, _value, _data, _callback) {
-   var that = this;
-
-   this.source.setProperty(_property, _value, _data, function(_result) {
-      _callback( { sourceName: that.source.name, requestId: that.requestId, result: _result });
-   });
-}
-
 PeerCasa.prototype.isActive = function() {
    return this.connected;
 }
@@ -422,12 +407,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
          if (source) {
             _data.acker = that.casa.name;
             that.ackMessage('set-source-property-req', _data);
-
-            that.sourceRequests[_data.requestId] = new SourceRequestor(_data.requestId, source, _data);
-            that.sourceRequests[_data.requestId].setProperty(_data.property, _data.value, _data, function(_resp) {
-               that.socket.emit('set-source-property-resp', { sourceName: _resp.sourceName, requestId: _resp.requestId, result: _resp.result, requestor: _data.requestor });
-               delete that.sourceRequests[ _resp.requestId];
-            });
+            var res = source.setProperty(_data.property, _data.value, _data);
+            that.socket.emit('set-source-property-resp', { sourceName: source.name, requestId: _data.requestId, result: res, requestor: _data.requestor });
          } 
          else {
             // TBD Find the casa that ownes the source and work out how to foward the request
@@ -630,7 +611,7 @@ PeerCasa.prototype.setSourceInactive = function(_source, _data, _callback) {
    this.setSourceProperty(_source, "ACTIVE", false, _data, _callback);
 }
 
-PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _data, _callback) {
+PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _data) {
    var that = this;
 
    if (this.connected) {
@@ -641,14 +622,18 @@ PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, 
                                                                   property: _propName, value: _propValue,
                                                                   requestId: id, requestor: this.casa.name } };
 
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, _callback, this.socket);
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, function(_err, _res) {
+         console.log(that.name + ': Unable to send SetProperty request to source ' + _source.name + ' at remote casa ');
+      }, this.socket);
+
       this.incompleteRequests[id].sendRequest(message, function(_requestId) {
          console.log(that.name + ': Timeout occurred sending a changeProperty request for source ' + _source.name);
          delete that.incompleteRequests[_requestId];
       });
+      return true;
    }
    else {
-      _callback(false);
+      return false;
    }
 }
 

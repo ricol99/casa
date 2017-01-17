@@ -51,26 +51,24 @@ GPIOPropertyBinder.prototype.Ready = function() {
    });
 }
 
-GPIOPropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
-   this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data, _callback);
+GPIOPropertyBinder.prototype.setProperty = function(_propValue, _data) {
+   return this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
 }
 
-GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data, _callback) {
+GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data) {
    var that = this;
 
    if (this.ready && this.writable) {
       this.gpio.write(_value, function (err) {
-         if (err) {
-            _callback(false);
-         }
-         else {
-            this.updatePropertyAfterRead(_propValue, _data);
-            _callback(true);
+
+         if (!err) {
+            that.updatePropertyAfterRead(_propValue, _data);
          }
       });
+      return true;
    }
    else {
-      _callback(false);
+      return false;
    }
 }
 

@@ -8,7 +8,7 @@ function PropertyBinder(_config, _owner) {
    this.writeable = (_config.writeable) ? _config.writeable : true;
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : false;
-   this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : true;
+   this.captiveProperty = (_config.captiveProperty) ? _config.captiveProperty : false;
    this.prioritiseSources = _config.prioritiseSources;
   
    this.outputTransform = _config.outputTransform; 
@@ -80,6 +80,8 @@ function PropertyBinder(_config, _owner) {
       this.target = this.targetListener.source;
    }
 
+   this.manualOverrideTimeout = (_config.manualOverrideTimeout) ? _config.manualOverrideTimeout : 3600;
+
    if (_config.manualOverrideSource) {
       this.manualOverrideSourceProperty = (_config.manualOverrideSourceProperty) ? _config.manualOverrideSourceProperty : "ACTIVE";
       this.manualOverrideListener = new SourceListener({ source: _config.manualOverrideSource, sourceProperty: this.manualOverrideSourceProperty, isTarget: false,
@@ -87,7 +89,6 @@ function PropertyBinder(_config, _owner) {
                                                          inputMap:_config.manualOverrideSourceInputMap}, this);
 
       this.manualOverrideSource = this.manualOverrideListener.source;
-      this.manualOverrideTimeout = (_config.manualOverrideTimeout) ? _config.manualOverrideTimeout : 3600;
    }
 
    this.listening = true;
@@ -130,9 +131,6 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
          if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
             sourceListenerInCharge = highestPrioritySource;
          }
-         if (highestPrioritySource) {
-            console.log(this.name+": AAAAAAAAAAAAAAA High="+highestPrioritySource.name+", sourceListener="+sourceListener.name);
-         }
       }
 
       if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
@@ -173,21 +171,14 @@ PropertyBinder.prototype.goInvalid = function(_data) {
 }
 
 // Override this to actually update what ever the property is bound to
-PropertyBinder.prototype.setProperty = function(_propValue, _data, _callback) {
+PropertyBinder.prototype.setProperty = function(_propValue, _data) {
 
-   if (this.manualMode) {
-      
-      if (this.myPropertyValue() != _propValue) {
-         this.updatePropertyAfterRead(_propName, _propValue, _data);
-         _callback(true);         
-      }
-      else {
-         _callback(true);                  
-      }
+   if (this.writeable) {
+      this.setManualMode(true);
+      this.updatePropertyAfterRead(_propValue, _data);
    }
-   else {
-      _callback(false);
-   }
+
+   return this.writeable;
 }
 
 PropertyBinder.prototype.setManualMode = function(_manualMode) {

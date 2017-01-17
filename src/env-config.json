@@ -89,6 +89,17 @@
          ]
       },
       {
+         "name": "lightwaverflink:home",
+         "displayName": "LightwaveRF Wifi Link",
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.236",
+               "writable": false
+            }
+         ]
+      },
+      {
          "name": "hklightaccessory:do-not-know-switch",
          "displayName": "Do Not Know Light",
          "pincode": "111-11-111",

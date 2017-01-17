@@ -1,13 +1,13 @@
 var util = require('util');
 var Thing = require('./thing');
-var LightwaveRF = require("lightwaverf");
+var LightwaveRf = require("lightwaverf");
 
 function LightwaveRfLink(_config) {
 
    Thing.call(this, _config);
 
    this.thingType = 'lightwave-controller';
-   this.lightwaveRf = new LightwaveRF({ ip: this.getProperty('ipAddress') });
+   this.lightwaveRf = new LightwaveRf({ ip: this.getProperty('ipAddress') });
    this.queue = [];
    this.requestPending = false;
 }
@@ -94,7 +94,7 @@ LightwaveRfLink.prototype.makeNextRequest = function() {
             var delay = setTimeout(function(_this) {
                _this.requestPending = false;
                _this.makeNextRequest();
-            }, 500, that);
+            }, 750, that);
          }
          else {
             that.requestPending = false;
