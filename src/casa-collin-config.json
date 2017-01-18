@@ -97,19 +97,11 @@
                   "name": "schedulepropertybinder:timed-env-low-light",
                   "events": [
                      {
-                        "rule": "sunrise:1750",
+                        "rule": "sunset:-2700",
                         "propertyValue": true
                      },
                      {
                         "rule": "sunrise:3600",
-                        "propertyValue": false
-                     },
-                     {
-                        "rule": "sunset:-3600",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:-1750",
                         "propertyValue": false
                      }
                   ]

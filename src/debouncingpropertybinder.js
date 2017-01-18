@@ -13,6 +13,19 @@ function DebouncingPropertyBinder(_config, _owner) {
 
 util.inherits(DebouncingPropertyBinder, PropertyBinder);
 
+function copyData(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
 function startTimer(_that) {
 
    _that.timeoutObj = setTimeout(function(_this) {

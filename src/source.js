@@ -143,7 +143,7 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
    sendData.oldState = this.props['ACTIVE'];
    this.props['ACTIVE'] = false;
    sendData.propertyName = _propName;
-   console.log(this.name + ": Emitting invalid! send data=", sendData);
+   console.log(this.name + ": Emitting invalid!");
    this.emit('invalid', sendData);
 }
 
