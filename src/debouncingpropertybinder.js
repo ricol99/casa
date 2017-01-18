@@ -13,57 +13,48 @@ function DebouncingPropertyBinder(_config, _owner) {
 
 util.inherits(DebouncingPropertyBinder, PropertyBinder);
 
-DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   var that = this;
-   this.lastdata = _data;
+function startTimer(_that) {
 
+   _that.timeoutObj = setTimeout(function(_this) {
+      _this.timeoutObj = null;
+
+      if (!_this.binderEnabled) {
+         _this.goInvalid({ sourceName: _this.owner.name });
+      }
+      else if (_this.lastData) {
+         _this.active = _this.sourceActive;
+         _this.updatePropertyAfterRead(_this.sourceActive, _this.lastData);
+         _this.lastData = null;
+      }
+   }, _that.threshold*1000, _that);
+}
+
+DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.propertyValue;
    console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
 
-   if (_data.coldStart || this.active == propValue) {
+   if (_data.coldStart) {    // Cold start only once
       this.sourceActive = propValue;
-
-      if (propValue) {
-         this.active = true;
-         this.updatePropertyAfterRead(true, _data);
-         return;
-      }
-      else {
-         this.active = false;
-         this.updatePropertyAfterRead(false, _data);
-         return;
-      }
+      this.active = propValue;
+      this.updatePropertyAfterRead(propValue, _data);
+      return;
    }
-   else if (this.sourceActive != propValue) {
+
+   if (this.active == propValue) {   // Current output is the same as new input, just update input
       this.sourceActive = propValue;
+   }
+   else if (this.sourceActive != propValue) {   // Input has changed, start timer and ignore until timer expires
+      this.sourceActive = propValue;
+      this.lastData = copyData(_data);  // TODO: Should we cache positive and negative case?
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
-
-         this.timeoutObj = setTimeout(function() {
-            that.timeoutObj = null;
-
-            if (that.sourceActive) {
-               that.active = true;
-               that.updatePropertyAfterRead(true, _data);
-               return;
-            }
-            else {
-               this.active = false;
-               that.updatePropertyAfterRead(false, _data);
-               return;
-            }
-
-            if (!that.binderEnabled) {
-               that.goInvalid({ sourceName: that.name });
-            }
-         }, this.threshold*1000);
+         startTimer(this);
       }
    }
 };
 
 DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
-   var that = this;
    console.log(this.name + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
 
    if (this.binderEnabled) {
@@ -71,27 +62,7 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
-
-         this.timeoutObj = setTimeout(function() {
-            that.timeoutObj = null;
-
-            if (that.lastData) {
-
-               if (that.sourceActive) {
-                  that.active = true;
-                  that.updatePropertyAfterRead(true , { sourceName: that.ownerName });
-               }
-               else {
-                  that.active = false;
-                  that.updatePropertyAfterRead(false , { sourceName: that.ownerName });
-               }
-               that.lastData = null;
-            }
-
-            if (!that.binderEnabled) {
-               that.goInvalid({ sourceName: that.name });
-            }
-         }, this.threshold*1000);
+         startTimer(this);
       }
    }
 };

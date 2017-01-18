@@ -336,6 +336,17 @@
                         "source": "room:lounge",
                         "sourceProperty": "automated-lighting-brightness"
                      }
+                  },
+                  {
+                     "name": "power",
+                     "initialValue": false,
+                     "writeable": true,
+                     "binder": {
+                        "name": "propertybinder:automated-lounge-lights-power",
+                        "source": "room:lounge",
+                        "sourceProperty": "automated-lighting-brightness",
+                        "inputTransform": "$value > 0"
+                     }
                   }
                ],
                "things": [
