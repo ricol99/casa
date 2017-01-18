@@ -31,13 +31,14 @@ function startTimer(_that) {
    _that.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
-      if (!_this.binderEnabled) {
-         _this.goInvalid({ sourceName: _this.owner.name });
-      }
-      else if (_this.lastData) {
+      if (_this.lastData) {
          _this.active = _this.sourceActive;
          _this.updatePropertyAfterRead(_this.sourceActive, _this.lastData);
          _this.lastData = null;
+      }
+
+      if (!_this.binderEnabled) {
+         _this.goInvalid({ sourceName: _this.owner.name });
       }
    }, _that.threshold*1000, _that);
 }
