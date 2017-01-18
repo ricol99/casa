@@ -3,7 +3,7 @@ var events = require('events');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-//var storage = require('node-persist');
+var storage = require('node-persist');
  
 //var io = require('socket.io')(http);
 
@@ -36,7 +36,7 @@ function Casa(_config) {
    this.uber = false;
    this.sourceEnabled = true;
 
-   //storage.initSync();
+   storage.initSync();
 
    var that = this;
 
