@@ -1,11 +1,15 @@
 var util = require('util');
 var Thing = require('./thing');
+var storage = require('node-persist');
+const HAP = require('hap-nodejs');
+HAP.init();
 
-var Accessory = require('hap-nodejs').Accessory;
-var Service = require('hap-nodejs').Service;
-var Characteristic = require('hap-nodejs').Characteristic;
-var uuid = require('hap-nodejs').uuid;
-"use strict"
+var Accessory = HAP.Accessory;
+var Service = HAP.Service;
+var Characteristic = HAP.Characteristic;
+var uuid = HAP.uuid;
+
+storage.initSync();
 
 function HomekitAccessory(_config) {
 
