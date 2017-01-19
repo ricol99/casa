@@ -38,6 +38,8 @@
                "writable": false,
                "binder": {
                   "name": "lineartransformpropertybinder:light-sensor-lux",
+                  "source": "thing:dumgoyne-sensors",
+                  "sourceProperty": "light-sensor",
                   "inputMin": 0,
                   "inputMax": 100,
                   "outputMin": 0,
