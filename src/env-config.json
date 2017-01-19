@@ -2,6 +2,13 @@
    "name": "casa:env",
    "displayName": "Casa Collin Environment Casa",
    "gang": "casa-collin-v2",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "199.245.56.152",
+         "port": 80
+      }
+   },
    "listeningPort": 8097,
    "props": [],
    "things": [
