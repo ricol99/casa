@@ -37,7 +37,7 @@
                "initialValue": 0,
                "writable": false,
                "binder": {
-                  "name": "lineartransformbinder:light-sensor-lux",
+                  "name": "lineartransformpropertybinder:light-sensor-lux",
                   "inputMin": 0,
                   "inputMax": 100,
                   "outputMin": 0,
