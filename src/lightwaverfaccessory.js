@@ -140,6 +140,7 @@ LightwaveRfAccessory.prototype.updateProperty = function(_propName, _propValue, 
          else {
             console.log(this.name + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
             this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[_propValue].id, this.callbackHandler);
+            Thing.prototype.updateProperty.call(this, "brightness", this.moods[_propValue].high, { sourceName: this.name });
          }
       }
       else if (_propName == "power" && !_propValue) {
