@@ -24,6 +24,29 @@
          ]
       },
       {
+         "name": "hklightsensoraccessory:hk-ambient-light-sensor",
+         "displayName": "Ambient Light Level",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E3:CE:3C",
+         "manufacturer": "Casa Home Automation Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
+         "props": [
+            {
+               "name": "light-level",
+               "initialValue": 0,
+               "writable": false,
+               "binder": {
+                  "name": "lineartransformbinder:light-sensor-lux",
+                  "inputMin": 0,
+                  "inputMax": 100,
+                  "outputMin": 0,
+                  "outputMax": 10000
+               }
+            }
+         ]
+      },
+      {
          "name": "thing:dumgoyne-sensors",
          "displayName": "Environment Sensors in Dumgoyne",
          "props": [
