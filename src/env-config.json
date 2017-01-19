@@ -222,7 +222,7 @@
                      "binder": {
                         "name": "propertybinder:automated-kitchen-lights-mood",
                         "source": "room:kitchen",
-                        "sourceProperty": "automated-lighting-mood"
+                        "sourceProperty": "automated-lighting-mood",
                         "inputMap": {
                            "off": 0,
                            "low": 30,
