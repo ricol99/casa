@@ -216,13 +216,19 @@
                "brightnessSupported": true,
                "props": [
                   {
-                     "name": "mood",
+                     "name": "brightness",
                      "initialValue": "off",
                      "writeable": true,
                      "binder": {
                         "name": "propertybinder:automated-kitchen-lights-mood",
                         "source": "room:kitchen",
                         "sourceProperty": "automated-lighting-mood"
+                        "inputMap": {
+                           "off": 0,
+                           "low": 30,
+                           "medium": 70,
+                           "full": 100
+                        }
                      }
                   }
                ],
