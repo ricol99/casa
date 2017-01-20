@@ -40,7 +40,7 @@
                   "name": "propertybinder:light-sensor-lux",
                   "source": "thing:dumgoyne-sensors",
                   "sourceProperty": "light-sensor",
-                  "inputTransform": "$value*$value",
+                  "inputTransform": "$value*$value"
                }
             }
          ]
