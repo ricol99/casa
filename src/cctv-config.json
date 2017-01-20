@@ -2,13 +2,6 @@
    "name": "casa:cctv",
    "displayName": "Casa Collin CCTV System",
    "gang": "casa-collin-v2",
-   "parentCasa": {
-      "name": "casa:internet",
-      "address": {
-         "hostname": "199.245.56.152",
-         "port": 80
-      }
-   },
    "listeningPort": 8082,
    "props": {},
    "things": [
@@ -52,6 +45,18 @@
                         "sourceProperty": "test-prop-4"
                      }
                   ]
+               }
+            },
+            {
+               "name": "test-smooth-transform",
+               "initialValue": 0,
+               "writable": false,
+               "binder": {
+                  "name": "smoothtransformpropertybinder:test-smooth-transform",
+                  "rate": 10,
+                  "resolution": 5,
+                  "source": "thing:home-daylight-sensor",
+                  "sourceProperty": "lightLevel"
                }
             },
             {
