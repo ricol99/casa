@@ -37,13 +37,10 @@
                "initialValue": 0,
                "writable": false,
                "binder": {
-                  "name": "lineartransformpropertybinder:light-sensor-lux",
+                  "name": "propertybinder:light-sensor-lux",
                   "source": "thing:dumgoyne-sensors",
                   "sourceProperty": "light-sensor",
-                  "inputMin": 0,
-                  "inputMax": 100,
-                  "outputMin": 0,
-                  "outputMax": 10000
+                  "inputTransform": "$value*$value",
                }
             }
          ]
@@ -79,11 +76,11 @@
          "displayName": "Environment Based on Sensors in Dumgoyne",
          "props": [
             {
-               "name": "daylight",
+               "name": "daylight-sensor",
                "initialValue": false,
                "writable": false,
                "binder": {
-                  "name": "thresholdpropertybinder:dumgoyne-env-daylight",
+                  "name": "thresholdpropertybinder:dumgoyne-env-daylight-sensor",
                   "threshold" : 40,
                   "buffer": 5,
                   "outputTransform": "$value>=40",
@@ -91,6 +88,42 @@
                      {
                         "source": "thing:dumgoyne-sensors",
                         "sourceProperty": "light-sensor"
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "daylight-possible",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:env-daylight-possible",
+                  "events": [
+                     {
+                        "rule": "sunrise:-600",
+                        "propertyValue": true
+                     },
+                     {
+                        "rule": "sunset:+600",
+                        "propertyValue": false
+                     }
+                  ]
+               }
+            },
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "andpropertybinder:dumgoyne-env-daylight",
+                  "sources": [
+                     {
+                        "source": "thing:dumgoyne-sensors",
+                        "sourceProperty": "light-sensor"
+                     },
+                     {
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "daylight-possible"
                      }
                   ]
                }
