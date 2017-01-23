@@ -118,8 +118,8 @@
                   "name": "andpropertybinder:dumgoyne-env-daylight",
                   "sources": [
                      {
-                        "source": "thing:dumgoyne-sensors",
-                        "sourceProperty": "light-sensor"
+                        "source": "thing:dumgoyne-environment",
+                        "sourceProperty": "daylight-sensor"
                      },
                      {
                         "source": "thing:dumgoyne-environment",
