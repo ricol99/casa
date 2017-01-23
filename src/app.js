@@ -1,7 +1,7 @@
 var version = 1.003;
 var crypto = require('crypto');
 var fs = require('fs');
-require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: false, info: true });
+require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true });
 
 var systemConfigFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.json'; 
 var configFile = (process.argv.length >= 4) ? process.argv[3] : 'internet-config.json'; 

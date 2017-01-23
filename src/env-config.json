@@ -269,7 +269,7 @@
                      "displayName": "Kitchen Island Lights",
                      "roomID": 2,
                      "deviceID": 2,
-                     "brightnessThreshold": 30,
+                     "brightnessSupported": true,
                      "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
