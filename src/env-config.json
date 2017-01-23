@@ -340,11 +340,11 @@
                }
             },
             {
-               "name": "automated-lighting-brightness",
-               "initialValue": "off",
+               "name": "brightness",
+               "initialValue": 0,
                "writable": false,
                "binder": {
-                  "name": "orpropertybinder:auto-lounge-lighting-brightness",
+                  "name": "orpropertybinder:lounge-lighting-brightness",
                   "prioritiseSources": true,
                   "sources": [
                      {
@@ -365,6 +365,22 @@
                      }
                   ]
                }
+            },
+            {
+               "name": "power",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "propertybinder:lounge-lighting-power",
+                  "prioritiseSources": true,
+                  "sources": [
+                     {
+                        "source": "room:lounge",
+                        "sourceProperty": "brightness",
+                        "inputTransform": "$value>0"
+                     }
+                  ]
+               }
             }
          ],
          "things": [
@@ -378,27 +394,6 @@
                "serialNumber": "1234567890",
                "brightnessSupported": true,
                "props": [
-                  {
-                     "name": "brightness",
-                     "initialValue": 100,
-                     "writeable": true,
-                     "binder": {
-                        "name": "propertybinder:automated-lounge-lights-brightness",
-                        "source": "room:lounge",
-                        "sourceProperty": "automated-lighting-brightness"
-                     }
-                  },
-                  {
-                     "name": "power",
-                     "initialValue": false,
-                     "writeable": true,
-                     "binder": {
-                        "name": "propertybinder:automated-lounge-lights-power",
-                        "source": "room:lounge",
-                        "sourceProperty": "automated-lighting-brightness",
-                        "inputTransform": "$value > 0"
-                     }
-                  }
                ],
                "things": [
                   {
