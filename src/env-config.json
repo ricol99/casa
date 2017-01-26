@@ -63,9 +63,9 @@
                   "maxIgnore": 18,
                   "inputMin": 3.291,
                   "inputMax": 0,
-                  "outputMin": 0,
+                  "outputMin": 1,
                   "outputMax": 100,
-                  "outputResolution": 100,
+                  "outputResolution": 99,
                   "floorOutput": true
                }
             }
@@ -520,6 +520,7 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
                "props": [
                ],
                "things": [
@@ -543,6 +544,7 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
                "props": [
                ],
                "things": [
