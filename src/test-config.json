@@ -21,6 +21,16 @@
                "name": "ipAddress",
                "initialValue": "192.168.1.236",
                "writable": false
+            },
+            {
+               "name": "richard-present",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "devicepresentpropertybinder:richards-iphone-present",
+                  "host": "192.168.1.128",
+                  "interval": 10
+               }
             }
          ]
       }

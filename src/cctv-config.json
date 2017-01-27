@@ -230,6 +230,33 @@
                }
             },
             {
+               "name": "test-schedule-ramp",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "schedulepropertybinder:test-schedule-ramp",
+                  "events": [
+                     {
+                        "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                        "ramp": {
+                           "startValue": 0,
+                           "endValue": 100,
+                           "step": 2,
+                           "duration": 50
+                        }
+                     },
+                     {
+                        "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                        "ramp": {
+                           "endValue": 0,
+                           "step": -2,
+                           "duration": 50
+                        }
+                     }
+                  ]
+               }
+            },
+            {
                "name": "test-property-broken",
                "initialValue": false,
                "writable": false,

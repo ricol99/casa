@@ -157,10 +157,10 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
    return actualOutputValue;
 }
 
-PropertyBinder.prototype.updatePropertyAfterRead = function(_newPropValue, _data) {
+PropertyBinder.prototype.updatePropertyAfterRead = function(_newPropValue, _data, _forceUpdate) {
    var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
 
-   if (this.myPropertyValue() !== actualOutputValue || this.cold) {
+   if (this.myPropertyValue() !== actualOutputValue || this.cold || _forceUpdate) {
       this.cold = false;
       this.owner.updateProperty(this.propertyName, actualOutputValue, _data);
    }

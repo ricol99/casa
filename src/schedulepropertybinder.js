@@ -17,7 +17,7 @@ function SunScheduler(_latitude, _longitude, _apiKey) {
          var len = that.states.length;
 
          for (var i = 0; i < len; ++i) {
-            that.states[i].resetSunJobs(_sunTimes);
+            resetSunJobs(that.states[i], _sunTimes);
          }
       });
    });
@@ -90,8 +90,9 @@ function SchedulePropertyBinder(_config, _owner) {
 
    this.writable = false;
    this.events = [];
+   this.currentRamp = {};
 
-   this.createEventsFromConfig(_config.events);
+   createEventsFromConfig(this, _config.events);
 
    var that = this;
 
@@ -104,7 +105,44 @@ function SchedulePropertyBinder(_config, _owner) {
 
 util.inherits(SchedulePropertyBinder, PropertyBinder);
 
-SchedulePropertyBinder.prototype.createEventsFromConfig = function(_eventsConfig) {
+function copyData(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
+}
+
+function startRamp(_that) {
+
+   if (_that.currentRamp.timer) {
+      clearTimeout(_that.currentRamp.timer);
+   }
+
+   _that.currentRamp.timer = setTimeout(function(_this) {
+      _this.currentRamp.timer = null;
+
+      if (_this.binderEnabled) {
+        var difference = Math.abs(_this.currentRamp.endValue - _this.myPropertyValue());
+
+         if (difference <= Math.abs(_this.currentRamp.step)) {
+            _this.updatePropertyAfterRead(_this.currentRamp.endValue, { sourceName: _this.ownerName });
+         }
+         else {
+            _this.currentRamp.value += _this.currentRamp.step;
+            _this.updatePropertyAfterRead(_this.currentRamp.floorOutput(_this.currentRamp.value), { sourceName: _this.ownerName });
+            startRamp(_this);
+         }
+      }
+   }, _that.currentRamp.interval * 1000, _that);
+}
+
+function createEventsFromConfig(_this, _eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
 
    for (var index = 0; index < eventsConfigLen; ++index) {
@@ -128,12 +166,13 @@ SchedulePropertyBinder.prototype.createEventsFromConfig = function(_eventsConfig
          eventRuleDelta = 0;
       }
 
-      this.events.push({ rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                             sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue });
+      _this.events.push({ rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                         sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue,
+                         ramp:  _eventsConfig[index].ramp });
    }
 }
 
-SchedulePropertyBinder.prototype.lastEventScheduledBeforeNow = function(_now, _event) {
+function lastEventScheduledBeforeNow(_this, _now, _event) {
 
    var startDate = new Date();
    startDate.setTime(startDate.getTime()-(_now.getHours()*60*60*1000)-(_now.getSeconds()*60*1000));
@@ -157,16 +196,16 @@ SchedulePropertyBinder.prototype.lastEventScheduledBeforeNow = function(_now, _e
 
     } catch (err) {
        // Not scheduled during time period
-       console.log(this.name + ': Error: ' + err.message);
+       console.log(_this.name + ': Error: ' + err.message);
     }
 
     return (lastScheduled) ? lastScheduled.value : null;
 }
 
 // Returns null if it is not closer or the new closestSchedule
-SchedulePropertyBinder.prototype.determineClosestEvent = function(_now, _currentClosestEventSchedule, _event) {
+function determineClosestEvent(_this, _now, _currentClosestEventSchedule, _event) {
 
-   var lastScheduled = (_event.sunTime) ? _event.rule : this.lastEventScheduledBeforeNow(_now, _event);
+   var lastScheduled = (_event.sunTime) ? _event.rule : lastEventScheduledBeforeNow(_this, _now, _event);
 
    if (lastScheduled && lastScheduled < _now) {
 
@@ -185,82 +224,107 @@ SchedulePropertyBinder.prototype.determineClosestEvent = function(_now, _current
    }
 }
 
-SchedulePropertyBinder.prototype.scheduleAllJobs = function(_callback) {
-   var that = this;
+function scheduleAllJobs(_this, _callback) {
+   var that = _this;
 
-   sunScheduler.getSunTimes(this.latitude, this.longitude, this.forecastKey, function(_sunTimes) {
-      that.setSunTimes(_sunTimes);
+   sunScheduler.getSunTimes(_this.latitude, _this.longitude, _this.forecastKey, function(_sunTimes) {
+      setSunTimes(that, _sunTimes);
 
       for (var index = 0; index < that.events.length; ++index) {
 
          if (that.events[index].sunTime) {
 
             if (that.events[index].rule > new Date()) {
-               that.resetJob(that.events[index]);
+               resetJob(that, that.events[index]);
             }
          }
          else {
-            that.resetJob(that.events[index]);
+            resetJob(that, that.events[index]);
          }
       }
       _callback();
    });
 }
 
-SchedulePropertyBinder.prototype.resetSunJobs = function(_sunTimes) {
-   this.setSunTimes(_sunTimes);
+function resetSunJobs(_this, _sunTimes) {
+   setSunTimes(_this, _sunTimes);
 
-   for (var index = 0; index < this.events.length; ++index) {
+   for (var index = 0; index < _this.events.length; ++index) {
 
-      if (this.events[index].sunTime && (this.events[index].rule > new Date())) {
-         this.resetJob(this.events[index]);
+      if (_this.events[index].sunTime && (_this.events[index].rule > new Date())) {
+         resetJob(_this, _this.events[index]);
       }
    }
 }
 
-SchedulePropertyBinder.prototype.setSunTimes = function(_sunTimes) {
+function setSunTimes(_this, _sunTimes) {
 
    if (_sunTimes == undefined) {
-      _sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
+      _sunTimes = SunCalc.getTimes(new Date(), _this.latitude, _this.longitude);
    }
 
    var result = false;
-   var eventsLen = this.events.length;
+   var eventsLen = _this.events.length;
 
    for (var index = 0; index < eventsLen; ++index) {
 
-      if ((typeof this.events[index].originalRule == 'string') && _sunTimes[this.events[index].originalRule]) {
-         console.log(this.name + ': Rule ' + this.events[index].originalRule + ' is a sun time');
-         this.events[index].rule = new Date(_sunTimes[this.events[index].originalRule]);
-         this.events[index].rule.setTime(this.events[index].rule.getTime() + (this.events[index].ruleDelta * 1000));
-         this.events[index].sunTime = true;
-         console.log(this.name + ': Sun time ' + this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + this.events[index].rule);
+      if ((typeof _this.events[index].originalRule == 'string') && _sunTimes[_this.events[index].originalRule]) {
+         console.log(_this.name + ': Rule ' + _this.events[index].originalRule + ' is a sun time');
+         _this.events[index].rule = new Date(_sunTimes[_this.events[index].originalRule]);
+         _this.events[index].rule.setTime(_this.events[index].rule.getTime() + (_this.events[index].ruleDelta * 1000));
+         _this.events[index].sunTime = true;
+         console.log(_this.name + ': Sun time ' + _this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + _this.events[index].rule);
       }
    }
 }
 
-SchedulePropertyBinder.prototype.resetJob = function(_event) {
-   var that = this;
+function resetJob(_this, _event) {
+   var that = _this;
    
    if (_event.job) {
      _event.job.cancel();
    }
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
-      that.updatePropertyAfterRead(_event.propertyValue , { sourceName: this.ownerName });
+
+      if (_event.ramp == undefined) {
+         that.updatePropertyAfterRead(_event.propertyValue , { sourceName: that.ownerName });
+      }
+      else {
+         createNewRamp(that, _event);
+      }
    });
+}
+
+function createNewRamp(_this, _event) {
+
+   if (_event.ramp.startValue != undefined) {
+      _this.updatePropertyAfterRead(_event.ramp.startValue , { sourceName: _this.ownerName });
+   }
+
+   _this.currentRamp.endValue = _event.ramp.endValue;
+   _this.currentRamp.duration = _event.ramp.duration;
+   _this.currentRamp.step = _event.ramp.step;
+   _this.currentRamp.value = _this.myPropertyValue();
+   _this.currentRamp.floorOutput = (_event.ramp.floorOutput == undefined) ? function(_input) { return Math.floor(_input); } : function(_input) { return _input; };
+
+   var difference = Math.abs(_this.currentRamp.endValue - _this.currentRamp.value);
+   var noOfSteps = difference / Math.abs(_this.currentRamp.step);
+   _this.currentRamp.interval = _this.currentRamp.duration / noOfSteps;
+
+   startRamp(_this);
 }
 
 SchedulePropertyBinder.prototype.coldStart = function(_event) {
    var that = this;
 
-   this.scheduleAllJobs(function() {
+   scheduleAllJobs(this, function() {
       var closestEvent = null;
       var closestEventSchedule = null;
       var now = new Date();
 
       for (var index = 0; index < that.events.length; ++index) {
-         var tempClosestSchedule = that.determineClosestEvent(now, closestEventSchedule, that.events[index]);
+         var tempClosestSchedule = determineClosestEvent(that, now, closestEventSchedule, that.events[index]);
 
          if (tempClosestSchedule) {
             closestEvent = that.events[index];
@@ -268,14 +332,14 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
          }
       }
 
+      if (!closestEvent) {
+         closestEvent = that.events[that.events.length-1];
+      }
+
       // Set Initial Value
-      if (closestEvent) {
-         console.log(that.name + ": Closest event is "+closestEvent.rule);
-         that.updatePropertyAfterRead(closestEvent.propertyValue, { sourceName: that.owner.name, coldStart: true });
-      }
-      else {
-         that.updatePropertyAfterRead(that.events[that.events.length-1].propertyValue, { sourceName: that.owner.name, coldStart: true });
-      }
+      console.log(that.name + ": Closest event is " + closestEvent.rule);
+      var value = (closestEvent.ramp == undefined) ? closestEvent.propertyValue : closestEvent.ramp.endValue;
+      that.updatePropertyAfterRead(value, { sourceName: that.owner.name, coldStart: true });
    });
 }
 

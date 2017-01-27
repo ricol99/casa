@@ -161,6 +161,16 @@
                      }
                   ]
                }
+            },
+            {
+               "name": "richard-at-home",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "devicepresentpropertybinder:richards-iphone-present",
+                  "host": "192.168.1.128",
+                  "interval": 60
+               }
             }
          ]
       },
