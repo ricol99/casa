@@ -171,11 +171,11 @@ PropertyBinder.prototype.goInvalid = function(_data) {
 }
 
 // Override this to actually update what ever the property is bound to
-PropertyBinder.prototype.setProperty = function(_propValue, _data) {
+PropertyBinder.prototype.setProperty = function(_propValue, _data, _forceUpdate) {
 
    if (this.writeable) {
       this.setManualMode(true);
-      this.updatePropertyAfterRead(_propValue, _data);
+      this.updatePropertyAfterRead(_propValue, _data, _forceUpdate);
    }
 
    return this.writeable;
