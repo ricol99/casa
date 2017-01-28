@@ -642,6 +642,97 @@
                ]
             }
          ]
+      },
+      {
+         "name": "alarm:dumgoyne",
+         "displayName": "House Alarm",
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.90",
+               "writable": false
+            },
+            {
+               "name": "tamper-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:alarm-tamper",
+                  "gpioPin": 4,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "kitchen-pir",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:kitchen-pir",
+                  "gpioPin": 17,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "fire-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:fire-alarm",
+                  "gpioPin": 18,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "fully-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:fully-armed",
+                  "gpioPin": 22,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "part-armed",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:part-armed",
+                  "gpioPin": 23,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "alarm-triggered",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:alarm-triggered",
+                  "gpioPin": 24,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "confirmed-alarm",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:confirmed-alarm",
+                  "gpioPin": 25,
+                  "triggerLow": true
+               }
+            },
+            {
+               "name": "lounge-pir",
+               "initialValue": false,
+               "writable": false,
+               "binder": {
+                  "name": "gpiopropertybinder:lounge-pir",
+                  "gpioPin": 27,
+                  "triggerLow": true
+               }
+            }
+         ]
       }
    ]
 }
