@@ -134,9 +134,9 @@
                "writable": false,
                "binder": {
                   "name": "thresholdpropertybinder:dumgoyne-env-low-light",
-                  "threshold" : 55,
+                  "threshold" : 50,
                   "buffer": 5,
-                  "outputTransform": "$value<=55",
+                  "outputTransform": "$value<=50",
                   "sources": [
                      {
                         "source": "thing:dumgoyne-sensors",
@@ -227,7 +227,7 @@
                         "source": "thing:environment",
                         "sourceProperty": "background-lights",
                         "outputValues": {
-                           "true": 40,
+                           "true": 25,
                            "false": 0
                         }
                      }
@@ -369,7 +369,7 @@
                         "source": "thing:environment",
                         "sourceProperty": "background-lights",
                         "outputValues": {
-                           "true": 40,
+                           "true": 25,
                            "false": 0
                         }
                      }
