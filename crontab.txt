@@ -1,0 +1,1 @@
+@reboot /home/pi/dev/casa/run-casa.sh <CASA_NAME> &
