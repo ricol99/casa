@@ -10,6 +10,7 @@ function SmoothTransformPropertyBinder(_config, _owner) {
    this.calculatedResolution = _config.resolution;
    this.targetValue = 0;
    this.timeoutObj = null;
+   this.cold = true;
 
    PropertyBinder.call(this, _config, _owner);
 }
@@ -57,7 +58,12 @@ SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = fun
    this.lastData = copyData(_data);
    var propValue = _data.propertyValue;
 
-   if (this.targetValue != propValue) {
+   if (this.cold) {
+      this.cold = false;
+      this.value = propValue;
+      this.updatePropertyAfterRead(propValue, _data);
+   }
+   else if (this.targetValue != propValue) {
       this.targetValue = propValue;
 
       var difference = this.targetValue - this.myPropertyValue();
@@ -66,9 +72,9 @@ SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = fun
       var timeToChangeByOne =  totalTimeToChange / Math.abs(difference);
       this.calculatedResolution = timeToChangeByOne * this.resolution;
       this.step = ((difference > 0) ? 1 : -1) * this.resolution;
-      this.value = propValue;
 
       if (Math.abs(this.targetValue - this.myPropertyValue()) <= Math.abs(this.step)) {
+         this.value = propValue;
          this.updatePropertyAfterRead(propValue, _data);
       }
       else {
