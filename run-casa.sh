@@ -6,6 +6,6 @@ cd /home/pi/dev/casa/src
 RC=1
 while [ $RC -ne 0 ]; do
    sudo -u pi git pull origin master
-   node app.js casa-collin-config.json env-config.json > log.txt >> error.txt
+   node app.js casa-collin-config.json env-config.json >/home/pi/dev/casa/log.txt 2>/home/pi/dev/casa/error.txt
    RC=$?
 done
