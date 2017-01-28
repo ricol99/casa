@@ -39,13 +39,14 @@ function restartTimer(_that) {
       _this.timeoutObj = null;
 
       if (_this.binderEnabled) {
-        var difference = _this.targetValue - _this.myPropertyValue();
+        var difference = _this.targetValue - _this.value;
 
          if (Math.abs(difference) <= Math.abs(_this.step)) {
             _this.updatePropertyAfterRead(_this.targetValue, _this.lastData);
          }
          else {
-            _this.updatePropertyAfterRead(_this.floorOutput(_this.myPropertyValue() + _this.step), _this.lastData);
+            _this.value += _this.step;
+            _this.updatePropertyAfterRead(_this.floorOutput(_this.value), _this.lastData);
             restartTimer(_this);
          }
       }
@@ -65,6 +66,7 @@ SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = fun
       var timeToChangeByOne =  totalTimeToChange / Math.abs(difference);
       this.calculatedResolution = timeToChangeByOne * this.resolution;
       this.step = ((difference > 0) ? 1 : -1) * this.resolution;
+      this.value = propValue;
 
       if (Math.abs(this.targetValue - this.myPropertyValue()) <= Math.abs(this.step)) {
          this.updatePropertyAfterRead(propValue, _data);

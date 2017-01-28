@@ -128,7 +128,7 @@ function startRamp(_that) {
       _this.currentRamp.timer = null;
 
       if (_this.binderEnabled) {
-        var difference = Math.abs(_this.currentRamp.endValue - _this.myPropertyValue());
+        var difference = Math.abs(_this.currentRamp.endValue - _this.currentRamp.value);
 
          if (difference <= Math.abs(_this.currentRamp.step)) {
             _this.updatePropertyAfterRead(_this.currentRamp.endValue, { sourceName: _this.ownerName });
@@ -305,7 +305,7 @@ function createNewRamp(_this, _event) {
    _this.currentRamp.endValue = _event.ramp.endValue;
    _this.currentRamp.duration = _event.ramp.duration;
    _this.currentRamp.step = _event.ramp.step;
-   _this.currentRamp.value = _this.myPropertyValue();
+   _this.currentRamp.value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _this.myPropertyValue();
    _this.currentRamp.floorOutput = (_event.ramp.floorOutput == undefined) ? function(_input) { return Math.floor(_input); } : function(_input) { return _input; };
 
    var difference = Math.abs(_this.currentRamp.endValue - _this.currentRamp.value);
