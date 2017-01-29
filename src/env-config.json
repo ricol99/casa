@@ -658,7 +658,7 @@
                "writable": false,
                "binder": {
                   "name": "gpiopropertybinder:alarm-tamper",
-                  "gpioPin": 4,
+                  "gpioPin": 5,
                   "triggerLow": true
                }
             },
