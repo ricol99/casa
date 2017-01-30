@@ -38,7 +38,7 @@ function startTimer(_that) {
       }
 
       if (!_this.binderEnabled) {
-         _this.goInvalid({ sourceName: _this.owner.name });
+         PropertyBinder.prototype.sourceIsInvalid.call(_this, _this.invalidData);
       }
    }, _that.threshold*1000, _that);
 }
@@ -70,6 +70,7 @@ DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function
 
 DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
    console.log(this.name + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
+   this.invalidData = copyData(_data);
 
    if (this.binderEnabled) {
       this.binderEnabled = false;

@@ -15,6 +15,12 @@ function PushoverBinder(_config, _owner) {
 }
 
 PushoverBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+
+   if (_data.coldStart) {
+      this.updatePropertyAfterRead(_data.propertyValue, _data);
+      return;
+   }
+
    console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
 
    var _title = 'Casa Collin' + ((this.messagePriority > 0) ? ' Alarm' : ' Update');

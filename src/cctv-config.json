@@ -2,6 +2,13 @@
    "name": "casa:cctv",
    "displayName": "Casa Collin CCTV System",
    "gang": "casa-collin-v2",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "localhost",
+         "port": 8096
+      }
+   },
    "listeningPort": 8082,
    "props": {},
    "things": [
