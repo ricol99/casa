@@ -108,24 +108,35 @@ LightwaveRfAccessory.prototype.updateProperty = function(_propName, _propValue, 
          if (_propValue) {
 
             if (this.brightnessSupported) {
-               this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, this.props["brightness"], this.callbackHandler);
+               if (!_data.coldStart) {
+                  this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, this.props["brightness"], this.callbackHandler);
+               }
             }
             else {
-               this.lightwaveRfLink.turnDeviceOn(this.roomID, this.deviceID, this.callbackHandler);
+               if (!_data.coldStart) {
+                  this.lightwaveRfLink.turnDeviceOn(this.roomID, this.deviceID, this.callbackHandler);
+               }
             }
          }
          else {
-            this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+            }
          }
       }
       else if (_propName == "brightness") {
 
          if (_propValue == 0) {
-            this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+            }
             Thing.prototype.updateProperty.call(this, "power", false, _data);
          }
          else {
-            this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, _propValue, this.callbackHandler);
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, _propValue, this.callbackHandler);
+            }
          }
       }
    }
@@ -135,16 +146,25 @@ LightwaveRfAccessory.prototype.updateProperty = function(_propName, _propValue, 
 
          if (_propValue == "off") {
             console.log(this.name + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
-            this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+            }
          }
          else {
             console.log(this.name + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
-            this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[_propValue].id, this.callbackHandler);
+
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[_propValue].id, this.callbackHandler);
+            }
          }
       }
       else if (_propName == "power" && !_propValue) {
          console.log(this.name + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
-         this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+
+         if (!_data.coldStart) {
+            this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+         }
          Thing.prototype.updateProperty.call(this, "mood", "off", _data);
       }
       else {
@@ -153,12 +173,18 @@ LightwaveRfAccessory.prototype.updateProperty = function(_propName, _propValue, 
 
          if (moodName == "off") {
             console.log(this.name + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
-            this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+            }
             Thing.prototype.updateProperty.call(this, "mood", "off", _data);
          }
          else {
             console.log(this.name + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
-            this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[moodName].id, this.callbackHandler);
+
+            if (!_data.coldStart) {
+               this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[moodName].id, this.callbackHandler);
+            }
             Thing.prototype.updateProperty.call(this, "mood", moodName, _data);
          }
       }
