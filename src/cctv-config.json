@@ -249,7 +249,7 @@
                            "startValue": 0,
                            "endValue": 100,
                            "step": 2,
-                           "duration": 50
+                           "duration": 10
                         }
                      },
                      {
@@ -257,7 +257,7 @@
                         "ramp": {
                            "endValue": 0,
                            "step": -2,
-                           "duration": 50
+                           "duration": 25
                         }
                      }
                   ]
