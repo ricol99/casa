@@ -733,6 +733,14 @@
                }
             }
          ]
+      },
+      {
+         "name": "alarmtexecom:dumgoyne-alarm",
+         "displayName": "Test Dumgoyne Alarm",
+         "port": 8200,
+         "pollingInterval": 2,
+         "maxPollMisses": 1,
+         "props": []
       }
    ]
 }
