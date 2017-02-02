@@ -12,7 +12,7 @@ console.log('System File: ' + systemConfigFile + ' Casa File: ' + configFile);
 var config = require('./' + configFile);
 var systemConfig = require('./' + systemConfigFile);
 
-if (config.name == 'casa:internet' && !config.id) {
+if (config.name == 'internet' && !config.id) {
    config.id = '0000001';
 }
 
@@ -28,7 +28,7 @@ if (!config.id) {
       var id = crypto.randomBytes(16).toString('hex');
       if (err=fs.writeFileSync(idFilename, JSON.stringify({id: id}))) {
          console.log('Cannot write ID file!');
-         throw err
+         throw err;
       }
       config.id = id;
   }

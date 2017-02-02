@@ -29,11 +29,7 @@
             {
                "name": "pushoverDestAddr",
                "initialValue": "gX5JLc28t775dYr1yjuo4p38t7hziV",
-               "writable": false,
-               "binder": {
-                  "name": "i2cpropertybinder:pushoverDestAddr",
-                  "address": 24
-               }
+               "writable": false
             }
          ]
       },
@@ -62,104 +58,90 @@
                "name": "ACTIVE",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "orpropertybinder:home-casas",
-                  "sources": [
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-alarm"
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-cctv"
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-env"
-                     }
-                  ]
-               }
+               "type": "orproperty",
+               "sources": [
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-alarm"
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-cctv"
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-env"
+                  }
+               ]
             },
             {
                "name": "casa-alarm",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "debouncingpropertybinder:casa-alarm",
-                  "source": "casa:alarm",
-                  "sourceProperty": "ACTIVE",
-                  "threshold": 120
-               }
+               "type": "debounceproperty",
+               "source": "casa:alarm",
+               "sourceProperty": "ACTIVE",
+               "threshold": 120
             },
             {
                "name": "casa-cctv",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "debouncingpropertybinder:casa-cctv",
-                  "source": "casa:cctv",
-                  "sourceProperty": "ACTIVE",
-                  "threshold": 120
-               }
+               "type": "debounceproperty",
+               "source": "casa:cctv",
+               "sourceProperty": "ACTIVE",
+               "threshold": 120
             },
             {
                "name": "casa-env",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "debouncingpropertybinder:casa-env",
-                  "source": "casa:env",
-                  "sourceProperty": "ACTIVE",
-                  "threshold": 120
-               }
+               "type": "debounceproperty",
+               "source": "casa:env",
+               "sourceProperty": "ACTIVE",
+               "threshold": 120
             },
             {
                "name": "alarm-armed",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "orpropertybinder:alarm-armed",
-                  "sources": [
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "fully-armed"
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "part-armed"
-                     }
-                  ]
-               }
+               "type": "orproperty",
+               "sources": [
+                  {
+                     "name": "alarm:home",
+                     "property": "fully-armed"
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "part-armed"
+                  }
+               ]
             },
             {
                "name": "debounced-alarm-armed",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "debouncingpropertybinder:alarm-armed",
-                  "source": "thing:home-internet-connection",
-                  "sourceProperty": "alarm-armed",
-                  "threshold": 30
-               }
+               "type": "debounceproperty",
+               "source": "thing:home-internet-connection",
+               "sourceProperty": "alarm-armed",
+               "threshold": 30
             },
             {
                "name": "lost-while-armed",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "andpropertybinder:home-internet-lost-while-armed",
-                  "sources": [
-                     {
-                        "source": "casa-alarm",
-                        "sourceProperty": "ACTIVE",
-                        "inputTransform": "!$value"
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "debounced-alarm-armed"
-                     }
-                  ]
-               }
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "casa-alarm",
+                     "property": "ACTIVE",
+                     "inputTransform": "!$value"
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "debounced-alarm-armed"
+                  }
+               ]
             }
          ]
       },
@@ -171,141 +153,135 @@
                "name": "priority-message",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "pushoverbinder:priority-message",
-                  "priority": 2,
-                  "target": "usergroup:key-holders",
-                  "sources": [
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "tamper-alarm",
-                        "outputValues": {
-                           "true": "H-Alarm being tampered with!",
-                           "false": "H-Alarm no longer in tamper mode"
-                        }
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "mains-failure",
-                        "outputValues": {
-                           "true": "H-Alarm has lost mains power!",
-                           "false": "H-Alarm mains power restored"
-                        }
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "fire-alarm",
-                        "outputValues": {
-                           "true": "H-Fire Alarm!",
-                           "false": "H-Fire alarm reset"
-                        }
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "alarm-triggered",
-                        "outputValues": {
-                           "true": "H-Alarm triggered",
-                           "false": "H-Alarm trigger reset"
-                        }
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "confirmed-alarm",
-                        "outputValues": {
-                           "true": "H-Alarm confirmed - call police!",
-                           "false": "H-Confirmed alarm reset"
-                        }
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "lost-while-armed",
-                        "outputValues": {
-                           "true": "H-Internet connection to home has been lost while alarm is fully armed!",
-                           "false": "H-Internet connection to home restored"
-                        }
+               "type": "pushoverproperty",
+               "priority": 2,
+               "userGroup": "usergroup:key-holders",
+               "sources": [
+                  {
+                     "name": "alarm:home",
+                     "property": "tamper-alarm",
+                     "outputValues": {
+                        "true": "H-Alarm being tampered with!",
+                        "false": "H-Alarm no longer in tamper mode"
                      }
-                  ]
-               }
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "mains-failure",
+                     "outputValues": {
+                        "true": "H-Alarm has lost mains power!",
+                        "false": "H-Alarm mains power restored"
+                     }
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "fire-alarm",
+                     "outputValues": {
+                        "true": "H-Fire Alarm!",
+                        "false": "H-Fire alarm reset"
+                     }
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "alarm-triggered",
+                     "outputValues": {
+                        "true": "H-Alarm triggered",
+                        "false": "H-Alarm trigger reset"
+                     }
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "confirmed-alarm",
+                     "outputValues": {
+                        "true": "H-Alarm confirmed - call police!",
+                        "false": "H-Confirmed alarm reset"
+                     }
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "lost-while-armed",
+                     "outputValues": {
+                        "true": "H-Internet connection to home has been lost while alarm is fully armed!",
+                        "false": "H-Internet connection to home restored"
+                     }
+                  }
+               ]
             },
             {
                "name": "urgent-message",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "pushoverbinder:urgent-message",
-                  "priority": 1,
-                  "target": "usergroup:admins",
-                  "sources": [
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "ACTIVE",
-                        "outputValues": {
-                           "true": "H-Internet connection to home restored",
-                           "false": "H-Internet connection to home has been lost!"
-                        }
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-alarm",
-                        "outputValues": {
-                           "true": "H-Casa 'alarm' is active",
-                           "false": "H-Casa 'alarm' has gone down!"
-                        }
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-cctv",
-                        "outputValues": {
-                           "true": "H-Casa 'cctv' is active",
-                           "false": "H-Casa 'cctv' has gone down!"
-                        }
-                     },
-                     {
-                        "source": "thing:home-internet-connection",
-                        "sourceProperty": "casa-env",
-                        "outputValues": {
-                           "true": "H-Casa 'env' is active",
-                           "false": "H-Casa 'env' has gone down!"
-                        }
+               "type": "pushoverproperty",
+               "priority": 1,
+               "userGroup": "usergroup:admins",
+               "sources": [
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "ACTIVE",
+                     "outputValues": {
+                        "true": "H-Internet connection to home restored",
+                        "false": "H-Internet connection to home has been lost!"
                      }
-                  ]
-               }
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-alarm",
+                     "outputValues": {
+                        "true": "H-Casa 'alarm' is active",
+                        "false": "H-Casa 'alarm' has gone down!"
+                     }
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-cctv",
+                     "outputValues": {
+                        "true": "H-Casa 'cctv' is active",
+                        "false": "H-Casa 'cctv' has gone down!"
+                     }
+                  },
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "casa-env",
+                     "outputValues": {
+                        "true": "H-Casa 'env' is active",
+                        "false": "H-Casa 'env' has gone down!"
+                     }
+                  }
+               ]
             },
             {
                "name": "normal-message",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "pushoverbinder:normal-message",
-                  "priority": 0,
-                  "target": "usergroup:admins",
-                  "sources": [
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "fully-armed",
-                        "outputValues": {
-                           "true": "H-Alarm armed",
-                           "false": "H-Alarm disarmed"
-                        }
-                     },
-                     {
-                        "source": "alarm:home",
-                        "sourceProperty": "part-armed",
-                        "outputValues": {
-                           "true": "H-Alarm part armed",
-                           "false": "H-Alarm disarmed"
-                        }
-                     },
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "daylight",
-                        "outputValues": {
-                           "true": "H-Good morning!",
-                           "false": "H-Good evening!"
-                        }
+               "type": "pushoverproperty",
+               "priority": 0,
+               "userGroup": "usergroup:admins",
+               "sources": [
+                  {
+                     "name": "alarm:home",
+                     "property": "fully-armed",
+                     "outputValues": {
+                        "true": "H-Alarm armed",
+                        "false": "H-Alarm disarmed"
                      }
-                  ]
-               }
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "part-armed",
+                     "outputValues": {
+                        "true": "H-Alarm part armed",
+                        "false": "H-Alarm disarmed"
+                     }
+                  },
+                  {
+                     "name": "thing:environment",
+                     "property": "daylight",
+                     "outputValues": {
+                        "true": "H-Good morning!",
+                        "false": "H-Good evening!"
+                     }
+                  }
+               ]
             }
          ]
       }

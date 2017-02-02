@@ -18,8 +18,8 @@
  
 var util = require('util');
 
-function ContactIdProtocol(_name) {
-   this.name = _name;
+function ContactIdProtocol(_uName) {
+   this.uName = _uName;
 
    this.QUALIFIERS = {
       1 : 'Event/Activated',
@@ -86,12 +86,12 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
 
    // Validate
    if (_msg.length != 16) {
-      console.log(this.name + ": Invalid message size " + _msg.length);
+      console.log(this.uName + ": Invalid message size " + _msg.length);
       return false;
    }
 
    if (_msg.slice(4,6) != '18' && _msg.slice(4,6) != '98') {
-      console.log(this.name + ": Invalid message type " + _msg.slice(4,6));
+      console.log(this.uName + ": Invalid message type " + _msg.slice(4,6));
       return undefined;
    }
 
@@ -102,7 +102,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    message.value = _msg.slice(12,15);
 
    if (isNaN(message.qualifier) || isNaN(message.eventNum) || isNaN(message.area) || isNaN(message.value)) {
-      console.log(this.name + ": Unable to parse event!");
+      console.log(this.uName + ": Unable to parse event!");
       return undefined;
    }
 

@@ -5,7 +5,6 @@ var io = require('socket.io-client');
 var CasaSystem = require('./casasystem');
 
 function RemoteCasa(_config, _peerCasa) {
-   this.name = _config.name;
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.peerCasa = _peerCasa;
@@ -24,20 +23,20 @@ function RemoteCasa(_config, _peerCasa) {
    this.peerCasa.on('casa-active', function(_data) {
 
       if (!that.isActive()) {
-         console.log(that.name + ': Connected to my peer. Going active.');
+         console.log(that.uName + ': Connected to my peer. Going active.');
 
          // listen for source changes from peer casas
          that.establishListeners(true);
 
-         that.updateProperty('ACTIVE', true, { sourceName: that.name });
+         that.updateProperty('ACTIVE', true, { sourceName: that.uName });
       }
    });
 
    this.peerCasa.on('casa-inactive', function(_data) {
 
       if (that.isActive()) {
-         console.log(that.name + ': Lost connection to my peer. Going inactive.');
-         that.updateProperty('ACTIVE', false, { sourceName: that.name });
+         console.log(that.uName + ': Lost connection to my peer. Going inactive.');
+         that.updateProperty('ACTIVE', false, { sourceName: that.uName });
       }
    });
 }
@@ -51,7 +50,7 @@ RemoteCasa.prototype.establishListeners = function(_force) {
 
       // listen for sourcechanges from peer casas
       this.peerCasa.on('source-property-changed', function(_data) {
-         console.log(that.name + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
+         console.log(that.uName + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
 
          if (that.sources[_data.sourceName]) {
             that.sources[_data.sourceName].sourceHasChangedProperty(_data);
@@ -73,9 +72,9 @@ RemoteCasa.prototype.setSourceInactive = function(_source, _callback) {
 
 RemoteCasa.prototype.addSource = function(_source) {
    // Peer source being added to remote casa
-   console.log(this.name + ': Source '  +_source.name + ' added to remote casa ');
-   this.sources[_source.name] = _source;
-   console.log(this.name + ': ' + _source.name + ' associated!');
+   console.log(this.uName + ': Source '  +_source.name + ' added to remote casa ');
+   this.sources[_source.uName] = _source;
+   console.log(this.uName + ': ' + _source.uName + ' associated!');
 }
 
 RemoteCasa.prototype.invalidateSources = function() {
@@ -83,9 +82,9 @@ RemoteCasa.prototype.invalidateSources = function() {
    for(var prop in this.sources) {
 
       if(this.sources.hasOwnProperty(prop)){
-         console.log(this.name + ': Invaliding source ' + this.sources[prop].name);
+         console.log(this.uName + ': Invaliding source ' + this.sources[prop].uName);
          this.sources[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.sources[prop].name];
+         delete this.casaSys.allObjects[this.sources[prop].uName];
          delete this.sources[prop];
       }
    }

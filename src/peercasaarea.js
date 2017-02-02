@@ -8,24 +8,24 @@ function PeerCasaArea(_config) {
    var that = this;
 
    this.broadcastListener = function(_message) {
-      console.log(that.name + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+      console.log(that.uName + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
       // Broadcast to all children - peers and parent already know
       for(var prop in that.casaSys.childCasaAreas) {
 
          if(that.casaSys.childCasaAreas.hasOwnProperty(prop)){
-            console.log(that.name + ': Broadcasting to child area ' + that.casaSys.childCasaAreas[prop].name);
+            console.log(that.uName + ': Broadcasting to child area ' + that.casaSys.childCasaAreas[prop].uName);
             that.casaSys.childCasaAreas[prop].broadcastMessage(_message);
          }
       }
    };
 
    this.forwardRequestListener = function(_data) {
-      console.log(that.name + ': Forward event request from peer. Source: ' + _data.data.sourceName);
+      console.log(that.uName + ': Forward event request from peer. Source: ' + _data.data.sourceName);
    };
 
    this.forwardResponseListener = function(_data) {
-      console.log(that.name + ': Forward event response from peer. Source: ' + _data.data.sourceName);
+      console.log(that.uName + ': Forward event response from peer. Source: ' + _data.data.sourceName);
    };
 }
 

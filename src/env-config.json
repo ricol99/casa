@@ -36,12 +36,9 @@
                "name": "light-level",
                "initialValue": 0,
                "writable": false,
-               "binder": {
-                  "name": "propertybinder:light-sensor-lux",
-                  "source": "thing:dumgoyne-sensors",
-                  "sourceProperty": "light-sensor",
-                  "inputTransform": "$value*$value"
-               }
+               "source": "thing:dumgoyne-sensors",
+               "sourceProperty": "light-sensor",
+               "inputTransform": "$value*$value"
             }
          ]
       },
@@ -51,23 +48,21 @@
          "props": [
             {
                "name": "light-sensor",
+               "type": "i2cproperty",
                "initialValue": 0,
                "writable": false,
-               "binder": {
-                  "name": "i2cpropertybinder:light-channel-1",
-                  "address1": 104,
-                  "address2": 105,
-                  "channel": 1,
-                  "interval": 5,
-                  "maxChange": 5,
-                  "maxIgnore": 18,
-                  "inputMin": 3.291,
-                  "inputMax": 0,
-                  "outputMin": 1,
-                  "outputMax": 100,
-                  "outputResolution": 99,
-                  "floorOutput": true
-               }
+               "address1": 104,
+               "address2": 105,
+               "channel": 1,
+               "interval": 5,
+               "maxChange": 5,
+               "maxIgnore": 18,
+               "inputMin": 3.291,
+               "inputMax": 0,
+               "outputMin": 1,
+               "outputMax": 100,
+               "outputResolution": 99,
+               "floorOutput": true
             }
          ]
       },
@@ -77,100 +72,88 @@
          "props": [
             {
                "name": "daylight-sensor",
+               "type": "thresholdproperty",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "thresholdpropertybinder:dumgoyne-env-daylight-sensor",
-                  "threshold" : 40,
-                  "buffer": 5,
-                  "outputTransform": "$value>=40",
-                  "sources": [
-                     {
-                        "source": "thing:dumgoyne-sensors",
-                        "sourceProperty": "light-sensor"
-                     }
-                  ]
-               }
+               "threshold" : 40,
+               "buffer": 5,
+               "outputTransform": "$value>=40",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-sensors",
+                     "property": "light-sensor"
+                  }
+               ]
             },
             {
                "name": "daylight-possible",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "schedulepropertybinder:env-daylight-possible",
-                  "events": [
-                     {
-                        "rule": "sunrise:-600",
-                        "propertyValue": true
-                     },
-                     {
-                        "rule": "sunset:+600",
-                        "propertyValue": false
-                     }
-                  ]
-               }
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "sunrise:-600",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "sunset:+600",
+                     "propertyValue": false
+                  }
+               ]
             },
             {
                "name": "daylight",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "andpropertybinder:dumgoyne-env-daylight",
-                  "sources": [
-                     {
-                        "source": "thing:dumgoyne-environment",
-                        "sourceProperty": "daylight-sensor"
-                     },
-                     {
-                        "source": "thing:dumgoyne-environment",
-                        "sourceProperty": "daylight-possible"
-                     }
-                  ]
-               }
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight-sensor"
+                  },
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight-possible"
+                  }
+               ]
             },
             {
                "name": "low-light",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "thresholdpropertybinder:dumgoyne-env-low-light",
-                  "threshold" : 50,
-                  "buffer": 5,
-                  "outputTransform": "$value<=50",
-                  "sources": [
-                     {
-                        "source": "thing:dumgoyne-sensors",
-                        "sourceProperty": "light-sensor"
-                     }
-                  ]
-               }
+               "type": "thresholdproperty",
+               "threshold" : 50,
+               "buffer": 5,
+               "outputTransform": "$value<=50",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-sensors",
+                     "property": "light-sensor"
+                  }
+               ]
             },
             {
                "name": "background-lights",
                "initialValue": false,
                "writable": true,
-               "binder": {
-                  "name": "schedulepropertybinder:dumgoyne-env-background-lights",
-                  "source": "thing:dumgoyne-environment",
-                  "sourceProperty": "daylight",
-                  "inputTransform": "!$value",
-                  "events": [
-                     {
-                        "rule": "30 22 * * *",
-                        "propertyValue": false
-                     }
-                  ]
-               }
+               "type": "scheduleproperty",
+               "source": "thing:dumgoyne-environment",
+               "sourceProperty": "daylight",
+               "inputTransform": "!$value",
+               "events": [
+                  {
+                     "rule": "30 22 * * *",
+                     "propertyValue": false
+                  }
+               ]
             },
             {
                "name": "richard-at-home",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "devicepresentpropertybinder:richards-iphone-present",
-                  "host": "192.168.1.128",
-                  "interval": 60
-               }
+               "type": "devicepresentproperty",
+               "host": "192.168.1.128",
+               "interval": 60
             }
          ]
       },
@@ -179,76 +162,63 @@
          "displayName": "Kitchen Room",
          "props": [
             {
-               "name": "movement",
-               "initialValue": false,
-               "writable": false,
-               "binder" : {
-                  "name": "latchingpropertybinder:kitchen-movement",
-                  "source": "alarm:home",
-                  "sourceProperty": "kitchen-pir",
-                  "minOutputTime": 600
-               }
-            },
-            {
                "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
-               "binder" : {
-                  "name": "andpropertybinder:kitchen-movement-in-low-light",
-                  "sources": [
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "low-light"
-                     },
-                     {
-                        "source": "room:kitchen",
-                        "sourceProperty": "movement"
-                     }
-                  ]
-               }
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:environment",
+                     "property": "low-light"
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "kitchen-pir"
+                  }
+               ],
+               "inputSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 600
+                  }
+               ]
             },
             {
                "name": "brightness",
                "initialValue": 0,
                "writable": false,
-               "binder": {
-                  "name": "orpropertybinder:kitchen-lighting-brightness",
-                  "prioritiseSources": true,
-                  "sources": [
-                     {
-                        "source": "room:kitchen",
-                        "sourceProperty": "movement-in-low-light",
-                        "outputValues": {
-                           "true": 60,
-                           "false": 0
-                        }
-                     },
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "background-lights",
-                        "outputValues": {
-                           "true": 25,
-                           "false": 0
-                        }
+               "type": "orproperty",
+               "prioritiseSources": true,
+               "sources": [
+                  {
+                     "name": "room:kitchen",
+                     "property": "movement-in-low-light",
+                     "outputValues": {
+                        "true": 60,
+                        "false": 0
                      }
-                  ]
-               }
+                  },
+                  {
+                     "name": "thing:environment",
+                     "property": "background-lights",
+                     "outputValues": {
+                        "true": 25,
+                        "false": 0
+                     }
+                  }
+               ]
             },
             {
                "name": "power",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "propertybinder:kitchen-lighting-power",
-                  "prioritiseSources": true,
-                  "sources": [
-                     {  
-                        "source": "room:kitchen",
-                        "sourceProperty": "brightness",
-                        "inputTransform": "$value>0"
-                     } 
-                  ]
-               }
+               "sources": [
+                  {  
+                     "name": "room:kitchen",
+                     "property": "brightness",
+                     "inputTransform": "$value>0"
+                  } 
+               ]
             }
          ],
          "things": [
@@ -321,76 +291,63 @@
          "displayName": "Lounge Room",
          "props": [
             {
-               "name": "movement",
-               "initialValue": false,
-               "writable": false,
-               "binder" : {
-                  "name": "latchingpropertybinder:lounge-movement",
-                  "source": "alarm:home",
-                  "sourceProperty": "lounge-pir",
-                  "minOutputTime": 600
-               }
-            },
-            {
                "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
-               "binder" : {
-                  "name": "andpropertybinder:lounge-movement-in-low-light",
-                  "sources": [
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "low-light"
-                     },
-                     {
-                        "source": "room:lounge",
-                        "sourceProperty": "movement"
-                     }
-                  ]
-               }
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:environment",
+                     "property": "low-light"
+                  },
+                  {
+                     "name": "alarm:home",
+                     "property": "lounge-pir"
+                  }
+               ],
+               "inputSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 600
+                  }
+               ]
             },
             {
                "name": "brightness",
                "initialValue": 0,
                "writable": false,
-               "binder": {
-                  "name": "orpropertybinder:lounge-lighting-brightness",
-                  "prioritiseSources": true,
-                  "sources": [
-                     {
-                        "source": "room:lounge",
-                        "sourceProperty": "movement-in-low-light",
-                        "outputValues": {
-                           "true": 60,
-                           "false": 0
-                        }
-                     },
-                     {
-                        "source": "thing:environment",
-                        "sourceProperty": "background-lights",
-                        "outputValues": {
-                           "true": 25,
-                           "false": 0
-                        }
+               "type": "orproperty",
+               "prioritiseSources": true,
+               "sources": [
+                  {
+                     "name": "room:lounge",
+                     "property": "movement-in-low-light",
+                     "outputValues": {
+                        "true": 60,
+                        "false": 0
                      }
-                  ]
-               }
+                  },
+                  {
+                     "name": "thing:environment",
+                     "property": "background-lights",
+                     "outputValues": {
+                        "true": 25,
+                        "false": 0
+                     }
+                  }
+               ]
             },
             {
                "name": "power",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "propertybinder:lounge-lighting-power",
-                  "prioritiseSources": true,
-                  "sources": [
-                     {
-                        "source": "room:lounge",
-                        "sourceProperty": "brightness",
-                        "inputTransform": "$value>0"
-                     }
-                  ]
-               }
+               "sources": [
+                  {
+                     "name": "room:lounge",
+                     "property": "brightness",
+                     "inputTransform": "$value>0"
+                  }
+               ]
             }
          ],
          "things": [
@@ -622,11 +579,8 @@
                      "name": "power",
                      "initialValue": false,
                      "writeable": true,
-                     "binder": {
-                        "name": "propertybinder:automated-master-bedroom-lights-power",
-                        "source": "thing:environment",
-                        "sourceProperty": "bedtime"
-                     }
+                     "source": "thing:environment",
+                     "sourceProperty": "bedtime"
                   }
                ],
                "things": [
@@ -656,81 +610,66 @@
                "name": "tamper-alarm",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:alarm-tamper",
-                  "gpioPin": 5,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 5,
+               "triggerLow": true
             },
             {
                "name": "kitchen-pir",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:kitchen-pir",
-                  "gpioPin": 17,
-                  "triggerLow": true
+               "type": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true
                }
             },
             {
                "name": "fire-alarm",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:fire-alarm",
-                  "gpioPin": 18,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true
             },
             {
                "name": "fully-armed",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:fully-armed",
-                  "gpioPin": 22,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 22,
+               "triggerLow": true
             },
             {
                "name": "part-armed",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:part-armed",
-                  "gpioPin": 23,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
             },
             {
                "name": "alarm-triggered",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:alarm-triggered",
-                  "gpioPin": 24,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 24,
+               "triggerLow": true
             },
             {
                "name": "confirmed-alarm",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:confirmed-alarm",
-                  "gpioPin": 25,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 25,
+               "triggerLow": true
             },
             {
                "name": "lounge-pir",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "gpiopropertybinder:lounge-pir",
-                  "gpioPin": 27,
-                  "triggerLow": true
-               }
+               "type": "gpioproperty",
+               "gpioPin": 27,
+               "triggerLow": true
             }
          ]
       },

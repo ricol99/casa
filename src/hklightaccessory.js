@@ -80,7 +80,7 @@ function HomekitLightAccessory(_config) {
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
-   this.setProperty("power", _status ? true : false, { sourceName: this.name }, true);
+   this.updateProperty("power", _status ? true : false, { sourceName: this.uName }, true);
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
@@ -88,8 +88,8 @@ HomekitLightAccessory.prototype.getPower = function() {
 };
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
-   console.log(this.name + ": Changing brightness to " + _status);
-   this.setProperty("brightness", _status, { sourceName: this.name }, true);
+   console.log(this.uName + ": Changing brightness to " + _status);
+   this.updateProperty("brightness", _status, { sourceName: this.uName }, true);
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
@@ -97,8 +97,8 @@ HomekitLightAccessory.prototype.getBrightness = function() {
 }
 
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
-   console.log(this.name + ": Changing saturation to " + _status);
-   this.setProperty("saturation", _status, { sourceName: this.name }, true);
+   console.log(this.uName + ": Changing saturation to " + _status);
+   this.updateProperty("saturation", _status, { sourceName: this.uName }, true);
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
@@ -106,8 +106,8 @@ HomekitLightAccessory.prototype.getSaturation = function() {
 }
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
-   console.log(this.name + ": Changing hue to " + _status);
-   this.setProperty("hue", _status, { sourceName: this.name }, true);
+   console.log(this.uName + ": Changing hue to " + _status);
+   this.updateProperty("hue", _status, { sourceName: this.uName }, true);
 };
 
 HomekitLightAccessory.prototype.getHue = function() {
@@ -145,12 +145,3 @@ HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue,
 };
 
 module.exports = exports = HomekitLightAccessory;
-
-// To inform HomeKit about changes occurred outside of HomeKit (like user physically turn on the light)
-// Please use Characteristic.updateValue
-// 
-// lightAccessory
-//   .getService(Service.Lightbulb)
-//   .getCharacteristic(Characteristic.On)
-//   .updateValue(true);
-

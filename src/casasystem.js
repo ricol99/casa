@@ -8,6 +8,7 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
    this.config = _config;
    this.systemConfig = _systemConfig;
    this.name = _systemConfig.name;
+   this.uName = "casasys:"+_systemConfig.name;
    this.version = _version;
 
    this.uberCasa = false;
@@ -82,15 +83,15 @@ CasaSystem.prototype.cleverRequire = function(_name) {
 
 CasaSystem.prototype.deletePeerCasa = function(_peerCasa) {
 
-  if (remoteCasas[_peerCasa.name]) {
-     delete remoteCasas[_peerCasa.name];
-     delete allObjects[_peerCasa.name];
+  if (remoteCasas[_peerCasa.uName]) {
+     delete remoteCasas[_peerCasa.uName];
+     delete allObjects[_peerCasa.uName];
 
      if (parentCasa == _peerCasa) {
      }
 
-     if (childCasas[_peerCasa.name]) {
-        delete childCasas[_peerCasa.name];
+     if (childCasas[_peerCasa.uName]) {
+        delete childCasas[_peerCasa.uName];
      }
 
      if (_peerCasa.persistent) {
@@ -105,23 +106,23 @@ CasaSystem.prototype.extractUsers = function() {
    if (this.config.users) {
 
       this.config.users.forEach(function(user) { 
-         var User = that.cleverRequire(user.name);
+         var User = that.cleverRequire(user.uName);
          user.owner = that;
          var userObj = new User(user);
-         that.users[userObj.name] = userObj;
-         that.allObjects[userObj.name] = userObj;
-         console.log('New user: ' + user.name);
+         that.users[userObj.uName] = userObj;
+         that.allObjects[userObj.uName] = userObj;
+         console.log('New user: ' + user.uName);
       });
    }
 }
 
 // Extract Things
 CasaSystem.prototype.createThing = function(_config, _parent) {
-   var Thing = this.cleverRequire(_config.name);
+   var Thing = this.cleverRequire(_config.uName);
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
-   this.things[thingObj.name] = thingObj;
-   this.allObjects[thingObj.name] = thingObj;
+   this.things[thingObj.uName] = thingObj;
+   this.allObjects[thingObj.uName] = thingObj;
    console.log('New thing: ' + _config.name);
    return thingObj;
 };
@@ -153,11 +154,11 @@ CasaSystem.prototype.mergeConfigs = function() {
 }
 
 CasaSystem.prototype.extractCasa = function() {
-   var Casa = this.cleverRequire(this.config.name);
+   var Casa = this.cleverRequire(this.config.uName);
    var casaObj = new Casa(this.config);
-   this.allObjects[casaObj.name] = casaObj;
+   this.allObjects[casaObj.uName] = casaObj;
    this.casa = casaObj;
-   console.log('New casa: ' + casaObj.name);
+   console.log('New casa: ' + casaObj.uName);
 }
 
 CasaSystem.prototype.extractParentCasa = function() {
@@ -165,15 +166,15 @@ CasaSystem.prototype.extractParentCasa = function() {
    if (this.config.parentCasa) {
       var ParentCasa = require('./parentcasa');
       this.parentCasa = new ParentCasa(this.config.parentCasa);
-      this.remoteCasas[this.parentCasa.name] = this.parentCasa;
-      this.allObjects[this.parentCasa.name] = this.parentCasa;
-      console.log('New parentcasa: ' + this.parentCasa.name);
+      this.remoteCasas[this.parentCasa.uName] = this.parentCasa;
+      this.allObjects[this.parentCasa.uName] = this.parentCasa;
+      console.log('New parentcasa: ' + this.parentCasa.uName);
 
       var ParentCasaArea = require('./parentcasaarea');
       this.parentCasaArea = new ParentCasaArea ({ name: 'parentcasaarea:my-parent' });
-      this.casaAreas[this.parentCasaArea.name] = this.parentCasaArea;
-      this.allObjects[this.parentCasaArea.name] = this.parentCasaArea;
-      console.log('New parentcasaarea: ' + this.parentCasaArea.name);
+      this.casaAreas[this.parentCasaArea.uName] = this.parentCasaArea;
+      this.allObjects[this.parentCasaArea.uName] = this.parentCasaArea;
+      console.log('New parentcasaarea: ' + this.parentCasaArea.uName);
 
       this.parentCasa.setCasaArea(this.parentCasaArea);
    }
@@ -184,7 +185,7 @@ CasaSystem.prototype.coldStartThings = function() {
    for(var prop in this.things) {
 
       if (this.things.hasOwnProperty(prop)){
-         console.log(this.name + ': Cold starting thing ' + this.things[prop].name);
+         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
          this.things[prop].coldStart();
       }
    }
@@ -193,19 +194,19 @@ CasaSystem.prototype.coldStartThings = function() {
 CasaSystem.prototype.createPeerCasaArea = function() {
    var PeerCasaArea = require('./peercasaarea');
    this.peerCasaArea= new PeerCasaArea({ name: 'peercasaarea:my-peers' });
-   this.casaAreas[this.peerCasaArea.name] = this.peerCasaArea;
-   this.allObjects[this.peerCasaArea.name] = this.peerCasaArea;
+   this.casaAreas[this.peerCasaArea.uName] = this.peerCasaArea;
+   this.allObjects[this.peerCasaArea.uName] = this.peerCasaArea;
 }
 
 CasaSystem.prototype.createChildCasaArea = function(_casas) {
    var ChildCasaArea = require('./childcasaarea');
-   var childCasaArea = new ChildCasaArea({ name: 'childcasaarea:' + this.casa.name + this.areaId});
+   var childCasaArea = new ChildCasaArea({ name: 'childcasaarea:' + this.casa.uName + this.areaId});
 
    this.areaId = (this.areaId + 1) % 100000;
 
-   this.casaAreas[childCasaArea.name] = childCasaArea;
-   this.childCasaAreas[childCasaArea.name] = childCasaArea;
-   this.allObjects[childCasaArea.name] = childCasaArea;
+   this.casaAreas[childCasaArea.uName] = childCasaArea;
+   this.childCasaAreas[childCasaArea.uName] = childCasaArea;
+   this.allObjects[childCasaArea.uName] = childCasaArea;
 
    var len = _casas.length;
 
@@ -220,9 +221,9 @@ CasaSystem.prototype.findCasaArea = function(_areaName) {
 }
 
 CasaSystem.prototype.deleteCasaArea = function(_area) {
-   delete this.casaAreas[_area.name];
-   delete this.allObjects[_area.name];
-   delete this.childCasaAreas[_area.name];
+   delete this.casaAreas[_area.uName];
+   delete this.allObjects[_area.uName];
+   delete this.childCasaAreas[_area.uName];
 
    if (_area == this.parentCasaArea) {
       this.parentCasaArea = null;
@@ -278,12 +279,12 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 }
 
 CasaSystem.prototype.createChildCasa = function(_config, _peers) {
-   console.log('Creating a child casa for casa ' + _config.name);
+   console.log('Creating a child casa for casa ' + _config.uName);
 
    var area = null;
 
    // Resolve area
-   area = this.resolveCasaAreasAndPeers(_config.name, _peers);
+   area = this.resolveCasaAreasAndPeers(_config.uName, _peers);
 
    var ChildCasa = require('./childcasa');
    var childCasa = new ChildCasa(_config);
@@ -292,21 +293,21 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
       childCasa.setCasaArea(area);
    }
 
-   this.remoteCasas[childCasa.name] = childCasa;
-   this.allObjects[childCasa.name] = childCasa;
+   this.remoteCasas[childCasa.uName] = childCasa;
+   this.allObjects[childCasa.uName] = childCasa;
 
    this.setUberCasa(true);
    return childCasa;
 }
 
 CasaSystem.prototype.createPeerCasa = function(_config) {
-   console.log('Creating a peer casa for casa ' + _config.name);
+   console.log('Creating a peer casa for casa ' + _config.uName);
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
    peerCasa.setCasaArea(this.peerCasaArea);
 
-   this.remoteCasas[peerCasa.name] = peerCasa;
-   this.allObjects[peerCasa.name] = peerCasa;
+   this.remoteCasas[peerCasa.uName] = peerCasa;
+   this.allObjects[peerCasa.uName] = peerCasa;
    return peerCasa;
 }
 

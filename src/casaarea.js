@@ -10,20 +10,22 @@ function CasaArea(_config) {
    this.casaCount = 0;
    this.name = _config.name;
 
+   Thing.call(this, _config);
+
    var that = this;
 }
 
 util.inherits(CasaArea, Thing);
 
 CasaArea.prototype.addCasa = function(_casa) {
-   this.casas[_casa.name] = _casa;
+   this.casas[_casa.uName] = _casa;
    this.casaCount++;
 
    this.setupCasaListeners(_casa);
 }
 
 CasaArea.prototype.removeCasa = function(_casa) {
-   delete this.casas[_casa.name];
+   delete this.casas[_casa.uName];
    this.casaCount--;
  
    this.removeCasaListeners(_casa);

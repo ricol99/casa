@@ -3,22 +3,22 @@ var events = require('events');
 var S = require('string');
 var CasaSystem = require('./casasystem');
 
-function PeerSource(_name, _props, _peerCasa) {
-   this.name = _name;
+function PeerSource(_uName, _props, _peerCasa) {
+   this.uName = _uName;
    this.props = _props;
    this.peerCasa = _peerCasa;
    this.sourceEnabled = true;
 
    var casaSys = CasaSystem.mainInstance();
-   var source = casaSys.findSource(_name);
+   var source = casaSys.findSource(_uName);
 
    if (source) {
       this.ghostMode = true;
       this.myRealSource = source;
-      console.log(this.name + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
+      console.log(this.uName + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
    }
    else {
-      casaSys.allObjects[this.name] = this;
+      casaSys.allObjects[this.uName] = this;
    }
    
    events.EventEmitter.call(this);
@@ -31,7 +31,7 @@ function PeerSource(_name, _props, _peerCasa) {
 util.inherits(PeerSource, events.EventEmitter);
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
-   console.log(this.name + ': received changed-property event from peer.');
+   console.log(this.uName + ': received changed-property event from peer.');
 
    // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
    if (this.ghostMode) {
@@ -41,7 +41,7 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
       }
    }
    else {
-      console.info('Property Changed: ' + this.name + ':' + _data.propertyName + ': ' + _data.propertyValue);
+      console.info('Property Changed: ' + this.uName + ':' + _data.propertyName + ': ' + _data.propertyValue);
       this.props[_data.propertyName] = _data.propertyValue;
       this.emit('property-changed', copyData(_data));
    }
@@ -65,7 +65,7 @@ PeerSource.prototype.isPropertyEnabled = function(_property) {
 }
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
-   console.log(this.name + ': Attempting to set source property');
+   console.log(this.uName + ': Attempting to set source property');
    return this.peerCasa.setSourceProperty(this, _propName, _propValue, _data);
 }
 
@@ -81,11 +81,11 @@ PeerSource.prototype.coldStart = function() {
 
          if (this.props.hasOwnProperty(prop)) {
             var sendData = {};
-            sendData.sourceName = this.name;
+            sendData.sourceName = this.uName;
             sendData.propertyName = prop;
             sendData.propertyValue = this.props[prop];
             sendData.coldStart = true;
-            console.info('Property Changed: ' + this.name + ':' + prop + ': ' + sendData.propertyValue);
+            console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.propertyValue);
             this.emit('property-changed', sendData);
          }
       }
@@ -100,7 +100,7 @@ PeerSource.prototype.invalidateSource = function() {
       for(var prop in this.props) {
 
          if (this.props.hasOwnProperty(prop)) {
-            this.emit('invalid', { sourceName: this.name, propertyName: this.props[prop] });
+            this.emit('invalid', { sourceName: this.uName, propertyName: this.props[prop] });
          }
       }
    }

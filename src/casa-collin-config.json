@@ -135,19 +135,21 @@
                "name": "daylight",
                "initialValue": false,
                "writable": false,
-               "binder": {
-                  "name": "topvalidpropertybinder:env-daylight",
-                  "sources": [
-                     {
-                        "source": "thing:dumgoyne-environment",
-                        "sourceProperty": "daylight"
-                     },
-                     {
-                        "source": "thing:timed-environment",
-                        "sourceProperty": "daylight"
-                     }
-                  ]
-               }
+               "transforms": [
+                  {
+                     "name": "topvalidgate:daylight"
+                  }
+               ],
+               "sources": [
+                  {
+                     "source": "thing:dumgoyne-environment",
+                     "sourceProperty": "daylight"
+                  },
+                  {
+                     "source": "thing:timed-environment",
+                     "sourceProperty": "daylight"
+                  }
+               ]
             },
             {
                "name": "background-lights",

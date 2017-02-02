@@ -21,7 +21,7 @@ function PeerCasaService(_config) {
    this.casa = this.casaSys.casa;
 
    this.listeningPort = this.casa.listeningPort;
-   this.name = this.casa.name;
+   this.uName = this.casa.uName;
    this.id = this.casa.id;
 
    if (!process.env.INTERNETCASA) {
@@ -36,9 +36,9 @@ function PeerCasaService(_config) {
          console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
          if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
-            (service.name != that.casa.name && !that.casaSys.remoteCasas[service.name])) {
+            (service.name != that.casa.uName && !that.casaSys.remoteCasas[service.name])) {
 
-            if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.name != service.name)) {
+            if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.uName != service.name)) {
                // Found a peer
                var config  = {
                   name: service.name,
@@ -47,10 +47,10 @@ function PeerCasaService(_config) {
                };
 
                // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-               if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.name)) {
+               if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.uName)) {
                   var peerCasa = that.casaSys.createPeerCasa(config);
                   peerCasa.start();
-                  console.log('New peer casa: ' + peerCasa.name);
+                  console.log('New peer casa: ' + peerCasa.uName);
                }
             }
          }
@@ -66,7 +66,7 @@ function PeerCasaService(_config) {
 
 PeerCasaService.prototype.createAdvertisement = function() {
    try {
-     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.name, txtRecord: { id: this.id, gang: this.gang }});
+     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang }});
      this.ad.on('error', function(err) {
         console.log('Not advertising service! Error: ' + err);
      });

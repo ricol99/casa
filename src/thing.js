@@ -4,7 +4,6 @@ var Source = require('./source');
 function Thing(_config) {
    this.displayName = _config.displayName;
    this.things = {};
-   this.thingType = _config.type;
 
    Source.call(this, _config);
 }
@@ -20,7 +19,7 @@ Thing.prototype.setParent = function(_thing) {
 };
 
 Thing.prototype.addThing = function(_thing) {
-   this.things[_thing.name] = _thing;
+   this.things[_thing.uName] = _thing;
 };
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {

@@ -12,7 +12,7 @@ function ChildCasaArea(_config) {
    var that = this;
 
    this.broadcastListener = function(_message) {
-      console.log(that.name + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+      console.log(that.uName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
       // Broadcast to all my siblings
       for(var prop in that.casaSys.childCasaAreas) {
@@ -22,7 +22,7 @@ function ChildCasaArea(_config) {
 
             // Is the area a sibling?
             if (childCasaArea != that) {
-               console.log(that.name + ': Broadcasting to child area ' + childCasaArea.name);
+               console.log(that.uName + ': Broadcasting to child area ' + childCasaArea.uName);
                childCasaArea.broadcastMessage(_message);
             }
          }
@@ -38,11 +38,11 @@ function ChildCasaArea(_config) {
    };
 
    this.forwardRequestListener = function(_data) {
-      console.log(that.name + ': Forward event request from child. Source: ' + _data.data.sourceName);
+      console.log(that.uName + ': Forward event request from child. Source: ' + _data.data.sourceName);
    };
 
    this.forwardResponseListener = function(_data) {
-      console.log(that.name + ': Forward event response from child. Source: ' + _data.data.sourceName);
+      console.log(that.uName + ': Forward event response from child. Source: ' + _data.data.sourceName);
    };
 }
 

@@ -34,7 +34,7 @@ function TexecomAlarm(_config) {
    this.pollingTolerance = 30000;   // ms
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;
 
-   this.decoders = { 2: new ContactIdProtocol("contactid:"+this.name), 3: new SIAProtocol("sia:"+this.name) };
+   this.decoders = { 2: new ContactIdProtocol("contactid:"+this.uName), 3: new SIAProtocol("sia:"+this.uName) };
 
    var that = this;
 }
@@ -43,7 +43,7 @@ util.inherits(TexecomAlarm, Thing);
 
 TexecomAlarm.prototype.newConnection = function(_socket) {
    var that = this;
-   console.log(this.name + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
+   console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
   _socket.on('data', function (_data) {
      console.log("DATA:",_data);
@@ -53,7 +53,7 @@ TexecomAlarm.prototype.newConnection = function(_socket) {
      }
 
      if (_data.slice(-2) != '\r\n') {
-        console.log(that.name + ": Ignoring line with missing terminator");
+        console.log(that.uName + ": Ignoring line with missing terminator");
         return;
      }
      var newData = _data.slice(0,-2);
@@ -66,7 +66,7 @@ TexecomAlarm.prototype.newConnection = function(_socket) {
         handleMessage(that, _socket, message, newData);
      }
      else {
-        console.log(that.name + ": Unhandled Message");
+        console.log(that.uName + ": Unhandled Message");
      }
   });
 };
@@ -105,23 +105,23 @@ function handlePollEvent(_this, _socket, _data) {
    _socket.write(buf);
    
    if (_this.pollsMissed > 0) {
-      console.log(_this.name + ": Polling recovered (within tolerance) with Texecom alarm!");
+      console.log(_this.uName + ": Polling recovered (within tolerance) with Texecom alarm!");
       _this.pollsMissed = 0;
    }
 
-   _this.updateProperty('ACTIVE', true, { sourceName: _this.name });
+   _this.updateProperty('ACTIVE', true, { sourceName: _this.uName });
 
    // More props to update here!  XXXX
    if (flags & FLAG_AC_FAILURE) {
-      console.log(_this.name + ": Poll event received AC Failure");
+      console.log(_this.uName + ": Poll event received AC Failure");
    }
 
    if (flags & FLAG_BATTERY_FAILURE) {
-      console.log(_this.name + ": Poll event received Battery Failure");
+      console.log(_this.uName + ": Poll event received Battery Failure");
    }
 
    if (flags & FLAG_ARMED) {
-      console.log(_this.name + ": Poll event received Alarm armed");
+      console.log(_this.uName + ": Poll event received Alarm armed");
    }
 
    info = {
@@ -141,7 +141,7 @@ function handleMessage(_this, _socket, _message, _data) {
    console.log("%s: a/c %s area %d %s %s %d %s" , _message.protocol, _message.accountNumber, _message.area, _message.event, _message.valueName, _message.value, _message.extraText);
 
    if (_message.description != undefined) {
-      console.log(_this.name + ": Message description: " + _message.description);
+      console.log(_this.uName + ": Message description: " + _message.description);
    }
 
    // Send ACK
@@ -158,7 +158,7 @@ function handleMessage(_this, _socket, _message, _data) {
    };
 
    if (_message.extraText) {
-      console.log(_this.name + ": Extra message text: " + _message.extraText);
+      console.log(_this.uName + ": Extra message text: " + _message.extraText);
    }
 }
 
@@ -174,8 +174,8 @@ function restartWatchdog(_that) {
 
       if (_this.pollsMissed > _this.maxPollMisses) {
          // Lost connection with alarm
-         console.info(_this.name + ": Lost connection to Texecom Alarm!");
-         _this.updateProperty('ACTIVE', false, { sourceName: _this.name });
+         console.info(_this.uName + ": Lost connection to Texecom Alarm!");
+         _this.updateProperty('ACTIVE', false, { sourceName: _this.uName });
       }
       else {
          restartWatchdog(_this);

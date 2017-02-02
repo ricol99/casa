@@ -1,17 +1,17 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 
-function DebouncingPropertyBinder(_config, _owner) {
+function DebouncingProperty(_config, _owner) {
 
    this.threshold = _config.threshold;
    this.timeoutObj = null;
    this.sourceActive = false;
    this.active = false;
 
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 }
 
-util.inherits(DebouncingPropertyBinder, PropertyBinder);
+util.inherits(DebouncingProperty, Property);
 
 function copyData(_sourceData) {
    var newData = {};
@@ -37,15 +37,15 @@ function startTimer(_that) {
          _this.lastData = null;
       }
 
-      if (!_this.binderEnabled) {
-         PropertyBinder.prototype.sourceIsInvalid.call(_this, _this.invalidData);
+      if (!_this.enabled) {
+         Property.prototype.sourceIsInvalid.call(_this, _this.invalidData);
       }
    }, _that.threshold*1000, _that);
 }
 
-DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+DebouncingProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.propertyValue;
-   console.log(this.name + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
+   console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
 
    if (_data.coldStart) {    // Cold start only once
       this.sourceActive = propValue;
@@ -68,12 +68,12 @@ DebouncingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function
    }
 };
 
-DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.name + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
+DebouncingProperty.prototype.sourceIsInvalid = function(_data) {
+   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
    this.invalidData = copyData(_data);
 
-   if (this.binderEnabled) {
-      this.binderEnabled = false;
+   if (this.enabled) {
+      this.enabled = false;
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -82,4 +82,4 @@ DebouncingPropertyBinder.prototype.sourceIsInvalid = function(_data) {
    }
 };
 
-module.exports = exports = DebouncingPropertyBinder;
+module.exports = exports = DebouncingProperty;
