@@ -1,7 +1,7 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Step = require('./step');
 
-function SmoothTransformPropertyBinder(_config, _owner) {
+function SmootherStep(_config, _owner) {
 
    this.rate = _config.rate;                    // Change allowed per second
    this.resolution = (_config.resolution == undefined) ? 1 : _config.resolution;
@@ -12,10 +12,10 @@ function SmoothTransformPropertyBinder(_config, _owner) {
    this.timeoutObj = null;
    this.cold = true;
 
-   PropertyBinder.call(this, _config, _owner);
+   Step.call(this, _config, _owner);
 }
 
-util.inherits(SmoothTransformPropertyBinder, PropertyBinder);
+util.inherits(SmootherStep, Step);
 
 function copyData(_sourceData) {
    var newData = {};
@@ -39,34 +39,32 @@ function restartTimer(_that) {
    _that.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
-      if (_this.binderEnabled) {
+      if (_this.enabled) {
         var difference = _this.targetValue - _this.value;
 
          if (Math.abs(difference) <= Math.abs(_this.step)) {
-            _this.updatePropertyAfterRead(_this.targetValue, _this.lastData);
+            _this.outputForNextStep(_this.targetValue, _this.lastData);
          }
          else {
-            _this.value += _this.step;
-            _this.updatePropertyAfterRead(_this.floorOutput(_this.value), _this.lastData);
+            var newValue = _this.value + _this.step;
+            _this.outputForNextStep(_this.floorOutput(newValue), _this.lastData);
             restartTimer(_this);
          }
       }
    }, _that.calculatedResolution * 1000, _that);
 }
 
-SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+SmootherStep.prototype.process = function(_value, _data) {
    this.lastData = copyData(_data);
-   var propValue = _data.propertyValue;
 
    if (this.cold) {
       this.cold = false;
-      this.value = propValue;
-      this.updatePropertyAfterRead(propValue, _data);
+      this.outputForNextStep(_value, _data);
    }
-   else if (this.targetValue != propValue) {
-      this.targetValue = propValue;
+   else if (this.targetValue != _value) {
+      this.targetValue = _value;
 
-      var difference = this.targetValue - this.myPropertyValue();
+      var difference = this.targetValue - this.myValue();
 
       var totalTimeToChange = Math.abs(difference) / this.rate;
       var timeToChangeByOne =  totalTimeToChange / Math.abs(difference);
@@ -74,8 +72,7 @@ SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = fun
       this.step = ((difference > 0) ? 1 : -1) * this.resolution;
 
       if (Math.abs(this.targetValue - this.myPropertyValue()) <= Math.abs(this.step)) {
-         this.value = propValue;
-         this.updatePropertyAfterRead(propValue, _data);
+         this.outputForNextStep(_value, _data);
       }
       else {
          restartTimer(this);
@@ -83,4 +80,4 @@ SmoothTransformPropertyBinder.prototype.newPropertyValueReceivedFromSource = fun
    }
 };
 
-module.exports = exports = SmoothTransformPropertyBinder;
+module.exports = exports = SmootherStep;

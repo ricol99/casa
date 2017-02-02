@@ -1,13 +1,13 @@
 var util = require('util');
 var Gpio = require('onoff').Gpio;
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 
-function GPIOPropertyBinder(_config, _owner) {
+function GPIOProperty(_config, _owner) {
 
    this.gpioPin = _config.gpioPin;
    this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
 
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    this.ready = false;
    this.direction = (this.writable) ? 'out' : 'in';
@@ -22,16 +22,16 @@ function GPIOPropertyBinder(_config, _owner) {
  
 }
 
-util.inherits(GPIOPropertyBinder, PropertyBinder);
+util.inherits(GPIOProperty, Property);
 
-GPIOPropertyBinder.prototype.Ready = function() {
+GPIOProperty.prototype.Ready = function() {
    var that = this;
    this.ready = true;
 
    this.gpio.read( function(_err, _value) {
        var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
        that.value = newValue;
-       that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.ownerName, coldStart: true });
+       that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.owner.uName, coldStart: true });
    });
 
    this.gpio.watch(function (_err, _value) {
@@ -45,39 +45,33 @@ GPIOPropertyBinder.prototype.Ready = function() {
          if (newValue != that.value) {
             console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
             that.value = newValue;
-            that.updatePropertyAfterRead((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.sourceName });
+            that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false));
          }
       }
    });
 }
 
-GPIOPropertyBinder.prototype.setProperty = function(_propValue, _data) {
-   return this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
+GPIO.prototype.propertyAboutToChange = function(_propValue, _data) {
+
+   if ((this.direction == 'out' || this.direction == 'inout') && (that.value != _propValue)) {
+      this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
+   }
 }
 
-GPIOPropertyBinder.prototype.set = function(_propValue, _value, _data) {
+GPIO.prototype.set = function(_value, _data) {
    var that = this;
 
    if (this.ready && this.writable) {
-      this.gpio.write(_value, function (err) {
-
-         if (!err) {
-            that.updatePropertyAfterRead(_propValue, _data);
-         }
-      });
-      return true;
-   }
-   else {
-      return false;
+      this.gpio.write(_value);
    }
 }
 
-GPIOPropertyBinder.prototype.coldStart = function() {
+GPIOProperty.prototype.coldStart = function() {
    var that = this;
 
    this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
    this.Ready();
 }
 
-module.exports = exports = GPIOPropertyBinder;
+module.exports = exports = GPIOProperty;
  

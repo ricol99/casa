@@ -1,22 +1,22 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Step = require('./step');
 
-function ThresholdPropertyBinder(_config, _owner) {
+function ThresholdStep(_config, _owner) {
    // Thresholds with buffer must not overlap
    
    this.thresholds = (_config.threshold != undefined) ? [_config.threshold] : _config.thresholds;
    this.buffer = _config.buffer;
    this.activeThreshold = -1;
-   this.lastValue = 0;
    this.cold = true;
+   this.value = 0;
 
-   PropertyBinder.call(this, _config, _owner);
+   Step.call(this, _config, _owner);
 }
 
-util.inherits(ThresholdPropertyBinder, PropertyBinder);
+util.inherits(ThresholdStep, Step);
 
-ThresholdPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   var newPropertyValue = _data.propertyValue;
+ThresholdStep.prototype.process = function(_value, _data) {
+   var newPropertyValue = _value;
 
    if (this.cold) {
       this.cold = false;
@@ -26,8 +26,8 @@ ThresholdPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(
 
          for (var index = 0; index < this.thresholds.length; ++index) {
 
-            if (((this.lastValue >= this.thresholds[index]) && (_data.propertyValue <= this.thresholds[index])) ||
-                ((this.lastValue <= this.thresholds[index]) && (_data.propertyValue >= this.thresholds[index]))) {
+            if (((this.value >= this.thresholds[index]) && (_data.propertyValue <= this.thresholds[index])) ||
+                ((this.value <= this.thresholds[index]) && (_data.propertyValue >= this.thresholds[index]))) {
 
                this.activeThreshold = index;
                break;
@@ -36,8 +36,8 @@ ThresholdPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(
       }
 
       if (this.activeThreshold != -1) {
-         // We are currently buffering
 
+         // We are currently buffering
          if (Math.abs(_data.propertyValue - this.thresholds[this.activeThreshold]) > this.buffer) {
             this.activeThreshold = -1;
          }
@@ -47,8 +47,7 @@ ThresholdPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(
       }
    }
 
-   this.lastValue = newPropertyValue;
-   this.updatePropertyAfterRead(newPropertyValue, _data);
+   this.outputForNextStep(newPropertyValue, _data);
 };
 
-module.exports = exports = ThresholdPropertyBinder;
+module.exports = exports = ThresholdStep;

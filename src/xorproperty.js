@@ -1,17 +1,17 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 
-function XorPropertyBinder(_config, _owner) {
+function XorProperty(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    var that = this;
 }
 
-util.inherits(XorPropertyBinder, PropertyBinder);
+util.inherits(XorProperty, Property);
 
-XorPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+XorProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var allInputsActive = true;
    var oneInputActive = false;
 
@@ -27,7 +27,7 @@ XorPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourc
       }
    }
 
-   this.updatePropertyAfterRead((allInputsActive) ? false : oneInputActive, _data);
+   this.updatePropertyInternal((allInputsActive) ? false : oneInputActive, _data);
 };
 
-module.exports = exports = XorPropertyBinder;
+module.exports = exports = XorProperty;

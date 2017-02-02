@@ -1,15 +1,15 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 
-function TopValidPropertyBinder(_config, _owner) {
+function TopValidProperty(_config, _owner) {
 
    _config.allInputsRequiredForValidity = false;
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    this.highestValidSource = null;
 }
 
-util.inherits(TopValidPropertyBinder, PropertyBinder);
+util.inherits(TopValidProperty, Property);
 
 function findHighestPriorityValidSource(_this) {
    var highestPriorityFound = 99999;
@@ -30,27 +30,27 @@ function findHighestPriorityValidSource(_this) {
    return highestPrioritySource;
 }
 
-TopValidPropertyBinder.prototype.sourceIsInvalid = function(_data) {
+TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 
    if (this.highestValidSource && (this.highestValidSource.sourcePropertyName == _data.sourcePropertyName)) {
       // Current output is based off a now invalid source - rescan
       this.highestValidSource = findHighestPriorityValidSource(this);
 
       if (this.highestValidSource) {
-         this.updatePropertyAfterRead(this.highestValidSource.getPropertyValue(), { sourceName: this.owner.name });
+         this.updatePropertyInternal(this.highestValidSource.getPropertyValue());
       }
    }
 
-   PropertyBinder.prototype.sourceIsInvalid.call(this, _data);
+   Property.prototype.sourceIsInvalid.call(this, _data);
 }
 
-TopValidPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+TopValidProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
 
    this.highestValidSource = findHighestPriorityValidSource(this);
 
    if (_sourceListener == this.highestValidSource) {
-      this.updatePropertyAfterRead(_data.propertyValue, _data);
+      this.updatePropertyInternal(_data.propertyValue, _data);
    }
 };
 
-module.exports = exports = TopValidPropertyBinder;
+module.exports = exports = TopValidProperty;

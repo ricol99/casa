@@ -1,10 +1,11 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 var i2c = require('./ABElectronics_NodeJS_Libraries/lib/adcpi/adcpi');
 
-function I2CPropertyBinder(_config, _owner) {
+// I2C Device
+function I2CProperty(_thing, _config, _owner) {
 
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    this.writable = false;
    this.address1 = _config.address1;
@@ -38,18 +39,21 @@ function I2CPropertyBinder(_config, _owner) {
    this.ignoreCounter = 0;
 }
 
-util.inherits(I2CPropertyBinder, PropertyBinder);
+util.inherits(I2CProperty, Property);
 
-I2CPropertyBinder.prototype.setProperty = function(_propValue, _data) {
-   console.log(this.name + ': Not allowed to set property ' + this.propertyName + ' to ' + _propValue);
+I2CProperty.prototype.setProperty = function(_propValue, _data) {
+   console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;
 }
 
-I2CPropertyBinder.prototype.coldStart = function() {
+I2CProperty.prototype.coldStart = function() {
    this.wire = new ADCPi(this.address1, this.address2, 18);
-
    startScanning(this);
 }
+
+// ====================
+// NON_EXPORTED METHODS
+// ====================
 
 function trimInputReading(_this, _inputReading) {
 
@@ -93,10 +97,10 @@ function transformInputReading(_this, _inputReading) {
 }
 
 function publishNewPropertyValue(_this, _inputReading, _propertyValue) {
-   console.log(_this.name + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
+   console.log(_this.uName + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
    _this.previousInputReading = _inputReading;
    _this.previousOutputValue = _propertyValue;
-   _this.updatePropertyAfterRead(_propertyValue, { sourceName: _this.ownerName });
+   _this.updatePropertyInternal(_propertyValue);
 }
 
 function startScanning(_this) {
@@ -125,7 +129,7 @@ function startScanning(_this) {
             }
             else {
                _that.ignoreCounter = 0;
-               console.log(_that.name + ': Ignored reading for too many intervals, accepting new value');
+               console.log(_that.uName + ': Ignored reading for too many intervals, accepting new value');
                publishNewPropertyValue(_that, inputReading, outputValue);
             }
          }
@@ -143,5 +147,5 @@ function stopScanning(_this) {
    }
 }
 
-module.exports = exports = I2CPropertyBinder;
+module.exports = exports = I2CProperty;
  

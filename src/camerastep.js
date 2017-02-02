@@ -1,22 +1,22 @@
 var http = require('http');
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Step = require('./thing');
 
-function SpyCameraBinder(_config, _owner) {
+function Camera(_config) {
 
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };
    this.id = _config.cameraId;
 
-   PropertyBinder.call(this, _config, _owner);
-
-   var that = this;
+   Step.call(this, _config);
 }
 
-SpyCameraBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   console.log(this.name + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
+util.inherits(Camera, Step);
+
+Camera.prototype.process = function(_value, _data) {
+   console.log(this.type + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _value);
 
    // https active request
-   if (_data.propertyValue) {
+   if (_value) {
       this.options.path = '/++ssControlActiveMode?cameraNum=' + this.id;
    }
    else {
@@ -30,10 +30,7 @@ SpyCameraBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceL
       console.log("Got error: " + e.message);
    });
 
-   this.updatePropertyAfterRead(_data.propertyValue, _data);
+   this.outputForNextStep(_value, _data);
 }
 
-
-util.inherits(SpyCameraBinder, PropertyBinder);
-
-module.exports = exports = SpyCameraBinder;
+module.exports = exports = Camera;

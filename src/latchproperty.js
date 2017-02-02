@@ -1,7 +1,7 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 
-function LatchingPropertyBinder(_config, _owner) {
+function LatchProperty(_config, _owner) {
 
    this.minOutputTime = _config.minOutputTime;
 
@@ -13,7 +13,7 @@ function LatchingPropertyBinder(_config, _owner) {
       _config.inputMap = _config.controller.inputMap;
   }
 
-   PropertyBinder.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    this.minOutputTimeObj = null;
    this.sourceActive = false;
@@ -22,7 +22,103 @@ function LatchingPropertyBinder(_config, _owner) {
    this.lastData = null;
 }
 
-util.inherits(LatchingPropertyBinder, PropertyBinder);
+util.inherits(LatchProperty, Property);
+
+LatchProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+   var propValue = _data.propertyValue;
+   this.lastData = _data;
+
+   if (propValue) {
+      console.log(this.uName + ': target ' + _data.sourceName + ' active!');
+      this.sourceActive = true;
+   
+      if (this.minOutputTime != undefined) {
+         restartTimer(this);
+         this.active = true;
+         this.updatePropertyInternal(propValue, _data);
+         return;
+      }
+      else if (this.controllerActive) {
+         this.active = true;
+         this.updatePropertyInternal(propValue, _data);
+         return;
+      }
+   }
+   else {
+      console.log(this.uName + ': target ' + _data.sourceName + ' inactive!');
+      this.sourceActive = false;
+
+      if (this.active) {
+
+         if (this.minOutputTime != undefined) {
+
+            // Destination is active. If there is no timer, deactivate. Else, let the timer do it
+            if (this.minOutputTimeObj == null) {
+               this.active = false;
+               this.updatePropertyInternal(false, _data);
+               return;
+            }
+         }
+      }
+      else {
+         this.active = false;
+         this.updatePropertyInternal(false, _data);
+         return;
+      }
+   }
+}
+
+LatchProperty.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
+   this.controllerActive = _data.propertyValue;
+
+   if (this.controllerActive) {
+      if (!this.active && this.sourceActive) {
+
+         if (this.lastData) {
+            this.active = true;
+            this.updatePropertyInternal(true, this.lastData);
+            this.lastData = null;
+            return;
+         }
+      }
+   }
+   else {
+      if (this.active) {
+
+         if (this.lastData) {
+            this.active = false;
+            this.updatePropertyInternal(false, this.lastData);
+            this.lastData = null;
+            return;
+         }
+      }
+   }
+}
+   
+// ====================
+// NON_EXPORTED METHODS
+// ====================
+
+function restartTimer(_this) {
+
+   if (_this.minOutputTimeObj) {
+      clearTimeout(_this.minOutputTimeObj);
+   }
+
+   _this.minOutputTimeObj = setTimeout(function(_that) {
+      _that.minOutputTimeObj = null;
+
+      if (!_that.sourceActive) {
+         _that.active = false;
+
+         if (_that.lastData) {
+            _that.updatePropertyInternal(false, _that.lastData);
+            _that.lastData = null;
+            return;
+         }
+      }
+   }, _this.minOutputTime*1000, _this);
+}
 
 function copyData(_sourceData) {
    var newData = {};
@@ -37,96 +133,4 @@ function copyData(_sourceData) {
    return newData;
 }
 
-LatchingPropertyBinder.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   var propValue = _data.propertyValue;
-   this.lastData = _data;
-
-   if (propValue) {
-      console.log(this.name + ': target ' + _data.sourceName + ' active!');
-      this.sourceActive = true;
-   
-      if (this.minOutputTime != undefined) {
-         this.restartTimer();
-         this.active = true;
-         this.updatePropertyAfterRead(propValue, _data);
-         return;
-      }
-      else if (this.controllerActive) {
-         this.active = true;
-         this.updatePropertyAfterRead(propValue, _data);
-         return;
-      }
-   }
-   else {
-      console.log(this.name + ': target ' + _data.sourceName + ' inactive!');
-      this.sourceActive = false;
-
-      if (this.active) {
-
-         if (this.minOutputTime != undefined) {
-
-            // Destination is active. If there is no timer, deactivate. Else, let the timer do it
-            if (this.minOutputTimeObj == null) {
-               this.active = false;
-               this.updatePropertyAfterRead(false, _data);
-               return;
-            }
-         }
-      }
-      else {
-         this.active = false;
-         this.updatePropertyAfterRead(false, _data);
-         return;
-      }
-   }
-}
-
-LatchingPropertyBinder.prototype.restartTimer = function() {
-
-   if (this.minOutputTimeObj) {
-      clearTimeout(this.minOutputTimeObj);
-   }
-
-   this.minOutputTimeObj = setTimeout(function(_this) {
-      _this.minOutputTimeObj = null;
-
-      if (!_this.sourceActive) {
-         _this.active = false;
-
-         if (_this.lastData) {
-            _this.updatePropertyAfterRead(false, _this.lastData);
-            _this.lastData = null;
-            return;
-         }
-      }
-   }, this.minOutputTime*1000, this);
-}
-
-LatchingPropertyBinder.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
-   this.controllerActive = _data.propertyValue;
-
-   if (this.controllerActive) {
-      if (!this.active && this.sourceActive) {
-
-         if (this.lastData) {
-            this.active = true;
-            this.updatePropertyAfterRead(true, this.lastData);
-            this.lastData = null;
-            return;
-         }
-      }
-   }
-   else {
-      if (this.active) {
-
-         if (this.lastData) {
-            this.active = false;
-            this.updatePropertyAfterRead(false, this.lastData);
-            this.lastData = null;
-            return;
-         }
-      }
-   }
-}
-   
-module.exports = exports = LatchingPropertyBinder;
+module.exports = exports = LatchProperty;

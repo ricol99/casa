@@ -1,13 +1,13 @@
 var util = require('util');
-var PropertyBinder = require('./propertybinder');
+var Property = require('./property');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 var Forecast = require('forecast.io');
 var Parser = require('cron-parser');
 
-var sunScheduler = null;
+var sunScheduleProperty = null;
 
-function SunScheduler(_latitude, _longitude, _apiKey) {
+function SunScheduleProperty(_latitude, _longitude, _apiKey) {
    this.states = [];
    var that = this;
 
@@ -23,7 +23,7 @@ function SunScheduler(_latitude, _longitude, _apiKey) {
    });
 }
 
-SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _callback) {
+SunScheduleProperty.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _callback) {
    var sunriseDelta = 0;
    var sunsetDelta = 0;
 
@@ -76,7 +76,9 @@ SunScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _c
    });
 }
 
-function SchedulePropertyBinder(_config, _owner) {
+function ScheduleProperty(_config, _owner) {
+
+   Property.call(this, _config, _owner);
 
    // Defaults to London
    this.latitude = (_config.latitude) ? _config.latitude : 51.5;
@@ -86,24 +88,27 @@ function SchedulePropertyBinder(_config, _owner) {
    this.startRuleIsSunTime = false;
    this.endRuleIsSunTime = false;
 
-   PropertyBinder.call(this, _config, _owner);
-
    this.writable = false;
    this.events = [];
-   this.currentRamp = {};
+   this.ramps = {};
 
    createEventsFromConfig(this, _config.events);
 
    var that = this;
 
-   if (!sunScheduler) {
-      sunScheduler = new SunScheduler(this.latitude, this.longitude, this.forecastKey);
+   if (!sunScheduleProperty) {
+      sunScheduleProperty = new SunScheduleProperty(this.latitude, this.longitude, this.forecastKey);
    }
 
-   sunScheduler.states.push(this);
+   sunScheduleProperty.states.push(this);
 }
 
-util.inherits(SchedulePropertyBinder, PropertyBinder);
+util.inherits(ScheduleProperty, Property);
+
+ScheduleProperty.prototype.setProperty = function(_propValue, _data) {
+   console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
+   return false;
+}
 
 function copyData(_sourceData) {
    var newData = {};
@@ -118,29 +123,43 @@ function copyData(_sourceData) {
    return newData;
 }
 
-function startRamp(_that) {
+function Ramp(_thing, _propName) {
+   this.thing = _thing;
+   this.propName = _propName;
+}
 
-   if (_that.currentRamp.timer) {
-      clearTimeout(_that.currentRamp.timer);
+Ramp.prototype.start = function( _value, _endValue, _step, _interval, _floorOutput) {
+   this.value = _value;
+   this.endValue = _endValue;
+   this.interval = _interval;
+   this.floorOutput = _floorOutput;
+
+   this.nextInterval();
+};
+
+Ramp.prototype.nextInterval = function() {
+
+   if (this.timer) {
+      clearTimeout(this.timer);
    }
 
-   _that.currentRamp.timer = setTimeout(function(_this) {
-      _this.currentRamp.timer = null;
+   this.timer = setTimeout(function(_this) {
+      _this.timer = null;
 
-      if (_this.binderEnabled) {
-        var difference = Math.abs(_this.currentRamp.endValue - _this.currentRamp.value);
+      if (_this.enabled) {
+        var difference = Math.abs(_this.endValue - _this.value);
 
-         if (difference <= Math.abs(_this.currentRamp.step)) {
-            _this.updatePropertyAfterRead(_this.currentRamp.endValue, { sourceName: _this.ownerName });
+         if (difference <= Math.abs(_this.step)) {
+            _this.thing.updatePropertyInternal(_this.endValue, { sourceName: _this.thing.uName });
          }
          else {
-            _this.currentRamp.value += _this.currentRamp.step;
-            _this.updatePropertyAfterRead(_this.currentRamp.floorOutput(_this.currentRamp.value), { sourceName: _this.ownerName });
-            startRamp(_this);
+            _this.value += _this.step;
+            _this.thing.updatePropertyInternal(_this.floorOutput(_this.value), { sourceName: _this.thing.uName });
+            _this.nextInterval();
          }
       }
-   }, _that.currentRamp.interval * 1000, _that);
-}
+   }, this.interval * 1000, this);
+};
 
 function createEventsFromConfig(_this, _eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
@@ -166,9 +185,10 @@ function createEventsFromConfig(_this, _eventsConfig) {
          eventRuleDelta = 0;
       }
 
-      _this.events.push({ rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                         sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue,
-                         ramp:  _eventsConfig[index].ramp });
+      _this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                          sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue, ramp:  _eventsConfig[index].ramp });
+
+      _this.props[_eventsConfig[index].name] = false;
    }
 }
 
@@ -196,7 +216,7 @@ function lastEventScheduledBeforeNow(_this, _now, _event) {
 
     } catch (err) {
        // Not scheduled during time period
-       console.log(_this.name + ': Error: ' + err.message);
+       console.log(_this.uName + ': Error: ' + err.message);
     }
 
     return (lastScheduled) ? lastScheduled.value : null;
@@ -227,7 +247,7 @@ function determineClosestEvent(_this, _now, _currentClosestEventSchedule, _event
 function scheduleAllJobs(_this, _callback) {
    var that = _this;
 
-   sunScheduler.getSunTimes(_this.latitude, _this.longitude, _this.forecastKey, function(_sunTimes) {
+   sunScheduleProperty.getSunTimes(_this.latitude, _this.longitude, _this.forecastKey, function(_sunTimes) {
       setSunTimes(that, _sunTimes);
 
       for (var index = 0; index < that.events.length; ++index) {
@@ -269,11 +289,11 @@ function setSunTimes(_this, _sunTimes) {
    for (var index = 0; index < eventsLen; ++index) {
 
       if ((typeof _this.events[index].originalRule == 'string') && _sunTimes[_this.events[index].originalRule]) {
-         console.log(_this.name + ': Rule ' + _this.events[index].originalRule + ' is a sun time');
+         console.log(_this.uName + ': Rule ' + _this.events[index].originalRule + ' is a sun time');
          _this.events[index].rule = new Date(_sunTimes[_this.events[index].originalRule]);
          _this.events[index].rule.setTime(_this.events[index].rule.getTime() + (_this.events[index].ruleDelta * 1000));
          _this.events[index].sunTime = true;
-         console.log(_this.name + ': Sun time ' + _this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + _this.events[index].rule);
+         console.log(_this.uName + ': Sun time ' + _this.events[index].originalRule + ' for start of schedule. Actual scheduled time is ' + _this.events[index].rule);
       }
    }
 }
@@ -288,7 +308,7 @@ function resetJob(_this, _event) {
    _event.job = schedule.scheduleJob(_event.rule, function() {
 
       if (_event.ramp == undefined) {
-         that.updatePropertyAfterRead(_event.propertyValue , { sourceName: that.ownerName });
+         that.updatePropertyInternal(_event.propertyValue , { sourceName: that.uName });
       }
       else {
          createNewRamp(that, _event);
@@ -299,23 +319,27 @@ function resetJob(_this, _event) {
 function createNewRamp(_this, _event) {
 
    if (_event.ramp.startValue != undefined) {
-      _this.updatePropertyAfterRead(_event.ramp.startValue , { sourceName: _this.ownerName });
+      _this.updatePropertyInternal(_event.ramp.startValue , { sourceName: _this.uName });
    }
 
-   _this.currentRamp.endValue = _event.ramp.endValue;
-   _this.currentRamp.duration = _event.ramp.duration;
-   _this.currentRamp.step = _event.ramp.step;
-   _this.currentRamp.value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _this.myPropertyValue();
-   _this.currentRamp.floorOutput = (_event.ramp.floorOutput == undefined) ? function(_input) { return Math.floor(_input); } : function(_input) { return _input; };
+   var endValue = _event.ramp.endValue;
+   var duration = _event.ramp.duration;
+   var step = _event.ramp.step;
+   var value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _this.myValue();
+   var floorOutput = (_event.ramp.floorOutput == undefined) ? function(_input) { return Math.floor(_input); } : function(_input) { return _input; };
 
-   var difference = Math.abs(_this.currentRamp.endValue - _this.currentRamp.value);
-   var noOfSteps = difference / Math.abs(_this.currentRamp.step);
-   _this.currentRamp.interval = _this.currentRamp.duration / noOfSteps;
+   var difference = Math.abs(endValue - value);
+   var noOfSteps = difference / Math.abs(step);
+   var interval = duration / noOfSteps;
 
-   startRamp(_this);
+   if (_this.ramps[_event.name] == undefined) {
+      _this.ramps[_event.name] = new Ramp(_this, _event.name);
+   }
+
+   _this.ramps[_event.name].start(value, endValue, step, interval, floorOutput);
 }
 
-SchedulePropertyBinder.prototype.coldStart = function(_event) {
+ScheduleProperty.prototype.coldStart = function(_event) {
    var that = this;
 
    scheduleAllJobs(this, function() {
@@ -337,11 +361,11 @@ SchedulePropertyBinder.prototype.coldStart = function(_event) {
       }
 
       // Set Initial Value
-      console.log(that.name + ": Closest event is " + closestEvent.rule);
+      console.log(that.uName + ": Closest event is " + closestEvent.rule);
       var value = (closestEvent.ramp == undefined) ? closestEvent.propertyValue : closestEvent.ramp.endValue;
-      that.updatePropertyAfterRead(value, { sourceName: that.owner.name, coldStart: true });
+      that.updatePropertyInternal(value, { sourceName: that.uName, coldStart: true });
    });
 }
 
-module.exports = exports = SchedulePropertyBinder;
+module.exports = exports = ScheduleProperty;
  
