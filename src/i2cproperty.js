@@ -3,7 +3,7 @@ var Property = require('./property');
 var i2c = require('./ABElectronics_NodeJS_Libraries/lib/adcpi/adcpi');
 
 // I2C Device
-function I2CProperty(_thing, _config, _owner) {
+function I2CProperty(_config, _owner) {
 
    Property.call(this, _config, _owner);
 

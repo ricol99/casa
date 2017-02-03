@@ -357,14 +357,14 @@ function loadSteps(_this, _config) {
             _this.outputPipeline = step;
 
             if (_this.stepPipeline == null) {
-               this.stepPipeline = _this.outputPipeline;
+               _this.stepPipeline = _this.outputPipeline;
             }
          }
       }
    }
 
    if (step) {
-      step.setNextStep(this);
+      step.setNextStep(_this);
    }
 }
 

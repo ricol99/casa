@@ -621,7 +621,6 @@
                "type": "gpioproperty",
                "gpioPin": 17,
                "triggerLow": true
-               }
             },
             {
                "name": "fire-alarm",

@@ -190,7 +190,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
       }
    }
    
-   Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
+   //Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 

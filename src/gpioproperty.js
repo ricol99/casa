@@ -31,7 +31,7 @@ GPIOProperty.prototype.Ready = function() {
    this.gpio.read( function(_err, _value) {
        var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
        that.value = newValue;
-       that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { sourceName: this.owner.uName, coldStart: true });
+       that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { coldStart: true });
    });
 
    this.gpio.watch(function (_err, _value) {
@@ -51,14 +51,14 @@ GPIOProperty.prototype.Ready = function() {
    });
 }
 
-GPIO.prototype.propertyAboutToChange = function(_propValue, _data) {
+GPIOProperty.prototype.propertyAboutToChange = function(_propValue, _data) {
 
    if ((this.direction == 'out' || this.direction == 'inout') && (that.value != _propValue)) {
       this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
    }
 }
 
-GPIO.prototype.set = function(_value, _data) {
+GPIOProperty.prototype.set = function(_value, _data) {
    var that = this;
 
    if (this.ready && this.writable) {
