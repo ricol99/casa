@@ -68,6 +68,7 @@ GPIOProperty.prototype.set = function(_value, _data) {
 
 GPIOProperty.prototype.coldStart = function() {
    var that = this;
+   console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
 
    this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
    this.Ready();
