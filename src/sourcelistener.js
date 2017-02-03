@@ -8,8 +8,8 @@ function SourceListener(_config, _owner) {
    this.owner = _owner;
    this.sourceName = _config.uName;
 
-   this.inputTransform = _config.inputTransform; 
-   this.inputMap = (_config.inputMap) ? copyData(_config.inputMap) : undefined;
+   this.transform = _config.transform; 
+   this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
 
    this.ignoreSourceUpdates = (_config.ignoreSourceUpdates == undefined) ? false : _config.ignoreSourceUpdates;
    this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
@@ -83,13 +83,13 @@ function transformInput(_this, _data) {
    var input = _data.propertyValue;
    var newInput = input;
 
-   if (_this.inputTransform) {
-      var exp = _this.inputTransform.replace(/\$value/g, "input");
+   if (_this.transform) {
+      var exp = _this.transform.replace(/\$value/g, "input");
       eval("newInput = " + exp);
    }
 
-   if (_this.inputMap && _this.inputMap[newInput] != undefined) {
-      newInput = _this.inputMap[newInput];
+   if (_this.transformMap && _this.transformMap[newInput] != undefined) {
+      newInput = _this.transformMap[newInput];
    }
 
    return newInput;
@@ -121,7 +121,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       this.lastData = copyData(_data);
       this.lastData.sourcePropertyName = this.sourcePropertyName;
 
-      if (this.inputTransform || this.inputMap) {
+      if (this.transform || this.transformMap) {
          this.lastData.propertyValue = transformInput(this, _data);
       }
 

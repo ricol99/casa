@@ -1,5 +1,6 @@
 var util = require('util');
 var HomekitAccessory = require('./hkaccessory');
+var Property = require('./property');
 
 var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
@@ -14,7 +15,7 @@ function HomekitLightAccessory(_config) {
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
 
-   this.props["power"] = false;
+   this.props["power"] = new Property({ name: "power", type: "property", initialValue: false }, this);
 
    var that = this;
 
@@ -32,7 +33,7 @@ function HomekitLightAccessory(_config) {
       });
 
    if (this.brightnessSupported) {
-      this.props["brightness"] = 100; 
+      this.props["brightness"] = new Property({ name: "brightness", type: "property", initialValue: 100 }, this);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -47,7 +48,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.saturationSupported) {
-      this.props["saturation"] = 0; 
+      this.props["saturation"] = new Property({ name: "saturation", type: "property", initialValue: 0 }, this);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -62,7 +63,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.hueSupported) {
-      this.props["hue"] = 0; 
+      this.props["hue"] = new Property({ name: "hue", type: "property", initialValue: 0 }, this);
 
       this.hkAccessory
          .getService(Service.Lightbulb)
@@ -84,7 +85,7 @@ HomekitLightAccessory.prototype.setPower = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
-   return this.props["power"] ? 1 : 0;
+   return this.props["power"].value ? 1 : 0;
 };
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
@@ -93,7 +94,7 @@ HomekitLightAccessory.prototype.setBrightness = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
-   return this.props["brightness"];
+   return this.props["brightness"].value;
 }
 
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
@@ -102,7 +103,7 @@ HomekitLightAccessory.prototype.setSaturation = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
-   return this.props["saturation"];
+   return this.props["saturation"].value;
 }
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
@@ -111,7 +112,7 @@ HomekitLightAccessory.prototype.setHue = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getHue = function() {
-   return this.props["hue"];
+   return this.props["hue"].value;
 }
 
 HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue, _data, _forceUpdate) {

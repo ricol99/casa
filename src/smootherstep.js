@@ -39,7 +39,7 @@ function restartTimer(_that) {
    _that.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
-      if (_this.enabled) {
+      if (_this.valid) {
         var difference = _this.targetValue - _this.value;
 
          if (Math.abs(difference) <= Math.abs(_this.step)) {
@@ -64,14 +64,14 @@ SmootherStep.prototype.process = function(_value, _data) {
    else if (this.targetValue != _value) {
       this.targetValue = _value;
 
-      var difference = this.targetValue - this.myValue();
+      var difference = this.targetValue - this.value;
 
       var totalTimeToChange = Math.abs(difference) / this.rate;
       var timeToChangeByOne =  totalTimeToChange / Math.abs(difference);
       this.calculatedResolution = timeToChangeByOne * this.resolution;
       this.step = ((difference > 0) ? 1 : -1) * this.resolution;
 
-      if (Math.abs(this.targetValue - this.myPropertyValue()) <= Math.abs(this.step)) {
+      if (Math.abs(this.targetValue - this.value) <= Math.abs(this.step)) {
          this.outputForNextStep(_value, _data);
       }
       else {

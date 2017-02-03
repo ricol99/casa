@@ -34,7 +34,7 @@ function Casa(_config) {
    this.sourceListeners = {};
    this.workers = [];
    this.uber = false;
-   this.sourceEnabled = true;
+   this.valid = true;
 
    //storage.initSync();
 
@@ -69,7 +69,7 @@ util.inherits(Casa, events.EventEmitter);
 
 Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};
-   this.config.uName = _config.uName;
+   this.config.name = _config.name;
    this.config.displayName = _config.displayName;
    if (_config.gang) this.config.gang = _config.gang;
    this.config.sources = [];
@@ -77,13 +77,13 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 
    var len = _config.things.length;
    for (var j = 0; j < len; ++j) {
-      this.config.sources.push(_config.things[j].uName);
+      this.config.sources.push(_config.things[j].name);
       this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 
    var len = _config.users.length;
    for (var k = j; k < len + j; ++k) {
-      this.config.sources.push(_config.users[k-j].uName);
+      this.config.sources.push(_config.users[k-j].name);
       this.config.sourcesStatus.push({ properties: {}, status: false });
    }
 }
@@ -230,8 +230,17 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
    this.config.sourcesStatus = [];
 
    var i = 0;
+
    for(var prop in this.config.sources) {
-      this.config.sourcesStatus.push({ properties: this.sources[this.config.sources[i]].props,
+      var allProps = {};
+
+      var props = this.sources[this.config.sources[i]].props
+
+      for (var name in props) {
+         allProps[name] = props[name].value;
+      }
+
+      this.config.sourcesStatus.push({ properties: allProps,
                                        status: this.sources[this.config.sources[i++]].isActive() });
    }
 }

@@ -42,8 +42,8 @@ DebounceProperty.prototype.sourceIsInvalid = function(_data) {
    console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
    this.invalidData = copyData(_data);
 
-   if (this.enabled) {
-      this.enabled = false;
+   if (this.valid) {
+      this.valid = false;
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -80,7 +80,7 @@ function startTimer(_that) {
          _this.lastData = null;
       }
 
-      if (!_this.enabled) {
+      if (!_this.valid) {
          Property.prototype.sourceIsInvalid.call(_this, _this.invalidData);
       }
    }, _that.threshold*1000, _that);

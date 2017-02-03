@@ -10,7 +10,7 @@ function Step(_config, _owner) {
    this.value = 0;
    this.lastData = null;
   
-   this.enabled = true;
+   this.valid = true;
    this.cold = true;
 }
 
@@ -37,8 +37,8 @@ Step.prototype.outputForNextStep = function(_outputValue, _data) {
    this.value = _outputValue;
    this.lastData = copyData(_data);
 
-   if (this.sourceStep) {
-      this.this.updatePropertyInternal(_outputValue, _data);
+   if (this.sourceStep != undefined) {
+      this.owner.updatePropertyInternal(_outputValue, _data);
    }
    else {
       this.nextStep.process(_outputValue, _data);

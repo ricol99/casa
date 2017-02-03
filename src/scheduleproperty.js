@@ -123,14 +123,15 @@ function copyData(_sourceData) {
    return newData;
 }
 
-function Ramp(_thing, _propName) {
-   this.thing = _thing;
+function Ramp(_owner, _propName) {
+   this.owner = _owner;
    this.propName = _propName;
 }
 
-Ramp.prototype.start = function( _value, _endValue, _step, _interval, _floorOutput) {
+Ramp.prototype.start = function(_value, _endValue, _step, _interval, _floorOutput) {
    this.value = _value;
    this.endValue = _endValue;
+   this.step = _step;
    this.interval = _interval;
    this.floorOutput = _floorOutput;
 
@@ -146,15 +147,15 @@ Ramp.prototype.nextInterval = function() {
    this.timer = setTimeout(function(_this) {
       _this.timer = null;
 
-      if (_this.enabled) {
+      if (_this.owner.valid) {
         var difference = Math.abs(_this.endValue - _this.value);
 
          if (difference <= Math.abs(_this.step)) {
-            _this.thing.updatePropertyInternal(_this.endValue, { sourceName: _this.thing.uName });
+            _this.owner.updatePropertyInternal(_this.endValue, { sourceName: _this.owner.uName });
          }
          else {
             _this.value += _this.step;
-            _this.thing.updatePropertyInternal(_this.floorOutput(_this.value), { sourceName: _this.thing.uName });
+            _this.owner.updatePropertyInternal(_this.floorOutput(_this.value), { sourceName: _this.owner.uName });
             _this.nextInterval();
          }
       }
@@ -187,8 +188,6 @@ function createEventsFromConfig(_this, _eventsConfig) {
 
       _this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
                           sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue, ramp:  _eventsConfig[index].ramp });
-
-      _this.props[_eventsConfig[index].name] = false;
    }
 }
 
@@ -319,13 +318,13 @@ function resetJob(_this, _event) {
 function createNewRamp(_this, _event) {
 
    if (_event.ramp.startValue != undefined) {
-      _this.updatePropertyInternal(_event.ramp.startValue , { sourceName: _this.uName });
+      _this.updatePropertyInternal(_event.ramp.startValue);
    }
 
    var endValue = _event.ramp.endValue;
    var duration = _event.ramp.duration;
    var step = _event.ramp.step;
-   var value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _this.myValue();
+   var value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _this.rawProperyValue;
    var floorOutput = (_event.ramp.floorOutput == undefined) ? function(_input) { return Math.floor(_input); } : function(_input) { return _input; };
 
    var difference = Math.abs(endValue - value);

@@ -7,7 +7,7 @@ function PeerSource(_uName, _props, _peerCasa) {
    this.uName = _uName;
    this.props = _props;
    this.peerCasa = _peerCasa;
-   this.sourceEnabled = true;
+   this.valid = true;
 
    var casaSys = CasaSystem.mainInstance();
    var source = casaSys.findSource(_uName);
@@ -60,7 +60,7 @@ function copyData(_sourceData) {
    return newData;
 }
 
-PeerSource.prototype.isPropertyEnabled = function(_property) {
+PeerSource.prototype.isPropertyValid = function(_property) {
    return true;
 }
 
@@ -95,7 +95,7 @@ PeerSource.prototype.coldStart = function() {
 PeerSource.prototype.invalidateSource = function() {
 
    if (!this.ghostMode) {
-      this.sourceEnabled = false;
+      this.valid = false;
 
       for(var prop in this.props) {
 

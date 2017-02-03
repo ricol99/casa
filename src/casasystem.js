@@ -106,19 +106,19 @@ CasaSystem.prototype.extractUsers = function() {
    if (this.config.users) {
 
       this.config.users.forEach(function(user) { 
-         var User = that.cleverRequire(user.uName);
+         var User = that.cleverRequire(user.name);
          user.owner = that;
          var userObj = new User(user);
          that.users[userObj.uName] = userObj;
          that.allObjects[userObj.uName] = userObj;
-         console.log('New user: ' + user.uName);
+         console.log('New user: ' + userObj.uName);
       });
    }
 }
 
 // Extract Things
 CasaSystem.prototype.createThing = function(_config, _parent) {
-   var Thing = this.cleverRequire(_config.uName);
+   var Thing = this.cleverRequire(_config.name);
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
    this.things[thingObj.uName] = thingObj;
@@ -154,7 +154,7 @@ CasaSystem.prototype.mergeConfigs = function() {
 }
 
 CasaSystem.prototype.extractCasa = function() {
-   var Casa = this.cleverRequire(this.config.uName);
+   var Casa = this.cleverRequire(this.config.name);
    var casaObj = new Casa(this.config);
    this.allObjects[casaObj.uName] = casaObj;
    this.casa = casaObj;

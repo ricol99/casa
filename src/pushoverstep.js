@@ -3,21 +3,21 @@ var Step = require('./step');
 var push = require( 'pushover-notifications' );
 var CasaSystem = require('./casasystem');
 
-function Pushover(_config) {
+function PushoverStep(_config, _owner) {
    this.messagePriority = (_config.priority) ? _config.priority : 0;
 
    var casaSys = CasaSystem.mainInstance();
    this.userGroup = casaSys.findSource(_config.userGroup);
 
-   Step.call(this, _config);
+   Step.call(this, _config, _owner);
 
    this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
                                   token: 'ac7TcmTptiV3Yrh6MZ93xGQsfxp2mV' });
 }
 
-util.inherits(Pushover, Step);
+util.inherits(PushoverStep, Step);
 
-Pushover.prototype.process = function(_value, _data) {
+PushoverStep.prototype.process = function(_value, _data) {
 
    if (_data.coldStart) {
       return;
@@ -46,5 +46,5 @@ Pushover.prototype.process = function(_value, _data) {
    this.outputForNextStep(_value, _data);
 }
 
-module.exports = exports = Pushover;
+module.exports = exports = PushoverStep;
 

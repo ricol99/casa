@@ -34,7 +34,7 @@ function restartTimer(_that) {
    _that.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
-      if (_this.binderEnabled) {
+      if (_this.valid) {
          var that2 = _this;
 
          ping.sys.probe(_this.host, function(_isAlive) {

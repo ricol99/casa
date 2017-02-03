@@ -38,7 +38,7 @@
                "writable": false,
                "source": "thing:dumgoyne-sensors",
                "sourceProperty": "light-sensor",
-               "inputTransform": "$value*$value"
+               "transform": "$value*$value"
             }
          ]
       },
@@ -139,7 +139,7 @@
                "type": "scheduleproperty",
                "source": "thing:dumgoyne-environment",
                "sourceProperty": "daylight",
-               "inputTransform": "!$value",
+               "transform": "!$value",
                "events": [
                   {
                      "rule": "30 22 * * *",
@@ -216,7 +216,7 @@
                   {  
                      "name": "room:kitchen",
                      "property": "brightness",
-                     "inputTransform": "$value>0"
+                     "transform": "$value>0"
                   } 
                ]
             }
@@ -345,7 +345,7 @@
                   {
                      "name": "room:lounge",
                      "property": "brightness",
-                     "inputTransform": "$value>0"
+                     "transform": "$value>0"
                   }
                ]
             }

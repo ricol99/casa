@@ -7,8 +7,8 @@ function LatchProperty(_config, _owner) {
 
    if (_config.controller) {
       _config.ignoreTargetUpdates = false;
-      _config.target = _config.controller.source;
-      _config.targetProperty = _config.controller.sourceProperty;
+      _config.target = _config.controller.name;
+      _config.targetProperty = _config.controller.property;
       _config.inputTransform = _config.controller.inputTransform;
       _config.inputMap = _config.controller.inputMap;
   }

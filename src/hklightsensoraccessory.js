@@ -1,5 +1,6 @@
 var util = require('util');
 var HomekitAccessory = require('./hkaccessory');
+var Property = require('./property');
 
 var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
@@ -10,7 +11,7 @@ function HomekitLightSensorAccessory(_config) {
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-light-accessory";
 
-   this.props["light-level"] = 1;
+   this.props["light-level"] = new Property({ name: "light-level", type: "property", initialValue: 1 }, this);
 
    var that = this;
 
@@ -25,7 +26,7 @@ function HomekitLightSensorAccessory(_config) {
 util.inherits(HomekitLightSensorAccessory, HomekitAccessory);
 
 HomekitLightSensorAccessory.prototype.getCurrentLightLevel = function() {
-   return this.props["light-level"];
+   return this.props["light-level"].value;
 };
 
 HomekitLightSensorAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
@@ -41,12 +42,4 @@ HomekitLightSensorAccessory.prototype.updateProperty = function(_propName, _prop
 };
 
 module.exports = exports = HomekitLightSensorAccessory;
-
-// To inform HomeKit about changes occurred outside of HomeKit (like user physically turn on the light)
-// Please use Characteristic.updateValue
-// 
-// lightAccessory
-//   .getService(Service.LightSensor)
-//   .getCharacteristic(Characteristic.On)
-//   .updateValue(true);
 

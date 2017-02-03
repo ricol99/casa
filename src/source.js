@@ -5,14 +5,14 @@ var Property = require('./property');
 
 function Source(_config) {
    this.uName = _config.name;
-   this.sourceEnabled = true;
+   this.valid = true;
 
    this.setMaxListeners(50);
 
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
 
-   this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', owner: this, initialValue: false }) };
+   this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', owner: this, initialValue: false }, this) };
 
    if (_config.props) {
       var propLen = _config.props.length;
@@ -20,12 +20,14 @@ function Source(_config) {
       for (var i = 0; i < propLen; ++i) {
          var Prop = Property;
 
-         if ((_config.props[i].type == undefined) {
-            _config.props[i].type = 'property');
+         if (_config.props[i].type == undefined) {
+            _config.props[i].type = 'property';
+         }
+         else {
             Prop = require('./'+_config.props[i].type);
          }
 
-         this.props[_config.props[i].name] = new Prop(_config.props[i]);
+         this.props[_config.props[i].name] = new Prop(_config.props[i], this);
       }
    }
 
@@ -40,13 +42,13 @@ function Source(_config) {
 util.inherits(Source, events.EventEmitter);
 
 Source.prototype.isActive = function() {
-   return this.props['ACTIVE'];
+   return this.props['ACTIVE'].value;
 }
 
-Source.prototype.isPropertyEnabled = function(_property) {
+Source.prototype.isPropertyValid = function(_property) {
 
-   if (this.propBinders[_property]) {
-      return this.propBinders[_property].enabled;
+   if (this.props[_property] != undefined) {
+      return this.props[_property].valid;
    }
    else {
       return true;
@@ -78,7 +80,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
    if (prop && (prop.value != _data.propertyValue)) {
 
       // Only update if the property has no processing attached to it
-      if (prop.type === 'property' && !prop.stepPipeline && !prop.hasSourceOutputValues);
+      if (prop.type === 'property' && !prop.stepPipeline && !prop.hasSourceOutputValues) {
          return prop.setProperty(_data.propertyValue, _data);
       }
    }
@@ -97,7 +99,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    // Call the final hook
    this.propertyAboutToChange(_propName, _propValue, _data);
 
-   var oldValue = this.props[_propName];
+   var oldValue = this.props[_propName].value;
    this.props[_propName].value = _propValue;
    var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.uName;
@@ -121,11 +123,11 @@ function copyData(_sourceData) {
 }
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {
-   console.log(this.uName + ": Going invalid! Previously active state=" + this.props['ACTIVE']);
+   console.log(this.uName + ": Going invalid! Previously active state=" + this.props['ACTIVE'].value);
 
    var sendData = _sourceData;
    sendData.sourceName = this.uName;
-   sendData.oldState = this.props['ACTIVE'];
+   sendData.oldState = this.props['ACTIVE'].value;
    this.props['ACTIVE'].value = false;	// XXX TODO Should this be setProperty()?
    sendData.propertyName = _propName;
    console.log(this.uName + ": Emitting invalid!");

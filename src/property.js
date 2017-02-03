@@ -14,6 +14,9 @@ function Property(_config, _owner) {
    this.value = _config.initialValue;
    this.rawProperyValue = _config.initialValue;
 
+   this.outputTransform = _config.outputTransform;
+   this.outputMap = (_config.outputMap) ? copyData(_config.outputMap) : undefined;
+
    this.valid = false;
    this.manualMode = false;
    this.cold = true;
@@ -25,7 +28,7 @@ function Property(_config, _owner) {
    this.noOfSources = 0;
 
    if (_config.source) {
-      _config.sources = [{ uName: _config.source, property: _config.sourceProperty }];
+      _config.sources = [{ name: _config.source, property: _config.sourceProperty, uName: _config.source+":"+_config.sourceProperty }];
    }
 
    if (_config.sources) {
@@ -33,7 +36,7 @@ function Property(_config, _owner) {
       this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
-         this.hasSourceOutputValues ||= (_config.sources[index].outputValues != undefined);
+         this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].outputValues != undefined);
 
          if (_config.sources[index].priority == undefined) {
             _config.sources[index].priority = index;
@@ -90,10 +93,20 @@ Property.prototype.myValue = function() {
 // Use updatePropertyInternal() to kick off step pipleline
 //
 Property.prototype.process = function(_newValue, _data) {
+
+   if (_data == undefined) {
+      _data = { sourceName: this.owner.uName };
+   }
+
    var actualOutputValue = transformNewPropertyValueBasedOnSource(this, _newValue, _data);
 
    if (this.myValue() !== actualOutputValue || this.cold) {
-      this.cold = false;
+
+      if (this.cold) {
+         _data.coldStart = true;
+         this.cold = false;
+      }
+
       this.propertyAboutToChange(actualOutputValue, _data);
       this.owner.updateProperty(this.name, actualOutputValue, _data);
    }
@@ -102,7 +115,11 @@ Property.prototype.process = function(_newValue, _data) {
 // Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.rawProperyValue = _newPropValue;
-   ((this.stepPipeline) ? this.stepPipeline : this).process(_data.propertyValue);
+
+   if (_data == undefined) {
+      _data = { sourceName: this.owner.uName };
+   }
+   ((this.stepPipeline) ? this.stepPipeline : this).process(_newPropValue, _data);
 };
 
 //
@@ -165,12 +182,12 @@ Property.prototype.amIValid = function() {
    if (this.allSourcesRequiredForValidity) {
 
       return (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-            return _sourceListener.sourceListenerEnabled;
+            return _sourceListener.valid;
       }));
    }
    else {
       return (anyAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-            return _sourceListener.sourceListenerEnabled;
+            return _sourceListener.valid;
       }));
    }
 };
@@ -183,7 +200,7 @@ Property.prototype.amIValid = function() {
 //
 Property.prototype.sourceIsValid = function(_data) {
 
-   var oldEnabled = this.valid;
+   var oldValid = this.valid;
    this.valid = this.amIValid();
 
    this.target = (this.targetListener) ? this.targetListener.source : null;
@@ -195,7 +212,7 @@ Property.prototype.sourceIsValid = function(_data) {
       this.listening = true;
    }
 
-   if (!oldEnabled && this.valid) {
+   if (!oldValid && this.valid) {
       this.sourcePropertyChanged(_data);
    }
 }
@@ -208,11 +225,11 @@ Property.prototype.sourceIsValid = function(_data) {
 //
 Property.prototype.sourceIsInvalid = function(_data) {
 
-   var oldEnabled = this.valid;
+   var oldValid = this.valid;
    this.valid = this.amIValid();
 
    // Has the valid stated changed from true to false?
-   if (oldEnabled && !this.valid) {
+   if (oldValid && !this.valid) {
       // If so, tell the others guys that I am now invalid
       console.log(this.uName + ': INVALID');
 
@@ -290,7 +307,7 @@ Property.prototype.newPropertyValueReceivedFromTarget = function(_targetListener
 // Override this if you listen to a source that is not "Source".
 // If you listen to a "Source" you will be fired by that Source cold starting
 Property.prototype.coldStart = function(_data) {
-   // DO NOTHING BY DEFAULT
+   this.updatePropertyInternal(this.value, { sourceName: this.owner.uName, coldStart: true });
 };
 
 // ====================
@@ -307,35 +324,41 @@ function loadSteps(_this, _config) {
    var previousStep = null;
    var step = null;
 
-   for (var i = 0; i < _config.inputSteps.length; ++i) {
-      var Step = require('./'+_config.inputSteps[i].type);
-      step = new Step(_this, _config.inputSteps[i]);
-      _this.inputSteps.push(step);
+   if (_config.inputSteps != undefined) {
 
-      if (i > 0) {
-         previousStep.setNextStep(step);
-      }
-      else {
-         _this.stepPipeline = step;
-      }
+      for (var i = 0; i < _config.inputSteps.length; ++i) {
+         var Step = require('./'+_config.inputSteps[i].type);
+         step = new Step(_config.inputSteps[i], _this);
+         _this.inputSteps.push(step);
 
-      previousStep = step;
-   }
+         if (i > 0) {
+            previousStep.setNextStep(step);
+         }
+         else {
+            _this.stepPipeline = step;
+         }
 
-   for (var j = 0; j < _config.outputSteps.length; ++j) {
-      var Step = require('./'+_config.outputSteps[j].type);
-      step = new Step(_this, _config.outputSteps[j]);
-      _this.outputSteps.push(step);
-
-      if (j > 0) {
-         previousStep.setNextStep(step);
          previousStep = step;
       }
-      else {
-         _this.outputPipeline = step;
+   }
 
-         if (_this.stepPipeline == null) {
-            this.stepPipeline = _this.outputPipeline;
+   if (_config.outputSteps != undefined) {
+
+      for (var j = 0; j < _config.outputSteps.length; ++j) {
+         var Step = require('./'+_config.outputSteps[j].type);
+         step = new Step(_config.outputSteps[j], _this);
+         _this.outputSteps.push(step);
+
+         if (j > 0) {
+            previousStep.setNextStep(step);
+            previousStep = step;
+         }
+         else {
+            _this.outputPipeline = step;
+
+            if (_this.stepPipeline == null) {
+               this.stepPipeline = _this.outputPipeline;
+            }
          }
       }
    }
@@ -358,7 +381,7 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
-         if (sourceListener && sourceListener.sourceListenerEnabled && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
          }
@@ -370,21 +393,24 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
 
 function transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data) {
    var actualOutputValue = _newPropValue;
-   var sourceListener = (_data.sourcePropertyName != undefined) ? _this.sourceListeners[_data.sourcePropertyName] : undefined;
 
-   if (sourceListener) {
-      var sourceListenerInCharge = sourceListener;
+   if (_data.sourcePropertyName != undefined) {
+      var sourceListener = (_data.sourcePropertyName != undefined) ? _this.sourceListeners[_data.sourcePropertyName] : undefined;
 
-      if (_this.prioritiseSources) {
-         var highestPrioritySource = findHighestPrioritySource(_this, _newPropValue);
+      if (sourceListener) {
+         var sourceListenerInCharge = sourceListener;
 
-         if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
-            sourceListenerInCharge = highestPrioritySource;
+         if (_this.prioritiseSources) {
+            var highestPrioritySource = findHighestPrioritySource(_this, _newPropValue);
+
+            if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
+               sourceListenerInCharge = highestPrioritySource;
+            }
          }
-      }
 
-      if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
-         actualOutputValue = sourceListenerInCharge.outputValues[actualOutputValue];
+         if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
+            actualOutputValue = sourceListenerInCharge.outputValues[actualOutputValue];
+         }
       }
    }
 
