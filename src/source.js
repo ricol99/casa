@@ -139,7 +139,6 @@ Source.prototype.coldStart = function() {
    for (var prop in this.props) {
 
       if (this.props.hasOwnProperty(prop)) {
-         console.log('AAAAAAAAAAAAAAAAAAAA ',this.props[prop].uName);
          this.props[prop].coldStart();
       }
    }
