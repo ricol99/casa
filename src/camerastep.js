@@ -2,12 +2,12 @@ var http = require('http');
 var util = require('util');
 var Step = require('./thing');
 
-function Camera(_config) {
+function Camera(_config, _owner) {
 
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };
    this.id = _config.cameraId;
 
-   Step.call(this, _config);
+   Step.call(this, _config, _owner);
 }
 
 util.inherits(Camera, Step);
