@@ -50,9 +50,17 @@ function Casa(_config) {
      res.sendFile(__dirname + '/index.html');
    });
 
-   app.get('/source/:source', function(req, res){
-      var s = (that.casaSys.allObjects[req.params.source]) ? that.casaSys.allObjects[req.params.source].props : {};
-      res.json(s);
+   app.get('/source/:source', function(req, res) {
+      var allProps = {};
+
+      if (that.casaSys.allObjects[req.params.source]) {
+
+         for (var name in that.casaSys.allObjects[req.params.source].props) {
+            allProps[name] = that.casaSys.allObjects[req.params.source].props[name].value;
+         }
+      }
+
+      res.json(allProps);
    });
 
    io.on('connection', function(_socket) {

@@ -135,7 +135,7 @@
                   {
                      "name": "casa-alarm",
                      "property": "ACTIVE",
-                     "inputTransform": "!$value"
+                     "transform": "!$value"
                   },
                   {
                      "name": "thing:home-internet-connection",

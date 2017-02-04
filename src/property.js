@@ -98,7 +98,9 @@ Property.prototype.process = function(_newValue, _data) {
       _data = { sourceName: this.owner.uName };
    }
 
-   var actualOutputValue = transformNewPropertyValueBasedOnSource(this, _newValue, _data);
+   checkData(this, _newValue, _data);
+
+   var actualOutputValue = transformNewPropertyValue(this, _newValue, _data);
 
    if (this.myValue() !== actualOutputValue || this.cold) {
 
@@ -119,6 +121,9 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    if (_data == undefined) {
       _data = { sourceName: this.owner.uName };
    }
+
+   checkData(this, _newPropValue, _data);
+
    ((this.stepPipeline) ? this.stepPipeline : this).process(_newPropValue, _data);
 };
 
@@ -490,6 +495,15 @@ function anyAssocArrayElementsDo(_obj, _func) {
       }
    }
    return false;
+}
+
+function checkData(_this, _value, _data) {
+
+   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
+   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
+   if (_data.properyName == undefined) _data.propertyName = _this.name;
+   if (_data.properyValue == undefined) _data.propertyValue = _value;
+
 }
 
 module.exports = exports = Property;
