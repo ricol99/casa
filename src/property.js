@@ -14,8 +14,8 @@ function Property(_config, _owner) {
    this.value = _config.initialValue;
    this.rawProperyValue = _config.initialValue;
 
-   this.outputTransform = _config.outputTransform;
-   this.outputMap = (_config.outputMap) ? copyData(_config.outputMap) : undefined;
+   this.transform = _config.transform;
+   this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
 
    this.valid = false;
    this.manualMode = false;
@@ -422,17 +422,17 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
    var actualOutputValue = transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data);
 
    // Apply Output Transform
-   if (_this.outputTransform || _this.outputMap) {
+   if (_this.transform || _this.transformMap) {
       var output = actualOutputValue;
       var newOutput = output;
 
-      if (_this.outputTransform) {
-         var exp = _this.outputTransform.replace(/\$value/g, "output");
+      if (_this.transform) {
+         var exp = _this.transform.replace(/\$value/g, "output");
          eval("newOutput = " + exp);
       }
 
-      if (_this.outputMap && _this.outputMap[newOutput] != undefined) {
-         newOutput = _this.outputMap[newOutput];
+      if (_this.transformMap && _this.transformMap[newOutput] != undefined) {
+         newOutput = _this.transformMap[newOutput];
       }
 
       actualOutputValue = newOutput;
