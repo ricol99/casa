@@ -60,7 +60,12 @@ SourceListener.prototype.refreshSources = function() {
 
       if (ret) {
          this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
-                                    propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
+                                             propertyName: this.property }));
+
+         if (this.source.getProperty(this.property) != this.sourceRawValue) {
+            this.internalSourcePropertyChanged(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
+                                                          propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
+         }
       }
    }
    return ret;
@@ -120,6 +125,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       // ** TODO Do we need to cache data based on the propertyValue? Not done so far
       this.lastData = copyData(_data);
       this.lastData.sourcePropertyName = this.sourcePropertyName;
+      this.sourceRawValue = _data.propertyValue;
 
       if (this.transform || this.transformMap) {
          this.lastData.propertyValue = transformInput(this, _data);

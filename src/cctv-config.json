@@ -128,6 +128,21 @@
                      "propertyValue": true
                   }
                ]
+            },
+            {
+               "name": "test-source-transform-map",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2",
+                     "transformMap": {
+                        "true": "test-prop-2 is True!",
+                        "false": "test-prop-2 is False!"
+                     }
+                  }
+               ]
             }
          ]
       },

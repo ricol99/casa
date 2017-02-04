@@ -214,12 +214,8 @@ Property.prototype.sourceIsValid = function(_data) {
    this.manualOverrideSource = (this.manualOverrideListener) ? this.manualOverrideListener.source : null;
 
    if (!this.manualOverrideSource) {
-      this.setMan
+      this.setManualMode(false);
       this.listening = true;
-   }
-
-   if (!oldValid && this.valid) {
-      this.sourcePropertyChanged(_data);
    }
 }
 
@@ -313,7 +309,6 @@ Property.prototype.newPropertyValueReceivedFromTarget = function(_targetListener
 // Override this if you listen to a source that is not "Source".
 // If you listen to a "Source" you will be fired by that Source cold starting
 Property.prototype.coldStart = function(_data) {
-   this.updatePropertyInternal(this.value, { sourceName: this.owner.uName, coldStart: true });
 };
 
 // ====================
