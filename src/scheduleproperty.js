@@ -32,7 +32,7 @@ SunScheduleProperty.prototype.getSunTimes = function(_latitude, _longitude, _api
 
    var sunTimes = SunCalc.getTimes(new Date(), _latitude, _longitude);
 
-   forecast.getAtTime(_latitude, _longitude, new Date(), function (_err, _res, _data) {
+   /*forecast.getAtTime(_latitude, _longitude, new Date(), function (_err, _res, _data) {
       var sunriseIndex = 0;
       var sunsetIndex = 0;
 
@@ -71,9 +71,9 @@ SunScheduleProperty.prototype.getSunTimes = function(_latitude, _longitude, _api
       }
       else {
          console.info("SCHEDULER unable to get sunrise time! Error = ", _err.code);
-      }
+      }*/
       _callback(sunTimes);
-   });
+   //});
 }
 
 function ScheduleProperty(_config, _owner) {

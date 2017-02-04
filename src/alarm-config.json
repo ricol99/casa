@@ -86,25 +86,6 @@
                "triggerLow": true
             }
          ]
-      },
-      {
-         "name": "thing:camera-lounge",
-         "displayName": "Camera Lounge",
-         "props": [
-            {
-               "name": "lounge-recording",
-               "initialValue": false,
-               "writable": true,
-               "type": "cameraproperty",
-               "source": "room:lounge",
-               "sourceProperty": "movement",
-               "cctvHostname": "192.168.1.245",
-               "cctvPort": 8000,
-               "userId": "ricol99",
-               "password": "carrot99",
-               "cameraId": 1
-            }
-         ]
       }
    ]
 }
