@@ -160,7 +160,7 @@
                   {
                      "name": "alarm:home",
                      "property": "tamper-alarm",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm being tampered with!",
                         "false": "H-Alarm no longer in tamper mode"
                      }
@@ -168,7 +168,7 @@
                   {
                      "name": "alarm:home",
                      "property": "mains-failure",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm has lost mains power!",
                         "false": "H-Alarm mains power restored"
                      }
@@ -176,7 +176,7 @@
                   {
                      "name": "alarm:home",
                      "property": "fire-alarm",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Fire Alarm!",
                         "false": "H-Fire alarm reset"
                      }
@@ -184,7 +184,7 @@
                   {
                      "name": "alarm:home",
                      "property": "alarm-triggered",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm triggered",
                         "false": "H-Alarm trigger reset"
                      }
@@ -192,7 +192,7 @@
                   {
                      "name": "alarm:home",
                      "property": "confirmed-alarm",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm confirmed - call police!",
                         "false": "H-Confirmed alarm reset"
                      }
@@ -200,7 +200,7 @@
                   {
                      "name": "thing:home-internet-connection",
                      "property": "lost-while-armed",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Internet connection to home has been lost while alarm is fully armed!",
                         "false": "H-Internet connection to home restored"
                      }
@@ -218,7 +218,7 @@
                   {
                      "name": "thing:home-internet-connection",
                      "property": "ACTIVE",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Internet connection to home restored",
                         "false": "H-Internet connection to home has been lost!"
                      }
@@ -226,7 +226,7 @@
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-alarm",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Casa 'alarm' is active",
                         "false": "H-Casa 'alarm' has gone down!"
                      }
@@ -234,7 +234,7 @@
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-cctv",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Casa 'cctv' is active",
                         "false": "H-Casa 'cctv' has gone down!"
                      }
@@ -242,7 +242,7 @@
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-env",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Casa 'env' is active",
                         "false": "H-Casa 'env' has gone down!"
                      }
@@ -260,7 +260,7 @@
                   {
                      "name": "alarm:home",
                      "property": "fully-armed",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm armed",
                         "false": "H-Alarm disarmed"
                      }
@@ -268,7 +268,7 @@
                   {
                      "name": "alarm:home",
                      "property": "part-armed",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Alarm part armed",
                         "false": "H-Alarm disarmed"
                      }
@@ -276,7 +276,7 @@
                   {
                      "name": "thing:environment",
                      "property": "daylight",
-                     "outputValues": {
+                     "transformMap": {
                         "true": "H-Good morning!",
                         "false": "H-Good evening!"
                      }

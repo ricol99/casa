@@ -58,8 +58,8 @@ function Property(_config, _owner) {
       this.targetProperty = (_config.targetProperty) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? true : _config.ignoreTargetUpdates;
       this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
-                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, inputTransform: _config.targetInputTransform,
-                                                 inputMap:_config.targetInputMap}, this);
+                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
+                                                 transformMap:_config.targetTransformMap}, this);
 
       this.target = this.targetListener.source;
    }
@@ -69,8 +69,8 @@ function Property(_config, _owner) {
    if (_config.manualOverrideSource) {
       this.manualOverrideSourceProperty = (_config.manualOverrideSourceProperty) ? _config.manualOverrideSourceProperty : "ACTIVE";
       this.manualOverrideListener = new SourceListener({ uName: _config.manualOverrideSource, sourceProperty: this.manualOverrideSourceProperty, isTarget: true,
-                                                         ignoreSourceUpdates: false, inputTransform: _config.manualOverrideSourceInputTransform,
-                                                         inputMap:_config.manualOverrideSourceInputMap}, this);
+                                                         ignoreSourceUpdates: false, transform: _config.manualOverrideSourceTransform,
+                                                         transformMap:_config.manualOverrideSourceTransformMap}, this);
 
       this.manualOverrideSource = this.manualOverrideListener.source;
    }
@@ -100,17 +100,15 @@ Property.prototype.process = function(_newValue, _data) {
 
    checkData(this, _newValue, _data);
 
-   var actualOutputValue = transformNewPropertyValue(this, _newValue, _data);
-
-   if (this.myValue() !== actualOutputValue || this.cold) {
+   if (this.myValue() !== _newValue || this.cold) {
 
       if (this.cold) {
          _data.coldStart = true;
          this.cold = false;
       }
 
-      this.propertyAboutToChange(actualOutputValue, _data);
-      this.owner.updateProperty(this.name, actualOutputValue, _data);
+      this.propertyAboutToChange(_newValue, _data);
+      this.owner.updateProperty(this.name, _newValue, _data);
    }
 };
 
@@ -124,7 +122,10 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
    checkData(this, _newPropValue, _data);
 
-   ((this.stepPipeline) ? this.stepPipeline : this).process(_newPropValue, _data);
+   var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
+   _data.propertyValue = actualOutputValue;
+
+   ((this.stepPipeline) ? this.stepPipeline : this).process(actualOutputValue, _data);
 };
 
 //
@@ -412,7 +413,6 @@ function transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data) {
                sourceListenerInCharge = highestPrioritySource;
             }
          }
-
          if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
             actualOutputValue = sourceListenerInCharge.outputValues[actualOutputValue];
          }

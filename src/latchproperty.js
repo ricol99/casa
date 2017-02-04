@@ -9,8 +9,8 @@ function LatchProperty(_config, _owner) {
       _config.ignoreTargetUpdates = false;
       _config.target = _config.controller.name;
       _config.targetProperty = _config.controller.property;
-      _config.inputTransform = _config.controller.inputTransform;
-      _config.inputMap = _config.controller.inputMap;
+      _config.transform = _config.controller.transform;
+      _config.transformMap = _config.controller.transformMap;
   }
 
    Property.call(this, _config, _owner);
