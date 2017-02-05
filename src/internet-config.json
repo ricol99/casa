@@ -56,9 +56,9 @@
          "props": [
             {
                "name": "ACTIVE",
+               "type": "orproperty",
                "initialValue": false,
                "writable": false,
-               "type": "orproperty",
                "sources": [
                   {
                      "name": "thing:home-internet-connection",
@@ -76,36 +76,36 @@
             },
             {
                "name": "casa-alarm",
+               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "type": "debounceproperty",
                "source": "casa:alarm",
                "sourceProperty": "ACTIVE",
                "threshold": 120
             },
             {
                "name": "casa-cctv",
+               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "type": "debounceproperty",
                "source": "casa:cctv",
                "sourceProperty": "ACTIVE",
                "threshold": 120
             },
             {
                "name": "casa-env",
+               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "type": "debounceproperty",
                "source": "casa:env",
                "sourceProperty": "ACTIVE",
                "threshold": 120
             },
             {
                "name": "alarm-armed",
+               "type": "orproperty",
                "initialValue": false,
                "writable": false,
-               "type": "orproperty",
                "sources": [
                   {
                      "name": "alarm:home",
@@ -119,18 +119,18 @@
             },
             {
                "name": "debounced-alarm-armed",
+               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "type": "debounceproperty",
                "source": "thing:home-internet-connection",
                "sourceProperty": "alarm-armed",
                "threshold": 30
             },
             {
                "name": "lost-while-armed",
+               "type": "andproperty",
                "initialValue": false,
                "writable": false,
-               "type": "andproperty",
                "sources": [
                   {
                      "name": "casa-alarm",
@@ -151,9 +151,9 @@
          "props": [
             {
                "name": "priority-message",
+               "type": "pushoverproperty",
                "initialValue": false,
                "writable": false,
-               "type": "pushoverproperty",
                "priority": 2,
                "userGroup": "usergroup:key-holders",
                "sources": [
@@ -161,57 +161,57 @@
                      "name": "alarm:home",
                      "property": "tamper-alarm",
                      "transformMap": {
-                        "true": "H-Alarm being tampered with!",
-                        "false": "H-Alarm no longer in tamper mode"
+                        "true": "Alarm being tampered with!",
+                        "false": "Alarm no longer in tamper mode"
                      }
                   },
                   {
                      "name": "alarm:home",
                      "property": "mains-failure",
                      "transformMap": {
-                        "true": "H-Alarm has lost mains power!",
-                        "false": "H-Alarm mains power restored"
+                        "true": "Alarm has lost mains power!",
+                        "false": "Alarm mains power restored"
                      }
                   },
                   {
                      "name": "alarm:home",
                      "property": "fire-alarm",
                      "transformMap": {
-                        "true": "H-Fire Alarm!",
-                        "false": "H-Fire alarm reset"
+                        "true": "Fire Alarm!",
+                        "false": "Fire alarm reset"
                      }
                   },
                   {
                      "name": "alarm:home",
                      "property": "alarm-triggered",
                      "transformMap": {
-                        "true": "H-Alarm triggered",
-                        "false": "H-Alarm trigger reset"
+                        "true": "Alarm triggered",
+                        "false": "Alarm trigger reset"
                      }
                   },
                   {
                      "name": "alarm:home",
                      "property": "confirmed-alarm",
                      "transformMap": {
-                        "true": "H-Alarm confirmed - call police!",
-                        "false": "H-Confirmed alarm reset"
+                        "true": "Alarm confirmed - call police!",
+                        "false": "Confirmed alarm reset"
                      }
                   },
                   {
                      "name": "thing:home-internet-connection",
                      "property": "lost-while-armed",
                      "transformMap": {
-                        "true": "H-Internet connection to home has been lost while alarm is fully armed!",
-                        "false": "H-Internet connection to home restored"
+                        "true": "Internet connection to home has been lost while alarm is fully armed!",
+                        "false": "Internet connection to home restored"
                      }
                   }
                ]
             },
             {
                "name": "urgent-message",
+               "type": "pushoverproperty",
                "initialValue": false,
                "writable": false,
-               "type": "pushoverproperty",
                "priority": 1,
                "userGroup": "usergroup:admins",
                "sources": [
@@ -219,41 +219,41 @@
                      "name": "thing:home-internet-connection",
                      "property": "ACTIVE",
                      "transformMap": {
-                        "true": "H-Internet connection to home restored",
-                        "false": "H-Internet connection to home has been lost!"
+                        "true": "Internet connection to home restored",
+                        "false": "Internet connection to home has been lost!"
                      }
                   },
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-alarm",
                      "transformMap": {
-                        "true": "H-Casa 'alarm' is active",
-                        "false": "H-Casa 'alarm' has gone down!"
+                        "true": "Casa 'alarm' is active",
+                        "false": "Casa 'alarm' has gone down!"
                      }
                   },
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-cctv",
                      "transformMap": {
-                        "true": "H-Casa 'cctv' is active",
-                        "false": "H-Casa 'cctv' has gone down!"
+                        "true": "Casa 'cctv' is active",
+                        "false": "Casa 'cctv' has gone down!"
                      }
                   },
                   {
                      "name": "thing:home-internet-connection",
                      "property": "casa-env",
                      "transformMap": {
-                        "true": "H-Casa 'env' is active",
-                        "false": "H-Casa 'env' has gone down!"
+                        "true": "Casa 'env' is active",
+                        "false": "Casa 'env' has gone down!"
                      }
                   }
                ]
             },
             {
                "name": "normal-message",
+               "type": "pushoverproperty",
                "initialValue": false,
                "writable": false,
-               "type": "pushoverproperty",
                "priority": 0,
                "userGroup": "usergroup:admins",
                "sources": [
@@ -261,24 +261,24 @@
                      "name": "alarm:home",
                      "property": "fully-armed",
                      "transformMap": {
-                        "true": "H-Alarm armed",
-                        "false": "H-Alarm disarmed"
+                        "true": "Alarm armed",
+                        "false": "Alarm disarmed"
                      }
                   },
                   {
                      "name": "alarm:home",
                      "property": "part-armed",
                      "transformMap": {
-                        "true": "H-Alarm part armed",
-                        "false": "H-Alarm disarmed"
+                        "true": "Alarm part armed",
+                        "false": "Alarm disarmed"
                      }
                   },
                   {
                      "name": "thing:environment",
-                     "property": "daylight",
+                     "property": "low-light",
                      "transformMap": {
-                        "true": "H-Good morning!",
-                        "false": "H-Good evening!"
+                        "true": "Lights are now sensitive to movement!",
+                        "false": "Too bright for lights to come on!"
                      }
                   }
                ]

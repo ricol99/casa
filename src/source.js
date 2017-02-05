@@ -12,7 +12,7 @@ function Source(_config) {
    var casaSys = CasaSystem.mainInstance();
    this.casa = casaSys.casa;
 
-   this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', owner: this, initialValue: false }, this) };
+   this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
 
    if (_config.props) {
       var propLen = _config.props.length;

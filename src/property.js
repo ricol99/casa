@@ -220,6 +220,17 @@ Property.prototype.sourceIsValid = function(_data) {
 }
 
 //
+// Internal function can be called by derived properties
+// Actual tell all listening parties that this proerty is now invalid
+// Some properties wish to delay or stop this and become responsible for calling this function
+// when they override Property.prototype.sourceIsInvalid()
+//
+Property.prototype.goInvalid = function (_data) {
+   console.log(this.uName + ': INVALID');
+   this.owner.goInvalid(this.name, _data);
+}
+
+//
 // Called by SourceListener as a defined source has become invalid (unavailable)
 // Property can define its policy regarding whether it decides to go valid/invalid
 // E.g. it may decide it needs all sources to be valid, or just one
@@ -232,12 +243,9 @@ Property.prototype.sourceIsInvalid = function(_data) {
 
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
-      // If so, tell the others guys that I am now invalid
-      console.log(this.uName + ': INVALID');
-
       this.target = null;
       this.manualOverrideSource = null;
-      this.owner.goInvalid(this.name, _data);
+      this.goInvalid(this.name, _data);
    }
 };
 
