@@ -77,7 +77,7 @@
                "writable": false,
                "threshold" : 40,
                "buffer": 5,
-               "outputTransform": "$value>=40",
+               "transform": "$value>=40",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
@@ -124,7 +124,7 @@
                "type": "thresholdproperty",
                "threshold" : 50,
                "buffer": 5,
-               "outputTransform": "$value<=50",
+               "transform": "$value<=50",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
