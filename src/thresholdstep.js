@@ -1,7 +1,7 @@
 var util = require('util');
 var Step = require('./step');
 
-function ThresholdStep(_config, _owner) {
+function ThresholdStep(_config, _pipeline) {
    // Thresholds with buffer must not overlap
    
    this.thresholds = (_config.threshold != undefined) ? [_config.threshold] : _config.thresholds;
@@ -10,7 +10,7 @@ function ThresholdStep(_config, _owner) {
    this.cold = true;
    this.value = 0;
 
-   Step.call(this, _config, _owner);
+   Step.call(this, _config, _pipeline);
 }
 
 util.inherits(ThresholdStep, Step);

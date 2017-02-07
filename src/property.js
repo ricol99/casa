@@ -1,6 +1,7 @@
 var util = require('util');
 var SourceListener = require('./sourcelistener');
 var CasaSystem = require('./casasystem');
+var Pipeline = require('./pipeline');
 
 function Property(_config, _owner) {
    this.name = _config.name;
@@ -22,7 +23,18 @@ function Property(_config, _owner) {
    this.cold = true;
    this.hasSourceOutputValues = false;	// Sources can influence the final property value (source in charge)
 
-   loadSteps(this, _config);
+   if (_config.sourceSteps) {
+      this.sourcePipeline = new Pipeline(_config.sourceSteps, this);
+      this.pipeline = this.sourcePipeline;
+   }
+
+   if (_config.outputSteps) {
+      this.outputPipeline = new Pipeline(_config.setSteps, this);
+
+      if (this.sourcePipeline == undefined) {
+         this.pipeline = this.outputPipeline;
+      }
+   }
 
    this.sourceListeners = {};
    this.noOfSources = 0;
@@ -89,28 +101,62 @@ Property.prototype.myValue = function() {
 
 //
 // Internal method - Called by the last step in the pipeline
-// * DO NOT CALL DIRECTLY *
-// Use updatePropertyInternal() to kick off step pipleline
 //
-Property.prototype.process = function(_newValue, _data) {
+Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
 
-   if (_data == undefined) {
-      _data = { sourceName: this.owner.uName };
-   }
+   if (_pipeline == this.sourcePipeline) {
+      console.log(this.uName+": output from source pipeline. Property Value="+_newValue);
 
-   checkData(this, _newValue, _data);
-
-   if (this.myValue() !== _newValue || this.cold) {
-
-      if (this.cold) {
-         _data.coldStart = true;
-         this.cold = false;
+      if (this.outputPipeline) {
+         this.outputPipeline.newInputForProcess(_newValue, _data);
       }
-
-      this.propertyAboutToChange(_newValue, _data);
-      this.owner.updateProperty(this.name, _newValue, _data);
+      else {
+         processFinalOutput(this, _newValue, _data);
+      }
+   }
+   else {
+      console.log(this.uName+": output from output pipeline. Property Value="+_newValue);
+      processFinalOutput(this, _newValue, _data);
    }
 };
+
+//
+// Internal method - Called by the last step in the pipeline
+//
+Property.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) {
+
+   if (_pipeline == this.sourcePipeline) {
+
+      if (this.outputPipeline) {
+         this.outputPipeline.sourceIsValid(_data);
+      }
+      else {
+         this.goValid(_data);
+      }
+   }
+   else {
+      this.goValid(_data);
+   }
+}
+
+//
+// Internal method - Called by the last step in the pipeline
+//
+Property.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
+
+   if (_pipeline == this.sourcePipeline) {
+
+      if (this.outputPipeline) {
+         this.outputPipeline.sourceIsInvalid(_data);
+      }
+      else {
+         this.goInvalid(_data);
+      }
+   }
+   else {
+      this.goInvalid(_data);
+   }
+}
 
 // Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
@@ -122,10 +168,12 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
    checkData(this, _newPropValue, _data);
 
-   var actualOutputValue = transformNewPropertyValue(this, _newPropValue, _data);
-   _data.propertyValue = actualOutputValue;
-
-   ((this.stepPipeline) ? this.stepPipeline : this).process(actualOutputValue, _data);
+   if (this.pipeline) {
+      this.pipeline.newInputForProcess(_newPropValue, _data);
+   }
+   else {
+       processFinalOutput(this, _newPropValue, _data)
+   }
 };
 
 //
@@ -136,7 +184,13 @@ Property.prototype.setProperty = function(_propValue, _data) {
 
    if (this.writeable) {
       this.setManualMode(true);
-      ((this.outputPipeline != null) ? this.outputPipeline : this).process(_propValue, _data);
+
+     if (this.outputPipeline != undefined) {
+        this.outputPipeline.newInputForProcess(_propValue, _data);
+     }
+     else {
+        processFinalOutput(this, _propValue, _data);
+     }
    }
 
    return this.writeable;
@@ -217,6 +271,10 @@ Property.prototype.sourceIsValid = function(_data) {
       this.setManualMode(false);
       this.listening = true;
    }
+
+   if (this.pipeline) {
+      this.pipeline.sourceIsValid(_data);
+   }
 }
 
 //
@@ -228,6 +286,9 @@ Property.prototype.sourceIsValid = function(_data) {
 Property.prototype.goInvalid = function (_data) {
    console.log(this.uName + ': INVALID');
    this.owner.goInvalid(this.name, _data);
+}
+
+Property.prototype.goValid = function (_data) {
 }
 
 //
@@ -245,7 +306,10 @@ Property.prototype.sourceIsInvalid = function(_data) {
    if (oldValid && !this.valid) {
       this.target = null;
       this.manualOverrideSource = null;
-      this.goInvalid(this.name, _data);
+
+      if (this.pipeline) {
+         this.pipeline.sourceIsValid(_data);
+      }
    }
 };
 
@@ -323,57 +387,20 @@ Property.prototype.coldStart = function(_data) {
 // NON-EXPORTED METHODS
 // ====================
 
-function loadSteps(_this, _config) {
-   _this.inputSteps = [];
-   _this.outputSteps = [];
+function processFinalOutput(_this, _newValue, _data) {
 
-   _this.stepPipeline = null;
-   _this.outputPipeline = null;
+   var actualOutputValue = transformNewPropertyValue(_this, _newValue, _data);
+   _data.propertyValue = actualOutputValue;
 
-   var previousStep = null;
-   var step = null;
+   if (_this.value !== actualOutputValue || _this.cold) {
 
-   if (_config.inputSteps != undefined) {
-
-      for (var i = 0; i < _config.inputSteps.length; ++i) {
-         var Step = require('./'+_config.inputSteps[i].type);
-         step = new Step(_config.inputSteps[i], _this);
-         _this.inputSteps.push(step);
-
-         if (i > 0) {
-            previousStep.setNextStep(step);
-         }
-         else {
-            _this.stepPipeline = step;
-         }
-
-         previousStep = step;
+      if (_this.cold) {
+         _data.coldStart = true;
+         _this.cold = false;
       }
-   }
 
-   if (_config.outputSteps != undefined) {
-
-      for (var j = 0; j < _config.outputSteps.length; ++j) {
-         var Step = require('./'+_config.outputSteps[j].type);
-         step = new Step(_config.outputSteps[j], _this);
-         _this.outputSteps.push(step);
-
-         if (j > 0) {
-            previousStep.setNextStep(step);
-            previousStep = step;
-         }
-         else {
-            _this.outputPipeline = step;
-
-            if (_this.stepPipeline == null) {
-               _this.stepPipeline = _this.outputPipeline;
-            }
-         }
-      }
-   }
-
-   if (step) {
-      step.setNextStep(_this);
+      _this.propertyAboutToChange(actualOutputValue, _data);
+      _this.owner.updateProperty(_this.name, actualOutputValue, _data);
    }
 }
 

@@ -1,12 +1,12 @@
 var util = require('util');
 var Step = require('./step');
 
-function DelayStep(_config, _owner) {
+function DelayStep(_config, _pipeline) {
 
    this.delay = (_config.delay) ? _config.delay : 0;
    this.delayedEvents = [];
 
-   Step.call(this, _config, _owner);
+   Step.call(this, _config, _pipeline);
 }
 
 util.inherits(DelayStep, Step);

@@ -1,7 +1,7 @@
 var util = require('util');
 var Step = require('./step');
 
-function SmootherStep(_config, _owner) {
+function SmootherStep(_config, _pipeline) {
 
    this.rate = _config.rate;                    // Change allowed per second
    this.resolution = (_config.resolution == undefined) ? 1 : _config.resolution;
@@ -12,7 +12,7 @@ function SmootherStep(_config, _owner) {
    this.timeoutObj = null;
    this.cold = true;
 
-   Step.call(this, _config, _owner);
+   Step.call(this, _config, _pipeline);
 }
 
 util.inherits(SmootherStep, Step);
@@ -43,11 +43,11 @@ function restartTimer(_that) {
         var difference = _this.targetValue - _this.value;
 
          if (Math.abs(difference) <= Math.abs(_this.step)) {
-            _this.outputForNextStep(_this.targetValue, _this.lastData);
+            _this.outputForNextStep(_this.targetValue);
          }
          else {
             var newValue = _this.value + _this.step;
-            _this.outputForNextStep(_this.floorOutput(newValue), _this.lastData);
+            _this.outputForNextStep(_this.floorOutput(newValue));
             restartTimer(_this);
          }
       }
@@ -55,13 +55,12 @@ function restartTimer(_that) {
 }
 
 SmootherStep.prototype.process = function(_value, _data) {
-   this.lastData = copyData(_data);
 
    if (this.cold) {
       this.cold = false;
       this.outputForNextStep(_value, _data);
    }
-   else if (this.targetValue != _value) {
+   else if (this.value != _value) {
       this.targetValue = _value;
 
       var difference = this.targetValue - this.value;

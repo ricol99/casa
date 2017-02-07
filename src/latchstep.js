@@ -1,11 +1,11 @@
 var util = require('util');
 var Step = require('./step');
 
-function LatchStep(_config, _owner) {
+function LatchStep(_config, _pipeline) {
 
    this.minOutputTime = _config.minOutputTime;
 
-   Step.call(this, _config, _owner);
+   Step.call(this, _config, _pipeline);
 
    this.minOutputTimeObj = null;
    this.sourceActive = false;

@@ -1,8 +1,8 @@
 var util = require('util');
 var Step = require('./step');
 
-function InvertStep(_config, _owner) {
-   Step.call(this, _config, _owner);
+function InvertStep(_config, _pipeline) {
+   Step.call(this, _config, _pipeline);
 }
 
 util.inherits(InvertStep, Step);

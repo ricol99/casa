@@ -1,7 +1,7 @@
 var util = require('util');
 var Step = require('./step');
 
-function LinearTransformStep(_config, _owner) {
+function LinearTransformStep(_config, _pipeline) {
    this.inputMin = _config.inputMin;
    this.inputMax = _config.inputMax;
    this.outputMin = _config.outputMin;
@@ -11,7 +11,7 @@ function LinearTransformStep(_config, _owner) {
    this.inputRange = this.inputMax - this.inputMin;
    this.outputRange = this.outputMax - this.outputMin;
 
-   Step.call(this, _config, _owner);
+   Step.call(this, _config, _pipeline);
 }
 
 util.inherits(LinearTransformStep, Step);
