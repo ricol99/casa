@@ -321,7 +321,14 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
 
    var len = this.config.sources.length;
    for (var i = 0; i < len; ++i) {
-      this.config.sourcesStatus.push({ properties: this.sources[this.config.sources[i]].props,
+      var allProps = {};
+      var props = this.sources[this.config.sources[i]].props;
+
+      for (var name in props) {
+         allProps[name] = props[name].value;
+      }
+
+      this.config.sourcesStatus.push({ properties: allProps,
                                        status: this.sources[this.config.sources[i]].isActive() });
    }
 }
