@@ -5,7 +5,6 @@ var CasaSystem = require('./casasystem');
 
 function PeerSource(_uName, _props, _peerCasa) {
    this.uName = _uName;
-   this.props = _props;
    this.peerCasa = _peerCasa;
    this.valid = true;
 
@@ -20,7 +19,16 @@ function PeerSource(_uName, _props, _peerCasa) {
    else {
       casaSys.allObjects[this.uName] = this;
    }
-   
+
+   this.props = {};
+
+   for (var prop in _props) {
+
+      if (_props.hasOwnProperty(prop)){
+         this.props[prop] = { value: _props[prop] };
+      }
+   }
+
    events.EventEmitter.call(this);
 
    var that = this;
@@ -37,12 +45,12 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    if (this.ghostMode) {
 
       if (this.myRealSource.sourceHasChangedProperty(_data)) {
-         this.props[_data.propertyName] = _data.propertyValue;
+         this.props[_data.propertyName] = { value: _data.propertyValue };
       }
    }
    else {
       console.info('Property Changed: ' + this.uName + ':' + _data.propertyName + ': ' + _data.propertyValue);
-      this.props[_data.propertyName] = _data.propertyValue;
+      this.props[_data.propertyName] = { value: _data.propertyValue };
       this.emit('property-changed', copyData(_data));
    }
 }
@@ -70,7 +78,7 @@ PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
 }
 
 PeerSource.prototype.getProperty = function(_propName) {
-   return this.props[_propName];
+   return this.props[_propName].value;
 }
 
 PeerSource.prototype.coldStart = function() {
@@ -83,7 +91,7 @@ PeerSource.prototype.coldStart = function() {
             var sendData = {};
             sendData.sourceName = this.uName;
             sendData.propertyName = prop;
-            sendData.propertyValue = this.props[prop];
+            sendData.propertyValue = this.props[prop].value;
             sendData.coldStart = true;
             console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.propertyValue);
             this.emit('property-changed', sendData);
@@ -100,7 +108,7 @@ PeerSource.prototype.invalidateSource = function() {
       for(var prop in this.props) {
 
          if (this.props.hasOwnProperty(prop)) {
-            this.emit('invalid', { sourceName: this.uName, propertyName: this.props[prop] });
+            this.emit('invalid', { sourceName: this.uName, propertyName: this.props[prop].value });
          }
       }
    }
