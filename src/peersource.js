@@ -1,6 +1,5 @@
 var util ('util');
 var events = require('events');
-var S = require('string');
 var CasaSystem = require('./casasystem');
 
 function PeerSource(_uName, _props, _peerCasa) {
@@ -53,7 +52,7 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
       this.props[_data.propertyName] = { value: _data.propertyValue };
       this.emit('property-changed', copyData(_data));
    }
-}
+};
 
 function copyData(_sourceData) {
    var newData = {};
@@ -70,16 +69,16 @@ function copyData(_sourceData) {
 
 PeerSource.prototype.isPropertyValid = function(_property) {
    return true;
-}
+};
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set source property');
    return this.peerCasa.setSourceProperty(this, _propName, _propValue, _data);
-}
+};
 
 PeerSource.prototype.getProperty = function(_propName) {
    return this.props[_propName].value;
-}
+};
 
 PeerSource.prototype.invalidateSource = function() {
 
@@ -96,7 +95,7 @@ PeerSource.prototype.invalidateSource = function() {
       delete this.peerCasa.casaSys.allObjects[this.sources[prop].uName];
       delete this.peerCasa.sources[prop];
    }
-}
+};
 
 module.exports = exports = PeerSource;
 
