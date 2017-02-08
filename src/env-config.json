@@ -154,7 +154,7 @@
                "type": "devicepresentproperty",
                "host": "192.168.1.128",
                "interval": 60,
-               "inputSteps": [
+               "sourceSteps": [
                   {
                      "type": "latchstep",
                      "minOutputTime": 600
@@ -182,7 +182,7 @@
                      "property": "kitchen-pir"
                   }
                ],
-               "inputSteps": [
+               "sourceSteps": [
                   {
                      "type": "latchstep",
                      "minOutputTime": 600
@@ -311,7 +311,7 @@
                      "property": "lounge-pir"
                   }
                ],
-               "inputSteps": [
+               "sourceSteps": [
                   {
                      "type": "latchstep",
                      "minOutputTime": 600

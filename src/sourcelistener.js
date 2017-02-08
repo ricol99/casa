@@ -55,7 +55,7 @@ SourceListener.prototype.establishListeners = function() {
    return this.valid;
 }
 
-SourceListener.prototype.refreshSources = function() {
+SourceListener.prototype.refreshSource = function() {
    var ret = true;
 
    if (!this.valid)  {

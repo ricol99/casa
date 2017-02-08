@@ -97,10 +97,11 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 }
 
 Casa.prototype.refreshSourceListeners = function() {
+
    for (var prop in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(prop)) {
-         this.sourceListeners[prop].refreshSources();
+         this.sourceListeners[prop].refreshSource();
       }
    }
 }
@@ -236,20 +237,17 @@ function Connection(_server, _socket) {
 Casa.prototype.refreshConfigWithSourcesStatus = function() {
    delete this.config.sourcesStatus;
    this.config.sourcesStatus = [];
+   var len = this.config.sources.length;
 
-   var i = 0;
-
-   for(var prop in this.config.sources) {
+   for (var i = 0; i < len; ++i) {
       var allProps = {};
-
       var props = this.sources[this.config.sources[i]].props
 
       for (var name in props) {
          allProps[name] = props[name].value;
       }
 
-      this.config.sourcesStatus.push({ properties: allProps,
-                                       status: this.sources[this.config.sources[i++]].isActive() });
+      this.config.sourcesStatus.push({ properties: allProps, status: this.sources[this.config.sources[i]].isActive() });
    }
 }
 
@@ -280,9 +278,6 @@ Casa.prototype.createRemoteCasa = function(_data) {
 
    // Refresh all inactive sources and workers
    this.refreshSourceListeners();
-
-   // Cold start all the peers sources now that everything has been created
-   remoteCasa.coldStartPeerSources();
 
    return remoteCasa;
 }
