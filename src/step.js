@@ -37,7 +37,7 @@ Step.prototype.process = function(_value, _data) {
 // Source has become available
 //
 Step.prototype.sourceIsValid = function(_data) {
-   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' is now valid');
+   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' is now valid');
    this.sourceValid = true;
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -52,7 +52,7 @@ Step.prototype.sourceIsValid = function(_data) {
 // Source is not available anymore
 //
 Step.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
+   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
    this.sourceValid = false;
    var oldValid = this.valid;
    this.valid = this.amIValid();

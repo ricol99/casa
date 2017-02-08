@@ -90,7 +90,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.source.removeListener('invalid', this.invalidCallback);
 
       if (this.pipeline) {
-         this.pipeline.sourceIsValid(copyData({ sourcePropertyName: _this.sourcePropertyName, sourceName: _this.sourceName, propertyName: _this.property }));
+         this.pipeline.sourceIsInvalid(copyData({ sourcePropertyName: _this.sourcePropertyName, sourceName: _this.sourceName, propertyName: _this.property }));
       }
       else {
          goInvalid(this, _data);
@@ -112,6 +112,7 @@ function goInvalid(_this, _data) {
 //
 SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
    _data.propertyValue = _newValue;
+   this.sourcePropertyValue = newValue;
 
    if (this.isTarget) {
       this.owner.targetPropertyChanged(copyData(_data));
@@ -182,12 +183,12 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
          this.lastData.propertyValue = transformInput(this, _data);
       }
 
-      this.sourcePropertyValue = this.lastData.propertyValue;
-
       if (this.pipeline) {
          this.pipeline.process(this.lastData.propertyValue, this.lastData);
       }
       else {
+         this.sourcePropertyValue = this.lastData.propertyValue;
+
          if (this.isTarget) {
             this.owner.targetPropertyChanged(copyData(this.lastData));
          }

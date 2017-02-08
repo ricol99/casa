@@ -80,7 +80,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
    if (prop && (prop.value != _data.propertyValue)) {
 
       // Only update if the property has no processing attached to it
-      if (prop.type === 'property' && !prop.stepPipeline && !prop.hasSourceOutputValues) {
+      if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
          return prop.setProperty(_data.propertyValue, _data);
       }
    }
