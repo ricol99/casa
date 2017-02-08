@@ -1,4 +1,4 @@
-var util ('util');
+var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
@@ -92,8 +92,7 @@ PeerSource.prototype.invalidateSource = function() {
          }
       }
 
-      delete this.peerCasa.casaSys.allObjects[this.sources[prop].uName];
-      delete this.peerCasa.sources[prop];
+      delete this.peerCasa.casaSys.allObjects[this.uName];
    }
 };
 

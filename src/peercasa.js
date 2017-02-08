@@ -136,6 +136,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if(this.sources.hasOwnProperty(prop)){
          console.log(this.uName + ': Invaliding source ' + this.sources[prop].uName);
          this.sources[prop].invalidateSource();
+         delete this.sources[prop];
       }
    }
 
