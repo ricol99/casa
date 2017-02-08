@@ -279,12 +279,12 @@ CasaSystem.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 }
 
 CasaSystem.prototype.createChildCasa = function(_config, _peers) {
-   console.log('Creating a child casa for casa ' + _config.uName);
+   console.log('Creating a child casa for casa ' + _config.name);
 
    var area = null;
 
    // Resolve area
-   area = this.resolveCasaAreasAndPeers(_config.uName, _peers);
+   area = this.resolveCasaAreasAndPeers(_config.name, _peers);
 
    var ChildCasa = require('./childcasa');
    var childCasa = new ChildCasa(_config);
@@ -301,7 +301,7 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
 }
 
 CasaSystem.prototype.createPeerCasa = function(_config) {
-   console.log('Creating a peer casa for casa ' + _config.uName);
+   console.log('Creating a peer casa for casa ' + _config.name);
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
    peerCasa.setCasaArea(this.peerCasaArea);
