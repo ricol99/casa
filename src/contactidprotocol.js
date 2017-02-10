@@ -107,7 +107,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
 
 
    var qualstr = (this.QUALIFIERS[message.qualifier] == undefined) ? '' : this.QUALIFIERS[message.qualifier];
-   var eventstr;
+   var eventStr;
 
    if (this.EVENTS[message.eventNum] != undefined) {
       eventStr = this.EVENTS[message.eventNum].name;
@@ -115,11 +115,11 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       message.propertyValue = (this.EVENTS[message.eventNum].value == undefined) ? true : this.EVENTS[message.eventNum].value;
    }
    else {
-      eventstr = 'Unknown Event '+message.eventNum;
+      eventStr = 'Unknown Event '+message.eventNum;
    }
 
-   message.event = eventstr + qualstr;
-   message.description = eventstr + qualstr;
+   message.event = eventStr + qualstr;
+   message.description = eventStr + qualstr;
    message.valueName = 'Zone/User';
    return message;
 };
