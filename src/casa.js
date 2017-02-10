@@ -238,7 +238,6 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
    delete this.config.sourcesStatus;
    this.config.sourcesStatus = [];
    var len = this.config.sources.length;
-   console.log(this.uName+': AAAAAAAAA Number of sources = "+len);
 
    for (var i = 0; i < len; ++i) {
       var allProps = {};
@@ -250,7 +249,6 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
             allProps[name] = props[name].value;
          }
       }
-      console.log(this.uName+': AAAAAAAAA Properties for source "+this.sources[this.config.sources[i]].uName+" = ", allProps);
 
       this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
