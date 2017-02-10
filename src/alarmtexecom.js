@@ -38,6 +38,10 @@ function TexecomAlarm(_config) {
    this.props['battery-failure']  = new Property({ name: 'battery-failure', type: 'property', initialValue: false }, this);
    this.props['line-failure']  = new Property({ name: 'line-failure', type: 'property', initialValue: false }, this);
    this.props['fire-alarm']  = new Property({ name: 'fire-alarm', type: 'property', initialValue: false }, this);
+   this.props['medical-alarm']  = new Property({ name: 'medical-alarm', type: 'property', initialValue: false }, this);
+   this.props['panic-alarm']  = new Property({ name: 'panic-alarm', type: 'property', initialValue: false }, this);
+   this.props['duress-alarm']  = new Property({ name: 'duress-alarm', type: 'property', initialValue: false }, this);
+   this.props['attack-alarm']  = new Property({ name: 'attack-alarm', type: 'property', initialValue: false }, this);
    this.props['carbon-monoxide-alarm']  = new Property({ name: 'carbon-monoxide-alarm', type: 'property', initialValue: false }, this);
    this.props['tamper-alarm']  = new Property({ name: 'tamper-alarm', type: 'property', initialValue: false }, this);
    this.props['armed-normal']  = new Property({ name: 'armed-normal', type: 'property', initialValue: false }, this);
@@ -169,7 +173,9 @@ function handleMessage(_this, _socket, _message, _data) {
       description: _message.description
    };
 
-   // TODO update properties for zone-alarm, confirmed-alarm
+   if (_message.property != undefined) {
+      _this.updateProperty(_message.property, _message.propertyValue, { sourceName: _this.uName }); 
+   }
 }
 
 function restartWatchdog(_that) {
