@@ -178,6 +178,7 @@ function handleMessage(_this, _socket, _message, _data) {
 
    if (_message.property != undefined) {
       _this.updateProperty(_message.property, _message.propertyValue, { sourceName: _this.uName }); 
+      console.log(_this.uName+": Message received, event="+_message.event+" - "+ _message.description);
    }
    else {
       console.log(_this.uName+": message received that had no property: \""+_message.description+"\"");

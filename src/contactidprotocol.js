@@ -118,7 +118,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       eventStr = 'Unknown Event '+message.eventNum;
    }
 
-   message.event = eventStr + qualstr;
+   message.event = message.eventNum;
    message.description = eventStr + qualstr;
    message.valueName = 'Zone/User';
    return message;
