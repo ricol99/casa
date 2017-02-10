@@ -45,6 +45,7 @@ function TexecomAlarm(_config) {
    this.props['carbon-monoxide-alarm']  = new Property({ name: 'carbon-monoxide-alarm', type: 'property', initialValue: false }, this);
    this.props['tamper-alarm']  = new Property({ name: 'tamper-alarm', type: 'property', initialValue: false }, this);
    this.props['armed-normal']  = new Property({ name: 'armed-normal', type: 'property', initialValue: false }, this);
+   this.props['armed-part']  = new Property({ name: 'armed-part', type: 'property', initialValue: false }, this);
    this.props['zone-alarm']  = new Property({ name: 'zone-alarm', type: 'property', initialValue: false }, this);
    this.props['confirmed-alarm']  = new Property({ name: 'confirmed-alarm', type: 'property', initialValue: false }, this);
    this.props['engineer-mode']  = new Property({ name: 'engineer-mode', type: 'property', initialValue: false }, this);

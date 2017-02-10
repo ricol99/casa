@@ -63,7 +63,7 @@ function ContactIdProtocol(_uName) {
 
       411: { name: 'Download Start' },
       412: { name: 'Download End', },
-      441: { name: 'Part Arm', property: 'part-armed' },
+      441: { name: 'Part Arm', property: 'armed-part' },
 
       457: { name: 'Exit Error' },
       459: { name: 'Recent Closing' },
