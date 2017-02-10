@@ -38,7 +38,7 @@ function ContactIdProtocol(_uName) {
       131: { name: 'Perimeter', property: 'zone-alarm' },
       132: { name: 'Interior', property: 'zone-alarm' },
       133: { name: '24 Hour', },
-      134: { name: 'Entry/Exit'},
+      134: { name: 'Entry/Exit', property: 'in-exit-entry' },
       135: { name: 'Day/Night'},
       136: { name: 'Outdoor'},
       137: { name: 'Zone Tamper', property: 'tamper-alarm' },

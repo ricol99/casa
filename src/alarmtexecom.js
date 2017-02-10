@@ -48,6 +48,8 @@ function TexecomAlarm(_config) {
    this.props['armed-part']  = new Property({ name: 'armed-part', type: 'property', initialValue: false }, this);
    this.props['zone-alarm']  = new Property({ name: 'zone-alarm', type: 'property', initialValue: false }, this);
    this.props['confirmed-alarm']  = new Property({ name: 'confirmed-alarm', type: 'property', initialValue: false }, this);
+   this.props['in-exit-entry']  = new Property({ name: 'in-exit-entry', type: 'property', initialValue: false }, this);
+   this.props['system-failure']  = new Property({ name: 'system-failure', type: 'property', initialValue: false }, this);
    this.props['engineer-mode']  = new Property({ name: 'engineer-mode', type: 'property', initialValue: false }, this);
 
    this.pollingTolerance = 30000;   // ms
@@ -176,6 +178,9 @@ function handleMessage(_this, _socket, _message, _data) {
 
    if (_message.property != undefined) {
       _this.updateProperty(_message.property, _message.propertyValue, { sourceName: _this.uName }); 
+   }
+   else {
+      console.log(_this.uName+": message received that had no property: \""+_message.description+"\"");
    }
 }
 
