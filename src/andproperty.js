@@ -3,7 +3,7 @@ var Property = require('./property');
 
 function AndProperty(_config, _owner) {
 
-   _config.allInputsRequiredForValidity = true;
+   _config.allSourcesRequiredForValidity = true;
    Property.call(this, _config, _owner);
 
    var that = this;

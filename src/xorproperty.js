@@ -3,7 +3,7 @@ var Property = require('./property');
 
 function XorProperty(_config, _owner) {
 
-   _config.allInputsRequiredForValidity = false;
+   _config.allSourcesRequiredForValidity = false;
    Property.call(this, _config, _owner);
 
    var that = this;

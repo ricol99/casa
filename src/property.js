@@ -262,7 +262,6 @@ Property.prototype.sourceIsValid = function(_data) {
 
    var oldValid = this.valid;
    this.valid = this.amIValid();
-
    this.target = (this.targetListener) ? this.targetListener.source : null;
 
    this.manualOverrideSource = (this.manualOverrideListener) ? this.manualOverrideListener.source : null;
