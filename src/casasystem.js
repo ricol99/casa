@@ -124,6 +124,13 @@ CasaSystem.prototype.createThing = function(_config, _parent) {
    this.things[thingObj.uName] = thingObj;
    this.allObjects[thingObj.uName] = thingObj;
    console.log('New thing: ' + _config.name);
+
+   console.log('AAAAAAA Thing Added: ', _config.name);
+   for (var prop in thingObj.props) {
+      if (thingObj.props.hasOwnProperty(prop)) {
+         console.log('AAAAAAA Property Added: ',prop);
+      }
+   }
    return thingObj;
 };
 

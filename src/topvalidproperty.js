@@ -43,7 +43,10 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
       if (newHighestSource && (newHighestSource != this.highestValidSource)) {
          this.highestValidSource = newHighestSource;
          _data.propertyValue = this.highestValidSource.getPropertyValue();
-         this.updatePropertyInternal(this.highestValidSource.getPropertyValue(), _data);
+
+         if (_data.propertyValue != undefined) {
+            this.updatePropertyInternal(_data.propertyValue, _data);
+         }
       }
       else {
          this.highestValidSource = newHighestSource;
@@ -63,7 +66,10 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
       if (newHighestSource && (newHighestSource != this.highestValidSource)) {
          this.highestValidSource = newHighestSource;
          _data.propertyValue = this.highestValidSource.getPropertyValue();
-         this.updatePropertyInternal(this.highestValidSource.getPropertyValue(), _data);
+
+         if (_data.propertyValue != undefined) {
+            this.updatePropertyInternal(_data.propertyValue, _data);
+         }
       }
       else {
          this.highestValidSource = newHighestSource;
