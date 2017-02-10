@@ -305,19 +305,34 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
    delete this.config.sourcesStatus;
    this.config.sourcesStatus = [];
-
    var len = this.config.sources.length;
+
    for (var i = 0; i < len; ++i) {
       var allProps = {};
-      var props = this.sources[this.config.sources[i]].props;
+      var props = this.sources[this.config.sources[i]].props
 
       for (var name in props) {
-         allProps[name] = props[name].value;
+
+         if (props.hasOwnProperty(prop)) {
+            allProps[name] = props[name].value;
+         }
       }
 
-      this.config.sourcesStatus.push({ properties: allProps,
-                                       status: this.sources[this.config.sources[i]].isActive() });
+      this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i++]].isActive() });
    }
+}
+
+function copyData(_sourceData) {
+   var newData = {};
+
+   for (var prop in _sourceData) {
+
+      if (_sourceData.hasOwnProperty(prop)){
+         newData[prop] = _sourceData[prop];
+      }
+   }
+
+   return newData;
 }
 
 PeerCasa.prototype.createSources = function(_data, _peerCasa) {

@@ -27,22 +27,26 @@ function findHighestPriorityValidSource(_this) {
       }
    }
 
+   console.log(_this.uName+": AAAAAAA Highest priority valid source = "+highestPrioritySource.uName);
    return highestPrioritySource;
 }
 
 TopValidProperty.prototype.sourceIsValid = function(_data) {
+   console.log(this.uName+": AAAAAAA Source is valid = ",_data);
 
    if ((this.highestValidSource && (this.highestValidSource.sourcePropertyName != _data.sourcePropertyName)) ||
        (!this.highestValidSource)) {
 
       // Current output is based off a now invalid source - rescan
       var newHighestSource = findHighestPriorityValidSource(this);
-      this.highestValidSource = findHighestPriorityValidSource(this);
 
       if (newHighestSource && (newHighestSource != this.highestValidSource)) {
          this.highestValidSource = newHighestSource;
          _data.propertyValue = this.highestValidSource.getPropertyValue();
          this.updatePropertyInternal(this.highestValidSource.getPropertyValue(), _data);
+      }
+      else {
+         this.highestValidSource = newHighestSource;
       }
    }
 
@@ -50,14 +54,19 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
 };
 
 TopValidProperty.prototype.sourceIsInvalid = function(_data) {
+   console.log(this.uName+": AAAAAAA Source is invalid = ",_data);
 
    if (this.highestValidSource && (this.highestValidSource.sourcePropertyName == _data.sourcePropertyName)) {
       // Current output is based off a now invalid source - rescan
-      this.highestValidSource = findHighestPriorityValidSource(this);
+      var newHighestSource = findHighestPriorityValidSource(this);
 
-      if (this.highestValidSource) {
+      if (newHighestSource && (newHighestSource != this.highestValidSource)) {
+         this.highestValidSource = newHighestSource;
          _data.propertyValue = this.highestValidSource.getPropertyValue();
          this.updatePropertyInternal(this.highestValidSource.getPropertyValue(), _data);
+      }
+      else {
+         this.highestValidSource = newHighestSource;
       }
    }
 
@@ -65,6 +74,7 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 }
 
 TopValidProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+   console.log(this.uName+": AAAAAAA New Property Value received, value = "+_data.propertyValue);
 
    if (_sourceListener == this.highestValidSource) {
       this.updatePropertyInternal(_data.propertyValue, _data);
