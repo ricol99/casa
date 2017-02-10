@@ -54,7 +54,7 @@ function ContactIdProtocol(_uName) {
       351: { name: 'ATS Path Fault' },
       354: { name: 'Failed to Communicate' },
 
-      400: { name: 'Arm/Disarm', property: 'armed-normal' },
+      400: { name: 'Arm/Disarm', property: 'armed-part' },
       401: { name: 'Arm/Disarm by User', property: 'armed-normal' },
       403: { name: 'Automatic Arm/Disarm', property: 'armed-normal' },
       406: { name: 'Alarm Abort' },
