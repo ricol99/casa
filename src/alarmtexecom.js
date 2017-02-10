@@ -31,12 +31,25 @@ function TexecomAlarm(_config) {
    this.maxPollMisses = (_config.maxPollMisses == undefined) ? 3 : _config.maxPollMisses;
    this.alarmIp = _config.alarmIp;
 
+   this.props['ACTIVE'].value = false;
+   this.props['line-failure']  = new Property({ name: 'line-failure', type: 'property', initialValue: false }, this);
+   this.props['ac-power-failure']  = new Property({ name: 'ac-power-failure', type: 'property', initialValue: false }, this);
+   this.props['battery-failure']  = new Property({ name: 'battery-failure', type: 'property', initialValue: false }, this);
+   this.props['line-failure']  = new Property({ name: 'line-failure', type: 'property', initialValue: false }, this);
+   this.props['fire-alarm']  = new Property({ name: 'fire-alarm', type: 'property', initialValue: false }, this);
+   this.props['carbon-monoxide-alarm']  = new Property({ name: 'carbon-monoxide-alarm', type: 'property', initialValue: false }, this);
+   this.props['tamper-alarm']  = new Property({ name: 'tamper-alarm', type: 'property', initialValue: false }, this);
+   this.props['armed-normal']  = new Property({ name: 'armed-normal', type: 'property', initialValue: false }, this);
+   this.props['zone-alarm']  = new Property({ name: 'zone-alarm', type: 'property', initialValue: false }, this);
+   this.props['confirmed-alarm']  = new Property({ name: 'confirmed-alarm', type: 'property', initialValue: false }, this);
+   this.props['engineer-mode']  = new Property({ name: 'engineer-mode', type: 'property', initialValue: false }, this);
+
    this.pollingTolerance = 30000;   // ms
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;
+   this.pollsMissed = 0;
 
    this.decoders = { 2: new ContactIdProtocol("contactid:"+this.uName), 3: new SIAProtocol("sia:"+this.uName) };
 
-   var that = this;
 }
 
 util.inherits(TexecomAlarm, Thing);
@@ -46,7 +59,6 @@ TexecomAlarm.prototype.newConnection = function(_socket) {
    console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
   _socket.on('data', function (_data) {
-     console.log("DATA:",_data);
 
      if (_data.slice(0,3) == '+++') {
         return;
@@ -103,69 +115,66 @@ function handlePollEvent(_this, _socket, _data) {
    var buf = new Buffer('5b505d0000060d0a','hex');
    buf.writeInt16BE(_this.pollingInterval / 1000 / 60,3)
    _socket.write(buf);
-   
+
    if (_this.pollsMissed > 0) {
       console.log(_this.uName + ": Polling recovered (within tolerance) with Texecom alarm!");
       _this.pollsMissed = 0;
    }
 
-   _this.updateProperty('ACTIVE', true, { sourceName: _this.uName });
-
-   // More props to update here!  XXXX
-   if (flags & FLAG_AC_FAILURE) {
-      console.log(_this.uName + ": Poll event received AC Failure");
+   if (!_this.props['ACTIVE'].value) {
+      console.log(_this.uName + ": Connection restored to Texecom alarm!");
+      _this.updateProperty('ACTIVE', true, { sourceName: _this.uName });
    }
 
-   if (flags & FLAG_BATTERY_FAILURE) {
-      console.log(_this.uName + ": Poll event received Battery Failure");
+   if ((flags & FLAG_LINE_FAILURE != 0) != _this.props['line-failure].value) {
+      _this.updateProperty('line-failure', (flags & FLAG_LINE_FAILURE != 0), { sourceName: _this.uName });
    }
 
-   if (flags & FLAG_ARMED) {
-      console.log(_this.uName + ": Poll event received Alarm armed");
+   if ((flags & FLAG_AC_FAILURE != 0) != _this.props['ac-power-failure].value) {
+      _this.updateProperty('ac-power-failure', (flags & FLAG_AC_FAILURE != 0), { sourceName: _this.uName });
    }
 
-   info = {
-      flags_raw: flags,
-      line_failure: (flags & FLAG_LINE_FAILURE) > 0,
-      ac_failure: (flags & FLAG_AC_FAILURE) > 0,
-      battery_failure: (flags & FLAG_BATTERY_FAILURE) > 0,
-      armed: (flags & FLAG_ARMED) > 0,
-      engineer: (flags & FLAG_ENGINEER) > 0
-   };
+   if ((flags & FLAG_BATTERY_FAILURE != 0) != _this.props['battery-failure].value) {
+      _this.updateProperty('battery-failure', (flags & FLAG_BATTERY_FAILURE != 0), { sourceName: _this.uName });
+   }
+
+   if ((flags & FLAG_ARMED != 0) != _this.props['armed-normal].value) {
+      _this.updateProperty('armed-normal', (flags & FLAG_ARMED != 0), { sourceName: _this.uName });
+   }
+
+   if ((flags & FLAG_ENGINEER != 0) != _this.props['engineer-mode].value) {
+      _this.updateProperty('engineer-mode', (flags & FLAG_ENGINEER != 0), { sourceName: _this.uName });
+   }
 
    restartWatchdog(_this);
 }
 
 function handleMessage(_this, _socket, _message, _data) {
 
-   console.log("%s: a/c %s area %d %s %s %d %s" , _message.protocol, _message.accountNumber, _message.area, _message.event, _message.valueName, _message.value, _message.extraText);
-
-   if (_message.description != undefined) {
-      console.log(_this.uName + ": Message description: " + _message.description);
-   }
-
    // Send ACK
    buf = new Buffer('00060d0a', 'hex');
    buf[0] = _data[0];
    _socket.write(buf);
 
-   info = {
+   var info = {
+      protocol: _message.protocol,
+      accountNumber: _message.accountNumber,
       area: _message.area,
       event: _message.event,
       value: _message.value,
       valueType: _message.valueName,
-      extraText: _message.extraText
+      extraText: _message.extraText,
+      description: _message.description
    };
 
-   if (_message.extraText) {
-      console.log(_this.uName + ": Extra message text: " + _message.extraText);
-   }
+   // TODO update properties for zone-alarm, confirmed-alarm
 }
 
 function restartWatchdog(_that) {
 
    if (_that.watchdog) {
       clearTimeout(_that.watchdog);
+      _that.pollsMissed = 0;
    }
 
    _that.watchdog = setTimeout(function(_this) {
@@ -175,6 +184,7 @@ function restartWatchdog(_that) {
       if (_this.pollsMissed > _this.maxPollMisses) {
          // Lost connection with alarm
          console.info(_this.uName + ": Lost connection to Texecom Alarm!");
+         _this.pollsMissed = 0;
          _this.updateProperty('ACTIVE', false, { sourceName: _this.uName });
       }
       else {

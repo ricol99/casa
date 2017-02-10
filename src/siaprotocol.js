@@ -332,8 +332,6 @@ function SIAProtocol(_name) {
 
 SIAProtocol.prototype.parseRecord = function(_record) {
    var parsedRecord = {};
-   console.log(_record[0] & 0x3f);
-
    parsedRecord.type = _record[0] & 0xc0;
    parsedRecord.payloadlength = _record[0] & 0x3f;
 
@@ -343,8 +341,6 @@ SIAProtocol.prototype.parseRecord = function(_record) {
    }
    parsedRecord.payloadType = _record[1];
    parsedRecord.payload = _record.slice(2,2 + parsedRecord.payloadlength)
-   console.log("payload length="+parsedRecord.payload.length);
-   console.log("record length="+_record.length);
 
    if ((3 + parsedRecord.payloadlength) == _record.length) {
       parsedRecord.nextrec = null;
@@ -371,7 +367,6 @@ SIAProtocol.prototype.parseRecord = function(_record) {
    else {
       return { payloadType: '', payload: '', nextrec: parsedRecord.nextrec };
    }
-
 }
 
 SIAProtocol.prototype.decodeMessage = function(_msg) {
@@ -389,15 +384,15 @@ SIAProtocol.prototype.decodeMessage = function(_msg) {
       }
 
       if (parsedRecord.payloadType == 35) {
-         message.accountNumber = parsedRecord.payload;
+         message.accountNumber = parsedRecord.payload.toString();
       }
       else if (parsedRecord.payloadType == 65) {
          message.extraText = parsedRecord.payload;
       }
       else if (parsedRecord.payloadType == 78) {
-         message.area = parsedRecord.payload[2];
+         message.area = String.fromCharCode(parsedRecord.payload[2]);
          message.eventNum = parsedRecord.payload.slice(3,5);
-         message.value = parsedRecord.payload.slice(5,8);
+         message.value = parsedRecord.payload.slice(5,8).toString();
 
          if (isNaN(message.area) || isNaN(message.value)) {
             console.log(this.name + ": Payload parse error");

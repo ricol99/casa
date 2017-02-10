@@ -28,60 +28,59 @@ function ContactIdProtocol(_uName) {
    };
 
    this.EVENTS = {
-      100: 'Medical',
-      110: 'Fire',
-      120: 'Panic',
-      121: 'Duress',
-      122: 'Silent Attack',
-      123: 'Audible Attack',
-      130: 'Intruder',
-      131: 'Perimeter',
-      132: 'Interior',
-      133: '24 Hour',
-      134: 'Entry/Exit',
-      135: 'Day/Night',
-      136: 'Outdoor',
-      137: 'Zone Tamper',
-      139: 'Confirmed Alarm',
-      145: 'System Tamper',
+      100: { name: Medical', property: 'medical-alarm' },
+      110: { name: Fire', property: 'fire-alarm' },
+      120: { name: Panic', property: 'panic-alarm' },
+      121: { name: Duress', property: 'duress-alarm' },
+      122: { name: Silent Attack', property: 'attack-alarm' },
+      123: { name: Audible Attack', property: 'attack-alarm' },
+      130: { name: Intruder', property: 'zone-alarm' },
+      131: { name: Perimeter', property: 'zone-alarm' },
+      132: { name: Interior', property: 'zone-alarm' },
+      133: { name: 24 Hour', },
+      134: { name: Entry/Exit'},
+      135: { name: Day/Night'},
+      136: { name: Outdoor'},
+      137: { name: Zone Tamper', property: 'tamper-alarm' },
+      139: { name: Confirmed Alarm', property: 'confirmed-alarm' },
+      145: { name: System Tamper', property: 'tamper-alarm' },
 
-      300: 'System Trouble',
-      301: 'AC Lost',
-      302: 'Low Battery',
-      305: 'System Power Up',
-      320: 'Mains Over-voltage',
-      333: 'Network Failure',
-      351: 'ATS Path Fault',
-      354: 'Failed to Communicate',
+      300: { name: System Trouble', property: 'system-failure' },
+      301: { name: AC Lost', property: 'ac-power-failure' },
+      302: { name: Low Battery' },
+      305: { name: System Power Up', property: 'ac-power-failure', value: false },
+      320: { name: Mains Over-voltage' },
+      333: { name: Network Failure' },
+      351: { name: ATS Path Fault' },
+      354: { name: Failed to Communicate' },
 
-      400: 'Arm/Disarm',
-      401: 'Arm/Disarm by User',
-      403: 'Automatic Arm/Disarm',
-      406: 'Alarm Abort',
-      407: 'Remote Arm/Disarm',
-      408: 'Quick Arm',
+      400: { name: Arm/Disarm', property: 'armed-normal' },
+      401: { name: Arm/Disarm by User', property: 'armed-normal' },
+      403: { name: Automatic Arm/Disarm', property: 'armed-normal' },
+      406: { name: Alarm Abort' },
+      407: { name: Remote Arm/Disarm', property: 'armed-normal' },
+      408: { name: Quick Arm', property: 'armed-normal' },
 
-      411: 'Download Start',
-      412: 'Download End',
-      441: 'Part Arm',
+      411: { name: Download Start' },
+      412: { name: Download End', },
+      441: { name: Part Arm', property: 'part-armed' },
 
-      457: 'Exit Error',
-      459: 'Recent Closing',
-      570: 'Zone Locked Out',
+      457: { name: Exit Error' },
+      459: { name: Recent Closing' },
+      570: { name: Zone Locked Out' },
 
-      601: 'Manual Test',
-      602: 'Periodic Test',
-      607: 'User Walk Test',
+      601: { name: Manual Test' },
+      602: { name: Periodic Test' },
+      607: { name: User Walk Test' },
 
-      623: 'Log Capacity Alert',
-      625: 'Date/Time Changed',
-      627: 'Program Mode Entry',
-      628: 'Program Mode Exit',
+      623: { name: Log Capacity Alert' },
+      625: { name: Date/Time Changed', },
+      627: { name: Program Mode Entry', property: 'engineer-mode' },
+      628: { name: Program Mode Exit', property: 'engineer-mode', value: false },
    }
 }
 
 ContactIdProtocol.prototype.decodeMessage = function(_msg) {
-
    var message = { protocol: 'ContactID'};
 
    // Validate
@@ -95,11 +94,11 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       return undefined;
    }
 
-   message.accountNumber = _msg.slice(0,4).toString().replace('A', '0');
+   message.accountNumber = _msg.slice(0,4).toString().replace(/A/g, '0');
    message.qualifier = _msg.slice(6,7);
    message.eventNum = _msg.slice(7,10);
-   message.area = _msg.slice(10,12);
-   message.value = _msg.slice(12,15);
+   message.area = _msg.slice(10,12).toString();
+   message.value = _msg.slice(12,15).toString();
 
    if (isNaN(message.qualifier) || isNaN(message.eventNum) || isNaN(message.area) || isNaN(message.value)) {
       console.log(this.uName + ": Unable to parse event!");
@@ -108,7 +107,17 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
 
 
    var qualstr = (this.QUALIFIERS[message.qualifier] == undefined) ? '' : this.QUALIFIERS[message.qualifier];
-   var eventstr = (this.EVENTS[message.eventNum] == undefined) ? ('Unknown Event '+message.eventNum) : this.EVENTS[message.eventNum];
+   var eventstr;
+
+   if (this.EVENTS[message.eventNum] != undefined) {
+      eventStr = this.EVENTS[message.eventNum].name;
+      message.property = this.EVENTS[message.eventNum].property;
+      message.propertyValue = (this.EVENTS[message.eventNum].value == undefined) ? true : this.EVENTS[message.eventNum].value;
+   }
+   else {
+      eventStr = 'Unknown Event '+message.eventNum;
+   }
+
    message.event = eventstr + qualstr;
    message.description = eventstr + qualstr;
    message.valueName = 'Zone/User';
