@@ -132,24 +132,24 @@ function handlePollEvent(_this, _socket, _data) {
       _this.updateProperty('ACTIVE', true, { sourceName: _this.uName });
    }
 
-   if ((flags & FLAG_LINE_FAILURE != 0) != _this.props['line-failure'].value) {
-      _this.updateProperty('line-failure', (flags & FLAG_LINE_FAILURE != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_LINE_FAILURE) != 0) != _this.props['line-failure'].value) {
+      _this.updateProperty('line-failure', ((flags & FLAG_LINE_FAILURE) != 0), { sourceName: _this.uName });
    }
 
-   if ((flags & FLAG_AC_FAILURE != 0) != _this.props['ac-power-failure'].value) {
-      _this.updateProperty('ac-power-failure', (flags & FLAG_AC_FAILURE != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_AC_FAILURE) != 0) != _this.props['ac-power-failure'].value) {
+      _this.updateProperty('ac-power-failure', ((flags & FLAG_AC_FAILURE) != 0), { sourceName: _this.uName });
    }
 
-   if ((flags & FLAG_BATTERY_FAILURE != 0) != _this.props['battery-failure'].value) {
-      _this.updateProperty('battery-failure', (flags & FLAG_BATTERY_FAILURE != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_BATTERY_FAILURE) != 0) != _this.props['battery-failure'].value) {
+      _this.updateProperty('battery-failure', ((flags & FLAG_BATTERY_FAILURE) != 0), { sourceName: _this.uName });
    }
 
-   if ((flags & FLAG_ARMED != 0) != _this.props['armed-normal'].value) {
-      _this.updateProperty('armed-normal', (flags & FLAG_ARMED != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_ARMED) != 0) != _this.props['armed-normal'].value) {
+      _this.updateProperty('armed-normal', ((flags & FLAG_ARMED) != 0), { sourceName: _this.uName });
    }
 
-   if ((flags & FLAG_ENGINEER != 0) != _this.props['engineer-mode'].value) {
-      _this.updateProperty('engineer-mode', (flags & FLAG_ENGINEER != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_ENGINEER) != 0) != _this.props['engineer-mode'].value) {
+      _this.updateProperty('engineer-mode', ((flags & FLAG_ENGINEER) != 0), { sourceName: _this.uName });
    }
 
    console.log(this.uName + ": Poll received from alarm. Flags="+flags);
