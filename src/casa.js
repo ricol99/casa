@@ -245,7 +245,7 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
 
       for (var name in props) {
 
-         if (props.hasOwnProperty(prop)) {
+         if (props.hasOwnProperty(name)) {
             allProps[name] = props[name].value;
          }
       }
