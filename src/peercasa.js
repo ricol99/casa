@@ -318,7 +318,7 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
          }
       }
 
-      this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i++]].isActive() });
+      this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
 }
 
