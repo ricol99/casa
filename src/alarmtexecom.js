@@ -147,6 +147,7 @@ function handlePollEvent(_this, _socket, _data) {
       _this.updateProperty('engineer-mode', (flags & FLAG_ENGINEER != 0), { sourceName: _this.uName });
    }
 
+   console.log(this.uName + ": Poll received from alarm. Flags="+flags);
    restartWatchdog(_this);
 }
 
