@@ -416,8 +416,7 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
-         //if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
-         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound)) {
+         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
          }
@@ -431,7 +430,7 @@ function transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data) {
    var actualOutputValue = _newPropValue;
 
    if (_data.sourcePropertyName != undefined) {
-      var sourceListener = (_data.sourcePropertyName != undefined) ? _this.sourceListeners[_data.sourcePropertyName] : undefined;
+      var sourceListener = _this.sourceListeners[_data.sourcePropertyName];
 
       if (sourceListener) {
          var sourceListenerInCharge = sourceListener;
