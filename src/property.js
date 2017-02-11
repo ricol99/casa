@@ -416,7 +416,8 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
       if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
          var sourceListener = _this.sourceListeners[sourcePropertyName];
 
-         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+         //if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
+         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound)) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
          }
