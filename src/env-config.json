@@ -137,9 +137,13 @@
                "initialValue": false,
                "writable": true,
                "type": "scheduleproperty",
-               "source": "thing:dumgoyne-environment",
-               "sourceProperty": "daylight",
-               "transform": "!$value",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight",
+                     "transform": "!$value"
+                  }
+               ],
                "events": [
                   {
                      "rule": "30 22 * * *",
