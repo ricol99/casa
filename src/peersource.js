@@ -80,6 +80,25 @@ PeerSource.prototype.getProperty = function(_propName) {
    return this.props[_propName].value;
 };
 
+PeerSource.prototype.coldStart = function() {
+
+   if (!this.ghostMode) {
+
+      for (var prop in this.props) {
+
+         if (this.props.hasOwnProperty(prop)) {
+            var sendData = {};
+            sendData.sourceName = this.uName;
+            sendData.propertyName = prop;
+            sendData.propertyValue = this.props[prop].value;
+            sendData.coldStart = true;
+            console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.propertyValue);
+            this.emit('property-changed', copyData(sendData));
+         }
+      }
+   }
+}
+
 PeerSource.prototype.invalidateSource = function() {
 
    if (!this.ghostMode) {

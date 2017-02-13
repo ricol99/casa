@@ -129,6 +129,19 @@ PeerCasa.prototype.removeCasaListeners = function() {
    this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
 }
 
+
+PeerCasa.prototype.coldStartPeerSources = function() {
+
+   for (var prop in this.sources) {
+
+      if (this.sources.hasOwnProperty(prop)){
+         console.log(this.uName + ': Cold starting peer source ' + this.sources[prop].uName);
+         this.sources[prop].coldStart();
+      }
+   }
+}
+
+
 PeerCasa.prototype.invalidateSources = function() {
 
    for(var prop in this.sources) {

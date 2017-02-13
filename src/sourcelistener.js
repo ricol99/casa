@@ -72,8 +72,8 @@ SourceListener.prototype.refreshSource = function() {
             this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
          }
 
-         this.internalSourcePropertyChanged(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
-                                                       propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
+         //this.internalSourcePropertyChanged(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
+                                                       //propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
       }
    }
    return ret;

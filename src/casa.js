@@ -295,6 +295,9 @@ Casa.prototype.createRemoteCasa = function(_data) {
    // Refresh all inactive sources and workers
    this.refreshSourceListeners();
 
+   // Cold start all the peers sources now that everything has been created
+   remoteCasa.coldStartPeerSources();
+
    return remoteCasa;
 }
 
