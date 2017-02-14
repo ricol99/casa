@@ -36,7 +36,7 @@
                "name": "light-level",
                "initialValue": 0,
                "writable": false,
-               "sources:" [
+               "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
                      "property": "light-sensor",
