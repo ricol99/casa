@@ -39,9 +39,9 @@ function Property(_config, _owner) {
    this.sourceListeners = {};
    this.noOfSources = 0;
 
-   if (_config.source) {
-      _config.sources = [{ name: _config.source, property: _config.sourceProperty, uName: _config.source+":"+_config.sourceProperty }];
-   }
+   //if (_config.source) {
+      //_config.sources = [{ name: _config.source, property: _config.sourceProperty, uName: _config.source+":"+_config.sourceProperty }];
+   //}
 
    if (_config.sources) {
       this.valid = false;

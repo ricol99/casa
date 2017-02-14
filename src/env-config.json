@@ -36,9 +36,13 @@
                "name": "light-level",
                "initialValue": 0,
                "writable": false,
-               "source": "thing:dumgoyne-sensors",
-               "sourceProperty": "light-sensor",
-               "transform": "$value*$value"
+               "sources:" [
+                  {
+                     "name": "thing:dumgoyne-sensors",
+                     "property": "light-sensor",
+                     "transform": "$value*$value"
+                  }
+               ]
             }
          ]
       },
@@ -589,8 +593,12 @@
                      "name": "power",
                      "initialValue": false,
                      "writeable": true,
-                     "source": "thing:environment",
-                     "sourceProperty": "bedtime"
+                     "sources": [
+                        {
+                           "name": "thing:environment",
+                           "property": "bedtime"
+                        }
+                     ]
                   }
                ],
                "things": [
@@ -612,24 +620,11 @@
          "displayName": "House Alarm",
          "props": [
             {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.90",
-               "writable": false
-            },
-            {
                "name": "tamper-alarm",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 5,
-               "triggerLow": true
-            },
-            {
-               "name": "kitchen-pir",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 17,
                "triggerLow": true
             },
             {
@@ -649,14 +644,6 @@
                "triggerLow": true
             },
             {
-               "name": "part-armed",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 23,
-               "triggerLow": true
-            },
-            {
                "name": "alarm-triggered",
                "initialValue": false,
                "writable": false,
@@ -671,6 +658,36 @@
                "type": "gpioproperty",
                "gpioPin": 25,
                "triggerLow": true
+            }
+         ]
+      },
+      {
+         "name": "alarmtexecom:dumgoyne",
+         "displayName": "Dumgoyne Alarm",
+         "port": 8200,
+         "pollingInterval": 2,
+         "maxPollMisses": 1,
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.85",
+               "writable": false
+            },
+            {
+               "name": "kitchen-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true
+            },
+            {
+               "name": "part-armed",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
             },
             {
                "name": "lounge-pir",
@@ -681,14 +698,6 @@
                "triggerLow": true
             }
          ]
-      },
-      {
-         "name": "alarmtexecom:dumgoyne-alarm",
-         "displayName": "Test Dumgoyne Alarm",
-         "port": 8200,
-         "pollingInterval": 2,
-         "maxPollMisses": 1,
-         "props": []
       }
    ]
 }

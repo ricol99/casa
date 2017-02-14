@@ -160,8 +160,12 @@
                "initialValue": false,
                "writable": false,
                "type": "invertproperty",
-               "source": "thing:environment",
-               "sourceProperty": "daylight"
+               "sources": [
+                  {
+                     "name": "thing:environment",
+                     "property": "daylight"
+                  }
+               ]
             },
             {
                "name": "low-light",

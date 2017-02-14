@@ -56,8 +56,12 @@
                "writable": false,
                "rate": 10,
                "resolution": 5,
-               "source": "thing:home-daylight-sensor",
-               "sourceProperty": "lightLevel"
+               "sources": [
+                  {
+                     "name": "thing:home-daylight-sensor",
+                     "property": "lightLevel"
+                  }
+               ]
             },
             {
                "name": "alarm-status",
@@ -94,8 +98,12 @@
                "inputMax": 100,
                "outputMin": 10,
                "outputMax": 0,
-               "source": "thing:home-daylight-sensor",
-               "sourceProperty": "lightLevel"
+               "sources": [
+                  {
+                     "name": "thing:home-daylight-sensor",
+                     "property": "lightLevel"
+                  }
+               ]
             },
             {
                "name": "daylight",
@@ -219,8 +227,12 @@
                "type": "latchproperty",
                "initialValue": false,
                "writable": false,
-               "source": "thing:test-cctv",
-               "sourceProperty": "test-prop-2",
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2"
+                  }
+               ],
                "controller": {
                   "name": "thing:test-cctv",
                   "property": "test-prop-3"
@@ -255,8 +267,12 @@
                "name": "test-property-broken",
                "initialValue": false,
                "writable": false,
-               "source": "propertyactivator:test-source-not-found",
-               "sourceProperty": "test-prop-not-found"
+               "sources": [
+                  {
+                     "name": "propertyactivator:test-source-not-found",
+                     "property": "test-prop-not-found"
+                  }
+               ]
             }
          ]
       },
@@ -311,9 +327,13 @@
                "initialValue": false,
                "writable": true,
                "type": "scheduleproperty",
-               "source": "thing:dumgoyne-environment",
-               "sourceProperty": "daylight",
-               "transform": "!$value",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight",
+                     "transform": "!$value"
+                  }
+               ],
                "events": [
                   {
                      "rule": "30 22 * * *",

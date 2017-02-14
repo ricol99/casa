@@ -79,27 +79,39 @@
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "source": "casa:alarm",
-               "sourceProperty": "ACTIVE",
-               "threshold": 120
+               "threshold": 120,
+               "sources": [
+                  {
+                     "name": "casa:alarm",
+                     "property": "ACTIVE"
+                  }
+               ]
             },
             {
                "name": "casa-cctv",
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "source": "casa:cctv",
-               "sourceProperty": "ACTIVE",
-               "threshold": 120
+               "threshold": 120,
+               "sources": [
+                  {
+                     "name": "casa:cctv",
+                     "property": "ACTIVE"
+                  }
+               ]
             },
             {
                "name": "casa-env",
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "source": "casa:env",
-               "sourceProperty": "ACTIVE",
-               "threshold": 120
+               "threshold": 120,
+               "sources": [
+                  {
+                     "name": "casa:env",
+                     "property": "ACTIVE"
+                  }
+               ]
             },
             {
                "name": "alarm-armed",
@@ -122,9 +134,13 @@
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "source": "thing:home-internet-connection",
-               "sourceProperty": "alarm-armed",
-               "threshold": 30
+               "threshold": 30,
+               "sources": [
+                  {
+                     "name": "thing:home-internet-connection",
+                     "property": "alarm-armed"
+                  }
+               ]
             },
             {
                "name": "lost-while-armed",
