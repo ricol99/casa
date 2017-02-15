@@ -183,14 +183,6 @@
                   },
                   {
                      "name": "alarm:home",
-                     "property": "mains-failure",
-                     "transformMap": {
-                        "true": "Alarm has lost mains power!",
-                        "false": "Alarm mains power restored"
-                     }
-                  },
-                  {
-                     "name": "alarm:home",
                      "property": "fire-alarm",
                      "transformMap": {
                         "true": "Fire Alarm!",
