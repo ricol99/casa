@@ -56,7 +56,7 @@ Source.prototype.isPropertyValid = function(_property) {
 }
 
 Source.prototype.getProperty = function(_property) {
-   return this.props[_property].value;
+   return (this.props[_property] != undefined) ? this.props[_property].value : undefined;
 }
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
