@@ -19,7 +19,7 @@ function PeerCasa(_config) {
    this.loginAs = 'peer';
    this.remoteCasas = [];
    this.persistent = false;
-   this.deathTime = 60;
+   this.deathTime = 500;
 
    Source.call(this, _config);
 
@@ -80,20 +80,27 @@ function PeerCasa(_config) {
    this.casaLostHandler = function(_data) {
 
       if (_data.peerName == that.uName) {
+
          // Cope with race between old diconnect and new connect - Ignore is sockets do not match
          if (!that.socket || (that.socket == _data.socket)) {
-
             console.log(that.uName + ': I have lost my peer!');
+
+            if (that.intervalID) {
+               clearInterval(that.intervalID);
+               that.intervalID = null;
+            }
 
             if (that.connected) {
                console.log(that.uName + ': Lost connection to my peer. Going inactive.');
                that.connected = false;
-               clearInterval(that.intervalID);
-               that.intervalID = null;
                that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-               that.socket = null;
+               that.removeCasaListeners();
+               that.invalidateSources();
+               that.setCasaArea(null);
                that.updateProperty('ACTIVE', false, { sourceName: that.uName });
             }
+
+            that.deleteMeIfNeeded();
          }
       }
    };
@@ -126,7 +133,9 @@ PeerCasa.prototype.removeCasaListeners = function() {
       this.casa.removeListener('casa-lost', this.casaLostHandler);
    }
 
-   this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   if (!this.persistent) {
+      this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   }
 }
 
 
@@ -250,62 +259,71 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       that.messageHasBeenAcked(_data);
    });
 
-   this.socket.on('error', function(_error) {
-      console.log(that.uName + ': Error received: ' + _error);
+   if (this.proActiveConnect) {
 
-      if (that.intervalID) {
-         clearInterval(that.intervalID);
-         that.intervalID = null;
-      }
+      this.socket.on('error', function(_error) {
+         console.log(that.uName + ': Error received: ' + _error);
 
-      if (that.connected) {
-         console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-         that.connected = false;
-         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-         that.invalidateSources();
-         that.updateProperty('ACTIVE', false, { sourceName: that.uName });
-      }
+         if (that.intervalID) {
+            clearInterval(that.intervalID);
+            that.intervalID = null;
+         }
 
-      that.deleteMeIfNeeded();
-   });
+         if (that.connected) {
+            console.log(that.uName + ': Lost connection to my peer. Going inactive.');
+            that.connected = false;
+            that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
+            that.removeCasaListeners();
+            that.invalidateSources();
+            that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+         }
 
-   this.socket.on('disconnect', function() {
-      console.log(that.uName + ': Error disconnect');
+         that.deleteMeIfNeeded();
+      });
 
-      if (that.intervalID) {
-         clearInterval(that.intervalID);
-         that.intervalID = null;
-      }
+      this.socket.on('disconnect', function() {
+         console.log(that.uName + ': Error disconnect');
 
-      if (that.connected) {
-         console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-         that.connected = false;
-         that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-         that.invalidateSources();
-         that.updateProperty('ACTIVE', false, { sourceName: that.uName });
-      }
+         if (that.intervalID) {
+            clearInterval(that.intervalID);
+            that.intervalID = null;
+         }
 
-      that.deleteMeIfNeeded();
-   });
+         if (that.connected) {
+            console.log(that.uName + ': Lost connection to my peer. Going inactive.');
+            that.connected = false;
+            that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
+            that.removeCasaListeners();
+            that.invalidateSources();
+            that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+         }
+
+         that.deleteMeIfNeeded();
+      });
+   }
+
 }
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
    var that = this;
 
    if (!this.persistent) {
+      delete this.socket;
+      this.socket = undefined;
+      console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');
+
+      if (that.casaSys.remoteCasas[that.uName]) {
+         delete that.casaSys.remoteCasas[that.uName];
+         delete that.casaSys.allObjects[that.uName];
+      }
 
       setTimeout(function() {
 
          if (!that.connected) {
-            that.socket.close();
-
-            if (that.casaSys.remoteCasas[that.uName]) {
-               delete that.casaSys.remoteCasas[that.uName];
-               delete that.casaSys.allObjects[that.uName];
-            }
+            console.log(that.uName + ': Peercasa object has been deleted - cleanup complete');
             delete that;
          }
-      }, this.deathTime * 1000);
+      }, this.deathTime);
    }
    else if (this.manualDisconnect) {
       // Recreate socket to attempt reconnection

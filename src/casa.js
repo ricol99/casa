@@ -131,16 +131,6 @@ Casa.prototype.deleteMe = function(_connection) {
       delete this.clients[_connection.peerName];
    }
 
-   if (remoteCasa) {
-      console.log(this.uName + ': deleting remote casa ' + remoteCasa.uName);
-      remoteCasa.removeCasaListeners();
-      remoteCasa.invalidateSources();
-      remoteCasa.setCasaArea(null);
-      delete this.casaSys.remoteCasas[remoteCasa.uName];
-      delete this.casaSys.allObjects[remoteCasa.uName];
-      delete remoteCasa;
-   }
-
    _connection.deleted = true;
    delete _connection;
 }
