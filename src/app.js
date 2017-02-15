@@ -1,4 +1,4 @@
-var version = 1.007;
+var version = 1.008;
 var crypto = require('crypto');
 var fs = require('fs');
 require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true });
