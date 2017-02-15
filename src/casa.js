@@ -97,7 +97,6 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 }
 
 Casa.prototype.refreshSourceListeners = function() {
-
    for (var prop in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(prop)) {
@@ -331,6 +330,10 @@ Casa.prototype.isUber = function() {
 Casa.prototype.allocatePort = function(_uName) {
    this.ports[_uName] = this.nextPortToAllocate;
    return this.nextPortToAllocate++;
+}
+
+Casa.prototype.getProperty = function(_property) {
+   return true;
 }
 
 module.exports = exports = Casa;

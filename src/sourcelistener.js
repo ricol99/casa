@@ -63,7 +63,6 @@ SourceListener.prototype.refreshSource = function() {
       console.log(this.uName + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
-         this.sourcePropertyValue = this.source.getProperty(this.property);
 
          if (this.pipeline) {
             this.pipeline.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
@@ -71,9 +70,6 @@ SourceListener.prototype.refreshSource = function() {
          else {
             this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
          }
-
-         //this.internalSourcePropertyChanged(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName,
-                                                       //propertyName: this.property, propertyValue: this.source.getProperty(this.property) }));
       }
    }
    return ret;

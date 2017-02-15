@@ -1,6 +1,6 @@
 {
-   "name": "casa:alarm",
-   "displayName": "Casa Collin Texecom Alarm",
+   "name": "casa:cctv",
+   "displayName": "Casa Collin CCTV",
    "gang": "casa-collin-v2",
    "parentCasa": {
       "name": "casa:internet",
@@ -9,11 +9,11 @@
          "port": 8096
       }
    },
-   "listeningPort": 8098,
+   "listeningPort": 8099,
    "props": [],
    "things": [
       {
-         "name": "alarm:home",
+         "name": "thing:cctv",
          "displayName": "House Alarm",
          "props": [
             {
@@ -22,12 +22,7 @@
                "writable": false
             },
             {
-               "name": "tamper-alarm",
-               "initialValue": false,
-               "writable": false
-            },
-            {
-               "name": "mains-failure",
+               "name": "tamper-cctv",
                "initialValue": false,
                "writable": false
             },
@@ -37,7 +32,7 @@
                "writable": false
             },
             {
-               "name": "fire-alarm",
+               "name": "fire-cctv",
                "initialValue": false,
                "writable": false
             },
@@ -52,12 +47,12 @@
                "writable": false
             },
             {
-               "name": "alarm-triggered",
+               "name": "cctv-triggered",
                "initialValue": false,
                "writable": false
             },
             {
-               "name": "confirmed-alarm",
+               "name": "confirmed-cctv",
                "initialValue": false,
                "writable": false
             },
