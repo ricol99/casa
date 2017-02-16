@@ -557,6 +557,7 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
                "props": [
                ],
                "things": [

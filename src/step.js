@@ -4,7 +4,7 @@ var util = require('util');
 // Constructor
 //
 function Step(_config, _pipeline) {
-   this.uName = _config.type+":ANONYMOUS";
+   this.uName = _pipeline.uName+":"+_config.type;
    this.type = _config.type;
    this.pipeline = _pipeline;
    this.value = 0;
