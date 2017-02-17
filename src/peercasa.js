@@ -11,6 +11,8 @@ function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.config = _config;
+   this.secureMode = _config.secureMode;
+   this.certDir = _config.certDir;
    
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
@@ -38,6 +40,22 @@ function PeerCasa(_config) {
 
    this.incompleteRequests = [];
    this.reqId = 0;
+
+   if (this.secureMode) {
+      var fs = require('fs');
+      this.http = "https";
+      this.socketOptions = {
+         secure: true,
+         rejectUnauthorized: false,
+         key: fs.readFileSync(this.certDir+'/client.key'),
+         cert: fs.readFileSync(this.certDir+'/client.crt'),
+         ca: fs.readFileSync(this.certDir+'/ca.crt')
+      };
+   }
+   else {
+      this.http = "http";
+      this.socketOptions = { transports: ['websocket'] };
+   }
 
    this.lastHeartbeat = Date.now() + 10000;
 
@@ -199,7 +217,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    var that = this;
 
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-   this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/',  { transports: ['websocket'] } );
+   this.socket = io(this.http + '://' + that.address.hostname + ':' + this.address.port + '/', this.socketOptions);
    //this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
 
    this.socket.on('connect', function() {

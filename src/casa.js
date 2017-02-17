@@ -1,16 +1,9 @@
 var util = require('util');
 var events = require('events');
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-//var storage = require('node-persist');
- 
-//var io = require('socket.io')(http);
-
-var io = require('socket.io')(http, {
-  allowUpgrades: true,
-  transports: ['websocket']
-});
+var express;
+var app;
+var http;
+var io;
 
 var CasaSystem = require('./casasystem');
 
@@ -20,6 +13,8 @@ function Casa(_config) {
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
    this.ports = {};
+   this.secureMode = _config.secureMode;
+   this.certDir = _config.certDir;
 
    this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
@@ -36,21 +31,53 @@ function Casa(_config) {
    this.uber = false;
    this.valid = true;
 
-   //storage.initSync();
-
    var that = this;
 
-   //app.get('/nuclear_alarm.mp3', function(req, res){
-     //res.sendFile(__dirname + '/nuclear_alarm.mp3');
-   //});
-
    this.buildSimpleConfig(_config);
+   createServer(this);
+}
+
+util.inherits(Casa, events.EventEmitter);
+
+function createServer(_this) {
+   var that = _this;
+
+   express = require('express');
+   app = express();
+
+   if (_this.secureMode) {
+      var fs = require('fs');
+
+      var serverOptions = {
+        key: fs.readFileSync(_this.certDir+'/server.key'),
+        cert: fs.readFileSync(_this.certDir+'/server.crt'),
+        ca: fs.readFileSync(_this.certDir+'/ca.crt'),
+        requestCert: true,
+        rejectUnauthorized: false
+      };
+
+      http = require('https').Server(serverOptions, app);
+
+      io = require('socket.io')(http, {
+         allowUpgrades: true
+      });
+   }
+   else {
+      http = require('http').Server(app);
+
+      io = require('socket.io')(http, {
+         allowUpgrades: true,
+         transports: ['websocket']
+      });
+   }
 
    app.get('/index.html', function(req, res){
      res.sendFile(__dirname + '/index.html');
    });
 
    app.get('/source/:source', function(req, res) {
+      console.log(req.client.authorized);
+      console.log(req.connection.getPeerCertificate().subject);
       var allProps = {};
 
       if (that.casaSys.allObjects[req.params.source]) {
@@ -68,12 +95,10 @@ function Casa(_config) {
       that.anonymousClients[_socket.id] = new Connection(that, _socket);
    });
 
-   http.listen(this.listeningPort, function(){
+   http.listen(_this.listeningPort, function(){
       console.log('listening on *:' + that.listeningPort);
    });
 }
-
-util.inherits(Casa, events.EventEmitter);
 
 Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};
@@ -262,6 +287,8 @@ Casa.prototype.isActive = function() {
 
 Casa.prototype.createRemoteCasa = function(_data) {
    var remoteCasa;
+   _data.casaConfig.secureMode = this.secureMode;
+   _data.casaConfig.certDir = this.certDir;
 
    if (_data.casaType == 'child') {
       remoteCasa = this.casaSys.createChildCasa(_data.casaConfig, _data.peers);

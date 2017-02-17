@@ -3,7 +3,7 @@ var S = require('string');
 
 var _mainInstance = null;
 
-function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
+function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certDir, _version) {
    this.casaName = _config.name;
    this.config = _config;
    this.systemConfig = _systemConfig;
@@ -33,6 +33,9 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _version) {
 
    var that = this;
    _mainInstance = this;
+
+   this.config.secureMode = _secureMode;
+   this.config.certDir = _certDir;
 
    // Merge Configs
    this.mergeConfigs();
@@ -164,6 +167,8 @@ CasaSystem.prototype.extractCasa = function() {
 CasaSystem.prototype.extractParentCasa = function() {
 
    if (this.config.parentCasa) {
+      this.config.parentCasa.secureMode = this.config.secureMode;
+      this.config.parentCasa.certDir = this.config.certDir;
       var ParentCasa = require('./parentcasa');
       this.parentCasa = new ParentCasa(this.config.parentCasa);
       this.remoteCasas[this.parentCasa.uName] = this.parentCasa;

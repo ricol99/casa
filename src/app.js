@@ -1,11 +1,30 @@
 var version = 1.008;
 var crypto = require('crypto');
 var fs = require('fs');
+var commandLineArgs = require('command-line-args')
+ 
+var optionDefinitions = [
+  { name: 'system', alias: 's', type: String },
+  { name: 'local', alias: 'l', type: String, defaultOption: true },
+  { name: 'secure', type: Boolean },
+  { name: 'certs', alias: 'c', type: String },
+  { name: 'nopeer', type: Boolean },
+]
+
+var options = commandLineArgs(optionDefinitions)
+
+if (options.local == undefined) {
+   console.log("Usage: casa [--system|-s <SYSTEM.json>] [--secure] [--nopeer] <LOCAL>.json");
+   process.exit(1);
+}
+
 require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true });
 
-var systemConfigFile = (process.argv.length >= 3) ? process.argv[2] : 'casa-collin-config.json'; 
-var configFile = (process.argv.length >= 4) ? process.argv[3] : 'internet-config.json'; 
-var connectToPeers = (process.argv.length >= 5) ? process.argv[4] != '-nopeer' : true; 
+var systemConfigFile = (options.system == undefined) ? 'casa-collin-config.json' : options.system;
+var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
+var secureMode = (options.secure == undefined) ? false : options.secure;
+var certDir = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : options.certs;
+var configFile = options.local;
 
 console.log('System File: ' + systemConfigFile + ' Casa File: ' + configFile);
 
@@ -36,5 +55,5 @@ if (!config.id) {
 
 System = require('./casasystem');
 
-var system = new System(systemConfig, config, connectToPeers, version);
+var system = new System(systemConfig, config, connectToPeers, secureMode, certDir, version);
 
