@@ -6,7 +6,7 @@
       "name": "casa:internet",
       "address": {
          "hostname": "199.245.56.152",
-         "port": 80
+         "port": 443
       }
    },
    "listeningPort": 8097,
