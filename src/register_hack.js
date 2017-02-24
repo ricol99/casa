@@ -78,7 +78,7 @@ util.inherits(LightwaveRF, events.EventEmitter);
  */
 LightwaveRF.prototype.register = function(callback) {
 	this.sendUdp("!F*p", callback);
-	//this.sendUdp("!R1Fa", callback);
+//this.sendUdp("!R1Fa", callback);
 }
 
 /**
