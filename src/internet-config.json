@@ -120,11 +120,11 @@
                "writable": false,
                "sources": [
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "fully-armed"
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "part-armed"
                   }
                ]
@@ -174,7 +174,7 @@
                "userGroup": "usergroup:key-holders",
                "sources": [
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "tamper-alarm",
                      "transformMap": {
                         "true": "Alarm being tampered with!",
@@ -182,7 +182,7 @@
                      }
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "fire-alarm",
                      "transformMap": {
                         "true": "Fire Alarm!",
@@ -190,7 +190,7 @@
                      }
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "alarm-triggered",
                      "transformMap": {
                         "true": "Alarm triggered",
@@ -198,7 +198,7 @@
                      }
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "confirmed-alarm",
                      "transformMap": {
                         "true": "Alarm confirmed - call police!",
@@ -266,7 +266,7 @@
                "userGroup": "usergroup:admins",
                "sources": [
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "fully-armed",
                      "transformMap": {
                         "true": "Alarm armed",
@@ -274,7 +274,7 @@
                      }
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "part-armed",
                      "transformMap": {
                         "true": "Alarm part armed",

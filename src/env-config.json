@@ -186,7 +186,7 @@
                      "property": "low-light"
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "kitchen-pir"
                   }
                ],
@@ -315,7 +315,7 @@
                      "property": "low-light"
                   },
                   {
-                     "name": "alarm:home",
+                     "name": "alarm:dumgoyne",
                      "property": "lounge-pir"
                   }
                ],
@@ -625,7 +625,7 @@
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
-               "gpioPin": 5,
+               "gpioPin": 8,
                "triggerLow": true
             },
             {
@@ -659,20 +659,6 @@
                "type": "gpioproperty",
                "gpioPin": 25,
                "triggerLow": true
-            }
-         ]
-      },
-      {
-         "name": "alarmtexecom:dumgoyne",
-         "displayName": "Dumgoyne Alarm",
-         "port": 8200,
-         "pollingInterval": 2,
-         "maxPollMisses": 1,
-         "props": [
-            {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.85",
-               "writable": false
             },
             {
                "name": "kitchen-pir",
@@ -697,6 +683,20 @@
                "type": "gpioproperty",
                "gpioPin": 27,
                "triggerLow": true
+            }
+         ]
+      },
+      {
+         "name": "alarmtexecom:dumgoyne",
+         "displayName": "Dumgoyne Alarm",
+         "port": 8200,
+         "pollingInterval": 2,
+         "maxPollMisses": 1,
+         "props": [
+            {
+               "name": "ipAddress",
+               "initialValue": "192.168.1.85",
+               "writable": false
             }
          ]
       }
