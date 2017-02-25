@@ -406,14 +406,14 @@
          "displayName": "Outside",
          "props": [
             {
-               "name": "movement-in-low-light",
+               "name": "movement-in-the-dark",
                "initialValue": false,
                "writable": false,
                "type": "andproperty",
                "sources": [
                   {
                      "name": "thing:environment",
-                     "property": "low-light"
+                     "property": "dark"
                   },
                   {
                      "name": "alarm:dumgoyne",
@@ -423,7 +423,7 @@
                "sourceSteps": [
                   {
                      "type": "latchstep",
-                     "minOutputTime": 600
+                     "minOutputTime": 60
                   }
                ]
             },
@@ -434,7 +434,7 @@
                "sources": [
                   {
                      "name": "room:outside",
-                     "property": "movement-in-low-light",
+                     "property": "movement-in-the-dark",
                      "outputValues": {
                         "true": 100,
                         "false": 0
