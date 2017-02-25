@@ -405,6 +405,55 @@
          "name": "room:outside",
          "displayName": "Outside",
          "props": [
+            {
+               "name": "movement-in-low-light",
+               "initialValue": false,
+               "writable": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:environment",
+                     "property": "low-light"
+                  },
+                  {
+                     "name": "alarm:dumgoyne",
+                     "property": "back-garden-1-pir"
+                  }
+               ],
+               "sourceSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 600
+                  }
+               ]
+            },
+            {
+               "name": "brightness",
+               "initialValue": 0,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "room:outside",
+                     "property": "movement-in-low-light",
+                     "outputValues": {
+                        "true": 100,
+                        "false": 0
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "power",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "room:outside",
+                     "property": "brightness",
+                     "transform": "$value>0"
+                  }
+               ]
+            }
          ],
          "things": [
             {
@@ -653,7 +702,7 @@
                "triggerLow": true
             },
             {
-               "name": "confirmed-alarm",
+               "name": "back-garden-1-pir",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
