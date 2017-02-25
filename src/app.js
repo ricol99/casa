@@ -9,6 +9,7 @@ var optionDefinitions = [
   { name: 'secure', type: Boolean },
   { name: 'certs', alias: 'c', type: String },
   { name: 'nopeer', type: Boolean },
+  { name: 'sonos', type: Boolean },
 ]
 
 var options = commandLineArgs(optionDefinitions)
@@ -25,6 +26,7 @@ var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var secureMode = (options.secure == undefined) ? false : options.secure;
 var certDir = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : options.certs;
 var configFile = options.local;
+var discoverSonos = (options.sonos == undefined) ? false : options.sonos;
 
 console.log('System File: ' + systemConfigFile + ' Casa File: ' + configFile);
 
@@ -55,5 +57,5 @@ if (!config.id) {
 
 System = require('./casasystem');
 
-var system = new System(systemConfig, config, connectToPeers, secureMode, certDir, version);
+var system = new System(systemConfig, config, connectToPeers, secureMode, certDir, discoverSonos, version);
 

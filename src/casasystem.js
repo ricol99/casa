@@ -3,7 +3,7 @@ var S = require('string');
 
 var _mainInstance = null;
 
-function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certDir, _version) {
+function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certDir, _discoverSonos, _version) {
    this.casaName = _config.name;
    this.config = _config;
    this.systemConfig = _systemConfig;
@@ -71,6 +71,11 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    if (_connectToPeers) {
       var PeerCasaService = require('./peercasaservice');
       this.peerCasaService = new PeerCasaService({ gang: _config.gang });
+   }
+
+   if (_discoverSonos) {
+      var SonosService = require('./sonosservice');
+      this.sonosService = new SonosService();
    }
 }
 
