@@ -54,9 +54,9 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
          this.highestValidSource = newHighestSource;
          _data.propertyValue = this.highestValidSource.getPropertyValue();
 
-         if (_data.propertyValue != undefined) {
+         //if (_data.propertyValue != undefined) {
             this.updatePropertyInternal(_data.propertyValue, _data);
-         }
+         //}
       }
       else {
          this.highestValidSource = newHighestSource;

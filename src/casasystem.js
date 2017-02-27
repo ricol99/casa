@@ -3,7 +3,7 @@ var S = require('string');
 
 var _mainInstance = null;
 
-function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certDir, _discoverSonos, _version) {
+function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certDir, _version) {
    this.casaName = _config.name;
    this.config = _config;
    this.systemConfig = _systemConfig;
@@ -20,6 +20,7 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    this.peerCasas = [];
    this.parentCasa = null;
    this.remoteCasas = [];
+   this.services = {};
 
    this.casaArea = null;
    this.parentCasaArea = null;
@@ -46,6 +47,9 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    // Extract Users
    this.extractUsers();
 
+   // Extract Services
+   this.extractServices(this.config.services);
+
    // Extract Things
    this.extractThings(this.config.things);
 
@@ -71,11 +75,6 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    if (_connectToPeers) {
       var PeerCasaService = require('./peercasaservice');
       this.peerCasaService = new PeerCasaService({ gang: _config.gang });
-   }
-
-   if (_discoverSonos) {
-      var SonosService = require('./sonosservice');
-      this.sonosService = new SonosService();
    }
 }
 
@@ -122,7 +121,27 @@ CasaSystem.prototype.extractUsers = function() {
          console.log('New user: ' + userObj.uName);
       });
    }
-}
+};
+
+CasaSystem.prototype.extractServices = function(_config) {
+
+   if (_config) {
+      console.log('Extracting services...');
+
+      for (var index = 0; index < _config.length; ++index) {
+         console.log('Loading service '+ _config[index].name);
+         var Service = require('./'+_config[index].name);
+         this.services[_config[index].name] = new Service(_config[index]);
+      }
+
+      console.log('Cold starting services...');
+
+      for (index = 0; index < _config.length; ++index) {
+         console.log('Cold starting service '+ _config[index].name);
+         this.services[_config[index].name].coldStart();
+      }
+   }
+};
 
 // Extract Things
 CasaSystem.prototype.createThing = function(_config, _parent) {
@@ -332,6 +351,10 @@ CasaSystem.prototype.findRemoteCasa = function (_casaName) {
 CasaSystem.prototype.findSource = function (_sourceName) {
    return this.allObjects[_sourceName];
 }
+
+CasaSystem.prototype.findService = function(_serviceName) {
+   return this.services[_serviceName];
+};
 
 CasaSystem.prototype.resolveObject = function (objName) {
     return this.allObjects[objName];

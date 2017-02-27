@@ -11,7 +11,30 @@
    },
    "listeningPort": 8082,
    "props": {},
+   "services": [
+      {
+         "name": "sonosservice"
+      },
+      {
+         "name": "webservice",
+         "port": 11001,
+         "mediaPath": "/Users/richardcollin/personal/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      },
+      {  
+         "name": "lightwaverfservice",
+         "displayName": "LightwaveRF Link Service",
+         "linkAddress": "192.168.1.236"
+      }
+   ],
    "things": [
+      {
+         "name": "sonosplayer:living-room",
+         "zone": "Living Room"
+      },
       {
          "name": "thing:home-daylight-sensor",
          "displayName": "Home daylight sensor",

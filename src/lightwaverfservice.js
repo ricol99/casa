@@ -1,20 +1,22 @@
 var util = require('util');
-var Thing = require('./thing');
+var Service = require('./service');
 var LightwaveRf = require("lightwaverf");
 
-function LightwaveRfLink(_config) {
+function LightwaveRfService(_config) {
+   Service.call(this, _config);
 
-   Thing.call(this, _config);
-
-   this.thingType = 'lightwave-controller';
-   this.lightwaveRf = new LightwaveRf({ ip: this.getProperty('ipAddress') });
+   this.linkAddress = _config.linkAddress;
    this.queue = [];
    this.requestPending = false;
 }
 
-util.inherits(LightwaveRfLink, Thing);
+util.inherits(LightwaveRfService, Service);
 
-LightwaveRfLink.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
+LightwaveRfService.prototype.coldStart = function() {
+   this.lightwaveRf = new LightwaveRf({ ip: this.linkAddress });
+};
+
+LightwaveRfService.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on, roomId: ' + _params.roomId + ', deviceId: ' + _params.deviceId);
@@ -26,7 +28,7 @@ LightwaveRfLink.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback)
    }
 }
 
-LightwaveRfLink.prototype.turnDeviceOff = function(_roomId, _deviceId, _callback) {
+LightwaveRfService.prototype.turnDeviceOff = function(_roomId, _deviceId, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device off, roomId: ' + _params.roomId + ', deviceId: ' + _params.deviceId);
@@ -38,7 +40,7 @@ LightwaveRfLink.prototype.turnDeviceOff = function(_roomId, _deviceId, _callback
    }
 }
 
-LightwaveRfLink.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel, _callback) {
+LightwaveRfService.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on with dim level, roomId: ' + _params.roomId + ', _deviceId: ' + _params.deviceId + ', dimLevel: ' + _params.dimLevel);
@@ -50,7 +52,7 @@ LightwaveRfLink.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel,
    }
 }
 
-LightwaveRfLink.prototype.setRoomMood = function(_roomId, _moodId, _callback) {
+LightwaveRfService.prototype.setRoomMood = function(_roomId, _moodId, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': setting room mood, roomId: ' + _params.roomId + ' moodId:' + _params.moodId);
@@ -62,7 +64,7 @@ LightwaveRfLink.prototype.setRoomMood = function(_roomId, _moodId, _callback) {
    }
 }
 
-LightwaveRfLink.prototype.turnRoomOff = function(_roomId, _callback) {
+LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning room off, roomId: ' + _params.roomId);
@@ -74,11 +76,11 @@ LightwaveRfLink.prototype.turnRoomOff = function(_roomId, _callback) {
    }
 }
 
-LightwaveRfLink.prototype.addToQueue = function(_request, _params, _callback) {
+LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback) {
    this.queue.push({ request: _request, params: _params, callback: _callback });
 }
 
-LightwaveRfLink.prototype.makeNextRequest = function() {
+LightwaveRfService.prototype.makeNextRequest = function() {
    var that = this;
 
    if (this.queue.length > 0) {
@@ -103,4 +105,4 @@ LightwaveRfLink.prototype.makeNextRequest = function() {
    }
 }
 
-module.exports = exports = LightwaveRfLink;
+module.exports = exports = LightwaveRfService;

@@ -41,13 +41,11 @@ function LightwaveRfAccessory(_config) {
 
    this.displayName = _config.displayName;
 
-   if (_config.lightwaveRfLink) {
-      this.lightwaveRfLink =  this.casaSys.findSource(_config.lightwaveRfLink);
+   this.lightwaveRfService =  this.casaSys.findService("lightwaverfservice");
 
-      if (!this.lightwaveRfLink) {
-         console.error(this.uName + ": ***** LightwaveRfLink not found! *************");
-         process.exit();
-      }
+   if (!this.lightwaveRfService) {
+      console.error(this.uName + ": ***** LightwaveRf service not found! *************");
+      process.exit();
    }
 }
 
@@ -109,18 +107,18 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
 
             if (this.brightnessSupported) {
                if (!_data.coldStart) {
-                  this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, this.props["brightness"].value, this.callbackHandler);
+                  this.lightwaveRfService.setDeviceDim(this.roomID, this.deviceID, this.props["brightness"].value, this.callbackHandler);
                }
             }
             else {
                if (!_data.coldStart) {
-                  this.lightwaveRfLink.turnDeviceOn(this.roomID, this.deviceID, this.callbackHandler);
+                  this.lightwaveRfService.turnDeviceOn(this.roomID, this.deviceID, this.callbackHandler);
                }
             }
          }
          else {
             if (!_data.coldStart) {
-               this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+               this.lightwaveRfService.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
             }
          }
       }
@@ -129,13 +127,13 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          if (_propValue == 0) {
 
             if (!_data.coldStart) {
-               this.lightwaveRfLink.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
+               this.lightwaveRfService.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
             }
             Thing.prototype.updateProperty.call(this, "power", false, _data);
          }
          else {
             if (!_data.coldStart) {
-               this.lightwaveRfLink.setDeviceDim(this.roomID, this.deviceID, _propValue, this.callbackHandler);
+               this.lightwaveRfService.setDeviceDim(this.roomID, this.deviceID, _propValue, this.callbackHandler);
             }
          }
       }
@@ -148,14 +146,14 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             console.log(this.uName + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {
-               this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+               this.lightwaveRfService.turnRoomOff(this.roomID, this.callbackHandler);
             }
          }
          else {
             console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {
-               this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[_propValue].id, this.callbackHandler);
+               this.lightwaveRfService.setRoomMood(this.roomID, this.moods[_propValue].id, this.callbackHandler);
             }
          }
       }
@@ -163,7 +161,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          console.log(this.uName + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
 
          if (!_data.coldStart) {
-            this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+            this.lightwaveRfService.turnRoomOff(this.roomID, this.callbackHandler);
          }
          Thing.prototype.updateProperty.call(this, "mood", "off", _data);
       }
@@ -175,7 +173,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             console.log(this.uName + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {
-               this.lightwaveRfLink.turnRoomOff(this.roomID, this.callbackHandler);
+               this.lightwaveRfService.turnRoomOff(this.roomID, this.callbackHandler);
             }
             Thing.prototype.updateProperty.call(this, "mood", "off", _data);
          }
@@ -183,7 +181,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {
-               this.lightwaveRfLink.setRoomMood(this.roomID, this.moods[moodName].id, this.callbackHandler);
+               this.lightwaveRfService.setRoomMood(this.roomID, this.moods[moodName].id, this.callbackHandler);
             }
             Thing.prototype.updateProperty.call(this, "mood", moodName, _data);
          }

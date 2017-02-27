@@ -11,18 +11,28 @@
    },
    "listeningPort": 8097,
    "props": [],
-   "things": [
+   "services": [
       {
-         "name": "lightwaverflink:home",
-         "displayName": "LightwaveRF Wifi Link",
-         "props": [
-            {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.236",
-               "writable": false
-            }
-         ]
+         "name": "sonosservice",
+         "displayName": "Sonos Discovery Service"
       },
+      {
+         "name": "webservice",
+         "displayName": "Web Server Service",
+         "port": 80,
+         "mediaPath": "/web/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      },
+      {
+         "name": "lightwaverfservice",
+         "displayName": "LightwaveRF Link Service",
+         "linkAddress": "192.168.1.236"
+      }
+   ],
+   "things": [
       {
          "name": "hklightsensoraccessory:hk-ambient-light-sensor",
          "displayName": "Ambient Light Level",
@@ -75,13 +85,13 @@
          "displayName": "Environment Based on Sensors in Dumgoyne",
          "props": [
             {
-               "name": "daylight-sensor",
+               "name": "daylight-threshold",
                "type": "thresholdproperty",
                "initialValue": false,
                "writable": false,
-               "threshold" : 45,
-               "buffer": 5,
-               "transform": "$value>=45",
+               "threshold" : 40,
+               "buffer": 7,
+               "transform": "$value>=40",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
@@ -113,7 +123,7 @@
                "sources": [
                   {
                      "name": "thing:dumgoyne-environment",
-                     "property": "daylight-sensor"
+                     "property": "daylight-threshold"
                   },
                   {
                      "name": "thing:dumgoyne-environment",
@@ -122,17 +132,34 @@
                ]
             },
             {
-               "name": "low-light",
+               "name": "low-light-threshold",
                "initialValue": false,
                "writable": false,
                "type": "thresholdproperty",
-               "threshold" : 55,
-               "buffer": 5,
-               "transform": "$value<=55",
+               "threshold" : 65,
+               "buffer": 7,
+               "transform": "$value<=65",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
                      "property": "light-sensor"
+                  }
+               ]
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "low-light-threshold"
+                  },
+                  {
+                     "name": "alarm:dumgoyne",
+                     "property": "part-armed",
+                     "transform": "!$value"
                   }
                ]
             },
@@ -254,7 +281,6 @@
                      "roomID": 2,
                      "deviceID": 1,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   },
@@ -264,7 +290,6 @@
                      "roomID": 2,
                      "deviceID": 2,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   },
@@ -272,7 +297,6 @@
                      "name": "lightwaverfaccessory:kitchen-cupboards-lights",
                      "displayName": "Kitchen Cupboard Lights",
                      "roomID": 6,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "moods": [
                         {
                            "name": "low",
@@ -383,7 +407,6 @@
                      "roomID": 1,
                      "deviceID": 1,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   },
@@ -393,11 +416,14 @@
                      "roomID": 1,
                      "deviceID": 2,
                      "brightnessThreshold": 30,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
                ]
+            },
+            {
+               "name": "sonosplayer:living-room",
+               "zone": "Living Room"
             }
          ]
       },
@@ -473,7 +499,6 @@
                      "roomID": 3,
                      "deviceID": 1,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -496,7 +521,6 @@
                      "roomID": 3,
                      "deviceID": 2,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   },
@@ -506,7 +530,6 @@
                      "roomID": 3,
                      "deviceID": 3,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -536,7 +559,6 @@
                      "displayName": "Hall Table Lamp",
                      "roomID": 4,
                      "deviceID": 1,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -560,7 +582,6 @@
                      "roomID": 4,
                      "deviceID": 2,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -584,7 +605,6 @@
                      "roomID": 4,
                      "deviceID": 3,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -616,7 +636,6 @@
                      "roomID": 2,
                      "deviceID": 3,
                      "brightnessSupported": true,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }
@@ -657,7 +676,6 @@
                      "displayName": "Natalie Table Lamp",
                      "roomID": 1,
                      "deviceID": 3,
-                     "lightwaveRfLink": "lightwaverflink:home",
                      "props": [
                      ]
                   }

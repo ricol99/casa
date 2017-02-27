@@ -53,7 +53,7 @@ function createServer(_this) {
         cert: fs.readFileSync(_this.certDir+'/server.crt'),
         ca: fs.readFileSync(_this.certDir+'/ca.crt'),
         requestCert: true,
-        rejectUnauthorized: false
+        rejectUnauthorized: true
       };
 
       http = require('https').Server(serverOptions, app);
