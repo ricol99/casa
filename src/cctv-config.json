@@ -36,6 +36,10 @@
          "zone": "Living Room"
       },
       {
+         "name": "sonosplayer:dylan-bedroom-room",
+         "zone": "Dylan's Room"
+      },
+      {
          "name": "thing:home-daylight-sensor",
          "displayName": "Home daylight sensor",
          "props": [
