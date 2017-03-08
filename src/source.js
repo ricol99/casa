@@ -91,7 +91,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
 Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 };
 
-// INTERNAL METHOD AND FOR USE BY PROPERTY BINDERS
+// INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
    console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
@@ -108,6 +108,16 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    sendData.propertyValue = _propValue;
    this.emit('property-changed', sendData);
 }
+
+Source.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
+
+   if (!this.props[_propName]) {
+     var Property = require('./' + _propType);
+     _config.name = _propName;
+     _config.type = _propType;
+     this.props[_propName]  = new Property(_config, this);
+   }
+};
 
 function copyData(_sourceData) {
    var newData = {};

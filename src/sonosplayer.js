@@ -16,25 +16,25 @@ function SonosPlayer(_config) {
    this.notifications = {};
    this.inAlarmStatus = false;
 
-   this.props['volume']  = new Property({ name: 'volume', type: 'property', initialValue: 0 }, this);
-   this.props['volume-writable']  = new Property({ name: 'volume-writable', type: 'property', initialValue: false }, this);
-   this.props['muted']  = new Property({ name: 'muted', type: 'property', initialValue: false }, this);
-   this.props['playing']  = new Property({ name: 'playing', type: 'property', initialValue: false }, this);
-   this.props['current-track']  = new Property({ name: 'current-track', type: 'property', initialValue: "" }, this);
-   this.props['play-mode']  = new Property({ name: 'play-mode', type: 'property', initialValue: "" }, this);
+   this.ensurePropertyExists('volume', 'property', { initialValue: 0 });
+   this.ensurePropertyExists('volume-writable', 'property', { initialValue: 0 });
+   this.ensurePropertyExists('muted', 'property', { initialValue: false });
+   this.ensurePropertyExists('playing', 'property', { initialValue: false });
+   this.ensurePropertyExists('current-track', 'property', { initialValue: "" });
+   this.ensurePropertyExists('play-mode', 'property', { initialValue: "" });
 
    if (_config.alarmUrl) {
       this.alarmUrls['alarm'] = _config.alarmUrl;
       this.alarmRepeatTimes['alarm'] = _config.alarmRepeatTime;
       this.alarmVolumes['alarm'] = _config.hasOwnProperty("alarmVolume") ? _config.alarmVolume : 60;
-      this.props['alarm']  = new Property({ name: 'alarm', type: 'property', initialValue: false }, this);
+      this.ensurePropertyExists('alarm', 'property', { initialValue: false });
    }
 
    if (_config.fireAlarmUrl) {
       this.alarmUrls['fire-alarm'] = _config.fireAlarmUrl;
       this.alarmRepeatTimes['fire-alarm'] = _config.fireAlarmRepeatTime;
       this.alarmVolumes['fire-alarm'] = _config.hasOwnProperty("fireAlarmVolume") ? _config.fireAlarmVolume : 60;
-      this.props['fire-alarm']  = new Property({ name: 'fire-alarm', type: 'property', initialValue: false }, this);
+      this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false });
    }
 }
 
@@ -108,7 +108,7 @@ SonosPlayer.prototype.startSyncingStatus = function() {
    var avTransportControlListener = new internalListener(this, '/MediaRenderer/AVTransport/Control', SonosPlayer.prototype.processAVTransportControlChange);
 
    this.sonosListener.on('serviceEvent', function(_endpoint, _sid, _data) {
-      console.log(that.uName + ": Received notifcation from device. Endpoint="+_endpoint+" Sid="+_sid+" Data=",_data);
+      console.log(that.uName + ": Received notifcation from device.");
 
       if (that.notifications[_sid]) {
          that.notifications[_sid].call(that, _data);
@@ -198,7 +198,7 @@ SonosPlayer.prototype.pause = function(_level) {
 SonosPlayer.prototype.play = function(_url) {
    var that = this;
 
-   if (url) {
+   if (_url) {
       this.sonos.queueNext(_url, function(_err, _playing) {
 
          if (_err) {
@@ -209,6 +209,14 @@ SonosPlayer.prototype.play = function(_url) {
 
                if (_err) {
                   console.log(that.uName + ": Unable to play next track!");
+               }
+               else {
+                  that.sonos.play(function(_err, _result) {
+
+                     if (_err) {
+                        console.log(that.uName + ": Unable to play next track!");
+                     }
+                  });
                }
             });
          }
@@ -253,20 +261,20 @@ SonosPlayer.prototype.saveCurrentState = function(_property) {
                         playing: this.props['playing'].value };
 
    if (this.props['muted'].value) {
-      this.props['muted'].setProperty(false);
+      this.props['muted'].setProperty(false, { sourceName: this.uName });
    }
 
-   this.props['volume'].setProperty(this.alarmVolumes[_property]);
+   this.props['volume'].setProperty(this.alarmVolumes[_property], { sourceName: this.uName });
 };
 
 SonosPlayer.prototype.restoreSavedState = function() {
 
    if (this.props['volume'].value !== this.savedStatus.volume) {
-      this.props['volume'].setProperty(this.savedStatus.volume);
+      this.props['volume'].setProperty(this.savedStatus.volume, { sourceName: this.uName });
    }
 
    if (this.props['muted'].value !== this.savedStatus.muted) {
-      this.props['muted'].setProperty(this.savedStatus.muted);
+      this.props['muted'].setProperty(this.savedStatus.muted, { sourceName: this.uName });
    }
 
    if (this.savedStatus.playing) {
@@ -302,10 +310,10 @@ SonosPlayer.prototype.replayAfterTimeout = function(_url, _timeout) {
 
       if (_this.inAlarmStatus) {
 
-         this.sonos.previous(function(_err, _result) {
+         _this.sonos.previous(function(_err, _result) {
 
-            if (err) {
-               console.log(this.uName + ": Unable to call previous track");
+            if (_err) {
+               console.log(_this.uName + ": Unable to call previous track");
             }
          });
 
