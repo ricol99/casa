@@ -12,6 +12,7 @@ function BroadbandSpeedTester(_config) {
    this.ensurePropertyExists('download-speed', 'property', { initialValue: 0 });
    this.ensurePropertyExists('ping-time', 'property', { initialValue: 0 });
    this.ensurePropertyExists('server-address', 'property', { initialValue: '' });
+   this.ensurePropertyExists('test-result', 'property', { initialValue: '' });
 }
 
 util.inherits(BroadbandSpeedTester, Thing);
@@ -25,11 +26,15 @@ BroadbandSpeedTester.prototype.testSpeed = function() {
       if (_data.hasOwnProperty('speeds') {
          that.props['download-speed'].setProperty(_data.speeds.download, { sourceName: that.uName });
          that.props['upload-speed'].setProperty(_data.speeds.upload, { sourceName: that.uName });
-      }
 
-      if (_data.hasOwnProperty('server') {
-         that.props['ping-time'].setProperty(_data.server.ping, { sourceName: that.uName });
-         that.props['server-address'].setProperty(_data.server.host, { sourceName: that.uName });
+         if (_data.hasOwnProperty('server') {
+            that.props['ping-time'].setProperty(_data.server.ping, { sourceName: that.uName });
+            that.props['server-address'].setProperty(_data.server.host, { sourceName: that.uName });
+
+            that.props['test-result'].setProperty('Speed Test: D=' + _data.speeds.download +
+                                                  ' U=' + _data.speeds.upload +
+                                                  ' P=' + _data.server.ping, { sourceName: that.uName });
+         }
       }
    });
 

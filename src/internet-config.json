@@ -285,9 +285,13 @@
                      "name": "thing:environment",
                      "property": "low-light",
                      "transformMap": {
-                        "true": "Lights are now sensitive to movement!",
-                        "false": "Too bright for lights to come on!"
+                        "true": "Lights now sensitive to movement",
+                        "false": "Lights back to manual mode"
                      }
+                  },
+                  {
+                     "name": "broadbandspeedtester:dumgoyne",
+                     "property": "test-result"
                   }
                ]
             }

@@ -199,6 +199,17 @@
          ]
       },
       {
+         "name": "thing:dumgoyne-broadband",
+         "displayName": "Dumgoyne Internet Connection",
+         "things": [
+            {
+               "name": "broadbandspeedtester:dumgoyne",
+               "maxTime": 5000,
+               "schedule": "0 2 * * *"
+            }
+         ]
+      },
+      {
          "name": "room:kitchen",
          "displayName": "Kitchen Room",
          "props": [
