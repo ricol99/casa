@@ -88,7 +88,7 @@ SonosPlayer.prototype.establishPlayerConnection = function(_device) {
    });
 };
 
-function internalListener(_owner, _endpoint, _handler) {
+function InternalListener(_owner, _endpoint, _handler) {
 
    _owner.sonosListener.addService(_endpoint, function(_err, _sid) {
 
@@ -104,8 +104,10 @@ function internalListener(_owner, _endpoint, _handler) {
 SonosPlayer.prototype.startSyncingStatus = function() {
    var that = this;
 
-   var renderingControlListener =  new internalListener(this, '/MediaRenderer/GroupRenderingControl/Event', SonosPlayer.prototype.processRenderControlChange);
-   var avTransportControlListener = new internalListener(this, '/MediaRenderer/AVTransport/Control', SonosPlayer.prototype.processAVTransportControlChange);
+   var groupRenderingControlListener =  new InternalListener(this, '/MediaRenderer/GroupRenderingControl/Event', SonosPlayer.prototype.processGroupRenderControlChange);
+   var renderingControlListener =  new InternalListener(this, '/MediaRenderer/RenderingControl/Event', SonosPlayer.prototype.processRenderControlChange);
+   var avTransportListener = new InternalListener(this, '/MediaRenderer/AVTransport/Event', SonosPlayer.prototype.processAVTransportChange);
+   var devicePropertiesListener = new InternalListener(this, '/DeviceProperties/Event', SonosPlayer.prototype.processDevicePropertiesChange);
 
    this.sonosListener.on('serviceEvent', function(_endpoint, _sid, _data) {
       console.log(that.uName + ": Received notifcation from device.");
@@ -120,16 +122,23 @@ SonosPlayer.prototype.startSyncingStatus = function() {
 };
 
 SonosPlayer.prototype.processRenderControlChange = function(_data) {
-   console.log(this.uName + ": processRenderControlChange()");
+   console.log(this.uName + ": processRenderControlChange() data=",_data);
+};
+
+SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
+   console.log(this.uName + ": processGroupRenderControlChange()");
    this.props['volume'].setProperty(_data.GroupVolume, { sourceName: this.uName });
    this.props['muted'].setProperty((_data.GroupMute != 0), { sourceName: this.uName });
    this.props['volume-writable'].setProperty((_data.GroupVolumeChangeable == 0), { sourceName: this.uName });
 };
 
-SonosPlayer.prototype.processAVTransportControlChange = function(_data) {
-   console.log(this.uName + ": processAVTransportControlChange()");
+SonosPlayer.prototype.processAVTransportChange = function(_data) {
+   console.log(this.uName + ": processAVTransportChange() data=",_data);
 };
 
+SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
+   console.log(this.uName + ": processDevicePropertiesChange() data=",_data);
+};
 SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    var that = this;
 
@@ -199,26 +208,10 @@ SonosPlayer.prototype.play = function(_url) {
    var that = this;
 
    if (_url) {
-      this.sonos.queueNext(_url, function(_err, _playing) {
+      that.sonos.play(function(_err, _result) {
 
          if (_err) {
-            console.log(that.uName + ": Unable to queue next track!");
-         }
-         else {
-            that.sonos.next(function(_err, _result) {
-
-               if (_err) {
-                  console.log(that.uName + ": Unable to play next track!");
-               }
-               else {
-                  that.sonos.play(function(_err, _result) {
-
-                     if (_err) {
-                        console.log(that.uName + ": Unable to play next track!");
-                     }
-                  });
-               }
-            });
+            console.log(that.uName + ": Unable to play next track!");
          }
       });
    }
@@ -310,10 +303,10 @@ SonosPlayer.prototype.replayAfterTimeout = function(_url, _timeout) {
 
       if (_this.inAlarmStatus) {
 
-         _this.sonos.previous(function(_err, _result) {
+         _this.sonos.play(_url, function(_err, _result) {
 
             if (_err) {
-               console.log(_this.uName + ": Unable to call previous track");
+               console.log(_this.uName + ": Unable to replay alarm sound");
             }
          });
 

@@ -32,6 +32,17 @@
    ],
    "things": [
       {
+         "name": "thing:internet-connection",
+         "displayName": "Internet Connection",
+         "things": [
+            {
+               "name": "broadbandspeedtester:speed-tester",
+               "maxTime": 5000,
+               "schedule": "0 2 * * *"
+            }
+         ]
+      },
+      {
          "name": "sonosplayer:living-room",
          "displayName": "Sonos Player for Living Room",
          "zone": "Living Room",

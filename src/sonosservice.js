@@ -38,7 +38,7 @@ SonosService.prototype.coldStart = function() {
            that.players[_attrs.CurrentZoneName] = [ _device ];
            console.log(that.uName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
 
-           if (that.callbacks.hasOwnProperty(_attrs.CurrentZoneName) {
+           if (that.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
 
               for (var i = 0; i < that.callbacks[_attrs.CurrentZoneName].length; ++i) {
                  that.callbacks[_attrs.CurrentZoneName][i](null, that.players[_attrs.CurrentZoneName][0]);

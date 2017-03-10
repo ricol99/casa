@@ -116,6 +116,30 @@
                      "propertyValue": false
                   }
                ]
+            },
+            {
+               "name": "dylan-in-bed",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "00 21 * * 1-5",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "30 22 * * 6-7",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "30 7 * * 1-5",
+                     "propertyValue": false
+                  },
+                  {
+                     "rule": "30 9 * * 6-7",
+                     "propertyValue": false
+                  }
+               ]
             }
          ]
       },
