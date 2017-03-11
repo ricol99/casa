@@ -24,7 +24,7 @@ function Source(_config) {
             _config.props[i].type = 'property';
          }
          else {
-            Prop = require('./'+_config.props[i].type);
+            Prop = require('./properties/'+_config.props[i].type);
          }
 
          this.props[_config.props[i].name] = new Prop(_config.props[i], this);

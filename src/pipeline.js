@@ -49,7 +49,7 @@ function loadSteps(_this, _steps) {
    var step = null;
 
    for (var i = 0; i < _steps.length; ++i) {
-      var Step = require('./'+_steps[i].type);
+      var Step = require('./steps/'+_steps[i].type);
       step = new Step(_steps[i], _this);
       _this.steps.push(step);
 

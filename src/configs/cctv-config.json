@@ -1,0 +1,407 @@
+{
+   "name": "casa:cctv",
+   "displayName": "Casa Collin CCTV System",
+   "gang": "casa-collin-v2",
+   "parentCasa": {
+      "name": "casa:internet",
+      "address": {
+         "hostname": "localhost",
+         "port": 8096
+      }
+   },
+   "listeningPort": 8082,
+   "props": {},
+   "services": [
+      {
+         "name": "sonosservice"
+      },
+      {
+         "name": "webservice",
+         "port": 11001,
+         "mediaPath": "/Users/richardcollin/personal/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      },
+      {  
+         "name": "lightwaverfservice",
+         "displayName": "LightwaveRF Link Service",
+         "linkAddress": "192.168.1.236"
+      }
+   ],
+   "things": [
+      {
+         "name": "thing:internet-connection",
+         "displayName": "Internet Connection",
+         "things": [
+            {
+               "name": "broadbandspeedtester:speed-tester",
+               "maxTime": 5000,
+               "schedule": "25 13 * * *"
+            }
+         ]
+      },
+      {
+         "name": "sonosplayer:living-room",
+         "displayName": "Sonos Player for Living Room",
+         "zone": "Living Room",
+         "fireAlarmRepeatTime": 5000,
+         "fireAlarmVolume": 65,
+         "fireAlarmUrl": "http://192.168.1.65:11001/siren_or_alarm.mp3",
+         "props": [
+            {
+               "name": "fire-alarm",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2"
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "sonosplayer:dylan-bedroom-room",
+         "zone": "Dylan's Room"
+      },
+      {
+         "name": "thing:home-daylight-sensor",
+         "displayName": "Home daylight sensor",
+         "props": [
+            {
+               "name": "lightLevel",
+               "type": "orproperty",
+               "initialValue": 100,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2",
+                     "outputValues": {
+                        "true": 30,
+                        "false": 100
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "thing:test-daylight-sensor",
+         "displayName": "Test daylight sensor",
+         "props": [
+            {
+               "name": "manual-mode",
+               "initialValue": "false",
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-4"
+                  }
+               ]
+            },
+            {
+               "name": "test-smooth-transform",
+               "type": "smootherproperty",
+               "initialValue": 0,
+               "writable": false,
+               "rate": 10,
+               "resolution": 5,
+               "sources": [
+                  {
+                     "name": "thing:home-daylight-sensor",
+                     "property": "lightLevel"
+                  }
+               ]
+            },
+            {
+               "name": "alarm-status",
+               "type": "orproperty",
+               "initialValue": "white",
+               "writable": false,
+               "prioritiseSources": true,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-1",
+                     "outputValues": {
+                        "true": "green",
+                        "false": "white"
+                     }
+                  },
+                  {
+                     "name": "thing:home-daylight-sensor",
+                     "property": "lightLevel",
+                     "transform": "$value<50",
+                     "outputValues": {
+                        "true": "red",
+                        "false": "blue"
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "smallerLightLevel",
+               "type": "lineartransformproperty",
+               "initialValue": 0,
+               "writable": false,
+               "inputMin": 0,
+               "inputMax": 100,
+               "outputMin": 10,
+               "outputMax": 0,
+               "sources": [
+                  {
+                     "name": "thing:home-daylight-sensor",
+                     "property": "lightLevel"
+                  }
+               ]
+            },
+            {
+               "name": "daylight",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "sunrise",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "sunset:-1800",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "dark",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "sunrise",
+                     "propertyValue": false
+                  },
+                  {
+                     "rule": "sunset:-1800",
+                     "propertyValue": true
+                  }
+               ]
+            },
+            {
+               "name": "test-source-transform-map",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2",
+                     "transformMap": {
+                        "true": "test-prop-2 is True!",
+                        "false": "test-prop-2 is False!"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "thing:test-cctv",
+         "displayName": "Test CCTV Config",
+         "props": [
+            {
+               "name": "test-prop-1",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "test-prop-2",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "test-prop-3",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "test-prop-4",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "0,20,40 * * * *",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "10,30,50 * * * *",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "latching-test-prop-2",
+               "type": "latchproperty",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "thing:test-cctv",
+                     "property": "test-prop-2"
+                  }
+               ],
+               "controller": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-3"
+               }
+            },
+            {
+               "name": "test-schedule-ramp",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                     "ramp": {
+                        "startValue": 0,
+                        "endValue": 100,
+                        "step": 2,
+                        "duration": 10
+                     }
+                  },
+                  {
+                     "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
+                     "ramp": {
+                        "endValue": 0,
+                        "step": -2,
+                        "duration": 25
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "test-property-broken",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "name": "propertyactivator:test-source-not-found",
+                     "property": "test-prop-not-found"
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "thing:dumgoyne-environment",
+         "displayName": "Environment Based on Sensors in Dumgoyne",
+         "props": [
+            {
+               "name": "daylight-sensor",
+               "initialValue": false,
+               "writable": false
+            },
+            {
+               "name": "daylight-possible",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "sunrise:-600",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "sunset:+600",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight-sensor"
+                  },
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight-possible"
+                  }
+               ]
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false
+            },
+            {
+               "name": "background-lights",
+               "initialValue": false,
+               "writable": true,
+               "type": "scheduleproperty",
+               "sources": [
+                  {
+                     "name": "thing:dumgoyne-environment",
+                     "property": "daylight",
+                     "transform": "!$value"
+                  }
+               ],
+               "events": [
+                  {
+                     "rule": "30 22 * * *",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "richard-at-home",
+               "initialValue": false,
+               "writable": false
+            }
+         ]
+      }
+   ]
+}

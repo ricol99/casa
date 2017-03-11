@@ -78,12 +78,17 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    }
 }
 
-CasaSystem.prototype.cleverRequire = function(_name) {
+CasaSystem.prototype.cleverRequire = function(_name, _path) {
    var str = S(_name).between('', ':').s;
+   var path = '';
+
+   if (_path && (_path !== str+'s')) {
+      path = _path + '/';
+   }
 
    if (!this.constructors[str]) {
       console.log('loading more code: ./' + str);
-      this.constructors[str] = require('./' + str);
+      this.constructors[str] = require('./' + path + str);
    }
    return this.constructors[str];
 }
@@ -130,7 +135,7 @@ CasaSystem.prototype.extractServices = function(_config) {
 
       for (var index = 0; index < _config.length; ++index) {
          console.log('Loading service '+ _config[index].name);
-         var Service = require('./'+_config[index].name);
+         var Service = require('./services/'+_config[index].name);
          this.services[_config[index].name] = new Service(_config[index]);
       }
 
@@ -145,7 +150,7 @@ CasaSystem.prototype.extractServices = function(_config) {
 
 // Extract Things
 CasaSystem.prototype.createThing = function(_config, _parent) {
-   var Thing = this.cleverRequire(_config.name);
+   var Thing = this.cleverRequire(_config.name, 'things');
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
    this.things[thingObj.uName] = thingObj;
