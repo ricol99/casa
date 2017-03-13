@@ -1,5 +1,5 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function LinearTransformStep(_config, _pipeline) {
    this.inputMin = _config.inputMin;
@@ -11,10 +11,10 @@ function LinearTransformStep(_config, _pipeline) {
    this.inputRange = this.inputMax - this.inputMin;
    this.outputRange = this.outputMax - this.outputMin;
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(LinearTransformStep, Step);
+util.inherits(LinearTransformStep, PipelineStep);
 
 //
 // Called by Property or previous Step

@@ -1,5 +1,5 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function SmootherStep(_config, _pipeline) {
 
@@ -12,10 +12,10 @@ function SmootherStep(_config, _pipeline) {
    this.timeoutObj = null;
    this.cold = true;
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(SmootherStep, Step);
+util.inherits(SmootherStep, PipelineStep);
 
 function copyData(_sourceData) {
    var newData = {};

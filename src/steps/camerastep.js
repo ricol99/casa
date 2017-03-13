@@ -1,16 +1,16 @@
 var http = require('http');
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function Camera(_config, _pipeline) {
 
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };
    this.id = _config.cameraId;
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(Camera, Step);
+util.inherits(Camera, PipelineStep);
 
 Camera.prototype.process = function(_value, _data) {
    console.log(this.type + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _value);

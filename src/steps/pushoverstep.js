@@ -1,5 +1,5 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 var push = require( 'pushover-notifications' );
 var CasaSystem = require('../casasystem');
 
@@ -9,13 +9,13 @@ function PushoverStep(_config, _pipeline) {
    var casaSys = CasaSystem.mainInstance();
    this.userGroup = casaSys.findSource(_config.userGroup);
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 
    this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
                                   token: 'ac7TcmTptiV3Yrh6MZ93xGQsfxp2mV' });
 }
 
-util.inherits(PushoverStep, Step);
+util.inherits(PushoverStep, PipelineStep);
 
 PushoverStep.prototype.process = function(_value, _data) {
 

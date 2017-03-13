@@ -3,7 +3,7 @@ var util = require('util');
 //
 // Constructor
 //
-function Step(_config, _pipeline) {
+function PipelineStep(_config, _pipeline) {
    this.uName = _pipeline.uName+":"+_config.type;
    this.type = _config.type;
    this.pipeline = _pipeline;
@@ -20,16 +20,16 @@ function Step(_config, _pipeline) {
 // ================
 
 //
-// Called by Property or previous Step 
-// Steps should derive from this to process new input
+// Called by Property or previous PipelineStep 
+// PipelineSteps should derive from this to process new input
 // Call outputForNextStep() to pass on output to next step (when required)
 //
-Step.prototype.newInputForProcess = function(_value, _data) {
+PipelineStep.prototype.newInputForProcess = function(_value, _data) {
    this.lastData = copyData(_data);
    this.process(_value, _data);
 }
 
-Step.prototype.process = function(_value, _data) {
+PipelineStep.prototype.process = function(_value, _data) {
    this.outputForNextStep(_value, _data);
 }
 
@@ -37,7 +37,7 @@ Step.prototype.process = function(_value, _data) {
 // Called by property or previous step
 // Source has become available
 //
-Step.prototype.sourceIsValid = function(_data) {
+PipelineStep.prototype.sourceIsValid = function(_data) {
    console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' is now valid');
    this.sourceValid = true;
    var oldValid = this.valid;
@@ -52,7 +52,7 @@ Step.prototype.sourceIsValid = function(_data) {
 // Called by property or previous step
 // Source is not available anymore
 //
-Step.prototype.sourceIsInvalid = function(_data) {
+PipelineStep.prototype.sourceIsInvalid = function(_data) {
    console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
    this.sourceValid = false;
    var oldValid = this.valid;
@@ -64,7 +64,7 @@ Step.prototype.sourceIsInvalid = function(_data) {
    }
 };
 
-Step.prototype.amIValid = function() {
+PipelineStep.prototype.amIValid = function() {
    return this.sourceValid;
 };
 
@@ -75,20 +75,20 @@ Step.prototype.amIValid = function() {
 //
 // Internal - Used to set up step processing pipeline
 //
-Step.prototype.setNextStep = function(_step) {
+PipelineStep.prototype.setNextStep = function(_step) {
    this.nextStep = _step;
 }
 
 //
 // Internal - called when step in initialised
-Step.prototype.coldStart = function(_data) {
+PipelineStep.prototype.coldStart = function(_data) {
    this.nextStep.coldStart(_data);
 };
 
 //
 // Internal - Derived steps call this to pass on their output to the next step in the pipeline
 //
-Step.prototype.outputForNextStep = function(_outputValue, _data) {
+PipelineStep.prototype.outputForNextStep = function(_outputValue, _data) {
    this.value = _outputValue;
 
    if (_data == undefined) {
@@ -109,7 +109,7 @@ Step.prototype.outputForNextStep = function(_outputValue, _data) {
 //
 // Internal - Inform next step that I am available
 //
-Step.prototype.goValid = function(_data) {
+PipelineStep.prototype.goValid = function(_data) {
 
    if (this.nextStep) {
       this.nextStep.sourceIsValid(_data);
@@ -122,7 +122,7 @@ Step.prototype.goValid = function(_data) {
 //
 // Internal - Inform next step that I am not available
 //
-Step.prototype.goInvalid = function(_data) {
+PipelineStep.prototype.goInvalid = function(_data) {
 
    if (this.nextStep) {
       this.nextStep.sourceIsInvalid(_data);
@@ -159,4 +159,4 @@ function checkData(_this, _value, _data) {
 }
 
 
-module.exports = exports = Step;
+module.exports = exports = PipelineStep;

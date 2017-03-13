@@ -1,11 +1,11 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function LatchStep(_config, _pipeline) {
 
    this.minOutputTime = _config.minOutputTime;
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 
    this.minOutputTimeObj = null;
    this.sourceActive = false;
@@ -13,7 +13,7 @@ function LatchStep(_config, _pipeline) {
    this.lastData = null;
 }
 
-util.inherits(LatchStep, Step);
+util.inherits(LatchStep, PipelineStep);
 
 LatchStep.prototype.process = function(_value, _data) {
    var propValue = _value;

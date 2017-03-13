@@ -1,5 +1,5 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function ThresholdStep(_config, _pipeline) {
    // Thresholds with buffer must not overlap
@@ -10,10 +10,10 @@ function ThresholdStep(_config, _pipeline) {
    this.cold = true;
    this.value = 0;
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(ThresholdStep, Step);
+util.inherits(ThresholdStep, PipelineStep);
 
 ThresholdStep.prototype.process = function(_value, _data) {
    var newPropertyValue = _value;

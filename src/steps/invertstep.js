@@ -1,11 +1,11 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function InvertStep(_config, _pipeline) {
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(InvertStep, Step);
+util.inherits(InvertStep, PipelineStep);
 
 //
 // Called by Property or previous Step

@@ -1,21 +1,21 @@
 var util = require('util');
-var Step = require('../step');
+var PipelineStep = require('../pipelinestep');
 
 function DelayStep(_config, _pipeline) {
 
    this.delay = (_config.delay) ? _config.delay : 0;
    this.delayedEvents = [];
 
-   Step.call(this, _config, _pipeline);
+   PipelineStep.call(this, _config, _pipeline);
 }
 
-util.inherits(DelayStep, Step);
+util.inherits(DelayStep, PipelineStep);
 
 // Called by Property or previous Step
 // Steps should derive from this to process new input
 // Call outputForNextStep() to pass on output to next step (when required)
 //
-InvertStep.prototype.process = function(_value, _data) {
+DelayStep.prototype.process = function(_value, _data) {
    console.log('source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to ' + _value + '!');
    this.delayEvents.push(new DelayedEvent(_value, _data, this);
 }

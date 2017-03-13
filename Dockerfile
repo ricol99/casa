@@ -1,7 +1,8 @@
 FROM node:latest
 
 # prepare dir where app will reside
-RUN mkdir -p /src/.certs
+RUN mkdir -p /src/.certs /src/properies /src/steps /src/configs /src/things /src/services
+
 WORKDIR /src
 
 # copy the npm config file and run install
