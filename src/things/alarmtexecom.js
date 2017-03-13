@@ -18,7 +18,6 @@
  
 var util = require('util');
 var Thing = require('../thing');
-var Property = require('./property');
 var net = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
@@ -33,24 +32,23 @@ function TexecomAlarm(_config) {
    this.alarmIp = _config.alarmIp;
 
    this.props['ACTIVE'].value = false;
-   this.props['line-failure']  = new Property({ name: 'line-failure', type: 'property', initialValue: false }, this);
-   this.props['ac-power-failure']  = new Property({ name: 'ac-power-failure', type: 'property', initialValue: false }, this);
-   this.props['battery-failure']  = new Property({ name: 'battery-failure', type: 'property', initialValue: false }, this);
-   this.props['line-failure']  = new Property({ name: 'line-failure', type: 'property', initialValue: false }, this);
-   this.props['fire-alarm']  = new Property({ name: 'fire-alarm', type: 'property', initialValue: false }, this);
-   this.props['medical-alarm']  = new Property({ name: 'medical-alarm', type: 'property', initialValue: false }, this);
-   this.props['panic-alarm']  = new Property({ name: 'panic-alarm', type: 'property', initialValue: false }, this);
-   this.props['duress-alarm']  = new Property({ name: 'duress-alarm', type: 'property', initialValue: false }, this);
-   this.props['attack-alarm']  = new Property({ name: 'attack-alarm', type: 'property', initialValue: false }, this);
-   this.props['carbon-monoxide-alarm']  = new Property({ name: 'carbon-monoxide-alarm', type: 'property', initialValue: false }, this);
-   this.props['tamper-alarm']  = new Property({ name: 'tamper-alarm', type: 'property', initialValue: false }, this);
-   this.props['armed-normal']  = new Property({ name: 'armed-normal', type: 'property', initialValue: false }, this);
-   this.props['armed-part']  = new Property({ name: 'armed-part', type: 'property', initialValue: false }, this);
-   this.props['zone-alarm']  = new Property({ name: 'zone-alarm', type: 'property', initialValue: false }, this);
-   this.props['confirmed-alarm']  = new Property({ name: 'confirmed-alarm', type: 'property', initialValue: false }, this);
-   this.props['in-exit-entry']  = new Property({ name: 'in-exit-entry', type: 'property', initialValue: false }, this);
-   this.props['system-failure']  = new Property({ name: 'system-failure', type: 'property', initialValue: false }, this);
-   this.props['engineer-mode']  = new Property({ name: 'engineer-mode', type: 'property', initialValue: false }, this);
+   this.ensurePropertyExists('line-failure', 'property', { initialValue: false });
+   this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false });
+   this.ensurePropertyExists('battery-failure', 'property', { initialValue: false });
+   this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('medical-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('panic-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('duress-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('attack-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('armed-normal', 'property', { initialValue: false });
+   this.ensurePropertyExists('armed-part', 'property', { initialValue: false });
+   this.ensurePropertyExists('zone-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false });
+   this.ensurePropertyExists('system-failure', 'property', { initialValue: false });
+   this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false });
 
    this.pollingTolerance = 30000;   // ms
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;

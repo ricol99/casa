@@ -1,6 +1,5 @@
 var util = require('util');
 var HomekitAccessory = require('./hkaccessory');
-var Property = require('./property');
 
 var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
@@ -15,7 +14,7 @@ function HomekitLightAccessory(_config) {
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
 
-   this.props["power"] = new Property({ name: "power", type: "property", initialValue: false }, this);
+   this.ensurePropertyExists('power', 'property', { initialValue: false });
 
    var that = this;
 
@@ -33,7 +32,7 @@ function HomekitLightAccessory(_config) {
       });
 
    if (this.brightnessSupported) {
-      this.props["brightness"] = new Property({ name: "brightness", type: "property", initialValue: 100 }, this);
+      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 });
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -48,7 +47,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.saturationSupported) {
-      this.props["saturation"] = new Property({ name: "saturation", type: "property", initialValue: 0 }, this);
+      this.ensurePropertyExists('saturation', 'property', { initialValue: 0 });
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -63,7 +62,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.hueSupported) {
-      this.props["hue"] = new Property({ name: "hue", type: "property", initialValue: 0 }, this);
+      this.ensurePropertyExists('hue', 'property', { initialValue: 0 });
 
       this.hkAccessory
          .getService(Service.Lightbulb)
