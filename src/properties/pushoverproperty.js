@@ -7,6 +7,7 @@ function PushoverProperty(_config, _owner) {
                           priority: _config.priority,
                           userGroup: _config.userGroup };
 
+   _config.allSourcesRequiredForValidity = false;
    SourceStepProperty.call(this, _config, _owner);
 }
 

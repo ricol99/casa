@@ -111,8 +111,9 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
 Source.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
 
-   if (!this.props[_propName]) {
-     var Property = require('./' + _propType);
+   if (!this.props.hasOwnProperty(_propName)) {
+     var loadPath =  (_propType === 'property') ? '' : 'properties/'
+     var Property = require('./' + loadPath + _propType);
      _config.name = _propName;
      _config.type = _propType;
      this.props[_propName]  = new Property(_config, this);

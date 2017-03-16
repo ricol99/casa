@@ -52,6 +52,6 @@ Thing.prototype.getProperty = function(_property) {
    }
 
    return value;
-}
+};
 
 module.exports = exports = Thing;

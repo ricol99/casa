@@ -10,7 +10,7 @@ function Property(_config, _owner) {
 
    this.writeable = (_config.writeable) ? _config.writeable : true;
    this.owner = _owner;
-   this.allSourcesRequiredForValidity = (_config.allSourcesRequiredForValidity) ? _config.allSourcesRequiredForValidity : true;  //****** TODO Check all properties for this *******
+   this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;  //****** TODO Check all properties for this *******
    this.prioritiseSources = _config.prioritiseSources;
    this.value = _config.initialValue;
    this.rawProperyValue = _config.initialValue;
@@ -318,6 +318,7 @@ Property.prototype.sourceIsInvalid = function(_data) {
 //     - only if the property is valid and not in manual mode
 //
 Property.prototype.sourcePropertyChanged = function(_data) {
+
    var that = this;
 
    if (this.valid) {
@@ -333,6 +334,7 @@ Property.prototype.sourcePropertyChanged = function(_data) {
          }
       }
       else {
+
          if (this.sourceListeners[_data.sourcePropertyName]) {
             this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
          }

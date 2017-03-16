@@ -47,7 +47,9 @@ BroadbandSpeedTester.prototype.testSpeed = function() {
 BroadbandSpeedTester.prototype.coldStart = function() {
    var that = this;
 
+   console.log(this.uName+': Broadband speed test scheduled');
    var refreshJob = schedule.scheduleJob(this.schedule, function() {
+      console.log(that.uName+': Testing broadband speed');
       that.testSpeed();
    });
 

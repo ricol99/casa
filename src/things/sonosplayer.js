@@ -207,10 +207,10 @@ SonosPlayer.prototype.play = function(_url) {
    var that = this;
 
    if (_url) {
-      that.sonos.play(function(_err, _result) {
+      that.sonos.play(_url, function(_err, _result) {
 
          if (_err) {
-            console.log(that.uName + ": Unable to play next track!");
+            console.log(that.uName + ": Unable to play "+_url+"!");
          }
       });
    }
@@ -218,7 +218,7 @@ SonosPlayer.prototype.play = function(_url) {
       that.sonos.play(function(_err, _result) {
 
          if (_err) {
-            console.log(that.uName + ": Unable to play next track!");
+            console.log(that.uName + ": Unable to play!");
          }
       });
    }
