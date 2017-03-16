@@ -29,7 +29,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.outputSteps) {
-      this.outputPipeline = new Pipeline(_config.setSteps, this);
+      this.outputPipeline = new Pipeline(_config.outputSteps, this);
 
       if (this.sourcePipeline == undefined) {
          this.pipeline = this.outputPipeline;
