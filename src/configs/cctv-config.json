@@ -32,13 +32,13 @@
    ],
    "things": [
       {
-         "name": "thing:internet-connection",
+         "name": "thing:dumgoyne-broadband",
          "displayName": "Internet Connection",
          "things": [
             {
                "name": "broadbandspeedtester:speed-tester",
                "maxTime": 5000,
-               "schedule": "45 12 * * *"
+               "schedule": "39 12 * * *"
             }
          ]
       },

@@ -290,7 +290,7 @@
                      }
                   },
                   {
-                     "name": "broadbandspeedtester:dumgoyne",
+                     "name": "thing:dumgoyne-broadband",
                      "property": "test-result"
                   }
                ]

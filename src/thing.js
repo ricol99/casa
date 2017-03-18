@@ -31,7 +31,12 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
 
+   var oldPropValue = this.value;
    Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
+
+   if (this.parent) {
+      this.parent.childPropertyChanged(_propName, _propValue, oldPropValue, this);
+   }
 };
 
 Thing.prototype.getProperty = function(_property) {
@@ -52,6 +57,18 @@ Thing.prototype.getProperty = function(_property) {
    }
 
    return value;
+};
+
+Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldValue, _child) {
+
+   if (!this.props.hasOwnProperty(_propName)) {
+      this.emitPropertyChange(_propName, _propValue, _propOldValue);
+
+      if (this.parent) {
+         this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this);
+      }
+   }
+
 };
 
 module.exports = exports = Thing;
