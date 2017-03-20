@@ -20,7 +20,7 @@ function HomekitSpeakerAccessory(_config) {
 
    this.hkAccessory
       .addService(Service.Speaker, this.displayName) // services exposed to the user should have "names" like "Speaker" for this case
-      .getCharacteristic(Characteristic.Muted)
+      .getCharacteristic(Characteristic.Mute)
       .on('set', function(_value, _callback) {
          that.setMuted(_value);
          _callback();

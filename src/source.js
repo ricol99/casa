@@ -121,7 +121,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    sendData.propertyOldValue = oldValue;
    sendData.propertyValue = _propValue;
 
-   if (this.hasOwnProperty('local') {
+   if (this.hasOwnProperty('local')) {
       sendData.local = this.local;
    }
    this.emit('property-changed', sendData);

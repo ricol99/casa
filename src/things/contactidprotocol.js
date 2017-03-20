@@ -51,7 +51,7 @@ function ContactIdProtocol(_uName) {
       305: { name: 'System Power Up', property: 'ac-power-failure', value: false },
       320: { name: 'Mains Over-voltage', property: 'alarm-error', value: 'Mains Over-voltage' },
       333: { name: 'Network Failure', property: 'alarm-error', value: 'Network Failure' },
-      351: { name: 'ATS Path Fault, property: 'alarm-error', value: 'ATS Path Fault' },
+      351: { name: 'ATS Path Fault', property: 'alarm-error', value: 'ATS Path Fault' },
       354: { name: 'Failed to Communicate' , property: 'alarm-error', value: 'Failed to Communicate' },
 
       400: { name: 'Arm/Disarm', property: 'armed-part', qualifiers: { 1: false, 3: true } },
