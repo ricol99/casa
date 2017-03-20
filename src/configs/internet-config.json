@@ -290,6 +290,10 @@
                      }
                   },
                   {
+                     "name": "thing:alarm-dumgoyne",
+                     "property": "alarm-error"
+                  },
+                  {
                      "name": "thing:dumgoyne-broadband",
                      "property": "test-result"
                   }

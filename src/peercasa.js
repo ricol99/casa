@@ -126,8 +126,14 @@ function PeerCasa(_config) {
    this.sourcePropertyChangedCasaHandler = function(_data) {
 
       if (that.connected && (_data.sourcePeerCasa != that.uName)) {
-         console.log(that.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
-         that.sendMessage('source-property-changed', _data);
+
+         if (!_data.local) {
+            console.log(that.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
+            that.sendMessage('source-property-changed', _data);
+         }
+         else {
+            console.log(that.uName + ': not publishing source ' + _data.sourceName + ' property-changed to peer casa - Not Global');
+         }
       }
    };
 

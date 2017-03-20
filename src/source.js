@@ -31,6 +31,7 @@ function Source(_config) {
       }
    }
 
+   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    events.EventEmitter.call(this);
 
    if (this.casa) {
@@ -101,6 +102,7 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _propOldVa
    sendData.propertyName = _propName;
    sendData.propertyOldValue = _propOldValue;
    sendData.propertyValue = _propValue;
+   sendData.local = this.local;
    this.emit('property-changed', sendData);
 };
 
@@ -118,6 +120,10 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    sendData.propertyName = _propName;
    sendData.propertyOldValue = oldValue;
    sendData.propertyValue = _propValue;
+
+   if (this.hasOwnProperty('local') {
+      sendData.local = this.local;
+   }
    this.emit('property-changed', sendData);
 }
 

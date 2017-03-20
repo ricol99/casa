@@ -47,33 +47,35 @@ function ContactIdProtocol(_uName) {
 
       300: { name: 'System Trouble', property: 'system-failure' },
       301: { name: 'AC Lost', property: 'ac-power-failure' },
-      302: { name: 'Low Battery' },
+      302: { name: 'Low Battery', property: 'battery-failure' },
       305: { name: 'System Power Up', property: 'ac-power-failure', value: false },
-      320: { name: 'Mains Over-voltage' },
-      333: { name: 'Network Failure' },
-      351: { name: 'ATS Path Fault' },
-      354: { name: 'Failed to Communicate' },
+      320: { name: 'Mains Over-voltage', property: 'alarm-error', value: 'Mains Over-voltage' },
+      333: { name: 'Network Failure', property: 'alarm-error', value: 'Network Failure' },
+      351: { name: 'ATS Path Fault, property: 'alarm-error', value: 'ATS Path Fault' },
+      354: { name: 'Failed to Communicate' , property: 'alarm-error', value: 'Failed to Communicate' },
 
-      400: { name: 'Arm/Disarm', property: 'armed-part' },
-      401: { name: 'Arm/Disarm by User', property: 'armed-normal' },
-      403: { name: 'Automatic Arm/Disarm', property: 'armed-normal' },
+      400: { name: 'Arm/Disarm', property: 'armed-part', qualifiers: { 1: false, 3: true } },
+      401: { name: 'Arm/Disarm by User', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
+      403: { name: 'Automatic Arm/Disarm', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
+
       406: { name: 'Alarm Abort' },
-      407: { name: 'Remote Arm/Disarm', property: 'armed-normal' },
-      408: { name: 'Quick Arm', property: 'armed-normal' },
+
+      407: { name: 'Remote Arm/Disarm', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
+      408: { name: 'Quick Arm', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
 
       411: { name: 'Download Start' },
       412: { name: 'Download End', },
-      441: { name: 'Part Arm', property: 'armed-part' },
+      441: { name: 'Part Arm', property: 'armed-part', qualifiers: { 1: false, 3: true } },
 
-      457: { name: 'Exit Error' },
+      457: { name: 'Exit Error', property: 'alarm-error', value: 'Exit Error' },
       459: { name: 'Recent Closing' },
-      570: { name: 'Zone Locked Out' },
+      570: { name: 'Zone Locked Out', property: 'alarm-error', value: 'Zone Locked Out' },
 
       601: { name: 'Manual Test' },
       602: { name: 'Periodic Test' },
       607: { name: 'User Walk Test' },
 
-      623: { name: 'Log Capacity Alert' },
+      623: { name: 'Log Capacity Alert', property: 'alarm-error', value: 'Log Capacity Alert' },
       625: { name: 'Date/Time Changed', },
       627: { name: 'Program Mode Entry', property: 'engineer-mode' },
       628: { name: 'Program Mode Exit', property: 'engineer-mode', value: false },
@@ -112,7 +114,16 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    if (this.EVENTS[message.eventNum] != undefined) {
       eventStr = this.EVENTS[message.eventNum].name;
       message.property = this.EVENTS[message.eventNum].property;
-      message.propertyValue = (this.EVENTS[message.eventNum].value == undefined) ? true : this.EVENTS[message.eventNum].value;
+
+      if (this.EVENTS[message.eventNum].value == undefined) {
+         message.propertyValue = this.EVENTS[message.eventNum].value;
+      }
+      else if (this.EVENTS[message.eventNum].qualifiers) {
+         message.propertyValue = this.EVENTS[message.eventNum].qualifiers[message.qualifier];
+      }
+      else {
+         message.propertyValue = true;
+      }
    }
    else {
       eventStr = 'Unknown Event '+message.eventNum;

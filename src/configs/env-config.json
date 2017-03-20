@@ -89,9 +89,9 @@
                "type": "thresholdproperty",
                "initialValue": false,
                "writable": false,
-               "threshold" : 40,
+               "threshold" : 47,
                "buffer": 7,
-               "transform": "$value>=40",
+               "transform": "$value>=47",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
@@ -136,9 +136,9 @@
                "initialValue": false,
                "writable": false,
                "type": "thresholdproperty",
-               "threshold" : 65,
+               "threshold" : 63,
                "buffer": 7,
-               "transform": "$value<=65",
+               "transform": "$value<=63",
                "sources": [
                   {
                      "name": "thing:dumgoyne-sensors",
@@ -214,6 +214,15 @@
          "displayName": "Kitchen Room",
          "props": [
             {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true,
+               "local": true
+            },
+            {
                "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
@@ -224,8 +233,8 @@
                      "property": "low-light"
                   },
                   {
-                     "name": "alarm:dumgoyne",
-                     "property": "kitchen-pir"
+                     "name": "room:kitchen",
+                     "property": "movement-pir"
                   }
                ],
                "sourceSteps": [
@@ -340,6 +349,15 @@
          "displayName": "Lounge Room",
          "props": [
             {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 27,
+               "triggerLow": true,
+               "local": true
+            }
+            {
                "name": "movement-in-low-light",
                "initialValue": false,
                "writable": false,
@@ -350,8 +368,8 @@
                      "property": "low-light"
                   },
                   {
-                     "name": "alarm:dumgoyne",
-                     "property": "lounge-pir"
+                     "name": "room:lounge",
+                     "property": "movement-pir"
                   }
                ],
                "sourceSteps": [
@@ -433,8 +451,23 @@
                ]
             },
             {
-               "name": "sonosplayer:living-room",
-               "zone": "Living Room"
+               "name": "hkspeakeraccessory:lounge-speakers",
+               "displayName": "Lounge Speakers",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:32",
+               "manufacturer": "Lounge Speaker Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "volumeSupported": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "sonosplayer:living-room",
+                     "displayName": "Sonos Player for Living Room",
+                     "zone": "Living Room"
+                  }
+               ]
             }
          ]
       },
@@ -442,6 +475,15 @@
          "name": "room:outside",
          "displayName": "Outside",
          "props": [
+            {
+               "name": "movement-1-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 25,
+               "triggerLow": true,
+               "local": true
+            },
             {
                "name": "movement-in-the-dark",
                "initialValue": false,
@@ -453,8 +495,8 @@
                      "property": "dark"
                   },
                   {
-                     "name": "alarm:dumgoyne",
-                     "property": "back-garden-1-pir"
+                     "name": "room:outside",
+                     "property": "movement-1-pir"
                   }
                ],
                "sourceSteps": [
@@ -655,6 +697,33 @@
          ]
       },
       {
+         "name": "room:dylan-bedroom",
+         "displayName": "Dylan's Bedroom",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hkspeakeraccessory:dylan-bedroom-speakers",
+               "displayName": "Dylan's Bedroom Speakers",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3E",
+               "manufacturer": "Lounge Speaker Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "volumeSupported": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "sonosplayer:dylan-bedroom",
+                     "displayName": "Sonos Player for Dylan's Bedroom",
+                     "zone": "Dylan's Room"
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
          "props": [
@@ -731,35 +800,11 @@
                "triggerLow": true
             },
             {
-               "name": "back-garden-1-pir",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 25,
-               "triggerLow": true
-            },
-            {
-               "name": "kitchen-pir",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 17,
-               "triggerLow": true
-            },
-            {
                "name": "part-armed",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 23,
-               "triggerLow": true
-            },
-            {
-               "name": "lounge-pir",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 27,
                "triggerLow": true
             }
          ]

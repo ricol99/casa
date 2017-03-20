@@ -49,6 +49,7 @@ function TexecomAlarm(_config) {
    this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false });
    this.ensurePropertyExists('system-failure', 'property', { initialValue: false });
    this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false });
+   this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' });
 
    this.pollingTolerance = 30000;   // ms
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;

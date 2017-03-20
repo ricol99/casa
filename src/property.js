@@ -14,6 +14,7 @@ function Property(_config, _owner) {
    this.prioritiseSources = _config.prioritiseSources;
    this.value = _config.initialValue;
    this.rawProperyValue = _config.initialValue;
+   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
 
    this.transform = _config.transform;
    this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
@@ -400,6 +401,7 @@ function processFinalOutput(_this, _newValue, _data) {
          _this.cold = false;
       }
 
+      _data.local = _this.local;
       _this.propertyAboutToChange(actualOutputValue, _data);
       _this.owner.updateProperty(_this.name, actualOutputValue, _data);
    }

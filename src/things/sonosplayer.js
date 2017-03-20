@@ -126,9 +126,9 @@ SonosPlayer.prototype.processRenderControlChange = function(_data) {
 
 SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
    console.log(this.uName + ": processGroupRenderControlChange()");
-   this.props['volume'].setProperty(_data.GroupVolume, { sourceName: this.uName });
-   this.props['muted'].setProperty((_data.GroupMute != 0), { sourceName: this.uName });
-   this.props['volume-writable'].setProperty((_data.GroupVolumeChangeable == 0), { sourceName: this.uName });
+   this.updateProperty('volume', _data.GroupVolume, { sourceName: this.uName });
+   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable == 0), { sourceName: this.uName });
+   this.updateProperty('muted', (_data.GroupMute != 0), { sourceName: this.uName });
 };
 
 SonosPlayer.prototype.processAVTransportChange = function(_data) {

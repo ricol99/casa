@@ -15,6 +15,7 @@ Thing.prototype.setParent = function(_thing) {
    if (_thing) {
       this.parent = _thing;
       this.parent.addThing(this);
+      this.local = true;
    }
 };
 
