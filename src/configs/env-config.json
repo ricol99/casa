@@ -356,7 +356,7 @@
                "gpioPin": 27,
                "triggerLow": true,
                "local": true
-            }
+            },
             {
                "name": "movement-in-low-light",
                "initialValue": false,
