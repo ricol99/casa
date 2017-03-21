@@ -7,7 +7,7 @@ function OutputStepProperty(_config, _owner) {
       _config.outputSteps = [ _config.outputStep ];
    }
    else {
-      _config.outputSteps.unshift(_config.outputStep);
+      _config.outputSteps.push(_config.outputStep);
    }
 
    Property.call(this, _config, _owner);
