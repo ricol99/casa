@@ -24,6 +24,7 @@ Thing.prototype.addThing = function(_thing) {
 };
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
+   _data.parentThing = this.uName;
 
    for (var thing in this.things) {
 
@@ -32,6 +33,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
 
+   _data.parentThing == undefined;
    var oldPropValue = this.value;
    Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 

@@ -85,7 +85,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.source.removeListener('invalid', this.invalidCallback);
 
       if (this.pipeline) {
-         this.pipeline.sourceIsInvalid(copyData({ sourcePropertyName: _this.sourcePropertyName, sourceName: _this.sourceName, propertyName: _this.property }));
+         this.pipeline.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
       }
       else {
          goInvalid(this, _data);
@@ -93,14 +93,13 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    }
 }
 
-function goValid(_this, _data) {
-   _this.owner.sourceIsValid(copyData({ sourcePropertyName: _this.sourcePropertyName, sourceName: _this.sourceName, propertyName: _this.property }));
+SourceListener.prototype.goValid = function(_data) {
+   this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
 }
 
-function goInvalid(_this, _data) {
-   _this.owner.sourceIsInvalid(copyData({ sourcePropertyName: _this.sourcePropertyName, sourceName: _this.sourceName, propertyName: _this.property }));
+SourceListener.prototype.goInvalid = function(_data) {
+   this.owner.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
 }
-
 
 //
 // Internal method - Called by the last step in the pipeline
@@ -131,17 +130,17 @@ SourceListener.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data
    this.goInvalid(_data);
 }
 
-function transformInput(_this, _data) {
+SourceListener.prototype.transformInput = function(_data) {
    var input = _data.propertyValue;
    var newInput = input;
 
-   if (_this.transform) {
-      var exp = _this.transform.replace(/\$value/g, "input");
+   if (this.transform) {
+      var exp = this.transform.replace(/\$value/g, "input");
       eval("newInput = " + exp);
    }
 
-   if (_this.transformMap && _this.transformMap[newInput] != undefined) {
-      newInput = _this.transformMap[newInput];
+   if (this.transformMap && this.transformMap[newInput] != undefined) {
+      newInput = this.transformMap[newInput];
    }
 
    return newInput;
@@ -175,7 +174,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       this.sourceRawValue = _data.propertyValue;
 
       if (this.transform || this.transformMap) {
-         this.lastData.propertyValue = transformInput(this, _data);
+         this.lastData.propertyValue = this.transformInput(_data);
       }
 
       if (this.pipeline) {

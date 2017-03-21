@@ -33,7 +33,7 @@ DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_source
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
-         startTimer(this);
+         this.startTimer();
       }
    }
 };
@@ -79,9 +79,9 @@ function copyData(_sourceData) {
    return newData;
 }
 
-function startTimer(_that) {
+DebounceProperty.prototype.startTimer = function() {
 
-   _that.timeoutObj = setTimeout(function(_this) {
+   this.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
       if (_this.lastData) {
@@ -94,7 +94,7 @@ function startTimer(_that) {
          _this.readyToGoInvalid = true;
          _this.goInvalid(_this.invalidData);
       }
-   }, _that.threshold*1000, _that);
+   }, this.threshold*1000, this);
 }
 
 module.exports = exports = DebounceProperty;

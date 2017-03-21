@@ -30,13 +30,13 @@ function copyData(_sourceData) {
    return newData;
 }
 
-function restartTimer(_that) {
+SmootherStep.prototype.restartTimer = function() {
 
-   if (_that.timeoutObj) {
-      clearTimeout(_that.timeoutObj);
+   if (this.timeoutObj) {
+      clearTimeout(this.timeoutObj);
    }
 
-   _that.timeoutObj = setTimeout(function(_this) {
+   this.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
       if (_this.valid) {
@@ -48,10 +48,10 @@ function restartTimer(_that) {
          else {
             var newValue = _this.value + _this.step;
             _this.outputForNextStep(_this.floorOutput(newValue));
-            restartTimer(_this);
+            _this.restartTimer();
          }
       }
-   }, _that.calculatedResolution * 1000, _that);
+   }, this.calculatedResolution * 1000, this);
 }
 
 SmootherStep.prototype.process = function(_value, _data) {
@@ -74,7 +74,7 @@ SmootherStep.prototype.process = function(_value, _data) {
          this.outputForNextStep(_value, _data);
       }
       else {
-         restartTimer(this);
+         this.restartTimer();
       }
    }
 };

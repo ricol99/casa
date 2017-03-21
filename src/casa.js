@@ -34,24 +34,24 @@ function Casa(_config) {
    var that = this;
 
    this.buildSimpleConfig(_config);
-   createServer(this);
+   this.createServer();
 }
 
 util.inherits(Casa, events.EventEmitter);
 
-function createServer(_this) {
-   var that = _this;
+Casa.prototype.createServer = function() {
+   var that = this;
 
    express = require('express');
    app = express();
 
-   if (_this.secureMode) {
+   if (this.secureMode) {
       var fs = require('fs');
 
       var serverOptions = {
-        key: fs.readFileSync(_this.certDir+'/server.key'),
-        cert: fs.readFileSync(_this.certDir+'/server.crt'),
-        ca: fs.readFileSync(_this.certDir+'/ca.crt'),
+        key: fs.readFileSync(this.certDir+'/server.key'),
+        cert: fs.readFileSync(this.certDir+'/server.crt'),
+        ca: fs.readFileSync(this.certDir+'/ca.crt'),
         requestCert: true,
         rejectUnauthorized: true
       };
@@ -95,10 +95,10 @@ function createServer(_this) {
       that.anonymousClients[_socket.id] = new Connection(that, _socket);
    });
 
-   http.listen(_this.listeningPort, function(){
+   http.listen(this.listeningPort, function(){
       console.log('listening on *:' + that.listeningPort);
    });
-}
+};
 
 Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};

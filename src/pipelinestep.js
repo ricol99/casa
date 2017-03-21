@@ -95,7 +95,7 @@ PipelineStep.prototype.outputForNextStep = function(_outputValue, _data) {
       _data = {};
    }
 
-   checkData(this, _outputValue, _data);
+   this.checkData(_outputValue, _data);
    this.lastData = copyData(_data);
 
    if (this.nextStep) {
@@ -149,14 +149,14 @@ function copyData(_sourceData) {
    return newData;
 }
 
-function checkData(_this, _value, _data) {
+PipelineStep.prototype.checkData = function(_value, _data) {
 
-   if (_data.sourceName == undefined) _data.sourceName = _this.lastData.sourceName;
-   if (_data.sourcePropertyName == undefined) _data.sourcePropertyName = _this.lastData.sourcePropertyName;
-   if (_data.properyName == undefined) _data.propertyName = _this.lastData.propertyName;
+   if (_data.sourceName == undefined) _data.sourceName = this.lastData.sourceName;
+   if (_data.sourcePropertyName == undefined) _data.sourcePropertyName = this.lastData.sourcePropertyName;
+   if (_data.properyName == undefined) _data.propertyName = this.lastData.propertyName;
    if (_data.properyValue == undefined) _data.propertyValue = _value;
 
-}
+};
 
 
 module.exports = exports = PipelineStep;

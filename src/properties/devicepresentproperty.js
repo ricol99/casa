@@ -18,31 +18,31 @@ DevicePresentProperty.prototype.setProperty = function(_propValue, _data) {
 }
 
 DevicePresentProperty.prototype.coldStart = function(_event) {
-   restartTimer(this);
+   this.restartTimer();
 }
 
 // ====================
 // NON-EXPORTED METHODS
 // ====================
 
-function restartTimer(_that) {
+DevicePresentProperty.prototype.restartTimer = function() {
 
-   if (_that.timeoutObj) {
-      clearTimeout(_that.timeoutObj);
+   if (this.timeoutObj) {
+      clearTimeout(this.timeoutObj);
    }
 
-   _that.timeoutObj = setTimeout(function(_this) {
+   this.timeoutObj = setTimeout(function(_this) {
       _this.timeoutObj = null;
 
       if (_this.valid) {
          var that2 = _this;
 
          ping.sys.probe(_this.host, function(_isAlive) {
-            that2.updatePropertyInternal(_isAlive, { sourceName: that2.owner.name });
+            that2.updatePropertyInternal(_isAlive);
             restartTimer(that2);
          });
       }
-   }, _that.interval * 1000, _that);
+   }, this.interval * 1000, this);
 }
 
 module.exports = exports = DevicePresentProperty;

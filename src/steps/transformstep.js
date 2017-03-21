@@ -20,13 +20,13 @@ TransformStep.prototype.process = function(_value, _data) {
    var input = _value;
    var newInput = input;
 
-   if (_this.transform) {
-      var exp = _this.transform.replace(/\$value/g, "input");
+   if (this.transform) {
+      var exp = this.transform.replace(/\$value/g, "input");
       eval("newInput = " + exp);
    }
 
-   if (_this.map && _this.map[newInput] != undefined) {
-      newInput = _this.map[newInput];
+   if (this.map && this.map[newInput] != undefined) {
+      newInput = this.map[newInput];
    }
 
    this.outputForNextStep(newInput, _data);

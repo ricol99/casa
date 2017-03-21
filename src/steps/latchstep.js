@@ -24,7 +24,7 @@ LatchStep.prototype.process = function(_value, _data) {
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
-         restartTimer(this);
+         this.restartTimer();
          this.active = true;
          this.outputForNextStep(propValue, _data);
       }
@@ -55,13 +55,13 @@ LatchStep.prototype.process = function(_value, _data) {
 // NON_EXPORTED METHODS
 // ====================
 
-function restartTimer(_this) {
+LatchStep.prototype.restartTimer = function() {
 
-   if (_this.minOutputTimeObj) {
-      clearTimeout(_this.minOutputTimeObj);
+   if (this.minOutputTimeObj) {
+      clearTimeout(this.minOutputTimeObj);
    }
 
-   _this.minOutputTimeObj = setTimeout(function(_that) {
+   this.minOutputTimeObj = setTimeout(function(_that) {
       _that.minOutputTimeObj = null;
 
       if (!_that.sourceActive) {
@@ -73,7 +73,7 @@ function restartTimer(_this) {
             return;
          }
       }
-   }, _this.minOutputTime*1000, _this);
+   }, this.minOutputTime*1000, this);
 }
 
 function copyData(_sourceData) {

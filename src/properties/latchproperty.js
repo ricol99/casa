@@ -33,7 +33,7 @@ LatchProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceLis
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
-         restartTimer(this);
+         this.restartTimer();
          this.active = true;
          this.updatePropertyInternal(propValue, _data);
          return;
@@ -99,13 +99,13 @@ LatchProperty.prototype.newPropertyValueReceivedFromTarget = function(_targetLis
 // NON_EXPORTED METHODS
 // ====================
 
-function restartTimer(_this) {
+LatchProperty.prototype.restartTimer = function() {
 
-   if (_this.minOutputTimeObj) {
-      clearTimeout(_this.minOutputTimeObj);
+   if (this.minOutputTimeObj) {
+      clearTimeout(this.minOutputTimeObj);
    }
 
-   _this.minOutputTimeObj = setTimeout(function(_that) {
+   this.minOutputTimeObj = setTimeout(function(_that) {
       _that.minOutputTimeObj = null;
 
       if (!_that.sourceActive) {
@@ -117,7 +117,7 @@ function restartTimer(_this) {
             return;
          }
       }
-   }, _this.minOutputTime*1000, _this);
+   }, this.minOutputTime*1000, this);
 }
 
 function copyData(_sourceData) {

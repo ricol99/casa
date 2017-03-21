@@ -78,11 +78,11 @@ TexecomAlarm.prototype.newConnection = function(_socket) {
      var newData = _data.slice(0,-2);
 
      if (newData.slice(0,4) == 'POLL') {
-        handlePollEvent(that, _socket, newData);
+        that.handlePollEvent(_socket, newData);
      }
      else if (that.decoders[newData.slice(0,1)] != undefined) {
         var message = that.decoders[newData.slice(0,1)].decodeMessage(newData.slice(1));
-        handleMessage(that, _socket, message, newData);
+        that.handleMessage(_socket, message, newData);
      }
      else {
         console.log(that.uName + ": Unhandled Message");
@@ -107,7 +107,7 @@ TexecomAlarm.prototype.coldStart = function(_event) {
    this.server.listen(this.port);
 };
 
-function handlePollEvent(_this, _socket, _data) {
+TexecomAlarm.prototype.handlePollEvent = function(_socket, _data) {
    // POLL flags (not all of these are verified - see docs)
    var FLAG_LINE_FAILURE = 1;
    var FLAG_AC_FAILURE = 2;
@@ -120,44 +120,44 @@ function handlePollEvent(_this, _socket, _data) {
    var flags = (parts[1][0]+'').charCodeAt(0);
 
    var buf = new Buffer('5b505d0000060d0a','hex');
-   buf.writeInt16BE(_this.pollingInterval / 1000 / 60,3)
+   buf.writeInt16BE(this.pollingInterval / 1000 / 60,3)
    _socket.write(buf);
 
-   if (_this.pollsMissed > 0) {
-      console.log(_this.uName + ": Polling recovered (within tolerance) with Texecom alarm!");
-      _this.pollsMissed = 0;
+   if (this.pollsMissed > 0) {
+      console.log(this.uName + ": Polling recovered (within tolerance) with Texecom alarm!");
+      this.pollsMissed = 0;
    }
 
-   if (!_this.props['ACTIVE'].value) {
-      console.log(_this.uName + ": Connection restored to Texecom alarm!");
-      _this.updateProperty('ACTIVE', true, { sourceName: _this.uName });
+   if (!this.props['ACTIVE'].value) {
+      console.log(this.uName + ": Connection restored to Texecom alarm!");
+      this.updateProperty('ACTIVE', true, { sourceName: this.uName });
    }
 
-   if (((flags & FLAG_LINE_FAILURE) != 0) != _this.props['line-failure'].value) {
-      _this.updateProperty('line-failure', ((flags & FLAG_LINE_FAILURE) != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_LINE_FAILURE) != 0) != this.props['line-failure'].value) {
+      this.updateProperty('line-failure', ((flags & FLAG_LINE_FAILURE) != 0), { sourceName: this.uName });
    }
 
-   if (((flags & FLAG_AC_FAILURE) != 0) != _this.props['ac-power-failure'].value) {
-      _this.updateProperty('ac-power-failure', ((flags & FLAG_AC_FAILURE) != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_AC_FAILURE) != 0) != this.props['ac-power-failure'].value) {
+      this.updateProperty('ac-power-failure', ((flags & FLAG_AC_FAILURE) != 0), { sourceName: this.uName });
    }
 
-   if (((flags & FLAG_BATTERY_FAILURE) != 0) != _this.props['battery-failure'].value) {
-      _this.updateProperty('battery-failure', ((flags & FLAG_BATTERY_FAILURE) != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_BATTERY_FAILURE) != 0) != this.props['battery-failure'].value) {
+      this.updateProperty('battery-failure', ((flags & FLAG_BATTERY_FAILURE) != 0), { sourceName: this.uName });
    }
 
-   if (((flags & FLAG_ARMED) != 0) != _this.props['armed-normal'].value) {
-      _this.updateProperty('armed-normal', ((flags & FLAG_ARMED) != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_ARMED) != 0) != this.props['armed-normal'].value) {
+      this.updateProperty('armed-normal', ((flags & FLAG_ARMED) != 0), { sourceName: this.uName });
    }
 
-   if (((flags & FLAG_ENGINEER) != 0) != _this.props['engineer-mode'].value) {
-      _this.updateProperty('engineer-mode', ((flags & FLAG_ENGINEER) != 0), { sourceName: _this.uName });
+   if (((flags & FLAG_ENGINEER) != 0) != this.props['engineer-mode'].value) {
+      this.updateProperty('engineer-mode', ((flags & FLAG_ENGINEER) != 0), { sourceName: this.uName });
    }
 
    console.log(this.uName + ": Poll received from alarm. Flags="+flags);
-   restartWatchdog(_this);
-}
+   this.restartWatchdog();
+};
 
-function handleMessage(_this, _socket, _message, _data) {
+TexecomAlarm.prototype.handleMessage = function(_socket, _message, _data) {
 
    // Send ACK
    buf = new Buffer('00060d0a', 'hex');
@@ -176,22 +176,22 @@ function handleMessage(_this, _socket, _message, _data) {
    };
 
    if (_message.property != undefined) {
-      _this.updateProperty(_message.property, _message.propertyValue, { sourceName: _this.uName }); 
-      console.log(_this.uName+": Message received, event="+_message.event+" - "+ _message.description);
+      this.updateProperty(_message.property, _message.propertyValue, { sourceName: this.uName }); 
+      console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
    }
    else {
-      console.log(_this.uName+": message received that had no property: \""+_message.description+"\"");
+      console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
    }
-}
+};
 
-function restartWatchdog(_that) {
+TexecomAlarm.prototype.restartWatchdog = function() {
 
-   if (_that.watchdog) {
-      clearTimeout(_that.watchdog);
-      _that.pollsMissed = 0;
+   if (this.watchdog) {
+      clearTimeout(this.watchdog);
+      this.pollsMissed = 0;
    }
 
-   _that.watchdog = setTimeout(function(_this) {
+   this.watchdog = setTimeout(function(_this) {
       _this.watchdog = undefined;
       _this.pollsMissed++;
 
@@ -202,18 +202,18 @@ function restartWatchdog(_that) {
          _this.updateProperty('ACTIVE', false, { sourceName: _this.uName });
       }
       else {
-         restartWatchdog(_this);
+         _this.restartWatchdog();
       }
 
-   }, _that.pollingTimeout, _that);
-}
+   }, this.pollingTimeout, this);
+};
 
-function stopWatchdog(_this) {
+TexecomAlarm.prototype.stopWatchdog = function() {
 
-   if (_this.watchdog) {
-      _this.clearTimeout(_this.watchdog);
-      _this.watchdog = undefined;
+   if (this.watchdog) {
+      this.clearTimeout(this.watchdog);
+      this.watchdog = undefined;
    }
-}
+};
 
 module.exports = exports = TexecomAlarm;

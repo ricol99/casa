@@ -67,9 +67,9 @@ function Property(_config, _owner) {
       this.valid = true;
    }
 
-   if (_config.target) {
-      this.targetProperty = (_config.targetProperty) ? _config.targetProperty : "ACTIVE";
-      this.ignoreTargetUpdates = (_config.ignoreTargetUpdates == undefined) ? true : _config.ignoreTargetUpdates;
+   if (_config.hasOwnProperty('target')) {
+      this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
+      this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
       this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
                                                  transformMap:_config.targetTransformMap}, this);
@@ -77,18 +77,7 @@ function Property(_config, _owner) {
       this.target = this.targetListener.source;
    }
 
-   this.manualOverrideTimeout = (_config.manualOverrideTimeout) ? _config.manualOverrideTimeout : 3600;
-
-   if (_config.manualOverrideSource) {
-      this.manualOverrideSourceProperty = (_config.manualOverrideSourceProperty) ? _config.manualOverrideSourceProperty : "ACTIVE";
-      this.manualOverrideListener = new SourceListener({ uName: _config.manualOverrideSource, sourceProperty: this.manualOverrideSourceProperty, isTarget: true,
-                                                         ignoreSourceUpdates: false, transform: _config.manualOverrideSourceTransform,
-                                                         transformMap:_config.manualOverrideSourceTransformMap}, this);
-
-      this.manualOverrideSource = this.manualOverrideListener.source;
-   }
-
-   this.listening = true;
+   this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
 }
 
 //
@@ -112,12 +101,12 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
          this.outputPipeline.newInputForProcess(_newValue, _data);
       }
       else {
-         processFinalOutput(this, _newValue, _data);
+         this.processFinalOutput(_newValue, _data);
       }
    }
    else {
       console.log(this.uName+": output from output pipeline. Property Value="+_newValue);
-      processFinalOutput(this, _newValue, _data);
+      this.processFinalOutput(_newValue, _data);
    }
 };
 
@@ -167,13 +156,13 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       _data = { sourceName: this.owner.uName };
    }
 
-   checkData(this, _newPropValue, _data);
+   this.checkData(_newPropValue, _data);
 
    if (this.pipeline) {
       this.pipeline.newInputForProcess(_newPropValue, _data);
    }
    else {
-       processFinalOutput(this, _newPropValue, _data)
+       this.processFinalOutput(_newPropValue, _data)
    }
 };
 
@@ -184,14 +173,18 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 Property.prototype.setProperty = function(_propValue, _data) {
 
    if (this.writeable) {
-      this.setManualMode(true);
 
-     if (this.outputPipeline != undefined) {
-        this.outputPipeline.newInputForProcess(_propValue, _data);
-     }
-     else {
-        processFinalOutput(this, _propValue, _data);
-     }
+      if (!_data.parentThing) {
+         this.setManualMode(true);
+         _data.manualPropertyChange = true;
+      }
+
+      if (this.outputPipeline != undefined) {
+         this.outputPipeline.newInputForProcess(_propValue, _data);
+      }
+      else {
+         this.processFinalOutput(_propValue, _data);
+      }
    }
 
    return this.writeable;
@@ -204,23 +197,34 @@ Property.prototype.setProperty = function(_propValue, _data) {
 //                - output step pipeline (and setProperty() ) still enabled
 //
 Property.prototype.setManualMode = function(_manualMode) {
-   this.manualMode = _manualMode;
 
    if (_manualMode) {
-      this.listening = false;
-      restartManualOverrideTimer(this);
+      this.restartManualOverrideTimer();
    }
-   else {
-      this.listening = true;
+   else if (this.manualOverrideTimer) {
+      clearTimeout(this.manualOverrideTimer);
+   }
 
-      if (this.manualOverrideTimer) {
-         clearTimeout(this.manualOverrideTimer);
-      }
+   if (this.manualMode != _manualMode) {
+      this.manualMode = _manualMode;
 
-      if (this.lastData) {
-         this.newPropertyValueReceivedFromSource(this.sourceListeners[this.lastData.sourcePropertyName], this.lastData);
-         this.lastData = null;
+      if (!_manualMode) {
+         this.leaveManualMode();
       }
+   }
+};
+
+//
+// Property should come out of manual mode
+// in manual mode - ignore events from all defined sources for a period when in manual mode
+// Coming out, latest property automatic aupdate should be applied, if it was received while in manual mode
+//
+Property.prototype.leaveManualMode = function() {
+
+   if (this.lastAutoUpdate) {
+      this.propertyAboutToChange(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
+      this.owner.updateProperty(this.name, this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
+      this.lastAutoUpdate = null;
    }
 };
 
@@ -265,13 +269,6 @@ Property.prototype.sourceIsValid = function(_data) {
    this.valid = this.amIValid();
    this.target = (this.targetListener) ? this.targetListener.source : null;
 
-   this.manualOverrideSource = (this.manualOverrideListener) ? this.manualOverrideListener.source : null;
-
-   if (!this.manualOverrideSource) {
-      this.setManualMode(false);
-      this.listening = true;
-   }
-
    if (this.pipeline) {
       this.pipeline.sourceIsValid(_data);
    }
@@ -305,7 +302,6 @@ Property.prototype.sourceIsInvalid = function(_data) {
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
       this.target = null;
-      this.manualOverrideSource = null;
 
       if (this.pipeline) {
          this.pipeline.sourceIsValid(_data);
@@ -324,24 +320,13 @@ Property.prototype.sourcePropertyChanged = function(_data) {
 
    if (this.valid) {
 
-      if (!this.listening) {  // In manual override mode
+      if (this.sourceListeners[_data.sourcePropertyName]) {
 
-         if (this.sourceListeners[_data.sourcePropertyName]) {
+         if (this.manualMode) {  // In manual override mode, copy data
             this.lastData = copyData(_data);
          }
-         else {  // Must have come from manual override source
-            restartManualOverrideTimer(this);
-            this.updatePropertyInternal(_data.propertyValue, _data);
-         }
-      }
-      else {
-
-         if (this.sourceListeners[_data.sourcePropertyName]) {
+         else {
             this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
-         }
-         else {  // Must have come from manual override source
-            this.setManualMode(true);
-            this.updatePropertyInternal(_data.propertyValue, _data);
          }
       }
    }
@@ -355,11 +340,9 @@ Property.prototype.sourcePropertyChanged = function(_data) {
 Property.prototype.targetPropertyChanged = function(_data) {
 
    if (this.valid) {
+
       if (this.targetListener && this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
          this.newPropertyValueReceivedFromTarget(this.targetListener, _data);
-      }
-      else if (this.manualOverrideListener.sourcePropertyName == _data.sourcePropertyName && !this.manualMode) {
-         processManualOverridePropertyChange(this, this.manualOverrideListener, _data);
       }
    }
 };
@@ -386,39 +369,42 @@ Property.prototype.coldStart = function(_data) {
 };
 
 // ====================
-// NON-EXPORTED METHODS
+// INTERNAL METHODS
 // ====================
 
-function processFinalOutput(_this, _newValue, _data) {
+Property.prototype.processFinalOutput = function(_newValue, _data) {
 
-   var actualOutputValue = transformNewPropertyValue(_this, _newValue, _data);
+   var actualOutputValue = this.transformNewPropertyValue(_newValue, _data);
    _data.propertyValue = actualOutputValue;
 
-   if (_this.value !== actualOutputValue || _this.cold) {
+   if (this.value !== actualOutputValue || this.cold) {
 
-      if (_this.cold) {
+      if (this.cold) {
          _data.coldStart = true;
-         _this.cold = false;
+         this.cold = false;
       }
 
-      _data.local = _this.local;
-      _this.propertyAboutToChange(actualOutputValue, _data);
-      _this.owner.updateProperty(_this.name, actualOutputValue, _data);
-   }
-}
+      _data.local = this.local;
 
-function processManualOverridePropertyChange(_this, _manualOverrideListener, _data) {
-   _this.listening = _data.sourcePropertyValue;
+      if (!this.manualMode || (this.manualMode && _data.manualPropertyChange)) {
+         this.propertyAboutToChange(actualOutputValue, _data);
+         this.owner.updateProperty(this.name, actualOutputValue, _data);
+      }
+      else {
+         // Copy values to be updated once the manual timer has expired
+         this.lastAutoUpdate = { propertyValue: actualOutputValue, data: copyData(_data) };
+      }
+   }
 };
 
-function findHighestPrioritySource(_this, _sourcePropertyValue) {
+Property.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
-   for (var sourcePropertyName in _this.sourceListeners) {
+   for (var sourcePropertyName in this.sourceListeners) {
 
-      if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
-         var sourceListener = _this.sourceListeners[sourcePropertyName];
+      if (this.sourceListeners.hasOwnProperty(sourcePropertyName)){
+         var sourceListener = this.sourceListeners[sourcePropertyName];
 
          if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
             highestPriorityFound = sourceListener.priority;
@@ -428,21 +414,21 @@ function findHighestPrioritySource(_this, _sourcePropertyValue) {
    }
 
    return highestPrioritySource;
-}
+};
 
-function transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data) {
+Property.prototype.transformNewPropertyValueBasedOnSource = function(_newPropValue, _data) {
    var actualOutputValue = _newPropValue;
 
    if (_data.sourcePropertyName != undefined) {
-      var sourceListener = _this.sourceListeners[_data.sourcePropertyName];
+      var sourceListener = this.sourceListeners[_data.sourcePropertyName];
 
       if (sourceListener) {
          var sourceListenerInCharge = sourceListener;
 
-         if (_this.prioritiseSources) {
-            var highestPrioritySource = findHighestPrioritySource(_this, _newPropValue);
+         if (this.prioritiseSources) {
+            var highestPrioritySource = this.findHighestPrioritySource(_newPropValue);
 
-            if (highestPrioritySource && (highestPrioritySource.priority >= sourceListener.priority)) {
+            if (highestPrioritySource && (highestPrioritySource.priority <= sourceListener.priority)) {
                sourceListenerInCharge = highestPrioritySource;
             }
          }
@@ -453,24 +439,24 @@ function transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data) {
    }
 
    return actualOutputValue;
-}
+};
 
 // *** TODO Move this to its own step2
-function transformNewPropertyValue(_this, _newPropValue, _data) {
-   var actualOutputValue = transformNewPropertyValueBasedOnSource(_this, _newPropValue, _data);
+Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
+   var actualOutputValue = this.transformNewPropertyValueBasedOnSource(_newPropValue, _data);
 
    // Apply Output Transform
-   if (_this.transform || _this.transformMap) {
+   if (this.transform || this.transformMap) {
       var output = actualOutputValue;
       var newOutput = output;
 
-      if (_this.transform) {
-         var exp = _this.transform.replace(/\$value/g, "output");
+      if (this.transform) {
+         var exp = this.transform.replace(/\$value/g, "output");
          eval("newOutput = " + exp);
       }
 
-      if (_this.transformMap && _this.transformMap[newOutput] != undefined) {
-         newOutput = _this.transformMap[newOutput];
+      if (this.transformMap && this.transformMap[newOutput] != undefined) {
+         newOutput = this.transformMap[newOutput];
       }
 
       actualOutputValue = newOutput;
@@ -479,17 +465,17 @@ function transformNewPropertyValue(_this, _newPropValue, _data) {
    return actualOutputValue;
 }
 
-function restartManualOverrideTimer(_this) {
+Property.prototype.restartManualOverrideTimer = function() {
 
-   if (_this.manualOverrideTimer) {
-      clearTimeout(_this.manualOverrideTimer);
+   if (this.manualOverrideTimer) {
+      clearTimeout(this.manualOverrideTimer);
    }
 
-   _this.manualOverrideTimer = setTimeout(function(_that) {
+   this.manualOverrideTimer = setTimeout(function(_that) {
       _that.manualOverrideTimer = null;
       _that.setManualMode(false);
-   }, _this.manualOverrideTimeout*1000, _this);
-}
+   }, this.manualOverrideTimeout*1000, this);
+};
 
 function copyData(_sourceData) {
    var newData = {};
@@ -530,11 +516,11 @@ function anyAssocArrayElementsDo(_obj, _func) {
    return false;
 }
 
-function checkData(_this, _value, _data) {
+Property.prototype.checkData = function(_value, _data) {
 
-   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
-   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
-   if (_data.properyName == undefined) _data.propertyName = _this.name;
+   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   if (_data.properyName == undefined) _data.propertyName = this.name;
    if (_data.properyValue == undefined) _data.propertyValue = _value;
 
 }
