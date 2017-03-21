@@ -174,7 +174,7 @@ Property.prototype.setProperty = function(_propValue, _data) {
 
    if (this.writeable) {
 
-      if (!_data.parentThing) {
+      if (!_data.parentThing || _data.manualPropertyChange) {
          this.setManualMode(true);
          _data.manualPropertyChange = true;
       }
