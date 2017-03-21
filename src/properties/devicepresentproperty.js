@@ -35,11 +35,11 @@ DevicePresentProperty.prototype.restartTimer = function() {
       _this.timeoutObj = null;
 
       if (_this.valid) {
-         var that2 = _this;
+         var that = _this;
 
          ping.sys.probe(_this.host, function(_isAlive) {
-            that2.updatePropertyInternal(_isAlive);
-            restartTimer(that2);
+            that.updatePropertyInternal(_isAlive);
+            that.restartTimer();
          });
       }
    }, this.interval * 1000, this);
