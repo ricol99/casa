@@ -1,16 +1,16 @@
 var util = require('util');
-var SourceStepProperty = require('../sourcestepproperty');
+var OutputStepProperty = require('../outputstepproperty');
 
 function PushoverProperty(_config, _owner) {
 
-   _config.sourceStep = { type: 'pushoverstep',
+   _config.outputStep = { type: 'pushoverstep',
                           priority: _config.priority,
                           userGroup: _config.userGroup };
 
    _config.allSourcesRequiredForValidity = false;
-   SourceStepProperty.call(this, _config, _owner);
+   OutputStepProperty.call(this, _config, _owner);
 }
 
-util.inherits(PushoverProperty, SourceStepProperty);
+util.inherits(PushoverProperty, OutputStepProperty);
 
 module.exports = exports = PushoverProperty;

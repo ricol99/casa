@@ -54,12 +54,10 @@
                "name": "fire-alarm",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:test-cctv",
-                     "property": "test-prop-2"
-                  }
-               ]
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-2"
+               }
             }
          ]
       },
@@ -76,16 +74,14 @@
                "type": "orproperty",
                "initialValue": 100,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:test-cctv",
-                     "property": "test-prop-2",
-                     "outputValues": {
-                        "true": 30,
-                        "false": 100
-                     }
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-2",
+                  "outputValues": {
+                     "true": 30,
+                     "false": 100
                   }
-               ]
+               }
             }
          ]
       },
@@ -97,12 +93,10 @@
                "name": "manual-mode",
                "initialValue": "false",
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:test-cctv",
-                     "property": "test-prop-4"
-                  }
-               ]
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-4"
+               }
             },
             {
                "name": "test-smooth-transform",
@@ -111,12 +105,10 @@
                "writable": false,
                "rate": 10,
                "resolution": 5,
-               "sources": [
-                  {
-                     "name": "thing:home-daylight-sensor",
-                     "property": "lightLevel"
-                  }
-               ]
+               "source": {
+                  "name": "thing:home-daylight-sensor",
+                  "property": "lightLevel"
+               }
             },
             {
                "name": "alarm-status",
@@ -153,12 +145,10 @@
                "inputMax": 100,
                "outputMin": 10,
                "outputMax": 0,
-               "sources": [
-                  {
-                     "name": "thing:home-daylight-sensor",
-                     "property": "lightLevel"
-                  }
-               ]
+               "source": {
+                  "name": "thing:home-daylight-sensor",
+                  "property": "lightLevel"
+               }
             },
             {
                "name": "daylight",
@@ -196,16 +186,14 @@
                "name": "test-source-transform-map",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:test-cctv",
-                     "property": "test-prop-2",
-                     "transformMap": {
-                        "true": "test-prop-2 is True!",
-                        "false": "test-prop-2 is False!"
-                     }
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-2",
+                  "transformMap": {
+                     "true": "test-prop-2 is True!",
+                     "false": "test-prop-2 is False!"
                   }
-               ]
+               }
             }
          ]
       },
@@ -282,12 +270,10 @@
                "type": "latchproperty",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:test-cctv",
-                     "property": "test-prop-2"
-                  }
-               ],
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-2"
+               },
                "controller": {
                   "name": "thing:test-cctv",
                   "property": "test-prop-3"
@@ -322,12 +308,10 @@
                "name": "test-property-broken",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "propertyactivator:test-source-not-found",
-                     "property": "test-prop-not-found"
-                  }
-               ]
+               "source": {
+                  "name": "propertyactivator:test-source-not-found",
+                  "property": "test-prop-not-found"
+               }
             }
          ]
       },
@@ -382,13 +366,11 @@
                "initialValue": false,
                "writable": true,
                "type": "scheduleproperty",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "daylight",
-                     "transform": "!$value"
-                  }
-               ],
+               "source": {
+                  "name": "thing:dumgoyne-environment",
+                  "property": "daylight",
+                  "transform": "!$value"
+               },
                "events": [
                   {
                      "rule": "30 22 * * *",

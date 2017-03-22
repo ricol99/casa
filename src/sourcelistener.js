@@ -168,7 +168,6 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
    if (!this.ignoreSourceUpdates && _data.propertyName == this.property) {
       console.log(this.uName + ": processing source property change, property=" + _data.propertyName);
 
-      // ** TODO Do we need to cache data based on the propertyValue? Not done so far
       this.lastData = copyData(_data);
       this.lastData.sourcePropertyName = this.sourcePropertyName;
       this.sourceRawValue = _data.propertyValue;

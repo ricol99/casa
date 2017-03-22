@@ -10,7 +10,7 @@ function Property(_config, _owner) {
 
    this.writeable = (_config.writeable) ? _config.writeable : true;
    this.owner = _owner;
-   this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;  //****** TODO Check all properties for this *******
+   this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
    this.prioritiseSources = _config.prioritiseSources;
    this.value = _config.initialValue;
    this.rawProperyValue = _config.initialValue;
@@ -40,9 +40,9 @@ function Property(_config, _owner) {
    this.sourceListeners = {};
    this.noOfSources = 0;
 
-   //if (_config.source) {
-      //_config.sources = [{ name: _config.source, property: _config.sourceProperty, uName: _config.source+":"+_config.sourceProperty }];
-   //}
+   if (_config.source) {
+      _config.sources = [_config.source];
+   }
 
    if (_config.sources) {
       this.valid = false;

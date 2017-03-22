@@ -80,12 +80,10 @@
                "initialValue": false,
                "writable": false,
                "threshold": 120,
-               "sources": [
-                  {
-                     "name": "casa:alarm",
-                     "property": "ACTIVE"
-                  }
-               ]
+               "source": {
+                  "name": "casa:alarm",
+                  "property": "ACTIVE"
+               }
             },
             {
                "name": "casa-cctv",
@@ -93,12 +91,10 @@
                "initialValue": false,
                "writable": false,
                "threshold": 120,
-               "sources": [
-                  {
-                     "name": "casa:cctv",
-                     "property": "ACTIVE"
-                  }
-               ]
+               "source": {
+                  "name": "casa:cctv",
+                  "property": "ACTIVE"
+               }
             },
             {
                "name": "casa-env",
@@ -106,12 +102,10 @@
                "initialValue": false,
                "writable": false,
                "threshold": 120,
-               "sources": [
-                  {
-                     "name": "casa:env",
-                     "property": "ACTIVE"
-                  }
-               ]
+               "source": {
+                  "name": "casa:env",
+                  "property": "ACTIVE"
+               }
             },
             {
                "name": "alarm-armed",
@@ -135,12 +129,10 @@
                "initialValue": false,
                "writable": false,
                "threshold": 30,
-               "sources": [
-                  {
-                     "name": "thing:home-internet-connection",
-                     "property": "alarm-armed"
-                  }
-               ]
+               "source": {
+                  "name": "thing:home-internet-connection",
+                  "property": "alarm-armed"
+               }
             },
             {
                "name": "lost-while-armed",

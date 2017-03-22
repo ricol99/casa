@@ -46,13 +46,11 @@
                "name": "light-level",
                "initialValue": 0,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-sensors",
-                     "property": "light-sensor",
-                     "transform": "$value*$value"
-                  }
-               ]
+               "source": {
+                  "name": "thing:dumgoyne-sensors",
+                  "property": "light-sensor",
+                  "transform": "$value*$value"
+               }
             }
          ]
       },
@@ -92,12 +90,10 @@
                "threshold" : 47,
                "buffer": 7,
                "transform": "$value>=47",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-sensors",
-                     "property": "light-sensor"
-                  }
-               ]
+               "source": {
+                  "name": "thing:dumgoyne-sensors",
+                  "property": "light-sensor"
+               }
             },
             {
                "name": "daylight-possible",
@@ -139,12 +135,10 @@
                "threshold" : 63,
                "buffer": 7,
                "transform": "$value<=63",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-sensors",
-                     "property": "light-sensor"
-                  }
-               ]
+               "source": {
+                  "name": "thing:dumgoyne-sensors",
+                  "property": "light-sensor"
+               }
             },
             {
                "name": "low-light",
@@ -168,13 +162,11 @@
                "initialValue": false,
                "writable": true,
                "type": "scheduleproperty",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "daylight",
-                     "transform": "!$value"
-                  }
-               ],
+               "source": {
+                  "name": "thing:dumgoyne-environment",
+                  "property": "daylight",
+                  "transform": "!$value"
+               },
                "events": [
                   {
                      "rule": "30 22 * * *",
@@ -285,13 +277,11 @@
                      "name": "power",
                      "initialValue": false,
                      "writable": false,
-                     "sources": [
-                        {  
-                           "name": "room:kitchen",
-                           "property": "brightness",
-                           "transform": "$value>0"
-                        } 
-                     ]
+                     "source": {  
+                        "name": "room:kitchen",
+                        "property": "brightness",
+                        "transform": "$value>0"
+                     } 
                   }
                ],
                "things": [
@@ -420,13 +410,11 @@
                      "name": "power",
                      "initialValue": false,
                      "writable": false,
-                     "sources": [
-                        {
-                           "name": "room:lounge",
-                           "property": "brightness",
-                           "transform": "$value>0"
-                        }
-                     ]
+                     "source": {
+                        "name": "room:lounge",
+                        "property": "brightness",
+                        "transform": "$value>0"
+                     }
                   }
                ],
                "things": [
@@ -510,28 +498,24 @@
                "name": "brightness",
                "initialValue": 0,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "room:outside",
-                     "property": "movement-in-the-dark",
-                     "outputValues": {
-                        "true": 100,
-                        "false": 0
-                     }
+               "source": {
+                  "name": "room:outside",
+                  "property": "movement-in-the-dark",
+                  "outputValues": {
+                     "true": 100,
+                     "false": 0
                   }
-               ]
+               }
             },
             {
                "name": "power",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "room:outside",
-                     "property": "brightness",
-                     "transform": "$value>0"
-                  }
-               ]
+               "source": {
+                  "name": "room:outside",
+                  "property": "brightness",
+                  "transform": "$value>0"
+               }
             }
          ],
          "things": [
@@ -742,12 +726,10 @@
                      "name": "power",
                      "initialValue": false,
                      "writeable": true,
-                     "sources": [
-                        {
-                           "name": "thing:environment",
-                           "property": "bedtime"
-                        }
-                     ]
+                     "source": {
+                        "name": "thing:environment",
+                        "property": "bedtime"
+                     }
                   }
                ],
                "things": [

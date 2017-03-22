@@ -80,6 +80,16 @@ PeerSource.prototype.getProperty = function(_propName) {
    return this.props[_propName].value;
 };
 
+PeerSource.prototype.getAllProperties = function(_allProps) {
+
+   for (var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
+         _allProps[prop] = this.props[prop].value;
+      }
+   }
+};
+
 PeerSource.prototype.coldStart = function() {
 
    if (!this.ghostMode) {
