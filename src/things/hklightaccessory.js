@@ -80,7 +80,7 @@ function HomekitLightAccessory(_config) {
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
-   this.setProperty("power", _status ? true : false, { sourceName: this.uName }, true);
+   this.updateProperty("power", _status ? true : false, { sourceName: this.uName });
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
@@ -89,7 +89,7 @@ HomekitLightAccessory.prototype.getPower = function() {
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
    console.log(this.uName + ": Changing brightness to " + _status);
-   this.setProperty("brightness", _status, { sourceName: this.uName });
+   this.updateProperty("brightness", _status, { sourceName: this.uName });
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
@@ -98,7 +98,7 @@ HomekitLightAccessory.prototype.getBrightness = function() {
 
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
    console.log(this.uName + ": Changing saturation to " + _status);
-   this.setProperty("saturation", _status, { sourceName: this.uName });
+   this.updateProperty("saturation", _status, { sourceName: this.uName });
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
@@ -107,14 +107,14 @@ HomekitLightAccessory.prototype.getSaturation = function() {
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
    console.log(this.uName + ": Changing hue to " + _status);
-   this.setProperty("hue", _status, { sourceName: this.uName });
+   this.updateProperty("hue", _status, { sourceName: this.uName });
 };
 
 HomekitLightAccessory.prototype.getHue = function() {
    return this.props["hue"].value;
 }
 
-HomekitLightAccessory.prototype.setProperty = function(_propName, _propValue, _data) {
+HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (_propName == "power") {
       this.hkAccessory
@@ -141,7 +141,7 @@ HomekitLightAccessory.prototype.setProperty = function(_propName, _propValue, _d
         .updateValue(_propValue);
    }
 
-   Thing.prototype.setProperty.call(this, _propName, _propValue, _data);
+   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 module.exports = exports = HomekitLightAccessory;
