@@ -62,6 +62,18 @@ Thing.prototype.getProperty = function(_property) {
    return value;
 };
 
+Thing.prototype.getAllProperties = function(_allProps) {
+
+   Source.prototype.getAllProperties.call(this, _allProps);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].getAllProperties(_allProps);
+      }
+   }
+};
+
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldValue, _child) {
 
    if (!this.props.hasOwnProperty(_propName)) {

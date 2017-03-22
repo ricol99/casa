@@ -286,7 +286,7 @@
                      "property": "low-light",
                      "transformMap": {
                         "true": "Lights now sensitive to movement",
-                        "false": "Lights back to manual mode"
+                        "false": "Lights are not sensitive to movement"
                      }
                   },
                   {

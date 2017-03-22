@@ -71,6 +71,17 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
    } 
 }
 
+Source.prototype.getAllProperties = function(_allProps) {
+
+   for (var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
+         _allProps[prop] = this.props[prop].value;
+      }
+   }
+};
+
+
 // Only called by ghost peer source
 Source.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer (duplicate) source');

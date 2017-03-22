@@ -76,15 +76,11 @@ Casa.prototype.createServer = function() {
    });
 
    app.get('/source/:source', function(req, res) {
-      console.log(req.client.authorized);
-      console.log(req.connection.getPeerCertificate().subject);
       var allProps = {};
+      var source = that.casaSys.allObjects[req.params.source];
 
-      if (that.casaSys.allObjects[req.params.source]) {
-
-         for (var name in that.casaSys.allObjects[req.params.source].props) {
-            allProps[name] = that.casaSys.allObjects[req.params.source].props[name].value;
-         }
+      if (source) {
+         source.getAllProperties(allProps);
       }
 
       res.json(allProps);
