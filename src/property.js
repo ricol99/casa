@@ -90,6 +90,19 @@ Property.prototype.myValue = function() {
 };
 
 //
+// Internal method - dispatch processing to output pipeline
+//
+Property.prototype.sendToOutputPipeline = function(_newValue, _data) {
+
+   if (this.outputPipeline) {
+      this.outputPipeline.newInputForProcess(_newValue, _data);
+   }
+   else {
+      this.processFinalOutput(_newValue, _data);
+   }
+};
+
+//
 // Internal method - Called by the last step in the pipeline
 //
 Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
@@ -97,11 +110,12 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
    if (_pipeline == this.sourcePipeline) {
       console.log(this.uName+": output from source pipeline. Property Value="+_newValue);
 
-      if (this.outputPipeline) {
-         this.outputPipeline.newInputForProcess(_newValue, _data);
+      if (this.manualMode) {
+         // Copy values to be updated once the manual timer has expired
+         this.lastAutoUpdate = { propertyValue: _newValue, data: copyData(_data) };
       }
       else {
-         this.processFinalOutput(_newValue, _data);
+         this.sendToOutputPipeline(_newValue, _data);
       }
    }
    else {
@@ -158,11 +172,15 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
    this.checkData(_newPropValue, _data);
 
-   if (this.pipeline) {
-      this.pipeline.newInputForProcess(_newPropValue, _data);
+   if (this.sourcePipeline) {
+      this.sourcePipeline.newInputForProcess(_newPropValue, _data);
+   }
+   else if (this.manualMode) {
+      // Copy property change - will be sent once the manual timer has expired
+      this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
    }
    else {
-       this.processFinalOutput(_newPropValue, _data)
+      this.sendToOutputPipeline(_newPropValue, _data);
    }
 };
 
@@ -179,11 +197,12 @@ Property.prototype.setProperty = function(_propValue, _data) {
          _data.manualPropertyChange = true;
       }
 
-      if (this.outputPipeline != undefined) {
-         this.outputPipeline.newInputForProcess(_propValue, _data);
+      if (_data.parentThing && this.manualMode) {
+         // Copy property change - will be sent once the manual timer has expired
+         this.lastAutoUpdate = { propertyValue: _propValue, data: copyData(_data) };
       }
       else {
-         this.processFinalOutput(_propValue, _data);
+         this.sendToOutputPipeline(_propValue, _data);
       }
    }
 
@@ -222,8 +241,7 @@ Property.prototype.setManualMode = function(_manualMode) {
 Property.prototype.leaveManualMode = function() {
 
    if (this.lastAutoUpdate) {
-      this.propertyAboutToChange(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
-      this.owner.updateProperty(this.name, this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
+      this.sendToOutputPipeline(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
       this.lastAutoUpdate = null;
    }
 };
@@ -385,15 +403,8 @@ Property.prototype.processFinalOutput = function(_newValue, _data) {
       }
 
       _data.local = this.local;
-
-      if (!this.manualMode || (this.manualMode && _data.manualPropertyChange)) {
-         this.propertyAboutToChange(actualOutputValue, _data);
-         this.owner.updateProperty(this.name, actualOutputValue, _data);
-      }
-      else {
-         // Copy values to be updated once the manual timer has expired
-         this.lastAutoUpdate = { propertyValue: actualOutputValue, data: copyData(_data) };
-      }
+      this.propertyAboutToChange(actualOutputValue, _data);
+      this.owner.updateProperty(this.name, actualOutputValue, _data);
    }
 };
 

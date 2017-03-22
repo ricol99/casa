@@ -81,7 +81,7 @@ function copyData(_sourceData) {
 
    for (var prop in _sourceData) {
 
-      if (_sourceData.hasOwnStep(prop)){
+      if (_sourceData.hasOwnProperty(prop)){
          newData[prop] = _sourceData[prop];
       }
    }

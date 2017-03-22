@@ -243,43 +243,6 @@
                      "minOutputTime": 600
                   }
                ]
-            },
-            {
-               "name": "brightness",
-               "initialValue": 0,
-               "writable": false,
-               "type": "orproperty",
-               "prioritiseSources": true,
-               "sources": [
-                  {
-                     "name": "room:kitchen",
-                     "property": "movement-in-low-light",
-                     "outputValues": {
-                        "true": 60,
-                        "false": 0
-                     }
-                  },
-                  {
-                     "name": "thing:environment",
-                     "property": "background-lights",
-                     "outputValues": {
-                        "true": 25,
-                        "false": 0
-                     }
-                  }
-               ]
-            },
-            {
-               "name": "power",
-               "initialValue": false,
-               "writable": false,
-               "sources": [
-                  {  
-                     "name": "room:kitchen",
-                     "property": "brightness",
-                     "transform": "$value>0"
-                  } 
-               ]
             }
          ],
          "things": [
@@ -293,6 +256,43 @@
                "serialNumber": "1234567890",
                "brightnessSupported": true,
                "props": [
+                  {
+                     "name": "brightness",
+                     "initialValue": 0,
+                     "writable": false,
+                     "type": "orproperty",
+                     "prioritiseSources": true,
+                     "sources": [
+                        {
+                           "name": "room:kitchen",
+                           "property": "movement-in-low-light",
+                           "outputValues": {
+                              "true": 60,
+                              "false": 0
+                           }
+                        },
+                        {
+                           "name": "thing:environment",
+                           "property": "background-lights",
+                           "outputValues": {
+                              "true": 25,
+                              "false": 0
+                           }
+                        }
+                     ]
+                  },
+                  {
+                     "name": "power",
+                     "initialValue": false,
+                     "writable": false,
+                     "sources": [
+                        {  
+                           "name": "room:kitchen",
+                           "property": "brightness",
+                           "transform": "$value>0"
+                        } 
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -378,43 +378,6 @@
                      "minOutputTime": 600
                   }
                ]
-            },
-            {
-               "name": "brightness",
-               "initialValue": 0,
-               "writable": false,
-               "type": "orproperty",
-               "prioritiseSources": true,
-               "sources": [
-                  {
-                     "name": "room:lounge",
-                     "property": "movement-in-low-light",
-                     "outputValues": {
-                        "true": 60,
-                        "false": 0
-                     }
-                  },
-                  {
-                     "name": "thing:environment",
-                     "property": "background-lights",
-                     "outputValues": {
-                        "true": 25,
-                        "false": 0
-                     }
-                  }
-               ]
-            },
-            {
-               "name": "power",
-               "initialValue": false,
-               "writable": false,
-               "sources": [
-                  {
-                     "name": "room:lounge",
-                     "property": "brightness",
-                     "transform": "$value>0"
-                  }
-               ]
             }
          ],
          "things": [
@@ -428,6 +391,43 @@
                "serialNumber": "1234567890",
                "brightnessSupported": true,
                "props": [
+                  {
+                     "name": "brightness",
+                     "initialValue": 0,
+                     "writable": false,
+                     "type": "orproperty",
+                     "prioritiseSources": true,
+                     "sources": [
+                        {
+                           "name": "room:lounge",
+                           "property": "movement-in-low-light",
+                           "outputValues": {
+                              "true": 60,
+                              "false": 0
+                           }
+                        },
+                        {
+                           "name": "thing:environment",
+                           "property": "background-lights",
+                           "outputValues": {
+                              "true": 25,
+                              "false": 0
+                           }
+                        }
+                     ]
+                  },
+                  {
+                     "name": "power",
+                     "initialValue": false,
+                     "writable": false,
+                     "sources": [
+                        {
+                           "name": "room:lounge",
+                           "property": "brightness",
+                           "transform": "$value>0"
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {

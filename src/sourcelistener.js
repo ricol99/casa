@@ -88,7 +88,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
          this.pipeline.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
       }
       else {
-         goInvalid(this, _data);
+         this.goInvalid(_data);
       }
    }
 }
