@@ -55,7 +55,7 @@ DebounceProperty.prototype.sourceIsInvalid = function(_data) {
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
-         startTimer(this);
+         this.startTimer();
       }
    }
 
