@@ -24,7 +24,10 @@ Thing.prototype.addThing = function(_thing) {
 };
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
-   _data.parentThing = this.uName;
+
+   if (this.manualMode) {
+      _data.parentThing = this.uName;
+   }
 
    for (var thing in this.things) {
 
