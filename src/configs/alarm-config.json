@@ -62,7 +62,7 @@
                "triggerLow": true
             },
             {
-               "name": "alarm-triggered",
+               "name": "zone-alarm",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",

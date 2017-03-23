@@ -52,7 +52,7 @@
                "writable": false
             },
             {
-               "name": "alarm-triggered",
+               "name": "zone-alarm",
                "initialValue": false,
                "writable": false
             },

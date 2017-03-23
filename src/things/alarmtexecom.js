@@ -17,14 +17,14 @@
 // limitations under the License.
  
 var util = require('util');
-var Thing = require('../thing');
+var Alarm = require('alarm');
 var net = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
 
-function TexecomAlarm(_config) {
+function AlarmTexecom(_config) {
 
-   Thing.call(this, _config);
+   Alarm.call(this, _config);
 
    this.port = _config.port;
    this.pollingInterval = _config.pollingInterval * 1000 * 60;   // mins into ms
@@ -59,9 +59,9 @@ function TexecomAlarm(_config) {
 
 }
 
-util.inherits(TexecomAlarm, Thing);
+util.inherits(AlarmTexecom, Alarm);
 
-TexecomAlarm.prototype.newConnection = function(_socket) {
+AlarmTexecom.prototype.newConnection = function(_socket) {
    var that = this;
    console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
@@ -91,7 +91,7 @@ TexecomAlarm.prototype.newConnection = function(_socket) {
 };
 
 
-TexecomAlarm.prototype.coldStart = function(_event) {
+AlarmTexecom.prototype.coldStart = function(_event) {
    var that = this;
 
    this.server = net.createServer(function(_socket) {
@@ -107,7 +107,7 @@ TexecomAlarm.prototype.coldStart = function(_event) {
    this.server.listen(this.port);
 };
 
-TexecomAlarm.prototype.handlePollEvent = function(_socket, _data) {
+AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
    // POLL flags (not all of these are verified - see docs)
    var FLAG_LINE_FAILURE = 1;
    var FLAG_AC_FAILURE = 2;
@@ -157,7 +157,7 @@ TexecomAlarm.prototype.handlePollEvent = function(_socket, _data) {
    this.restartWatchdog();
 };
 
-TexecomAlarm.prototype.handleMessage = function(_socket, _message, _data) {
+AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
 
    // Send ACK
    buf = new Buffer('00060d0a', 'hex');
@@ -184,7 +184,7 @@ TexecomAlarm.prototype.handleMessage = function(_socket, _message, _data) {
    }
 };
 
-TexecomAlarm.prototype.restartWatchdog = function() {
+AlarmTexecom.prototype.restartWatchdog = function() {
 
    if (this.watchdog) {
       clearTimeout(this.watchdog);
@@ -208,7 +208,7 @@ TexecomAlarm.prototype.restartWatchdog = function() {
    }, this.pollingTimeout, this);
 };
 
-TexecomAlarm.prototype.stopWatchdog = function() {
+AlarmTexecom.prototype.stopWatchdog = function() {
 
    if (this.watchdog) {
       this.clearTimeout(this.watchdog);
@@ -216,4 +216,4 @@ TexecomAlarm.prototype.stopWatchdog = function() {
    }
 };
 
-module.exports = exports = TexecomAlarm;
+module.exports = exports = AlarmTexecom;

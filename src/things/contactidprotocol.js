@@ -115,7 +115,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       eventStr = this.EVENTS[message.eventNum].name;
       message.property = this.EVENTS[message.eventNum].property;
 
-      if (this.EVENTS[message.eventNum].value == undefined) {
+      if (this.EVENTS[message.eventNum].value != undefined) {
          message.propertyValue = this.EVENTS[message.eventNum].value;
       }
       else if (this.EVENTS[message.eventNum].qualifiers) {

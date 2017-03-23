@@ -118,7 +118,7 @@
                      "property": "fully-armed"
                   },
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "part-armed"
                   }
                ]
@@ -183,7 +183,7 @@
                   },
                   {
                      "name": "alarm:dumgoyne",
-                     "property": "alarm-triggered",
+                     "property": "zone-alarm",
                      "transformMap": {
                         "true": "Alarm triggered",
                         "false": "Alarm trigger reset"
@@ -266,7 +266,7 @@
                      }
                   },
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "part-armed",
                      "transformMap": {
                         "true": "Alarm part armed",
