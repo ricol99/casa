@@ -25,7 +25,7 @@ Thing.prototype.addThing = function(_thing) {
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.manualMode) {
+   if (this.props[_propName] && !this.props[_propName].manualMode) {
       _data.parentThing = this.uName;
    }
 
