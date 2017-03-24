@@ -17,7 +17,7 @@
 // limitations under the License.
  
 var util = require('util');
-var Alarm = require('alarm');
+var Alarm = require('./alarm');
 var net = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
