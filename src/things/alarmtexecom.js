@@ -218,4 +218,14 @@ AlarmTexecom.prototype.stopWatchdog = function() {
    }
 };
 
+AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data) {
+
+   if (_propName == "armed-normal" && !_propValue) {
+      this.updateProperty("zone-alarm", false, _data);
+      this.updateProperty("confirmed-alarm", false, _data);
+   }
+
+   Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
+};
+
 module.exports = exports = AlarmTexecom;
