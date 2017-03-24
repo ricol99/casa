@@ -178,7 +178,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       }
 
       if (this.pipeline) {
-         this.pipeline.process(this.lastData.propertyValue, this.lastData);
+         this.pipeline.newInputForProcess(this.lastData.propertyValue, this.lastData);
       }
       else {
          this.sourcePropertyValue = this.lastData.propertyValue;
