@@ -190,10 +190,10 @@ SonosPlayer.prototype.setMuted = function(_muted) {
    });
 };
 
-SonosPlayer.prototype.pause = function(_level) {
+SonosPlayer.prototype.pause = function() {
    var that = this;
 
-   this.sonos.pause(_level, function(_err, _result) {
+   this.sonos.pause(function(_err, _result) {
 
       if (_err) {
          console.log(that.uName + ": Unable to pause!");
