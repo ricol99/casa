@@ -107,7 +107,7 @@ SourceListener.prototype.goInvalid = function(_data) {
 //
 SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
    _data.propertyValue = _newValue;
-   this.sourcePropertyValue = newValue;
+   this.sourcePropertyValue = _newValue;
 
    if (this.isTarget) {
       this.owner.targetPropertyChanged(copyData(_data));
