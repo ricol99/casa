@@ -1,6 +1,7 @@
 var util = require('util');
 var Source = require('./source');
 var CasaSystem = require('./casasystem');
+var Pipeline = require('./pipeline');
 
 function SourceListener(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
