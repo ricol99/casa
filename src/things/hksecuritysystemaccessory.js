@@ -88,15 +88,18 @@ HomekitSecuritySystemAccessory.prototype.getTamperState = function() {
 HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (_propName == "part-armed") {
+      this.updateProperty("target-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.STAY_ARM : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.STAY_ARM : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
    }
    else if (_propName == "fully-armed") {
+      this.updateProperty("target-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.AWAY_ARM : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.AWAY_ARM : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
    }
    else if (_propName == "tamper-alarm") {
       this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
    else if (_propName == "zone-alarm") {
+      this.updateProperty("target-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
    }
    else if (_propName == "confirmed-alarm") {

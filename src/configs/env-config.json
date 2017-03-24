@@ -795,6 +795,14 @@
                "triggerLow": true
             },
             {
+               "name": "part-armed",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
+            },
+            {
                "name": "zone-alarm",
                "initialValue": false,
                "writable": false,
@@ -820,9 +828,10 @@
                "name": "part-armed",
                "initialValue": false,
                "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 23,
-               "triggerLow": true
+               "source": {
+                  "name": "alarm:dumgoyne",
+                  "property": "part-armed"
+               }
             },
             {
                "name": "fully-armed",
@@ -831,7 +840,7 @@
                "writable": false,
                "sources": [
                   {
-                     "name": "alarmtexecom:dumgoyne",
+                     "name": "alarm:dumgoyne",
                      "property": "part-armed",
                      "transform": "!$value"
                   },
