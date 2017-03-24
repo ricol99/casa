@@ -178,7 +178,7 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
    if (_message.property != undefined) {
       this.updateProperty(_message.property, _message.propertyValue, { sourceName: this.uName }); 
       console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
-      this.updateProperty('alarm-error', "ARC event="+_message.event+", "_message.property+"="+_message.propertyValue, { sourceName: this.uName });
+      this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue, { sourceName: this.uName });
    }
    else {
       console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
