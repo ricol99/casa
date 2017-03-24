@@ -17,7 +17,7 @@ util.inherits(DelayStep, PipelineStep);
 //
 DelayStep.prototype.process = function(_value, _data) {
    console.log('source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to ' + _value + '!');
-   this.delayEvents.push(new DelayedEvent(_value, _data, this);
+   this.delayEvents.push(new DelayedEvent(_value, _data, this));
 }
 
 DelayStep.prototype.deleteDelayedEvent = function() {
