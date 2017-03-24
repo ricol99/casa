@@ -703,13 +703,15 @@
                      "displayName": "Sonos Player for Dylan's Bedroom",
                      "zone": "Dylan's Room",
                      "props": [
-                        "name": "playing",
-                        "type": "edgeproperty",
-                        "writable": true,
-                        "leadingEdgeOutput": false,
-                        "source": {
-                           "name": "alarmtexecom:dumgoyne",
-                           "property": "part-armed"
+                        {
+                           "name": "playing",
+                           "type": "edgeproperty",
+                           "writable": true,
+                           "leadingEdgeOutput": false,
+                           "source": {
+                              "name": "alarmtexecom:dumgoyne",
+                              "property": "part-armed"
+                           }
                         }
                      ]
                   }
