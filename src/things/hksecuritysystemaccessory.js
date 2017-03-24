@@ -105,7 +105,7 @@ HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _p
       this.hkAccessory
         .getService(Service.SecuritySystem)
         .getCharacteristic(Characteristic.SecuritySystemCurrentState)
-        .updateValue(propValue);
+        .updateValue(_propValue);
    }
    else if (_propName == "tamper-state") {
       this.hkAccessory
