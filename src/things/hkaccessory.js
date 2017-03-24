@@ -59,6 +59,12 @@ HomekitAccessory.prototype.coldStart = function() {
       });
    }
    else {
+
+      this.hkAccessory.on('identify', function(_paired, _callback) {
+         that.identify();
+         _callback();
+      });
+
       this.hkAccessory.publish({
          port: this.port,
          username: this.username,
