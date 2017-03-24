@@ -94,7 +94,7 @@ HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _p
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.AWAY_ARM : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
    }
    else if (_propName == "tamper-alarm") {
-      this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED. : Characteristic.StatusTampered.NOT_TAMPERED, _data);
+      this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
    else if (_propName == "alarm-triggered") {
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
