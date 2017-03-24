@@ -14,10 +14,10 @@ function HomekitSecuritySystemAccessory(_config) {
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: false });
-   this.ensurePropertyExists('target-state', 'property', { initialValue: false });
-   this.ensurePropertyExists('system-fault', 'property', { initialValue: false });
-   this.ensurePropertyExists('tamper-state', 'property', { initialValue: false });
+   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED });
+   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARMED });
+   this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT });
+   this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED });
 
    this.ensurePropertyExists('part-armed', 'property', { initialValue: false });
    this.ensurePropertyExists('fully-armed', 'property', { initialValue: false });

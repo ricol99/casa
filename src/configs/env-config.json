@@ -13,6 +13,15 @@
    "props": [],
    "services": [
       {
+         "name": "homekitservice",
+         "displayName": "Homekit Service",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E4:CF:ED",
+         "manufacturer": "Casa Home Automation Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
+      },
+      {
          "name": "sonosservice",
          "displayName": "Sonos Discovery Service"
       },
