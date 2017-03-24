@@ -37,10 +37,10 @@ function HomekitSecuritySystemAccessory(_config) {
    this.hkAccessory
       .getService(Service.SecuritySystem) 
       .getCharacteristic(Characteristic.SecuritySystemTargetState)
-      .on('set', function(_value, _callback) {
-         that.setTargetState(_value);
-         _callback();
-      })
+      //.on('set', function(_value, _callback) {
+         //that.setTargetState(_value);
+         //_callback();
+      //})
       .on('get', function(_callback) {
          _callback(null, that.getTargetState());
       });
@@ -99,7 +99,7 @@ HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _p
       this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
    else if (_propName == "zone-alarm") {
-      this.updateProperty("target-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
+      this.updateProperty("target-state", (_propValue) ? Characteristic.SecuritySystemTargetState.ALARM_TRIGGERED : Characteristic.SecuritySystemTargetState.DISARMED, _data);
       this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
    }
    else if (_propName == "confirmed-alarm") {
@@ -108,6 +108,12 @@ HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _p
       this.hkAccessory
         .getService(Service.SecuritySystem)
         .getCharacteristic(Characteristic.SecuritySystemCurrentState)
+        .updateValue(_propValue);
+   }
+   else if (_propName == "target-state") {
+      this.hkAccessory
+        .getService(Service.SecuritySystem)
+        .getCharacteristic(Characteristic.SecuritySystemTargetState)
         .updateValue(_propValue);
    }
    else if (_propName == "tamper-state") {
