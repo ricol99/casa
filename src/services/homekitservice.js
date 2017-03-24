@@ -6,7 +6,6 @@ HAP.init();
 
 var Bridge = HAP.Bridge;
 var Accessory = HAP.Accessory;
-var Service = HAP.Service;
 var Characteristic = HAP.Characteristic;
 var uuid = HAP.uuid;
 
@@ -14,6 +13,7 @@ storage.initSync();
 
 function HomekitService(_config) {
    Service.call(this, _config);
+
    this.port = this.casa.allocatePort(this.uName);
 
    this.displayName = _config.displayName;
@@ -23,10 +23,7 @@ function HomekitService(_config) {
    this.model = (_config.model == undefined) ? "v1.0" : _config.model;
    this.serialNumber = (_config.serialNumber == undefined) ? "XXXXXXX" : _config.serialNumber;
 
-   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.uName);
-   this.hkAccessory = new Accessory(this.displayName, this.hkUUID);
-   this.hkAccessory.username = this.username;
-   this.hkAccessory.pincode = this.pincode;
+   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.uName);
 }
 
 util.inherits(HomekitService, Service);
@@ -35,7 +32,7 @@ HomekitService.prototype.coldStart = function() {
    var that = this;
 
    // Start by creating our Bridge which will host all loaded Accessories
-   this.bridge = new Bridge('Casa Homekit Bridge', this.hkUUID));
+   this.bridge = new Bridge('Casa Homekit Bridge', this.hkUUID);
 
    // Listen for bridge identification event
    this.bridge.on('identify', function(_paired, _callback) {
@@ -44,12 +41,14 @@ HomekitService.prototype.coldStart = function() {
    });
 
    // Publish the Bridge on the local network.
-   this.bridge.publish({
-     username: that.username,
-     port: that.port,
-     pincode: that.pincode,
-     category: Accessory.Categories.BRIDGE
-   });
+   setTimeout(function(_this) {
+      _this.bridge.publish({
+         username: _this.username,
+         port: _this.port,
+         pincode: _this.pincode,
+         category: Accessory.Categories.BRIDGE
+      });
+   }, 15000, this);
 };
 
 HomekitService.prototype.addAccessory = function(_accessory) {

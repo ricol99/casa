@@ -1,12 +1,10 @@
 var util = require('util');
 var Thing = require('../thing');
-var CasaSystem = require('../casasystem');
 var Sonos = require('sonos');
 
 function SonosPlayer(_config) {
    Thing.call(this, _config);
 
-   this.casaSys = CasaSystem.mainInstance();
    this.zone = _config.zone;
    this.host = _config.host;
    this.alarmUrls = {};

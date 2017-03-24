@@ -50,15 +50,15 @@ HomekitAccessory.prototype.coldStart = function() {
        .setCharacteristic(Characteristic.Model, this.model)
        .setCharacteristic(Characteristic.SerialNumber, this.serialNumber);
 
-   if (homekitService) {
-      homekitService.addAccesory(this.hkAccessory);
-   }
-   else {
+   if (this.homekitService) {
+      this.homekitService.addAccessory(this.hkAccessory);
+
       this.hkAccessory.on('identify', function(_paired, _callback) {
          that.identify();
          _callback();
       });
-
+   }
+   else {
       this.hkAccessory.publish({
          port: this.port,
          username: this.username,

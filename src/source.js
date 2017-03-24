@@ -9,8 +9,8 @@ function Source(_config) {
 
    this.setMaxListeners(50);
 
-   var casaSys = CasaSystem.mainInstance();
-   this.casa = casaSys.casa;
+   this.casaSys = CasaSystem.mainInstance();
+   this.casa = this.casaSys.casa;
 
    this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
 
