@@ -17,14 +17,14 @@
 // limitations under the License.
  
 var util = require('util');
-var Alarm = require('./alarm');
+var Thing = require('../thing');
 var net = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
 
 function AlarmTexecom(_config) {
 
-   Alarm.call(this, _config);
+   Thing.call(this, _config);
 
    this.port = _config.port;
    this.pollingInterval = _config.pollingInterval * 1000 * 60;   // mins into ms
@@ -59,7 +59,7 @@ function AlarmTexecom(_config) {
 
 }
 
-util.inherits(AlarmTexecom, Alarm);
+util.inherits(AlarmTexecom, Thing);
 
 AlarmTexecom.prototype.newConnection = function(_socket) {
    var that = this;
