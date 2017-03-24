@@ -32,7 +32,7 @@ HomekitService.prototype.coldStart = function() {
    var that = this;
 
    // Start by creating our Bridge which will host all loaded Accessories
-   this.bridge = new Bridge('Casa Homekit Bridge', this.hkUUID);
+   this.bridge = new Bridge('Casa Homekit Bridge', uuid.generate('Casa Homekit Bridge'));
 
    // Listen for bridge identification event
    this.bridge.on('identify', function(_paired, _callback) {
