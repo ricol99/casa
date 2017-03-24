@@ -25,7 +25,7 @@ EdgeStep.prototype.process = function(_value, _data) {
    if (this.value && !_value && this.hasOwnProperty('trailingEdgeOutput')) {
       this.outputForNextStep(this.trailingEdgeOutput, _data);
    }
-   else if (!this.value && value && this.hasOwnProperty('leadingEdgeOutput')) {
+   else if (!this.value && _value && this.hasOwnProperty('leadingEdgeOutput')) {
       this.outputForNextStep(this.leadingEdgeOutput, _data);
    }
 }
