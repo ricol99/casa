@@ -1,5 +1,5 @@
 var util = require('util');
-var Service = require('../service');
+var CasaService = require('../service');
 var storage = require('node-persist');
 const HAP = require('hap-nodejs');
 HAP.init();
@@ -12,7 +12,7 @@ var uuid = HAP.uuid;
 storage.initSync();
 
 function HomekitService(_config) {
-   Service.call(this, _config);
+   CasaService.call(this, _config);
 
    this.port = this.casa.allocatePort(this.uName);
 
@@ -26,7 +26,7 @@ function HomekitService(_config) {
    this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.uName);
 }
 
-util.inherits(HomekitService, Service);
+util.inherits(HomekitService, CasaService);
 
 HomekitService.prototype.coldStart = function() {
    var that = this;
