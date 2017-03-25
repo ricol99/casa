@@ -7,11 +7,12 @@ function SonosPlayer(_config) {
 
    this.zone = _config.zone;
    this.host = _config.host;
+   this.port = _config.port;
    this.alarmUrls = {};
    this.alarmRepeatTimes = {};
    this.alarmVolumes = {};
-   this.notifications = {};
    this.inAlarmStatus = false;
+   this.devices = [];
 
    this.ensurePropertyExists('volume', 'property', { initialValue: 0 });
    this.ensurePropertyExists('volume-writable', 'property', { initialValue: 0 });
@@ -41,8 +42,7 @@ SonosPlayer.prototype.coldStart = function() {
    var that = this;
 
    if (this.host) {
-      this.sonos = new Sonos.Sonos(this.host);
-      this.props['ACTIVE'].setProperty(true, { sourceName: this.uName, coldStart: true });
+      this.createDevice({ host: this.host, port: this.port });
    }
    else {
       this.sonosService = this.casaSys.findService("sonosservice");
@@ -55,7 +55,7 @@ SonosPlayer.prototype.coldStart = function() {
       this.sonosService.registerForHostForZone(this.zone, function(_err, _device) {
 
          if (!_err) {
-            that.establishPlayerConnection(_device);
+            that.createDevice(_device);
          }
       });
    }
@@ -63,13 +63,22 @@ SonosPlayer.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this);
 };
 
-SonosPlayer.prototype.establishPlayerConnection = function(_device) {
+SonosPlayer.prototype.createDevice = function(_device) {
+   this.devices.push(new SonosDevice(this, _device));
+
+   if (this.devices.length == 1) {
+      this.props['ACTIVE'].setProperty(true, { sourceName: this.uName, coldStart: true });
+   }
+};
+
+function SonosDevice(_player, _device) {
    var that = this;
 
-   this.props['ACTIVE'].setProperty(true, { sourceName: this.uName });
+   this.notifications = {};
+   this.player = _player;
    this.device = _device;
    this.sonos = new Sonos.Sonos(this.device.host, this.device.port);
-   this.localListeningPort = this.sonosService.grabLocalListeningPort();
+   this.localListeningPort = this.player.sonosService.grabLocalListeningPort();
 
    // XX TODO Remove hack
    var SonosListener = require('../node_modules/sonos/lib/events/listener');
@@ -83,7 +92,7 @@ SonosPlayer.prototype.establishPlayerConnection = function(_device) {
 
       that.startSyncingStatus();
    });
-};
+}
 
 function InternalListener(_owner, _endpoint, _handler) {
 
@@ -98,7 +107,7 @@ function InternalListener(_owner, _endpoint, _handler) {
    });
 };
 
-SonosPlayer.prototype.startSyncingStatus = function() {
+SonosDevice.prototype.startSyncingStatus = function() {
    var that = this;
 
    var groupRenderingControlListener =  new InternalListener(this, '/MediaRenderer/GroupRenderingControl/Event', SonosPlayer.prototype.processGroupRenderControlChange);
@@ -110,7 +119,7 @@ SonosPlayer.prototype.startSyncingStatus = function() {
       console.log(that.uName + ": Received notifcation from device.");
 
       if (that.notifications[_sid]) {
-         that.notifications[_sid].call(that, _data);
+         that.notifications[_sid].call(that.player, _data);
       }
       else {
          console.error(that.uName + ": Received notification for sid that has no handler. Sid=", _sid);

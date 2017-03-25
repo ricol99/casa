@@ -47,6 +47,13 @@ SonosService.prototype.coldStart = function() {
         }
         else {
            that.players[_attrs.CurrentZoneName].push(_device);
+
+           if (that.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
+
+              for (var i = 0; i < that.callbacks[_attrs.CurrentZoneName].length; ++i) {
+                 that.callbacks[_attrs.CurrentZoneName][i](null, that.players[_attrs.CurrentZoneName][that.players[_attrs.CurrentZoneName].length - 1]);
+              }
+           }
            console.log(that.uName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
         }
      });

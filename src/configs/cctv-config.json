@@ -51,7 +51,7 @@
          "fireAlarmUrl": "http://192.168.1.65:11001/siren_or_alarm.mp3",
          "props": [
             {
-               "name": "fire-alarm",
+               "name": "afire-alarm",
                "initialValue": false,
                "writable": false,
                "source": {
