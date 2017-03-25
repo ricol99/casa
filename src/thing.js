@@ -101,12 +101,15 @@ Thing.prototype.getAllProperties = function(_allProps) {
 
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldValue, _child) {
 
-   if (!this.props.hasOwnProperty(_propName)) {
+   if (this.props.hasOwnProperty(_propName)) {
+      this.updateProperty(_propName, _propValue, { sourceName: this.uName });
+   }
+   else {
       this.emitPropertyChange(_propName, _propValue, _propOldValue);
+   }
 
-      if (this.parent) {
-         this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this);
-      }
+   if (this.parent) {
+      this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this);
    }
 
 };
