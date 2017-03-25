@@ -126,7 +126,7 @@ SonosPlayer.prototype.processRenderControlChange = function(_data) {
 SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
    console.log(this.uName + ": processGroupRenderControlChange()", _data);
    this.updateProperty('volume', _data.GroupVolume, { sourceName: this.uName });
-   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable == 0), { sourceName: this.uName });
+   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0), { sourceName: this.uName });
    this.updateProperty('muted', (_data.GroupMute != 0), { sourceName: this.uName });
 };
 
@@ -141,7 +141,7 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
       case 'PLAYING':
          this.updateProperty('playing', true, { sourceName: this.uName });
          break;
-      case 'PLAYBACK_PAUSED':
+      case 'PAUSED_PLAYBACK':
          this.updateProperty('playing', false, { sourceName: this.uName });
          break;
       default:
