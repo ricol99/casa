@@ -71,7 +71,7 @@ HomekitSpeakerAccessory.prototype.updateProperty = function(_propName, _propValu
    if (_propName == "muted") {
       this.hkAccessory
         .getService(Service.Speaker)
-        .getCharacteristic(Characteristic.Muted)
+        .getCharacteristic(Characteristic.Mute)
         .updateValue(_propValue ? 1 : 0);
    }
    else if (_propName == "volume") {
