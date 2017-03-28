@@ -25,7 +25,7 @@ Thing.prototype.addThing = function(_thing) {
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.props[_propName]) {
+   if (this.props.hasOwnProperty(_propName)) {
 
       if (this.props[_propName].value === _propValue) {
          return;
