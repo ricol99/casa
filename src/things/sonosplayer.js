@@ -43,6 +43,7 @@ SonosPlayer.prototype.coldStart = function() {
 
    if (this.host) {
       this.createDevice({ host: this.host, port: this.port });
+      this.sonos = this.devices[0].sonos;
    }
    else {
       this.sonosService = this.casaSys.findService("sonosservice");
@@ -134,9 +135,9 @@ SonosPlayer.prototype.processRenderControlChange = function(_data) {
 
 SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
    console.log(this.uName + ": processGroupRenderControlChange()", _data);
-   this.updateProperty('volume', _data.GroupVolume, { sourceName: this.uName });
-   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0), { sourceName: this.uName });
-   this.updateProperty('muted', (_data.GroupMute != 0), { sourceName: this.uName });
+   this.updateProperty('volume', _data.GroupVolume, { sourceName: this.uName }, true);
+   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0), { sourceName: this.uName }, true);
+   this.updateProperty('muted', (_data.GroupMute != 0), { sourceName: this.uName }, true);
 };
 
 SonosPlayer.prototype.processAVTransportChange = function(_data) {
@@ -148,20 +149,21 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
 
    switch (_data.LastChangedPlayState) {
       case 'PLAYING':
-         this.updateProperty('playing', true, { sourceName: this.uName });
+         this.updateProperty('playing', true, { sourceName: this.uName }, true);
          break;
       case 'PAUSED_PLAYBACK':
-         this.updateProperty('playing', false, { sourceName: this.uName });
+         this.updateProperty('playing', false, { sourceName: this.uName }, true);
          break;
       default:
          console.log(this.uName + ": Playstate not processed, state="+_data.LastChangedPlayState);
          break;
    }
 };
-SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
+
+SonosPlayer.prototype.updateProperty = function(_propName, _propValue, _data, _receivedFromDevice) {
    var that = this;
 
-   if (this.sonos) {
+   if (this.sonos && !_receivedFromDevice) {
 
       switch (_propName) {
       case "volume": 
@@ -188,6 +190,8 @@ SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _d
       default:
       }
    }
+
+   Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 SonosPlayer.prototype.setVolume = function(_level) {

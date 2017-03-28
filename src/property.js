@@ -439,7 +439,7 @@ Property.prototype.transformNewPropertyValueBasedOnSource = function(_newPropVal
          if (this.prioritiseSources) {
             var highestPrioritySource = this.findHighestPrioritySource(_newPropValue);
 
-            if (highestPrioritySource && (highestPrioritySource.priority <= sourceListener.priority)) {
+            if (highestPrioritySource) {
                sourceListenerInCharge = highestPrioritySource;
             }
          }
