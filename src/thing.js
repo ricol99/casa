@@ -25,15 +25,11 @@ Thing.prototype.addThing = function(_thing) {
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.props.hasOwnProperty(_propName)) {
+   var oldPropValue = this.value;
+   Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
-      //if (this.props[_propName].value === _propValue) {
-         //return;
-      //}
-
-      if (!this.props[_propName].manualMode) {
-         _data.parentThing = this.uName;
-      }
+   if (this.props.hasOwnProperty(_propName) && !this.props[_propName].manualMode) {
+     _data.parentThing = this.uName;
    }
 
    for (var thing in this.things) {
@@ -42,10 +38,6 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          this.things[thing].setProperty(_propName, _propValue, _data);
       }
    }
-
-   _data.parentThing == undefined;
-   var oldPropValue = this.value;
-   Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
    if (this.parent) {
       this.parent.childPropertyChanged(_propName, _propValue, oldPropValue, this);
@@ -93,7 +85,6 @@ Thing.prototype.setProperty = function(_propName, _propValue, _data) {
    return ret;
 };
 
-
 Thing.prototype.getAllProperties = function(_allProps) {
 
    Source.prototype.getAllProperties.call(this, _allProps);
@@ -109,7 +100,10 @@ Thing.prototype.getAllProperties = function(_allProps) {
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldValue, _child) {
 
    if (this.props.hasOwnProperty(_propName)) {
-      this.updateProperty(_propName, _propValue, { sourceName: this.uName });
+
+      if (this.props[_propName].value != _propValue) {
+         this.updateProperty(_propName, _propValue, { sourceName: this.uName });
+      }
    }
    else {
       this.emitPropertyChange(_propName, _propValue, _propOldValue);

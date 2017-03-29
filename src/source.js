@@ -57,13 +57,13 @@ Source.prototype.isPropertyValid = function(_property) {
 }
 
 Source.prototype.getProperty = function(_property) {
-   return (this.props[_property] != undefined) ? this.props[_property].value : undefined;
+   return (this.props.hasOwnProperty(_property)) ? this.props[_property].value : undefined;
 }
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
-   if (this.props[_propName] != undefined) {
+   if (this.props.hasOwnProperty(_propName)) {
       return this.props[_propName].setProperty(_propValue, _data);
    }
    else {
