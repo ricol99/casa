@@ -148,21 +148,23 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
    console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
 
-   // Call the final hook
-   this.propertyAboutToChange(_propName, _propValue, _data);
+   if (this.props.hasOwnProperty(_propName)) {
+      // Call the final hook
+      this.propertyAboutToChange(_propName, _propValue, _data);
 
-   var oldValue = this.props[_propName].value;
-   this.props[_propName].value = _propValue;
-   var sendData = (_data) ? copyData(_data) : {};
-   sendData.sourceName = this.uName;
-   sendData.propertyName = _propName;
-   sendData.propertyOldValue = oldValue;
-   sendData.propertyValue = _propValue;
+      var oldValue = this.props[_propName].value;
+      this.props[_propName].value = _propValue;
+      var sendData = (_data) ? copyData(_data) : {};
+      sendData.sourceName = this.uName;
+      sendData.propertyName = _propName;
+      sendData.propertyOldValue = oldValue;
+      sendData.propertyValue = _propValue;
 
-   if (this.hasOwnProperty('local')) {
-      sendData.local = this.local;
+      if (this.hasOwnProperty('local')) {
+         sendData.local = this.local;
+      }
+      this.emit('property-changed', sendData);
    }
-   this.emit('property-changed', sendData);
 }
 
 Source.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
