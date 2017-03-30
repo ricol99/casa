@@ -12,7 +12,7 @@ function DevicePresentProperty(_config, _owner) {
 
 util.inherits(DevicePresentProperty, Property);
 
-DevicePresentProperty.prototype.setProperty = function(_propValue, _data) {
+DevicePresentProperty.prototype.set = function(_propValue, _data) {
    console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;
 }

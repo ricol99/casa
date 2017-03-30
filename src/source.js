@@ -91,7 +91,7 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
-      return this.props[_propName].setProperty(_propValue, _data);
+      return this.props[_propName].set(_propValue, _data);
    }
    else {
       return false;
@@ -120,7 +120,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
 
       // Only update if the property has no processing attached to it
       if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
-         return prop.setProperty(_data.propertyValue, _data);
+         return prop.set(_data.propertyValue, _data);
       }
    }
    return false;

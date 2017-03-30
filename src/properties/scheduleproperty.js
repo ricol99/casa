@@ -105,7 +105,7 @@ function ScheduleProperty(_config, _owner) {
 
 util.inherits(ScheduleProperty, Property);
 
-ScheduleProperty.prototype.setProperty = function(_propValue, _data) {
+ScheduleProperty.prototype.set = function(_propValue, _data) {
    console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;
 }

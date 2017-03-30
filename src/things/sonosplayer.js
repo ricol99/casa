@@ -68,7 +68,7 @@ SonosPlayer.prototype.createDevice = function(_device) {
    this.devices.push(new SonosDevice(this, _device));
 
    if (this.devices.length == 1) {
-      this.props['ACTIVE'].setProperty(true, { sourceName: this.uName, coldStart: true });
+      this.props['ACTIVE'].set(true, { sourceName: this.uName, coldStart: true });
    }
 };
 
@@ -277,20 +277,20 @@ SonosPlayer.prototype.saveCurrentState = function(_property) {
                         playing: this.props['playing'].value };
 
    if (this.props['muted'].value) {
-      this.props['muted'].setProperty(false, { sourceName: this.uName });
+      this.props['muted'].set(false, { sourceName: this.uName });
    }
 
-   this.props['volume'].setProperty(this.alarmVolumes[_property], { sourceName: this.uName });
+   this.props['volume'].set(this.alarmVolumes[_property], { sourceName: this.uName });
 };
 
 SonosPlayer.prototype.restoreSavedState = function() {
 
    if (this.props['volume'].value !== this.savedStatus.volume) {
-      this.props['volume'].setProperty(this.savedStatus.volume, { sourceName: this.uName });
+      this.props['volume'].set(this.savedStatus.volume, { sourceName: this.uName });
    }
 
    if (this.props['muted'].value !== this.savedStatus.muted) {
-      this.props['muted'].setProperty(this.savedStatus.muted, { sourceName: this.uName });
+      this.props['muted'].set(this.savedStatus.muted, { sourceName: this.uName });
    }
 
    if (this.savedStatus.playing) {

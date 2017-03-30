@@ -41,7 +41,7 @@ function I2CProperty(_config, _owner) {
 
 util.inherits(I2CProperty, Property);
 
-I2CProperty.prototype.setProperty = function(_propValue, _data) {
+I2CProperty.prototype.set = function(_propValue, _data) {
    console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;
 }

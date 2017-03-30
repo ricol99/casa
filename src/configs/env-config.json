@@ -746,7 +746,6 @@
                   {
                      "name": "power",
                      "initialValue": false,
-                     "writeable": true,
                      "source": {
                         "name": "thing:environment",
                         "property": "bedtime"

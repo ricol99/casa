@@ -8,7 +8,6 @@ function Property(_config, _owner) {
    this.type = _config.type;
    this.uName = _owner.uName+":"+this.type+":"+this.name;
 
-   this.writeable = (_config.writeable) ? _config.writeable : true;
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
    this.prioritiseSources = _config.prioritiseSources;
@@ -188,25 +187,20 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 // Used to set the property directly, ignoring the defined sources and input step pipeline processing
 // Output step pipeline still executes
 //
-Property.prototype.setProperty = function(_propValue, _data) {
+Property.prototype.set = function(_propValue, _data) {
 
-   if (this.writeable) {
-
-      if (!_data.parentThing || _data.manualPropertyChange) {
-         this.setManualMode(true);
-         _data.manualPropertyChange = true;
-      }
-
-      if (_data.parentThing && this.manualMode) {
-         // Copy property change - will be sent once the manual timer has expired
-         this.lastAutoUpdate = { propertyValue: _propValue, data: copyData(_data) };
-      }
-      else {
-         this.sendToOutputPipeline(_propValue, _data);
-      }
+   if (!_data.parentThing || _data.manualPropertyChange) {
+      this.setManualMode(true);
+      _data.manualPropertyChange = true;
    }
 
-   return this.writeable;
+   if (_data.parentThing && this.manualMode) {
+      // Copy property change - will be sent once the manual timer has expired
+      this.lastAutoUpdate = { propertyValue: _propValue, data: copyData(_data) };
+   }
+   else {
+      this.sendToOutputPipeline(_propValue, _data);
+   }
 };
 
 //

@@ -24,12 +24,17 @@ Thing.prototype.addThing = function(_thing) {
 };
 
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
-
    var oldPropValue = this.value;
    Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
-   if (this.props.hasOwnProperty(_propName) && !this.props[_propName].manualMode) {
-     _data.parentThing = this.uName;
+   if (this.props.hasOwnProperty(_propName)) {
+
+      if (this.props[_propName].manualMode) {
+         _data.manualPropertyChange = true;
+      }
+      else {
+        _data.parentThing = this.uName;
+      }
    }
 
    for (var thing in this.things) {
