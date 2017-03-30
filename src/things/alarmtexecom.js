@@ -286,6 +286,7 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
 
    this.armingState = "connecting";
    console.log(this.uName + ': Connecting to Texecom alarm');
+   console.log(this.uName + ': Connecting to ip='+this.ipAddress+' port='+this.port);
 
    this.socket = net.createConnection(this.port, this.ipAddress);
 
