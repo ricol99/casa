@@ -10,8 +10,8 @@ function HomekitSecuritySystemAccessory(_config) {
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-security-system-accessory";
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.STAY_ARM });
-   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.STAY_ARM });
+   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED });
+   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARMED });
    this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT });
    this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED });
 
@@ -83,23 +83,23 @@ HomekitSecuritySystemAccessory.prototype.getTamperState = function() {
 
 HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (_propName == "part-armed" && _propValue && this.props['target-state'].value != Characteristic.SecurityTargetCurrentState.STAY_ARM) {
-      this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.STAY_ARM, _data);
-      this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.STAY_ARM, _data);
-   }
-   else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecurityTargetCurrentState.DISARMED) {
-      this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
-      this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
-   }
-   else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != Characteristic.SecurityTargetCurrentState.AWAY_ARM) {
-      this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.AWAY_ARM, _data);
-      this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.AWAY_ARM, _data);
-   }
-   else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecurityTargetCurrentState.DISARMED) {
-      this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
-      this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
-   }
-   else if (_propName == "tamper-alarm") {
+   //if (_propName == "part-armed" && _propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.STAY_ARM) {
+      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.STAY_ARM, _data);
+      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.STAY_ARM, _data);
+   //}
+   //else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.DISARMED) {
+      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
+      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
+   //}
+   //else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.AWAY_ARM) {
+      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.AWAY_ARM, _data);
+      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.AWAY_ARM, _data);
+   //}
+   //else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.DISARMED) {
+      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
+      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
+   //}
+   if (_propName == "tamper-alarm") {
       this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
    else if (_propName == "zone-alarm") {

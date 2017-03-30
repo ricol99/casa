@@ -48,8 +48,8 @@ function AlarmTexecom(_config) {
 
    this.props['ACTIVE'].value = false;
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.STAY_ARM });
-   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.STAY_ARM });
+   this.ensurePropertyExists('current-state', 'property', { initialValue: STATE_DISARMED });
+   this.ensurePropertyExists('target-state', 'property', { initialValue: STATE_DISARMED });
 
    this.ensurePropertyExists('line-failure', 'property', { initialValue: false });
    this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false });
@@ -243,31 +243,40 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.updateProperty("zone-alarm", false, _data);
       this.updateProperty("confirmed-alarm", false, _data);
    }
-   else if (_propName == "target-state" && (this.props['target-state'].value != this.props['current-state'].value)) {
-      this.connectAndCommandAlarm();
+   else if (_propName == "target-state" && (_propValue != this.props['current-state'].value)) {
+      setTimeout(function(_this) {	// Make sure the target-state is set before executing request
+         _this.connectAndCommandAlarm();
+      }, 500, this);
    }
-   else if (propName == "part-armed") {
-      this.updateProperty('current-state', (_propValue) ? STATE_STAY_ARM : STATE_DISARMED, { sourceName: this.uName });
+   if (_propName == "part-armed" && _propValue && this.props['target-state'].value != STATE_STAY_ARM) {
+      this.updateProperty("current-state", STATE_STAY_ARM, _data);
+      this.updateProperty("target-state", STATE_STAY_ARM, _data);
    }
-   else if (propName == "fully-armed") {
-      this.updateProperty('current-state', (_propValue) ? STATE_AWAY_ARM : STATE_DISARMED, { sourceName: this.uName });
+   else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
+      this.updateProperty("current-state", STATE_DISARMED, _data);
+      this.updateProperty("target-state", STATE_DISARMED, _data);
+   }
+   else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != STATE_AWAY_ARM) {
+      this.updateProperty("current-state", STATE_AWAY_ARM, _data);
+      this.updateProperty("target-state", STATE_AWAY_ARM, _data);
+   }
+   else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
+      this.updateProperty("current-state", STATE_DISARMED, _data);
+      this.updateProperty("target-state", STATE_DISARMED, _data);
    }
 
    Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
-
-AlarmTexecom.prototype.armAlarm = function() {
-
-
-};
-
-AlarmTexecom.prototype.connectAndCommandAlarm = function() {
+AlarmTexecom.prototype.connectAndCommandAlarm = function(_propValue) {
    var that = this;
+   this.requestedTargetState = _propValue;
+
+   console.log(this.uName+": AAAAAAAAAAAA connectAndCommandAlarm()");
 
    if (this.armingState !== "idle") {
 
-      if (this.props['target-state'].value != STATE_DISARMED)) {
+      if (this.props['target-state'].value != STATE_DISARMED) {
          console.log(this.uName + ": Already trying to arm/disarm alarm");
          return;
       }
@@ -289,7 +298,7 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
 
    this.socket.on('error', function(_buffer) {
       console.log(that.uName + ': Error connecting to Texecom alarm');
-      that.armingState = "idle";
+      that.failedToSendCommand();
    });
 
    this.socket.on('data', function(_buffer) {
@@ -330,32 +339,32 @@ AlarmTexecom.prototype.cancelOngoingRequest = function() {
 AlarmTexecom.prototype.sendNextMessage = function() {
    var buffer;
 
-   switch (armingState) {
+   switch (this.armingState) {
       case "connected":
          this.armingState = "logging-into-panel";
-         this.sendToAlarm(Buffer.from("\W"+that.udl+"/", 'ascii')); 	// Panel login
+         this.sendToAlarm(Buffer.from("\\W"+this.udl+"/", 'ascii')); 	// Panel login
          break;
       case "logged-into-panel":
          this.armingState = "logging-in-as-user";
-         buffer = Buffer.from("\X3 /", 'ascii');
+         buffer = Buffer.from("\\X3 /", 'ascii');
          buffer[3] = this.userNumber;
          this.sendToAlarm(buffer); 	// User login
          break;
       case "logged-in-as-user":
          if (this.props['target-state'].value == STATE_STAY_ARM) {
             this.armingState = "attempting-to-part-arm";
-            buffer = Buffer.from("\Y  /", 'ascii');
+            buffer = Buffer.from("\\Y  /", 'ascii');
          }
          else if (this.props['target-state'].value == STATE_AWAY_ARM) {
             this.armingState = "attempting-to-arm";
-            buffer = Buffer.from("\A  /", 'ascii');
+            buffer = Buffer.from("\\A  /", 'ascii');
          }
          else if (this.props['target-state'].value == STATE_DISARMED) {
             this.armingState = "attempting-to-disarm";
-            buffer = Buffer.from("\D  /", 'ascii');
+            buffer = Buffer.from("\\D  /", 'ascii');
          }
-         buffer[3] = 1;
-         buffer[4] = 0;
+         buffer[2] = 1;
+         buffer[3] = 0;
          this.sendToAlarm(buffer);
          break;
       default:
@@ -382,9 +391,9 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
       this.responseTimer = null;
    }
 
-   switch (armingState) {
+   switch (this.armingState) {
       case "logging-into-panel":
-         if (_buffer.equals(Buffer.from([4f, 4b, 0d, 0a], 'ascii')) {
+         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
             this.armingState = "logged-into-panel";
             console.log(this.uName + ": Logged into panel successfully");
             this.sendNextMessage();
@@ -395,7 +404,7 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
          }
          break;
       case "logging-in-as-user":
-         if ((_buffer.length >= 25) && (_buffer[9] != 0xff && (_buffer[10] != 0xee)) {
+         if ((_buffer.length >= 25) && (_buffer[9] != 0xff) && (_buffer[10] != 0xee)) {
             this.armingState = "logged-in-as-user";
             console.log(this.uName + ": Logged in to panel as a user successfully");
             this.sendNextMessage();
@@ -407,7 +416,7 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
          break;
       case "attempting-to-part-arm":
       case "attempting-to-arm":
-         if (_buffer.equals(Buffer.from([4f, 4b, 0d, 0a], 'ascii')) {
+         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
             this.armingState = (this.props['target-state'].value == STATE_STAY_ARM) ? "part-armed-received" : "fully-armed-received";
             console.log(this.uName + ": Arming command acknowledged by Texecom alarm");
 
@@ -429,7 +438,7 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
          }
          break;
       case "attempting-to-disarm":
-         if (_buffer.equals(Buffer.from([4f, 4b, 0d, 0a], 'ascii')) {
+         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
             this.armingState = "disarm-received";
             console.log(this.uName + ": Disarming command acknowledged by Texecom alarm");
             this.closeConnectionWithAlarm();
@@ -446,14 +455,17 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
 };
 
 AlarmTexecom.prototype.closeConnectionWithAlarm = function() {
-   this.armingState = idle;
+   this.armingState = "idle";
    this.socket.end();
 };
 
 AlarmTexecom.prototype.failedToSendCommand = function() {
-   this.armingState = idle;
-   this.socket.end();
-   this.updateProperty('target-state', this.props['current-state'].value, { sourceName: this.uName });
+
+   if (this.armingState !== "idle") {
+      this.armingState = "idle";
+      this.socket.destroy();
+      this.updateProperty('target-state', this.props['current-state'].value, { sourceName: this.uName });
+   }
 };
 
 module.exports = exports = AlarmTexecom;
