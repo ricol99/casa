@@ -1,7 +1,7 @@
 FROM node:latest
 
 # prepare dir where app will reside
-RUN mkdir -p /src/.certs /src/properies /src/steps /src/configs /src/things /src/services
+RUN mkdir -p /src/.certs/secure-config /src/properies /src/steps /src/configs /src/things /src/services
 
 WORKDIR /src
 
@@ -23,6 +23,7 @@ COPY src/services/* /src/services/
 
 # copy the certs 
 COPY .certs/* /src/.certs/
+COPY secure-config/* /src/.certs/secure-config/
 
 EXPOSE 8096
 CMD [ "node", "app.js", "--system", "configs/casa-collin-config.json", "configs/internet-config.json", "--nopeer", "--secure", "--certs", ".certs" ]
