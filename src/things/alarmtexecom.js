@@ -292,7 +292,10 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
    this.socket.on('connect', function(_buffer) {
       console.log(this.uName + ': Connected to alarm');
       that.armingState = "connected";
-      that.sendNextMessage();
+
+      setTimeout(function(_this) {
+         _this.sendNextMessage();
+      }, 1500, that);
    });
 
    this.socket.on('error', function(_buffer) {
@@ -337,6 +340,8 @@ AlarmTexecom.prototype.sendNextMessage = function() {
    var buffer;
 
    switch (this.armingState) {
+      case "idle":
+         break;
       case "connected":
          this.armingState = "logging-into-panel";
          this.sendToAlarm(Buffer.from("\\W"+this.udl+"/", 'ascii')); 	// Panel login
