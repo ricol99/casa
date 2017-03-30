@@ -813,60 +813,55 @@
          ]
       },
       {
-         "name": "alarmtexecom:dumgoyne",
-         "displayName": "Dumgoyne Alarm",
-         "port": 8200,
-         "pollingInterval": 2,
-         "maxPollMisses": 1,
+         "name": "hksecuritysystemaccessory:dumgoyne",
+         "displayName": "Dumgoyne Security System",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E3:CE:40",
+         "manufacturer": "Casa Home Automation Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890",
          "props": [
-            {
-               "name": "ipAddress",
-               "initialValue": "192.168.1.85",
-               "writable": false
-            },
-            {
-               "name": "part-armed",
-               "initialValue": false,
-               "writable": false,
-               "source": {
-                  "name": "alarm:dumgoyne",
-                  "property": "part-armed"
-               }
-            },
-            {
-               "name": "fully-armed",
-               "type": "andproperty",
-               "initialValue": false,
-               "writable": false,
-               "sources": [
-                  {
-                     "name": "alarm:dumgoyne",
-                     "property": "part-armed",
-                     "transform": "!$value"
-                  },
-                  {
-                     "name": "alarmtexecom:dumgoyne",
-                     "property": "armed-normal",
-                     "steps": [
-                        {
-                           "type": "delaystep",
-                           "delay": 5
-                        }
-                     ]
-                  }
-               ]
-            }
          ],
          "things": [
             {
-               "name": "hksecuritysystemaccessory:dumgoyne",
-               "displayName": "Dumgoyne Security System",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:40",
-               "manufacturer": "Casa Home Automation Ltd",
-               "model": "V0.1",
-               "serialNumber": "1234567890",
+               "name": "alarmtexecom:dumgoyne",
+               "displayName": "Dumgoyne Alarm",
+               "pollingInterval": 2,
+               "maxPollMisses": 1,
+               "secureConfig": true,
                "props": [
+                  {
+                     "name": "part-armed",
+                     "initialValue": false,
+                     "writable": false,
+                     "source": {
+                        "name": "alarm:dumgoyne",
+                        "property": "part-armed"
+                     }
+                  },
+                  {
+                     "name": "fully-armed",
+                     "type": "andproperty",
+                     "initialValue": false,
+                     "writable": false,
+                     "sources": [
+                        {
+                           "name": "alarm:dumgoyne",
+                           "property": "part-armed",
+                           "transform": "!$value"
+                        },
+                        {
+                           "name": "alarmtexecom:dumgoyne",
+                           "property": "armed-normal",
+                           "steps": [
+                              {
+                                 "type": "delaystep",
+                                 "delay": 5
+                              }
+                           ]
+                        }
+                     ]
+                  }
                ]
             }
          ]

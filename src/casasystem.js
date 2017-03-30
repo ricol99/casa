@@ -78,6 +78,10 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    }
 }
 
+CasaSystem.prototype.secureRequire = function(_name) {
+   return require(this.config.certDir +  '/secure-config/' + _name);
+};
+
 CasaSystem.prototype.cleverRequire = function(_name, _path) {
    var str = S(_name).between('', ':').s;
    var path = '';
