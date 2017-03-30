@@ -68,21 +68,17 @@ Thing.prototype.getProperty = function(_property) {
 Thing.prototype.setProperty = function(_propName, _propValue, _data) {
    var ret = false;
 
-   if (!Source.prototype.setProperty.call(this, _propName, _propValue, _data)) {
+   Source.prototype.setProperty.call(this, _propName, _propValue, _data);
+
+   if (!this.props.hasOwnProperty(_propName)) {
 
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            ret = this.things[thing].setProperty(_propName, _propValue, _data);
-
-            if (ret) {
-               break;
-            }
+            this.things[thing].setProperty(_propName, _propValue, _data);
          }
       }
    }
-
-   return ret;
 };
 
 Thing.prototype.getAllProperties = function(_allProps) {
