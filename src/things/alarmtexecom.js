@@ -299,8 +299,8 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
       }, 1500, that);
    });
 
-   this.socket.on('error', function(_buffer) {
-      console.log(that.uName + ': Error connecting to Texecom alarm');
+   this.socket.on('error', function(_error) {
+      console.log(that.uName + ': Error connecting to Texecom alarm, error:'+_error);
       that.failedToSendCommand();
    });
 
