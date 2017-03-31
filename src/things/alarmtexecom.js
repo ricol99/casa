@@ -21,7 +21,6 @@ var Thing = require('../thing');
 var net = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
-net = require('net');
 
 var STATE_STAY_ARM = 0;
 var STATE_AWAY_ARM = 1;
@@ -37,8 +36,9 @@ function AlarmTexecom(_config) {
    this.maxPollMisses = (_config.maxPollMisses == undefined) ? 3 : _config.maxPollMisses;
 
    // Secure config
-   this.ipAddress = _config.ipAddress;
-   this.port = _config.port;
+   this.alarmAddress = _config.alarmAddress;
+   this.serverPort = _config.serverPort;
+   this.alarmPort = _config.alarmPort;
    this.udl = _config.udl;
    this.userNumber = _config.userNumber;
 
@@ -115,7 +115,7 @@ AlarmTexecom.prototype.coldStart = function(_event) {
 
    this.server = net.createServer(function(_socket) {
 
-      //if ((that.ipAddress && _socket.remoteAddress === that.ipAddress) || (!that.ipAddress)) {
+      //if ((that.alarmAddress && _socket.remoteAddress === that.alarmAddress) || (!that.alarmAddress)) {
          that.newConnection(_socket);
       //}
       //else {
@@ -123,7 +123,7 @@ AlarmTexecom.prototype.coldStart = function(_event) {
       //}
    });
 
-   this.server.listen(this.port);
+   this.server.listen(this.serverPort);
 };
 
 AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
@@ -286,9 +286,9 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
 
    this.armingState = "connecting";
    console.log(this.uName + ': Connecting to Texecom alarm');
-   console.log(this.uName + ': Connecting to ip='+this.ipAddress+' port='+this.port);
+   console.log(this.uName + ': Connecting to ip='+this.alarmAddress+' port='+this.alarmPort);
 
-   this.socket = net.createConnection(this.port, this.ipAddress);
+   this.socket = net.createConnection(this.alarmPort, this.alarmAddress);
 
    this.socket.on('connect', function(_buffer) {
       console.log(this.uName + ': Connected to alarm');

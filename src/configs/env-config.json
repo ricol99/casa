@@ -816,6 +816,7 @@
          "displayName": "Dumgoyne Alarm",
          "pollingInterval": 2,
          "maxPollMisses": 1,
+         "serverPort": 8200,
          "secureConfig": true,
          "props": [
             {
