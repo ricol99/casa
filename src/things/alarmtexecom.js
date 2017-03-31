@@ -19,7 +19,6 @@
 var util = require('util');
 var Thing = require('../thing');
 var net = require('net');
-var net2 = require('net');
 var ContactIdProtocol = require('./contactidprotocol');
 var SIAProtocol = require('./siaprotocol');
 
@@ -289,7 +288,7 @@ AlarmTexecom.prototype.connectAndCommandAlarm = function() {
    console.log(this.uName + ': Connecting to Texecom alarm');
    console.log(this.uName + ': Connecting to ip='+this.alarmAddress+' port='+this.alarmPort);
 
-   this.socket = net2.createConnection(this.alarmPort, this.alarmAddress);
+   this.socket = net.createConnection({ port: this.alarmPort, host: this.alarmAddress });
 
    this.socket.on('connect', function(_buffer) {
       console.log(this.uName + ': Connected to alarm');
