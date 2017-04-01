@@ -52,7 +52,7 @@ Thing.prototype.getProperty = function(_property) {
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            var value = this.things[thing].getProperty(_property);
+            value = this.things[thing].getProperty(_property);
 
             if (value != undefined) {
                break;
