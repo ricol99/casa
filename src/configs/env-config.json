@@ -854,7 +854,7 @@
          ],
          "things": [
             {
-               "name": "hksecuritysystemaccessory:dumgoyne",
+               "name": "hksecuritysystem:dumgoyne",
                "displayName": "Dumgoyne Security System",
                "pincode": "111-11-111",
                "username": "CC:22:3D:E3:CE:40",

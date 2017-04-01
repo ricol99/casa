@@ -243,7 +243,20 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
 
       if (_propName == "target-state") {
 
-         if (_propValue != this.props['current-state'].value) {
+         if (_propValue == STATE_NIGHT_ARM) {
+
+            setTimeout(function(_this, _oldValue) {	// Don't allow night mode, ignore and set target state back to old value
+               _this.updateProperty('target-state', oldValue, true);
+            }, 100, this, _this.props['target-state'].value);
+         }
+         else if (_propValue != this.props['current-state'].value) {
+
+            if (((this.props['current-state'].value === STATE_STAY_ARM) && (this.props['target-state'].value === STATE_AWAY_ARM)) ||
+                ((this.props['current-state'].value === STATE_AWAY_ARM) && (this.props['target-state'].value === STATE_STAY_ARM))) {
+
+               // Don't allow that state transition, just move to disarmed state
+               _propValue = STATE_DISARMED;
+            }
 
             setTimeout(function(_this) {	// Make sure the target-state is set before executing request
                _this.moveTowardsTargetState();
@@ -283,9 +296,11 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
       this.updateProperty("current-state", STATE_DISARMED, _data, true);
    }
    else if (_propName == "part-armed") {
+      this.armingState = "idle";
       this.updateProperty("current-state", (_propValue) ? STATE_STAY_ARM : STATE_DISARMED, _data);
    }
    else if (_propName == "fully-armed") {
+      this.armingState = "idle";
       this.updateProperty("current-state", (_propValue) ? STATE_AWAY_ARM : STATE_DISARMED, _data);
    }
 
@@ -343,7 +358,7 @@ AlarmTexecom.prototype.moveTowardsTargetState = function(_forceState) {
 AlarmTexecom.prototype.cancelOngoingRequest = function() {
    var buffer;
 
-   switch (armingState) {
+   switch (this.armingState) {
       case "connecting":
       case "connected":
       case "logged-into-panel":

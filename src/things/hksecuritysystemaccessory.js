@@ -5,7 +5,7 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
-function HomekitSecuritySystemAccessory(_config) {
+function HomekitSecuritySystem(_config) {
 
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-security-system-accessory";
@@ -15,8 +15,6 @@ function HomekitSecuritySystemAccessory(_config) {
    this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT });
    this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED });
 
-   this.ensurePropertyExists('part-armed', 'property', { initialValue: false });
-   this.ensurePropertyExists('fully-armed', 'property', { initialValue: false });
    this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
    this.ensurePropertyExists('alarm-triggered', 'property', { initialValue: false });
    this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false });
@@ -57,48 +55,32 @@ function HomekitSecuritySystemAccessory(_config) {
 
 }
 
-util.inherits(HomekitSecuritySystemAccessory, HomekitAccessory);
+util.inherits(HomekitSecuritySystem, HomekitAccessory);
 
-HomekitSecuritySystemAccessory.prototype.getCurrentState = function() {
+HomekitSecuritySystem.prototype.getCurrentState = function() {
    return this.props["current-state"].value;
 };
 
-HomekitSecuritySystemAccessory.prototype.getTargetState = function() {
+HomekitSecuritySystem.prototype.getTargetState = function() {
    return this.props["target-state"].value;
 };
 
-HomekitSecuritySystemAccessory.prototype.setTargetState = function(_state) {
+HomekitSecuritySystem.prototype.setTargetState = function(_state) {
    console.log(this.uName + ": Changing target state to " + _state);
    this.props['target-state'].setManualMode(true);
    this.updateProperty("target-state", _state, { sourceName: this.uName });
 };
 
-HomekitSecuritySystemAccessory.prototype.getSystemFault = function() {
+HomekitSecuritySystem.prototype.getSystemFault = function() {
    return this.props["system-fault"].value;
 }
 
-HomekitSecuritySystemAccessory.prototype.getTamperState = function() {
+HomekitSecuritySystem.prototype.getTamperState = function() {
    return this.props["tamper-state"].value;
 }
 
-HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
+HomekitSecuritySystem.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   //if (_propName == "part-armed" && _propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.STAY_ARM) {
-      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.STAY_ARM, _data);
-      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.STAY_ARM, _data);
-   //}
-   //else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.DISARMED) {
-      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
-      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
-   //}
-   //else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.AWAY_ARM) {
-      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.AWAY_ARM, _data);
-      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.AWAY_ARM, _data);
-   //}
-   //else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != Characteristic.SecuritySystemTargetState.DISARMED) {
-      //this.updateProperty("target-state", Characteristic.SecuritySystemTargetState.DISARMED, _data);
-      //this.updateProperty("current-state", Characteristic.SecuritySystemCurrentState.DISARMED, _data);
-   //}
    if (_propName == "tamper-alarm") {
       this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
@@ -135,4 +117,4 @@ HomekitSecuritySystemAccessory.prototype.updateProperty = function(_propName, _p
    HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
-module.exports = exports = HomekitSecuritySystemAccessory;
+module.exports = exports = HomekitSecuritySystem;

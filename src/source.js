@@ -145,10 +145,15 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _propOldVa
 };
 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
-   console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
+
+      if (!_data.coldStart && (_propValue === this.props[_propName].value)) {
+         return;
+      }
+
+      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
+
       // Call the final hook
       this.propertyAboutToChange(_propName, _propValue, _data);
 
@@ -163,6 +168,8 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       if (this.hasOwnProperty('local')) {
          sendData.local = this.local;
       }
+
+      console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
       this.emit('property-changed', sendData);
    }
 }
