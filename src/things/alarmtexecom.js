@@ -239,10 +239,23 @@ AlarmTexecom.prototype.stopWatchdog = function() {
 
 AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _receivedFromDevice) {
 
-   if (!_receivedFromDevice && _propName == "target-state" && (_propValue != this.props['current-state'].value)) {
-      setTimeout(function(_this) {	// Make sure the target-state is set before executing request
-         _this.connectAndCommandAlarm();
-      }, 500, this);
+   if (!_receivedFromDevice) {
+
+      if (_propName == "target-state") {
+
+         if (_propValue != this.props['current-state'].value) {
+
+            setTimeout(function(_this) {	// Make sure the target-state is set before executing request
+               _this.moveTowardsTargetState();
+            }, 100, this);
+         }
+         else if (this.armingState != "idle") {
+
+            setTimeout(function(_this) {	// Make sure the target-state is set before executing request
+               _this.cancelOngoingRequest();
+            }, 100, this);
+         }
+      }
    }
 
    if (_propName == "armed-normal" && !_propValue) {
@@ -250,18 +263,22 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
       this.updateProperty("confirmed-alarm", false, _data, true);
    }
    else if (_propName == "part-armed" && _propValue && this.props['target-state'].value != STATE_STAY_ARM) {
+      this.armingState = "idle";
       this.updateProperty("current-state", STATE_STAY_ARM, _data, true);
       this.updateProperty("target-state", STATE_STAY_ARM, _data, true);
    }
    else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
+      this.armingState = "idle";
       this.updateProperty("current-state", STATE_DISARMED, _data, true);
       this.updateProperty("target-state", STATE_DISARMED, _data, true);
    }
    else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != STATE_AWAY_ARM) {
+      this.armingState = "idle";
       this.updateProperty("current-state", STATE_AWAY_ARM, _data, true);
       this.updateProperty("target-state", STATE_AWAY_ARM, _data, true);
    }
    else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
+      this.armingState = "idle";
       this.updateProperty("current-state", STATE_DISARMED, _data, true);
       this.updateProperty("target-state", STATE_DISARMED, _data, true);
    }
@@ -275,14 +292,24 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
    Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
-AlarmTexecom.prototype.connectAndCommandAlarm = function() {
+AlarmTexecom.prototype.moveTowardsTargetState = function(_forceState) {
    var that = this;
-   console.log(this.uName+": AAAAAAAAAAAA connectAndCommandAlarm()");
 
    if (this.armingState !== "idle") {
+      console.log(this.uName+": Already requesting another action - cancelling it!");
       this.cancelOngoingRequest();
       return;
    }
+
+   if (!_forceState && (this.props['target-state'].value === this.props['current-state'].value)) {
+      console.log(this.uName+": States already in sync, job done!");
+      return;
+   }
+
+   this.targetState = (_forceState) ? _forceState : this.props['target-state'].value;
+
+   console.log(this.uName+": Attempting to move states from current state:"+this.props['current-state'].value+
+               " to target state:"+this.targetState);
 
    this.armingState = "connecting";
    console.log(this.uName + ': Connecting to Texecom alarm');
@@ -324,13 +351,22 @@ AlarmTexecom.prototype.cancelOngoingRequest = function() {
       case "logging-into-panel":
       case "logging-in-as-user":
          this.failedToSendCommand();
-         this.connectAndCommandAlarm();
+         this.moveTowardsTargetState();
          break;
       case "attempting-to-part-arm":
       case "attempting-to-arm":
       case "attempting-to-disarm":
 	 // Do Nothing
          this.requestCancelled = true;
+         break;
+      case "part-arm-req-acked":
+      case "fully-arm-req-acked":
+         this.moveTowardsTargetState(STATE_DISARMED);
+         break;
+      case "disarm-req-acked":
+         setTimeout(function(_this) {
+            _this.moveTowardsTargetState();
+         }, 2500, this);
          break;
       default:
          console.log(this.uName + ": Not able to send data to alarm and not it the right state. Current state: "+this.armingState);
@@ -354,15 +390,15 @@ AlarmTexecom.prototype.sendNextMessage = function() {
          this.sendToAlarm(buffer); 	// User login
          break;
       case "logged-in-as-user":
-         if (this.props['target-state'].value == STATE_STAY_ARM) {
+         if (this.targetState == STATE_STAY_ARM) {
             this.armingState = "attempting-to-part-arm";
             buffer = Buffer.from("\\Y  /", 'ascii');
          }
-         else if (this.props['target-state'].value == STATE_AWAY_ARM) {
+         else if (this.targetState == STATE_AWAY_ARM) {
             this.armingState = "attempting-to-arm";
             buffer = Buffer.from("\\A  /", 'ascii');
          }
-         else if (this.props['target-state'].value == STATE_DISARMED) {
+         else if (this.targetState == STATE_DISARMED) {
             this.armingState = "attempting-to-disarm";
             buffer = Buffer.from("\\D  /", 'ascii');
          }
@@ -420,12 +456,12 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
       case "attempting-to-part-arm":
       case "attempting-to-arm":
          if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
-            this.armingState = (this.props['target-state'].value == STATE_STAY_ARM) ? "part-armed-received" : "fully-armed-received";
+            this.armingState = (this.targetState == STATE_STAY_ARM) ? "part-arm-req-acked" : "fully-arm-req-acked";
             console.log(this.uName + ": Arming command acknowledged by Texecom alarm");
 
             if (this.requestCancelled) {
               this.requestCancelled = false;
-              this.connectAndCommandAlarm();	// Restart process to disarm
+              this.moveTowardsTargetState();	// Restart process to disarm
             }
             else {
                this.closeConnectionWithAlarm();
@@ -433,29 +469,46 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
          }
          else {
             console.log(this.uName + ": Unable to log into Texecom alarm panel - Check UDL");
-            this.failedToSendCommand();
 
             if (this.requestCancelled) {
               this.requestCancelled = false;
+              this.armingState = "idle";
+              this.socket.destroy();
+              this.moveTowardsTargetState();	// Restart process to disarm
+            }
+            else {
+               this.failedToSendCommand();
             }
          }
          break;
       case "attempting-to-disarm":
          if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
-            this.armingState = "disarm-received";
+            this.armingState = "disarm-req-acked";
             console.log(this.uName + ": Disarming command acknowledged by Texecom alarm");
 
             if (this.requestCancelled) {
               this.requestCancelled = false;
-              this.connectAndCommandAlarm();	// Restart process to disarm
+              this.moveTowardsTargetState();	// Restart process to disarm
             }
             else {
                this.closeConnectionWithAlarm();
+               setTimeout(function(_this) {
+                  _this.moveTowardsTargetState();
+               }, 2000, this);
             }
          }
          else {
             console.log(this.uName + ": Unable to log into Texecom alarm panel - Check UDL");
-            this.failedToSendCommand();
+
+            if (this.requestCancelled) {
+              this.requestCancelled = false;
+              this.armingState = "idle";
+              this.socket.destroy();
+              this.moveTowardsTargetState();	// Restart process to disarm
+            }
+            else {
+               this.failedToSendCommand();
+            }
          }
          break;
       default:
@@ -465,7 +518,6 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
 };
 
 AlarmTexecom.prototype.closeConnectionWithAlarm = function() {
-   this.armingState = "idle";
    this.socket.end();
 };
 
