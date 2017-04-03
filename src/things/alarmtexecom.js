@@ -246,8 +246,8 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
          if (_propValue == STATE_NIGHT_ARM) {
 
             setTimeout(function(_this, _oldValue) {	// Don't allow night mode, ignore and set target state back to old value
-               _this.updateProperty('target-state', oldValue, true);
-            }, 100, this, _this.props['target-state'].value);
+               _this.updateProperty('target-state', _oldValue, true);
+            }, 100, this, this.props['target-state'].value);
          }
          else if (_propValue != this.props['current-state'].value) {
 
