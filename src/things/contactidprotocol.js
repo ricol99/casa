@@ -65,9 +65,9 @@ function ContactIdProtocol(_uName) {
 
       411: { name: 'Download Start' },
       412: { name: 'Download End', },
-      441: { name: 'Part Arm', property: 'armed-part', qualifiers: { 1: false, 3: true } },
+      441: { name: 'Part Arm', property: 'part-armed', qualifiers: { 1: false, 3: true } },
 
-      457: { name: 'Exit Error', property: 'alarm-error', value: 'Exit Error' },
+      457: { name: 'Exit Error' },
       459: { name: 'Recent Closing' },
       570: { name: 'Zone Locked Out', property: 'alarm-error', value: 'Zone Locked Out' },
 

@@ -84,11 +84,6 @@ HomekitSecuritySystem.prototype.updateProperty = function(_propName, _propValue,
    if (_propName == "tamper-alarm") {
       this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
    }
-   else if (_propName == "zone-alarm") {
-      this.updateProperty("current-state", (_propValue) ? Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED : Characteristic.SecuritySystemCurrentState.DISARMED, _data);
-   }
-   else if (_propName == "confirmed-alarm") {
-   }
    else if (_propName == "current-state") {
       this.hkAccessory
         .getService(Service.SecuritySystem)

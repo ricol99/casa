@@ -62,7 +62,8 @@ function AlarmTexecom(_config) {
    this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { initialValue: false });
    this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
    this.ensurePropertyExists('armed-normal', 'property', { initialValue: false });
-   this.ensurePropertyExists('armed-part', 'property', { initialValue: false });
+   this.ensurePropertyExists('part-armed', 'property', { initialValue: false });
+   this.ensurePropertyExists('fully-armed', 'property', { initialValue: false });
    this.ensurePropertyExists('zone-alarm', 'property', { initialValue: false });
    this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false });
    this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false });
@@ -76,6 +77,9 @@ function AlarmTexecom(_config) {
 
    this.decoders = { 2: new ContactIdProtocol("contactid:"+this.uName), 3: new SIAProtocol("sia:"+this.uName) };
 
+   this.eventHandlers = {};
+   this.eventHandlers["406"] = AlarmTexecom.prototype.alarmAbortHandler;
+   this.eventHandlers["457"] = AlarmTexecom.prototype.exitErrorHandler;
 }
 
 util.inherits(AlarmTexecom, Thing);
@@ -199,6 +203,9 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
       console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
       this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue, { sourceName: this.uName });
    }
+   else if (this.eventHandlers.hasOwnProperty(_message.event) {
+      this.eventHandlers[_message.event].call(this, _message);
+   }
    else {
       console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
       this.updateProperty('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier, { sourceName: this.uName });
@@ -302,6 +309,9 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
    else if (_propName == "fully-armed") {
       this.armingState = "idle";
       this.updateProperty("current-state", (_propValue) ? STATE_AWAY_ARM : STATE_DISARMED, _data);
+   }
+   else if (_propName == "zone-alarm") {
+      this.updateProperty("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED, _data);
    }
 
    Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
@@ -541,6 +551,27 @@ AlarmTexecom.prototype.failedToSendCommand = function() {
       this.armingState = "idle";
       this.socket.destroy();
       this.updateProperty('target-state', this.props['current-state'].value, { sourceName: this.uName });
+   }
+};
+
+AlarmTexecom.prototype.alarmAbortHandler = function(_event) {
+
+   if (this.props["part-armed"].value) {
+      this.updateProperty("part-armed", false, { sourceName: this.uName });
+   }
+   else if (this.props["fully-armed"].value) {
+      this.updateProperty("fully-armed", false, { sourceName: this.uName });
+   }
+  
+   if (this.props["armed-normal"].value) {
+      this.updateProperty("armed-normal", false, { sourceName: this.uName });
+   }
+};
+
+AlarmTexecom.prototype.exitErrorHandler = function(_event) {
+
+   if (this.armingMode != "idle") {
+      this.updateProperty("target-state", STATE_DISARMED, { sourceName: this.uName });
    }
 };
 
