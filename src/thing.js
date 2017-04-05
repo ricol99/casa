@@ -122,22 +122,4 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldV
    }
 };
 
-Thing.prototype.deprecatedChildPropertyChanged = function(_propName, _propValue, _propOldValue, _child) {
-
-   if (this.props.hasOwnProperty(_propName)) {
-
-      if (this.props[_propName].value != _propValue) {
-         this.updateProperty(_propName, _propValue, { sourceName: this.uName });
-      }
-   }
-   else if (!(this.childProps.hasOwnProperty(_propName) && (this.childProps[_propName] === _propValue))) {
-      this.childProps[_propName] = _propValue;
-      this.emitPropertyChange(_propName, _propValue, _propOldValue);
-   }
-
-   if (this.parent) {
-      this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this);
-   }
-};
-
 module.exports = exports = Thing;
