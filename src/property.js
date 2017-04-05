@@ -169,7 +169,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       _data = { sourceName: this.owner.uName };
    }
 
-   this.checkData(_newPropValue, _data);
+   this.checkData(this, _newPropValue, _data);
 
    if (this.sourcePipeline) {
       this.sourcePipeline.newInputForProcess(_newPropValue, _data);
@@ -185,22 +185,15 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
 //
 // Used to set the property directly, ignoring the defined sources and input step pipeline processing
+// Using this method wil place the property in manual mode (it will ignore any sources for a defined period)
 // Output step pipeline still executes
 //
 Property.prototype.set = function(_propValue, _data) {
+   this.setManualMode(true);
+   _data.manualPropertyChange = true;
 
-   if (!_data.parentThing || _data.manualPropertyChange) {
-      this.setManualMode(true);
-      _data.manualPropertyChange = true;
-   }
-
-   if (_data.parentThing && this.manualMode) {
-      // Copy property change - will be sent once the manual timer has expired
-      this.lastAutoUpdate = { propertyValue: _propValue, data: copyData(_data) };
-   }
-   else {
-      this.sendToOutputPipeline(_propValue, _data);
-   }
+   this.sendToOutputPipeline(_propValue, _data);
+   return true;
 };
 
 //
@@ -521,13 +514,16 @@ function anyAssocArrayElementsDo(_obj, _func) {
    return false;
 }
 
-Property.prototype.checkData = function(_value, _data) {
+Property.prototype.checkData = function(_this, _value, _data) {
 
    if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
    if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
    if (_data.properyName == undefined) _data.propertyName = this.name;
    if (_data.properyValue == undefined) _data.propertyValue = _value;
 
+   if (_this.manualMode) {
+      _data.manualPropertyChange = true;
+   }
 }
 
 module.exports = exports = Property;

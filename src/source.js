@@ -131,11 +131,11 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
-Source.prototype.emitPropertyChange = function(_propName, _propValue, _propOldValue) {
+Source.prototype.emitPropertyChange = function(_propName, _propValue, _propOldValue, _data) {
    console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
    console.info('Child Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
 
-   var sendData = {};
+   var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.uName;
    sendData.propertyName = _propName;
    sendData.propertyOldValue = _propOldValue;
@@ -171,6 +171,10 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
       this.emit('property-changed', sendData);
+      return true;
+   }
+   else {
+      return false;
    }
 }
 

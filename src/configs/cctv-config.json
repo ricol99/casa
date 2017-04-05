@@ -384,6 +384,74 @@
                "writable": false
             }
          ]
+      },
+      {
+         "name": "thing:test-composite",
+         "props": [
+            {
+               "name": "top-level-prop",
+               "initialValue": false
+            },
+            {
+               "name": "all-prop",
+               "initialValue": false,
+               "source": {
+                  "name": "thing:test-cctv",
+                  "property": "test-prop-2"
+               }
+            }
+         ],
+         "things": [
+            {
+               "name": "thing:test-comp-level-1-1",
+               "props": [
+                  {
+                     "name": "only-lower-levels-prop",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "all-prop",
+                     "initialValue": false
+                  }
+               ],
+               "things": [
+                  {
+                     "name": "thing:test-comp-level-2-1",
+                     "props": [
+                        {
+                           "name": "only-lower-levels-prop",
+                           "initialValue": false
+                        },
+                        {
+                           "name": "all-prop",
+                           "initialValue": false
+                        },
+                        {
+                           "name": "only-level-2",
+                           "initialValue": false,
+                           "source": {
+                              "name": "thing:test-cctv",
+                              "property": "test-prop-1"
+                           }
+                        }
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "thing:test-comp-level-1-2",
+               "props": [
+                  {
+                     "name": "only-lower-levels-prop",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "all-prop",
+                     "initialValue": false
+                  }
+               ]
+            }
+         ]
       }
    ]
 }
