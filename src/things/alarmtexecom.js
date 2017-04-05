@@ -203,7 +203,7 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
       console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
       this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue, { sourceName: this.uName });
    }
-   else if (this.eventHandlers.hasOwnProperty(_message.event) {
+   else if (this.eventHandlers.hasOwnProperty(_message.event)) {
       this.eventHandlers[_message.event].call(this, _message);
    }
    else {
