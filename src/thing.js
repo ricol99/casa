@@ -52,7 +52,8 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
       if (this.parent) {
-         this.parent.childPropertyChanged(_propName, _propValue, propertyOldValue, this, _data);
+         _data.propertyOldValue = propertyOldValue;
+         this.parent.childPropertyChanged(_propName, _propValue, this, _data);
       }
       else {
          _data.alignWithParent = true;
@@ -122,12 +123,13 @@ Thing.prototype.getAllProperties = function(_allProps) {
    }
 };
 
-Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldValue, _child, _data) {
+Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
 
    if (this.parent) {
-      this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this, _data);
+      this.parent.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
+      _data.alignWithParent = true;
       this.updateProperty(_propName, _propValue, _data);
    }
 };
