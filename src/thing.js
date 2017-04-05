@@ -23,38 +23,48 @@ Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
 };
 
-// Used to navigate down the composite thing tree to update a property shared by all
-// things with the composite thing
-Thing.prototype.alignPropertyWithParent = function(_propName, _propValue, _oldValue, _data) {
+// Actually update the property value and let all interested parties know
+// Also used to navigate down the composite thing tree to update a property shared by all
+// things with the composite thing (_data.alignWithParent)
+Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (_data.manualPropertyChange && !this.props[_propName].manualMode) {
-      this.props[_propName].setManualMode(true);
-   }
+   if (_data.alignWithParent) {
+      var propertyOldValue = _data.propertyOldValue;
 
-   if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
-      this.emitPropertyChange(_propName, _propValue, _oldValue, _data);
-   }
+      if (_data.manualPropertyChange && !this.props[_propName].manualMode) {
+         this.props[_propName].setManualMode(true);
+      }
 
-   for (var thing in this.things) {
+      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
+         this.emitPropertyChange(_propName, _propValue, propertyOldValue, _data);
+      }
 
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].alignPropertyWithParent(_propName, _propValue, _oldValue, _data);
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].updateProperty(_propName, _propValue, _data);
+         }
       }
    }
-};
-
-// Actually update the property value and let all interested parties know
-// Uses the derrived class method and also informs the parent
-// Only called by property - should not be called by any other class
-Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
-   var oldPropValue = this.value;
-   Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
-
-   if (this.parent) {
-      this.parent.childPropertyChanged(_propName, _propValue, oldPropValue, this, _data);
-   }
    else {
-      this.alignPropertyWithParent(_propName, _propValue, oldPropValue, _data);
+      var propertyOldValue = this.value;
+
+      Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
+
+      if (this.parent) {
+         this.parent.childPropertyChanged(_propName, _propValue, propertyOldValue, this, _data);
+      }
+      else {
+         _data.alignWithParent = true;
+         _data.propertyOldValue = propertyOldValue;
+
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].updateProperty(_propName, _propValue, _data);
+            }
+         }
+      }
    }
 };
 
@@ -118,7 +128,7 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _propOldV
       this.parent.childPropertyChanged(_propName, _propValue, _propOldValue, this, _data);
    }
    else {
-      this.alignPropertyWithParent(_propName, _propValue, _propOldValue, _data);
+      this.updateProperty(_propName, _propValue, _data);
    }
 };
 
