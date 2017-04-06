@@ -28,7 +28,7 @@ Thing.prototype.addThing = function(_thing) {
 // things with the composite thing (_data.alignWithParent)
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (_data.alignWithParent) {
+   if (_data && _data.alignWithParent) {
 
       if (_data.manualPropertyChange && !this.props[_propName].manualMode) {
          this.props[_propName].setManualMode(true);
