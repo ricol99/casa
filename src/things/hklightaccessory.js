@@ -118,7 +118,7 @@ HomekitLightAccessory.prototype.getHue = function() {
    return this.props["hue"].value;
 }
 
-HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
+HomekitLightAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "power") {
       this.hkAccessory
