@@ -81,7 +81,7 @@ util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
    this.props['power'].setManualMode(true);
-   this.updateProperty("power", _status ? true : false, { sourceName: this.uName });
+   this.updateProperty("power", _status ? true : false);
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
@@ -91,7 +91,7 @@ HomekitLightAccessory.prototype.getPower = function() {
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
    console.log(this.uName + ": Changing brightness to " + _status);
    this.props['brightness'].setManualMode(true);
-   this.updateProperty("brightness", _status, { sourceName: this.uName });
+   this.updateProperty("brightness", _status);
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
@@ -101,7 +101,7 @@ HomekitLightAccessory.prototype.getBrightness = function() {
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
    console.log(this.uName + ": Changing saturation to " + _status);
    this.props['saturation'].setManualMode(true);
-   this.updateProperty("saturation", _status, { sourceName: this.uName });
+   this.updateProperty("saturation", _status);
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
@@ -111,7 +111,7 @@ HomekitLightAccessory.prototype.getSaturation = function() {
 HomekitLightAccessory.prototype.setHue = function(_status) {
    console.log(this.uName + ": Changing hue to " + _status);
    this.props['hue'].setManualMode(true);
-   this.updateProperty("hue", _status, { sourceName: this.uName });
+   this.updateProperty("hue", _status);
 };
 
 HomekitLightAccessory.prototype.getHue = function() {

@@ -25,16 +25,15 @@ BroadbandSpeedTester.prototype.testSpeed = function() {
    test.on('data', function(_data) {
 
       if (_data.hasOwnProperty('speeds')) {
-         that.updateProperty('download-speed', _data.speeds.download, { sourceName: that.uName });
-         that.updateProperty('upload-speed', _data.speeds.upload, { sourceName: that.uName });
+         that.updateProperty('download-speed', _data.speeds.download);
+         that.updateProperty('upload-speed', _data.speeds.upload);
 
          if (_data.hasOwnProperty('server')) {
-            that.updateProperty('ping-time', _data.server.ping, { sourceName: that.uName });
-            that.updateProperty('server-address', _data.server.host, { sourceName: that.uName });
+            that.updateProperty('ping-time', _data.server.ping);
+            that.updateProperty('server-address', _data.server.host);
 
             that.updateProperty('test-result', 'Speed Test: D=' + _data.speeds.download +
-                                ' U=' + _data.speeds.upload + ' P=' + _data.server.ping,
-                                { sourceName: that.uName });
+                                ' U=' + _data.speeds.upload + ' P=' + _data.server.ping);
          }
       }
    });

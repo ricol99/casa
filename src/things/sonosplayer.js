@@ -87,7 +87,7 @@ function SonosDevice(_player, _device) {
    this.sonosListener.listen(function(_err, _result) {
 
       if (_err) {
-         console.error(that.uName + ": ***** Unable to start Sonos listener: " + _err);
+         console.error(this.uName + ": ***** Unable to start Sonos listener: " + _err);
          process.exit(1);
       }
 
@@ -135,9 +135,9 @@ SonosPlayer.prototype.processRenderControlChange = function(_data) {
 
 SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
    console.log(this.uName + ": processGroupRenderControlChange()", _data);
-   this.updateProperty('volume', _data.GroupVolume, { sourceName: this.uName }, true);
-   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0), { sourceName: this.uName }, true);
-   this.updateProperty('muted', (_data.GroupMute != 0), { sourceName: this.uName }, true);
+   this.updateProperty('volume', _data.GroupVolume);
+   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0));
+   this.updateProperty('muted', (_data.GroupMute != 0));
 };
 
 SonosPlayer.prototype.processAVTransportChange = function(_data) {
@@ -149,10 +149,10 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
 
    switch (_data.LastChangedPlayState) {
       case 'PLAYING':
-         this.updateProperty('playing', true, { sourceName: this.uName }, true);
+         this.updateProperty('playing', true);
          break;
       case 'PAUSED_PLAYBACK':
-         this.updateProperty('playing', false, { sourceName: this.uName }, true);
+         this.updateProperty('playing', false);
          break;
       default:
          console.log(this.uName + ": Playstate not processed, state="+_data.LastChangedPlayState);
