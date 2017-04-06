@@ -131,14 +131,13 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
-Source.prototype.emitPropertyChange = function(_propName, _propValue, _propOldValue, _data) {
+Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
    console.info('Child Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.uName;
    sendData.propertyName = _propName;
-   sendData.propertyOldValue = _propOldValue;
    sendData.propertyValue = _propValue;
    sendData.local = this.local;
    this.emit('property-changed', sendData);
@@ -148,17 +147,14 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (this.props.hasOwnProperty(_propName)) {
 
-      if (!_data.coldStart && (_propValue === this.props[_propName].value)) {
+      if (!(_data && _data.coldStart) && (_propValue === this.props[_propName].value)) {
          return;
       }
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
-      // Call the final hook
-      this.propertyAboutToChange(_propName, _propValue, _data);
 
       var oldValue = this.props[_propName].value;
-      this.props[_propName].value = _propValue;
       var sendData = (_data) ? copyData(_data) : {};
       sendData.sourceName = this.uName;
       sendData.propertyName = _propName;
@@ -169,7 +165,12 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
          sendData.local = this.local;
       }
 
+      // Call the final hook
+      this.propertyAboutToChange(_propName, _propValue, sendData);
+
       console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
+      this.props[_propName].value = _propValue;
+      sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management
       this.emit('property-changed', sendData);
       return true;
    }
@@ -177,6 +178,16 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       return false;
    }
 }
+Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
+
+   setTimeout(function(_this, _nextValue) {     // Don't allow night mode, ignore and set target state back to old value
+      _this.updateProperty(_propName, _nextValue);
+   }, 100, this, _nextPropValue);
+
+};
+Source.prototype.rejectPropertyUpdate = function(_propName) {
+   this.setNextPropertyValue(_propName, this.props[_propName].value);
+};
 
 Source.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
 

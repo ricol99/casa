@@ -160,10 +160,10 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
    }
 };
 
-SonosPlayer.prototype.updateProperty = function(_propName, _propValue, _data, _receivedFromDevice) {
+SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    var that = this;
 
-   if (this.sonos && !_receivedFromDevice) {
+   if (this.sonos && _data.alignWithParent) {
 
       switch (_propName) {
       case "volume": 
@@ -190,8 +190,6 @@ SonosPlayer.prototype.updateProperty = function(_propName, _propValue, _data, _r
       default:
       }
    }
-
-   Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 SonosPlayer.prototype.setVolume = function(_level) {

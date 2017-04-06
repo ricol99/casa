@@ -199,16 +199,16 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
    };
 
    if (_message.property != undefined) {
-      this.updateProperty(_message.property, _message.propertyValue, { sourceName: this.uName }); 
+      this.updateProperty(_message.property, _message.propertyValue); 
       console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
-      this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue, { sourceName: this.uName });
+      this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue);
    }
    else if (this.eventHandlers.hasOwnProperty(_message.event)) {
       this.eventHandlers[_message.event].call(this, _message);
    }
    else {
       console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
-      this.updateProperty('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier, { sourceName: this.uName });
+      this.updateProperty('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier);
    }
 };
 
@@ -227,7 +227,7 @@ AlarmTexecom.prototype.restartWatchdog = function() {
          // Lost connection with alarm
          console.info(_this.uName + ": Lost connection to Texecom Alarm!");
          _this.pollsMissed = 0;
-         _this.updateProperty('ACTIVE', false, { sourceName: _this.uName });
+         _this.updateProperty('ACTIVE', false);
       }
       else {
          _this.restartWatchdog();
@@ -244,30 +244,29 @@ AlarmTexecom.prototype.stopWatchdog = function() {
    }
 };
 
-AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _receivedFromDevice) {
+AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (!_receivedFromDevice) {
+   if (_data.alignWithParent) {
 
       if (_propName == "target-state") {
 
          if (_propValue == STATE_NIGHT_ARM) {
-
-            setTimeout(function(_this, _oldValue) {	// Don't allow night mode, ignore and set target state back to old value
-               _this.updateProperty('target-state', _oldValue, true);
-            }, 100, this, this.props['target-state'].value);
+            // We don't allow NIGHT arm right now, just HOME and AWAY
+            this.rejectPropertyUpdate(_propName);
          }
          else if (_propValue != this.props['current-state'].value) {
 
             if (((this.props['current-state'].value === STATE_STAY_ARM) && (this.props['target-state'].value === STATE_AWAY_ARM)) ||
                 ((this.props['current-state'].value === STATE_AWAY_ARM) && (this.props['target-state'].value === STATE_STAY_ARM))) {
 
-               // Don't allow that state transition, just move to disarmed state
-               _propValue = STATE_DISARMED;
+               // Don't allow this state transition AWAY<-direct-to->HOME, must go via DISARMED state - just move to disarmed state
+               this.setNextPropertyValue(_propName, STATE_DISARMED);
             }
-
-            setTimeout(function(_this) {	// Make sure the target-state is set before executing request
-               _this.moveTowardsTargetState();
-            }, 100, this);
+            else {
+               setTimeout(function(_this) {	// Make sure the target-state is set before executing request
+                  _this.moveTowardsTargetState();
+               }, 100, this);
+            }
          }
          else if (this.armingState != "idle") {
 
@@ -279,42 +278,40 @@ AlarmTexecom.prototype.updateProperty = function(_propName, _propValue, _data, _
    }
 
    if (_propName == "armed-normal" && !_propValue) {
-      this.updateProperty("zone-alarm", false, _data, true);
-      this.updateProperty("confirmed-alarm", false, _data, true);
+      this.updateProperty("zone-alarm", false);
+      this.updateProperty("confirmed-alarm", false);
    }
    else if (_propName == "part-armed" && _propValue && this.props['target-state'].value != STATE_STAY_ARM) {
       this.armingState = "idle";
-      this.updateProperty("target-state", STATE_STAY_ARM, _data, true);
-      this.updateProperty("current-state", STATE_STAY_ARM, _data, true);
+      this.updateProperty("target-state", STATE_STAY_ARM);
+      this.updateProperty("current-state", STATE_STAY_ARM);
    }
    else if (_propName == "part-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
       this.armingState = "idle";
-      this.updateProperty("target-state", STATE_DISARMED, _data, true);
-      this.updateProperty("current-state", STATE_DISARMED, _data, true);
+      this.updateProperty("target-state", STATE_DISARMED);
+      this.updateProperty("current-state", STATE_DISARMED);
    }
    else if (_propName == "fully-armed" && _propValue && this.props['target-state'].value != STATE_AWAY_ARM) {
       this.armingState = "idle";
-      this.updateProperty("target-state", STATE_AWAY_ARM, _data, true);
-      this.updateProperty("current-state", STATE_AWAY_ARM, _data, true);
+      this.updateProperty("target-state", STATE_AWAY_ARM);
+      this.updateProperty("current-state", STATE_AWAY_ARM);
    }
    else if (_propName == "fully-armed" && !_propValue && this.props['target-state'].value != STATE_DISARMED) {
       this.armingState = "idle";
-      this.updateProperty("target-state", STATE_DISARMED, _data, true);
-      this.updateProperty("current-state", STATE_DISARMED, _data, true);
+      this.updateProperty("target-state", STATE_DISARMED);
+      this.updateProperty("current-state", STATE_DISARMED);
    }
    else if (_propName == "part-armed") {
       this.armingState = "idle";
-      this.updateProperty("current-state", (_propValue) ? STATE_STAY_ARM : STATE_DISARMED, _data);
+      this.updateProperty("current-state", (_propValue) ? STATE_STAY_ARM : STATE_DISARMED);
    }
    else if (_propName == "fully-armed") {
       this.armingState = "idle";
-      this.updateProperty("current-state", (_propValue) ? STATE_AWAY_ARM : STATE_DISARMED, _data);
+      this.updateProperty("current-state", (_propValue) ? STATE_AWAY_ARM : STATE_DISARMED);
    }
    else if (_propName == "zone-alarm") {
-      this.updateProperty("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED, _data);
+      this.updateProperty("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED);
    }
-
-   Thing.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 AlarmTexecom.prototype.moveTowardsTargetState = function(_forceState) {

@@ -79,10 +79,10 @@ HomekitSecuritySystem.prototype.getTamperState = function() {
    return this.props["tamper-state"].value;
 }
 
-HomekitSecuritySystem.prototype.updateProperty = function(_propName, _propValue, _data) {
+HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "tamper-alarm") {
-      this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED, _data);
+      this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED);
    }
    else if (_propName == "current-state") {
       this.hkAccessory
@@ -108,8 +108,6 @@ HomekitSecuritySystem.prototype.updateProperty = function(_propName, _propValue,
         .getCharacteristic(Characteristic.StatusFault)
         .updateValue(_propValue);
    }
-
-   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 module.exports = exports = HomekitSecuritySystem;

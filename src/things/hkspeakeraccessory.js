@@ -66,7 +66,7 @@ HomekitSpeakerAccessory.prototype.getVolume = function() {
    return this.props["volume"].value;
 }
 
-HomekitSpeakerAccessory.prototype.updateProperty = function(_propName, _propValue, _data, _forceUpdate) {
+HomekitSpeakerAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "muted") {
       this.hkAccessory
@@ -80,8 +80,6 @@ HomekitSpeakerAccessory.prototype.updateProperty = function(_propName, _propValu
         .getCharacteristic(Characteristic.Volume)
         .updateValue(_propValue);
    }
-
-   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data, true);
 };
 
 module.exports = exports = HomekitSpeakerAccessory;

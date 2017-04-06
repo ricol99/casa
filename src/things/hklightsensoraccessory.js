@@ -28,7 +28,7 @@ HomekitLightSensorAccessory.prototype.getCurrentLightLevel = function() {
    return this.props["light-level"].value;
 };
 
-HomekitLightSensorAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
+HomekitLightSensorAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "light-level") {
       this.hkAccessory
@@ -36,8 +36,6 @@ HomekitLightSensorAccessory.prototype.updateProperty = function(_propName, _prop
         .getCharacteristic(Characteristic.CurrentAmbientLightLevel)
         .updateValue(_propValue);
    }
-
-   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 module.exports = exports = HomekitLightSensorAccessory;

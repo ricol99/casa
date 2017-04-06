@@ -118,7 +118,7 @@ HomekitLightAccessory.prototype.getHue = function() {
    return this.props["hue"].value;
 }
 
-HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue, _data) {
+HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "power") {
       this.hkAccessory
@@ -144,8 +144,6 @@ HomekitLightAccessory.prototype.updateProperty = function(_propName, _propValue,
         .getCharacteristic(Characteristic.Hue)
         .updateValue(_propValue);
    }
-
-   HomekitAccessory.prototype.updateProperty.call(this, _propName, _propValue, _data);
 };
 
 module.exports = exports = HomekitLightAccessory;

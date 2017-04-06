@@ -29,14 +29,13 @@ Thing.prototype.addThing = function(_thing) {
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (_data.alignWithParent) {
-      var propertyOldValue = _data.propertyOldValue;
 
       if (_data.manualPropertyChange && !this.props[_propName].manualMode) {
          this.props[_propName].setManualMode(true);
       }
 
       if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
-         this.emitPropertyChange(_propName, _propValue, propertyOldValue, _data);
+         this.emitPropertyChange(_propName, _propValue, _data);
       }
 
       for (var thing in this.things) {
@@ -47,17 +46,14 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
    else {
-      var propertyOldValue = this.value;
-
+      _data.propertyOldValue = this.value;
       Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
       if (this.parent) {
-         _data.propertyOldValue = propertyOldValue;
          this.parent.childPropertyChanged(_propName, _propValue, this, _data);
       }
       else {
          _data.alignWithParent = true;
-         _data.propertyOldValue = propertyOldValue;
 
          for (var thing in this.things) {
 
