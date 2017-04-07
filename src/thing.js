@@ -27,26 +27,32 @@ Thing.prototype.addThing = function(_thing) {
 // Also used to navigate down the composite thing tree to update a property shared by all
 // things with the composite thing (_data.alignWithParent)
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
+   var data = _data;
 
-   if (_data && _data.alignWithParent) {
+   if (!data) {
+      data = { sourceName: this.uName };
+   }
 
-      if (_data.manualPropertyChange && !this.props[_propName].manualMode) {
+   if (data.alignWithParent) {
+
+      if (data.manualPropertyChange && !this.props[_propName].manualMode) {
          this.props[_propName].setManualMode(true);
       }
 
-      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
-         this.emitPropertyChange(_propName, _propValue, _data);
+      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
+         this.emitPropertyChange(_propName, _propValue, data);
       }
 
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].updateProperty(_propName, _propValue, _data);
+            this.things[thing].updateProperty(_propName, _propValue, data);
          }
       }
    }
    else {
       var data = (_data) ? _data : { sourceName: this.uName };
+
       data.propertyOldValue = this.value;
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
