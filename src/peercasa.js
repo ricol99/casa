@@ -12,7 +12,7 @@ function PeerCasa(_config) {
    this.casa = this.casaSys.casa;
    this.config = _config;
    this.secureMode = _config.secureMode;
-   this.certDir = _config.certDir;
+   this.certPath = _config.certPath;
    
    this.proActiveConnect = _config.proActiveConnect;
    this.address = _config.address;
@@ -47,9 +47,9 @@ function PeerCasa(_config) {
       this.socketOptions = {
          secure: true,
          rejectUnauthorized: false,
-         key: fs.readFileSync(this.certDir+'/client.key'),
-         cert: fs.readFileSync(this.certDir+'/client.crt'),
-         ca: fs.readFileSync(this.certDir+'/ca.crt')
+         key: fs.readFileSync(this.certPath+'/client.key'),
+         cert: fs.readFileSync(this.certPath+'/client.crt'),
+         ca: fs.readFileSync(this.certPath+'/ca.crt')
       };
    }
    else {

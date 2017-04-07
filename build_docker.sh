@@ -1,5 +1,5 @@
 mkdir .certs
-cp ~/.casa-keys/* .certs
+cp -R ~/.casa-keys/* .certs
 docker build -t ricol99/casa .
 docker push ricol99/casa
 rm -rf .certs

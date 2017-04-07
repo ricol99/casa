@@ -14,7 +14,8 @@ function Casa(_config) {
    this.nextPortToAllocate = this.portStart;
    this.ports = {};
    this.secureMode = _config.secureMode;
-   this.certDir = _config.certDir;
+   this.certPath = _config.certPath;
+   this.configPath = _config.configPath;
 
    this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
@@ -49,9 +50,9 @@ Casa.prototype.createServer = function() {
       var fs = require('fs');
 
       var serverOptions = {
-        key: fs.readFileSync(this.certDir+'/server.key'),
-        cert: fs.readFileSync(this.certDir+'/server.crt'),
-        ca: fs.readFileSync(this.certDir+'/ca.crt'),
+        key: fs.readFileSync(this.certPath+'/server.key'),
+        cert: fs.readFileSync(this.certPath+'/server.crt'),
+        ca: fs.readFileSync(this.certPath+'/ca.crt'),
         requestCert: true,
         rejectUnauthorized: true
       };
@@ -73,6 +74,11 @@ Casa.prototype.createServer = function() {
 
    app.get('/index.html', function(req, res){
      res.sendFile(__dirname + '/index.html');
+   });
+
+   app.get(/configfile/:filename/, function(req, res){
+      console.log(that.uName + ": Serving file " + req.params.filename);
+      res.sendFile(that.configPath + '/' + req.params.filename);
    });
 
    app.get('/source/:source', function(req, res) {
@@ -280,7 +286,7 @@ Casa.prototype.isActive = function() {
 Casa.prototype.createRemoteCasa = function(_data) {
    var remoteCasa;
    _data.casaConfig.secureMode = this.secureMode;
-   _data.casaConfig.certDir = this.certDir;
+   _data.casaConfig.certPath = this.certPath;
 
    if (_data.casaType == 'child') {
       remoteCasa = this.casaSys.createChildCasa(_data.casaConfig, _data.peers);

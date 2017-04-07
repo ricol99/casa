@@ -7,7 +7,8 @@ var optionDefinitions = [
   { name: 'system', alias: 's', type: String },
   { name: 'local', alias: 'l', type: String, defaultOption: true },
   { name: 'secure', type: Boolean },
-  { name: 'certs', alias: 'c', type: String },
+  { name: 'certs', type: String },
+  { name: 'config', type: String },
   { name: 'nopeer', type: Boolean }
 ]
 
@@ -23,7 +24,8 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info
 var systemConfigFile = (options.system == undefined) ? 'casa-collin-config.json' : options.system;
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var secureMode = (options.secure == undefined) ? false : options.secure;
-var certDir = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : options.certs;
+var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : options.certs;
+var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-configs' : options.config;
 var configFile = options.local;
 
 console.log('System File: ' + systemConfigFile + ' Casa File: ' + configFile);
@@ -55,5 +57,5 @@ if (!config.id) {
 
 System = require('./casasystem');
 
-var system = new System(systemConfig, config, connectToPeers, secureMode, certDir, version);
+var system = new System(systemConfig, config, connectToPeers, secureMode, certPath, configPath, version);
 
