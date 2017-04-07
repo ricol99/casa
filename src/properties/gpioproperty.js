@@ -31,21 +31,21 @@ GPIOProperty.prototype.Ready = function() {
    this.gpio.read( function(_err, _value) {
        var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
        that.value = newValue;
-       that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false), { coldStart: true });
+       that.updatePropertyInternal((newValue) ? (that.triggerLow ? false : true) : (that.triggerLow ? true : false), { coldStart: true });
    });
 
    this.gpio.watch(function (_err, _value) {
 
       if (_err) {
-         console.log(this.name + ": Error from gpio library! Error = " + _err);
+         console.log(that.uName + ": Error from gpio library! Error = " + _err);
       }
       else {
          var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
 
          if (newValue != that.value) {
-            console.log(that.name + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
+            console.log(that.uName + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
             that.value = newValue;
-            that.updatePropertyInternal((newValue) ? (this.triggerLow ? false : true) : (this.triggerLow ? true : false));
+            that.updatePropertyInternal((newValue) ? (that.triggerLow ? false : true) : (that.triggerLow ? true : false));
          }
       }
    });

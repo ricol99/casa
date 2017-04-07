@@ -16,8 +16,6 @@ function HomekitSecuritySystem(_config) {
    this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED });
 
    this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('alarm-triggered', 'property', { initialValue: false });
-   this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false });
 
    var that = this;
 

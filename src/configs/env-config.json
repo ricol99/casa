@@ -1,6 +1,6 @@
 {
    "name": "casa:env",
-   "displayName": "Casa Collin Environment Casa",
+   "displayName": "Dumgoyne Environment Casa",
    "gang": "casa-collin-v2",
    "parentCasa": {
       "name": "casa:internet",
@@ -17,7 +17,7 @@
          "displayName": "Homekit Service",
          "pincode": "111-11-111",
          "username": "CC:22:3D:E4:CF:ED",
-         "manufacturer": "Casa Home Automation Ltd",
+         "manufacturer": "Casa Collin Ltd",
          "model": "V0.1",
          "serialNumber": "1234567890"
       },
@@ -320,8 +320,8 @@
                         {
                            "name": "low",
                            "id": 1,
-                           "low": 0,
-                           "high": 50
+                           "low": 1,
+                           "high": 33
                         },
                         {
                            "name": "medium",
@@ -786,22 +786,6 @@
                "triggerLow": true
             },
             {
-               "name": "fully-armed",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 22,
-               "triggerLow": true
-            },
-            {
-               "name": "part-armed",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 23,
-               "triggerLow": true
-            },
-            {
                "name": "zone-alarm",
                "initialValue": false,
                "writable": false,
@@ -823,33 +807,17 @@
                "name": "part-armed",
                "initialValue": false,
                "writable": false,
-               "source": {
-                  "name": "alarm:dumgoyne",
-                  "property": "part-armed"
-               }
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
             },
             {
                "name": "fully-armed",
-               "type": "andproperty",
                "initialValue": false,
                "writable": false,
-               "sources": [
-                  {
-                     "name": "alarm:dumgoyne",
-                     "property": "part-armed",
-                     "transform": "!$value"
-                  },
-                  {
-                     "name": "alarmtexecom:dumgoyne",
-                     "property": "armed-normal",
-                     "steps": [
-                        {
-                           "type": "delaystep",
-                           "delay": 5
-                        }
-                     ]
-                  }
-               ]
+               "type": "gpioproperty",
+               "gpioPin": 22,
+               "triggerLow": true
             }
          ],
          "things": [
