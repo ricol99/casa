@@ -69,7 +69,7 @@ SourceListener.prototype.refreshSource = function() {
             this.pipeline.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
          }
          else {
-            this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
+            this.goValid();
          }
       }
    }
@@ -94,7 +94,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    }
 }
 
-SourceListener.prototype.goValid = function(_data) {
+SourceListener.prototype.goValid = function() {
    this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
 }
 
@@ -121,7 +121,7 @@ SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _da
 // Internal method - Called by the last step in the pipeline
 //
 SourceListener.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) {
-   this.goValid(_data);
+   this.goValid();
 }
 
 //

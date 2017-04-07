@@ -9,10 +9,19 @@ function PushoverStep(_config, _pipeline) {
    var casaSys = CasaSystem.mainInstance();
    this.userGroup = casaSys.findSource(_config.userGroup);
 
+   if (!this.userGroup) {
+      console.error(this.uName + ": ***** UserGroup not found! *************");
+      process.exit(1);
+   }
+
    PipelineStep.call(this, _config, _pipeline);
 
-   this.pushService = new push( { user: 'hu7KvA9B2qaD5NvHUL4Fki3MBmnxW7h',
-                                  token: 'ac7TcmTptiV3Yrh6MZ93xGQsfxp2mV' });
+   this.pushService = casaSys.findService("pushoverservice");
+
+   if (!this.pushService) {
+      console.error(this.uName + ": ***** Pushover service not found! *************");
+      process.exit(1);
+   }
 }
 
 util.inherits(PushoverStep, PipelineStep);
@@ -23,26 +32,7 @@ PushoverStep.prototype.process = function(_value, _data) {
       return;
    }
 
-   var _title = 'Casa Collin' + ((this.messagePriority > 0) ? ' Alarm' : ' Update');
-
-   var msg = {
-      user: this.userGroup.getProperty('pushoverDestAddr'),
-      message: _value,    // required
-      title: _title, 
-      retry: 60,
-      expire: 3600,
-      priority: this.messagePriority,
-   };
-
-   var that = this;
-
-   this.pushService.send(msg, function(_err, _result ) {
-
-      if (_err) {
-         console.info('pushoverstep: Error logging into Pushover: ' + _err);
-      }
-   });
-
+   this.pushService.sendMessage(this.userGroup.getProperty('pushoverDestAddr'), this.messagePriority, _value);
    this.outputForNextStep(_value, _data);
 }
 

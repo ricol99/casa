@@ -46,19 +46,20 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
    else {
-      _data.propertyOldValue = this.value;
-      Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
+      var data = (_data) ? _data : { sourceName: this.uName };
+      data.propertyOldValue = this.value;
+      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
       if (this.parent) {
-         this.parent.childPropertyChanged(_propName, _propValue, this, _data);
+         this.parent.childPropertyChanged(_propName, _propValue, this, data);
       }
       else {
-         _data.alignWithParent = true;
+         data.alignWithParent = true;
 
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].updateProperty(_propName, _propValue, _data);
+               this.things[thing].updateProperty(_propName, _propValue, data);
             }
          }
       }

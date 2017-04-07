@@ -49,6 +49,13 @@
          ]
       }
    ],
+   "services": [
+      {
+         "name": "pushoverservice",
+         "displayName": "Pushover Messaging Service",
+         "secureConfig": true
+      }
+   ],
    "things": [
       {
          "name": "thing:home-internet-connection",

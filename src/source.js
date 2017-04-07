@@ -13,7 +13,7 @@ function Source(_config) {
    this.casa = this.casaSys.casa;
 
    if (_config.secureConfig) {
-      loadSecureConfig(this, _config);
+      this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
    }
 
    this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
@@ -45,29 +45,6 @@ function Source(_config) {
 }
 
 util.inherits(Source, events.EventEmitter);
-
-function loadSecureConfig(_this, _config) {
-   _this.secureConfig = _this.casaSys.secureRequire(_this.uName);
-
-   if (!_this.secureConfig) {
-      return;
-   }
-
-   for (var conf in _this.secureConfig) {
-      if (_this.secureConfig.hasOwnProperty(conf)) {
-         if (_config.hasOwnProperty(conf)) {
-            if (Array.isArray(_config[conf]) && Array.isArray(_this.secureConfig[conf])) {
-               for (var i = 0; i < _this.secureConfig[conf].length; ++i) {
-                  _config[conf].push(_this.secureConfig[conf][i]);
-               }
-            }
-         }
-         else {
-            _config[conf] = _this.secureConfig[conf];
-         }
-      }
-   }
-}
 
 Source.prototype.isActive = function() {
    return this.props['ACTIVE'].value;

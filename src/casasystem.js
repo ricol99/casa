@@ -78,6 +78,30 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certD
    }
 }
 
+CasaSystem.prototype.loadSecureConfig = function(_uName, _config) {
+   var secureConfig = this.secureRequire(_uName);
+
+   if (!secureConfig) {
+      return;
+   }
+
+   for (var conf in secureConfig) {
+      if (secureConfig.hasOwnProperty(conf)) {
+         if (_config.hasOwnProperty(conf)) {
+            if (Array.isArray(_config[conf]) && Array.isArray(secureConfig[conf])) {
+               for (var i = 0; i < secureConfig[conf].length; ++i) {
+                  _config[conf].push(secureConfig[conf][i]);
+               }
+            }
+         }
+         else {
+            _config[conf] = secureConfig[conf];
+         }
+      }
+   }
+   return secureConfig;
+}
+
 CasaSystem.prototype.secureRequire = function(_name) {
    return require(this.config.certDir +  '/secure-config/' + _name);
 };
