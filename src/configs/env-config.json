@@ -792,17 +792,7 @@
                "type": "gpioproperty",
                "gpioPin": 24,
                "triggerLow": true
-            }
-         ]
-      },
-      {
-         "name": "alarmtexecom:dumgoyne",
-         "displayName": "Dumgoyne Alarm",
-         "pollingInterval": 2,
-         "maxPollMisses": 1,
-         "serverPort": 8200,
-         "secureConfig": true,
-         "props": [
+            },
             {
                "name": "part-armed",
                "initialValue": false,
@@ -818,6 +808,32 @@
                "type": "gpioproperty",
                "gpioPin": 22,
                "triggerLow": true
+            }
+         ]
+      },
+      {
+         "name": "alarmtexecom:dumgoyne",
+         "displayName": "Dumgoyne Alarm",
+         "pollingInterval": 2,
+         "maxPollMisses": 1,
+         "serverPort": 8200,
+         "secureConfig": true,
+         "props": [
+            {
+               "name": "part-armed",
+               "initialValue": false,
+               "source": {
+                  "name": "alarm:dumgoyne",
+                  "property": "part-armed"
+               }
+            },
+            {
+               "name": "fully-armed",
+               "initialValue": false,
+               "source": {
+                  "name": "alarm:dumgoyne",
+                  "property": "fully-armed"
+               }
             }
          ],
          "things": [

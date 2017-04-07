@@ -31,7 +31,7 @@ GPIOProperty.prototype.Ready = function() {
    this.gpio.read( function(_err, _value) {
        var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
        that.value = newValue;
-       that.updatePropertyInternal((newValue) ? (that.triggerLow ? false : true) : (that.triggerLow ? true : false), { coldStart: true });
+       that.updatePropertyInternal(newValue == 1, { coldStart: true });
    });
 
    this.gpio.watch(function (_err, _value) {
@@ -45,7 +45,7 @@ GPIOProperty.prototype.Ready = function() {
          if (newValue != that.value) {
             console.log(that.uName + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
             that.value = newValue;
-            that.updatePropertyInternal((newValue) ? (that.triggerLow ? false : true) : (that.triggerLow ? true : false));
+            that.updatePropertyInternal(newValue == 1);
          }
       }
    });
