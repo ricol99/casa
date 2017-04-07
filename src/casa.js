@@ -76,7 +76,7 @@ Casa.prototype.createServer = function() {
      res.sendFile(__dirname + '/index.html');
    });
 
-   app.get(/configfile/:filename/, function(req, res){
+   app.get('/configfile/:filename', function(req, res){
       console.log(that.uName + ": Serving file " + req.params.filename);
       res.sendFile(that.configPath + '/' + req.params.filename);
    });
