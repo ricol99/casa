@@ -317,7 +317,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 AlarmTexecom.prototype.moveTowardsTargetState = function(_forceState) {
    var that = this;
 
-   if (this.armingState !== "idle") {
+   if (!_forceState && this.armingState !== "idle") {
       console.log(this.uName+": Already requesting another action - cancelling it!");
       this.cancelOngoingRequest();
       return;
