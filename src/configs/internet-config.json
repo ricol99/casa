@@ -109,19 +109,11 @@
             },
             {
                "name": "alarm-armed",
-               "type": "orproperty",
                "initialValue": false,
-               "writable": false,
-               "sources": [
-                  {
-                     "name": "alarm:dumgoyne",
-                     "property": "fully-armed"
-                  },
-                  {
-                     "name": "alarmtexecom:dumgoyne",
-                     "property": "part-armed"
-                  }
-               ]
+               "source": {
+                  "name": "alarmtexecom:dumgoyne",
+                  "property": "armed-normal"
+               }
             },
             {
                "name": "debounced-alarm-armed",
@@ -258,7 +250,7 @@
                "userGroup": "usergroup:admins",
                "sources": [
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "fully-armed",
                      "transformMap": {
                         "true": "Alarm armed",
