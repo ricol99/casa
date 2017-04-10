@@ -469,8 +469,8 @@
          ]
       },
       {
-         "name": "room:outside",
-         "displayName": "Outside",
+         "name": "room:outside-rear-garden-south",
+         "displayName": "Outside Backdoor and Rear Garden South",
          "props": [
             {
                "name": "movement-1-pir",
@@ -529,13 +529,14 @@
          ],
          "things": [
             {
-               "name": "hklightaccessory:back-door-outside-light",
-               "displayName": "Back Door Outside Light",
+               "name": "hklightaccessory:rear-garden-outside-lights",
+               "displayName": "Rear Garden South Outside Lights",
                "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:37",
+               "username": "CC:22:3D:E3:CE:38",
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
                "props": [
                ],
                "things": [
@@ -547,20 +548,7 @@
                      "brightnessSupported": true,
                      "props": [
                      ]
-                  }
-               ]
-            },
-            {
-               "name": "hklightaccessory:rear-garden-outside-lights",
-               "displayName": "Rear Garden Outside Lights",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:38",
-               "manufacturer": "LightwaveRF Ltd",
-               "model": "V0.1",
-               "serialNumber": "1234567890",
-               "props": [
-               ],
-               "things": [
+                  },
                   {
                      "name": "lightwaverfaccessory:bifold-outside-light",
                      "displayName": "Bifold Outside Light",
@@ -584,8 +572,39 @@
          ]
       },
       {
-         "name": "room:hall-landing-snug",
-         "displayName": "Hall, Landing and Snug Rooms",
+         "name": "room:downstairs-loo",
+         "displayName": "Downstairs Loo",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:loo-main-light",
+               "displayName": "Loo Light",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3A",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:loo-main-light",
+                     "displayName": "Loo Lights",
+                     "roomID": 4,
+                     "deviceID": 2,
+                     "brightnessSupported": true,
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:hall-landing",
+         "displayName": "Hall and Landing",
          "props": [
          ],
          "things": [
@@ -609,30 +628,15 @@
                      ]
                   }
                ]
-            },
-            {
-               "name": "hklightaccessory:loo-main-light",
-               "displayName": "Loo Light",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:3A",
-               "manufacturer": "LightwaveRF Ltd",
-               "model": "V0.1",
-               "serialNumber": "1234567890",
-               "brightnessSupported": true,
-               "props": [
-               ],
-               "things": [
-                  {
-                     "name": "lightwaverfaccessory:loo-main-light",
-                     "displayName": "Loo Lights",
-                     "roomID": 4,
-                     "deviceID": 2,
-                     "brightnessSupported": true,
-                     "props": [
-                     ]
-                  }
-               ]
-            },
+            }
+         ]
+      },
+      {
+         "name": "room:snug",
+         "displayName": "Snug and Music Room",
+         "props": [
+         ],
+         "things": [
             {
                "name": "hklightaccessory:snug-main-light",
                "displayName": "Snug Light",
