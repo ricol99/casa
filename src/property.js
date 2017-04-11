@@ -520,10 +520,6 @@ Property.prototype.checkData = function(_this, _value, _data) {
    if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
    if (_data.properyName == undefined) _data.propertyName = this.name;
    if (_data.properyValue == undefined) _data.propertyValue = _value;
-
-   if (_this.manualMode) {
-      _data.manualPropertyChange = true;
-   }
 }
 
 module.exports = exports = Property;
