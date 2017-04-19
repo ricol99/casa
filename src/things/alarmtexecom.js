@@ -412,7 +412,8 @@ AlarmTexecom.prototype.sendNextMessage = function() {
       case "logged-into-panel":
          this.armingState = "logging-in-as-user";
          buffer = Buffer.from("\\X3 /", 'ascii');
-         buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber ? this.userNumber;
+         buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber : this.userNumber;
+         console.log(this.uName + ": Logging in a user " + buffer[3]);
          this.sendToAlarm(buffer); 	// User login
          break;
       case "logged-in-as-user":
