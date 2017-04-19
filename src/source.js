@@ -147,6 +147,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
+      this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management
       this.emit('property-changed', sendData);
       return true;

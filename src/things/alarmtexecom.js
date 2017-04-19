@@ -105,7 +105,13 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
      }
      else if (that.decoders[newData.slice(0,1)] != undefined) {
         var message = that.decoders[newData.slice(0,1)].decodeMessage(newData.slice(1));
-        that.handleMessage(_socket, message, newData);
+
+        if (message != undefined) {
+           that.handleMessage(_socket, message, newData);
+        }
+        else {
+           console.log(that.uName + ": Unhandled Message");
+        }
      }
      else {
         console.log(that.uName + ": Unhandled Message");
@@ -200,7 +206,7 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
 
    if (_message.property != undefined) {
       this.updateProperty(_message.property, _message.propertyValue); 
-      console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description);
+      console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description, + ", value=" + _message.value);
       this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue);
    }
    else if (this.eventHandlers.hasOwnProperty(_message.event)) {

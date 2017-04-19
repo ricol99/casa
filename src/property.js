@@ -91,13 +91,17 @@ Property.prototype.myValue = function() {
 //
 // Internal method - dispatch processing to output pipeline
 //
-Property.prototype.sendToOutputPipeline = function(_newValue, _data) {
+Property.prototype.updatePropertyandSendToOutputPipeline = function(_newValue, _data) {
+   var propValue = this.transformAndSetProperty(_newValue, _data);
 
-   if (this.outputPipeline) {
-      this.outputPipeline.newInputForProcess(_newValue, _data);
-   }
-   else {
-      this.processFinalOutput(_newValue, _data);
+   if (propValue != undefined) {
+
+      if (this.outputPipeline) {
+         this.outputPipeline.newInputForProcess(propValue, _data);
+      }
+      else {
+         this.outputStepsComplete(propValue, _data);
+      }
    }
 };
 
@@ -114,12 +118,12 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
          this.lastAutoUpdate = { propertyValue: _newValue, data: copyData(_data) };
       }
       else {
-         this.sendToOutputPipeline(_newValue, _data);
+         this.updatePropertyandSendToOutputPipeline(_newValue, _data);
       }
    }
    else {
-      console.log(this.uName+": output from output pipeline. Property Value="+_newValue);
-      this.processFinalOutput(_newValue, _data);
+      console.log(this.uName+": output from output step pipeline. Property Value="+_newValue+". Call hook outputStepsComplete()");
+      this.outputStepsComplete(_newValue, _data);
    }
 };
 
@@ -179,7 +183,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
    }
    else {
-      this.sendToOutputPipeline(_newPropValue, _data);
+      this.updatePropertyandSendToOutputPipeline(_newPropValue, _data);
    }
 };
 
@@ -192,7 +196,7 @@ Property.prototype.set = function(_propValue, _data) {
    this.setManualMode(true);
    _data.manualPropertyChange = true;
 
-   this.sendToOutputPipeline(_propValue, _data);
+   this.updatePropertyandSendToOutputPipeline(_propValue, _data);
    return true;
 };
 
@@ -228,20 +232,31 @@ Property.prototype.setManualMode = function(_manualMode) {
 Property.prototype.leaveManualMode = function() {
 
    if (this.lastAutoUpdate) {
-      this.sendToOutputPipeline(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
+      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
       this.lastAutoUpdate = null;
    }
 };
 
 //
+// Derived Properties can use this to be called after the output pipeline has transformed the property value
+// This is called after all step pipeline processing is done - after the input and output pipelines (property has been already been set)
+// Useful when synchronising an external device with a property value (e.g. gpio out)
+// You cannot stop the property changing or change the value, it is for information only
+//
+Property.prototype.outputStepsComplete= function(_outputPipelineValue, _data) {
+   // BY DEFAULT, DO NOTHING
+};
+
+//
 // Derived Properties can use this to be called just before the prooperty is changed
-// This is called after all step pipeline processing is done
+// This is called after the input step pipeline processing has been done - just before the property is set
 // Useful when synchronising an external device with a property value (e.g. gpio in)
 // You cannot stop the property changing or change the value, it is for information only
 //
 Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
    // BY DEFAULT, DO NOTHING
 };
+
 
 //
 // Defines policy for property validity
@@ -377,7 +392,7 @@ Property.prototype.coldStart = function(_data) {
 // INTERNAL METHODS
 // ====================
 
-Property.prototype.processFinalOutput = function(_newValue, _data) {
+Property.prototype.transformAndSetProperty = function(_newValue, _data) {
 
    var actualOutputValue = this.transformNewPropertyValue(_newValue, _data);
    _data.propertyValue = actualOutputValue;
@@ -392,6 +407,10 @@ Property.prototype.processFinalOutput = function(_newValue, _data) {
       _data.local = this.local;
       this.propertyAboutToChange(actualOutputValue, _data);
       this.owner.updateProperty(this.name, actualOutputValue, _data);
+      return actualOutputValue;
+   }
+   else {
+      return undefined;
    }
 };
 

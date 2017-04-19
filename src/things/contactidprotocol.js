@@ -86,9 +86,9 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    var message = { protocol: 'ContactID'};
 
    // Validate
-   if (_msg.length != 16) {
+   if (!((_msg.length == 16) || (_msg.length == 12))) {
       console.log(this.uName + ": Invalid message size " + _msg.length);
-      return false;
+      return undefined;
    }
 
    if (_msg.slice(4,6) != '18' && _msg.slice(4,6) != '98') {
@@ -99,14 +99,25 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    message.accountNumber = _msg.slice(0,4).toString().replace(/A/g, '0');
    message.qualifier = _msg.slice(6,7);
    message.eventNum = _msg.slice(7,10);
-   message.area = _msg.slice(10,12).toString();
-   message.value = _msg.slice(12,15).toString();
 
-   if (isNaN(message.qualifier) || isNaN(message.eventNum) || isNaN(message.area) || isNaN(message.value)) {
+   if (isNaN(message.qualifier) || isNaN(message.eventNum)) {
       console.log(this.uName + ": Unable to parse event!");
       return undefined;
    }
 
+   if (_msg.length == 16) {
+      message.area = _msg.slice(10,12).toString();
+      message.value = _msg.slice(12,15).toString();
+
+      if (isNaN(message.area) || isNaN(message.value)) {
+         console.log(this.uName + ": Unable to parse event!");
+         return undefined;
+      }
+   }
+   else {
+      message.area = "ALL";
+      message.value = XX;
+   }
 
    var qualstr = (this.QUALIFIERS[message.qualifier] == undefined) ? '' : this.QUALIFIERS[message.qualifier];
    var eventStr;
