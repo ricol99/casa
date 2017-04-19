@@ -41,6 +41,7 @@ function AlarmTexecom(_config) {
    this.alarmPort = _config.alarmPort;
    this.udl = _config.udl;
    this.userNumber = _config.userNumber;
+   this.nightUserNumber = (_config.hasOwnProperty("nightUserNumber")) ? _config.nightUserNumber : this.userNumber;
 
    this.currentState = "disarmed";
    this.targetState = "disarmed";
@@ -256,16 +257,16 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 
       if (_propName == "target-state") {
 
-         if (_propValue == STATE_NIGHT_ARM) {
-            // We don't allow NIGHT arm right now, just HOME and AWAY
-            this.rejectPropertyUpdate(_propName);
-         }
-         else if (_propValue != this.props['current-state'].value) {
+         if (_propValue != this.props['current-state'].value) {
 
             if (((this.props['current-state'].value === STATE_STAY_ARM) && (this.props['target-state'].value === STATE_AWAY_ARM)) ||
-                ((this.props['current-state'].value === STATE_AWAY_ARM) && (this.props['target-state'].value === STATE_STAY_ARM))) {
+                ((this.props['current-state'].value === STATE_STAY_ARM) && (this.props['target-state'].value === STATE_NIGHT_ARM)) ||
+                ((this.props['current-state'].value === STATE_NIGHT_ARM) && (this.props['target-state'].value === STATE_AWAY_ARM)) ||
+                ((this.props['current-state'].value === STATE_NIGHT_ARM) && (this.props['target-state'].value === STATE_STAY_ARM)) ||
+                ((this.props['current-state'].value === STATE_AWAY_ARM) && (this.props['target-state'].value === STATE_STAY_ARM)) ||
+                ((this.props['current-state'].value === STATE_AWAY_ARM) && (this.props['target-state'].value === STATE_NIGHT_ARM))) {
 
-               // Don't allow this state transition AWAY<-direct-to->HOME, must go via DISARMED state - just move to disarmed state
+               // Don't allow this state transition AWAY<-to->HOME<-to->NIGHT, must go via DISARMED state - just move to disarmed state
                this.setNextPropertyValue(_propName, STATE_DISARMED);
             }
             else {
@@ -287,7 +288,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
       this.updateProperty("zone-alarm", false);
       this.updateProperty("confirmed-alarm", false);
    }
-   else if (_propName == "part-armed" && _propValue && this.props['target-state'].value != STATE_STAY_ARM) {
+   else if (_propName == "part-armed" && _propValue && this.props['target-state'].value == STATE_DISARMED) {
       this.armingState = "idle";
       this.updateProperty("target-state", STATE_STAY_ARM);
       this.updateProperty("current-state", STATE_STAY_ARM);
@@ -309,7 +310,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
    }
    else if (_propName == "part-armed") {
       this.armingState = "idle";
-      this.updateProperty("current-state", (_propValue) ? STATE_STAY_ARM : STATE_DISARMED);
+      this.updateProperty("current-state", (_propValue) ? this.props['target-state'].value : STATE_DISARMED);
    }
    else if (_propName == "fully-armed") {
       this.armingState = "idle";
@@ -411,11 +412,11 @@ AlarmTexecom.prototype.sendNextMessage = function() {
       case "logged-into-panel":
          this.armingState = "logging-in-as-user";
          buffer = Buffer.from("\\X3 /", 'ascii');
-         buffer[3] = this.userNumber;
+         buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber ? this.userNumber;
          this.sendToAlarm(buffer); 	// User login
          break;
       case "logged-in-as-user":
-         if (this.targetState == STATE_STAY_ARM) {
+         if ((this.targetState == STATE_STAY_ARM) || (this.targetState == STATE_NIGHT_ARM)) {
             this.armingState = "attempting-to-part-arm";
             buffer = Buffer.from("\\Y  /", 'ascii');
          }
@@ -489,7 +490,7 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
       case "attempting-to-part-arm":
       case "attempting-to-arm":
          if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
-            this.armingState = (this.targetState == STATE_STAY_ARM) ? "part-arm-req-acked" : "fully-arm-req-acked";
+            this.armingState = ((this.targetState == STATE_STAY_ARM) || (this.targetState == STATE_NIGHT_ARM)) ? "part-arm-req-acked" : "fully-arm-req-acked";
             console.log(this.uName + ": Arming command acknowledged by Texecom alarm");
 
             if (this.requestCancelled) {
