@@ -91,7 +91,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       return undefined;
    }
 
-   if (_msg.slice(4,6) != '18' && _msg.slice(4,6) != '98') {
+   if (_msg.slice(4,6) != '18' && _msg.slice(4,6) != '98' && _msg.slice(4,6) != 'A1') {
       console.log(this.uName + ": Invalid message type " + _msg.slice(4,6));
       return undefined;
    }
@@ -116,7 +116,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    }
    else {
       message.area = "ALL";
-      message.value = XX;
+      message.value = "XX";
    }
 
    var qualstr = (this.QUALIFIERS[message.qualifier] == undefined) ? '' : this.QUALIFIERS[message.qualifier];
