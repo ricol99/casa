@@ -409,37 +409,38 @@ AlarmTexecom.prototype.sendNextMessage = function() {
       case "connected":
          this.armingState = "waking-up-panel";
          //this.sendToAlarm(Buffer.from("\\W"+this.udl+"/", 'ascii')); 	// Panel login
-         this.sendToAlarmAppendChecksum(Buffer.from([0x03, 0x5a], 'ascii');
+         this.sendToAlarmAppendChecksum(Buffer.from([0x03, 0x5a, 0x00], 'ascii'));
          break;
       case "panel-awake":
          this.armingState = "logging-in-with-udl";
          //buffer = Buffer.from("\\X3 /", 'ascii');
          //buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber : this.userNumber;
          //this.sendToAlarm(buffer); 	// User login
-         buffer = Buffer.from([0x09, 0x5a], 'ascii');
-         buffer.append(this.udl);
+         buffer = Buffer.from("  " + this.udl + " ", 'ascii');
+         buffer[0] = 0x09;
+         buffer[1] = 0x5a;
          this.sendToAlarmAppendChecksum(buffer);
          break;
       case "logged-in-with-udl":
-         if ((this.targetState == STATE_STAY_ARM) {
+         if (this.targetState == STATE_STAY_ARM) {
             this.armingState = "attempting-to-part-arm";
             //buffer = Buffer.from("\\Y  /", 'ascii');
-            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x01], 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x01, 0x00], 'ascii'));
          }
          else if (this.targetState == STATE_NIGHT_ARM) {
             this.armingState = "attempting-to-night-arm";
             //buffer = Buffer.from("\\A  /", 'ascii');
-            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x02], 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x02, 0x00], 'ascii'));
          }
          else if (this.targetState == STATE_AWAY_ARM) {
             this.armingState = "attempting-to-arm";
             //buffer = Buffer.from("\\A  /", 'ascii');
-            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x41, 0x00], 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x41, 0x00, 0x00], 'ascii'));
          }
          else if (this.targetState == STATE_DISARMED) {
             this.armingState = "attempting-to-disarm";
             //buffer = Buffer.from("\\D  /", 'ascii');
-            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x44, 0x00], 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x44, 0x00, 0x00], 'ascii'));
          }
          //buffer[2] = 1;
          //buffer[3] = 0;
@@ -454,11 +455,12 @@ AlarmTexecom.prototype.sendNextMessage = function() {
 AlarmTexecom.prototype.sendToAlarmAppendChecksum = function(_buffer) {
    var sum = 0;
 
-   for (var i = 0; i < _buffer.length; ++i) {
+   for (var i = 0; i < _buffer.length-1; ++i) {
       sum += _buffer[i];
    }
+   console.log(this.uName + ": Sum of bytes = " + sum);
 
-   _buffer.append((sum && 0xff) ^ 0xff);
+   _buffer[_buffer.length-1] = (sum & 0xff) ^ 0xff;
   this.sendToAlarm(_buffer);
 };
 
