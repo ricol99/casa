@@ -375,16 +375,17 @@ AlarmTexecom.prototype.cancelOngoingRequest = function() {
    switch (this.armingState) {
       case "connecting":
       case "connected":
-      case "logged-into-panel":
-      case "logged-in-as-user":
-      case "logging-into-panel":
-      case "logging-in-as-user":
+      case "panel-awake":
+      case "logged-in-with-udl":
+      case "waking-up-panel":
+      case "logging-in-with-udl":
          clearTimeout(this.responseTimer);
          this.responseTimer = null;
          this.failedToSendCommand();
          this.moveTowardsTargetState();
          break;
       case "attempting-to-part-arm":
+      case "attempting-to-night-arm":
       case "attempting-to-arm":
       case "attempting-to-disarm":
 	 // Do Nothing
@@ -406,37 +407,59 @@ AlarmTexecom.prototype.sendNextMessage = function() {
       case "idle":
          break;
       case "connected":
-         this.armingState = "logging-into-panel";
-         this.sendToAlarm(Buffer.from("\\W"+this.udl+"/", 'ascii')); 	// Panel login
+         this.armingState = "waking-up-panel";
+         //this.sendToAlarm(Buffer.from("\\W"+this.udl+"/", 'ascii')); 	// Panel login
+         this.sendToAlarmAppendChecksum(Buffer.from([0x03, 0x5a], 'ascii');
          break;
-      case "logged-into-panel":
-         this.armingState = "logging-in-as-user";
-         buffer = Buffer.from("\\X3 /", 'ascii');
-         buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber : this.userNumber;
-         console.log(this.uName + ": Logging in a user " + buffer[3]);
-         this.sendToAlarm(buffer); 	// User login
+      case "panel-awake":
+         this.armingState = "logging-in-with-udl";
+         //buffer = Buffer.from("\\X3 /", 'ascii');
+         //buffer[3] = (this.targetState == STATE_NIGHT_ARM) ? this.nightUserNumber : this.userNumber;
+         //this.sendToAlarm(buffer); 	// User login
+         buffer = Buffer.from([0x09, 0x5a], 'ascii');
+         buffer.append(this.udl);
+         this.sendToAlarmAppendChecksum(buffer);
          break;
-      case "logged-in-as-user":
-         if ((this.targetState == STATE_STAY_ARM) || (this.targetState == STATE_NIGHT_ARM)) {
+      case "logged-in-with-udl":
+         if ((this.targetState == STATE_STAY_ARM) {
             this.armingState = "attempting-to-part-arm";
-            buffer = Buffer.from("\\Y  /", 'ascii');
+            //buffer = Buffer.from("\\Y  /", 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x01], 'ascii');
+         }
+         else if (this.targetState == STATE_NIGHT_ARM) {
+            this.armingState = "attempting-to-night-arm";
+            //buffer = Buffer.from("\\A  /", 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x05, 0x53, 0x00, 0x02], 'ascii');
          }
          else if (this.targetState == STATE_AWAY_ARM) {
             this.armingState = "attempting-to-arm";
-            buffer = Buffer.from("\\A  /", 'ascii');
+            //buffer = Buffer.from("\\A  /", 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x41, 0x00], 'ascii');
          }
          else if (this.targetState == STATE_DISARMED) {
             this.armingState = "attempting-to-disarm";
-            buffer = Buffer.from("\\D  /", 'ascii');
+            //buffer = Buffer.from("\\D  /", 'ascii');
+            this.sendToAlarmAppendChecksum(Buffer.from([0x04, 0x44, 0x00], 'ascii');
          }
-         buffer[2] = 1;
-         buffer[3] = 0;
-         this.sendToAlarm(buffer);
+         //buffer[2] = 1;
+         //buffer[3] = 0;
+         //this.sendToAlarm(buffer);
          break;
       default:
          console.log(this.uName + ": Not able to send data to alarm and not it the right state. Current state: "+this.armingState);
          this.failedToSendCommand();
    }
+};
+
+AlarmTexecom.prototype.sendToAlarmAppendChecksum = function(_buffer) {
+   var sum = 0;
+
+   for (var i = 0; i < _buffer.length; ++i) {
+      sum += _buffer[i];
+   }
+
+   _buffer.append((sum && 0xff) ^ 0xff);
+  this.sendToAlarm(_buffer);
 };
 
 AlarmTexecom.prototype.sendToAlarm = function(_buffer) {
@@ -466,9 +489,10 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
    }
 
    switch (this.armingState) {
-      case "logging-into-panel":
-         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
-            this.armingState = "logged-into-panel";
+      case "waking-up-panel":
+         //if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
+         if (_buffer.equals(Buffer.from([0x0b, 0x5a, 0x05, 0x01, 0x00, 0x00, 0x01, 0x06, 0x04, 0x08, 0x81], 'ascii'))) {
+            this.armingState = "panel-awake";
             console.log(this.uName + ": Logged into panel successfully");
             this.sendNextMessage();
          }
@@ -477,20 +501,23 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
             this.failedToSendCommand();
          }
          break;
-      case "logging-in-as-user":
-         if ((_buffer.length >= 25) && (_buffer[9] != 0xff) && (_buffer[10] != 0xee)) {
-            this.armingState = "logged-in-as-user";
-            console.log(this.uName + ": Logged in to panel as a user successfully");
+      case "logging-in-with-udl":
+         //if ((_buffer.length >= 25) && (_buffer[9] != 0xff) && (_buffer[10] != 0xee)) {
+         if (!_buffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
+            this.armingState = "logged-in-with-udl";
+            console.log(this.uName + ": Logged in to panel successfully");
             this.sendNextMessage();
          }
          else {
-            console.log(this.uName + ": Unable to log into Texecom alarm user - Check User Number");
+            console.log(this.uName + ": Unable to log into Texecom alarm user - Check UDL");
             this.failedToSendCommand();
          }
          break;
       case "attempting-to-part-arm":
+      case "attempting-to-night-arm":
       case "attempting-to-arm":
-         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
+         //if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
+         if (_buffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
             this.armingState = ((this.targetState == STATE_STAY_ARM) || (this.targetState == STATE_NIGHT_ARM)) ? "part-arm-req-acked" : "fully-arm-req-acked";
             console.log(this.uName + ": Arming command acknowledged by Texecom alarm");
 
@@ -515,7 +542,8 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
          }
          break;
       case "attempting-to-disarm":
-         if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
+         //if (_buffer.equals(Buffer.from([0x4f, 0x4b, 0x0d, 0x0a], 'ascii'))) {
+         if (_buffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
             console.log(this.uName + ": Disarming command acknowledged by Texecom alarm");
             this.requestCancelled = false;
             this.restartProcess(1000, "idle");
