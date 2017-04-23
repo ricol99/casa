@@ -43,8 +43,8 @@ function AlarmTexecom(_config) {
    this.alarmPort = _config.alarmPort;
    this.udl = _config.udl;
    this.userNumber = _config.userNumber;
-   this.stayPartArmNumber = _config.hasOwnProperty(stayPartArmNumber) ? _config.stayPartArmNumber : 1;
-   this.nightPartArmNumber = _config.hasOwnProperty(nightPartArmNumber) ? _config.nightPartArmNumber : 2;
+   this.stayPartArmNumber = _config.hasOwnProperty("stayPartArmNumber") ? _config.stayPartArmNumber : 1;
+   this.nightPartArmNumber = _config.hasOwnProperty("nightPartArmNumber") ? _config.nightPartArmNumber : 2;
 
    this.transactionTarget = STATE_DISARMED;
    this.transactionState = "idle";
@@ -93,6 +93,7 @@ function AlarmTexecom(_config) {
 
    this.eventHandlers = {};
    this.eventHandlers["400"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+   this.eventHandlers["407"] = AlarmTexecom.prototype.alarmArmNormalHandler;
    this.eventHandlers["406"] = AlarmTexecom.prototype.alarmAbortHandler;
    this.eventHandlers["457"] = AlarmTexecom.prototype.exitErrorHandler;
 }
@@ -231,6 +232,10 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
       console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
       this.updateProperty('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier);
    }
+
+   setTimeout(function() {
+      _socket.destroy();
+   }, 1000);
 };
 
 AlarmTexecom.prototype.restartWatchdog = function() {
@@ -279,7 +284,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
             }
             else {
                setTimeout(function(_this) {	// Make sure the target-state is set before executing request
-                  _this.initiateNewTransaction(this.props['target-state'].value);
+                  _this.initiateNewTransaction(_this.props['target-state'].value);
                }, 100, this);
             }
          }
@@ -443,7 +448,7 @@ AlarmTexecom.prototype.sendNextMessage = function() {
          }
          else if (this.transactionTarget == REQUEST_STATE) {
             this.transactionState = "attempting-to-retrieve-state";
-            this.sendToAlarmAppendChecksum(Buffer.from([0x07, 0x52, 0x00, 0x17, 0xb2, 0x40], 'ascii'));
+            this.sendToAlarmAppendChecksum(Buffer.from([0x07, 0x52, 0x00, 0x17, 0xb2, 0x40, 0x00], 'ascii'));
          }
          break;
       default:
@@ -622,7 +627,7 @@ AlarmTexecom.prototype.restartProcess = function(_timeout, _state) {
    }
 
    setTimeout(function(_this) {
-      _this.initiateNewTransaction(this.props['target-state'].value);
+      _this.initiateNewTransaction(_this.props['target-state'].value);
    }, _timeout, this);
 };
 
@@ -639,7 +644,10 @@ AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
    this.updateProperty(_message.property, _message.propertyValue);
 
    if (_message.propertyValue) {
-      this.initiateNewTransaction(REQUEST_STATE);
+
+      setTimeout(function(_this) {     // Make sure the target-state is set before executing request
+         _this.initiateNewTransaction(REQUEST_STATE, REQUEST_STATE);
+      }, 3000, this);
    }
    else {
       this.updateProperty("zone-alarm", false);
