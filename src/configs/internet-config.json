@@ -258,7 +258,7 @@
                "sources": [
                   {
                      "name": "alarmtexecom:dumgoyne",
-                     "property": "fully-armed",
+                     "property": "away-armed",
                      "transformMap": {
                         "true": "Alarm armed",
                         "false": "Alarm disarmed"

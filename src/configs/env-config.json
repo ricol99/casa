@@ -161,7 +161,7 @@
                   },
                   {
                      "name": "alarmtexecom:dumgoyne",
-                     "property": "part-armed",
+                     "property": "stay-armed",
                      "transform": "!$value"
                   }
                ]
@@ -723,7 +723,7 @@
                            "leadingEdgeOutput": false,
                            "source": {
                               "name": "alarmtexecom:dumgoyne",
-                              "property": "part-armed"
+                              "property": "stay-armed"
                            }
                         }
                      ]
@@ -823,22 +823,6 @@
          "serverPort": 8200,
          "secureConfig": true,
          "props": [
-            {
-               "name": "part-armed",
-               "initialValue": false,
-               "source": {
-                  "name": "alarm:dumgoyne",
-                  "property": "part-armed"
-               }
-            },
-            {
-               "name": "fully-armed",
-               "initialValue": false,
-               "source": {
-                  "name": "alarm:dumgoyne",
-                  "property": "fully-armed"
-               }
-            }
          ],
          "things": [
             {

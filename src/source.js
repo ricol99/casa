@@ -156,6 +156,11 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       return false;
    }
 }
+
+Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {
+   // Do nothing by default
+};
+
 Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
 
    setTimeout(function(_this, _nextValue) {     // Don't allow night mode, ignore and set target state back to old value
@@ -163,6 +168,7 @@ Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
    }, 100, this, _nextPropValue);
 
 };
+
 Source.prototype.rejectPropertyUpdate = function(_propName) {
    this.setNextPropertyValue(_propName, this.props[_propName].value);
 };

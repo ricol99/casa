@@ -33,7 +33,7 @@ Alarm.prototype.connect = function() {
    });
 
    this.socket.on('data', function(_buffer) {
-      console.log("Alarm->Middle: ", _buffer);
+      console.log("Alarm->Middle: LEN="+_buffer.length + " " + JSON.stringify(_buffer));
       that.emit('data', _buffer);
    });
 

@@ -92,7 +92,7 @@ Property.prototype.myValue = function() {
 // Internal method - dispatch processing to output pipeline
 //
 Property.prototype.updatePropertyandSendToOutputPipeline = function(_newValue, _data) {
-   var propValue = this.transformAndSetProperty(_newValue, _data);
+   var propValue = this.setPropertyInternal(_newValue, _data);
 
    if (propValue != undefined) {
 
@@ -101,6 +101,7 @@ Property.prototype.updatePropertyandSendToOutputPipeline = function(_newValue, _
       }
       else {
          this.outputStepsComplete(propValue, _data);
+         this.owner.propertyOutputStepsComplete(this.name, propValue, this.previousValue, _data);
       }
    }
 };
@@ -113,17 +114,24 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
    if (_pipeline == this.sourcePipeline) {
       console.log(this.uName+": output from source pipeline. Property Value="+_newValue);
 
-      if (this.manualMode) {
-         // Copy values to be updated once the manual timer has expired
-         this.lastAutoUpdate = { propertyValue: _newValue, data: copyData(_data) };
-      }
-      else {
-         this.updatePropertyandSendToOutputPipeline(_newValue, _data);
+      var propValue = this.transformNewPropertyValue(_newValue, _data);
+
+      if (propValue != undefined) {
+
+         if (this.manualMode) {
+            // Copy values to be updated once the manual timer has expired
+            this.lastAutoUpdate = { propertyValue: propValue, data: copyData(_data) };
+         }
+         else {
+            _data.propertyValue = propValue;
+            this.updatePropertyandSendToOutputPipeline(propValue, _data);
+         }
       }
    }
    else {
       console.log(this.uName+": output from output step pipeline. Property Value="+_newValue+". Call hook outputStepsComplete()");
       this.outputStepsComplete(_newValue, _data);
+      this.owner.propertyOutputStepsComplete(this.name, _newValue, this.previousValue, _data);
    }
 };
 
@@ -183,7 +191,12 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
    }
    else {
-      this.updatePropertyandSendToOutputPipeline(_newPropValue, _data);
+      var propValue = this.transformNewPropertyValue(_newPropValue, _data);
+
+      if (propValue != undefined) {
+         _data.propertyValue = propValue;
+         this.updatePropertyandSendToOutputPipeline(propValue, _data);
+      }
    }
 };
 
@@ -243,7 +256,7 @@ Property.prototype.leaveManualMode = function() {
 // Useful when synchronising an external device with a property value (e.g. gpio out)
 // You cannot stop the property changing or change the value, it is for information only
 //
-Property.prototype.outputStepsComplete= function(_outputPipelineValue, _data) {
+Property.prototype.outputStepsComplete = function(_outputValue, _data) {
    // BY DEFAULT, DO NOTHING
 };
 
@@ -392,12 +405,9 @@ Property.prototype.coldStart = function(_data) {
 // INTERNAL METHODS
 // ====================
 
-Property.prototype.transformAndSetProperty = function(_newValue, _data) {
+Property.prototype.setPropertyInternal = function(_newValue, _data) {
 
-   var actualOutputValue = this.transformNewPropertyValue(_newValue, _data);
-   _data.propertyValue = actualOutputValue;
-
-   if (this.value !== actualOutputValue || this.cold) {
+   if (this.value !== _newValue || this.cold) {
 
       if (this.cold) {
          _data.coldStart = true;
@@ -405,9 +415,9 @@ Property.prototype.transformAndSetProperty = function(_newValue, _data) {
       }
 
       _data.local = this.local;
-      this.propertyAboutToChange(actualOutputValue, _data);
-      this.owner.updateProperty(this.name, actualOutputValue, _data);
-      return actualOutputValue;
+      this.propertyAboutToChange(_newValue, _data);
+      this.owner.updateProperty(this.name, _newValue, _data);
+      return _newValue;
    }
    else {
       return undefined;
