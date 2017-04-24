@@ -69,10 +69,6 @@
                "sources": [
                   {
                      "name": "thing:home-internet-connection",
-                     "property": "casa-alarm"
-                  },
-                  {
-                     "name": "thing:home-internet-connection",
                      "property": "casa-cctv"
                   },
                   {
@@ -80,17 +76,6 @@
                      "property": "casa-env"
                   }
                ]
-            },
-            {
-               "name": "casa-alarm",
-               "type": "debounceproperty",
-               "initialValue": false,
-               "writable": false,
-               "threshold": 120,
-               "source": {
-                  "name": "casa:alarm",
-                  "property": "ACTIVE"
-               }
             },
             {
                "name": "casa-cctv",
@@ -140,7 +125,7 @@
                "writable": false,
                "sources": [
                   {
-                     "name": "casa-alarm",
+                     "name": "casa-env",
                      "property": "ACTIVE",
                      "transform": "!$value"
                   },
@@ -181,7 +166,7 @@
                      }
                   },
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "zone-alarm",
                      "transformMap": {
                         "true": "Alarm triggered",
@@ -189,7 +174,7 @@
                      }
                   },
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "confirmed-alarm",
                      "transformMap": {
                         "true": "Alarm confirmed - call police!",
@@ -224,14 +209,6 @@
                   },
                   {
                      "name": "thing:home-internet-connection",
-                     "property": "casa-alarm",
-                     "transformMap": {
-                        "true": "Casa 'alarm' is active",
-                        "false": "Casa 'alarm' has gone down!"
-                     }
-                  },
-                  {
-                     "name": "thing:home-internet-connection",
                      "property": "casa-cctv",
                      "transformMap": {
                         "true": "Casa 'cctv' is active",
@@ -260,15 +237,23 @@
                      "name": "alarmtexecom:dumgoyne",
                      "property": "away-armed",
                      "transformMap": {
-                        "true": "Alarm armed",
+                        "true": "Alarm fully armed - House empty",
                         "false": "Alarm disarmed"
                      }
                   },
                   {
                      "name": "alarmtexecom:dumgoyne",
-                     "property": "part-armed",
+                     "property": "stay-armed",
                      "transformMap": {
-                        "true": "Alarm part armed",
+                        "true": "Alarm armed - Doggies at home",
+                        "false": "Alarm disarmed"
+                     }
+                  },
+                  {
+                     "name": "alarmtexecom:dumgoyne",
+                     "property": "night-armed",
+                     "transformMap": {
+                        "true": "Alarm armed - Family at home",
                         "false": "Alarm disarmed"
                      }
                   },
@@ -276,8 +261,8 @@
                      "name": "thing:environment",
                      "property": "low-light",
                      "transformMap": {
-                        "true": "Lights now sensitive to movement",
-                        "false": "Lights are not sensitive to movement"
+                        "true": "Lights movement sensitive",
+                        "false": "Lights ignoring movement"
                      }
                   },
                   {

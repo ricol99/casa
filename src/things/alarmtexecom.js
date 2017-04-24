@@ -92,8 +92,14 @@ function AlarmTexecom(_config) {
    this.decoders = { 2: new ContactIdProtocol("contactid:"+this.uName), 3: new SIAProtocol("sia:"+this.uName) };
 
    this.eventHandlers = {};
-   this.eventHandlers["400"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+   this.eventHandlers["401"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+   this.eventHandlers["403"] = AlarmTexecom.prototype.alarmArmNormalHandler;
    this.eventHandlers["407"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+   this.eventHandlers["408"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+
+   this.eventHandlers["411"] = AlarmTexecom.prototype.alarmDownloadHandler;
+   this.eventHandlers["412"] = AlarmTexecom.prototype.alarmDownloadHandler;
+
    this.eventHandlers["406"] = AlarmTexecom.prototype.alarmAbortHandler;
    this.eventHandlers["457"] = AlarmTexecom.prototype.exitErrorHandler;
 }
@@ -333,20 +339,21 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget, _forceState) {
    var that = this;
 
-   if (!_forceState && this.transactionState !== "idle") {
-      console.log(this.uName+": Already requesting another action - cancelling it!");
-      this.cancelOngoingRequest();
-      return;
+   if (!_forceState) {
+
+      if (this.transactionState !== "idle") {
+         console.log(this.uName+": Already requesting another action - cancelling it!");
+         this.cancelOngoingRequest();
+         return;
+      }
+
+      if (this.transactionTarget === _transactionTarget) {
+         console.log(this.uName+": States already in sync, job done!");
+         return;
+      }
    }
 
-   //if (!_forceState && (this.props['target-state'].value === this.props['current-state'].value)) {
-   if (!_forceState && (this.transactionTarget === _transactionTarget)) {
-      console.log(this.uName+": States already in sync, job done!");
-      return;
-   }
-
-   //this.transactionTarget = (_forceState) ? _forceState : this.props['target-state'].value;
-   this.transactionTarget = (_forceState) ? _forceState : _transactionTarget;
+   this.transactionTarget = _transactionTarget;
 
    console.log(this.uName+": Attempting to move states from current state:"+this.props['current-state'].value+
                " to target state:"+this.transactionTarget);
@@ -405,7 +412,7 @@ AlarmTexecom.prototype.cancelOngoingRequest = function() {
          break;
       case "part-arm-req-acked":
       case "away-arm-req-acked":
-         this.initiateNewTransaction(this.props['target-state'].value, STATE_DISARMED);
+         this.initiateNewTransaction(STATE_DISARMED, true);
          break;
       default:
          console.log(this.uName + ": Not able to send data to alarm and not it the right state. Current state: "+this.transactionState);
@@ -616,7 +623,6 @@ AlarmTexecom.prototype.processAlarmStatus = function(_buffer) {
          this.updateProperty('part-armed', true);
       }
    }
-
 };
 
 AlarmTexecom.prototype.restartProcess = function(_timeout, _state) {
@@ -646,7 +652,7 @@ AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
    if (_message.propertyValue) {
 
       setTimeout(function(_this) {     // Make sure the target-state is set before executing request
-         _this.initiateNewTransaction(REQUEST_STATE, REQUEST_STATE);
+         _this.initiateNewTransaction(REQUEST_STATE);
       }, 3000, this);
    }
    else {
@@ -663,6 +669,10 @@ AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
       }
    }
 }
+
+AlarmTexecom.prototype.alarmDownloadHandler = function(_message) {
+   // DO NOTHING
+};
 
 AlarmTexecom.prototype.alarmAbortHandler = function(_message) {
 
