@@ -24,7 +24,7 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info
 var systemConfigFile = (options.system == undefined) ? 'casa-collin-config.json' : options.system;
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var secureMode = (options.secure == undefined) ? false : options.secure;
-var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : options.certs;
+var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : './'+options.certs;
 var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-configs' : options.config;
 var configFile = options.local;
 

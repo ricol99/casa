@@ -23,7 +23,7 @@ COPY src/services/* /src/services/
 
 # copy the certs 
 COPY .certs/* /src/.certs/
-COPY secure-config/* /src/.certs/secure-config/
+COPY .certs/secure-config/* /src/.certs/secure-config/
 
 EXPOSE 8096
 CMD [ "node", "app.js", "--system", "configs/casa-collin-config.json", "configs/internet-config.json", "--nopeer", "--secure", "--certs", ".certs" ]
