@@ -642,6 +642,7 @@ AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
       }
 
       this.updateProperty("current-state", STATE_DISARMED);
+      this.updateProperty("target-state", STATE_DISARMED);
    }
 }
 
