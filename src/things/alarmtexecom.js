@@ -93,6 +93,7 @@ function AlarmTexecom(_config) {
 
    this.eventHandlers = {};
    this.eventHandlers["401"] = AlarmTexecom.prototype.alarmArmNormalHandler;
+   this.eventHandlers["402"] = AlarmTexecom.prototype.alarmArmNormalHandler;
    this.eventHandlers["403"] = AlarmTexecom.prototype.alarmArmNormalHandler;
    this.eventHandlers["407"] = AlarmTexecom.prototype.alarmArmNormalHandler;
    this.eventHandlers["408"] = AlarmTexecom.prototype.alarmArmNormalHandler;

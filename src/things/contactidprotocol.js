@@ -56,6 +56,7 @@ function ContactIdProtocol(_uName) {
 
       400: { name: 'Arm/Disarm', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
       401: { name: 'Arm/Disarm by User', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
+      402: { name: 'Arm/Disarm by User', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
       403: { name: 'Automatic Arm/Disarm', property: 'armed-normal', qualifiers: { 1: false, 3: true } },
 
       406: { name: 'Alarm Abort' },
