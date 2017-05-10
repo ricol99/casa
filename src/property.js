@@ -337,7 +337,7 @@ Property.prototype.sourceIsInvalid = function(_data) {
       this.target = null;
 
       if (this.pipeline) {
-         this.pipeline.sourceIsValid(_data);
+         this.pipeline.sourceIsInvalid(_data);
       }
    }
 };

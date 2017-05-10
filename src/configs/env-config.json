@@ -64,6 +64,32 @@
          ]
       },
       {
+         "name": "thing:family",
+         "displayName": "Family Properties",
+         "props": [
+            {
+               "name": "on-holiday",
+               "initialValue": false,
+               "source": {
+                  "name": "hklightaccessory:family-on-holiday",
+                  "property": "power"
+               }
+            }
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:family-on-holiday",
+               "displayName": "Holiday - Family",
+               "manufacturer": "Casa Home Automation Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "local": true,
+               "props": [
+               ]
+            }
+         ]
+      },
+      {
          "name": "thing:dumgoyne-sensors",
          "displayName": "Environment Sensors in Dumgoyne",
          "props": [
@@ -295,21 +321,47 @@
                ],
                "things": [
                   {
-                     "name": "lightwaverfaccessory:kitchen-ceiling-lights",
-                     "displayName": "Kitchen Ceiling Lights",
-                     "roomID": 2,
-                     "deviceID": 1,
+                     "name": "hklightaccessory:kitchen-ceiling-lights",
+                     "displayName": "Ceiling Lights - Kitchen",
+                     "propogateToParent": false,
+                     "manufacturer": "Lightwave RF Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
                      "brightnessSupported": true,
                      "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "lightwaverfaccessory:kitchen-ceiling-lights",
+                           "displayName": "Ceiling Lights - Kitchen",
+                           "roomID": 2,
+                           "deviceID": 1,
+                           "brightnessSupported": true,
+                           "props": [
+                           ]
+                        }
                      ]
                   },
                   {
-                     "name": "lightwaverfaccessory:kitchen-island-lights",
-                     "displayName": "Kitchen Island Lights",
-                     "roomID": 2,
-                     "deviceID": 2,
+                     "name": "hklightaccessory:kitchen-island-lights",
+                     "displayName": "Island Lights - Kitchen",
+                     "propogateToParent": false,
+                     "manufacturer": "Lightwave RF Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
                      "brightnessSupported": true,
                      "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "lightwaverfaccessory:kitchen-island-lights",
+                           "displayName": "Island Lights - Kitchen",
+                           "roomID": 2,
+                           "deviceID": 2,
+                           "brightnessSupported": true,
+                           "props": [
+                           ]
+                        }
                      ]
                   },
                   {
@@ -428,21 +480,47 @@
                ],
                "things": [
                   {
-                     "name": "lightwaverfaccessory:wall-lights",
-                     "displayName": "Lounge Wall Lights",
-                     "roomID": 1,
-                     "deviceID": 1,
+                     "name": "hklightaccessory:lounge-wall-lights",
+                     "displayName": "Wall Lights - Lounge",
+                     "propogateToParent": false,
+                     "manufacturer": "Lightwave RF Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
                      "brightnessSupported": true,
                      "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "lightwaverfaccessory:wall-lights",
+                           "displayName": "Wall Lights - Lounge",
+                           "roomID": 1,
+                           "deviceID": 1,
+                           "brightnessSupported": true,
+                           "props": [
+                           ]
+                        }
                      ]
                   },
                   {
-                     "name": "lightwaverfaccessory:table-lamps",
-                     "displayName": "Lounge Table Lamps",
-                     "roomID": 1,
-                     "deviceID": 2,
-                     "brightnessThreshold": 30,
+                     "name": "hklightaccessory:lounge-table-lamps",
+                     "displayName": "Table Lamps - Lounge",
+                     "propogateToParent": false,
+                     "manufacturer": "Lightwave RF Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
+                     "brightnessSupported": true,
                      "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "lightwaverfaccessory:table-lamps",
+                           "displayName": "Table Lamps - Lounge",
+                           "roomID": 1,
+                           "deviceID": 2,
+                           "brightnessThreshold": 30,
+                           "props": [
+                           ]
+                        }
                      ]
                   }
                ]

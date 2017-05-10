@@ -83,6 +83,7 @@
                "initialValue": false,
                "writable": false,
                "threshold": 120,
+               "invalidValue": false,
                "source": {
                   "name": "casa:cctv",
                   "property": "ACTIVE"
@@ -94,6 +95,7 @@
                "initialValue": false,
                "writable": false,
                "threshold": 120,
+               "invalidValue": false,
                "source": {
                   "name": "casa:env",
                   "property": "ACTIVE"
@@ -113,6 +115,7 @@
                "initialValue": false,
                "writable": false,
                "threshold": 30,
+               "invalidValue": false,
                "source": {
                   "name": "thing:home-internet-connection",
                   "property": "alarm-armed"

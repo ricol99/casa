@@ -4,9 +4,11 @@ var Property = require('../property');
 function DebounceProperty(_config, _owner) {
 
    this.threshold = _config.threshold;
+   this.invalidValue = _config.invalidValue;
    this.timeoutObj = null;
    this.sourceActive = false;
    this.active = false;
+   this.sourceValid = false;
 
    Property.call(this, _config, _owner);
 }
@@ -39,27 +41,37 @@ DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_source
 };
 
 
-DebounceProperty.prototype.goInvalid = function(_data) {
+//DebounceProperty.prototype.goInvalid = function(_data) {
 
-  if (this.readyToGoInvalid) {
-     this.readyToGoInvalid = false;
-     Property.prototype.goInvalid.call(this, _data);
-  }
-};
+  //if (this.readyToGoInvalid) {
+     //this.readyToGoInvalid = false;
+     //Property.prototype.goInvalid.call(this, _data);
+  //}
+//};
 
 DebounceProperty.prototype.sourceIsInvalid = function(_data) {
    console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
    this.invalidData = copyData(_data);
 
    if (this.valid) {
+      this.sourceValid = false;
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
+         console.log(this.uName + ": Starting timer....");
          this.startTimer();
       }
    }
 
-   Property.prototype.sourceIsInvalid.call(this, _data);
+   //Property.prototype.sourceIsInvalid.call(this, _data);
+};
+
+DebounceProperty.prototype.sourceIsValid = function(_data) {
+   this.sourceValid = true;
+   this.sourceActive = false;
+   this.active = false;
+   this.lastData = null;
+   Property.prototype.sourceIsValid.call(this, _data);
 };
 
 // ====================
@@ -82,6 +94,7 @@ function copyData(_sourceData) {
 DebounceProperty.prototype.startTimer = function() {
 
    this.timeoutObj = setTimeout(function(_this) {
+      console.log(_this.uName + ": Timer expired!");
       _this.timeoutObj = null;
 
       if (_this.lastData) {
@@ -90,9 +103,15 @@ DebounceProperty.prototype.startTimer = function() {
          _this.lastData = null;
       }
 
-      if (!_this.valid) {
-         _this.readyToGoInvalid = true;
-         _this.goInvalid(_this.invalidData);
+      if (!_this.sourceValid) {
+
+         if (_this.invalidValue != undefined) {
+            _this.updatePropertyInternal(_this.invalidValue);
+         }
+
+         Property.prototype.sourceIsInvalid.call(_this, _this.invalidData);
+         //_this.readyToGoInvalid = true;
+         //_this.goInvalid(_this.invalidData);
       }
    }, this.threshold*1000, this);
 }

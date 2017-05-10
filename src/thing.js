@@ -3,6 +3,7 @@ var Source = require('./source');
 
 function Thing(_config) {
    this.displayName = _config.displayName;
+   this.propogateToParent = _config.hasOwnProperty("propogateToParent") ? _config.propogateToParent : true;
    this.things = {};
 
    Source.call(this, _config);
@@ -56,7 +57,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       data.propertyOldValue = this.value;
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
-      if (this.parent) {
+      if (this.parent && this.propogateToParent) {
          this.parent.childPropertyChanged(_propName, _propValue, this, data);
       }
       else {
