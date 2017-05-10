@@ -82,7 +82,7 @@
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "threshold": 120,
+               "threshold": 60,
                "invalidValue": false,
                "source": {
                   "name": "casa:cctv",
@@ -94,7 +94,7 @@
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "threshold": 120,
+               "threshold": 60,
                "invalidValue": false,
                "source": {
                   "name": "casa:env",
