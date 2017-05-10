@@ -335,7 +335,7 @@
                            "name": "lightwaverfaccessory:kitchen-ceiling-lights",
                            "displayName": "Ceiling Lights - Kitchen",
                            "roomID": 2,
-                           "deviceID": 1,
+                           "deviceID": 2,
                            "brightnessSupported": true,
                            "props": [
                            ]
@@ -357,7 +357,7 @@
                            "name": "lightwaverfaccessory:kitchen-island-lights",
                            "displayName": "Island Lights - Kitchen",
                            "roomID": 2,
-                           "deviceID": 2,
+                           "deviceID": 1,
                            "brightnessSupported": true,
                            "props": [
                            ]
@@ -508,7 +508,6 @@
                      "manufacturer": "Lightwave RF Ltd",
                      "model": "V0.1",
                      "serialNumber": "1234567890",
-                     "brightnessSupported": true,
                      "props": [
                      ],
                      "things": [
