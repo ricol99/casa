@@ -13,8 +13,9 @@ function HomekitLightAccessory(_config) {
    this.brightnessSupported = _config.brightnessSupported;
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
+   this.powerProp = _config.hasOwnProperty("powerProp") ? _config.powerProp : "power";
 
-   this.ensurePropertyExists('power', 'property', { initialValue: false });
+   this.ensurePropertyExists(powerProp, 'property', { initialValue: false });
 
    var that = this;
 
@@ -80,12 +81,12 @@ function HomekitLightAccessory(_config) {
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
 HomekitLightAccessory.prototype.setPower = function(_status) {
-   this.props['power'].setManualMode(true);
-   this.updateProperty("power", _status ? true : false);
+   this.props[powerProp].setManualMode(true);
+   this.updateProperty(powerProp, _status ? true : false);
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
-   return this.props["power"].value ? 1 : 0;
+   return this.props[powerProp].value ? 1 : 0;
 };
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
@@ -120,7 +121,7 @@ HomekitLightAccessory.prototype.getHue = function() {
 
 HomekitLightAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (_propName == "power") {
+   if (_propName == powerProp) {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.On)

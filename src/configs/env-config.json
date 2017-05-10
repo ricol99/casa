@@ -69,11 +69,7 @@
          "props": [
             {
                "name": "on-holiday",
-               "initialValue": false,
-               "source": {
-                  "name": "hklightaccessory:family-on-holiday",
-                  "property": "power"
-               }
+               "initialValue": false
             }
          ],
          "things": [
@@ -83,7 +79,7 @@
                "manufacturer": "Casa Home Automation Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
-               "local": true,
+               "powerProp": "on-holiday",
                "props": [
                ]
             }
