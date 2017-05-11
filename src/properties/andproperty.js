@@ -15,7 +15,6 @@ AndProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListe
 
    // all inputs active
    for (var prop in this.sourceListeners) {
-      console.log(this.uName+": AAAAAAAA Prop="+prop+" value="+this.sourceListeners[prop].sourcePropertyValue);
 
       if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && !this.sourceListeners[prop].sourcePropertyValue) {
          this.updatePropertyInternal(false, _data);
