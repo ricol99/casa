@@ -70,7 +70,47 @@
             {
                "name": "on-holiday",
                "initialValue": false
-            }
+            },
+            {
+               "name": "night-arm-schedule",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "00 5 * * 1-5",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "00 5 * * 6-7",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "00 7 * * 1-5",
+                     "propertyValue": false
+                  },
+                  {
+                     "rule": "00 8 * * 6-7",
+                     "propertyValue": false
+                  }
+               ]
+            },
+            {
+               "name": "night-arm-alarm",
+               "writable": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "thing:family",
+                     "property": "on-holiday",
+                     "transform": "!$value"
+                  },
+                  {
+                     "name": "thing:family",
+                     "property": "night-arm-schedule"
+                  }
+               ]
+            },
          ],
          "things": [
             {
@@ -896,6 +936,19 @@
          "serverPort": 8200,
          "secureConfig": true,
          "props": [
+            {
+               "name": "target-state",
+               "initialValue": 3,
+               "writable": false,
+               "source": {
+                  "name": "thing:family",
+                  "property": "night-arm-alarm",
+                  "transformMap": {
+                     "true": 2,
+                     "false": 3
+                  }
+               }
+            }
          ],
          "things": [
             {

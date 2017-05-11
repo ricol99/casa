@@ -118,11 +118,9 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
 
       if (propValue != undefined) {
 
-         if (this.manualMode) {
-            // Copy values to be updated once the manual timer has expired
-            this.lastAutoUpdate = { propertyValue: propValue, data: copyData(_data) };
-         }
-         else {
+         this.lastAutoUpdate = { propertyValue: propValue, data: copyData(_data) };
+
+         if (!this.manualMode) {
             _data.propertyValue = propValue;
             this.updatePropertyandSendToOutputPipeline(propValue, _data);
          }
@@ -186,16 +184,16 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    if (this.sourcePipeline) {
       this.sourcePipeline.newInputForProcess(_newPropValue, _data);
    }
-   else if (this.manualMode) {
-      // Copy property change - will be sent once the manual timer has expired
-      this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
-   }
    else {
-      var propValue = this.transformNewPropertyValue(_newPropValue, _data);
+      this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
 
-      if (propValue != undefined) {
-         _data.propertyValue = propValue;
-         this.updatePropertyandSendToOutputPipeline(propValue, _data);
+      if (!this.manualMode) {
+         var propValue = this.transformNewPropertyValue(_newPropValue, _data);
+
+         if (propValue != undefined) {
+            _data.propertyValue = propValue;
+            this.updatePropertyandSendToOutputPipeline(propValue, _data);
+         }
       }
    }
 };
@@ -207,7 +205,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 //
 Property.prototype.set = function(_propValue, _data) {
    this.setManualMode(true);
-   _data.manualPropertyChange = true;
+   _data.enterManualMode = true;
 
    this.updatePropertyandSendToOutputPipeline(_propValue, _data);
    return true;
@@ -226,6 +224,7 @@ Property.prototype.setManualMode = function(_manualMode) {
    }
    else if (this.manualOverrideTimer) {
       clearTimeout(this.manualOverrideTimer);
+      this.manualOverrideTimer = null;
    }
 
    if (this.manualMode != _manualMode) {
@@ -245,8 +244,8 @@ Property.prototype.setManualMode = function(_manualMode) {
 Property.prototype.leaveManualMode = function() {
 
    if (this.lastAutoUpdate) {
+      this.lastAutoUpdate.data.leaveManualMode = true;
       this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
-      this.lastAutoUpdate = null;
    }
 };
 
@@ -348,19 +347,12 @@ Property.prototype.sourceIsInvalid = function(_data) {
 //     - only if the property is valid and not in manual mode
 //
 Property.prototype.sourcePropertyChanged = function(_data) {
-
    var that = this;
 
    if (this.valid) {
 
       if (this.sourceListeners[_data.sourcePropertyName]) {
-
-         if (this.manualMode) {  // In manual override mode, copy data
-            this.lastData = copyData(_data);
-         }
-         else {
-            this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
-         }
+         this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
       }
    }
 };
