@@ -9,11 +9,11 @@ function BroadbandSpeedTester(_config) {
    this.maxTime = (_config.hasOwnProperty('maxTime')) ? _config.maxTime : 10000;
    this.schedule = (_config.hasOwnProperty('schedule')) ? _config.schedule : "0 2 * * *";	// 2am Everyday
 
-   this.ensurePropertyExists('upload-speed', 'property', { initialValue: 0 });
-   this.ensurePropertyExists('download-speed', 'property', { initialValue: 0 });
-   this.ensurePropertyExists('ping-time', 'property', { initialValue: 0 });
-   this.ensurePropertyExists('server-address', 'property', { initialValue: '' });
-   this.ensurePropertyExists('test-result', 'property', { initialValue: '' });
+   this.ensurePropertyExists('upload-speed', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('download-speed', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('ping-time', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('server-address', 'property', { initialValue: '' }, _config);
+   this.ensurePropertyExists('test-result', 'property', { initialValue: '' }, _config);
 }
 
 util.inherits(BroadbandSpeedTester, Thing);
@@ -52,6 +52,7 @@ BroadbandSpeedTester.prototype.coldStart = function() {
       that.testSpeed();
    });
 
+   Thing.prototype.coldStart.call(this);
 };
 
 module.exports = exports = BroadbandSpeedTester;

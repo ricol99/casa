@@ -10,12 +10,12 @@ function HomekitSecuritySystem(_config) {
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-security-system-accessory";
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED });
-   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARMED });
-   this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT });
-   this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED });
+   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED }, _config);
+   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARMED }, _config);
+   this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT }, _config);
+   this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED }, _config);
 
-   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
+   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
 
    var that = this;
 

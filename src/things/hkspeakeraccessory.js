@@ -10,10 +10,10 @@ function HomekitSpeakerAccessory(_config) {
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-speaker-accessory";
    this.volumeSupported = (_config.hasOwnProperty('volumeSupported')) ? _config.volumeSupported : true;
-   this.ensurePropertyExists('muted', 'property', { initialValue: false });
+   this.ensurePropertyExists('muted', 'property', { initialValue: false }, _config);
 
    if (this.volumeSupported) {
-      this.ensurePropertyExists('volume', 'property', { initialValue: 1 });
+      this.ensurePropertyExists('volume', 'property', { initialValue: 1 }, _config);
    }
 
    var that = this;
@@ -32,7 +32,7 @@ function HomekitSpeakerAccessory(_config) {
       });
 
    if (this.volumeSupported) {
-      this.ensurePropertyExists('volume', 'property', { initialValue: 1 });
+      this.ensurePropertyExists('volume', 'property', { initialValue: 1 }, _config);
 
       this.hkAccessory
         .getService(Service.Speaker)

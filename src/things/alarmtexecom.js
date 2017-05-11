@@ -51,30 +51,30 @@ function AlarmTexecom(_config) {
 
    this.props['ACTIVE'].value = false;
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: STATE_DISARMED });
-   this.ensurePropertyExists('target-state', 'property', { initialValue: STATE_DISARMED });
+   this.ensurePropertyExists('current-state', 'property', { initialValue: STATE_DISARMED }, _config);
+   this.ensurePropertyExists('target-state', 'property', { initialValue: STATE_DISARMED }, _config);
 
-   this.ensurePropertyExists('line-failure', 'property', { initialValue: false });
-   this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false });
-   this.ensurePropertyExists('battery-failure', 'property', { initialValue: false });
-   this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('medical-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('panic-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('duress-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('attack-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('armed-normal', 'property', { initialValue: false });
-   this.ensurePropertyExists('part-armed', 'property', { initialValue: false });
-   this.ensurePropertyExists('stay-armed', 'property', { initialValue: false });
-   this.ensurePropertyExists('night-armed', 'property', { initialValue: false });
-   this.ensurePropertyExists('away-armed', 'property', { initialValue: false });
-   this.ensurePropertyExists('zone-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false });
-   this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false });
-   this.ensurePropertyExists('system-failure', 'property', { initialValue: false });
-   this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false });
-   this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' });
+   this.ensurePropertyExists('line-failure', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('battery-failure', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('medical-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('panic-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('duress-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('attack-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('armed-normal', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('part-armed', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('stay-armed', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('night-armed', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('away-armed', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('zone-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('system-failure', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' }, _config);
 
    this.alarmStateMap = [ { nineDIndex: 68, prop: this.props['away-armed'], state: STATE_AWAY_ARM, value: false },
                           { nineDIndex: 42, value: false }, { nineDIndex: 44, value: false },
@@ -143,7 +143,7 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
 };
 
 
-AlarmTexecom.prototype.coldStart = function(_event) {
+AlarmTexecom.prototype.coldStart = function() {
    var that = this;
 
    this.server = net.createServer(function(_socket) {
@@ -157,6 +157,7 @@ AlarmTexecom.prototype.coldStart = function(_event) {
    });
 
    this.server.listen(this.serverPort);
+   Thing.prototype.coldStart.call(this); 
 };
 
 AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {

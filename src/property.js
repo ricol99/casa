@@ -391,6 +391,8 @@ Property.prototype.newPropertyValueReceivedFromTarget = function(_targetListener
 // Override this if you listen to a source that is not "Source".
 // If you listen to a "Source" you will be fired by that Source cold starting
 Property.prototype.coldStart = function(_data) {
+   console.log(this.uName+": AAAAA Cold starting value="+this.value);
+   this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
 };
 
 // ====================

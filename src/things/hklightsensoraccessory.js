@@ -10,7 +10,7 @@ function HomekitLightSensorAccessory(_config) {
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-light-accessory";
 
-   this.ensurePropertyExists('light-level', 'property', { initialValue: 1 });
+   this.ensurePropertyExists('light-level', 'property', { initialValue: 1 }, _config);
 
    var that = this;
 

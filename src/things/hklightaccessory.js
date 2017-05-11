@@ -15,7 +15,7 @@ function HomekitLightAccessory(_config) {
    this.saturationSupported = _config.saturationSupported;
    this.powerProp = _config.hasOwnProperty("powerProp") ? _config.powerProp : "power";
 
-   this.ensurePropertyExists(this.powerProp, 'property', { initialValue: false });
+   this.ensurePropertyExists(this.powerProp, 'property', { initialValue: false }, _config);
 
    var that = this;
 
@@ -33,7 +33,7 @@ function HomekitLightAccessory(_config) {
       });
 
    if (this.brightnessSupported) {
-      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 });
+      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -48,7 +48,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.saturationSupported) {
-      this.ensurePropertyExists('saturation', 'property', { initialValue: 0 });
+      this.ensurePropertyExists('saturation', 'property', { initialValue: 0 }, _config);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -63,7 +63,7 @@ function HomekitLightAccessory(_config) {
    }
 
    if (this.hueSupported) {
-      this.ensurePropertyExists('hue', 'property', { initialValue: 0 });
+      this.ensurePropertyExists('hue', 'property', { initialValue: 0 }, _config);
 
       this.hkAccessory
          .getService(Service.Lightbulb)
