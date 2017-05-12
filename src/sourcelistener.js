@@ -162,7 +162,15 @@ function copyData(_sourceData) {
 
 SourceListener.prototype.getPropertyValue = function() {
    return this.sourcePropertyValue;
-}
+};
+
+SourceListener.prototype.getSource = function() {
+   return this.source;
+};
+
+SourceListener.prototype.isValid = function() {
+   return this.valid;
+};
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 

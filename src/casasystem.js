@@ -13,6 +13,7 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
 
    this.uberCasa = false;
    this.users = [];
+   this.scenes = {};
    this.things = {};
    this.topLevelThings = [];
    this.casaAreas = [];
@@ -50,6 +51,9 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
 
    // Extract Services
    this.extractServices(this.config.services);
+
+   // Extract Scenes
+   this.extractScenes(this.config.scenes);
 
    // Extract Things
    this.extractThings(this.config.things);
@@ -176,6 +180,24 @@ CasaSystem.prototype.extractServices = function(_config) {
       }
    }
 };
+
+// Extract Scenes
+CasaSystem.prototype.createScene = function(_config, _parent) {
+};
+
+CasaSystem.prototype.extractScenes = function(_config, _parent) {
+
+   if (_config) {
+
+      for (var index = 0; index < _config.length; ++index) {
+         var Scene = this.cleverRequire(_config[index].name, 'scenes');
+         var sceneObj = new Scene(_config[index]);
+         this.scenes[sceneObj.uName] = sceneObj;
+         this.allObjects[sceneObj.uName] = sceneObj;
+         console.log('New scene: ' + _config[index].name);
+      }
+   }
+}
 
 // Extract Things
 CasaSystem.prototype.createThing = function(_config, _parent) {

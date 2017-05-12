@@ -16,7 +16,12 @@ function Source(_config) {
       this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
    }
 
-   this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
+   if (_config.props && _config.props.hasOwnProperty("ACTIVE")) {
+      this.props = {};
+   }
+   else {
+      this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
+   }
 
    if (_config.props) {
       var propLen = _config.props.length;

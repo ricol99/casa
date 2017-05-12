@@ -30,6 +30,44 @@
          "linkAddress": "192.168.1.236"
       }
    ],
+   "scenes": [
+      {
+         "name": "scene:on-holiday",
+         "displayName": "On Holiday Scene",
+         "props": [
+            {
+               "name": "ACTIVE",
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "writable": false,
+               "events": [
+                  {
+                     "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+                     "propertyValue": true
+                  },
+                  {
+                     "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+                     "propertyValue": false
+                  }
+               ]
+            }
+         ],
+         "activeStates": [
+            {
+               "name": "thing:test-cctv",
+               "property": "test-prop-1",
+               "value": true
+            }
+         ],
+         "inactiveStates": [
+            {
+               "name": "thing:test-cctv",
+               "property": "test-prop-1",
+               "value": false
+            }
+         ]
+      }
+   ],
    "things": [
       {
          "name": "thing:dumgoyne-broadband",
