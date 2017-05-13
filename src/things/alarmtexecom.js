@@ -280,7 +280,7 @@ AlarmTexecom.prototype.stopWatchdog = function() {
 
 AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   //if (_data.alignWithParent) {
+   if (_data.alignWithParent) {
 
       if (_propName == "target-state") {
 
@@ -303,7 +303,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
             }, 100, this);
          }
       }
-   //}
+   }
 
    if (_propName == "zone-alarm") {
       this.updateProperty("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED);
