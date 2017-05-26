@@ -498,16 +498,22 @@ Property.prototype.restartManualOverrideTimer = function() {
 };
 
 function copyData(_sourceData) {
-   var newData = {};
 
-   for (var prop in _sourceData) {
+   if (_sourceData) {
+      var newData = {};
 
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
+      for (var prop in _sourceData) {
+
+         if (_sourceData.hasOwnProperty(prop)){
+            newData[prop] = _sourceData[prop];
+         }
       }
-   }
 
-   return newData;
+      return newData;
+   }
+   else {
+      return undefined;
+   }
 }
 
 function allAssocArrayElementsDo(_obj, _func) {
