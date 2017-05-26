@@ -546,7 +546,7 @@
          "displayName": "Outside Backdoor and Rear Garden South",
          "props": [
             {
-               "name": "movement-1-pir",
+               "name": "movement-pir",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
@@ -565,8 +565,8 @@
                      "property": "dark"
                   },
                   {
-                     "name": "room:outside",
-                     "property": "movement-1-pir"
+                     "name": "room:outside-rear-garden-south",
+                     "property": "movement-pir"
                   }
                ],
                "sourceSteps": [
@@ -581,7 +581,7 @@
                "initialValue": 0,
                "writable": false,
                "source": {
-                  "name": "room:outside",
+                  "name": "room:outside-rear-garden-south",
                   "property": "movement-in-the-dark",
                   "outputValues": {
                      "true": 100,
@@ -594,7 +594,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "room:outside",
+                  "name": "room:outside-rear-garden-south",
                   "property": "brightness",
                   "transform": "$value>0"
                }
