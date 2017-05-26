@@ -245,7 +245,8 @@ Property.prototype.leaveManualMode = function() {
 
    if (this.lastAutoUpdate) {
       this.lastAutoUpdate.data.leaveManualMode = true;
-      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.propertyValue, this.lastAutoUpdate.data);
+      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.propertyValue, copyData(this.lastAutoUpdate.data));
+      this.lastAutoUpdate = null;
    }
 };
 
@@ -492,7 +493,6 @@ Property.prototype.restartManualOverrideTimer = function() {
    }
 
    this.manualOverrideTimer = setTimeout(function(_that) {
-      _that.manualOverrideTimer = null;
       _that.setManualMode(false);
    }, this.manualOverrideTimeout*1000, this);
 };
