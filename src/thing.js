@@ -31,11 +31,14 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      if (data.enterManualMode) {
-         this.props[_propName].setManualMode(true); // XXXX TODO Is this the right thing to do - who controls the timers?
-      }
-      else if (data.leaveManualMode) {
-         this.props[_propName].setManualMode(false); // XXXX TODO Is this the right thing to do - who controls the timers?
+      if (this.props[_propName]) {
+
+         if (data.enterManualMode) {
+            this.props[_propName].setManualMode(true); // XXXX TODO Is this the right thing to do - who controls the timers?
+         }
+         else if (data.leaveManualMode) {
+            this.props[_propName].setManualMode(false); // XXXX TODO Is this the right thing to do - who controls the timers?
+         }
       }
 
       if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
