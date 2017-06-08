@@ -339,7 +339,7 @@ AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget, _fo
    this.socket = net.createConnection({ port: this.alarmPort, host: this.alarmAddress });
 
    this.socket.on('connect', function(_buffer) {
-      console.log(this.uName + ': Connected to alarm');
+      console.log(that.uName + ': Connected to alarm');
       that.transactionState = "connected";
 
       setTimeout(function(_this) {
@@ -386,6 +386,7 @@ AlarmTexecom.prototype.cancelOngoingRequest = function() {
          break;
       case "part-arm-req-acked":
       case "away-arm-req-acked":
+         this.cancelAcknowledgeTimer();
          this.initiateNewTransaction(STATE_DISARMED, true);
          break;
       default:
@@ -512,6 +513,7 @@ AlarmTexecom.prototype.processResponse = function(_buffer) {
             }
             else {
                this.socket.destroy();
+               this.setAcknowledgeTimer();
             }
          }
          else {
@@ -611,6 +613,23 @@ AlarmTexecom.prototype.restartProcess = function(_timeout, _state) {
    }, _timeout, this);
 };
 
+AlarmTexecom.prototype.cancelAcknowledgeTimer = function() {
+
+   if (this.acknowledgeTimer) {
+      clearTimeout(this.acknowledgeTimer);
+      this.acknowledgeTimer = null;
+   }
+};
+
+AlarmTexecom.prototype.setAcknowledgeTimer = function() {
+   this.cancelAcknowledgeTimer();
+
+   this.acknowledgeTimer = setTimeout(function(_this) {
+      _this.acknowledgeTimer = null;
+      _this.failedToSendCommand();
+   }, 60000, this);
+};
+
 AlarmTexecom.prototype.failedToSendCommand = function() {
 
    if (this.transactionState !== "idle") {
@@ -621,6 +640,7 @@ AlarmTexecom.prototype.failedToSendCommand = function() {
 };
 
 AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
+   this.cancelAcknowledgeTimer();
    this.updateProperty(_message.property, _message.propertyValue);
    this.transactionState = "idle";
 
