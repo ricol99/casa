@@ -82,18 +82,35 @@ function SonosDevice(_player, _device) {
    this.localListeningPort = this.player.sonosService.grabLocalListeningPort();
 
    // XX TODO Remove hack
-   var SonosListener = require('../node_modules/sonos/lib/events/listener');
-   this.sonosListener = new SonosListener(this.device, { port: this.localListeningPort });
-   this.sonosListener.listen(function(_err, _result) {
-
-      if (_err) {
-         console.error(this.uName + ": ***** Unable to start Sonos listener: " + _err);
-         process.exit(1);
-      }
-
-      that.startSyncingStatus();
-   });
+   this.createListener();
 }
+
+SonosDevice.prototype.createListener = function() {
+   var that = this;
+   var SonosListener = require('../node_modules/sonos/lib/events/listener');
+
+   try {
+      this.sonosListener = new SonosListener(this.device, { port: this.localListeningPort });
+
+      this.sonosListener.listen(function(_err, _result) {
+
+         if (_err) {
+            console.error(that.uName + ": ***** Unable to start Sonos listener: " + _err);
+            process.exit(1);
+         }
+
+         that.startSyncingStatus();
+      });
+   }
+   catch (_err) {
+      console.error(this.uName + ": Caught exception " + _err + " from Sonos listener, restarting in 5 seconds...");
+
+      setTimeout(function(_this) {
+         console.error(_this.uName + ": Restarting Sonos listener");
+         _this.createListener();
+      }, 5000, this);
+   }
+};
 
 function InternalListener(_owner, _endpoint, _handler) {
 

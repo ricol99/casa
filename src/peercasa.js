@@ -353,7 +353,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       // Recreate socket to attempt reconnection
       this.manualDisconnect = false;
       console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-      this.socket.connect();
+      this.socket.connect(this.http + '://' + that.address.hostname + ':' + this.address.port + '/', this.socketOptions);
    }
 }
 
