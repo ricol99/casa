@@ -11,12 +11,159 @@
       {
          "name": "user:richard",
          "displayName": "Richard",
-         "props": []
+         "props": [
+            {
+               "name": "in-bed",
+               "initialValue": false
+            },
+            {
+               "name": "on-holiday",
+               "initialValue": false
+            },
+            {
+               "name": "at-home",
+               "initialValue": false
+            }
+         ]
       },
       {
          "name": "user:natalie",
          "displayName": "Natalie",
-         "props": []
+         "props": [
+            {
+               "name": "in-bed",
+               "initialValue": false
+            },
+            {
+               "name": "on-holiday",
+               "initialValue": false
+            },
+            {
+               "name": "at-home",
+               "initialValue": false
+            }
+         ]
+      },
+      {
+         "name": "user:dylan",
+         "displayName": "Dylan",
+         "props": [
+            {
+               "name": "in-bed",
+               "initialValue": false
+            },
+            {
+               "name": "on-holiday",
+               "initialValue": false
+            },
+            {
+               "name": "at-home",
+               "initialValue": false
+            }
+         ]
+      },
+      {
+         "name": "user:doggies",
+         "displayName": "Emmie and Bruno",
+         "props": [
+            {
+               "name": "at-home",
+               "initialValue": false
+            }
+         ]
+      },
+      {
+         "name": "usergroup:family",
+         "displayName": "Collin Family",
+         "users": [
+           "user:richard",
+           "user:natalie",
+           "user:dylan"
+         ],
+         "props": [
+            {
+               "name": "in-bed",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:richard",
+                     "property": "in-bed"
+                  },
+                  {
+                     "name": "user:natalie",
+                     "property": "in-bed"
+                  },
+                  {
+                     "name": "user:dylan",
+                     "property": "in-bed"
+                  }
+               ]
+            },
+            {
+               "name": "on-holiday",
+               "initialValue": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "name": "user:richard",
+                     "property": "on-holiday"
+                  },
+                  {
+                     "name": "user:natalie",
+                     "property": "on-holiday"
+                  },
+                  {
+                     "name": "user:dylan",
+                     "property": "on-holiday"
+                  }
+               ]
+            },
+            {
+               "name": "at-home",
+               "initialValue": false,
+               "type": "orproperty",
+               "sources": [
+                  {
+                     "name": "user:richard",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:natalie",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:dylan",
+                     "property": "at-home"
+                  }
+               ]
+            }
+         ],
+         "things": [
+            {
+               "name": "agent:family-holiday-agent",
+               "agentProp": "on-holiday",
+               "stateMap": {
+                  "true": [
+                     {
+                        "name": "user:richard",
+                        "property": "on-holiday",
+                        "value": true
+                     },
+                     {
+                        "name": "user:natalie",
+                        "property": "on-holiday",
+                        "value": true
+                     },
+                     {
+                        "name": "user:dylan",
+                        "property": "on-holiday",
+                        "value": true
+                     }
+                  ]
+               }
+            }
+         ]
       },
       {
          "name": "usergroup:admins",
@@ -46,6 +193,14 @@
                "writable": false
             }
          ]
+      }
+   ],
+   "services": [
+      {
+         "name": "scheduleservice",
+         "latitude":  51.5,
+         "longitude": -0.1,
+         "forecastKey": "5d3be692ae5ea4f3b785973e1f9ea520"
       }
    ],
    "things": [ 

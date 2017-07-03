@@ -12,7 +12,7 @@ function Property(_config, _owner) {
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
    this.prioritiseSources = _config.prioritiseSources;
    this.value = _config.initialValue;
-   this.rawProperyValue = _config.initialValue;
+   this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
 
    this.transform = _config.transform;
@@ -56,7 +56,7 @@ function Property(_config, _owner) {
 
          _config.sources[index].uName = _config.sources[index].name;
          var sourceListener = new SourceListener(_config.sources[index], this);
-         this.sourceListeners[sourceListener.sourcePropertyName] = sourceListener;
+         this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
       };
 
@@ -118,10 +118,10 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
 
       if (propValue != undefined) {
 
-         this.lastAutoUpdate = { propertyValue: propValue, data: copyData(_data) };
+         this.lastAutoUpdate = { value: propValue, data: copyData(_data) };
 
          if (!this.manualMode) {
-            _data.propertyValue = propValue;
+            _data.value = propValue;
             this.updatePropertyandSendToOutputPipeline(propValue, _data);
          }
       }
@@ -173,7 +173,7 @@ Property.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
 
 // Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
-   this.rawProperyValue = _newPropValue;
+   this.rawPropertyValue = _newPropValue;
 
    if (_data == undefined) {
       _data = { sourceName: this.owner.uName };
@@ -185,13 +185,13 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       this.sourcePipeline.newInputForProcess(_newPropValue, _data);
    }
    else {
-      this.lastAutoUpdate = { propertyValue: _newPropValue, data: copyData(_data) };
+      this.lastAutoUpdate = { value: _newPropValue, data: copyData(_data) };
 
       if (!this.manualMode) {
          var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
          if (propValue != undefined) {
-            _data.propertyValue = propValue;
+            _data.value = propValue;
             this.updatePropertyandSendToOutputPipeline(propValue, _data);
          }
       }
@@ -245,7 +245,7 @@ Property.prototype.leaveManualMode = function() {
 
    if (this.lastAutoUpdate) {
       this.lastAutoUpdate.data.leaveManualMode = true;
-      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.propertyValue, copyData(this.lastAutoUpdate.data));
+      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.value, copyData(this.lastAutoUpdate.data));
       this.lastAutoUpdate = null;
    }
 };
@@ -347,13 +347,29 @@ Property.prototype.sourceIsInvalid = function(_data) {
 // Will invoke this property processing followed by the step pipeline processing
 //     - only if the property is valid and not in manual mode
 //
-Property.prototype.sourcePropertyChanged = function(_data) {
+Property.prototype.receivedEventFromSource = function(_data) {
    var that = this;
 
    if (this.valid) {
 
-      if (this.sourceListeners[_data.sourcePropertyName]) {
-         this.newPropertyValueReceivedFromSource(this.sourceListeners[_data.sourcePropertyName], _data);
+      if (this.sourceListeners[_data.sourceEventName]) {
+         this.newEventReceivedFromSource(this.sourceListeners[_data.sourceEventName], _data);
+      }
+   }
+};
+
+//
+// Called by SourceListener as a defined source has raised an event
+// Will invoke this property processing followed by the step pipeline processing
+//     - only if the property is valid and not in manual mode
+//
+Property.prototype.sourceEventRaised = function(_data) {
+   var that = this;
+
+   if (this.valid) {
+
+      if (this.sourceListeners[_data.sourceEventName]) {
+         this.newEventReceivedFromSource(this.sourceListeners[_data.sourceEventName], _data);
       }
    }
 };
@@ -363,12 +379,12 @@ Property.prototype.sourcePropertyChanged = function(_data) {
 //   -- only works if target config ignoreTargetUpdates is set to false (default is true)
 // Also called by Manual Override Controller to override defined sources
 //
-Property.prototype.targetPropertyChanged = function(_data) {
+Property.prototype.receivedEventFromTarget = function(_data) {
 
    if (this.valid) {
 
-      if (this.targetListener && this.targetListener.sourcePropertyName == _data.sourcePropertyName) {
-         this.newPropertyValueReceivedFromTarget(this.targetListener, _data);
+      if (this.targetListener && this.targetListener.sourceEventName == _data.sourceEventName) {
+         this.newEventReceivedFromTarget(this.targetListener, _data);
       }
    }
 };
@@ -379,13 +395,13 @@ Property.prototype.targetPropertyChanged = function(_data) {
 // This will then invoke the input step pipeline processing followed by the output step pipleline processing
 // Only then will the property value be set
 // *NOTE* the final value will probably differ because of the step pipleline processing
-//  --- Use this.rawProperyValue to access previous value set (no affected by step pipeline processing)
+//  --- Use this.rawPropertyValue to access previous value set (no affected by step pipeline processing)
 //
-Property.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   this.updatePropertyInternal(_data.propertyValue, _data);
+Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   this.updatePropertyInternal(_data.value, _data);
 };
 
-Property.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
+Property.prototype.newEventReceivedFromTarget = function(_targetListener, _data) {
    // DO NOTHING BY DEFAULT
 };
 
@@ -422,10 +438,10 @@ Property.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
-   for (var sourcePropertyName in this.sourceListeners) {
+   for (var sourceEventName in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(sourcePropertyName)){
-         var sourceListener = this.sourceListeners[sourcePropertyName];
+      if (this.sourceListeners.hasOwnProperty(sourceEventName)){
+         var sourceListener = this.sourceListeners[sourceEventName];
 
          if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
             highestPriorityFound = sourceListener.priority;
@@ -440,8 +456,8 @@ Property.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
 Property.prototype.transformNewPropertyValueBasedOnSource = function(_newPropValue, _data) {
    var actualOutputValue = _newPropValue;
 
-   if (_data.sourcePropertyName != undefined) {
-      var sourceListener = this.sourceListeners[_data.sourcePropertyName];
+   if (_data.sourceEventName != undefined) {
+      var sourceListener = this.sourceListeners[_data.sourceEventName];
 
       if (sourceListener) {
          var sourceListenerInCharge = sourceListener;
@@ -545,9 +561,10 @@ function anyAssocArrayElementsDo(_obj, _func) {
 Property.prototype.checkData = function(_this, _value, _data) {
 
    if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   // ****** TBD TODO why is this line duplicated? Should it be _data.sourceEventName?
    if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
-   if (_data.properyName == undefined) _data.propertyName = this.name;
-   if (_data.properyValue == undefined) _data.propertyValue = _value;
+   if (_data.name == undefined) _data.name = this.name;
+   if (_data.value == undefined) _data.value = _value;
 }
 
 module.exports = exports = Property;

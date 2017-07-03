@@ -325,6 +325,11 @@ Casa.prototype.addSource = function(_source) {
       that.emit('source-property-changed', _data);
    });
 
+   _source.on('event-raised', function (_data) {
+      console.log(that.uName + ': ' + _data.sourceName + ' has raised an event');
+      that.emit('source-event-raised', _data);
+   });
+
    console.log(this.uName + ': ' + _source.uName + ' associated!');
 }
 

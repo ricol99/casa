@@ -1,52 +1,73 @@
 var util = require('util');
-var Source = require('./source');
+var Thing = require('./thing');
 var SourceListener = require('./sourcelistener');
 
-function Scene(_config) {
-   this.uName = _config.name;
-   this.displayName = _config.displayName;
-   this.sceneStates = {};
-   this.sourceListeners = {};
-   this.noOfSources = 0;
-
-   var configStateNames = { false: "inactiveState", true: "activeState" };
-
-   for (var sceneState in configStateNames) {
-      this.sceneStates[sceneState] = [];
-      var sceneStateArray = _config.hasOwnProperty(configStateNames[sceneState]) ? [ _config[configStateNames[sceneState]] ] : _config[configStateNames[sceneState]+"s"];
-
-      if (sceneStateArray) {
-
-         for (var i = 0; i < sceneStateArray.length; i++) {
-            this.sceneStates[sceneState].push({ uName: sceneStateArray[i].name, property: sceneStateArray[i].property, value: sceneStateArray[i].value, ignoreSourceUpdates: true });
-
-            if (!this.sourceListeners.hasOwnProperty(sceneStateArray[i].name)) {
-               this.sourceListeners[sceneStateArray[i].name] = new SourceListener(this.sceneStates[sceneState][i], this);
-               this.noOfSources++;
+/************************
+{
+   "name": "scene:on-holiday",
+   "displayName": "On Holiday Scene",
+   "props": [
+      {
+         "name": "ACTIVE",
+         "type": "scheduleproperty",
+         "initialValue": false,
+         "writable": false,
+         "events": [
+            {
+               "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+               "propertyValue": true
+            },
+            {
+               "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+               "propertyValue": false
             }
-         }
+         ]
+      }
+   ],
+   "sources": [
+      {
+         "name": "alarmtexecom:dumgoyne",
+         "property": "target-state",
+         "value": "armed-full"
+      }
+   ]
+}
+*************************/
+
+function Scene(_config) {
+   Thing.call(this, _config);
+
+   this.sources = [];
+   this.sourceListeners = {};
+   this.sceneProp = _config.hasOwnProperty("sceneProp") ? _config.sceneProp : "ACTIVE";
+
+   for (var i = 0; i < _config.sources.length; i++) {
+      this.sources.push(_config.sources[i]);
+      this.sources[i].ignoreSourceUpdates = true;
+
+      if (!this.sourceListeners.hasOwnProperty(_config.sources[i].name)) {
+         this.sourceListeners[_config.sources[i].name] = new SourceListener(this.sources[i], this);
       }
    }
 
-   Source.call(this, _config);
 }
 
-util.inherits(Scene, Source);
+util.inherits(Scene, Thing);
 
 Scene.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
 
-   if (_propertyName === "ACTIVE") {
-      this.setSceneStates(_propertyValue);
+   if ((_propertyName === this.sceneProp) && _propertyValue) {
+      this.setSceneStates();
    }
 };
 
-Scene.prototype.setSceneStates = function(_sceneState) {
+Scene.prototype.setSceneStates = function() {
 
-   for (var i = 0; i < this.sceneStates[_sceneState].length; ++i) {
-      var sourceListener = this.sourceListeners[this.sceneStates[_sceneState][i].uName];
+   for (var i = 0; i < this.sources.length; ++i) {
+      var sourceListener = this.sourceListeners[this.sources[i].name];
 
       if (sourceListener.isValid()) {
-         sourceListener.getSource().setProperty(this.sceneStates[_sceneState][i].property, this.sceneStates[_sceneState][i].value, { sourceName: this.uName });
+         sourceListener.getSource().setProperty(this.sources[i].property, this.sources[i].value, { sourceName: this.uName });
       }
    }
 };

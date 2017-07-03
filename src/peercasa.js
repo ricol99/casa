@@ -137,6 +137,20 @@ function PeerCasa(_config) {
       }
    };
 
+   this.sourceEventRaisedCasaHandler = function(_data) {
+
+      if (that.connected && (_data.sourcePeerCasa != that.uName)) {
+
+         if (!_data.local) {
+            console.log(that.uName + ': publishing source ' + _data.sourceName + ' event-raised to peer casa');
+            that.sendMessage('source-event-raised', _data);
+         }
+         else {
+            console.log(that.uName + ': not publishing source ' + _data.sourceName + ' event-raised to peer casa - Not Global');
+         }
+      }
+   };
+
    if (!this.proActiveConnect) {
       // Listen to Casa for my peer instance to connect
       this.casa.on('casa-joined', this.casaJoinedHandler);
@@ -145,6 +159,7 @@ function PeerCasa(_config) {
 
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
 }
 
 util.inherits(PeerCasa, Source);
@@ -159,6 +174,7 @@ PeerCasa.prototype.removeCasaListeners = function() {
 
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
+      this.casa.removeListener('source-event-raised', this.sourceEventRaisedCasaHandler);
    }
 }
 
@@ -465,6 +481,18 @@ PeerCasa.prototype.establishListeners = function(_force) {
          that.ackMessage('source-property-changed', _data);
       });
 
+      this.socket.on('source-event-raised', function(_data) {
+         console.log(that.uName + ': Event received from my peer. Event name: event-raised, source: ' + _data.sourceName);
+         that.emit('source-event-raised', _data);
+         that.emit('broadcast-message', { message: 'source-event-raised', data:_data, sourceCasa: that.uName });
+
+         if (that.sources[_data.sourceName]) {
+            _data.sourcePeerCasa = that.uName;
+            that.sources[_data.sourceName].sourceHasRaisedEvent(_data);
+         }
+         that.ackMessage('source-event-raised', _data);
+      });
+
       this.socket.on('set-source-property-req', function(_data) {
          console.log(that.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
          var source = that.casaSys.findSource(_data.sourceName);
@@ -502,6 +530,11 @@ PeerCasa.prototype.establishListeners = function(_force) {
 
       this.socket.on('source-property-changedAACCKK', function(_data) {
          console.log(that.uName + ': Property-changed Event ACKed by my peer. Source=' + _data.sourceName);
+         that.messageHasBeenAcked(_data);
+      });
+
+      this.socket.on('source-event-raisedAACCKK', function(_data) {
+         console.log(that.uName + ': Event-raised Event ACKed by my peer. Source=' + _data.sourceName);
          that.messageHasBeenAcked(_data);
       });
 

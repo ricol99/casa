@@ -55,7 +55,16 @@ RemoteCasa.prototype.establishListeners = function(_force) {
          if (that.sources[_data.sourceName]) {
             that.sources[_data.sourceName].sourceHasChangedProperty(_data);
          }
-         that.emit('source-property-chnaged', _data);
+         that.emit('source-property-changed', _data);
+      });
+
+      this.peerCasa.on('source-event-raised', function(_data) {
+         console.log(that.uName + ': Event received from remote casa. Event name: event-raised, source: ' + _data.sourceName);
+
+         if (that.sources[_data.sourceName]) {
+            that.sources[_data.sourceName].sourceHasRaisedEvent(_data);
+         }
+         that.emit('source-event-raised', _data);
       });
 
       this.listenersSetUp = true;

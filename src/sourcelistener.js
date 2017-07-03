@@ -16,11 +16,19 @@ function SourceListener(_config, _owner) {
    this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
    this.priority = (_config.priority == undefined) ? 0 : _config.priority;
    this.outputValues = (_config.outputValues == undefined) ? {} : copyData(_config.outputValues);
-   this.property = _config.property;
 
-   this.sourcePropertyName = this.sourceName + ":" + this.property;
+   this.listeningToPropertyChange = _config.hasOwnProperty("property");
 
-   this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceName + ":" + this.property;
+   if (this.listeningToPropertyChange) {
+      this.eventName = _config.property;
+   }
+   else {
+      this.eventName = _config.event;
+   }
+
+   this.sourceEventName = this.sourceName + ":" + this.eventName;
+   this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceName + ":" + this.eventName;
+
 
    if (_config.steps) {
       this.pipeline = new Pipeline(_config.steps, this);
@@ -35,9 +43,16 @@ function SourceListener(_config, _owner) {
 SourceListener.prototype.establishListeners = function() {
    var that = this;
 
-   this.propertyChangedCallback = function(_data) {
-      that.internalSourcePropertyChanged(_data);
-   };
+   if (this.listeningToPropertyChange) {
+      this.propertyChangedCallback = function(_data) {
+         that.internalSourcePropertyChanged(_data);
+      };
+   }
+   else {
+      this.eventRaisedCallback = function(_data) {
+         that.internalSourceEventRaised(_data);
+      };
+   }
 
    this.invalidCallback = function(_data) {
       that.internalSourceIsInvalid(_data);
@@ -49,7 +64,14 @@ SourceListener.prototype.establishListeners = function() {
 
 
    if (this.valid) {
-      this.source.on('property-changed', this.propertyChangedCallback);
+
+      if (this.listeningToPropertyChange) {
+         this.source.on('property-changed', this.propertyChangedCallback);
+      }
+      else {
+         this.source.on('event-raised', this.eventRaisedCallback);
+      }
+
       this.source.on('invalid', this.invalidCallback);
    }
 
@@ -66,7 +88,7 @@ SourceListener.prototype.refreshSource = function() {
       if (ret) {
 
          if (this.pipeline) {
-            this.pipeline.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
+            this.pipeline.sourceIsValid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
          else {
             this.goValid();
@@ -82,11 +104,17 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
    if (this.valid) {
       this.valid = false;
 
-      this.source.removeListener('property-changed', this.propertyChangedCallback);
+      if (this.listeningToPropertyChange) {
+         this.source.removeListener('property-changed', this.propertyChangedCallback);
+      }
+      else {
+         this.source.removeListener('event-raised', this.eventRaisedCallback);
+      }
+
       this.source.removeListener('invalid', this.invalidCallback);
 
       if (this.pipeline) {
-         this.pipeline.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
+         this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
       }
       else {
          this.goInvalid(_data);
@@ -95,25 +123,25 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 }
 
 SourceListener.prototype.goValid = function() {
-   this.owner.sourceIsValid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
+   this.owner.sourceIsValid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
 SourceListener.prototype.goInvalid = function(_data) {
-   this.owner.sourceIsInvalid(copyData({ sourcePropertyName: this.sourcePropertyName, sourceName: this.sourceName, propertyName: this.property }));
+   this.owner.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
 //
 // Internal method - Called by the last step in the pipeline
 //
 SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
-   _data.propertyValue = _newValue;
+   _data.value = _newValue;
    this.sourcePropertyValue = _newValue;
 
    if (this.isTarget) {
-      this.owner.targetPropertyChanged(copyData(_data));
+      this.owner.receivedEventFromTarget(copyData(_data));
    }
    else {
-      this.owner.sourcePropertyChanged(copyData(_data));
+      this.owner.receivedEventFromSource(copyData(_data));
    }
 };
 
@@ -132,7 +160,7 @@ SourceListener.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data
 }
 
 SourceListener.prototype.transformInput = function(_data) {
-   var input = _data.propertyValue;
+   var input = _data.value;
    var newInput = input;
 
    if (this.transform) {
@@ -174,32 +202,57 @@ SourceListener.prototype.isValid = function() {
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
-   if (!this.ignoreSourceUpdates && _data.propertyName == this.property) {
-      console.log(this.uName + ": processing source property change, property=" + _data.propertyName);
+   if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
+      console.log(this.uName + ": processing source property change, property=" + _data.name);
 
       this.lastData = copyData(_data);
-      this.lastData.sourcePropertyName = this.sourcePropertyName;
-      this.sourceRawValue = _data.propertyValue;
+      this.lastData.sourceEventName = this.sourceEventName;
+      this.sourceRawValue = _data.value;
 
       if (this.transform || this.transformMap) {
-         this.lastData.propertyValue = this.transformInput(_data);
+         this.lastData.value = this.transformInput(_data);
       }
 
       if (this.pipeline) {
-         this.pipeline.newInputForProcess(this.lastData.propertyValue, this.lastData);
+         this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
       }
       else {
-         this.sourcePropertyValue = this.lastData.propertyValue;
+         this.sourcePropertyValue = this.lastData.value;
 
          if (this.isTarget) {
-            this.owner.targetPropertyChanged(copyData(this.lastData));
+            this.owner.receivedEventFromTarget(copyData(this.lastData));
          }
          else {
-            this.owner.sourcePropertyChanged(copyData(this.lastData));
+            this.owner.receivedEventFromSource(copyData(this.lastData));
          }
       }
    }
-}
+};
+
+SourceListener.prototype.internalSourceEventRaised = function(_data) {
+
+   if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
+      console.log(this.uName + ": processing source event raised, event=" + _data.name);
+
+      this.lastData = copyData(_data);
+      this.lastData.sourceEventName = this.sourceEventName;
+      this.sourceRawValue = _data.value;
+
+      if (this.transform || this.transformMap) {
+         this.lastData.value = this.transformInput(_data);
+      }
+
+      if (this.pipeline) {
+         this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
+      }
+      else if (this.isTarget) {
+         this.owner.receivedEventFromTarget(copyData(this.lastData));
+      }
+      else {
+         this.owner.receivedEventFromSource(copyData(this.lastData));
+      }
+   }
+};
 
 module.exports = exports = SourceListener;
  

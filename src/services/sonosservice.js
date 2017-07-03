@@ -30,6 +30,7 @@ SonosService.prototype.registerForHostForZone = function(_zone, _callback) {
 SonosService.prototype.coldStart = function() {
    var that = this;
 
+   search.setMaxListeners(50);
    search.on('DeviceAvailable', function(_device, _model) {
 
      _device.getZoneAttrs(function(_err, _attrs) {

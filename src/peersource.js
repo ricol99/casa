@@ -44,13 +44,26 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    if (this.ghostMode) {
 
       if (this.myRealSource.sourceHasChangedProperty(_data)) {
-         this.props[_data.propertyName] = { value: _data.propertyValue };
+         this.props[_data.name] = { value: _data.value };
       }
    }
    else {
-      console.info('Property Changed: ' + this.uName + ':' + _data.propertyName + ': ' + _data.propertyValue);
-      this.props[_data.propertyName] = { value: _data.propertyValue };
+      console.info('Property Changed: ' + this.uName + ':' + _data.name + ': ' + _data.value);
+      this.props[_data.name] = { value: _data.value };
       this.emit('property-changed', copyData(_data));
+   }
+};
+
+PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
+   console.log(this.uName + ': received event-raised event from peer.');
+
+   // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
+   if (this.ghostMode) {
+      this.myRealSource.sourceHasRaisedEvent(_data);
+   }
+   else {
+      console.info('Event Raised: ' + this.uName + ':' + _data.uName);
+      this.emit('event-raised', copyData(_data));
    }
 };
 
@@ -99,10 +112,10 @@ PeerSource.prototype.coldStart = function() {
          if (this.props.hasOwnProperty(prop)) {
             var sendData = {};
             sendData.sourceName = this.uName;
-            sendData.propertyName = prop;
-            sendData.propertyValue = this.props[prop].value;
+            sendData.name = prop;
+            sendData.value = this.props[prop].value;
             sendData.coldStart = true;
-            console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.propertyValue);
+            console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.value);
             this.emit('property-changed', copyData(sendData));
          }
       }
@@ -117,7 +130,7 @@ PeerSource.prototype.invalidateSource = function() {
       for(var prop in this.props) {
 
          if (this.props.hasOwnProperty(prop)) {
-            this.emit('invalid', { sourceName: this.uName, propertyName: prop });
+            this.emit('invalid', { sourceName: this.uName, name: prop });
          }
       }
 

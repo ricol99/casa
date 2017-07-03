@@ -52,18 +52,11 @@
                ]
             }
          ],
-         "activeStates": [
+         "sources": [
             {
                "name": "thing:test-cctv",
                "property": "test-prop-1",
                "value": true
-            }
-         ],
-         "inactiveStates": [
-            {
-               "name": "thing:test-cctv",
-               "property": "test-prop-1",
-               "value": false
             }
          ]
       }

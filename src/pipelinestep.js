@@ -38,7 +38,7 @@ PipelineStep.prototype.process = function(_value, _data) {
 // Source has become available
 //
 PipelineStep.prototype.sourceIsValid = function(_data) {
-   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' is now valid');
+   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' is now valid');
    this.sourceValid = true;
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -53,7 +53,7 @@ PipelineStep.prototype.sourceIsValid = function(_data) {
 // Source is not available anymore
 //
 PipelineStep.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
+   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
    this.sourceValid = false;
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -152,9 +152,9 @@ function copyData(_sourceData) {
 PipelineStep.prototype.checkData = function(_value, _data) {
 
    if (_data.sourceName == undefined) _data.sourceName = this.lastData.sourceName;
-   if (_data.sourcePropertyName == undefined) _data.sourcePropertyName = this.lastData.sourcePropertyName;
-   if (_data.properyName == undefined) _data.propertyName = this.lastData.propertyName;
-   if (_data.properyValue == undefined) _data.propertyValue = _value;
+   if (_data.sourceEventName == undefined) _data.sourceEventName = this.lastData.sourceEventName;
+   if (_data.name == undefined) _data.name = this.lastData.name;
+   if (_data.value == undefined) _data.value = _value;
 
 };
 
