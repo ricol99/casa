@@ -43,11 +43,11 @@
                "events": [
                   {
                      "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             }
@@ -189,11 +189,11 @@
                "events": [
                   {
                      "rule": "sunrise",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "sunset:-1800",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -205,11 +205,11 @@
                "events": [
                   {
                      "rule": "sunrise",
-                     "propertyValue": false
+                     "value": false
                   },
                   {
                      "rule": "sunset:-1800",
-                     "propertyValue": true
+                     "value": true
                   }
                ]
             },
@@ -240,11 +240,11 @@
                "events": [
                   {
                      "rule": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -256,11 +256,11 @@
                "events": [
                   {
                      "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -272,11 +272,11 @@
                "events": [
                   {
                      "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -288,11 +288,11 @@
                "events": [
                   {
                      "rule": "0,20,40 * * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "10,30,50 * * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -363,11 +363,11 @@
                "events": [
                   {
                      "rule": "sunrise:-600",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "sunset:+600",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -405,7 +405,7 @@
                "events": [
                   {
                      "rule": "30 22 * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },

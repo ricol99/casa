@@ -75,6 +75,7 @@ SonosPlayer.prototype.createDevice = function(_device) {
 function SonosDevice(_player, _device) {
    var that = this;
 
+   this.uName = _player.uName + ":" + _device.host;
    this.notifications = {};
    this.player = _player;
    this.device = _device;

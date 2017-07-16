@@ -14,14 +14,58 @@
          "props": [
             {
                "name": "in-bed",
-               "initialValue": false
-            },
-            {
-               "name": "on-holiday",
-               "initialValue": false
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "events": [
+                  {
+                     "name": "richard-wake-up-call",
+                     "rule": "00 7 * * 1-5",
+                     "value": "false"
+                  },
+                  {
+                     "name": "richard-wake-up-call",
+                     "rule": "00 9 * * 6-7",
+                     "value": "false"
+                  }
+               ]
             },
             {
                "name": "at-home",
+               "initialValue": false
+            },
+            {
+               "name": "awake-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:richard",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:richard",
+                     "property": "in-bed",
+                     "transform": "!$value"
+                  }
+               ]
+            },
+            {
+               "name": "in-bed-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:richard",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:richard",
+                     "property": "in-bed"
+                  }
+               ]
+            },
+            {
+               "name": "on-holiday",
                "initialValue": false
             }
          ]
@@ -32,14 +76,58 @@
          "props": [
             {
                "name": "in-bed",
-               "initialValue": false
-            },
-            {
-               "name": "on-holiday",
-               "initialValue": false
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "events": [
+                  {
+                     "name": "natalie-wake-up-call",
+                     "rule": "45 6 * * 1-5",
+                     "value": "false"
+                  },
+                  {
+                     "name": "natalie-wake-up-call",
+                     "rule": "00 9 * * 6-7",
+                     "value": "false"
+                  }
+               ]
             },
             {
                "name": "at-home",
+               "initialValue": false
+            },
+            {
+               "name": "awake-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:natalie",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:natalie",
+                     "property": "in-bed",
+                     "transform": "!$value"
+                  }
+               ]
+            },
+            {
+               "name": "in-bed-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:natalie",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:natalie",
+                     "property": "in-bed"
+                  }
+               ]
+            },
+            {
+               "name": "on-holiday",
                "initialValue": false
             }
          ]
@@ -50,14 +138,58 @@
          "props": [
             {
                "name": "in-bed",
-               "initialValue": false
-            },
-            {
-               "name": "on-holiday",
-               "initialValue": false
+               "type": "scheduleproperty",
+               "initialValue": false,
+               "events": [
+                  {
+                     "name": "dylan-wake-up-call",
+                     "rule": "15 7 * * 1-5",
+                     "value": "false"
+                  },
+                  {
+                     "name": "dylan-wake-up-call",
+                     "rule": "00 10 * * 6-7",
+                     "value": "false"
+                  }
+               ]
             },
             {
                "name": "at-home",
+               "initialValue": false
+            },
+            {
+               "name": "awake-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:dylan",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:dylan",
+                     "property": "in-bed",
+                     "transform": "!$value"
+                  }
+               ]
+            },
+            {
+               "name": "in-bed-at-home",
+               "type": "andproperty",
+               "initialValue": false,
+               "sources": [
+                  {
+                     "name": "user:dylan",
+                     "property": "at-home"
+                  },
+                  {
+                     "name": "user:dylan",
+                     "property": "in-bed"
+                  }
+               ]
+            },
+            {
+               "name": "on-holiday",
                "initialValue": false
             }
          ]
@@ -82,21 +214,21 @@
          ],
          "props": [
             {
-               "name": "in-bed",
-               "type": "andproperty",
+               "name": "awake-at-home",
+               "type": "orproperty",
                "initialValue": false,
                "sources": [
                   {
                      "name": "user:richard",
-                     "property": "in-bed"
+                     "property": "awake-at-home"
                   },
                   {
                      "name": "user:natalie",
-                     "property": "in-bed"
+                     "property": "awake-at-home"
                   },
                   {
                      "name": "user:dylan",
-                     "property": "in-bed"
+                     "property": "awake-at-home"
                   }
                ]
             },
@@ -137,6 +269,24 @@
                      "property": "at-home"
                   }
                ]
+            },
+            {
+               "name": "awake",
+               "initialValue": true,
+               "source": {
+                  "name": "usergroup:family",
+                  "property": "in-bed",
+                  "transform": "!$value"
+               }
+            },
+            {
+               "name": "in-bed-at-home",
+               "initialValue": false,
+               "source": {
+                  "name": "usergroup:family",
+                  "property": "awake-at-home",
+                  "transform": "!$value"
+               }
             }
          ],
          "things": [
@@ -216,11 +366,11 @@
                "events": [
                   {
                      "rule": "sunrise:1800",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "sunset:-1800",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -232,11 +382,11 @@
                "events": [
                   {
                      "rule": "sunset:900",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "30 22 * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -248,11 +398,11 @@
                "events": [
                   {
                      "rule": "sunset:-2700",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "sunrise:3600",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -264,11 +414,11 @@
                "events": [
                   {
                      "rule": "30 22 * * *",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "15 23 * * *",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             },
@@ -280,19 +430,19 @@
                "events": [
                   {
                      "rule": "00 21 * * 1-5",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "30 22 * * 6-7",
-                     "propertyValue": true
+                     "value": true
                   },
                   {
                      "rule": "30 7 * * 1-5",
-                     "propertyValue": false
+                     "value": false
                   },
                   {
                      "rule": "30 9 * * 6-7",
-                     "propertyValue": false
+                     "value": false
                   }
                ]
             }

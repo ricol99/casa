@@ -80,7 +80,7 @@ Schedule.prototype.createEventsFromConfig = function(_owner, _eventsConfig) {
       }
 
       this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                          sunTime: false, job: null, propertyValue: _eventsConfig[index].propertyValue, ramp:  _eventsConfig[index].ramp, owner: _owner });
+                          sunTime: false, job: null, value: _eventsConfig[index].value, ramp:  _eventsConfig[index].ramp, owner: _owner });
    }
 }
 
@@ -192,7 +192,7 @@ Schedule.prototype.resetJob = function(_event) {
    _event.job = schedule.scheduleJob(_event.rule, function() {
 
       if (_event.ramp == undefined) {
-         _event.owner.scheduledEventTriggered(_event, _event.propertyValue);
+         _event.owner.scheduledEventTriggered(_event, _event.value);
       }
       else {
          that.startNewRamp(_event);

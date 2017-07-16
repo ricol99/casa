@@ -137,4 +137,12 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
    }
 };
 
+Thing.prototype.raiseEvent = function(_eventName, _data) {
+   Source.prototype.raiseEvent.call(this, _eventName, _data);
+
+   if (this.parent) {
+      this.parent.raiseEvent(_eventName, _data);
+   }
+};
+
 module.exports = exports = Thing;

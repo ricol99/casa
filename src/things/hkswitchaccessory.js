@@ -22,7 +22,10 @@ function HomekitSwitchAccessory(_config) {
          _callback();
       })
 
-   if (!this.stateless) {
+   if (this.stateless) {
+      this.statelessEventName = (_config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";
+   }
+   else {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
 
@@ -53,7 +56,7 @@ HomekitSwitchAccessory.prototype.getSwitch = function() {
 };
 
 HomekitSwitchAccessory.prototype.switchChanged = function(_oldValue, _newValue) {
-   this.raiseEvent("switch-event", { value: _newValue, oldValue: _oldValue });
+   this.raiseEvent(this.statelessEventName, { value: _newValue, oldValue: _oldValue });
 };
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

@@ -21,7 +21,7 @@ function Scheduler(_config) {
 util.inherits(Scheduler, Thing);
 
 Scheduler.prototype.scheduledEventTriggered = function(_event, _value) {
-   this.raiseEvent(_event.name, { sourceName: this.owner.uName, value: _value });
+   this.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
 }
 
 Scheduler.prototype.getRampStartValue = function(_event) {

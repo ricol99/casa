@@ -46,11 +46,11 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
    // Extract Casa
    this.extractCasa();
 
-   // Extract Users
-   this.extractUsers();
-
    // Extract Services
    this.extractServices(this.config.services);
+
+   // Extract Users
+   this.extractUsers();
 
    // Extract Scenes
    this.extractScenes(this.config.scenes);

@@ -2,43 +2,86 @@ var util = require('util');
 var Thing = require('./thing');
 var SourceListener = require('./sourcelistener');
 
+
 /************************
 {
    "name": "agent:on-holiday",
    "displayName": "On Holiday Agent",
+   "eventProp": "receivedEvent",
+   "stateProp": "currentState",
    "props": [
       {
-         "name": "ACTIVE",
-         "type": "scheduleproperty",
-         "initialValue": false,
-         "writable": false,
-         "events": [
+         "name": "receivedEvent",
+         "initialValue": "none"
+      },
+      {
+         "name": "currentState",
+         "initialValue": "alarm-disarmed"
+      }
+   ],
+   "events": {
+      "alarm-disarmed" : {
+         "true" : [
             {
-               "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-               "propertyValue": true
-            },
+               "name": "alarmtexecom:dumgoyne",
+               "property": "target-state",
+               "value": "armed-full",
+               "exitState": "alarm-armed"
+            }
+         ]
+      },
+      "alarm-armed" : {
+         "false" : [
             {
-               "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
-               "propertyValue": false
+               "name": "alarmtexecom:dumgoyne",
+               "property": "target-state",
+               "value": "disarmed",
+               "exitState": "alarm-disarmed"
             }
          ]
       }
-   ],
-   "sourceMap": {
-      "true" : [
-         {
-            "name": "alarmtexecom:dumgoyne",
-            "property": "target-state",
-            "value": "armed-full"
+   }
+}
+*************************/
+
+/************************
+{
+   "name": "brightness",
+   "type": "stateproperty",
+   "initialValue": "off",
+   "sources": [
+      {
+         "name": "user:natalie",
+         "property": "in-bed-at-home",
+         "states": {
+            "off": {
+               "true": [
+                  "value": "armed-full",
+                  "exitState": "alarm-armed"
+               ]
+            }
          }
-      ],
-      "false" : [
-         {
-            "name": "alarmtexecom:dumgoyne",
-            "property": "target-state",
-            "value": "disarmed"
-         }
-      ]
+      }
+      "alarm-disarmed" : {
+         "true" : [
+            {
+               "name": "alarmtexecom:dumgoyne",
+               "property": "target-state",
+               "value": "armed-full",
+               "exitState": "alarm-armed"
+            }
+         ]
+      },
+      "alarm-armed" : {
+         "false" : [
+            {
+               "name": "alarmtexecom:dumgoyne",
+               "property": "target-state",
+               "value": "disarmed",
+               "exitState": "alarm-disarmed"
+            }
+         ]
+      }
    }
 }
 *************************/
@@ -48,19 +91,19 @@ function Agent(_config) {
 
    this.sourceMap = {};
    this.sourceListeners = {};
-   this.agentProp = _config.hasOwnProperty("agentProp") ? _config.agentProp : "ACTIVE";
+   this.eventProp = _config.hasOwnProperty("eventProp") ? _config.eventProp : "ACTIVE";
 
-   for (var agentPropValue in _config.sourceMap) {
+   for (var eventPropValue in _config.sourceMap) {
 
-      if (_config.sourceMap.hasOwnProperty(agentPropValue)) {
-         this.sourceMap[agentPropValue] = [];
+      if (_config.sourceMap.hasOwnProperty(eventPropValue)) {
+         this.sourceMap[eventPropValue] = [];
 
-         for (var i = 0; i < _config.sourceMap[agentPropValue].length; i++) {
-            this.sourceMap[agentPropValue].push(_config.sourceMap[agentPropValue][i]);
-            this.sourceMap[agentPropValue][i].ignoreSourceUpdates = true;
+         for (var i = 0; i < _config.sourceMap[eventPropValue].length; i++) {
+            this.sourceMap[eventPropValue].push(_config.sourceMap[eventPropValue][i]);
+            this.sourceMap[eventPropValue][i].ignoreSourceUpdates = true;
 
-            if (!this.sourceListeners.hasOwnProperty(_config.sourceMap[agentPropValue][i].name)) {
-               this.sourceListeners[_config.sourceMap[agentPropValue][i].name] = new SourceListener(this.sourceMap[agentPropValue][i], this);
+            if (!this.sourceListeners.hasOwnProperty(_config.sourceMap[eventPropValue][i].name)) {
+               this.sourceListeners[_config.sourceMap[eventPropValue][i].name] = new SourceListener(this.sourceMap[eventPropValue][i], this);
             }
          }
       }
@@ -71,7 +114,7 @@ util.inherits(Agent, Thing);
 
 Agent.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
 
-   if ((_propertyName === this.agentProp)) {
+   if ((_propertyName === this.eventProp)) {
       this.setAgentStates(_propertyValue);
    }
 };

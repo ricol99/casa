@@ -43,7 +43,6 @@ function Scene(_config) {
 
    for (var i = 0; i < _config.sources.length; i++) {
       this.sources.push(_config.sources[i]);
-      this.sources[i].ignoreSourceUpdates = true;
 
       if (!this.sourceListeners.hasOwnProperty(_config.sources[i].name)) {
          this.sourceListeners[_config.sources[i].name] = new SourceListener(this.sources[i], this);
@@ -53,6 +52,36 @@ function Scene(_config) {
 }
 
 util.inherits(Scene, Thing);
+
+Scene.prototype.receivedEventFromSource = function(_data) {
+   var changed = false;
+
+   for (var i = 0; i < this.sources.length; i++) {
+
+      if ((this.sources[i].name === _data.sourceName) &&
+          (this.sources[i].property === _data.name) &&
+          (this.sources[i].currentValue !== _data.value)) {
+
+         this.sources[i].currentValue = _data.value;
+         changed = true;
+         break;
+      }
+   }
+
+   if (changed) {
+      var active = true;
+
+      for (var j = 0; j < this.sources.length; j++) {
+
+         if (this.sources[j].currentValue !== this.sources[j].value) {
+            active = false;
+            break;
+         }
+      }
+
+      this.updateProperty(sceneProp, active);
+   }
+};
 
 Scene.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
 
@@ -65,6 +94,7 @@ Scene.prototype.setSceneStates = function() {
 
    for (var i = 0; i < this.sources.length; ++i) {
       var sourceListener = this.sourceListeners[this.sources[i].name];
+      this.sources[i].currentValue = this.sources[i].value;
 
       if (sourceListener.isValid()) {
          sourceListener.getSource().setProperty(this.sources[i].property, this.sources[i].value, { sourceName: this.uName });
