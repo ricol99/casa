@@ -1,7 +1,6 @@
 var util = require('util');
 var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
-var Forecast = require('forecast.io');
 var Parser = require('cron-parser');
 var Service = require('../service');
 
@@ -11,46 +10,34 @@ function ScheduleService(_config) {
    // Defaults to London
    this.latitude = (_config.hasOwnProperty("latitude")) ? _config.latitude : 51.5;
    this.longitude = (_config.hasOwnProperty("longitude")) ? _config.longitude : -0.1;
-   this.forecastKey = (_config.hasOwnProperty("forecastKey")) ? _config.forecastKey : "5d3be692ae5ea4f3b785973e1f9ea520";
 
-   this.refreshScheduler = new RefreshScheduler(this.latitude, this.longitude, this.forecastKey, this);
-   this.sunTimeCallbacks = [];
+   this.refreshScheduler = new RefreshScheduler(this);
    this.schedules = [];
 }
 
 util.inherits(ScheduleService, Service);
 
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
-   this.schedules.push(new Schedule(_owner, _config, this));
+   var sched = new Schedule(_owner, _config, this);
+   this.schedules.push(sched);
+   return sched.getInitialValue();
 };
 
-ScheduleService.prototype.getSunTimes = function(_callback) {
+ScheduleService.prototype.getSunTimes = function() {
    var that = this;
 
    if (!this.sunTimes) {
-      this.sunTimeCallbacks.push(_callback);
-
-      if (this.sunTimeCallbacks.length == 1) {
-
-         this.refreshScheduler.getSunTimes(this.latitude, this.longitude, this.forecastKey, function(_sunTimes) {
-            that.sunTimes = _sunTimes;
-
-            for (var i = 0; i < that.sunTimeCallbacks.length; ++i) {
-               that.sunTimeCallbacks[i](this.sunTimes);
-            }
-            that.sunTimeCallbacks = [];
-         });
-      }
+      this.sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
    }
-   else {
-      _callback(this.sunTimes);
-   }
+
+   return this.sunTimes;
 };
 
-ScheduleService.prototype.refreshSunEvents = function(_sunTimes) {
+ScheduleService.prototype.refreshSunEvents = function() {
+   this.sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
 
    for (var index = 0; index < this.schedules.length; ++index) {
-      this.schedules[index].refreshSunEvents(_sunTimes);
+      this.schedules[index].refreshSunEvents(this.sunTimes);
    }
 };
 
@@ -149,26 +136,23 @@ Schedule.prototype.determineClosestEvent = function(_now, _currentClosestEventSc
    }
 };
 
-Schedule.prototype.scheduleAllJobs = function(_callback) {
+Schedule.prototype.scheduleAllJobs = function() {
    var that = this;
 
-   this.service.getSunTimes(function(_sunTimes) {
-      that.setSunTimes(_sunTimes);
+   this.setSunTimes(this.service.getSunTimes());
 
-      for (var index = 0; index < that.events.length; ++index) {
+   for (var index = 0; index < this.events.length; ++index) {
 
-         if (that.events[index].sunTime) {
+      if (this.events[index].sunTime) {
 
-            if (that.events[index].rule > new Date()) {
-               that.resetJob(that.events[index]);
-            }
-         }
-         else {
-            that.resetJob(that.events[index]);
+         if (this.events[index].rule > new Date()) {
+            this.resetJob(this.events[index]);
          }
       }
-      _callback();
-   });
+      else {
+         this.resetJob(this.events[index]);
+      }
+   }
 }
 
 Schedule.prototype.refreshSunEvents = function(_sunTimes) {
@@ -183,11 +167,6 @@ Schedule.prototype.refreshSunEvents = function(_sunTimes) {
 }
 
 Schedule.prototype.setSunTimes = function(_sunTimes) {
-
-   if (_sunTimes == undefined) {
-      _sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
-   }
-
    var result = false;
    var eventsLen = this.events.length;
 
@@ -245,32 +224,29 @@ Schedule.prototype.startNewRamp = function(_event) {
 }
 
 Schedule.prototype.scheduleEvents = function() {
-   var that = this;
+   this.scheduleAllJobs();
+};
 
-   this.scheduleAllJobs(function() {
-      var closestEvent = null;
-      var closestEventSchedule = null;
-      var now = new Date();
+Schedule.prototype.getInitialValue = function() {
+   var closestEvent = null;
+   var closestEventSchedule = null;
+   var now = new Date();
 
-      for (var index = 0; index < that.events.length; ++index) {
-         var tempClosestSchedule = that.determineClosestEvent(now, closestEventSchedule, that.events[index]);
+   for (var index = 0; index < this.events.length; ++index) {
+      var tempClosestSchedule = this.determineClosestEvent(now, closestEventSchedule, this.events[index]);
 
-         if (tempClosestSchedule) {
-            closestEvent = that.events[index];
-            closestEventSchedule = new Date(tempClosestSchedule);
-         }
+      if (tempClosestSchedule) {
+         closestEvent = this.events[index];
+         closestEventSchedule = new Date(tempClosestSchedule);
       }
+   }
 
-      if (!closestEvent) {
-         closestEvent = that.events[that.events.length-1];
-      }
+   if (!closestEvent) {
+      closestEvent = this.events[this.events.length-1];
+   }
 
-      // Set Initial Value
-      console.log(that.uName + ": Closest event is " + closestEvent.rule);
-      var value = (closestEvent.ramp == undefined) ? closestEvent.propertyValue : closestEvent.ramp.endValue;
-
-      closestEvent.owner.scheduledEventTriggered(closestEvent, value, true);
-   });
+   console.log(this.uName + ": Closest event is " + closestEvent.rule);
+   return (closestEvent.ramp == undefined) ? closestEvent.propertyValue : closestEvent.ramp.endValue;
 };
 
 function Ramp(_event) {
@@ -309,70 +285,13 @@ Ramp.prototype.nextInterval = function() {
    }, this.interval * 1000, this);
 };
 
-function RefreshScheduler(_latitude, _longitude, _apiKey, _schedulerService) {
+function RefreshScheduler(_schedulerService) {
    this.schedulerService = _schedulerService;
    var that = this;
 
    var refreshJob = schedule.scheduleJob('10 1 * * *', function() {
-
-      that.getSunTimes(_latitude, _longitude, _apiKey, function(_sunTimes) {
-         that.sunTimes = _sunTimes;
-         that.schedulerService.refreshSunEvents(_sunTimes);
-      });
+      that.schedulerService.refreshSunEvents();
    });
-}
-
-RefreshScheduler.prototype.getSunTimes = function(_latitude, _longitude, _apiKey, _callback) {
-   var sunriseDelta = 0;
-   var sunsetDelta = 0;
-
-   var options = { APIKey: _apiKey, timeout: 5000 };
-   var forecast = new Forecast(options);
-
-   var sunTimes = SunCalc.getTimes(new Date(), _latitude, _longitude);
-
-   /*forecast.getAtTime(_latitude, _longitude, new Date(), function(_err, _res, _data) {
-      var sunriseIndex = 0;
-      var sunsetIndex = 0;
-
-      if (!_err && _data.hourly && _data.hourly.data) {
-
-         for (var index = 0; index < _data.hourly.data.length; ++index) {
-
-            if (_data.hourly.data[index].time*1000 > sunTimes["sunrise"].getTime() && index > 0) {
-               sunriseIndex = index - 1;
-               break;
-            }
-         }
-
-         for (var index2 = index; index2 < _data.hourly.data.length; ++index2) {
-
-            if (_data.hourly.data[index2].time*1000 > sunTimes["sunsetStart"].getTime() && index2 > 0) {
-               sunsetIndex = index2 - 1;
-               break;
-            }
-         }
-    
-         if (_data.hourly.data[sunriseIndex].cloudCover > 0.2) {
-            sunriseDelta = _data.hourly.data[sunriseIndex].cloudCover * 3600;
-         }
-
-         if (_data.hourly.data[sunsetIndex].cloudCover > 0.2) {
-            sunsetDelta = _data.hourly.data[sunsetIndex].cloudCover * 3600;
-         }
-
-         sunTimes["sunrise"].setTime(sunTimes["sunrise"].getTime() + (sunriseDelta * 1000));
-         sunTimes["sunriseEnd"].setTime(sunTimes["sunriseEnd"].getTime() + (sunriseDelta * 1000));
-         sunTimes["sunsetStart"].setTime(sunTimes["sunsetStart"].getTime() - (sunsetDelta * 1000));
-         sunTimes["sunset"].setTime(sunTimes["sunset"].getTime() - (sunsetDelta * 1000));
-         console.info("Sunrise Cloud Cover = " + _data.hourly.data[sunriseIndex].cloudCover + " Sunrise Delta = " + sunriseDelta);
-         console.info("Sunset Cloud Cover = " + _data.hourly.data[sunsetIndex].cloudCover + " Sunset Delta = " + sunsetDelta);
-      }
-      else {
-         console.info("SCHEDULER unable to get sunrise time! Error = ", _err.code);
-      }*/
-      _callback(sunTimes);
-   //});
 }
 
 module.exports = exports = ScheduleService;

@@ -22,19 +22,13 @@ function ScheduleProperty(_config, _owner) {
    this.events = [];
    this.ramps = {};
 
-   this.scheduleService.registerEvents(this, _config.events);
+   this.value = this.scheduleService.registerEvents(this, _config.events);
 }
 
 util.inherits(ScheduleProperty, Property);
 
-ScheduleProperty.prototype.scheduledEventTriggered = function(_event, _value, _coldStart) {
-   var data = { sourceName: this.owner.uName };
-
-   if (_coldStart) {
-      data.coldStart = true;
-   }
-
-   this.updatePropertyInternal(_value, data);
+ScheduleProperty.prototype.scheduledEventTriggered = function(_event, _value) {
+   this.updatePropertyInternal(_value, { sourceName: this.owner.uName });
 }
 
 ScheduleProperty.prototype.getRampStartValue = function(_event) {
