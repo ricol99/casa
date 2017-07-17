@@ -316,6 +316,8 @@ PeerCasa.prototype.connectToPeerCasa = function() {
             that.removeCasaListeners();
             that.invalidateSources();
             that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+            that.manualDisconnect = true;
+            that.socket.disconnect();
          }
 
          that.deleteMeIfNeeded();

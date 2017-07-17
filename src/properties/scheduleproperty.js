@@ -22,7 +22,11 @@ function ScheduleProperty(_config, _owner) {
    this.events = [];
    this.ramps = {};
 
-   this.value = this.scheduleService.registerEvents(this, _config.events);
+   var val = this.scheduleService.registerEvents(this, _config.events);
+
+   if (_config.events.length > 1) {
+      this.value = val;
+   }
 }
 
 util.inherits(ScheduleProperty, Property);
