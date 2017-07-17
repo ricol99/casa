@@ -2,6 +2,137 @@ var util = require('util');
 var Thing = require('./thing');
 var SourceListener = require('./sourcelistener');
 
+{
+   "name": "room:master-bedroom",
+   "initialScene": "scene:master-bedroom-vacant",
+   "scenes": [
+      {
+         "name": "scene:master-bedroom-vacant",
+         "sources": [
+            {
+               "name": "user:natalie",
+               "property": "in-bed",
+               "value": false,
+               "nextScenes": [
+                  {
+                     "name": "scene:master-bedroom-natalie-reading",
+                     "value": true
+                  }
+               ]
+            },
+            {
+               "name": "user:richard",
+               "property": "in-bed",
+               "value": false,
+               "nextScenes": [
+                  {
+                     "name": "scene:master-bedroom-richard-reading",
+                     "value": true
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "scene:master-bedroom-natalie-reading",
+         "sources": [
+            {
+               "name": "room:master-bedroom",
+               "event": "natalie-bed-switch",
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-asleep",
+                  }
+               ]
+            },
+            {
+               "name": "user:richard",
+               "property": "in-bed",
+               "value": false,
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-both-reading",
+                     "value": true
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "scene:master-bedroom-both-reading",
+         "sources": [
+            {
+               "name": "room:master-bedroom",
+               "event": "natalie-bed-switch",
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-richard-reading-natalie-asleep",
+                  }
+               ]
+            },
+            {
+               "name": "room:master-bedroom",
+               "event": "richard-bed-switch",
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-natalie-reading-richard-asleep",
+                     "value": true
+                  }
+               ]
+            }
+         ]
+      }
+      {
+         "name": "scene:master-bedroom-natalie-reading",
+         "sources": [
+            {
+               "name": "room:master-bedroom",
+               "event": "natalie-bed-switch",
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-asleep",
+                  }
+               ]
+            },
+            {
+               "name": "user:richard",
+               "property": "in-bed",
+               "value": false,
+               "nextscenes": [
+                  {
+                     "name": "scene:master-bedroom-both-reading",
+                     "value": true
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "room:master-bedroom",
+         "event": "natalie-bed-switch",
+         "states": {
+            "on-in-bed-reading": {
+               "maxTime": 900,
+               "do": {
+                  "value": 0,
+                  "exitState": "off-in-bed-sleeping"
+               },
+               "timeout": {
+                  "value": 0,
+                  "exitState": "off-in-bed-sleeping"
+               }
+            },
+            "off-in-bed-sleeping": {
+               "do": {
+                  "value": 50, 
+                  "exitState": "on-in-bed-reading"
+               }
+            }
+         }
+      }
+   }
+}
+
 
 /************************
 {
