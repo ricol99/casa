@@ -25,7 +25,7 @@ function LatchProperty(_config, _owner) {
 util.inherits(LatchProperty, Property);
 
 LatchProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   var propValue = _data.propertyValue;
+   var propValue = _data.value;
    this.lastData = _data;
 
    if (propValue) {
@@ -69,7 +69,7 @@ LatchProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceLis
 }
 
 LatchProperty.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
-   this.controllerActive = _data.propertyValue;
+   this.controllerActive = _data.value;
 
    if (this.controllerActive) {
       if (!this.active && this.sourceActive) {

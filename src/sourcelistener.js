@@ -7,6 +7,7 @@ function SourceListener(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.owner = _owner;
+
    this.sourceName = _config.uName;
 
    this.transform = _config.transform; 

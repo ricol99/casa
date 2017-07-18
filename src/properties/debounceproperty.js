@@ -16,7 +16,7 @@ function DebounceProperty(_config, _owner) {
 util.inherits(DebounceProperty, Property);
 
 DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
-   var propValue = _data.propertyValue;
+   var propValue = _data.value;
    console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
 
    if (_data.coldStart) {    // Cold start only once

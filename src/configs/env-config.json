@@ -881,65 +881,6 @@
                      ]
                   }
                ]
-            },
-            {
-               "name": "hkswitchaccessory:natalie-in-bed",
-               "displayName": "Natalie in Bed",
-               "manufacturer": "Casa Collin Ltd",
-               "model": "V0.1",
-               "serialNumber": "1234567890",
-               "stateless": true,
-               "eventName": "natalie-bed-switch",
-               "props": [
-               ]
-            },
-            {
-               "name": "hkswitchaccessory:richard-in-bed",
-               "displayName": "Richard in Bed",
-               "manufacturer": "Casa Collin Ltd",
-               "model": "V0.1",
-               "serialNumber": "1234567890",
-               "stateless": true,
-               "eventName": "richard-bed-switch",
-               "props": [
-               ]
-            },
-            {
-               "name": "agent:master-bedroom-agent",
-               "displayName": "Master Bedroom Agent",
-               "agentProp": "bedroom-input",
-               "props": [
-                  "name": "bedroom-input",
-                  "initialValue": "idle",
-                  "sources": [
-                     {
-                        "name": "hkswitchaccessory:natalie-in-bed",
-                        "event": "natalie-bed-switch",
-                        "transform": "$value='natalie-in-bed'"
-                     },
-                     {
-                        "name": "hkswitchaccessory:richard-in-bed",
-                        "event": "richard-bed-switch",
-                        "transform": "$value='richard-in-bed'"
-                     }
-                  ]
-               ],
-               "sourceMap": {
-                  "natalie-in-bed" : [
-                     {
-                        "name": "user:natalie",
-                        "property": "in-bed",
-                        "value": true 
-                     }
-                  ],
-                  "richard-in-bed" : [
-                     {
-                        "name": "user:richard",
-                        "property": "in-bed",
-                        "value": true
-                     }
-                  ]
-               }
             }
          ]
       },

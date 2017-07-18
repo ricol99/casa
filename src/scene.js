@@ -15,11 +15,11 @@ var SourceListener = require('./sourcelistener');
          "events": [
             {
                "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-               "propertyValue": true
+               "value": true
             },
             {
                "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
-               "propertyValue": false
+               "value": false
             }
          ]
       }
@@ -43,9 +43,11 @@ function Scene(_config) {
 
    for (var i = 0; i < _config.sources.length; i++) {
       this.sources.push(_config.sources[i]);
+      var sourceListenerName = _config.sources[i].name + ":" + _config.sources[i].property;
+      this.sources[this.sources.length-1].sourceListenerName = sourceListenerName;
 
-      if (!this.sourceListeners.hasOwnProperty(_config.sources[i].name)) {
-         this.sourceListeners[_config.sources[i].name] = new SourceListener(this.sources[i], this);
+      if (!this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+         this.sourceListeners[sourceListenerName] = new SourceListener(this.sources[i], this);
       }
    }
 
@@ -93,7 +95,7 @@ Scene.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, 
 Scene.prototype.setSceneStates = function() {
 
    for (var i = 0; i < this.sources.length; ++i) {
-      var sourceListener = this.sourceListeners[this.sources[i].name];
+      var sourceListener = this.sourceListeners[this.sources[i].sourceListenerName];
       this.sources[i].currentValue = this.sources[i].value;
 
       if (sourceListener.isValid()) {

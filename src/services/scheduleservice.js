@@ -246,7 +246,7 @@ Schedule.prototype.getInitialValue = function() {
    }
 
    console.log(this.uName + ": Closest event is " + closestEvent.rule);
-   return (closestEvent.ramp == undefined) ? closestEvent.propertyValue : closestEvent.ramp.endValue;
+   return (closestEvent.ramp == undefined) ? closestEvent.value : closestEvent.ramp.endValue;
 };
 
 function Ramp(_event) {

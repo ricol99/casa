@@ -17,7 +17,7 @@ InvertStep.prototype.process = function(_value, _data) {
    if (typeof _value === "boolean") {
       this.outputForNextStep(!_value, _data);
    }
-   else if (typeof _data.propertyValue === "number") {
+   else if (typeof _data.value === "number") {
       this.outputForNextStep(-_value, _data);
    }
 }

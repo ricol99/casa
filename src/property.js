@@ -54,7 +54,7 @@ function Property(_config, _owner) {
             _config.sources[index].priority = index;
          }
 
-         _config.sources[index].uName = _config.sources[index].name;
+         _config.sources[index].uName = (_config.hasOwnProperty("name")) ? _config.sources[index].name : this.owner.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;

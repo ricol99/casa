@@ -15,7 +15,7 @@ function Camera(_config) {
 util.inherits(Camera, Thing);
 
 Camera.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.propertyValue);
+   console.log(this.uName + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _data.value);
 
    // https active request
    if (_propValue) {

@@ -26,8 +26,8 @@ ThresholdStep.prototype.process = function(_value, _data) {
 
          for (var index = 0; index < this.thresholds.length; ++index) {
 
-            if (((this.value >= this.thresholds[index]) && (_data.propertyValue <= this.thresholds[index])) ||
-                ((this.value <= this.thresholds[index]) && (_data.propertyValue >= this.thresholds[index]))) {
+            if (((this.value >= this.thresholds[index]) && (_data.value <= this.thresholds[index])) ||
+                ((this.value <= this.thresholds[index]) && (_data.value >= this.thresholds[index]))) {
 
                this.activeThreshold = index;
                break;
@@ -38,7 +38,7 @@ ThresholdStep.prototype.process = function(_value, _data) {
       if (this.activeThreshold != -1) {
 
          // We are currently buffering
-         if (Math.abs(_data.propertyValue - this.thresholds[this.activeThreshold]) > this.buffer) {
+         if (Math.abs(_data.value - this.thresholds[this.activeThreshold]) > this.buffer) {
             this.activeThreshold = -1;
          }
          else {

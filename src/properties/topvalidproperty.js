@@ -37,8 +37,8 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
    if (this.highestValidSource && (this.highestValidSource.sourcePropertyName != _data.sourcePropertyName)) {
 
       this.value = this.highestValidSource.getPropertyValue();
-      _data.propertyValue = this.value;
-      this.updatePropertyInternal(_data.propertyValue, _data);
+      _data.value = this.value;
+      this.updatePropertyInternal(_data.value, _data);
    }
 
    Property.prototype.sourceIsValid.call(this, _data);
@@ -52,10 +52,10 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 
       if (newHighestSource && (newHighestSource != this.highestValidSource)) {
          this.highestValidSource = newHighestSource;
-         _data.propertyValue = this.highestValidSource.getPropertyValue();
+         _data.value = this.highestValidSource.getPropertyValue();
 
-         //if (_data.propertyValue !== undefined) {
-            this.updatePropertyInternal(_data.propertyValue, _data);
+         //if (_data.value !== undefined) {
+            this.updatePropertyInternal(_data.value, _data);
          //}
       }
       else {
@@ -69,7 +69,7 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 TopValidProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
 
    if (_sourceListener == this.highestValidSource) {
-      this.updatePropertyInternal(_data.propertyValue, _data);
+      this.updatePropertyInternal(_data.value, _data);
    }
 };
 
