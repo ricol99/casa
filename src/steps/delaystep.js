@@ -16,7 +16,7 @@ util.inherits(DelayStep, PipelineStep);
 // Call outputForNextStep() to pass on output to next step (when required)
 //
 DelayStep.prototype.process = function(_value, _data) {
-   console.log('source ' + _data.sourceName + ' has changed property ' + _data.propertyName + ' to ' + _value + '!');
+   console.log('source ' + _data.sourceName + ' has changed property ' + _data.name + ' to ' + _value + '!');
    this.delayedEvents.push(new DelayedEvent(_value, _data, this));
 }
 

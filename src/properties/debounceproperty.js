@@ -17,7 +17,7 @@ util.inherits(DebounceProperty, Property);
 
 DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
-   console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.propertyName + ' has changed to ' + propValue + '!');
+   console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
 
    if (_data.coldStart) {    // Cold start only once
       this.sourceActive = propValue;
@@ -50,7 +50,7 @@ DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_source
 //};
 
 DebounceProperty.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.propertyName + ' invalid!');
+   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
    this.invalidData = copyData(_data);
 
    if (this.valid) {

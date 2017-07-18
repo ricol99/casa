@@ -16,6 +16,7 @@
     "forecast.io": "0.0.11",
     "hap-nodejs": "^0.4.21",
     "lightwaverf": "0.0.1",
+    "node-hue-api": "^2.4.2",
     "node-persist": "^2.0.7",
     "node-schedule": "~0.1.16",
     "ping": "^0.2.1",
