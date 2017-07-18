@@ -25,42 +25,47 @@ function PeerCasaService(_config) {
    this.id = this.casa.id;
 
    if (!process.env.INTERNETCASA) {
-      this.createAdvertisement();
+      try {
+         this.createAdvertisement();
 
-      this.browser = mdns.createBrowser(mdns.tcp('casa'), {resolverSequence: sequence});
-      //this.browser = mdns.createBrowser(mdns.tcp('casa'));
+         this.browser = mdns.createBrowser(mdns.tcp('casa'), {resolverSequence: sequence});
+         //this.browser = mdns.createBrowser(mdns.tcp('casa'));
 
-      var that = this;
+         var that = this;
 
-      this.browser.on('serviceUp', function(service) {
-         console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
+         this.browser.on('serviceUp', function(service) {
+            console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
-         if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
-            (service.name != that.casa.uName && !that.casaSys.remoteCasas[service.name])) {
+            if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
+               (service.name != that.casa.uName && !that.casaSys.remoteCasas[service.name])) {
 
-            if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.uName != service.name)) {
-               // Found a peer
-               var config  = {
-                  name: service.name,
-                  proActiveConnect: true,
-                  address: { hostname: service.host, port: service.port }
-               };
+               if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.uName != service.name)) {
+                  // Found a peer
+                  var config  = {
+                     name: service.name,
+                     proActiveConnect: true,
+                     address: { hostname: service.host, port: service.port }
+                  };
 
-               // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-               if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.uName)) {
-                  var peerCasa = that.casaSys.createPeerCasa(config);
-                  peerCasa.start();
-                  console.log('New peer casa: ' + peerCasa.uName);
+                  // Only try to connect if we don't have a session already AND it is our role to connect and not wait
+                  if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.uName)) {
+                     var peerCasa = that.casaSys.createPeerCasa(config);
+                     peerCasa.start();
+                     console.log('New peer casa: ' + peerCasa.uName);
+                  }
                }
             }
-         }
-      });
+         });
 
-      this.browser.on('serviceDown', function(service) {
-         console.log('service down: casa=' + service.name);
-      });
+         this.browser.on('serviceDown', function(service) {
+            console.log('service down: casa=' + service.name);
+         });
 
-      that.browser.start();
+         that.browser.start();
+      } catch (_err) {
+         // Not scheduled during time period
+         console.log(this.uName + ': Error: ' + _err.message);
+      }
    }
 }
 
