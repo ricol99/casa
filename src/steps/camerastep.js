@@ -13,7 +13,7 @@ function Camera(_config, _pipeline) {
 util.inherits(Camera, PipelineStep);
 
 Camera.prototype.process = function(_value, _data) {
-   console.log(this.type + ': received property change, property='+ _data.sourcePropertyName + ' value=' + _value);
+   console.log(this.type + ': received property change, property='+ _data.sourceEventName + ' value=' + _value);
 
    // https active request
    if (_value) {

@@ -171,24 +171,38 @@ function StateProperty(_config, _owner) {
 util.inherits(StateProperty, Thing);
 
 StateProperty.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
+   var currentState = this.states[this.value];
+   var nextState = null;
 
-   if ((_propertyName === this.eventProp)) {
-      this.setStatePropertyStates(_propertyValue);
+   if (currentState && currentState.sourceMap[_data.sourceEventName]) {
+      nextState = this.findNextState(currentState, _propertyValue);
+   }
+
+   if (!nextState && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
+      nextState = this.findNextState(this.states["DEFAULT"], _propertyValue);
+   }
+
+   if (nextState) {
+      this.updatePropertyInternal(nextState);
    }
 };
 
-StateProperty.prototype.setStatePropertyStates = function(_propertyValue) {
+StateProperty.prototype.findNextState = function(_state, _propertyValue) {
 
-   if (this.sourceMap[_propertyValue]) {
+   for (var i = 0; i < _state.sources.length, ++i) {
 
-      for (var i = 0; i < this.sourceMap[_propertyValue].length; ++i) {
-         var sourceListener = this.sourceListeners[this.sourceMap[_propertyValue][i].name];
+      if (_state.sources[i].hasOwnProperty("value")) {
 
-         if (sourceListener.isValid()) {
-            sourceListener.getSource().setProperty(this.sourceMap[_propertyValue][i].property, this.sourceMap[_propertyValue][i].value, { sourceName: this.uName });
+         if (_state.sources[i].value == _propertyValue) {
+            return _state.sources[i].nextState;
          }
       }
+      else {
+         return _state.sources[i].nextState;
+      }
    }
+
+   return undefined;
 };
 
 StateProperty.prototype.sourceIsValid = function(_data) {

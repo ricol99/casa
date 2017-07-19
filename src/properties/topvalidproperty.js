@@ -15,10 +15,10 @@ function findHighestPriorityValidSource(_this) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;
 
-   for (var sourcePropertyName in _this.sourceListeners) {
+   for (var sourceEventName in _this.sourceListeners) {
 
-      if (_this.sourceListeners.hasOwnProperty(sourcePropertyName)){
-         var sourceListener = _this.sourceListeners[sourcePropertyName];
+      if (_this.sourceListeners.hasOwnProperty(sourceEventName)){
+         var sourceListener = _this.sourceListeners[sourceEventName];
 
          if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.valid) {
             highestPriorityFound = sourceListener.priority;
@@ -34,7 +34,7 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
 
    this.highestValidSource = findHighestPriorityValidSource(this);
 
-   if (this.highestValidSource && (this.highestValidSource.sourcePropertyName != _data.sourcePropertyName)) {
+   if (this.highestValidSource && (this.highestValidSource.sourceEventName != _data.sourceEventName)) {
 
       this.value = this.highestValidSource.getPropertyValue();
       _data.value = this.value;
@@ -46,7 +46,7 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
 
 TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 
-   if (this.highestValidSource && (this.highestValidSource.sourcePropertyName == _data.sourcePropertyName)) {
+   if (this.highestValidSource && (this.highestValidSource.sourceEventName == _data.sourceEventName)) {
       // Current output is based off a now invalid source - rescan
       var newHighestSource = findHighestPriorityValidSource(this);
 
