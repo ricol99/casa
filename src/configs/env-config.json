@@ -837,6 +837,42 @@
                      ]
                   }
                ]
+            },
+            {
+               "name": "hklightaccessory:dylan-bedroom-lights",
+               "displayName": "Dylan Bedroom Lights",
+               "manufacturer": "Hue Philips Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "hueSupported": true,
+               "saturationSupported": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "hklightaccessory:dylan-bedroom-lamp",
+                     "displayName": "Dylan Bedroom Lamp",
+                     "propogateToParent": false,
+                     "manufacturer": "Hue Philips Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
+                     "brightnessSupported": true,
+                     "hueSupported": true,
+                     "saturationSupported": true,
+                     "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "huelight:dylan-bedroom-lamp",
+                           "displayName": "Dylan Bedroom Lamp",
+                           "deviceID": 2,
+                           "props": [
+                           ]
+                        }
+                     ]
+                  }
+               ]
             }
          ]
       },
