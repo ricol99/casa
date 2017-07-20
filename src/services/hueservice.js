@@ -5,7 +5,8 @@ var Hue = require("node-hue-api");
 function HueService(_config) {
    Service.call(this, _config);
 
-   this.linkAddress = _config.linkAddress;
+   this.linkId = _config.linkId;
+   this.userId = _config.userId;
    this.username = _config.username;
    this.queue = [];
    this.requestPending = false;
@@ -14,16 +15,42 @@ function HueService(_config) {
 util.inherits(HueService, Service);
 
 HueService.prototype.coldStart = function() {
- 
-   var displayResult = function(result) {
-       console.log(JSON.stringify(result, null, 2));
-   };
- 
-   this.hue = new Hue.HueApi(this.linkAddress, this.username);
-   this.lightState = Hue.lightState.create();
+   var that = this;
+
+   Hue.nupnpSearch(function(_err, _bridges) {
+
+      if (_err || _bridges.length == 0) {
+         console.error(that.uName + ": Unable to find bridge, error=" + _err ? _err : "None Found!");
+         process.exit(1);
+      }
+
+      console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
+
+      for (var i = 0; i < _bridges.length; ++i) {
+
+         if (_bridges[i].id == that.linkId) {
+            that.linkAddress = _bridges[i].ipaddress;
+            break;
+         }
+      }
+
+      if (!that.linkAddress) {
+         console.error(that.uName + ": Unable to find bridge, error=" + "Id " + that.linkId + " not Found!");
+         process.exit(1);
+      }
+
+      that.hue = new Hue.HueApi(that.linkAddress, that.userId);
+      that.lightState = Hue.lightState.create();
+      that.ready = true;
+   });
 };
 
 HueService.prototype.setLightState = function(_config, _callback) {
+
+   if (!this.ready) {
+      _callback("Not ready yet!");
+      return;
+   }
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on, deviceId: ' + _params.deviceId);
@@ -40,6 +67,11 @@ HueService.prototype.setLightState = function(_config, _callback) {
 
 HueService.prototype.turnLightOn = function(_deviceId, _callback) {
 
+   if (!this.ready) {
+      _callback("Not ready yet!");
+      return;
+   }
+
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on, deviceId: ' + _params.deviceId);
       _this.hue.setLightState(_params.deviceId, _this.lightState.on(), _callback);
@@ -51,6 +83,11 @@ HueService.prototype.turnLightOn = function(_deviceId, _callback) {
 };
 
 HueService.prototype.turnLightOff = function(_deviceId, _callback) {
+
+   if (!this.ready) {
+      _callback("Not ready yet!");
+      return;
+   }
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device off, deviceId: ' + _params.deviceId);

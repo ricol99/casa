@@ -39,6 +39,12 @@
          "name": "lightwaverfservice",
          "displayName": "LightwaveRF Link Service",
          "linkAddress": "192.168.1.236"
+      },
+      {
+         "name": "hueservice",
+         "displayName": "Hue Link Services",
+         "linkId": "001788fffe6d3a92",
+         "userId": "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w"
       }
    ],
    "scenes": [
