@@ -16,21 +16,45 @@ function HueLight(_config) {
    this.brightnessSupported = true;
    this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
 
-   if (_config.hueSupported) {
-      this.hueSupported = true;
-      this.ensurePropertyExists('hue', 'property', { initialValue: 255 }, _config);
-   }
-
-   if (_config.saturationSupported) {
-      this.saturationSupported = true;
-      this.ensurePropertyExists('saturation', 'property', { initialValue: 255 }, _config);
-   }
-
-   this.hueService =  this.casaSys.findService("lightwaverfservice");
+   this.hueService =  this.casaSys.findService("hueservice");
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");
       process.exit();
+   }
+
+   var that = this;
+
+   if (_config.hasOwnProperty("hueSupported")) {
+
+      if (_config.hueSupported) {
+         this.hueSupported = true;
+         this.ensurePropertyExists('hue', 'property', { initialValue: 65535 }, _config);
+      }
+
+      if (_config.saturationSupported) {
+         this.saturationSupported = true;
+         this.ensurePropertyExists('saturation', 'property', { initialValue: 255 }, _config);
+      }
+   }
+   else {
+      this.hueService.getLightCapability(this.deviceId, function(_err, _result) {
+
+         if (_err) {
+            console.error(that.uName + ": Not able to find hue light id=", that.deviceId);
+            return;
+         }
+
+         if (_result.hue) {
+            that.hueSupported = true;
+            that.ensurePropertyExists('hue', 'property', { initialValue: 65535 }, _config);
+         }
+
+         if (_result.saturation) {
+            that.saturationSupported = true;
+            that.ensurePropertyExists('saturation', 'property', { initialValue: 255 }, _config);
+         }
+      });
    }
 }
 
