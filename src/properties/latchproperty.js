@@ -24,7 +24,7 @@ function LatchProperty(_config, _owner) {
 
 util.inherits(LatchProperty, Property);
 
-LatchProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
    this.lastData = _data;
 

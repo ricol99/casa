@@ -66,7 +66,7 @@ TopValidProperty.prototype.sourceIsInvalid = function(_data) {
    Property.prototype.sourceIsInvalid.call(this, _data);
 }
 
-TopValidProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+TopValidProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    if (_sourceListener == this.highestValidSource) {
       this.updatePropertyInternal(_data.value, _data);

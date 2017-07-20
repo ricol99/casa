@@ -11,7 +11,7 @@ function XorProperty(_config, _owner) {
 
 util.inherits(XorProperty, Property);
 
-XorProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+XorProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var allInputsActive = true;
    var oneInputActive = false;
 

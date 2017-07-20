@@ -11,7 +11,7 @@ function AndProperty(_config, _owner) {
 
 util.inherits(AndProperty, Property);
 
-AndProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+AndProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    // all inputs active
    for (var prop in this.sourceListeners) {

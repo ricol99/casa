@@ -11,7 +11,7 @@ function OrProperty(_config, _owner) {
 
 util.inherits(OrProperty, Property);
 
-OrProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+OrProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    // any input active
    for (var prop in this.sourceListeners) {

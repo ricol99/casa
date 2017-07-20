@@ -15,7 +15,7 @@ function DebounceProperty(_config, _owner) {
 
 util.inherits(DebounceProperty, Property);
 
-DebounceProperty.prototype.newPropertyValueReceivedFromSource = function(_sourceListener, _data) {
+DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
    console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
 
