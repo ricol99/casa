@@ -10,6 +10,7 @@ function HueService(_config) {
    this.username = _config.username;
    this.queue = [];
    this.requestPending = false;
+   this.callbacks = {};
 }
 
 util.inherits(HueService, Service);
@@ -41,10 +42,9 @@ HueService.prototype.coldStart = function() {
 
       that.hue = new Hue.HueApi(that.linkAddress, that.userId);
       that.lightState = Hue.lightState.create();
-      that.callbacks = {};
       that.ready = true;
 
-      that.hue.lights(_deviceId, function(_err, _result) {
+      that.hue.lights(function(_err, _result) {
 
          if (_err) {
             console.error(that.uName + ": Unable to get lights status, error=" + _err);
@@ -60,6 +60,7 @@ HueService.prototype.coldStart = function() {
          }
 
          that.callbacks = {};
+         that.lightStatus = _result;
       });
    });
 };
@@ -96,73 +97,69 @@ function extractLightCapability(_this, _deviceId, _light, _callback) {
    _callback(null, { id: _deviceId, brightness: true, hue: colourSupported, saturation: colourSupported });
 }
 
-HueService.prototype.setLightState = function(_config, _callback) {
-
-   if (!this.ready) {
-      _callback("Not ready yet!");
-      return;
-   }
+HueService.prototype.setLightState = function(_deviceId, _config, _callback) {
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on, deviceId: ' + _params.deviceId);
 
       _this.hue.setLightState(_params.deviceId, { "on": _params.config.power, "bri": _params.config.brightness * 255 / 100,
-                                                  "hue": _params.config.hue, "sat": _params.config.saturation }, _callback)
+                                                  "hue": _params.config.hue * 65535 / 360, "sat": _params.config.saturation * 255 / 100 }, _callback)
 
-   }, { deviceId: _deviceId, config: copyObject(_config)) } , _callback);
-
-   if (!this.requestPending) {
-      this.makeNextRequest();
-   }
+   }, { deviceId: _deviceId, config: copyObject(_config) } , _callback);
 };
 
 HueService.prototype.turnLightOn = function(_deviceId, _callback) {
-
-   if (!this.ready) {
-      _callback("Not ready yet!");
-      return;
-   }
 
    this.addToQueue(function(_this, _params, _callback) {
       console.log(_this.uName + ': turning device on, deviceId: ' + _params.deviceId);
       _this.hue.setLightState(_params.deviceId, _this.lightState.on(), _callback);
    }, { deviceId: _deviceId } , _callback);
-
-   if (!this.requestPending) {
-      this.makeNextRequest();
-   }
 };
 
 HueService.prototype.turnLightOff = function(_deviceId, _callback) {
+
+   this.addToQueue(function(_this, _params, _callback) {
+      console.log(_this.uName + ': turning device off, deviceId: ' + _params.deviceId);
+      _this.hue.setLightState(_params.deviceId, _this.lightState.off(), _callback);
+   }, { deviceId: _deviceId } , _callback);
+};
+
+HueService.prototype.setLightBrightness = function(_deviceId, _brightness, _callback) {
+
+   this.addToQueue(function(_this, _params, _callback) {
+      console.log(_this.uName + ': setting brightness, deviceId: ' + _params.deviceId);
+      _this.hue.setLightState(_params.deviceId, _this.lightState.bri(_params.brightness * 255 / 100), _callback);
+   }, { deviceId: _deviceId, brightness: _brightness } , _callback);
+};
+
+HueService.prototype.setLightHue = function(_deviceId, _hue, _callback) {
+
+   this.addToQueue(function(_this, _params, _callback) {
+      console.log(_this.uName + ': setting hue, deviceId: ' + _params.deviceId);
+      _this.hue.setLightState(_params.deviceId, _this.lightState.hue(_params.hue * 65535 / 360), _callback);
+   }, { deviceId: _deviceId, hue: _hue } , _callback);
+};
+
+HueService.prototype.setLightSaturation = function(_deviceId, _saturation, _callback) {
+
+   this.addToQueue(function(_this, _params, _callback) {
+      console.log(_this.uName + ': setting saturation, deviceId: ' + _params.deviceId);
+      _this.hue.setLightState(_params.deviceId, _this.lightState.sat(_params.saturation * 255 / 100), _callback);
+   }, { deviceId: _deviceId, saturation: _saturation } , _callback);
+};
+
+HueService.prototype.addToQueue = function(_request, _params, _callback) {
 
    if (!this.ready) {
       _callback("Not ready yet!");
       return;
    }
 
-   this.addToQueue(function(_this, _params, _callback) {
-      console.log(_this.uName + ': turning device off, deviceId: ' + _params.deviceId);
-      _this.hue.setLightState(_params.deviceId, _this.lightState.off(), _callback);
-   }, { deviceId: _deviceId } , _callback);
+   this.queue.push({ request: _request, params: _params, callback: _callback });
 
    if (!this.requestPending) {
       this.makeNextRequest();
    }
-};
-
-HueService.prototype.setLightBrightness = function(_deviceId, _brightness, _callback) {
-   this.setLightState(_deviceId, { power: (_brightness > 0), brightness: _brightness }, _callback);
-};
-
-HueService.prototype.setLightHue = function(_deviceId, _hue, _callback) {
-   this.setLightState(_deviceId, { hue: _hue }, _callback);
-};
-HueService.prototype.setLightSaturation = function(_deviceId, _saturation, _callback) {
-   this.setLightState(_deviceId, { saturation: _saturation }, _callback);
-};
-
-HueService.prototype.addToQueue = function(_request, _params, _callback) {
-   this.queue.push({ request: _request, params: _params, callback: _callback });
 };
 
 HueService.prototype.makeNextRequest = function() {
@@ -197,7 +194,7 @@ function copyObject(_source) {
 
       for (var prop in _source) {
 
-         if (_sourceData.hasOwnProperty(prop)){
+         if (_source.hasOwnProperty(prop)){
             newData[prop] = _source[prop];
          }
       }

@@ -864,9 +864,12 @@
             {
                "name": "hklightaccessory:master-bedroom-lights",
                "displayName": "Bedroom Lights",
-               "manufacturer": "LightwaveRF Ltd",
+               "manufacturer": "Hue Philips Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "hueSupported": true,
+               "saturationSupported": true,
                "props": [
                   {
                      "name": "power",
@@ -879,11 +882,47 @@
                ],
                "things": [
                   {
-                     "name": "lightwaverfaccessory:natalie-table-lamp",
-                     "displayName": "Natalie Table Lamp",
-                     "roomID": 1,
-                     "deviceID": 3,
+                     "name": "hklightaccessory:natalie-bedroom-lamp",
+                     "displayName": "Natalie Bedroom Lamp",
+                     "propogateToParent": false,
+                     "manufacturer": "Hue Philips Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
+                     "brightnessSupported": true,
+                     "hueSupported": true,
+                     "saturationSupported": true,
                      "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "huelight:natalie-bedroom-lamp",
+                           "displayName": "Natalie Bedroom Lamp",
+                           "deviceID": 3,
+                           "props": [
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "hklightaccessory:richard-bedroom-lamp",
+                     "displayName": "Richard Bedroom Lamp",
+                     "propogateToParent": false,
+                     "manufacturer": "Hue Philips Ltd",
+                     "model": "V0.1",
+                     "serialNumber": "1234567890",
+                     "brightnessSupported": true,
+                     "hueSupported": true,
+                     "saturationSupported": true,
+                     "props": [
+                     ],
+                     "things": [
+                        {
+                           "name": "huelight:richard-bedroom-lamp",
+                           "displayName": "Richard Bedroom Lamp",
+                           "deviceID": 4,
+                           "props": [
+                           ]
+                        }
                      ]
                   }
                ]

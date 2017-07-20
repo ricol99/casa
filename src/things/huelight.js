@@ -38,7 +38,7 @@ function HueLight(_config) {
       }
    }
    else {
-      this.hueService.getLightCapability(this.deviceId, function(_err, _result) {
+      this.hueService.getLightCapability(this.deviceID, function(_err, _result) {
 
          if (_err) {
             console.error(that.uName + ": Not able to find hue light id=", that.deviceId);
@@ -92,13 +92,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
          if (_propName == "power") {
 
             if (_propValue) {
-
-               if (this.brightnessSupported) {
-                  this.hueService.setLightStatus(this.deviceID, this.props["brightness"].value, this.callbackHandler);
-               }
-               else {
-                  this.hueService.turnLightOn(this.deviceID, this.callbackHandler);
-               }
+               this.hueService.turnLightOn(this.deviceID, this.callbackHandler);
             }
             else {
                this.hueService.turnLightOff(this.deviceID, this.callbackHandler);
