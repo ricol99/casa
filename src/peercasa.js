@@ -239,7 +239,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
    var that = this;
 
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-   this.socket = io(this.http + '://' + that.address.hostname + ':' + this.address.port + '/', this.socketOptions);
+   this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
    //this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
 
    this.socket.on('connect', function() {
@@ -371,7 +371,13 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       // Recreate socket to attempt reconnection
       this.manualDisconnect = false;
       console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-      this.socket.connect(this.http + '://' + that.address.hostname + ':' + this.address.port + '/', this.socketOptions);
+
+      if (this.proActiveConnect) {
+         delete this.socket;
+         delete io;
+         var io = require('socket.io-client');
+         this.connectToPeerCasa();
+      }
    }
 }
 

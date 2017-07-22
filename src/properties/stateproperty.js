@@ -1,159 +1,6 @@
 var util = require('util');
 var Property = require('../property');
 
-/************************
-{
-   "name": "user-state",
-   "type": "stateproperty",
-   "initialValue": "no-users-present",
-   "states": [
-      {
-         "name": "DEFAULT",
-         "sources": [
-            {
-               "event": "wake-up-started",
-               "nextState": {
-                  "name": "users-waking-up"
-               }
-            },
-            {
-               "event": "wake-up-finished",
-               "nextState": {
-                  "name": "users-present"
-               }
-            }
-         ]
-      },
-      {
-         "name": "no-users-present",
-         "source": {
-            "property": "movement",
-            "nextStates": [
-               {
-                  "name": "users-present",
-                  "value": true
-               }
-            ]
-         }
-      },
-      {
-         "name": "users-present",
-         "sources": [
-            {
-               "property": "movement",
-               "nextStates": [
-                  {
-                     "name": "no-users-present",
-                     "value": false
-                  }
-               ]
-            },
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  "name": "natalie-reading"
-               }
-            },
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "richard-reading"
-               }
-            }
-         ]
-      },
-      {
-         "name": "natalie-reading",
-         "sources": [
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  "name": "natalie-asleep"
-               }
-            },
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "both-reading"
-               }
-            }
-         ]
-      },
-      {
-         "name": "richard-reading",
-         "sources": [
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "richard-asleep"
-               }
-            },
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  "name": "both-reading"
-               }
-            }
-         ]
-      },
-      {
-         "name": "both-reading",
-         "sources": [
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  {
-                     "name": "richard-reading-natalie-asleep"
-                  }
-               ]
-            },
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "natalie-reading-richard-asleep"
-               }
-            }
-         ]
-      }
-      {
-         "name": "richard-reading-natalie-asleep",
-         "sources": [
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  "name": "both-reading"
-               }
-            },
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "both-asleep"
-               }
-            }
-         ]
-      },
-      {
-         "name": "natalie-reading-richard-asleep",
-         "sources": [
-            {
-               "event": "natalie-bed-switch",
-               "nextstate": {
-                  "name": "both-asleep"
-               }
-            },
-            {
-               "event": "richard-bed-switch",
-               "nextstate": {
-                  "name": "both-reading"
-               }
-            }
-         ]
-      }
-   ]
-}
-
-*************************/
-
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
 
@@ -166,43 +13,78 @@ function StateProperty(_config, _owner) {
          this.states[stateName] = new State(_config.states[stateName], this);
       }
    }
+
+   this.setState(this.value);
 }
 
 util.inherits(StateProperty, Thing);
 
 StateProperty.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
    var currentState = this.states[this.value];
-   var nextState = null;
+   var source = null;
+
+   if (!sourceListener[_data.sourceEventName]) {
+      return;
+   }
 
    if (currentState && currentState.sourceMap[_data.sourceEventName]) {
-      nextState = this.findNextState(currentState, _propertyValue);
+      source = (currentState.sourceMap[_data.sourceEventName][_propertyValue]) ?
+                  currentState.sourceMap[_data.sourceEventName][_propertyValue] :
+                  currentState.sourceMap[_data.sourceEventName]["DEFAULT_VALUE"];
    }
 
-   if (!nextState && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
-      nextState = this.findNextState(this.states["DEFAULT"], _propertyValue);
+   if (!source && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
+      source = (this.states["DEFAULT"].sourceMap[_data.sourceEventName][_propertyValue]) ?
+                  this.states["DEFAULT"].sourceMap[_data.sourceEventName][_propertyValue] :
+                  this.states["DEFAULT"].sourceMap[_data.sourceEventName]["DEFAULT_VALUE"];
    }
 
-   if (nextState) {
-      this.updatePropertyInternal(nextState);
+   if (source) {
+      this.alignTargetProperties(source);
+
+      if (source.hasOwnProperty("nextState")) {
+         this.setState(source.nextState);
+      }
    }
 };
 
-StateProperty.prototype.findNextState = function(_state, _propertyValue) {
+StateProperty.prototype.setState = function(_nextState) {
 
-   for (var i = 0; i < _state.sources.length, ++i) {
-
-      if (_state.sources[i].hasOwnProperty("value")) {
-
-         if (_state.sources[i].value == _propertyValue) {
-            return _state.sources[i].nextState;
-         }
-      }
-      else {
-         return _state.sources[i].nextState;
-      }
+   if (this.stateTimer) {
+      clearTimeout(this.stateTimer);
+      this.stateTimer = null;
    }
 
-   return undefined;
+   if (this.states[source.nextState] && (this.states[source.nextState].hasOwnProperty("timeout")) {
+
+      this.stateTimer = setTimeout(function(_this, _nextState) {
+         _this.stateTimer = null;
+         _this.setState(_nextState);
+      }), this.this.states[source.nextState].timeout * 1000, this, source.nextState);
+   }
+
+   this.updatePropertyInternal(source.nextState);
+};
+
+StateProperty.prototype.findAction = function(_source, _propertyValue) {
+   var ret = _source;
+
+   if (_source.hasOwnProperty("value") && (_source.value != _propertyValue)) {
+      ret = null;
+   }
+
+   return ret;
+};
+
+StateProperty.prototype.alignTargetProperties = function(_source) {
+   var targets = _source.hasOwnProperty("targets") ? _source.targets : (_source.hasOwnProperty("target") ? [ _source.target ] : null);
+
+   if (targets) {
+
+      for (var i = 0; i < targets.length; ++i) {
+          this.owner.updateProperty(targets[i].property, targets[i].value);
+      }
+   }
 };
 
 StateProperty.prototype.sourceIsValid = function(_data) {
@@ -243,7 +125,12 @@ function State(_config, _owner) {
       }
 
       var this.sources[i].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
-      this.sourceMap[sourceListener.sourceEventName] = this.sources[i];
+      var val = this.sources[i].hasOwnProperty("value") ? this.sources[i].value : "DEFAULT_ENTRY";
+
+      if (!this.sourceMap[sourceListener.sourceEventName]) {
+         this.sourceMap[sourceListener.sourceEventName] = {};
+      }
+      this.sourceMap[sourceListener.sourceEventName][val] = this.sources[i];
    }
 }
 
