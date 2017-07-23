@@ -12,47 +12,56 @@ function HomekitSwitchAccessory(_config) {
    this.thingType = "homekit-switch-accessory";
 
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
-   this.hkService = (this.stateless) ? Service.StatelessProgrammableSwitch : Service.StatefulProgrammableSwitch;
+   this.hkService = Service.Switch;
 
    this.hkAccessory
       .addService(this.hkService, this.displayName) // services exposed to the user should have "names" like "Light" for this case
-      .getCharacteristic(Characteristic.ProgrammableSwitchEvent)
-      .on('change', function(_oldValue, _newValue, _callback) {
-         that.switchChanged(_oldValue, _newValue);
+      .getCharacteristic(Characteristic.On)
+      .on('set', function(_value, _callback) {
+         that.setSwitch(_value);
          _callback();
       })
+      // We want to intercept requests for our current state so we can query the hardware itself instead of
+      // allowing HAP-NodeJS to return the cached Characteristic.value.
+      .on('get', function(_callback) {
+         _callback(null, that.getSwitch());
+      });
 
    if (this.stateless) {
-      this.statelessEventName = (_config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";
+      this.statelessEventName = _config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";
    }
    else {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
-
-      this.hkAccessory
-         .getService(this.hkService) // services exposed to the user should have "names" like "Light" for this case
-         .getCharacteristic(Characteristic.ProgrammableSwitchOutputState)
-         .on('set', function(_value, _callback) {
-            that.setSwitch(_value);
-            _callback();
-         })
-         // We want to intercept requests for our current state so we can query the hardware itself instead of
-         // allowing HAP-NodeJS to return the cached Characteristic.value.
-         .on('get', function(_callback) {
-            _callback(null, that.getSwitch());
-         });
    }
 }
 
 util.inherits(HomekitSwitchAccessory, HomekitAccessory);
 
 HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
-   this.props[this.switchProp].setManualMode(true);
-   this.updateProperty(this.switchProp, _status ? true : false);
+
+   if (this.stateless) {
+
+      if (!this.timeout) {
+         this.switchChanged(false, true);
+
+         this.timeout = setTimeout(function(_this) {
+            _this.timeout = null;
+            _this.hkAccessory
+              .getService(Service.Switch)
+              .getCharacteristic(Characteristic.On)
+              .updateValue(0);
+         }, 100, this);
+      }
+   }
+   else {
+      this.props[this.switchProp].setManualMode(true);
+      this.updateProperty(this.switchProp, _status ? true : false);
+   }
 };
 
 HomekitSwitchAccessory.prototype.getSwitch = function() {
-   return this.props[this.switchProp].value ? 1 : 0;
+   return (this.stateless) ? false : this.props[this.switchProp].value ? 1 : 0;
 };
 
 HomekitSwitchAccessory.prototype.switchChanged = function(_oldValue, _newValue) {
@@ -63,8 +72,8 @@ HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _pr
 
    if (_propName == this.switchProp) {
       this.hkAccessory
-        .getService(Service.StatefulProgrammableSwitch)
-        .getCharacteristic(Characteristic.ProgrammableSwitchOutputState)
+        .getService(Service.Switch)
+        .getCharacteristic(Characteristic.On)
         .updateValue(_propValue ? 1 : 0);
    }
 };

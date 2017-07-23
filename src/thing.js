@@ -137,11 +137,31 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
    }
 };
 
-Thing.prototype.raiseEvent = function(_eventName, _data) {
-   Source.prototype.raiseEvent.call(this, _eventName, _data);
+Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
    if (this.parent) {
-      this.parent.raiseEvent(_eventName, _data);
+      this.parent.childRaisedEvent(_eventName, this, _data);
+   }
+   else {
+      _data.alignWithParent = true;
+      this.raiseEvent(_eventName, _data);
+   }
+};
+
+Thing.prototype.raiseEvent = function(_eventName, _data) {
+
+   if (_data.alignWithParent) {
+      Source.prototype.raiseEvent.call(this, _eventName, _data);
+
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].raiseEvent(_eventName, _data);
+         }
+      }
+   }
+   else {
+      this.childRaisedEvent(_eventName, this, _data);
    }
 };
 

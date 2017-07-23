@@ -1,10 +1,10 @@
 var util = require('util');
 var Property = require('../property');
+var SourceListener = require('../sourcelistener');
 
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
 
-   this.sourceListeners = {};
    this.states = {};
 
    for (var stateName in _config.states) {
@@ -17,33 +17,40 @@ function StateProperty(_config, _owner) {
    this.setState(this.value);
 }
 
-util.inherits(StateProperty, Thing);
+util.inherits(StateProperty, Property);
 
-StateProperty.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
+StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
+   console.log(this.uName + ": state about to change to " + _propertyValue);
+   this.setState(_propertyValue);
+};
+
+StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   console.log(this.uName + ": Event received when in state " + this.value);
+
+   var propertyValue = _data.value;
    var currentState = this.states[this.value];
    var source = null;
 
-   if (!sourceListener[_data.sourceEventName]) {
+   if (!this.sourceListeners[_sourceListener.sourceEventName]) {
       return;
    }
 
    if (currentState && currentState.sourceMap[_data.sourceEventName]) {
-      source = (currentState.sourceMap[_data.sourceEventName][_propertyValue]) ?
-                  currentState.sourceMap[_data.sourceEventName][_propertyValue] :
+      source = (currentState.sourceMap[_data.sourceEventName][propertyValue]) ?
+                  currentState.sourceMap[_data.sourceEventName][propertyValue] :
                   currentState.sourceMap[_data.sourceEventName]["DEFAULT_VALUE"];
    }
 
    if (!source && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
-      source = (this.states["DEFAULT"].sourceMap[_data.sourceEventName][_propertyValue]) ?
-                  this.states["DEFAULT"].sourceMap[_data.sourceEventName][_propertyValue] :
+      source = (this.states["DEFAULT"].sourceMap[_data.sourceEventName][propertyValue]) ?
+                  this.states["DEFAULT"].sourceMap[_data.sourceEventName][propertyValue] :
                   this.states["DEFAULT"].sourceMap[_data.sourceEventName]["DEFAULT_VALUE"];
    }
 
    if (source) {
-      this.alignTargetProperties(source);
 
       if (source.hasOwnProperty("nextState")) {
-         this.setState(source.nextState);
+         this.updatePropertyInternal(source.nextState);
       }
    }
 };
@@ -55,15 +62,18 @@ StateProperty.prototype.setState = function(_nextState) {
       this.stateTimer = null;
    }
 
-   if (this.states[source.nextState] && (this.states[source.nextState].hasOwnProperty("timeout")) {
+   if (this.states[_nextState]) {
 
-      this.stateTimer = setTimeout(function(_this, _nextState) {
-         _this.stateTimer = null;
-         _this.setState(_nextState);
-      }), this.this.states[source.nextState].timeout * 1000, this, source.nextState);
+      if (this.states[_nextState].hasOwnProperty("timeout")) {
+
+         this.stateTimer = setTimeout(function(_this, _nextState) {
+            _this.stateTimer = null;
+            _this.setState(_nextState);
+         }, this.this.states[_nextState].timeout * 1000, this, _nextState);
+      }
+
+      this.alignTargetProperties(this.states[_nextState]);
    }
-
-   this.updatePropertyInternal(source.nextState);
 };
 
 StateProperty.prototype.findAction = function(_source, _propertyValue) {
@@ -76,8 +86,8 @@ StateProperty.prototype.findAction = function(_source, _propertyValue) {
    return ret;
 };
 
-StateProperty.prototype.alignTargetProperties = function(_source) {
-   var targets = _source.hasOwnProperty("targets") ? _source.targets : (_source.hasOwnProperty("target") ? [ _source.target ] : null);
+StateProperty.prototype.alignTargetProperties = function(_state) {
+   var targets = _state.hasOwnProperty("targets") ? _state.targets : (_state.hasOwnProperty("target") ? [ _state.target ] : null);
 
    if (targets) {
 
@@ -98,7 +108,7 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
-      this.config.uName = _config.name;
+      _config.uName = this.owner.uName;
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
    }
@@ -118,18 +128,24 @@ function State(_config, _owner) {
 
    this.sources = _config.sources;
 
+   if (!this.sources) {
+      return;
+   }
+
    for (var i = 0; i < this.sources.length; i++) {
 
       if (!this.sources[i].hasOwnProperty("name")) {
          this.sources[i].name = this.owner.owner.uName;
       }
 
-      var this.sources[i].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
+      var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
+      this.sources[i].sourceListener = sourceListener;
       var val = this.sources[i].hasOwnProperty("value") ? this.sources[i].value : "DEFAULT_ENTRY";
 
       if (!this.sourceMap[sourceListener.sourceEventName]) {
          this.sourceMap[sourceListener.sourceEventName] = {};
       }
+
       this.sourceMap[sourceListener.sourceEventName][val] = this.sources[i];
    }
 }
