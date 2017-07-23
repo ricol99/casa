@@ -958,6 +958,32 @@
                      ]
                   },
                   {
+                     "name": "natalie-asleep",
+                     "sources": [
+                        {
+                           "event": "natalie-bedroom-switch",
+                           "nextState": "natalie-reading"
+                        },
+                        {
+                           "event": "richard-bedroom-switch",
+                           "nextState": "richard-reading-natalie-asleep"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "richard-asleep",
+                     "sources": [
+                        {
+                           "event": "richard-bedroom-switch",
+                           "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "natalie-bedroom-switch",
+                           "nextState": "natalie-reading-richard-asleep"
+                        }
+                     ]
+                  },
+                  {
                      "name": "both-reading",
                      "timeout": {
                         "duration": 900,
@@ -1080,12 +1106,12 @@
                                  "name": "natalie-reading",
                                  "targets": [
                                     {
-                                       "property": "brightness",
-                                       "value": 60
-                                    },
-                                    {
                                        "property": "power",
                                        "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 60
                                     }
                                  ]
                               },
