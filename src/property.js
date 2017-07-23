@@ -425,7 +425,6 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
       }
 
       _data.local = this.local;
-      this.propertyAboutToChange(_newValue, _data);
       this.owner.updateProperty(this.name, _newValue, _data);
       return _newValue;
    }

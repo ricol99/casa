@@ -55,7 +55,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       console.log(this.uName + ": AAAA Source found! Next state="+source.nextState);
 
       if (source.hasOwnProperty("nextState")) {
-         this.set(source.nextState, { sourceName: this.owner });
+         this.updatePropertyInternal(source.nextState, { sourceName: this.owner });
       }
    }
 };
@@ -82,10 +82,12 @@ StateProperty.prototype.setState = function(_nextState) {
 };
 
 StateProperty.prototype.alignTargetProperties = function(_state) {
-   var targets = _state.hasOwnProperty("targets") ? _state.targets : (_state.hasOwnProperty("target") ? [ _state.target ] : null);
+   console.log(this.uName + ": AAAAAA alignTargetProperties _state=", _state);
+   console.log(this.uName + ": AAAAAA alignTargetProperties targets=", _state.targets);
 
-   if (targets) {
-      this.owner.setNextProperties(targets);
+   if (_state.targets) {
+      console.log(this.uName+": AAAAA Targets =", _state.targets);
+      this.owner.setNextProperties(_state.targets);
    }
 };
 
@@ -122,6 +124,7 @@ function State(_config, _owner) {
    }
 
    this.sources = _config.sources;
+   this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : null);
 
    if (!this.sources) {
       return;

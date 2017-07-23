@@ -1090,6 +1090,7 @@
                      "name": "huelight:natalie-bedroom-lamp",
                      "displayName": "Natalie Bedroom Lamp",
                      "deviceID": 3,
+                     "propogateToParent": false,
                      "props": [
                         {
                            "name": "user-state",
@@ -1149,6 +1150,7 @@
                      "name": "huelight:richard-bedroom-lamp",
                      "displayName": "Richard Bedroom Lamp",
                      "deviceID": 4,
+                     "propogateToParent": false,
                      "props": [
                         {
                            "name": "user-state",

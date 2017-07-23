@@ -153,7 +153,8 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
          sendData.local = this.local;
       }
 
-      // Call the final hook
+      // Call the final hooks
+      this.props[_propName].propertyAboutToChange(_propValue, sendData);
       this.propertyAboutToChange(_propName, _propValue, sendData);
 
       console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
@@ -173,7 +174,7 @@ Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _
 };
 
 Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
-   this.setNextProperties([ { name: _propName, value: _nextPropValue } ]);
+   this.setNextProperties([ { property: _propName, value: _nextPropValue } ]);
 };
 
 Source.prototype.setNextProperties = function(_properties) {
@@ -181,7 +182,7 @@ Source.prototype.setNextProperties = function(_properties) {
    setTimeout(function(_this, _props) {
 
       for (var i = 0; i < _props.length; i++) {
-         _this.updateProperty(_props[i].name, _props[i].value);
+         _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
       }
    }, 100, this, _properties);
 };

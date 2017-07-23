@@ -41,7 +41,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          }
       }
 
-      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
+      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
          this.emitPropertyChange(_propName, _propValue, data);
       }
 
@@ -54,7 +54,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
       data.propertyOldValue = this.value;
-      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
+      Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
 
       if (this.parent && this.propogateToParent) {
          this.parent.childPropertyChanged(_propName, _propValue, this, data);
@@ -165,4 +165,22 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    }
 };
 
+function copyData(_sourceData) {
+
+   if (_sourceData) {
+      var newData = {};
+
+      for (var prop in _sourceData) {
+
+         if (_sourceData.hasOwnProperty(prop)){
+            newData[prop] = _sourceData[prop];
+         }
+      }
+
+      return newData;
+   }
+   else {
+      return undefined;
+   }
+}
 module.exports = exports = Thing;

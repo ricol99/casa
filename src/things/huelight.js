@@ -85,8 +85,6 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
          }
       };
 
-      console.log(this.uName + ": Attempting to apply property change to Hue Light device ID=" + this.deviceID);
-
       if (!_data.coldStart) {
 
          if (_propName == "power") {
