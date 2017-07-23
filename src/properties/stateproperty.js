@@ -85,11 +85,7 @@ StateProperty.prototype.alignTargetProperties = function(_state) {
    var targets = _state.hasOwnProperty("targets") ? _state.targets : (_state.hasOwnProperty("target") ? [ _state.target ] : null);
 
    if (targets) {
-
-      for (var i = 0; i < targets.length; ++i) {
-          console.log(this.uName+": AAAAA Aligning property "+targets[i].property+" with value "+targets[i].value);
-          this.owner.updateProperty(targets[i].property, targets[i].value);
-      }
+      this.owner.setNextProperties(targets);
    }
 };
 
