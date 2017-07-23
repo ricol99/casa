@@ -76,16 +76,6 @@ StateProperty.prototype.setState = function(_nextState) {
    }
 };
 
-StateProperty.prototype.findAction = function(_source, _propertyValue) {
-   var ret = _source;
-
-   if (_source.hasOwnProperty("value") && (_source.value != _propertyValue)) {
-      ret = null;
-   }
-
-   return ret;
-};
-
 StateProperty.prototype.alignTargetProperties = function(_state) {
    var targets = _state.hasOwnProperty("targets") ? _state.targets : (_state.hasOwnProperty("target") ? [ _state.target ] : null);
 
