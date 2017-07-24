@@ -79,11 +79,12 @@ StateProperty.prototype.setState = function(_nextState) {
 
       this.alignTargetProperties(this.states[_nextState]);
    }
+   else if (this.states["DEFAULT"]) {
+      this.alignTargetProperties(this.states["DEFAULT"]);
+   }
 };
 
 StateProperty.prototype.alignTargetProperties = function(_state) {
-   console.log(this.uName + ": AAAAAA alignTargetProperties _state=", _state);
-   console.log(this.uName + ": AAAAAA alignTargetProperties targets=", _state.targets);
 
    if (_state.targets) {
       console.log(this.uName+": AAAAA Targets =", _state.targets);
@@ -124,7 +125,8 @@ function State(_config, _owner) {
    }
 
    this.sources = _config.sources;
-   this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : null);
+   this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
+   console.log(this.uName+": BBBBB Targets="+this.targets);
 
    if (!this.sources) {
       return;

@@ -76,49 +76,54 @@ function copyObject(_sourceObject) {
 HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    var that = this;
 
-   if (_data.alignWithParent) {
+   console.log(this.uName+": AAAA propertyAboutToChange propName="+_propName+" propValue="+_propValue);
 
-      if (!_data.coldStart) {
+   if (!_data.coldStart) {
+   console.log(this.uName+": AAAA propertyAboutToChange propName="+_propName+" propValue="+_propValue);
 
-         if (_propName == "power") {
+      if (_propName == "power") {
 
-            if (_propValue) {
-               this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
-                  if (_error) {
-                     console.log(that.uName + ': Error turning room off ' + _error.message);
-                  }
-               });
-           }
-            else {
-               this.hueService.turnLightOff(this.deviceID, function(_error, _content) {
-                  if (_error) {
-                     console.log(that.uName + ': Error turning room off ' + _error.message);
-                  }
-               });
+         if (_propValue) {
+            this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
+
+               if (_error) {
+                  console.log(that.uName + ': Error turning room off ' + _error.message);
+               }
+            });
+        }
+         else {
+            this.hueService.turnLightOff(this.deviceID, function(_error, _content) {
+
+               if (_error) {
+                  console.log(that.uName + ': Error turning room off ' + _error.message);
+               }
+            });
+         }
+      }
+      else if (_propName == "brightness") {
+         this.hueService.setLightBrightness(this.deviceID, _propValue, function(_error, _content) {
+
+            if (_error) {
+               console.log(that.uName + ': Error turning room off ' + _error.message);
             }
-         }
-         else if (_propName == "brightness") {
-            this.hueService.setLightBrightness(this.deviceID, _propValue, function(_error, _content) {
-               if (_error) {
-                  console.log(that.uName + ': Error turning room off ' + _error.message);
-               }
-            });
-            this.updateProperty("power", (_propValue > 0));
-         }
-         else if (_propName == "hue") {
-            this.hueService.setLightHue(this.deviceID, _propValue, function(_error, _content) {
-               if (_error) {
-                  console.log(that.uName + ': Error turning room off ' + _error.message);
-               }
-            });
-         }
-         else if (_propName == "saturation") {
-            this.hueService.setLightSaturation(this.deviceID, _propValue, function(_error, _content) {
-               if (_error) {
-                  console.log(that.uName + ': Error turning room off ' + _error.message);
-               }
-            });
-         }
+         });
+         this.updateProperty("power", (_propValue > 0));
+      }
+      else if (_propName == "hue") {
+         this.hueService.setLightHue(this.deviceID, _propValue, function(_error, _content) {
+
+            if (_error) {
+               console.log(that.uName + ': Error turning room off ' + _error.message);
+            }
+         });
+      }
+      else if (_propName == "saturation") {
+         this.hueService.setLightSaturation(this.deviceID, _propValue, function(_error, _content) {
+
+            if (_error) {
+               console.log(that.uName + ': Error turning room off ' + _error.message);
+            }
+         });
       }
    }
 };
