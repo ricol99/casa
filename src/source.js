@@ -179,12 +179,15 @@ Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
 
 Source.prototype.setNextProperties = function(_properties) {
 
-   setTimeout(function(_this, _props) {
+   if (_properties && _properties.length > 0) {
 
-      for (var i = 0; i < _props.length; i++) {
-         _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
-      }
-   }, 100, this, _properties);
+      setTimeout(function(_this, _props) {
+
+         for (var i = 0; i < _props.length; i++) {
+            _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
+         }
+      }, 100, this, _properties);
+   }
 };
 
 Source.prototype.rejectPropertyUpdate = function(_propName) {

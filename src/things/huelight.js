@@ -41,7 +41,7 @@ function HueLight(_config) {
       this.hueService.getLightCapability(this.deviceID, function(_err, _result) {
 
          if (_err) {
-            console.error(that.uName + ": Not able to find hue light id=", that.deviceId);
+            console.error(that.uName + ": Not able to find hue light id=", that.deviceID);
             return;
          }
 
