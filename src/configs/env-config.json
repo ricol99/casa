@@ -915,11 +915,11 @@
                      "schedules": [
                          {
                             "name": "wake-up-call",
-                            "rule": "00 7 * * 1-5",
+                            "rule": "00 7 * * 1-5"
                          },
                          {
                             "name": "wake-up-call",
-                            "rule": "00 9 * * 6-7",
+                            "rule": "00 9 * * 6-7"
                          }
                      ],
                      "sources": [
@@ -1130,7 +1130,7 @@
                                  "targets": [
                                     {
                                        "property": "brightness",
-                                       "ramp: {
+                                       "ramp": {
                                           "startValue": 1,
                                           "endValue": 60,
                                           "step": 2,
@@ -1139,7 +1139,7 @@
                                     },
                                     {
                                        "property": "hue",
-                                       "ramp: {
+                                       "ramp": {
                                           "startValue": 1,
                                           "endValue": 60,
                                           "step": 2,
@@ -1148,7 +1148,7 @@
                                     },
                                     {
                                        "property": "saturation",
-                                       "ramp: {
+                                       "ramp": {
                                           "startValue": 1,
                                           "endValue": 60,
                                           "step": 2,
