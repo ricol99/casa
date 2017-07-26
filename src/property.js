@@ -1,6 +1,5 @@
 var util = require('util');
 var SourceListener = require('./sourcelistener');
-var CasaSystem = require('./casasystem');
 var Pipeline = require('./pipeline');
 
 function Property(_config, _owner) {

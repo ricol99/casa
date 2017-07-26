@@ -3,6 +3,7 @@ var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 var Parser = require('cron-parser');
 var Service = require('../service');
+var CasaSystem = require('../casasystem');
 
 function ScheduleService(_config) {
    Service.call(this, _config);
@@ -43,6 +44,13 @@ ScheduleService.prototype.refreshSunEvents = function() {
 
 ScheduleService.prototype.coldStart = function() {
    var that = this;
+   var casaSys = CasaSystem.mainInstance();
+   this.rampService =  casaSys.findService("rampservice");
+
+   if (!this.rampService) {
+      console.error(this.uName + ": ***** Ramp service not found! *************");
+      process.exit();
+   }
 };
 
 function Schedule(_owner, _config, _service) {
@@ -201,27 +209,24 @@ Schedule.prototype.resetJob = function(_event) {
 }
 
 Schedule.prototype.startNewRamp = function(_event) {
+   var rampConfig = copyObject(_event.ramp);
 
-   if (_event.ramp.startValue != undefined) {
-      _event.owner.scheduledEventTriggered(_event, _event.ramp.startValue);
+   if (!rampConfig.hasOwnProperty("startValue")) {
+      rampConfig.startValue = _event.owner.getRampStartValue(_event);
    }
 
-   var endValue = _event.ramp.endValue;
-   var duration = _event.ramp.duration;
-   var step = _event.ramp.step;
-   var value = (_event.ramp.startValue != undefined) ? _event.ramp.startValue : _event.owner.getRampStartValue(_event);
-   var floorOutput = (_event.ramp.floorOutput != undefined) ? _event.ramp.floorOutput : true;
-
-   var difference = Math.abs(endValue - value);
-   var noOfSteps = difference / Math.abs(step);
-   var interval = duration / noOfSteps;
-
-   if (this.ramps[_event.name] == undefined) {
-      this.ramps[_event.name] = new Ramp(_event);
-   }
-
-   this.ramps[_event.name].start(value, endValue, step, interval, floorOutput);
+   var ramp = this.service.rampService.createRamp(this, rampConfig);
+   ramp.callbackEvent = _event;
+   ramp.start();
 }
+
+Schedule.prototype.newValueFromRamp = function(_ramp, _rampName, _value) {
+   _ramp.callbackEvent.owner.scheduledEventTriggered(_rampName, _value);
+};
+
+Schedule.prototype.rampComplete = function(_ramp, _rampName) {
+   // DO NOTHING
+};
 
 Schedule.prototype.scheduleEvents = function() {
    this.scheduleAllJobs();
@@ -249,42 +254,6 @@ Schedule.prototype.getInitialValue = function() {
    return (closestEvent.ramp == undefined) ? closestEvent.value : closestEvent.ramp.endValue;
 };
 
-function Ramp(_event) {
-   this.event = _event;
-};
-
-Ramp.prototype.start = function(_value, _endValue, _step, _interval, _floorOutput) {
-   this.value = _value;
-   this.endValue = _endValue;
-   this.step = _step;
-   this.interval = _interval;
-   this.floorOutput = _floorOutput;
-
-   this.nextInterval();
-};
-
-Ramp.prototype.nextInterval = function() {
-
-   if (this.timer) {
-      clearTimeout(this.timer);
-   }
-
-   this.timer = setTimeout(function(_this) {
-      _this.timer = null;
-
-     var difference = Math.abs(_this.endValue - _this.value);
-
-      if (difference <= Math.abs(_this.step)) {
-         _this.event.owner.scheduledEventTriggered(_this.event, _this.endValue);
-      }
-      else {
-         _this.value += _this.step;
-         _this.event.owner.scheduledEventTriggered(_this.event, (_this.floorOutput) ? Math.floor(_this.value) : _this.value);
-         _this.nextInterval();
-      }
-   }, this.interval * 1000, this);
-};
-
 function RefreshScheduler(_schedulerService) {
    this.schedulerService = _schedulerService;
    var that = this;
@@ -292,6 +261,19 @@ function RefreshScheduler(_schedulerService) {
    var refreshJob = schedule.scheduleJob('10 1 * * *', function() {
       that.schedulerService.refreshSunEvents();
    });
+}
+
+function copyObject(_sourceObject) {
+   var newObject = {};
+
+   for (var prop in _sourceObject) {
+
+      if (_sourceObject.hasOwnProperty(prop)){
+         newObject[prop] = _sourceObject[prop];
+      }
+   }
+
+   return newObject;
 }
 
 module.exports = exports = ScheduleService;

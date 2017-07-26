@@ -130,6 +130,56 @@
                }
             },
             {
+               "name": "test-state-property",
+               "initialValue": 0
+            },
+            {
+               "name": "state-test",
+               "type": "stateproperty",
+               "initialValue": "idle",
+               "states": [
+                  {
+                     "name": "idle",
+                     "timeout": {
+                        "duration": 30,
+                        "nextState": "test-timeout"
+                     }
+                  },
+                  {
+                     "name": "test-timeout",
+                     "source": {
+                        "property": "test-state-property",
+                        "value": 50,
+                        "nextState": "test-limit"
+                     },
+                     "target": {
+                        "property": "test-state-property",
+                        "ramp": {
+                           "endValue": 50,
+                           "step": 5,
+                           "duration": 5
+                        }
+                     }
+                  },
+                  {
+                     "name": "test-limit",
+                     "source": {
+                        "property": "test-state-property",
+                        "value": 0,
+                        "nextState": "idle"
+                     },
+                     "target": {
+                        "property": "test-state-property",
+                        "ramp": {
+                           "endValue": 0,
+                           "step": -5,
+                           "duration": 5
+                        }
+                     }
+                  }
+               ]
+            },
+            {
                "name": "test-smooth-transform",
                "type": "smootherproperty",
                "initialValue": 0,

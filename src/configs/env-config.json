@@ -912,6 +912,16 @@
                   },
                   {
                      "name": "users-present",
+                     "schedules": [
+                         {
+                            "name": "wake-up-call",
+                            "rule": "00 7 * * 1-5",
+                         },
+                         {
+                            "name": "wake-up-call",
+                            "rule": "00 9 * * 6-7",
+                         }
+                     ],
                      "sources": [
                         {
                            "event": "natalie-bedroom-switch",
@@ -1093,6 +1103,14 @@
                      "propogateToParent": false,
                      "props": [
                         {
+                           "name": "dark",
+                           "initialValue": "false",
+                           "source": {
+                              "name": "thing:environment",
+                              "property": "dark"
+                           }
+                        },
+                        {
                            "name": "user-state",
                            "type": "stateproperty",
                            "states": [
@@ -1102,6 +1120,46 @@
                                     "property": "power",
                                     "value": false
                                  }
+                              },
+                              {
+                                 "name": "pre-wake-up",
+                                 "guard": {
+                                    "property": "dark",
+                                    "value": true
+                                 },
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "ramp: {
+                                          "startValue": 1,
+                                          "endValue": 60,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "ramp: {
+                                          "startValue": 1,
+                                          "endValue": 60,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "ramp: {
+                                          "startValue": 1,
+                                          "endValue": 60,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
                               },
                               {
                                  "name": "natalie-reading",
