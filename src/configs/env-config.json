@@ -911,17 +911,24 @@
                      }
                   },
                   {
-                     "name": "users-present",
+                     "name": "users-asleep-pre-wake-up",
                      "schedules": [
                          {
                             "name": "wake-up-call",
-                            "rule": "00 7 * * 1-5"
+                            "rule": "30 6 * * 1-5"
                          },
                          {
                             "name": "wake-up-call",
-                            "rule": "00 9 * * 6-7"
+                            "rule": "0 8 * * 6-7"
                          }
                      ],
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "users-present"
+                     }
+                  },
+                  {
+                     "name": "users-present",
                      "sources": [
                         {
                            "event": "natalie-bedroom-switch",
@@ -1122,17 +1129,17 @@
                                  }
                               },
                               {
-                                 "name": "pre-wake-up",
+                                 "name": "users-asleep-pre-wake-up",
                                  "guard": {
                                     "property": "dark",
-                                    "value": true
+                                    "value": false
                                  },
                                  "targets": [
                                     {
                                        "property": "brightness",
                                        "ramp": {
-                                          "startValue": 1,
-                                          "endValue": 60,
+                                          "startValue": 0,
+                                          "endValue": 100,
                                           "step": 2,
                                           "duration": 1800
                                        }
@@ -1140,18 +1147,18 @@
                                     {
                                        "property": "hue",
                                        "ramp": {
-                                          "startValue": 1,
+                                          "startValue": 0,
                                           "endValue": 60,
-                                          "step": 2,
+                                          "step": 1,
                                           "duration": 1800
                                        }
                                     },
                                     {
                                        "property": "saturation",
                                        "ramp": {
-                                          "startValue": 1,
-                                          "endValue": 60,
-                                          "step": 2,
+                                          "startValue": 100,
+                                          "endValue": 70,
+                                          "step": -1,
                                           "duration": 1800
                                        }
                                     },
