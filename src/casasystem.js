@@ -126,24 +126,6 @@ CasaSystem.prototype.cleverRequire = function(_name, _path) {
    return this.constructors[str];
 }
 
-CasaSystem.prototype.deletePeerCasa = function(_peerCasa) {
-
-  if (remoteCasas[_peerCasa.uName]) {
-     delete remoteCasas[_peerCasa.uName];
-     delete allObjects[_peerCasa.uName];
-
-     if (parentCasa == _peerCasa) {
-     }
-
-     if (childCasas[_peerCasa.uName]) {
-        delete childCasas[_peerCasa.uName];
-     }
-
-     if (_peerCasa.persistent) {
-     }
-  }
-}
-
 // Extract Users
 CasaSystem.prototype.extractUsers = function() {
    var that = this;

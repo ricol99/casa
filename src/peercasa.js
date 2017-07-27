@@ -240,7 +240,6 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
-   //this.socket = io('http://' + that.address.hostname + ':' + this.address.port + '/');
 
    this.socket.on('connect', function() {
       console.log(that.uName + ': Connected to my peer. Logging in...');
@@ -347,25 +346,24 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 }
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
-   var that = this;
 
    if (!this.persistent) {
       delete this.socket;
       this.socket = undefined;
       console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');
 
-      if (that.casaSys.remoteCasas[that.uName]) {
-         delete that.casaSys.remoteCasas[that.uName];
-         delete that.casaSys.allObjects[that.uName];
+      if (this.casaSys.remoteCasas[this.uName]) {
+         delete this.casaSys.remoteCasas[this.uName];
+         delete this.casaSys.allObjects[this.uName];
       }
 
-      setTimeout(function() {
+      setTimeout(function(_this) {
 
-         if (!that.connected) {
-            console.log(that.uName + ': Peercasa object has been deleted - cleanup complete');
-            delete that;
+         if (!_this.connected) {
+            console.log(_this.uName + ': Peercasa object has been deleted - cleanup complete');
+            delete _this;
          }
-      }, this.deathTime);
+      }, this.deathTime, this);
    }
    else if (this.manualDisconnect) {
       // Recreate socket to attempt reconnection
@@ -373,10 +371,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
 
       if (this.proActiveConnect) {
-         delete this.socket;
-         delete io;
-         var io = require('socket.io-client');
-         this.connectToPeerCasa();
+         this.socket.open();
       }
    }
 }
@@ -590,20 +585,22 @@ PeerCasa.prototype.establishHeartbeat = function() {
    this.lastHeartbeat = Date.now() + 10000;
 
    if (!this.intervalID) {
-      // Establish heartbeat
-      this.intervalID = setInterval(function(_that){
 
-         if (_that.connected) {
+      // Establish heartbeat
+      this.intervalID = setInterval(function(_this){
+
+         if (_this.connected) {
 
             // Check if we have received a heartbeat from the other side recently
-            if ((Date.now() - _that.lastHeartbeat) > 90000) {
-               console.log(_that.uName + ': No heartbeat received for 1.5 times interval!. Closing socket.');
-               _that.manualDisconnect = true;
-               _that.socket.disconnect();
+            if ((Date.now() - _this.lastHeartbeat) > 90000) {
+               console.log(_this.uName + ': No heartbeat received for 1.5 times interval!. Closing socket.');
+               _this.manualDisconnect = true;
+               _this.socket.disconnect();
+               _this.deleteMeIfNeeded();
             }
             else {
-               console.log(_that.uName + ': Last heartbeat time difference = ', Date.now() - _that.lastHeartbeat);
-               _that.socket.emit('heartbeat', { casaName: _that.casa.uName });
+               console.log(_this.uName + ': Last heartbeat time difference = ', Date.now() - _this.lastHeartbeat);
+               _this.socket.emit('heartbeat', { casaName: _this.casa.uName });
             }
          }
       }, 60000, this);
