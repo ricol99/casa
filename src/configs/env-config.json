@@ -918,7 +918,7 @@
                             "rule": "30 6 * * 1-5"
                          },
                          {
-                            "name": "wake-up-call",
+                            "name": "wake-up-call-weekend",
                             "rule": "0 8 * * 6-7"
                          }
                      ],

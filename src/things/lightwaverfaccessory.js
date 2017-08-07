@@ -109,22 +109,21 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
 
                if (this.brightnessSupported) {
                   this.lightwaveRfService.setDeviceDim(this.roomID, this.deviceID, this.props["brightness"].value, this.callbackHandler);
-                  }
+               }
                else {
                   this.lightwaveRfService.turnDeviceOn(this.roomID, this.deviceID, this.callbackHandler);
                }
             }
             else {
                this.lightwaveRfService.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
-               }
+            }
          }
          else if (_propName == "brightness") {
 
             if (_propValue == 0) {
-               this.lightwaveRfService.turnDeviceOff(this.roomID, this.deviceID, this.callbackHandler);
                this.updateProperty("power", false);
             }
-               else {
+            else {
                this.lightwaveRfService.setDeviceDim(this.roomID, this.deviceID, _propValue, this.callbackHandler);
             }
          }

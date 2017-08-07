@@ -91,15 +91,18 @@ LightwaveRfService.prototype.makeNextRequest = function() {
          that.queue.shift().callback(_error, _content);
 
          if (that.queue.length > 0) {
+         console.log(that.uName+": AAAAA queue length="+that.queue.length);
 
             // More in the queue, so reschedule after the link has had time to settle down
             var delay = setTimeout(function(_this) {
                _this.requestPending = false;
+               console.log(_this.uName+": AAAAA next request!" );
                _this.makeNextRequest();
             }, 750, that);
          }
          else {
             that.requestPending = false;
+            console.log(that.uName+": AAAAA no requests levft in queue!" );
          }
       });
    }
