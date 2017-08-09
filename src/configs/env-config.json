@@ -1002,8 +1002,18 @@
                   },
                   {
                      "name": "both-reading",
+                     "schedules": [
+                         {
+                            "name": "bedtime-call",
+                            "rule": "30 22 * * 1-5"
+                         },
+                         {
+                            "name": "bedtime-call-weekend",
+                            "rule": "0 23 * * 6-7"
+                         }
+                     ],
                      "timeout": {
-                        "duration": 900,
+                        "duration": 2700,
                         "nextState": "both-asleep"
                      },
                      "sources": [
@@ -1093,14 +1103,6 @@
                "hueSupported": true,
                "saturationSupported": true,
                "props": [
-                  {
-                     "name": "power",
-                     "initialValue": false,
-                     "source": {
-                        "name": "thing:environment",
-                        "property": "bedtime"
-                     }
-                  }
                ],
                "things": [
                   {

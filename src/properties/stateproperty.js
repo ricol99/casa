@@ -50,10 +50,22 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    if (source) {
 
       if (source.hasOwnProperty("nextState")) {
-         this.set(source.nextState, { sourceName: this.owner });
+         this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
       }
    }
 };
+
+StateProperty.prototype.transformNextState = function(_nextState) {
+   var nextState = _nextState;
+
+   switch (_nextState) {
+      case "PREVIOUS-STATE":
+         nextState = this.previousState;
+         break;
+   }
+
+   return nextState;
+}
 
 StateProperty.prototype.setState = function(_nextState) {
    console.log(this.uName+": setState state="+_nextState);
@@ -63,13 +75,15 @@ StateProperty.prototype.setState = function(_nextState) {
       this.stateTimer = null;
    }
 
+   this.previousState = this.value;
+
    if (this.states[_nextState]) {
 
       if (this.states[_nextState].timeout) {
 
          this.stateTimer = setTimeout(function(_this, _timeoutState) {
             _this.stateTimer = null;
-            _this.set(_timeoutState, { sourceName: _this.owner });
+            _this.set(_this.transformNextState(_timeoutState), { sourceName: _this.owner });
          }, this.states[_nextState].timeout.duration * 1000, this, this.states[_nextState].timeout.nextState);
       }
 
@@ -165,30 +179,32 @@ function State(_config, _owner) {
    this.guards = _config.hasOwnProperty("guards") ? _config.guards : (_config.hasOwnProperty("guard") ? [ _config.guard ] : undefined);
    this.timeout = _config.timeout;
 
-   if (!this.sources) {
-      return;
-   }
+   if (this.sources) {
 
-   for (var i = 0; i < this.sources.length; i++) {
+      for (var i = 0; i < this.sources.length; i++) {
 
-      if (!this.sources[i].hasOwnProperty("name")) {
-         this.sources[i].name = this.owner.owner.uName;
+         if (!this.sources[i].hasOwnProperty("name")) {
+            this.sources[i].name = this.owner.owner.uName;
+         }
+
+         var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
+         this.sources[i].sourceListener = sourceListener;
+         var val = this.sources[i].hasOwnProperty("value") ? this.sources[i].value : "DEFAULT_VALUE";
+
+         if (!this.sourceMap[sourceListener.sourceEventName]) {
+            this.sourceMap[sourceListener.sourceEventName] = {};
+         }
+
+         this.sourceMap[sourceListener.sourceEventName][val] = this.sources[i];
       }
-
-      var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
-      this.sources[i].sourceListener = sourceListener;
-      var val = this.sources[i].hasOwnProperty("value") ? this.sources[i].value : "DEFAULT_VALUE";
-
-      if (!this.sourceMap[sourceListener.sourceEventName]) {
-         this.sourceMap[sourceListener.sourceEventName] = {};
-      }
-
-      this.sourceMap[sourceListener.sourceEventName][val] = this.sources[i];
    }
 
    if (this.schedules) {
-      var casaSys = CasaSystem.mainInstance();
-      this.scheduleService =  casaSys.findService("scheduleservice");
+
+      if (!this.scheduleService) {
+         var casaSys = CasaSystem.mainInstance();
+         this.scheduleService =  casaSys.findService("scheduleservice");
+      }
 
       if (!this.scheduleService) {
          console.error(this.uName + ": ***** Schedule service not found! *************");
@@ -218,8 +234,13 @@ State.prototype.guardsComply = function() {
 }
 
 State.prototype.scheduledEventTriggered = function(_event, _value) {
+   console.log(this.uName+": AAAA event="+_event+" value="+_value);
    this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
    this.owner.set(this.name, { sourceName: this.owner.owner });
+}
+
+State.prototype.getRampStartValue = function(_event) {
+   return 0;
 }
 
 function copyObject(_sourceObject) {
