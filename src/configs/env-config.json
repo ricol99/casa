@@ -886,23 +886,6 @@
                "initialValue": "users-present",
                "states": [
                   {
-                     "name": "DEFAULT",
-                     "sources": [
-                        {
-                           "event": "wake-up-call",
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "wake-up-started",
-                           "nextState": "users-waking-up"
-                        },
-                        {
-                           "event": "wake-up-finished",
-                           "nextState": "users-present"
-                        }
-                     ]
-                  },
-                  {
                      "name": "no-users-present",
                      "source": {
                         "property": "movement",
@@ -911,14 +894,14 @@
                      }
                   },
                   {
-                     "name": "users-asleep-pre-wake-up",
+                     "name": "users-waking-up",
                      "schedules": [
                          {
-                            "name": "wake-up-call",
+                            "name": "pre-wake-up-call",
                             "rule": "30 6 * * 1-5"
                          },
                          {
-                            "name": "wake-up-call-weekend",
+                            "name": "pre-wake-up-call-weekend",
                             "rule": "0 8 * * 6-7"
                          }
                      ],
@@ -1112,14 +1095,6 @@
                      "propogateToParent": false,
                      "props": [
                         {
-                           "name": "dark",
-                           "initialValue": "false",
-                           "source": {
-                              "name": "thing:environment",
-                              "property": "dark"
-                           }
-                        },
-                        {
                            "name": "user-state",
                            "type": "stateproperty",
                            "states": [
@@ -1131,8 +1106,9 @@
                                  }
                               },
                               {
-                                 "name": "users-asleep-pre-wake-up",
+                                 "name": "users-waking-up",
                                  "guard": {
+                                    "source": "thing:environment",
                                     "property": "dark",
                                     "value": false
                                  },
@@ -1229,6 +1205,47 @@
                                     "property": "power",
                                     "value": false
                                  }
+                              },
+                              {
+                                 "name": "users-waking-up",
+                                 "guard": {
+                                    "source": "thing:environment",
+                                    "property": "dark",
+                                    "value": false
+                                 },
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 100,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 60,
+                                          "step": 1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "ramp": {
+                                          "startValue": 100,
+                                          "endValue": 70,
+                                          "step": -1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
                               },
                               {
                                  "name": "richard-reading",

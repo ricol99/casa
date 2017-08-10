@@ -5,6 +5,7 @@ var CasaSystem = require('../casasystem');
 
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
+   this.casaSys = CasaSystem.mainInstance();
 
    this.states = {};
 
@@ -116,8 +117,7 @@ StateProperty.prototype.alignTargetProperties = function(_state) {
             rampConfig.property = _state.targets[i].property;
 
             if (!this.rampService) {
-               var casaSys = CasaSystem.mainInstance();
-               this.rampService =  casaSys.findService("rampservice");
+               this.rampService =  this.casaSys.findService("rampservice");
 
                if (!this.rampService) {
                   console.error(this.uName + ": ***** Ramp service not found! *************");
@@ -222,8 +222,19 @@ State.prototype.guardsComply = function() {
    if (this.guards) {
 
       for (var i = 0; i < this.guards.length; ++i) {
+         var source = this.owner.owner;
 
-         if (this.guards[i].value != this.owner.owner.props[this.guards[i].property]) {
+         if (this.guards[i].hasOwnProperty("source")) {
+            source = this.casaSys.findSource(this.guards[i].source);
+
+            if (!source) {
+               ret = false;
+               break;
+            }
+
+         }
+
+         if (this.guards[i].value != source.getProperty(this.guards[i].property)) {
             ret = false;
             break;
          }

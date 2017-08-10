@@ -29,12 +29,12 @@ function HueLight(_config) {
 
       if (_config.hueSupported) {
          this.hueSupported = true;
-         this.ensurePropertyExists('hue', 'property', { initialValue: 65535 }, _config);
+         this.ensurePropertyExists('hue', 'property', { initialValue: 100 }, _config);
       }
 
       if (_config.saturationSupported) {
          this.saturationSupported = true;
-         this.ensurePropertyExists('saturation', 'property', { initialValue: 255 }, _config);
+         this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
       }
    }
    else {
@@ -47,12 +47,12 @@ function HueLight(_config) {
 
          if (_result.hue) {
             that.hueSupported = true;
-            that.ensurePropertyExists('hue', 'property', { initialValue: 65535 }, _config);
+            that.ensurePropertyExists('hue', 'property', { initialValue: 100 }, _config);
          }
 
          if (_result.saturation) {
             that.saturationSupported = true;
-            that.ensurePropertyExists('saturation', 'property', { initialValue: 255 }, _config);
+            that.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
          }
       });
    }
@@ -76,10 +76,7 @@ function copyObject(_sourceObject) {
 HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    var that = this;
 
-   console.log(this.uName+": AAAA propertyAboutToChange propName="+_propName+" propValue="+_propValue);
-
    if (!_data.coldStart) {
-   console.log(this.uName+": AAAA propertyAboutToChange propName="+_propName+" propValue="+_propValue);
 
       if (_propName == "power") {
 
@@ -128,5 +125,30 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
    }
 };
 
+HueLight.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+
+   this.statusTimer = setInterval(function(_this) {
+
+      _this.hueService.getLightState(this.deviceID, function(_error, _lightStatus) {
+
+         if (!_error && _lightStatus.state.reachable) {
+            _this.updateProperty("power", _lightStatus.state.on);
+
+            if (_this.brightnessSupported) {
+               _this.updateProperty("brightness", _lightStatus.bri.on * 100 / 255);
+            }
+
+            if (_this.hueSupported) {
+               _this.updateProperty("hue", _lightStatus.hue.on * 360 / 65535);
+            }
+
+            if (_this.saturationSupported) {
+               _this.updateProperty("saturation", _lightStatus.sat.on * 100 / 255);
+            }
+         }
+      });
+   }, 60000, this);
+};
 
 module.exports = exports = HueLight;

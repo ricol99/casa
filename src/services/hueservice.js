@@ -148,6 +148,13 @@ HueService.prototype.setLightSaturation = function(_deviceId, _saturation, _call
    }, { deviceId: _deviceId, saturation: _saturation } , _callback);
 };
 
+HueService.prototype.getLightState = function(_deviceId, _callback) {
+   this.addToQueue(function(_this, _params, _callback) {
+      console.log(_this.uName + ': getting light status, deviceId: ' + _params.deviceId);
+      _this.hue.lightStatus(_params.deviceId, _callback);
+   }, { deviceId: _deviceId } , _callback);
+};
+
 HueService.prototype.addToQueue = function(_request, _params, _callback) {
 
    if (!this.ready) {
