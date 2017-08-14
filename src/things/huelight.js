@@ -29,7 +29,7 @@ function HueLight(_config) {
 
       if (_config.hueSupported) {
          this.hueSupported = true;
-         this.ensurePropertyExists('hue', 'property', { initialValue: 100 }, _config);
+         this.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
       }
 
       if (_config.saturationSupported) {
@@ -47,7 +47,7 @@ function HueLight(_config) {
 
          if (_result.hue) {
             that.hueSupported = true;
-            that.ensurePropertyExists('hue', 'property', { initialValue: 100 }, _config);
+            that.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
          }
 
          if (_result.saturation) {
@@ -130,21 +130,21 @@ HueLight.prototype.coldStart = function() {
 
    this.statusTimer = setInterval(function(_this) {
 
-      _this.hueService.getLightState(this.deviceID, function(_error, _lightStatus) {
+      _this.hueService.getLightState(_this.deviceID, function(_error, _lightStatus) {
 
          if (!_error && _lightStatus.state.reachable) {
             _this.updateProperty("power", _lightStatus.state.on);
 
             if (_this.brightnessSupported) {
-               _this.updateProperty("brightness", _lightStatus.bri.on * 100 / 255);
+               _this.updateProperty("brightness", _lightStatus.state.bri.on * 100 / 255);
             }
 
             if (_this.hueSupported) {
-               _this.updateProperty("hue", _lightStatus.hue.on * 360 / 65535);
+               _this.updateProperty("hue", _lightStatus.state.hue.on * 360 / 65535);
             }
 
             if (_this.saturationSupported) {
-               _this.updateProperty("saturation", _lightStatus.sat.on * 100 / 255);
+               _this.updateProperty("saturation", _lightStatus.state.sat.on * 100 / 255);
             }
          }
       });
