@@ -7,6 +7,7 @@ function HueLight(_config) {
 
    Thing.call(this, _config);
    this.thingType = "hue-light";
+   this.propsSynced = { power: false, brightness: false, hue: false, saturation: false };
 
    this.deviceID = _config.deviceID;
    this.displayName = _config.displayName;
@@ -86,6 +87,9 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
                }
+               else {
+                  that.syncDeviceProperties();
+               }
             });
         }
          else {
@@ -97,31 +101,51 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
             });
          }
       }
-      else if (_propName == "brightness") {
-         this.hueService.setLightBrightness(this.deviceID, _propValue, function(_error, _content) {
-
-            if (_error) {
-               console.log(that.uName + ': Error turning room off ' + _error.message);
-            }
-         });
-         this.updateProperty("power", (_propValue > 0));
+      else if (this.getProperty("power")) {
+         this.syncDeviceProperty(_propName);
       }
-      else if (_propName == "hue") {
-         this.hueService.setLightHue(this.deviceID, _propValue, function(_error, _content) {
-
-            if (_error) {
-               console.log(that.uName + ': Error turning room off ' + _error.message);
-            }
-         });
+      else {
+         this.propsSynced[_propName] = false;
       }
-      else if (_propName == "saturation") {
-         this.hueService.setLightSaturation(this.deviceID, _propValue, function(_error, _content) {
+   }
+};
 
-            if (_error) {
-               console.log(that.uName + ': Error turning room off ' + _error.message);
-            }
-         });
+HueLight.prototype.syncDeviceProperties = function() {
+
+   for (var prop in this.propsSynced) {
+
+      if (this.propsSynced.hasOwnProperty(prop) && !this.propsSynced[prop]) {
+         this.syncDeviceProperty(prop);
       }
+   }
+};
+
+HueLight.prototype.syncDeviceProperty = function(_propName) {
+   var that = this;
+
+   if (_propName == "brightness") {
+      this.hueService.setLightBrightness(this.deviceID, _propValue, function(_error, _content) {
+
+         if (_error) {
+            console.log(that.uName + ': Error turning room off ' + _error.message);
+         }
+      });
+   }
+   else if (_propName == "hue") {
+      this.hueService.setLightHue(this.deviceID, _propValue, function(_error, _content) {
+
+         if (_error) {
+            console.log(that.uName + ': Error turning room off ' + _error.message);
+         }
+      });
+   }
+   else if (_propName == "saturation") {
+      this.hueService.setLightSaturation(this.deviceID, _propValue, function(_error, _content) {
+
+         if (_error) {
+            console.log(that.uName + ': Error turning room off ' + _error.message);
+         }
+      });
    }
 };
 
@@ -131,22 +155,38 @@ HueLight.prototype.coldStart = function() {
    this.statusTimer = setInterval(function(_this) {
 
       _this.hueService.getLightState(_this.deviceID, function(_error, _lightStatus) {
+         console.log(_this.uName + ": AAAA Lightstate = " + JSON.stringify(_lightStatus));
 
-         if (!_error && _lightStatus.state.reachable) {
-            _this.updateProperty("power", _lightStatus.state.on);
+/*         if (!_error && _lightStatus.state.reachable) {
+
+            if (_this.getProperty("power") != _lightStatus.state.on) {
+               _this.updateProperty("power", _lightStatus.state.on);
+            }
 
             if (_this.brightnessSupported) {
-               _this.updateProperty("brightness", _lightStatus.state.bri.on * 100 / 255);
+               var deviceBrightness = Math.floor(_lightStatus.state.bri * 100 / 255);
+
+               if (deviceBrightness != _this.getProperty("brightness")) {
+                  _this.updateProperty("brightness", deviceBrightness);
+               }
             }
 
             if (_this.hueSupported) {
-               _this.updateProperty("hue", _lightStatus.state.hue.on * 360 / 65535);
+               var deviceHue = Math.floor(_lightStatus.state.hue * 360 / 65535);
+
+               if (deviceHue != _this.getProperty("hue")) {
+                  _this.updateProperty("hue", deviceHue);
+               }
             }
 
             if (_this.saturationSupported) {
-               _this.updateProperty("saturation", _lightStatus.state.sat.on * 100 / 255);
+               var deviceSaturation = Math.floor(_lightStatus.state.sat * 100 / 255);
+
+               if (deviceSaturation != _this.getProperty("saturation")) {
+                  _this.updateProperty("saturation", deviceSaturation);
+               }
             }
-         }
+         } */
       });
    }, 60000, this);
 };
