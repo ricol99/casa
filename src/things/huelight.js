@@ -7,10 +7,11 @@ function HueLight(_config) {
 
    Thing.call(this, _config);
    this.thingType = "hue-light";
-   this.propsSynced = { power: false, brightness: false, hue: false, saturation: false };
+   this.propsSynced = { brightness: false, hue: false, saturation: false };
 
    this.deviceID = _config.deviceID;
    this.displayName = _config.displayName;
+   this.powerPending = false;
 
    this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
@@ -82,16 +83,18 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
+            this.powerPending = true;
             this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
 
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
                }
                else {
+                  that.powerPending = false;
                   that.syncDeviceProperties();
                }
             });
-        }
+         }
          else {
             this.hueService.turnLightOff(this.deviceID, function(_error, _content) {
 
@@ -101,7 +104,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
             });
          }
       }
-      else if (this.getProperty("power")) {
+      else if (this.getProperty("power") && !this.powerPending) {
          this.syncDeviceProperty(_propName);
       }
       else {
