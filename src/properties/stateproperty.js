@@ -88,52 +88,33 @@ StateProperty.prototype.setState = function(_nextState) {
          }, this.states[_nextState].timeout.duration * 1000, this, this.states[_nextState].timeout.nextState);
       }
 
-      if (this.states[_nextState].guardsComply()) {
-         this.alignTargetProperties(this.states[_nextState]);
+      var nextState = this.states[_nextState].initialise();
+
+      if (nextState) {
+
+         setTimeout(function(_this, _nextState) {
+            _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
+         }, 10, this, nextState);
       }
    }
    else if (this.states["DEFAULT"]) {
-      this.alignTargetProperties(this.states["DEFAULT"]);
+      this.states["DEFAULT"].alignTargetProperties();
    }
 };
 
-StateProperty.prototype.alignTargetProperties = function(_state) {
+StateProperty.prototype.createRamp = function(_config) {
 
-   if (_state.targets) {
-      var targets = [];
+   if (!this.rampService) {
+      this.rampService =  this.casaSys.findService("rampservice");
 
-      for (var i = 0; i < _state.targets.length; ++i) {
-
-         if (_state.targets[i].hasOwnProperty("value")) {
-            targets.push(_state.targets[i]);
-         }
-         else if (_state.targets[i].hasOwnProperty("ramp")) {
-            var rampConfig = copyObject(_state.targets[i].ramp);
-
-            if (!(rampConfig.hasOwnProperty("startValue"))) {
-               rampConfig.startValue = this.owner.props[_state.targets[i].property].value;
-            }
-
-            rampConfig.property = _state.targets[i].property;
-
-            if (!this.rampService) {
-               this.rampService =  this.casaSys.findService("rampservice");
-
-               if (!this.rampService) {
-                  console.error(this.uName + ": ***** Ramp service not found! *************");
-                  process.exit();
-               }
-            }
-
-            var ramp = this.rampService.createRamp(this, rampConfig);
-            ramp.start();
-         }
-      }
-
-      if (targets.length > 0) {
-         this.owner.setNextProperties(_state.targets);
+      if (!this.rampService) {
+         console.error(this.uName + ": ***** Ramp service not found! *************");
+         process.exit();
       }
    }
+
+   var ramp = this.rampService.createRamp(this, _config);
+   ramp.start();
 };
 
 StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
@@ -214,6 +195,65 @@ function State(_config, _owner) {
    }
 }
 
+State.prototype.initialise = function() {
+   this.alignTargetProperties();
+   return this.checkSourceProperties();
+};
+
+State.prototype.alignTargetProperties = function() {
+
+   if (this.guardsComply() && this.targets) {
+      var targets = [];
+
+      for (var i = 0; i < this.targets.length; ++i) {
+
+         if (this.targets[i].hasOwnProperty("value")) {
+            targets.push(this.targets[i]);
+         }
+         else if (this.targets[i].hasOwnProperty("ramp")) {
+            var rampConfig = copyObject(this.targets[i].ramp);
+
+            if (!(rampConfig.hasOwnProperty("startValue"))) {
+               rampConfig.startValue = this.owner.owner.props[this.targets[i].property].value;
+            }
+
+            rampConfig.property = this.targets[i].property;
+            this.owner.createRamp(rampConfig);
+         }
+      }
+
+      if (targets.length > 0) {
+         this.owner.owner.setNextProperties(targets);
+      }
+   }
+};
+
+State.prototype.checkSourceProperties = function() {
+   var nextState = null;
+
+   if (this.sources) {
+
+      for (var i = 0; i < this.sources.length; i++) {
+
+         if (this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
+            var sourceName = this.sources[i].hasOwnProperty("name") ? this.sources[i].name : this.owner.owner.uName;
+            var sourceEventName = sourceName + ":" + this.sources[i].property;
+            var source = this.sourceMap[sourceEventName][this.sources[i].value];
+
+            if (source.getSource().getProperty(this.sources[i].property) === this.source[i].value) {
+
+               // Property already matches so move to next state immediately
+               if (this.sources[i].hasOwnProperty("nextState")) {
+                  nextState = this.sources[i].nextState;
+                  break;
+               }
+            }
+         }
+      }
+   }
+
+   return nextState;
+};
 
 State.prototype.guardsComply = function() {
    var ret = true;

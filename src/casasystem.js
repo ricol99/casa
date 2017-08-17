@@ -213,12 +213,26 @@ CasaSystem.prototype.extractThings = function(_config, _parent) {
 CasaSystem.prototype.mergeConfigs = function() {
    this.config.users = this.systemConfig.users;
 
-   for (var i = 0; i < this.systemConfig.services.length; ++i) {
-      this.config.services.push(this.systemConfig.services[i]);
+   if (this.systemConfig.services) {
+
+      if (!this.config.services) {
+         this.config.services = [];
+      }
+
+      for (var i = 0; i < this.systemConfig.services.length; ++i) {
+         this.config.services.push(this.systemConfig.services[i]);
+      }
    }
 
-   for (var i = 0; i < this.systemConfig.things.length; ++i) {
-      this.config.things.push(this.systemConfig.things[i]);
+   if (this.systemConfig.things) {
+
+      if (!this.config.things) {
+         this.config.things = [];
+      }
+
+      for (var i = 0; i < this.systemConfig.things.length; ++i) {
+         this.config.things.push(this.systemConfig.things[i]);
+      }
    }
 }
 
