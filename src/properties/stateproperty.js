@@ -202,8 +202,7 @@ function State(_config, _owner) {
    if (this.schedules) {
 
       if (!this.scheduleService) {
-         var casaSys = CasaSystem.mainInstance();
-         this.scheduleService =  casaSys.findService("scheduleservice");
+         this.scheduleService =  this.owner.casaSys.findService("scheduleservice");
       }
 
       if (!this.scheduleService) {
@@ -225,7 +224,7 @@ State.prototype.guardsComply = function() {
          var source = this.owner.owner;
 
          if (this.guards[i].hasOwnProperty("source")) {
-            source = this.casaSys.findSource(this.guards[i].source);
+            source = this.owner.casaSys.findSource(this.guards[i].source);
 
             if (!source) {
                ret = false;
