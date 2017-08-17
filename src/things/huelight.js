@@ -127,7 +127,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName) {
    var that = this;
 
    if (_propName == "brightness") {
-      this.hueService.setLightBrightness(this.deviceID, _propValue, function(_error, _content) {
+      this.hueService.setLightBrightness(this.deviceID, this.getProperty("brightness"), function(_error, _content) {
 
          if (_error) {
             console.log(that.uName + ': Error turning room off ' + _error.message);
@@ -138,7 +138,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName) {
       });
    }
    else if (_propName == "hue") {
-      this.hueService.setLightHue(this.deviceID, _propValue, function(_error, _content) {
+      this.hueService.setLightHue(this.deviceID, this.getProperty("hue"), function(_error, _content) {
 
          if (_error) {
             console.log(that.uName + ': Error turning room off ' + _error.message);
@@ -149,7 +149,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName) {
       });
    }
    else if (_propName == "saturation") {
-      this.hueService.setLightSaturation(this.deviceID, _propValue, function(_error, _content) {
+      this.hueService.setLightSaturation(this.deviceID, this.getProperty("saturation"), function(_error, _content) {
 
          if (_error) {
             console.log(that.uName + ': Error turning room off ' + _error.message);
