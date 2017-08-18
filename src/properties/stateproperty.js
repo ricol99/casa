@@ -48,11 +48,38 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                   this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
    }
 
-   if (source) {
+   if (source && source.hasOwnProperty("nextState")) {
 
-      if (source.hasOwnProperty("nextState")) {
+      if (currentState && (source.nextState === currentState)) {
+         this.resetStateTimer(currentState);
+      }
+      else {
          this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
       }
+   }
+};
+
+StateProperty.prototype.resetStateTimer = function(_state) {
+   this.clearStateTimer();
+   this.setStateTimer(_state);
+};
+
+StateProperty.prototype.clearStateTimer = function() {
+   
+   if (this.stateTimer) {
+      clearTimeout(this.stateTimer);
+      this.stateTimer = null;
+   }
+};
+
+StateProperty.prototype.setStateTimer = function(_state) {
+
+   if (_state.timeout) {
+
+      this.stateTimer = setTimeout(function(_this, _timeoutState) {
+         _this.stateTimer = null;
+         _this.set(_this.transformNextState(_timeoutState), { sourceName: _this.owner });
+      }, _state.timeout.duration * 1000, this, _state.timeout.nextState);
    }
 };
 
@@ -71,30 +98,18 @@ StateProperty.prototype.transformNextState = function(_nextState) {
 StateProperty.prototype.setState = function(_nextState) {
    console.log(this.uName+": setState state="+_nextState);
 
-   if (this.stateTimer) {
-      clearTimeout(this.stateTimer);
-      this.stateTimer = null;
-   }
-
+   this.clearStateTimer();
    this.previousState = this.value;
 
    if (this.states[_nextState]) {
+      this.setStateTimer(this.states[_nextState]);
+      var immediateNextState = this.states[_nextState].initialise();
 
-      if (this.states[_nextState].timeout) {
-
-         this.stateTimer = setTimeout(function(_this, _timeoutState) {
-            _this.stateTimer = null;
-            _this.set(_this.transformNextState(_timeoutState), { sourceName: _this.owner });
-         }, this.states[_nextState].timeout.duration * 1000, this, this.states[_nextState].timeout.nextState);
-      }
-
-      var nextState = this.states[_nextState].initialise();
-
-      if (nextState) {
+      if (immediateNextState) {
 
          setTimeout(function(_this, _nextState) {
             _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
-         }, 10, this, nextState);
+         }, 10, this, immediateNextState);
       }
    }
    else if (this.states["DEFAULT"]) {
@@ -238,9 +253,10 @@ State.prototype.checkSourceProperties = function() {
          if (this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
             var sourceName = this.sources[i].hasOwnProperty("name") ? this.sources[i].name : this.owner.owner.uName;
             var sourceEventName = sourceName + ":" + this.sources[i].property;
-            var source = this.sourceMap[sourceEventName][this.sources[i].value];
+            var sourceListener = this.owner.sourceListeners[sourceEventName];
+            var source = (sourceListener) ? sourceListener.getSource() : null;
 
-            if (source.getSource().getProperty(this.sources[i].property) === this.source[i].value) {
+            if (source && source.getProperty(this.sources[i].property) === this.source[i].value) {
 
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState")) {

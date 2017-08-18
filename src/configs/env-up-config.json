@@ -199,13 +199,7 @@
                   {
                      "property": "movement-pir"
                   }
-               ],    
-               "sourceSteps": [
-                  {  
-                     "type": "latchstep",
-                     "minOutputTime": 600
-                  }
-               ]
+               ]    
             },
             {
                "name": "user-state",
@@ -217,6 +211,11 @@
                      "sources": [
                         {
                            "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
                            "value": true,
                            "nextState": "users-present"
                         },
@@ -232,7 +231,43 @@
                   },
                   {
                      "name": "users-present",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
                      "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "natalie-bedroom-switch",
+                           "nextState": "natalie-reading"
+                        },
+                        {
+                           "event": "richard-bedroom-switch",
+                           "nextState": "richard-reading"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present-in-low-light",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
                         {
                            "event": "natalie-bedroom-switch",
                            "nextState": "natalie-reading"
@@ -391,7 +426,14 @@
                      ],
                      "timeout": {
                         "duration": 1800,
-                        "nextState": "users-present"
+                        "nextState": "users-awake"
+                     }
+                  },
+                  {
+                     "name": "users-awake",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "no-users-present"
                      }
                   }
                ]
@@ -443,43 +485,15 @@
                                  }
                               },
                               {
-                                 "name": "users-waking-up",
-                                 "guard": {
-                                    "source": "thing:environment",
-                                    "property": "dark",
-                                    "value": false
-                                 },
+                                 "name": "users-present-in-low-light",
                                  "targets": [
-                                    {
-                                       "property": "brightness",
-                                       "ramp": {
-                                          "startValue": 0,
-                                          "endValue": 100,
-                                          "step": 2,
-                                          "duration": 1800
-                                       }
-                                    },
-                                    {
-                                       "property": "hue",
-                                       "ramp": {
-                                          "startValue": 0,
-                                          "endValue": 60,
-                                          "step": 1,
-                                          "duration": 1800
-                                       }
-                                    },
-                                    {
-                                       "property": "saturation",
-                                       "ramp": {
-                                          "startValue": 100,
-                                          "endValue": 70,
-                                          "step": -1,
-                                          "duration": 1800
-                                       }
-                                    },
                                     {
                                        "property": "power",
                                        "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
                                     }
                                  ]
                               },
@@ -521,27 +535,6 @@
                                        "value": true
                                     }
                                  ]
-                              }
-                           ]
-                        }
-                     ]
-                  },
-                  {
-                     "name": "huelight:richard-bedroom-lamp",
-                     "displayName": "Richard Bedroom Lamp",
-                     "deviceID": 4,
-                     "propogateToParent": false,
-                     "props": [
-                        {
-                           "name": "user-state",
-                           "type": "stateproperty",
-                           "states": [
-                              {
-                                 "name": "DEFAULT",
-                                 "target": {
-                                    "property": "power",
-                                    "value": false
-                                 }
                               },
                               {
                                  "name": "users-waking-up",
@@ -585,6 +578,49 @@
                                  ]
                               },
                               {
+                                 "name": "users-awake",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "huelight:richard-bedroom-lamp",
+                     "displayName": "Richard Bedroom Lamp",
+                     "deviceID": 4,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "user-state",
+                           "type": "stateproperty",
+                           "states": [
+                              {
+                                 "name": "DEFAULT",
+                                 "target": {
+                                    "property": "power",
+                                    "value": false
+                                 }
+                              },
+                              {
+                                 "name": "users-present-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
+                                    }
+                                 ]
+                              },
+                              {
                                  "name": "richard-reading",
                                  "targets": [
                                     {
@@ -617,6 +653,56 @@
                                        "property": "brightness",
                                        "value": 60
                                     },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              },
+                              {
+                                 "name": "users-waking-up",
+                                 "guard": {
+                                    "source": "thing:environment",
+                                    "property": "dark",
+                                    "value": false
+                                 },
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 100,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 60,
+                                          "step": 1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "ramp": {
+                                          "startValue": 100,
+                                          "endValue": 70,
+                                          "step": -1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              },
+                              {
+                                 "name": "users-awake",
+                                 "targets": [
                                     {
                                        "property": "power",
                                        "value": true
