@@ -427,10 +427,36 @@
                      "timeout": {
                         "duration": 1800,
                         "nextState": "users-awake"
+                     },
+                     "source":  {
+                        "name": "thing:environment",
+                        "property": "dark",
+                        "value": true,
+                        "nextState": "users-waking-up-in-dark"
+                     }
+                  },
+                  {
+                     "name": "users-waking-up-in-dark",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "users-awake"
                      }
                   },
                   {
                      "name": "users-awake",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "no-users-present"
+                     },
+                     "source":  {
+                        "name": "thing:environment",
+                        "property": "low-light",
+                        "value": true,
+                        "nextState": "users-awake-in-low-light"
+                     }
+                  },
+                  {
+                     "name": "users-awake-in-low-light",
                      "timeout": {
                         "duration": 1800,
                         "nextState": "no-users-present"
@@ -537,12 +563,7 @@
                                  ]
                               },
                               {
-                                 "name": "users-waking-up",
-                                 "guard": {
-                                    "source": "thing:environment",
-                                    "property": "dark",
-                                    "value": false
-                                 },
+                                 "name": "users-waking-up-in-dark",
                                  "targets": [
                                     {
                                        "property": "brightness",
@@ -578,8 +599,20 @@
                                  ]
                               },
                               {
-                                 "name": "users-awake",
+                                 "name": "users-awake-in-low-light",
                                  "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "value": 100
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 60
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 70,
+                                    },
                                     {
                                        "property": "power",
                                        "value": true
@@ -660,12 +693,7 @@
                                  ]
                               },
                               {
-                                 "name": "users-waking-up",
-                                 "guard": {
-                                    "source": "thing:environment",
-                                    "property": "dark",
-                                    "value": false
-                                 },
+                                 "name": "users-waking-up-in-dark",
                                  "targets": [
                                     {
                                        "property": "brightness",
@@ -701,8 +729,20 @@
                                  ]
                               },
                               {
-                                 "name": "users-awake",
+                                 "name": "users-awake-in-low-light",
                                  "targets": [
+                                    {  
+                                       "property": "brightness",
+                                       "value": 100
+                                    }, 
+                                    {  
+                                       "property": "hue",
+                                       "value": 60
+                                    },
+                                    {  
+                                       "property": "saturation",
+                                       "value": 70,
+                                    },
                                     {
                                        "property": "power",
                                        "value": true

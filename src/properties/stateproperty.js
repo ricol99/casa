@@ -109,7 +109,7 @@ StateProperty.prototype.setState = function(_nextState) {
 
          setTimeout(function(_this, _nextState) {
             _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
-         }, 10, this, immediateNextState);
+         }, 100, this, immediateNextState);
       }
    }
    else if (this.states["DEFAULT"]) {
@@ -172,7 +172,6 @@ function State(_config, _owner) {
    this.sources = _config.sources;
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
-   this.guards = _config.hasOwnProperty("guards") ? _config.guards : (_config.hasOwnProperty("guard") ? [ _config.guard ] : undefined);
    this.timeout = _config.timeout;
 
    if (this.sources) {
@@ -211,13 +210,18 @@ function State(_config, _owner) {
 }
 
 State.prototype.initialise = function() {
-   this.alignTargetProperties();
-   return this.checkSourceProperties();
+   var newImmediateState = this.checkSourceProperties();
+
+   if (!newImmediateState) {
+      this.alignTargetProperties();
+   }
+
+   return newImmediateState;
 };
 
 State.prototype.alignTargetProperties = function() {
 
-   if (this.guardsComply() && this.targets) {
+   if (this.targets) {
       var targets = [];
 
       for (var i = 0; i < this.targets.length; ++i) {
@@ -244,7 +248,7 @@ State.prototype.alignTargetProperties = function() {
 };
 
 State.prototype.checkSourceProperties = function() {
-   var nextState = null;
+   var immediateNextState = null;
 
    if (this.sources) {
 
@@ -260,7 +264,7 @@ State.prototype.checkSourceProperties = function() {
 
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState")) {
-                  nextState = this.sources[i].nextState;
+                  immediateNextState = this.sources[i].nextState;
                   break;
                }
             }
@@ -268,36 +272,8 @@ State.prototype.checkSourceProperties = function() {
       }
    }
 
-   return nextState;
+   return immediateNextState;
 };
-
-State.prototype.guardsComply = function() {
-   var ret = true;
-
-   if (this.guards) {
-
-      for (var i = 0; i < this.guards.length; ++i) {
-         var source = this.owner.owner;
-
-         if (this.guards[i].hasOwnProperty("source")) {
-            source = this.owner.casaSys.findSource(this.guards[i].source);
-
-            if (!source) {
-               ret = false;
-               break;
-            }
-
-         }
-
-         if (this.guards[i].value != source.getProperty(this.guards[i].property)) {
-            ret = false;
-            break;
-         }
-      }
-   }
-
-   return ret;
-}
 
 State.prototype.scheduledEventTriggered = function(_event, _value) {
    console.log(this.uName+": AAAA event="+_event+" value="+_value);
