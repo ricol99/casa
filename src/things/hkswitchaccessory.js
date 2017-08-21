@@ -27,10 +27,9 @@ function HomekitSwitchAccessory(_config) {
          _callback(null, that.getSwitch());
       });
 
-   if (this.stateless) {
-      this.statelessEventName = _config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";
-   }
-   else {
+   this.eventName = _config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";
+
+   if (!this.stateless) {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
    }
@@ -43,7 +42,7 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
    if (this.stateless) {
 
       if (!this.timeout) {
-         this.switchChanged(false, true);
+         this.raiseEvent(this.eventName, { value: true, oldValue: false });
 
          this.timeout = setTimeout(function(_this) {
             _this.timeout = null;
@@ -55,6 +54,7 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
       }
    }
    else {
+      this.raiseEvent(this.eventName, { value: _status, oldValue: this.props[this.switchProp] });
       this.props[this.switchProp].setManualMode(true);
       this.updateProperty(this.switchProp, _status ? true : false);
    }
@@ -62,10 +62,6 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
 
 HomekitSwitchAccessory.prototype.getSwitch = function() {
    return (this.stateless) ? false : this.props[this.switchProp].value ? 1 : 0;
-};
-
-HomekitSwitchAccessory.prototype.switchChanged = function(_oldValue, _newValue) {
-   this.raiseEvent(this.statelessEventName, { value: _newValue, oldValue: _oldValue });
 };
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

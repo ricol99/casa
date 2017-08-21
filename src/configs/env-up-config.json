@@ -86,11 +86,144 @@
                   {
                      "property": "movement-pir"
                   }
-               ],
-               "sourceSteps": [
+               ]
+            },
+            {
+               "name": "user-state",
+               "type": "stateproperty",
+               "initialValue": "no-users-present",
+               "states": [
                   {
-                     "type": "latchstep",
-                     "minOutputTime": 600
+                     "name": "no-users-present",
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "nextState": "dylan-reading"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "nextState": "dylan-reading"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present-in-low-light",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "nextState": "dylan-reading"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "dylan-reading",
+                     "timeout": {
+                        "duration": 900,
+                        "nextState": "dylan-asleep"
+                     },
+                     "sources": [
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "nextState": "dylan-asleep"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "dylan-asleep",
+                     "sources": [
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "nextState": "dylan-reading"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "dylan-waking-up",
+                     "schedules": [
+                         {
+                            "name": "pre-wake-up-call",
+                            "rule": "00 7 * * 1-5"
+                         },
+                         {
+                            "name": "pre-wake-up-call-weekend",
+                            "rule": "0 9 * * 6-7"
+                         }
+                     ],
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "dylan-awake"
+                     },
+                     "source":  {
+                        "name": "thing:environment",
+                        "property": "dark",
+                        "value": true,
+                        "nextState": "dylan-waking-up-in-dark"
+                     }
+                  },
+                  {
+                     "name": "dylan-waking-up-in-dark",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "dylan-awake"
+                     }
+                  },
+                  {
+                     "name": "dylan-awake",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "no-users-present"
+                     },
+                     "source":  {
+                        "name": "thing:environment",
+                        "property": "low-light",
+                        "value": true,
+                        "nextState": "dylan-awake-in-low-light"
+                     }
+                  },
+                  {
+                     "name": "dylan-awake-in-low-light",
+                     "timeout": {
+                        "duration": 1800,
+                        "nextState": "no-users-present"
+                     }
                   }
                ]
             },
@@ -109,7 +242,7 @@
                "displayName": "Dylan's Bedroom Speakers",
                "pincode": "111-11-111",
                "username": "CC:22:3D:E3:CE:3E",
-               "manufacturer": "Lounge Speaker Ltd",
+               "manufacturer": "Sonos Corporation",
                "model": "V0.1",
                "serialNumber": "1234567890",
                "volumeSupported": true,
@@ -136,6 +269,24 @@
                ]
             },
             {
+               "name": "hkswitchaccessory:dylan-bedroom-switch",
+               "displayName": "Dylan Bedroom Switch",
+               "manufacturer": "Casa Home Automation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "stateless": true,
+               "eventName": "dylan-bedroom-switch",
+               "props": [
+                  {
+                     "name": "ACTIVE",
+                     "initialValue": false,
+                     "source": {
+                        "property": "power"
+                     }
+                  }
+               ]
+            },
+            {
                "name": "hklightaccessory:dylan-bedroom-lights",
                "displayName": "Dylan Bedroom Lights",
                "manufacturer": "Hue Philips Ltd",
@@ -148,23 +299,105 @@
                ],
                "things": [
                   {
-                     "name": "hklightaccessory:dylan-bedroom-lamp",
+                     "name": "huelight:dylan-bedroom-lamp",
                      "displayName": "Dylan Bedroom Lamp",
+                     "deviceID": 2,
                      "propogateToParent": false,
-                     "manufacturer": "Hue Philips Ltd",
-                     "model": "V0.1",
-                     "serialNumber": "1234567890",
-                     "brightnessSupported": true,
-                     "hueSupported": true,
-                     "saturationSupported": true,
                      "props": [
-                     ],
-                     "things": [
                         {
-                           "name": "huelight:dylan-bedroom-lamp",
-                           "displayName": "Dylan Bedroom Lamp",
-                           "deviceID": 2,
-                           "props": [
+                           "name": "user-state",
+                           "type": "stateproperty",
+                           "states": [
+                              {
+                                 "name": "DEFAULT",
+                                 "target": {
+                                    "property": "power",
+                                    "value": false
+                                 }
+                              },
+                              {
+                                 "name": "users-present-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
+                                    }
+                                 ]
+                              },
+                              {
+                                 "name": "dylan-reading",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 60
+                                    }
+                                 ]
+                              },
+                              {
+                                 "name": "dylan-waking-up-in-dark",
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 100,
+                                          "step": 2,
+                                          "duration": 1800
+                                       }
+                                    }, 
+                                    {  
+                                       "property": "hue",
+                                       "ramp": {
+                                          "startValue": 0,
+                                          "endValue": 60,
+                                          "step": 1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "ramp": {
+                                          "startValue": 100,
+                                          "endValue": 70,
+                                          "step": -1,
+                                          "duration": 1800
+                                       }
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              },
+                              {
+                                 "name": "dylan-awake-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "value": 100
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 60
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 70,
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              }
                            ]
                         }
                      ]
