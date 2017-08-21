@@ -276,7 +276,6 @@ State.prototype.checkSourceProperties = function() {
 };
 
 State.prototype.scheduledEventTriggered = function(_event, _value) {
-   console.log(this.uName+": AAAA event="+_event+" value="+_value);
    this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
    this.owner.set(this.name, { sourceName: this.owner.owner });
 }
