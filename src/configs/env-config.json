@@ -941,13 +941,13 @@
                      },
                      "source":  {
                         "name": "thing:environment",
-                        "property": "dark",
+                        "property": "low-light",
                         "value": true,
-                        "nextState": "dylan-waking-up-in-dark"
+                        "nextState": "dylan-waking-up-in-low-light"
                      }
                   },
                   {
-                     "name": "dylan-waking-up-in-dark",
+                     "name": "dylan-waking-up-in-low-light",
                      "timeout": {
                         "duration": 1800,
                         "nextState": "dylan-awake"
@@ -1104,7 +1104,7 @@
                                  ]
                               },
                               {
-                                 "name": "dylan-waking-up-in-dark",
+                                 "name": "dylan-waking-up-in-low-light",
                                  "targets": [
                                     {
                                        "property": "brightness",
@@ -1425,13 +1425,13 @@
                      },
                      "source":  {
                         "name": "thing:environment",
-                        "property": "dark",
+                        "property": "low-light",
                         "value": true,
-                        "nextState": "users-waking-up-in-dark"
+                        "nextState": "users-waking-up-in-low-light"
                      }
                   },
                   {
-                     "name": "users-waking-up-in-dark",
+                     "name": "users-waking-up-in-low-light",
                      "timeout": {
                         "duration": 1800,
                         "nextState": "users-awake"
@@ -1558,7 +1558,7 @@
                                  ]
                               },
                               {
-                                 "name": "users-waking-up-in-dark",
+                                 "name": "users-waking-up-in-low-light",
                                  "targets": [
                                     {
                                        "property": "brightness",
@@ -1688,7 +1688,7 @@
                                  ]
                               },
                               {
-                                 "name": "users-waking-up-in-dark",
+                                 "name": "users-waking-up-in-low-light",
                                  "targets": [
                                     {
                                        "property": "brightness",
