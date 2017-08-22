@@ -214,6 +214,9 @@ State.prototype.initialise = function() {
 
    if (!newImmediateState) {
       this.alignTargetProperties();
+   } 
+   else {
+      console.log(this.uName + ": Initialise() ImmediateState state transfer to " + newImmediateState);
    }
 
    return newImmediateState;

@@ -134,6 +134,14 @@
                "initialValue": 0
             },
             {
+               "name": "test-always-true",
+               "initialValue": true
+            },
+            {
+               "name": "test-always-false",
+               "initialValue": false
+            },
+            {
                "name": "state-test",
                "type": "stateproperty",
                "initialValue": "idle",
@@ -147,11 +155,18 @@
                   },
                   {
                      "name": "test-timeout",
-                     "source": {
-                        "property": "test-state-property",
-                        "value": 50,
-                        "nextState": "test-limit"
-                     },
+                     "sources": [
+                        {
+                           "property": "test-always-true",
+                           "value": false,
+                           "nextState": "test-failed"
+                        },
+                        {
+                           "property": "test-state-property",
+                           "value": 50,
+                           "nextState": "test-immediate-next-state"
+                        }
+                     ],
                      "target": {
                         "property": "test-state-property",
                         "ramp": {
@@ -162,12 +177,29 @@
                      }
                   },
                   {
+                     "name": "test-immediate-next-state",
+                     "sources": [
+                        {
+                           "property": "test-state-property",
+                           "value": 0,
+                           "nextState": "idle"
+                        },
+                        {
+                           "property": "test-always-true",
+                           "value": true,
+                           "nextState": "test-limit"
+                        }
+                     ]
+                  },
+                  {
                      "name": "test-limit",
-                     "source": {
-                        "property": "test-state-property",
-                        "value": 0,
-                        "nextState": "idle"
-                     },
+                     "sources": [
+                        {
+                           "property": "test-state-property",
+                           "value": 0,
+                           "nextState": "idle"
+                        }
+                     ],
                      "target": {
                         "property": "test-state-property",
                         "ramp": {
