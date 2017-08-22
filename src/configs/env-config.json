@@ -1152,7 +1152,7 @@
                                     },
                                     {
                                        "property": "saturation",
-                                       "value": 70,
+                                       "value": 70
                                     },
                                     {
                                        "property": "power",
@@ -1606,7 +1606,7 @@
                                     },
                                     {
                                        "property": "saturation",
-                                       "value": 70,
+                                       "value": 70
                                     },
                                     {
                                        "property": "power",
@@ -1736,7 +1736,7 @@
                                     },
                                     {  
                                        "property": "saturation",
-                                       "value": 70,
+                                       "value": 70
                                     },
                                     {
                                        "property": "power",
