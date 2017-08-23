@@ -9,6 +9,7 @@ function StateProperty(_config, _owner) {
    this.autoMode = true;
 
    this.states = {};
+   this.targetPropsBuffer = {};
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -133,10 +134,10 @@ StateProperty.prototype.createRamp = function(_config) {
    ramp.start();
 };
 
-StateProperty.prototype.bufferTargetSetting = function(_targets) {
-
+StateProperty.prototype.bufferTargetAlignment = function(_targets) {
+   
    for (var i = 0; i < _targets.length; ++i) {
-   XXXXX
+      this.targetPropsBuffer[_targets[i].property] = _targets[i].value;
    }
 };
 
@@ -145,14 +146,14 @@ StateProperty.prototype.applyBufferedTargets = function(_targets) {
    if (this.targetPropsBuffer) {
       var targets = [];
 
-      for (var targetProp in this.targetPropsBuffer)) {
+      for (var targetProp in this.targetPropsBuffer) {
 
          if (this.targetPropsBuffer.hasOwnProperty(targetProp)) {
             targets.push({ property: targetProp, value: this.targetPropsBuffer[targetProp] });
          }
       }
 
-      this.targetPropsBuffer = null;
+      this.targetPropsBuffer = {};
       this.owner.owner.setNextProperties(targets);
    }
 };
@@ -281,7 +282,7 @@ State.prototype.alignTargetProperties = function() {
             this.owner.owner.setNextProperties(targets);
          }
          else {
-            this.owner.bufferTargetSetting(targets);
+            this.owner.bufferTargetAlignment(targets);
          }
       }
    }
