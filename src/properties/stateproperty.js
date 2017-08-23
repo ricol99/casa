@@ -6,6 +6,7 @@ var CasaSystem = require('../casasystem');
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.casaSys = CasaSystem.mainInstance();
+   this.autoMode = true;
 
    this.states = {};
 
@@ -132,6 +133,30 @@ StateProperty.prototype.createRamp = function(_config) {
    ramp.start();
 };
 
+StateProperty.prototype.bufferTargetSetting = function(_targets) {
+
+   for (var i = 0; i < _targets.length; ++i) {
+   XXXXX
+   }
+};
+
+StateProperty.prototype.applyBufferedTargets = function(_targets) {
+
+   if (this.targetPropsBuffer) {
+      var targets = [];
+
+      for (var targetProp in this.targetPropsBuffer)) {
+
+         if (this.targetPropsBuffer.hasOwnProperty(targetProp)) {
+            targets.push({ property: targetProp, value: this.targetPropsBuffer[targetProp] });
+         }
+      }
+
+      this.targetPropsBuffer = null;
+      this.owner.owner.setNextProperties(targets);
+   }
+};
+
 StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
    this.owner.setNextPropertyValue(_config.property, _value);
 };
@@ -233,19 +258,31 @@ State.prototype.alignTargetProperties = function() {
             targets.push(this.targets[i]);
          }
          else if (this.targets[i].hasOwnProperty("ramp")) {
-            var rampConfig = copyObject(this.targets[i].ramp);
 
-            if (!(rampConfig.hasOwnProperty("startValue"))) {
-               rampConfig.startValue = this.owner.owner.props[this.targets[i].property].value;
+            if (this.owner.autoMode) {
+               var rampConfig = copyObject(this.targets[i].ramp);
+
+               if (!(rampConfig.hasOwnProperty("startValue"))) {
+                  rampConfig.startValue = this.owner.owner.props[this.targets[i].property].value;
+               }
+
+               rampConfig.property = this.targets[i].property;
+               this.owner.createRamp(rampConfig);
             }
-
-            rampConfig.property = this.targets[i].property;
-            this.owner.createRamp(rampConfig);
+            else {
+               targets.push({ property: this.targets[i].property, value: this.targets[i].ramp.endValue });
+            }
          }
       }
 
       if (targets.length > 0) {
-         this.owner.owner.setNextProperties(targets);
+
+         if (this.autoMode) {
+            this.owner.owner.setNextProperties(targets);
+         }
+         else {
+            this.owner.bufferTargetSetting(targets);
+         }
       }
    }
 };

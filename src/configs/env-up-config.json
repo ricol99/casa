@@ -354,6 +354,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     }
                                  ]
                               },
@@ -367,6 +375,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 60
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     }
                                  ]
                               },
@@ -795,6 +811,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 60
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     }
                                  ]
                               },
@@ -804,6 +828,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 30
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     },
                                     {
                                        "property": "power",
@@ -817,6 +849,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 60
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     },
                                     {
                                        "property": "power",
@@ -923,6 +963,14 @@
                                        "value": 60
                                     },
                                     {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    },
+                                    {
                                        "property": "power",
                                        "value": true
                                     }
@@ -936,6 +984,14 @@
                                        "value": 30
                                     },
                                     {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    },
+                                    {
                                        "property": "power",
                                        "value": true
                                     }
@@ -947,6 +1003,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 60
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     },
                                     {
                                        "property": "power",
