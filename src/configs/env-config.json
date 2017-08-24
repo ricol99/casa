@@ -1037,6 +1037,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "dylan-bedroom-switch",
+               "propogateToParent": false,
                "manualScope": "none",
                "props": [
                   {
@@ -1822,6 +1823,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "natalie-bedroom-switch",
+               "propogateToParent": false,
                "manualScope": "none",
                "props": [
                   {
@@ -1841,6 +1843,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "richard-bedroom-switch",
+               "propogateToParent": false,
                "manualScope": "none",
                "props": [
                   {
