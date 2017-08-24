@@ -121,15 +121,6 @@
          "displayName": "Test daylight sensor",
          "props": [
             {
-               "name": "manual-mode",
-               "initialValue": "false",
-               "writable": false,
-               "source": {
-                  "name": "thing:test-cctv",
-                  "property": "test-prop-4"
-               }
-            },
-            {
                "name": "test-state-property",
                "initialValue": 0
             },
@@ -149,14 +140,14 @@
                   {
                      "name": "auto",
                      "timeout": {
-                        "duration": 60,
+                        "duration": 35,
                         "nextState": "manual"
                      }
                   },
                   {
                      "name": "manual",
                      "timeout": {
-                        "duration": 60,
+                        "duration": 35,
                         "nextState": "auto"
                      }
                   }

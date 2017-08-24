@@ -16,6 +16,9 @@ function Source(_config) {
       this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
    }
 
+   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
+   this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
+
    this.props = {};
 
    if (_config.props) {
@@ -38,7 +41,6 @@ function Source(_config) {
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('MODE', 'property', { initialValue: 'auto' }, _config);
 
-   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    events.EventEmitter.call(this);
 
    if (this.casa) {
@@ -131,8 +133,14 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (_propName === "MODE") {
-      this.setMode(_propValue);
+   if (_propName == "MODE") {
+
+      if (_propValue == "manual") {
+         this.setMode(_propValue, this.manualOverrideTimeout, "auto");
+      }
+      else {
+         this.setMode(_propValue);
+      }
    }
 
    if (this.props.hasOwnProperty(_propName)) {
@@ -177,7 +185,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 // in manual mode - properties ignore events from all defined sources for a period when in manual mode
 //                - property input step pipeline effectively disabled
 //
-// Omit _timerDuration if you don't require a timer to move to next mode
+// Omit _timerout if you don't require a timer to move to next mode
 //
 Source.prototype.setMode = function(_mode, _timeout, _timeoutMode) {
 
@@ -195,18 +203,19 @@ Source.prototype.setMode = function(_mode, _timeout, _timeoutMode) {
       for (var prop in this.props) {
 
          if (this.props.hasOwnProperty(prop)) {
-            this.props[prop].setManualMode(_mode === "manual");
+            this.props[prop].setManualMode(_mode === "manual", true);
          }
       }
    }
 }
 
 Source.prototype.startModeTimer = function(_timeout, _timeoutMode) {
-
+   console.info(this.uName+": AAAAA startModeTimer() ");
    this.modeTimer = setTimeout(function(_this, _nextMode) {
+      console.info(_this.uName+": AAAAA startModeTimer()  **TIMEOUT");
       _this.modeTimer = null;
-      _this.setMode(_nextMode);
-   }, _timeout, this, _timeoutMode);
+      _this.updateProperty("MODE", _nextMode);
+   }, _timeout * 1000, this, _timeoutMode);
 };
 
 Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {

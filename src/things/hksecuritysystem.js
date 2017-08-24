@@ -65,7 +65,7 @@ HomekitSecuritySystem.prototype.getTargetState = function() {
 
 HomekitSecuritySystem.prototype.setTargetState = function(_state) {
    console.log(this.uName + ": Changing target state to " + _state);
-   this.props['target-state'].setManualMode(true);
+   this.setManualMode('target-state');
    this.updateProperty("target-state", _state);
 };
 

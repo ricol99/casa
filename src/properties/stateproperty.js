@@ -316,7 +316,7 @@ State.prototype.checkSourceProperties = function() {
             if (source && source.getProperty(this.sources[i].property) === this.sources[i].value) {
 
                // Property already matches so move to next state immediately
-               if (this.sources[i].hasOwnProperty("nextState")) {
+               if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
                   immediateNextState = this.sources[i].nextState;
                   break;
                }

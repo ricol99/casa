@@ -56,8 +56,7 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
    }
    else {
       this.raiseEvent(this.eventName, { value: _status, oldValue: this.props[this.switchProp].value });
-      //this.props[this.switchProp].setManualMode(true);
-      this.setManualMode();
+      this.setManualMode(this.switchProp);
       this.updateProperty(this.switchProp, _status ? true : false);
    }
 };
