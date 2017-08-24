@@ -14,10 +14,15 @@ function StateProperty(_config, _owner) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
    }
 
-   this.setState(this.value);
+   //this.setState(this.value);
 }
 
 util.inherits(StateProperty, Property);
+
+StateProperty.prototype.coldStart = function(_data) {
+   this.setState(this.value);
+   Property.prototype.coldStart.call(this, _data);
+};
 
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
    console.log(this.uName + ": state about to change to " + _propertyValue);
