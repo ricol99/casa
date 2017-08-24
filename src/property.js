@@ -203,7 +203,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 // Output step pipeline still executes
 //
 Property.prototype.set = function(_propValue, _data) {
-   this.setManualMode(true);
+   this.setManualMode(true, this.manualOverrideTimeout);
    _data.enterManualMode = true;
 
    this.updatePropertyandSendToOutputPipeline(_propValue, _data);
@@ -216,10 +216,13 @@ Property.prototype.set = function(_propValue, _data) {
 //                - input step pipeline effectively disabled
 //                - output step pipeline (and setProperty() ) still enabled
 //
-Property.prototype.setManualMode = function(_manualMode) {
+// Omit _timerDuration if you don't require a timer when setting manual mode to true
+//                     or when setting manual mode to false
+//
+Property.prototype.setManualMode = function(_manualMode, _timerDuration) {
 
-   if (_manualMode) {
-      this.restartManualOverrideTimer();
+   if (_manualMode && (_timerDuration != undefined)) {
+      this.restartManualOverrideTimer(_timerDuration);
    }
    else if (this.manualOverrideTimer) {
       clearTimeout(this.manualOverrideTimer);
@@ -501,7 +504,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    return actualOutputValue;
 }
 
-Property.prototype.restartManualOverrideTimer = function() {
+Property.prototype.restartManualOverrideTimer = function(_timerDuration) {
 
    if (this.manualOverrideTimer) {
       clearTimeout(this.manualOverrideTimer);
@@ -509,7 +512,7 @@ Property.prototype.restartManualOverrideTimer = function() {
 
    this.manualOverrideTimer = setTimeout(function(_that) {
       _that.setManualMode(false);
-   }, this.manualOverrideTimeout*1000, this);
+   }, _timerDuration*1000, this);
 };
 
 function copyData(_sourceData) {

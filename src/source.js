@@ -16,12 +16,7 @@ function Source(_config) {
       this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
    }
 
-   if (_config.props && _config.props.hasOwnProperty("ACTIVE")) {
-      this.props = {};
-   }
-   else {
-      this.props = { ACTIVE: new Property({ name: 'ACTIVE', type: 'property', initialValue: false }, this) };
-   }
+   this.props = {};
 
    if (_config.props) {
       var propLen = _config.props.length;
@@ -39,6 +34,9 @@ function Source(_config) {
          this.props[_config.props[i].name] = new Prop(_config.props[i], this);
       }
    }
+
+   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('MODE', 'property', { initialValue: 'auto' }, _config);
 
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    events.EventEmitter.call(this);
@@ -133,6 +131,10 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
+   if (_propName === "MODE") {
+      this.setMode(_propValue);
+   }
+
    if (this.props.hasOwnProperty(_propName)) {
 
       if (!(_data && _data.coldStart) && (_propValue === this.props[_propName].value)) {
@@ -168,6 +170,44 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       return false;
    }
 }
+
+
+//
+// Place the source in/out manual/auto mode
+// in manual mode - properties ignore events from all defined sources for a period when in manual mode
+//                - property input step pipeline effectively disabled
+//
+// Omit _timerDuration if you don't require a timer to move to next mode
+//
+Source.prototype.setMode = function(_mode, _timeout, _timeoutMode) {
+
+   if (this.modeTimer) {
+      clearTimeout(this.modeTimer);
+      this.modeTimer = null;
+   }
+
+   if (_timeout != undefined) {
+      this.startModeTimer(_timeout, _timeoutMode);
+   }
+
+   if (this.props["MODE"].value !== _mode) {
+
+      for (var prop in this.props) {
+
+         if (this.props.hasOwnProperty(prop)) {
+            this.props[prop].setManualMode(_mode === "manual");
+         }
+      }
+   }
+}
+
+Source.prototype.startModeTimer = function(_timeout, _timeoutMode) {
+
+   this.modeTimer = setTimeout(function(_this, _nextMode) {
+      _this.modeTimer = null;
+      _this.setMode(_nextMode);
+   }, _timeout, this, _timeoutMode);
+};
 
 Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {
    // Do nothing by default
@@ -259,6 +299,26 @@ Source.prototype.coldStart = function() {
       }
    }
 }
+
+Source.prototype.getMode = function() {
+   return this.props['MODE'].value;
+};
+
+Source.prototype.getManualMode = function() {
+   return this.props['MODE'].value === 'manual';
+};
+
+Source.prototype.setManualMode = function() {
+   return this.setProperty("MODE", "manual", { sourceName: this.uName });
+};
+
+Source.prototype.getAutoMode = function() {
+   return this.props['MODE'].value === 'auto';
+};
+
+Source.prototype.setAutoMode = function() {
+   return this.setProperty("MODE", "auto", { sourceName: this.uName });
+};
 
 module.exports = exports = Source;
  

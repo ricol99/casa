@@ -1037,6 +1037,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "dylan-bedroom-switch",
+               "invokeManualMode": false,
                "props": [
                   {
                      "name": "ACTIVE",
@@ -1821,6 +1822,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "natalie-bedroom-switch",
+               "invokeManualMode": false,
                "props": [
                   {
                      "name": "ACTIVE",
@@ -1839,6 +1841,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "eventName": "richard-bedroom-switch",
+               "invokeManualMode": false,
                "props": [
                   {
                      "name": "ACTIVE",

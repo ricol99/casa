@@ -183,4 +183,5 @@ function copyData(_sourceData) {
       return undefined;
    }
 }
+
 module.exports = exports = Thing;

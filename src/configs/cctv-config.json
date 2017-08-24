@@ -142,6 +142,27 @@
                "initialValue": false
             },
             {
+               "name": "MODE",
+               "type": "stateproperty",
+               "initialValue": "auto",
+               "states": [
+                  {
+                     "name": "auto",
+                     "timeout": {
+                        "duration": 60,
+                        "nextState": "manual"
+                     }
+                  },
+                  {
+                     "name": "manual",
+                     "timeout": {
+                        "duration": 60,
+                        "nextState": "auto"
+                     }
+                  }
+               ]
+            },
+            {
                "name": "state-test",
                "type": "stateproperty",
                "initialValue": "idle",

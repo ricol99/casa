@@ -6,7 +6,6 @@ var CasaSystem = require('../casasystem');
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.casaSys = CasaSystem.mainInstance();
-   this.autoMode = true;
 
    this.states = {};
    this.targetPropsBuffer = {};
@@ -145,7 +144,7 @@ StateProperty.prototype.bufferSetNextProperties = function(_targets) {
    }
 };
 
-StateProperty.prototype.applyBufferedSetNextProperties = function(_targets) {
+StateProperty.prototype.applyBufferedSetNextProperties = function() {
 
    if (this.targetPropsBuffer) {
       var targets = [];
@@ -158,17 +157,25 @@ StateProperty.prototype.applyBufferedSetNextProperties = function(_targets) {
       }
 
       this.targetPropsBuffer = {};
-      this.owner.owner.setNextProperties(targets);
+      this.owner.setNextProperties(targets);
    }
 };
 
 StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
 
-   if (this.autoMode) {
+   if (this.owner.getAutoMode()) {
       this.owner.setNextPropertyValue(_config.property, _value);
    }
    else {
       this.bufferSetNextPropertyValue({ property: _config.property, value: _value });
+   }
+};
+
+// Override super method in Property and do nothing
+StateProperty.prototype.setManualMode = function(_manualMode, _timerDuration) {
+
+   if (!_manualMode) {
+      this.applyBufferedSetNextProperties();
    }
 };
 
@@ -283,7 +290,7 @@ State.prototype.alignTargetProperties = function() {
 
       if (targets.length > 0) {
 
-         if (this.autoMode) {
+         if (this.owner.owner.getAutoMode()) {
             this.owner.owner.setNextProperties(targets);
          }
          else {
@@ -342,4 +349,5 @@ function copyObject(_sourceObject) {
 
    return newObject;
 }
+
 module.exports = exports = StateProperty;
