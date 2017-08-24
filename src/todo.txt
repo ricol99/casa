@@ -1,4 +1,5 @@
-HDONE stateproperty: allow guard to listen to properties from other sources
-HDONE env: get sunrise to work
-HDONE huelight: monitor light state changes and reflect in property
-peercasa: get peers to work
+DONE stateproperty: allow guard to listen to properties from other sources
+DONE env: get sunrise to work
+DONE: peercasa: get peers to work
+huelight: monitor light state changes and reflect in property
+stateproperty: does createRamp leak?
