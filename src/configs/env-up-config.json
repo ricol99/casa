@@ -161,13 +161,33 @@
                      "schedules": [
                          {
                             "name": "bedtime-call",
-                            "rule": "00 21 * * 1-5"
+                            "rule": "00 21 * * 0-4"
                          },
                          {
                             "name": "bedtime-call-weekend",
-                            "rule": "30 22 * * 6-7"
+                            "rule": "30 22 * * 5-6"
                          }
                      ],
+                     "timeout": {
+                        "duration": 900,
+                        "nextState": "dylan-asleep"
+                     },
+                     "sources": [
+                        {
+                           "event": "dylan-bedroom-switch",
+                           "value": true,
+                           "nextState": "dylan-reading-in-low-light"
+                        },
+                        {
+                           "name": "thing:environment",
+                           "property": "low-light",
+                           "value": true,
+                           "nextState": "dylan-reading-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "dylan-reading-in-low-light",
                      "timeout": {
                         "duration": 900,
                         "nextState": "dylan-asleep"
@@ -368,7 +388,7 @@
                                  ]
                               },
                               {
-                                 "name": "dylan-reading",
+                                 "name": "dylan-reading-in-low-light",
                                  "targets": [
                                     {
                                        "property": "power",
@@ -623,11 +643,11 @@
                      "schedules": [
                          {
                             "name": "bedtime-call",
-                            "rule": "30 22 * * 1-5"
+                            "rule": "30 22 * * 0-4"
                          },
                          {
                             "name": "bedtime-call-weekend",
-                            "rule": "0 23 * * 6-7"
+                            "rule": "0 23 * * 5-6"
                          }
                      ],
                      "timeout": {
@@ -800,6 +820,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     }
                                  ]
                               },
@@ -954,6 +982,14 @@
                                     {
                                        "property": "brightness",
                                        "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
                                     }
                                  ]
                               },
