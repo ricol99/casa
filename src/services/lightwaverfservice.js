@@ -14,7 +14,6 @@ util.inherits(LightwaveRfService, Service);
 
 LightwaveRfService.prototype.coldStart = function() {
    this.lightwaveRf = new LightwaveRf({ ip: this.linkAddress });
-   this.registerWithLink();
 };
 
 LightwaveRfService.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
@@ -97,7 +96,7 @@ LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback,
 LightwaveRfService.prototype.makeNextRequest = function() {
    var that = this;
 
-   if ((this.queue.length > 0 && !this.requestPending) {
+   if ((this.queue.length > 0) && !this.requestPending) {
       this.requestPending = true;
 
       this.queue[0].request(this, this.queue[0].params, function(_error, _content) {
