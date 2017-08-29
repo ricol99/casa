@@ -1,6 +1,6 @@
 {
    "name": "casa:env-up",
-   "displayName": "Dumgoyne Upstairs Environment Casa",
+   "displayName": "Dumgoyne Upstairs Casa",
    "gang": "casa-collin-v2",
    "parentCasa": {
       "name": "casa:internet",

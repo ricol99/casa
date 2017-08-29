@@ -14,6 +14,7 @@ util.inherits(LightwaveRfService, Service);
 
 LightwaveRfService.prototype.coldStart = function() {
    this.lightwaveRf = new LightwaveRf({ ip: this.linkAddress });
+   this.registerWithLink();
 };
 
 LightwaveRfService.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
@@ -66,7 +67,30 @@ LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
    this.makeNextRequest();
 }
 
-LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback) {
+LightwaveRfService.prototype.registerWithLink = function(_callback) {
+
+   if (!this.lastRegistrationTime || ((Date.now() - this.lastRegistrationTime) > 60000)) {
+      this.lastRegistrationTime = Date.now();
+
+      this.addToQueue(function(_this, _params, _cb) {
+         console.log(_this.uName + ': Re-registering with link');
+         _this.lightwaveRf.register(_cb);
+      }, {} , _callback, true);
+   }
+}
+
+LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback, _noReg) {
+   var that = this;
+
+   if (!_noReg) {
+      this.registerWithLink(function(_error, _content) {
+
+         if (_error) {
+            console.error(that.uName + ": Unable to register with link, error = "+ _error);
+         }
+      });
+   }
+
    this.queue.push({ request: _request, params: _params, callback: _callback });
 }
 
