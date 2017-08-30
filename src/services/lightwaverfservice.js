@@ -79,16 +79,16 @@ LightwaveRfService.prototype.registerWithLink = function(_callback) {
 }
 
 LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback, _noReg) {
-   var that = this;
+   // var that = this;
 
-   if (!_noReg) {
-      this.registerWithLink(function(_error, _content) {
+   // if (!_noReg) {
+      // this.registerWithLink(function(_error, _content) {
 
-         if (_error) {
-            console.error(that.uName + ": Unable to register with link, error = "+ _error);
-         }
-      });
-   }
+         // if (_error) {
+            // console.error(that.uName + ": Unable to register with link, error = "+ _error);
+         // }
+      // });
+   // }
 
    this.queue.push({ request: _request, params: _params, callback: _callback });
 }
