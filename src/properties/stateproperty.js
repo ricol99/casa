@@ -9,12 +9,13 @@ function StateProperty(_config, _owner) {
 
    this.states = {};
    this.targetPropsBuffer = {};
+   this.controllingOwner = false;
+   this.assignedPriority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
+   this.priority = this.assignedPriority;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
    }
-
-   //this.setState(this.value);
 }
 
 util.inherits(StateProperty, Property);
@@ -138,50 +139,63 @@ StateProperty.prototype.createRamp = function(_config) {
    ramp.start();
 };
 
-StateProperty.prototype.bufferSetNextPropertyValue = function(_target) {
-   this.bufferSetNextProperties([_target]);
+StateProperty.prototype.alignProperty = function(_propName, _propValue, _priority) {
+   this.alignProperties([{ property: _propName, value: _propValue }], _priority);
 };
 
-StateProperty.prototype.bufferSetNextProperties = function(_targets) {
+StateProperty.prototype.alignProperties = function(_targets, _priority) {
+   this.priority = (_priority == undefined) ? this.assignedPriority : _priority;
+   this.targetPropsBuffer = {};
+
+   if (this.owner.takeControl(this, this.priority)) {
+      this.owner.setNextProperties(_targets);
+   }
+   else {
+      this.bufferAlignProperties(_targets, this.priority);
+   }
+};
+
+StateProperty.prototype.bufferAlignProperties = function(_targets, _priority) {
+   this.targetPropsBuffer = {};
    
    for (var i = 0; i < _targets.length; ++i) {
       this.targetPropsBuffer[_targets[i].property] = _targets[i].value;
+      this.targetPropsPriority = _priority;
    }
-};
+}; 
 
-StateProperty.prototype.applyBufferedSetNextProperties = function() {
+StateProperty.prototype.applyBufferedAlignProperties = function() {
+   var targets = [];
 
-   if (this.targetPropsBuffer) {
-      var targets = [];
+   for (var targetProp in this.targetPropsBuffer) {
 
-      for (var targetProp in this.targetPropsBuffer) {
-
-         if (this.targetPropsBuffer.hasOwnProperty(targetProp)) {
-            targets.push({ property: targetProp, value: this.targetPropsBuffer[targetProp] });
-         }
+      if (this.targetPropsBuffer.hasOwnProperty(targetProp)) {
+         targets.push({ property: targetProp, value: this.targetPropsBuffer[targetProp] });
       }
-
-      this.targetPropsBuffer = {};
-      this.owner.setNextProperties(targets);
    }
+
+   this.alignProperties(targets, this.targetPropsPriority);
 };
 
 StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-
-   if (this.owner.getAutoMode()) {
-      this.owner.setNextPropertyValue(_config.property, _value);
-   }
-   else {
-      this.bufferSetNextPropertyValue({ property: _config.property, value: _value });
-   }
+   this.alignProperty(_config.property, _value, _config.propertyPriority);
 };
 
 // Override super method in Property and do nothing
 StateProperty.prototype.setManualMode = function(_manualMode, _timerDuration) {
 
    if (!_manualMode) {
-      this.applyBufferedSetNextProperties();
+      this.applyBufferedAlignProperties();
    }
+};
+
+StateProperty.prototype.becomeController = function() {
+   this.controllingOwner = true;
+   this.applyBufferedAlignProperties();
+};
+
+StateProperty.prototype.ceasedToBeController = function(_newController) {
+   this.controllingOwner = false;
 };
 
 StateProperty.prototype.rampComplete = function(_ramp, _config) {
@@ -217,6 +231,7 @@ function State(_config, _owner) {
       _config.sources = [ _config.source ];
    }
 
+   this.priority = _config.priority;
    this.sources = _config.sources;
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
@@ -271,9 +286,9 @@ State.prototype.initialise = function() {
 };
 
 State.prototype.alignTargetProperties = function() {
+   var targets = [];
 
    if (this.targets) {
-      var targets = [];
 
       for (var i = 0; i < this.targets.length; ++i) {
 
@@ -289,20 +304,13 @@ State.prototype.alignTargetProperties = function() {
             }
 
             rampConfig.property = this.targets[i].property;
+            rampConfig.propertyPriority = this.priority;
             this.owner.createRamp(rampConfig);
          }
       }
-
-      if (targets.length > 0) {
-
-         if (this.owner.owner.getAutoMode()) {
-            this.owner.owner.setNextProperties(targets);
-         }
-         else {
-            this.owner.bufferSetNextProperties(targets);
-         }
-      }
    }
+
+   this.owner.alignProperties(targets, this.priority);
 };
 
 State.prototype.checkSourceProperties = function() {

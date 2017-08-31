@@ -18,6 +18,7 @@ function Source(_config) {
 
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
+   this.controllerPriority = 0;
 
    this.props = {};
 
@@ -39,7 +40,12 @@ function Source(_config) {
    }
 
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('MODE', 'property', { initialValue: 'auto' }, _config);
+
+   this.ensurePropertyExists('MODE', 'stateproperty',
+                             { initialValue: 'auto',
+                               states: [ { name: "auto", priority: 0 },
+                                         { name: "manual", priority: 9999999,
+                                           timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
 
    events.EventEmitter.call(this);
 
@@ -134,13 +140,7 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (_propName == "MODE") {
-
-      if (_propValue == "manual") {
-         this.setMode(_propValue, this.manualOverrideTimeout, "auto");
-      }
-      else {
-         this.setMode(_propValue);
-      }
+      this.setPropertyMode(_propValue);
    }
 
    if (this.props.hasOwnProperty(_propName)) {
@@ -187,16 +187,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 //
 // Omit _timerout if you don't require a timer to move to next mode
 //
-Source.prototype.setMode = function(_mode, _timeout, _timeoutMode) {
-
-   if (this.modeTimer) {
-      clearTimeout(this.modeTimer);
-      this.modeTimer = null;
-   }
-
-   if (_timeout != undefined) {
-      this.startModeTimer(_timeout, _timeoutMode);
-   }
+Source.prototype.setPropertyMode = function(_mode) {
 
    if (this.props["MODE"].value !== _mode) {
 
@@ -208,15 +199,6 @@ Source.prototype.setMode = function(_mode, _timeout, _timeoutMode) {
       }
    }
 }
-
-Source.prototype.startModeTimer = function(_timeout, _timeoutMode) {
-   console.info(this.uName+": AAAAA startModeTimer() ");
-   this.modeTimer = setTimeout(function(_this, _nextMode) {
-      console.info(_this.uName+": AAAAA startModeTimer()  **TIMEOUT");
-      _this.modeTimer = null;
-      _this.updateProperty("MODE", _nextMode);
-   }, _timeout * 1000, this, _timeoutMode);
-};
 
 Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {
    // Do nothing by default
@@ -308,6 +290,82 @@ Source.prototype.coldStart = function() {
       }
    }
 }
+
+Source.prototype.takeControl = function(_newController, _priority) {
+   var result = true;
+
+   if (_newController != this.controller) {
+
+      if (_priority >= this.controllerPriority) {
+         var oldController = this.controller;
+         this.controller = _newController;
+         this.controllerPriority = _priority;
+
+         if (oldController) {
+            oldController.ceasedToBeController(this.controller);
+         }
+      }
+      else {
+         this.addSecondaryController(_newController, _priority);
+         result = false;
+      }
+   }
+   else {
+      if (_priority != this.controllerPriority) {
+
+         // Same controling stateProperty but different priority - reassess if it still should be a controller
+         if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
+
+            if (_priority >= this.secondaryControllers[0].priority) {
+               this.controllerPriority = _priority;
+            }
+            else {
+               this.controllerPriority = this.secondaryControllers[0].priority;
+               this.controller = this.secondaryControllers[0].controller;
+               this.secondaryControllers.shift();
+               this.addSecondaryController(_newController, _priority);
+               _newController.ceasedToBeController(this.controller);
+               this.controller.becomeController();
+               result = false;
+            }
+         }
+         else {
+            this.controllerPriority = _priority;
+         }
+      }
+   }
+
+   return result;
+};
+
+Source.prototype.addSecondaryController = function(_controller, _priority) {
+   var placed = false;
+
+   if (!this.secondaryControllers) {
+      this.secondaryControllers = [];
+   }
+
+   // Make sure the controller is not already in the secondary controller list
+   for (var i = 0; i < this.secondaryControllers.length; ++i) {
+
+      if (this.secondaryControllers[i].controller == _controller) {
+         this.secondaryControllers.splice(i, 1);
+         break;
+      }
+   }
+
+   // Place controller in the secondary controller list according to priority level
+   for (var j = 0; j < this.secondaryControllers.length; ++j) {
+
+      if (_priority >= this.secondaryControllers[j].priority) {
+         this.secondaryControllers.splice(j, 0, { controller: _controller, priority: _priority });
+         placed = true;
+         break;
+      }
+   }
+
+   if (!placed) this.secondaryControllers.push({ controller: _controller, priority: _priority });
+};
 
 Source.prototype.getMode = function() {
    return this.props['MODE'].value;

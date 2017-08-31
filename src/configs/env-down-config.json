@@ -1,6 +1,6 @@
 {
-   "name": "casa:env",
-   "displayName": "Dumgoyne Environment Casa",
+   "name": "casa:env-down",
+   "displayName": "Dumgoyne Downstairs Casa",
    "gang": "casa-collin-v2",
    "parentCasa": {
       "name": "casa:internet",
@@ -286,14 +286,76 @@
                      "name": "room:kitchen",
                      "property": "movement-pir"
                   }
-               ],
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 600
-                  }
                ]
-            }
+            },
+            {
+               "name": "user-state",
+               "type": "stateproperty",
+               "initialValue": "no-users-present",
+               "states": [
+                  {
+                     "name": "no-users-present",
+                     "sources": [
+                        {  
+                           "name": "thing:environment",
+                           "property": "background-lights",
+                           "value": true,
+                           "nextState": "required"
+                        },
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "kitchen-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "kitchen-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present-in-low-light",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+XXX
          ],
          "things": [
             {
@@ -882,7 +944,7 @@
                            "value": true,
                            "nextState": "users-present-in-low-light"
                         },
-                        {
+                        {YYY
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
@@ -1098,6 +1160,27 @@
                                     "property": "power",
                                     "value": false
                                  }
+                              },
+                              {
+                                 "name": "users-present-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    }
+                                 ]
                               },
                               {
                                  "name": "dylan-reading-in-low-light",
@@ -1523,6 +1606,27 @@
                                  }
                               },
                               {
+                                 "name": "users-present-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    }
+                                 ]
+                              },
+                              {
                                  "name": "natalie-reading",
                                  "targets": [
                                     {
@@ -1662,6 +1766,27 @@
                                     "property": "power",
                                     "value": false
                                  }
+                              },
+                              {
+                                 "name": "users-present-in-low-light",
+                                 "targets": [
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    },
+                                    {
+                                       "property": "brightness",
+                                       "value": 80
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    }
+                                 ]
                               },
                               {
                                  "name": "richard-reading",
