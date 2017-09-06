@@ -377,19 +377,30 @@
                   }
                ]
             },
-            {
+            {  
                "name": "background-lights",
+               "type": "stateproperty",
                "initialValue": false,
-               "writable": false,
-               "type": "scheduleproperty",
-               "events": [
-                  {
-                     "rule": "sunset:900",
-                     "value": true
+               "states": [
+                  {  
+                     "name": false,
+                     "schedules": [
+                        {
+                           "name": "background-lights-off-week-night",
+                           "rule": "30 22 * * 0-4"
+                        },
+                        {
+                           "name": "background-lights-off-weekend",
+                           "rule": "00 23 * * 5-6"
+                        }
+                     ]
                   },
                   {
-                     "rule": "30 22 * * *",
-                     "value": false
+                     "name": true,
+                     "schedule": {
+                        "name": "background-lights-on",
+                        "rule": "sunset:900"
+                     }
                   }
                ]
             },

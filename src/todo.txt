@@ -1,6 +1,6 @@
 DONE stateproperty: allow guard to listen to properties from other sources
 DONE env: get sunrise to work
 DONE: peercasa: get peers to work
-huelight: monitor light state changes and reflect in property
+DONE: huelight: monitor light state changes and reflect in property
 stateproperty: does createRamp leak?
 source: setProperty() used for SetNextProperties - this will set manual mode on property.js- nwhat should we do with manaula mode?

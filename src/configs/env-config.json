@@ -63,7 +63,8 @@
                "displayName": "Holiday Scene",
                "manufacturer": "Casa Home Automation Ltd",
                "model": "V0.1",
-               "serialNumber": "1234567890"
+               "serialNumber": "1234567890",
+               "propogateToParent": true
             }
          ]
       }
@@ -101,12 +102,13 @@
          ],
          "things": [
             {
-               "name": "hklightaccessory:family-on-holiday",
+               "name": "hkswitchaccessory:family-on-holiday",
                "displayName": "Holiday - Family",
                "manufacturer": "Casa Home Automation Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
-               "powerProp": "on-holiday",
+               "switchProp": "on-holiday",
+               "propogateToParent": true,
                "props": [
                ]
             }
@@ -254,6 +256,7 @@
          "things": [
             {
                "name": "broadbandspeedtester:dumgoyne",
+               "propogateToParent": true,
                "maxTime": 5000,
                "schedule": "0 2 * * *"
             }
@@ -305,6 +308,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                   {
                      "name": "brightness",
@@ -360,6 +364,7 @@
                            "roomID": 2,
                            "deviceID": 2,
                            "brightnessSupported": true,
+                           "propogateToParent": true,
                            "props": [
                            ]
                         }
@@ -382,6 +387,7 @@
                            "roomID": 2,
                            "deviceID": 1,
                            "brightnessSupported": true,
+                           "propogateToParent": true,
                            "props": [
                            ]
                         }
@@ -391,6 +397,7 @@
                      "name": "lightwaverfaccessory:kitchen-cupboards-lights",
                      "displayName": "Kitchen Cupboard Lights",
                      "roomID": 6,
+                     "propogateToParent": false,
                      "moods": [
                         {
                            "name": "low",
@@ -464,6 +471,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                   {
                      "name": "brightness",
@@ -519,6 +527,7 @@
                            "roomID": 1,
                            "deviceID": 1,
                            "brightnessSupported": true,
+                           "propogateToParent": true,
                            "props": [
                            ]
                         }
@@ -540,6 +549,7 @@
                            "roomID": 1,
                            "deviceID": 2,
                            "brightnessThreshold": 30,
+                           "propogateToParent": true,
                            "props": [
                            ]
                         }
@@ -562,7 +572,8 @@
                   {
                      "name": "sonosplayer:living-room",
                      "displayName": "Sonos Player for Living Room",
-                     "zone": "Living Room"
+                     "zone": "Living Room",
+                     "propogateToParent": true
                   }
                ]
             }
@@ -637,6 +648,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -646,6 +658,7 @@
                      "roomID": 3,
                      "deviceID": 1,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   },
@@ -655,6 +668,7 @@
                      "roomID": 3,
                      "deviceID": 2,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   },
@@ -664,6 +678,7 @@
                      "roomID": 3,
                      "deviceID": 3,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   }
@@ -686,6 +701,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -695,6 +711,7 @@
                      "roomID": 4,
                      "deviceID": 2,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   }
@@ -716,6 +733,7 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -724,6 +742,7 @@
                      "displayName": "Hall Table Lamp",
                      "roomID": 4,
                      "deviceID": 1,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   }
@@ -746,6 +765,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -755,6 +775,7 @@
                      "roomID": 4,
                      "deviceID": 3,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   }
@@ -777,6 +798,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -786,6 +808,7 @@
                      "roomID": 2,
                      "deviceID": 3,
                      "brightnessSupported": true,
+                     "propogateToParent": true,
                      "props": [
                      ]
                   }
@@ -1028,6 +1051,7 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "volumeSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -1035,6 +1059,7 @@
                      "name": "sonosplayer:dylan-bedroom",
                      "displayName": "Sonos Player for Dylan's Bedroom",
                      "zone": "Dylan's Room",
+                     "propogateToParent": true,
                      "props": [
                         {
                            "name": "playing",
@@ -1079,6 +1104,7 @@
                "brightnessSupported": true,
                "hueSupported": true,
                "saturationSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -1103,10 +1129,6 @@
                                  "name": "dylan-reading-in-low-light",
                                  "targets": [
                                     {
-                                       "property": "power",
-                                       "value": true
-                                    },
-                                    {
                                        "property": "brightness",
                                        "value": 60
                                     },
@@ -1117,6 +1139,10 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
@@ -1502,6 +1528,7 @@
                "brightnessSupported": true,
                "hueSupported": true,
                "saturationSupported": true,
+               "propogateToParent": true,
                "props": [
                ],
                "things": [
@@ -1526,10 +1553,6 @@
                                  "name": "natalie-reading",
                                  "targets": [
                                     {
-                                       "property": "power",
-                                       "value": true
-                                    },
-                                    {
                                        "property": "brightness",
                                        "value": 60
                                     },
@@ -1540,6 +1563,10 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
@@ -1895,6 +1922,7 @@
                "manufacturer": "Casa Home Automation Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "propogateToParent": true,
                "props": [
                ]
             }

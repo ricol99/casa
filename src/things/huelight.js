@@ -83,15 +83,17 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
-            this.powerPending = true;
-            this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
+            this.hueService.setLightState(this.deviceID, { power: true, brightness: this.getProperty("brightness"),
+                                                           hue: this.getProperty("hue"), saturation: this.getProperty("saturation"), 
+                                                           function(_error, _content) {
 
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
                }
                else {
-                  that.powerPending = false;
-                  that.syncDeviceProperties();
+                  that.propsSynced.brightness = true;
+                  that.propsSynced.hue = true;
+                  that.propsSynced.saturation = true;
                }
             });
          }
@@ -104,7 +106,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
             });
          }
       }
-      else if (this.getProperty("power") && !this.powerPending) {
+      else if (this.getProperty("power")) {
          this.syncDeviceProperty(_propName);
       }
       else {

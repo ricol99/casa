@@ -50,17 +50,6 @@
    "scenes": [],
    "things": [
       {
-         "name": "thing:dumgoyne-broadband",
-         "displayName": "Dumgoyne Internet Connection",
-         "things": [
-            {
-               "name": "broadbandspeedtester:dumgoyne",
-               "maxTime": 5000,
-               "schedule": "0 2 * * *"
-            }
-         ]
-      },
-      {
          "name": "room:dylan-bedroom",
          "displayName": "Dylan's Bedroom",
          "props": [
@@ -370,10 +359,6 @@
                                  "name": "users-present-in-low-light",
                                  "targets": [
                                     {
-                                       "property": "power",
-                                       "value": true
-                                    },
-                                    {
                                        "property": "brightness",
                                        "value": 80
                                     },
@@ -384,16 +369,16 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
                               {
                                  "name": "dylan-reading-in-low-light",
                                  "targets": [
-                                    {
-                                       "property": "power",
-                                       "value": true
-                                    },
                                     {
                                        "property": "brightness",
                                        "value": 60
@@ -405,6 +390,10 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
@@ -814,10 +803,6 @@
                                  "name": "users-present-in-low-light",
                                  "targets": [
                                     {
-                                       "property": "power",
-                                       "value": true
-                                    },
-                                    {
                                        "property": "brightness",
                                        "value": 80
                                     },
@@ -828,16 +813,16 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
                               {
                                  "name": "natalie-reading",
                                  "targets": [
-                                    {
-                                       "property": "power",
-                                       "value": true
-                                    },
                                     {
                                        "property": "brightness",
                                        "value": 60
@@ -849,6 +834,10 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
@@ -976,10 +965,6 @@
                                  "name": "users-present-in-low-light",
                                  "targets": [
                                     {
-                                       "property": "power",
-                                       "value": true
-                                    },
-                                    {
                                        "property": "brightness",
                                        "value": 80
                                     },
@@ -990,6 +975,10 @@
                                     {
                                        "property": "saturation",
                                        "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
                                     }
                                  ]
                               },
@@ -1162,8 +1151,8 @@
          ]
       },
       {
-         "name": "thing:dumgoyne-upstairs-alarm",
-         "displayName": "House Alarm Upstairs",
+         "name": "thing:dumgoyne-alarm-upstairs-outputs",
+         "displayName": "House Alarm Upstairs Outputs - PIRs",
          "props": [
             {
                "name": "tamper-alarm",

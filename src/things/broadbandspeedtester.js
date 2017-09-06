@@ -1,7 +1,7 @@
 var util = require('util');
+var CasaSystem = require('../casasystem');
 var Thing = require('../thing');
 var speedTest = require('speedtest-net');
-var schedule = require('node-schedule');
 
 function BroadbandSpeedTester(_config) {
    Thing.call(this, _config);
@@ -14,6 +14,14 @@ function BroadbandSpeedTester(_config) {
    this.ensurePropertyExists('ping-time', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('server-address', 'property', { initialValue: '' }, _config);
    this.ensurePropertyExists('test-result', 'property', { initialValue: '' }, _config);
+
+   var casaSys = CasaSystem.mainInstance();
+   this.scheduleService =  casaSys.findService("scheduleservice");
+
+   if (!this.scheduleService) {
+      console.error(this.uName + ": ***** Schedule service not found! *************");
+      process.exit();
+   }
 }
 
 util.inherits(BroadbandSpeedTester, Thing);
@@ -44,15 +52,19 @@ BroadbandSpeedTester.prototype.testSpeed = function() {
 };
 
 BroadbandSpeedTester.prototype.coldStart = function() {
-   var that = this;
-
    console.log(this.uName+': Broadband speed test scheduled');
-   var refreshJob = schedule.scheduleJob(this.schedule, function() {
-      console.log(that.uName+': Testing broadband speed');
-      that.testSpeed();
-   });
+   this.scheduleService.registerEvents(this, [{ name: this.uName+":schedule", rule: this.schedule }]);
 
    Thing.prototype.coldStart.call(this);
 };
+
+BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event, _value) {
+   console.log(this.uName+': Testing broadband speed');
+   this.testSpeed();
+}
+
+BroadbandSpeedTester.prototype.getRampStartValue = function(_event) {
+   return 0;
+}
 
 module.exports = exports = BroadbandSpeedTester;

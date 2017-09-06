@@ -63,6 +63,32 @@
    ],
    "things": [
       {
+         "name": "thing:test-state-with-boolean-names",
+         "props": [
+            {
+               "name": "boolean-state",
+               "type": "stateproperty",
+               "initialValue": false,
+               "states": [
+                  {
+                     "name": false,
+                     "timeout": {
+                        "duration": 30,
+                        "nextState": true
+                     }
+                  },
+                  {
+                     "name": true,
+                     "timeout": {
+                        "duration": 30,
+                        "nextState": false
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "thing:dumgoyne-broadband",
          "displayName": "Internet Connection",
          "things": [

@@ -4,6 +4,7 @@ var Source = require('./source');
 function Thing(_config) {
    this.displayName = _config.displayName;
    this.propogateToParent = _config.hasOwnProperty("propogateToParent") ? _config.propogateToParent : true;
+   this.propogateToChildren = _config.hasOwnProperty("propogateToChildren") ? _config.propogateToChildren : true;
    this.things = {};
 
    Source.call(this, _config);
@@ -45,10 +46,13 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          this.emitPropertyChange(_propName, _propValue, data);
       }
 
-      for (var thing in this.things) {
+      if (this.propogateToChildren) {
 
-         if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].updateProperty(_propName, _propValue, data);
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].updateProperty(_propName, _propValue, data);
+            }
          }
       }
    }
@@ -59,7 +63,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       if (this.parent && this.propogateToParent) {
          this.parent.childPropertyChanged(_propName, _propValue, this, data);
       }
-      else {
+      else if (this.propogateToChildren) {
          data.alignWithParent = true;
 
          for (var thing in this.things) {
@@ -75,7 +79,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 Thing.prototype.getProperty = function(_property) {
    var value =  Source.prototype.getProperty.call(this, _property);
 
-   if (value == undefined) {
+   if ((value == undefined) && this.propogateToChildren) {
 
       for (var thing in this.things) {
 
