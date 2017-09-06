@@ -84,7 +84,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
 
          if (_propValue) {
             this.hueService.setLightState(this.deviceID, { power: true, brightness: this.getProperty("brightness"),
-                                                           hue: this.getProperty("hue"), saturation: this.getProperty("saturation"), 
+                                                           hue: this.getProperty("hue"), saturation: this.getProperty("saturation") }, 
                                                            function(_error, _content) {
 
                if (_error) {
