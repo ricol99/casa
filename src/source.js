@@ -1,7 +1,6 @@
 var util = require('util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
-var Property = require('./property');
 
 function Source(_config) {
    this.uName = _config.name;
@@ -26,10 +25,14 @@ function Source(_config) {
       var propLen = _config.props.length;
 
       for (var i = 0; i < propLen; ++i) {
-         var Prop = Property;
+         var Prop;
 
          if (_config.props[i].type == undefined) {
             _config.props[i].type = 'property';
+         }
+
+         if ((_config.props[i].type == "property") || (_config.props[i].type == "stateproperty")) {
+            Prop = require('./'+_config.props[i].type);
          }
          else {
             Prop = require('./properties/'+_config.props[i].type);
@@ -43,9 +46,10 @@ function Source(_config) {
 
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { initialValue: 'auto',
-                               states: [ { name: "auto", priority: 0 },
+                               states: [ { name: "auto", priority: -1 },
                                          { name: "manual", priority: 9999999,
-                                           timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
+                                           timeout: { duration: 10, nextState: "auto" }}]}, _config);
+                                           //timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
 
    events.EventEmitter.call(this);
 
@@ -139,10 +143,6 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (_propName == "MODE") {
-      this.setPropertyMode(_propValue);
-   }
-
    if (this.props.hasOwnProperty(_propName)) {
 
       if (!(_data && _data.coldStart) && (_propValue === this.props[_propName].value)) {
@@ -179,27 +179,6 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
 }
 
-
-//
-// Place the source in/out manual/auto mode
-// in manual mode - properties ignore events from all defined sources for a period when in manual mode
-//                - property input step pipeline effectively disabled
-//
-// Omit _timerout if you don't require a timer to move to next mode
-//
-Source.prototype.setPropertyMode = function(_mode) {
-
-   if (this.props["MODE"].value !== _mode) {
-
-      for (var prop in this.props) {
-
-         if (this.props.hasOwnProperty(prop)) {
-            this.props[prop].setManualMode(_mode === "manual", true);
-         }
-      }
-   }
-}
-
 Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {
    // Do nothing by default
 };
@@ -228,7 +207,7 @@ Source.prototype.rejectPropertyUpdate = function(_propName) {
 Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
 
    if (!this.props.hasOwnProperty(_propName)) {
-      var loadPath =  (_propType === 'property') ? '' : 'properties/'
+      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
       var Prop = require('./' + loadPath + _propType);
       _config.name = _propName;
       _config.type = _propType;
@@ -292,34 +271,41 @@ Source.prototype.coldStart = function() {
 }
 
 Source.prototype.takeControl = function(_newController, _priority) {
+   console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
 
    if (_newController != this.controller) {
 
       if (_priority >= this.controllerPriority) {
+         console.log(this.uName + ": Controller "+_newController.name+" is taking control");
          var oldController = this.controller;
          this.controller = _newController;
          this.controllerPriority = _priority;
 
          if (oldController) {
+            console.log(this.uName + ": Old controller "+oldController.name+" is losing control");
             oldController.ceasedToBeController(this.controller);
          }
       }
       else {
+         console.log(this.uName + ": Controller "+_newController.name+" failed to take control");
          this.addSecondaryController(_newController, _priority);
          result = false;
       }
    }
    else {
       if (_priority != this.controllerPriority) {
+         // Same controlling stateProperty but different priority - reassess if it still should be a controller
+         console.log(this.uName + ": Existing controller "+this.controller.name+" is changing priority");
 
-         // Same controling stateProperty but different priority - reassess if it still should be a controller
          if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
 
             if (_priority >= this.secondaryControllers[0].priority) {
+               console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
                this.controllerPriority = _priority;
             }
             else {
+               console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
                this.controllerPriority = this.secondaryControllers[0].priority;
                this.controller = this.secondaryControllers[0].controller;
                this.secondaryControllers.shift();
@@ -330,6 +316,7 @@ Source.prototype.takeControl = function(_newController, _priority) {
             }
          }
          else {
+            console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
             this.controllerPriority = _priority;
          }
       }

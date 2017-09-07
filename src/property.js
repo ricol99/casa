@@ -18,7 +18,6 @@ function Property(_config, _owner) {
    this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
 
    this.valid = false;
-   this.manualMode = false;
    this.cold = true;
    this.hasSourceOutputValues = false;	// Sources can influence the final property value (source in charge)
 
@@ -74,8 +73,6 @@ function Property(_config, _owner) {
 
       this.target = this.targetListener.source;
    }
-
-   this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
 }
 
 //
@@ -116,13 +113,8 @@ Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
       var propValue = this.transformNewPropertyValue(_newValue, _data);
 
       if (propValue != undefined) {
-
-         this.lastAutoUpdate = { value: propValue, data: copyData(_data) };
-
-         if (!this.manualMode) {
-            _data.value = propValue;
-            this.updatePropertyandSendToOutputPipeline(propValue, _data);
-         }
+         _data.value = propValue;
+         this.updatePropertyandSendToOutputPipeline(propValue, _data);
       }
    }
    else {
@@ -184,72 +176,22 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       this.sourcePipeline.newInputForProcess(_newPropValue, _data);
    }
    else {
-      this.lastAutoUpdate = { value: _newPropValue, data: copyData(_data) };
+      var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
-      if (!this.manualMode) {
-         var propValue = this.transformNewPropertyValue(_newPropValue, _data);
-
-         if (propValue != undefined) {
-            _data.value = propValue;
-            this.updatePropertyandSendToOutputPipeline(propValue, _data);
-         }
+      if (propValue != undefined) {
+         _data.value = propValue;
+         this.updatePropertyandSendToOutputPipeline(propValue, _data);
       }
    }
 };
 
 //
 // Used to set the property directly, ignoring the defined sources and input step pipeline processing
-// Using this method wil place the property in manual mode (it will ignore any sources for a defined period)
 // Output step pipeline still executes
 //
 Property.prototype.set = function(_propValue, _data) {
-   this.setManualMode(true);
-   _data.enterManualMode = true;
-
    this.updatePropertyandSendToOutputPipeline(_propValue, _data);
    return true;
-};
-
-//
-// Place the property in/out manual mode
-// in manual mode - ignore events from all defined sources for a period when in manual mode
-//                - input step pipeline effectively disabled
-//                - output step pipeline (and setProperty() ) still enabled
-//
-// Omit _timerDuration if you don't require a timer when setting manual mode to true
-//                     or when setting manual mode to false
-//
-Property.prototype.setManualMode = function(_manualMode, _timerNotRequired) {
-
-   if (_manualMode && (_timerNotRequired == undefined || !_timerNotRequired)) {
-      this.restartManualOverrideTimer(this.manualOverrideTimeout);
-   }
-   else if (this.manualOverrideTimer) {
-      clearTimeout(this.manualOverrideTimer);
-      this.manualOverrideTimer = null;
-   }
-
-   if (this.manualMode != _manualMode) {
-      this.manualMode = _manualMode;
-
-      if (!_manualMode) {
-         this.leaveManualMode();
-      }
-   }
-};
-
-//
-// Property should come out of manual mode
-// in manual mode - ignore events from all defined sources for a period when in manual mode
-// Coming out, latest property automatic aupdate should be applied, if it was received while in manual mode
-//
-Property.prototype.leaveManualMode = function() {
-
-   if (this.lastAutoUpdate) {
-      this.lastAutoUpdate.data.leaveManualMode = true;
-      this.updatePropertyandSendToOutputPipeline(this.lastAutoUpdate.value, copyData(this.lastAutoUpdate.data));
-      this.lastAutoUpdate = null;
-   }
 };
 
 //
@@ -347,7 +289,6 @@ Property.prototype.sourceIsInvalid = function(_data) {
 //
 // Called by SourceListener as a defined source has changed it property value
 // Will invoke this property processing followed by the step pipeline processing
-//     - only if the property is valid and not in manual mode
 //
 Property.prototype.receivedEventFromSource = function(_data) {
    var that = this;
@@ -363,7 +304,6 @@ Property.prototype.receivedEventFromSource = function(_data) {
 //
 // Called by SourceListener as a defined source has raised an event
 // Will invoke this property processing followed by the step pipeline processing
-//     - only if the property is valid and not in manual mode
 //
 Property.prototype.sourceEventRaised = function(_data) {
    var that = this;
@@ -379,7 +319,6 @@ Property.prototype.sourceEventRaised = function(_data) {
 //
 // Called by SourceListener (Target) as the defined target has changed it property value
 //   -- only works if target config ignoreTargetUpdates is set to false (default is true)
-// Also called by Manual Override Controller to override defined sources
 //
 Property.prototype.receivedEventFromTarget = function(_data) {
 
@@ -480,6 +419,10 @@ Property.prototype.transformNewPropertyValueBasedOnSource = function(_newPropVal
    return actualOutputValue;
 };
 
+Property.prototype.setManualMode = function(_manualMode) {
+   // DO NOTHING!
+};
+
 // *** TODO Move this to its own step2
 Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    var actualOutputValue = this.transformNewPropertyValueBasedOnSource(_newPropValue, _data);
@@ -503,17 +446,6 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
 
    return actualOutputValue;
 }
-
-Property.prototype.restartManualOverrideTimer = function(_timerDuration) {
-
-   if (this.manualOverrideTimer) {
-      clearTimeout(this.manualOverrideTimer);
-   }
-
-   this.manualOverrideTimer = setTimeout(function(_that) {
-      _that.setManualMode(false);
-   }, _timerDuration*1000, this);
-};
 
 function copyData(_sourceData) {
 

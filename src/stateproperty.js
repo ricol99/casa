@@ -1,7 +1,7 @@
 var util = require('util');
-var Property = require('../property');
-var SourceListener = require('../sourcelistener');
-var CasaSystem = require('../casasystem');
+var Property = require('./property');
+var SourceListener = require('./sourcelistener');
+var CasaSystem = require('./casasystem');
 
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
@@ -11,7 +11,7 @@ function StateProperty(_config, _owner) {
    this.targetPropsBuffer = {};
    this.controllingOwner = false;
    this.assignedPriority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
-   this.priority = this.assignedPriority;
+   this.currentPriority = this.assignedPriority;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -144,14 +144,14 @@ StateProperty.prototype.alignProperty = function(_propName, _propValue, _priorit
 };
 
 StateProperty.prototype.alignProperties = function(_targets, _priority) {
-   this.priority = (_priority == undefined) ? this.assignedPriority : _priority;
+   this.currentPriority = (_priority === undefined) ? this.assignedPriority : _priority;
    this.targetPropsBuffer = {};
 
-   if (this.owner.takeControl(this, this.priority)) {
+   if (this.owner.takeControl(this, this.currentPriority)) {
       this.owner.setNextProperties(_targets);
    }
    else {
-      this.bufferAlignProperties(_targets, this.priority);
+      this.bufferAlignProperties(_targets, this.currentPriority);
    }
 };
 
@@ -182,7 +182,7 @@ StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
 };
 
 // Override super method in Property and do nothing
-StateProperty.prototype.setManualMode = function(_manualMode, _timerDuration) {
+StateProperty.prototype.setManualMode = function(_manualMode) {
 
    if (!_manualMode) {
       this.applyBufferedAlignProperties();
@@ -231,7 +231,7 @@ function State(_config, _owner) {
       _config.sources = [ _config.source ];
    }
 
-   this.priority = _config.priority;
+   this.priority = _config.hasOwnProperty("priority") ? _config.priority : 0;
    this.sources = _config.sources;
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);

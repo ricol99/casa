@@ -165,14 +165,14 @@
                "states": [
                   {
                      "name": "auto",
-                     "priority": 0,
+                     "priority": -1,
                      "timeout": {
                         "duration": 35,
                         "nextState": "manual"
                      }
                   },
                   {
-                     "name": "manual",
+                    "name": "manual",
                      "priority": 999999,
                      "timeout": {
                         "duration": 35,
