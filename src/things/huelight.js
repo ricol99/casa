@@ -7,7 +7,6 @@ function HueLight(_config) {
 
    Thing.call(this, _config);
    this.thingType = "hue-light";
-   this.propsSynced = { brightness: false, hue: false, saturation: false };
 
    this.deviceID = _config.deviceID;
    this.displayName = _config.displayName;
@@ -83,17 +82,13 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
-            this.hueService.setLightState(this.deviceID, { power: true, brightness: this.getProperty("brightness"),
-                                                           hue: this.getProperty("hue"), saturation: this.getProperty("saturation") }, 
-                                                           function(_error, _content) {
+            this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
 
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
                }
                else {
-                  that.propsSynced.brightness = true;
-                  that.propsSynced.hue = true;
-                  that.propsSynced.saturation = true;
+                  that.syncDeviceProperties();
                }
             });
          }
@@ -107,57 +102,36 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
          }
       }
       else if (this.getProperty("power")) {
-         this.syncDeviceProperty(_propName);
-      }
-      else {
-         this.propsSynced[_propName] = false;
+         this.syncDeviceProperty(_propName, _propValue);
       }
    }
 };
 
 HueLight.prototype.syncDeviceProperties = function() {
-
-   for (var prop in this.propsSynced) {
-
-      if (this.propsSynced.hasOwnProperty(prop) && !this.propsSynced[prop]) {
-         this.syncDeviceProperty(prop);
-      }
-   }
-};
-
-HueLight.prototype.syncDeviceProperty = function(_propName) {
    var that = this;
 
-   if (_propName == "brightness") {
-      this.hueService.setLightBrightness(this.deviceID, this.getProperty("brightness"), function(_error, _content) {
+   this.hueService.setLightState(this.deviceID, { power: true, brightness: this.getProperty("brightness"),
+                                                  hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
+                                                  function(_error, _content) {
 
          if (_error) {
-            console.log(that.uName + ': Error turning room off ' + _error.message);
-         }
-         else {
-            that.propsSynced.brightness = true;
+            console.error(that.uName + ': Error turning room off ' + _error.message);
          }
       });
-   }
-   else if (_propName == "hue") {
-      this.hueService.setLightHue(this.deviceID, this.getProperty("hue"), function(_error, _content) {
+};
+
+HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
+   var that = this;
+
+   var f = { brightness: "setLightBrightness", hue: "setLightHue",
+             saturation: "setLightSaturation" };
+
+   if (f[_propName]) {
+
+      this.hueService[f[_propName]].call(this.hueService, this.deviceID, _propValue, function(_error, _content) {
 
          if (_error) {
-            console.log(that.uName + ': Error turning room off ' + _error.message);
-         }
-         else {
-            that.propsSynced.hue = true;
-         }
-      });
-   }
-   else if (_propName == "saturation") {
-      this.hueService.setLightSaturation(this.deviceID, this.getProperty("saturation"), function(_error, _content) {
-
-         if (_error) {
-            console.log(that.uName + ': Error turning room off ' + _error.message);
-         }
-         else {
-            that.propsSynced.saturation = true;
+            console.error(that.uName + ': Error turning room off ' + _error.message);
          }
       });
    }
