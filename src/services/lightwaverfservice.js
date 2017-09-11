@@ -59,7 +59,7 @@ LightwaveRfService.prototype.messageReceived = function(_message, _info) {
    // XXX TBD Check content for error code
 
    if (this.requests[code.toString()]) {
-      request.complete(null, content);
+      this.requests[code.toString()].complete(null, content);
       delete this.requests[code.toString()];
    }
 };
