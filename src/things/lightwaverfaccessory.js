@@ -94,7 +94,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
    this.callbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.log(that.uName + ': Error turning room off ' + _error.message);
+         console.error(that.uName + ': Error turning room off ' + _error);
       }
    };
 

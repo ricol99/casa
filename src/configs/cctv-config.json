@@ -63,6 +63,62 @@
    ],
    "things": [
       {
+         "name": "lightwaverfaccessory:kitchen-ceiling-lights",
+         "displayName": "Ceiling Lights - Kitchen",
+         "roomID": 2,
+         "deviceID": 2,
+         "brightnessSupported": true,
+         "props": [
+            {
+               "name": "test-lightwave-state",
+               "type": "stateproperty",
+               "initialValue": "off",
+               "states": [
+                  {
+                     "name": "off",
+                     "timeout": {
+                        "duration": 20,
+                        "nextState": "on"
+                     },
+                     "targets": [
+                        {
+                           "property": "brightness",
+                           "value": 0
+                        },
+                        {
+                           "property": "power",
+                           "value": false
+                        }
+                     ]
+                  },
+                  {
+                     "name": "on",
+                     "targets": [
+                        {
+                           "property": "brightness",
+                           "ramp": {
+                              "startValue": 50,
+                              "endValue": 100,
+                              "step": 5,
+                              "duration": 30
+                           }
+                        },
+                        {
+                           "property": "power",
+                           "value": true
+                        }
+                     ],
+                     "source": {
+                        "property": "brightness",
+                        "value": 100,
+                        "nextState": "off"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "thing:test-state-with-boolean-names",
          "props": [
             {
