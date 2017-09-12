@@ -289,11 +289,79 @@
                      "name": "room:kitchen",
                      "property": "movement-pir"
                   }
-               ],
-               "sourceSteps": [
+               ]
+            },
+            {
+               "name": "background-lights",
+               "initialValue": false,
+               "source" : {
+                  "name": "thing:environment",
+                  "property": "background-lights"
+               }
+            },
+            {
+               "name": "user-state",
+               "type": "stateproperty",
+               "initialValue": "no-users-present",
+               "states": [
                   {
-                     "type": "latchstep",
-                     "minOutputTime": 600
+                     "name": "no-users-present",
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "kitchen-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "kitchen-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present-in-low-light",
+                     "priority": 2,
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
                   }
                ]
             }
@@ -308,42 +376,75 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
-               "propogateToParent": true,
+               "propogateToParent": false,
+               "propogateToChild": true,
                "props": [
                   {
-                     "name": "brightness",
-                     "initialValue": 0,
-                     "writable": false,
-                     "type": "orproperty",
-                     "prioritiseSources": true,
-                     "sources": [
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
                         {
-                           "name": "room:kitchen",
-                           "property": "movement-in-low-light",
-                           "outputValues": {
-                              "true": 60,
-                              "false": 0
-                           }
+                           "name": "no-users-present",
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
                         },
                         {
-                           "name": "thing:environment",
-                           "property": "background-lights",
-                           "outputValues": {
-                              "true": 25,
-                              "false": 0
-                           }
+                           "name": "users-present",
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "priority": 2,
+                           "targets": [
+                              {
+                                 "property": "brightness",
+                                 "value": 60
+                              },
+                              {
+                                 "property": "power",
+                                 "value": true
+                              }
+                           ]
                         }
                      ]
                   },
                   {
-                     "name": "power",
-                     "initialValue": false,
-                     "writable": false,
-                     "source": {  
-                        "name": "room:kitchen",
-                        "property": "brightness",
-                        "transform": "$value>0"
-                     } 
+                     "name": "background-lights",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": false,
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
+                        },
+                        {
+                           "name": true,
+                           "priority": 1,
+                           "targets": [
+                              {
+                                 "property": "brightness",
+                                 "value": 25
+                              },
+                              {
+                                 "property": "power",
+                                 "value": true
+                              }
+                           ]
+                        }
+                     ]
                   }
                ],
                "things": [
@@ -351,6 +452,7 @@
                      "name": "hklightaccessory:kitchen-ceiling-lights",
                      "displayName": "Ceiling Lights - Kitchen",
                      "propogateToParent": false,
+                     "propogateToChild": true,
                      "manufacturer": "Lightwave RF Ltd",
                      "model": "V0.1",
                      "serialNumber": "1234567890",
@@ -374,6 +476,7 @@
                      "name": "hklightaccessory:kitchen-island-lights",
                      "displayName": "Island Lights - Kitchen",
                      "propogateToParent": false,
+                     "propogateToChild": true,
                      "manufacturer": "Lightwave RF Ltd",
                      "model": "V0.1",
                      "serialNumber": "1234567890",
@@ -388,8 +491,7 @@
                            "deviceID": 1,
                            "brightnessSupported": true,
                            "propogateToParent": true,
-                           "props": [
-                           ]
+                           "props": []
                         }
                      ]
                   },
@@ -452,13 +554,81 @@
                      "name": "room:lounge",
                      "property": "movement-pir"
                   }
-               ],
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 600
-                  }
                ]
+            },
+            {
+               "name": "background-lights",
+               "initialValue": false,
+               "source" : {
+                  "name": "thing:environment",
+                  "property": "background-lights"
+               }
+            },
+            {
+               "name": "user-state",
+               "type": "stateproperty",
+               "initialValue": "no-users-present",
+               "states": [
+                  {
+                     "name": "no-users-present",
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "lounge-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present",
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present"
+                        },
+                        {
+                           "event": "lounge-switch",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ]
+                  },
+                  {
+                     "name": "users-present-in-low-light",
+                     "priority": 2,
+                     "timeout": {
+                        "duration": 600,
+                        "nextState": "no-users-present"
+                     },
+                     "sources": [
+                        {
+                           "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        }
+                     ] 
+                  } 
+               ] 
             }
          ],
          "things": [
@@ -471,42 +641,75 @@
                "model": "V0.1",
                "serialNumber": "1234567890",
                "brightnessSupported": true,
-               "propogateToParent": true,
+               "propogateToParent": false,
+               "propogateToChild": true,
                "props": [
                   {
-                     "name": "brightness",
-                     "initialValue": 0,
-                     "writable": false,
-                     "type": "orproperty",
-                     "prioritiseSources": true,
-                     "sources": [
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
                         {
-                           "name": "room:lounge",
-                           "property": "movement-in-low-light",
-                           "outputValues": {
-                              "true": 60,
-                              "false": 0
-                           }
+                           "name": "no-users-present",
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
                         },
                         {
-                           "name": "thing:environment",
-                           "property": "background-lights",
-                           "outputValues": {
-                              "true": 25,
-                              "false": 0
-                           }
+                           "name": "users-present",
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "priority": 2,
+                           "targets": [
+                              {
+                                 "property": "brightness",
+                                 "value": 60
+                              },
+                              {
+                                 "property": "power",
+                                 "value": true
+                              }
+                           ]
                         }
                      ]
                   },
                   {
-                     "name": "power",
-                     "initialValue": false,
-                     "writable": false,
-                     "source": {
-                        "name": "room:lounge",
-                        "property": "brightness",
-                        "transform": "$value>0"
-                     }
+                     "name": "background-lights",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": false,
+                           "targets": [
+                              {
+                                 "property": "power",
+                                 "value": false
+                              }
+                           ]
+                        },
+                        {
+                           "name": true,
+                           "priority": 1,
+                           "targets": [
+                              {
+                                 "property": "brightness",
+                                 "value": 25
+                              },
+                              {
+                                 "property": "power",
+                                 "value": true
+                              }
+                           ]
+                        }
+                     ]
                   }
                ],
                "things": [
@@ -514,12 +717,12 @@
                      "name": "hklightaccessory:lounge-wall-lights",
                      "displayName": "Wall Lights - Lounge",
                      "propogateToParent": false,
+                     "propogateToChild": true,
                      "manufacturer": "Lightwave RF Ltd",
                      "model": "V0.1",
                      "serialNumber": "1234567890",
                      "brightnessSupported": true,
-                     "props": [
-                     ],
+                     "props": [],
                      "things": [
                         {
                            "name": "lightwaverfaccessory:wall-lights",
@@ -537,6 +740,7 @@
                      "name": "hklightaccessory:lounge-table-lamps",
                      "displayName": "Table Lamps - Lounge",
                      "propogateToParent": false,
+                     "propogateToChild": true,
                      "manufacturer": "Lightwave RF Ltd",
                      "model": "V0.1",
                      "serialNumber": "1234567890",
@@ -548,10 +752,8 @@
                            "displayName": "Table Lamps - Lounge",
                            "roomID": 1,
                            "deviceID": 2,
-                           "brightnessThreshold": 30,
                            "propogateToParent": true,
-                           "props": [
-                           ]
+                           "props": []
                         }
                      ]
                   }

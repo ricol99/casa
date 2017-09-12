@@ -9,7 +9,6 @@ function Property(_config, _owner) {
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
-   this.prioritiseSources = _config.prioritiseSources;
    this.value = _config.initialValue;
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
@@ -47,11 +46,6 @@ function Property(_config, _owner) {
 
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].outputValues != undefined);
-
-         if (_config.sources[index].priority == undefined) {
-            _config.sources[index].priority = index;
-         }
-
          _config.sources[index].uName = (_config.sources[index].hasOwnProperty("name")) ? _config.sources[index].name : this.owner.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
@@ -375,57 +369,22 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
    }
 };
 
-Property.prototype.findHighestPrioritySource = function(_sourcePropertyValue) {
-   var highestPriorityFound = 99999;
-   var highestPrioritySource = null;
-
-   for (var sourceEventName in this.sourceListeners) {
-
-      if (this.sourceListeners.hasOwnProperty(sourceEventName)){
-         var sourceListener = this.sourceListeners[sourceEventName];
-
-         if (sourceListener && sourceListener.valid && (sourceListener.priority < highestPriorityFound) && (sourceListener.sourcePropertyValue == _sourcePropertyValue)) {
-            highestPriorityFound = sourceListener.priority;
-            highestPrioritySource = sourceListener;
-         }
-      }
-   }
-
-   return highestPrioritySource;
-};
-
-Property.prototype.transformNewPropertyValueBasedOnSource = function(_newPropValue, _data) {
-   var actualOutputValue = _newPropValue;
-
-   if (_data.sourceEventName != undefined) {
-      var sourceListener = this.sourceListeners[_data.sourceEventName];
-
-      if (sourceListener) {
-         var sourceListenerInCharge = sourceListener;
-
-         if (this.prioritiseSources) {
-            var highestPrioritySource = this.findHighestPrioritySource(_newPropValue);
-
-            if (highestPrioritySource) {
-               sourceListenerInCharge = highestPrioritySource;
-            }
-         }
-         if (sourceListenerInCharge.outputValues && sourceListenerInCharge.outputValues[actualOutputValue] != undefined) {
-            actualOutputValue = sourceListenerInCharge.outputValues[actualOutputValue];
-         }
-      }
-   }
-
-   return actualOutputValue;
-};
-
 Property.prototype.setManualMode = function(_manualMode) {
    // DO NOTHING!
 };
 
 // *** TODO Move this to its own step2
 Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
-   var actualOutputValue = this.transformNewPropertyValueBasedOnSource(_newPropValue, _data);
+   // Transform new property value based on source
+   var actualOutputValue = _newPropValue;
+
+   if (_data.sourceEventName != undefined) {
+      var sourceListener = this.sourceListeners[_data.sourceEventName];
+
+      if (sourceListener && sourceListener.outputValues && sourceListener.outputValues[actualOutputValue] != undefined) {
+         actualOutputValue = sourceListener.outputValues[actualOutputValue];
+      }
+   }
 
    // Apply Output Transform
    if (this.transform || this.transformMap) {

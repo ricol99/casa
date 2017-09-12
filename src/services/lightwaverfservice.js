@@ -6,7 +6,7 @@ function LightwaveRfService(_config) {
    Service.call(this, _config);
 
    this.linkAddress = _config.linkAddress;
-   this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 10;
+   this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
 
    this.queue = [];
    this.requestPending = false;
@@ -146,7 +146,7 @@ LightwaveRfService.prototype.makeNextRequest = function() {
             var delay = setTimeout(function(_this) {
                _this.requestPending = false;
                _this.makeNextRequest();
-            }, 750, that);
+            }, 250, that);
          }
          else {
             that.requestPending = false;
