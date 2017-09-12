@@ -1,6 +1,6 @@
 var util = require('util');
 var Service = require('../service');
-var dgram = require('dgram');
+var Dgram = require('dgram');
 
 function LightwaveRfService(_config) {
    Service.call(this, _config);
@@ -14,8 +14,8 @@ function LightwaveRfService(_config) {
 
    this.requests = {};
 
-   this.sendSocket = dgram.createSocket("udp4");
-   this.receiveSocket = dgram.createSocket("udp4");
+   this.sendSocket = Dgram.createSocket("udp4");
+   this.receiveSocket = Dgram.createSocket("udp4");
 }
 
 util.inherits(LightwaveRfService, Service);
@@ -146,7 +146,7 @@ LightwaveRfService.prototype.makeNextRequest = function() {
             var delay = setTimeout(function(_this) {
                _this.requestPending = false;
                _this.makeNextRequest();
-            }, 500, that);
+            }, 750, that);
          }
          else {
             that.requestPending = false;
