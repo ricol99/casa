@@ -12,6 +12,7 @@ function HomekitSwitchAccessory(_config) {
    this.thingType = "homekit-switch-accessory";
 
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
+   this.invokeManualMode = _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode ? !this.stateless;
    this.hkService = Service.Switch;
 
    this.hkAccessory
@@ -56,7 +57,7 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
    }
    else {
       this.raiseEvent(this.eventName, { value: _status, oldValue: this.props[this.switchProp].value });
-      this.setManualMode(this.switchProp);
+      this.setManualMode();
       this.updateProperty(this.switchProp, _status ? true : false);
    }
 };

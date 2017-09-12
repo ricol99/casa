@@ -20,7 +20,7 @@ function HomekitAccessory(_config) {
    this.manufacturer = (_config.manufacturer == undefined) ? "Casa" : _config.manufacturer;
    this.model = (_config.model == undefined) ? "v1.0" : _config.model;
    this.serialNumber = (_config.serialNumber == undefined) ? "XXXXXXX" : _config.serialNumber;
-   this.manualScope = (_config.hasOwnProperty("manualScope")) ? _config.manualScope : "thing";
+   this.invokeManualMode = (_config.hasOwnProperty("invokeManualMode")) ? _config.invokeManualMode : true;
 
    this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.uName);
    this.hkAccessory = new Accessory(this.displayName, this.hkUUID);
@@ -80,19 +80,10 @@ HomekitAccessory.prototype.identify = function() {
 };
 
 // _property is not mandatory
-HomekitAccessory.prototype.setManualMode = function(_property) {
+HomekitAccessory.prototype.setManualMode = function() {
 
-   switch (this.manualScope) {
-    case "none":
-      break;
-    case "thing":
+   if (this.invokeManualMode) {
       Thing.prototype.setManualMode.call(this);
-      break;
-    case "property":
-      if (_property != undefined) {
-         this.props[_property].setManualMode(true);
-      }
-      break;
    }
 };
 
