@@ -77,7 +77,7 @@
                   {
                      "name": "off",
                      "timeout": {
-                        "duration": 20,
+                        "duration": 1,
                         "nextState": "on"
                      },
                      "targets": [
@@ -100,7 +100,7 @@
                               "startValue": 50,
                               "endValue": 100,
                               "step": 5,
-                              "duration": 30
+                              "duration": 5
                            }
                         },
                         {
