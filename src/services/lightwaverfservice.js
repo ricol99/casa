@@ -78,7 +78,7 @@ LightwaveRfService.prototype.setRoomMood = function(_roomId, _moodId, _callback)
 }
 
 LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
-   this.addToQueue("!R" + _deviceId + "Fa\0", _callback);
+   this.addToQueue("!R" + _roomId + "Fa\0", _callback);
 }
 
 LightwaveRfService.prototype.registerWithLink = function(_callback) {
