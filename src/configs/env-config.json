@@ -1183,11 +1183,15 @@
                      "schedules": [
                          {
                             "name": "pre-wake-up-call",
-                            "rule": "00 7 * * 1-5"
+                            "rule": "45 6 * * 1-5"
                          },
                          {
-                            "name": "pre-wake-up-call-weekend",
-                            "rule": "0 9 * * 6-7"
+                            "name": "pre-wake-up-call-sat",
+                            "rule": "00 8 * * 6"
+                         },
+                         {
+                            "name": "pre-wake-up-call-sun",
+                            "rule": "00 9 * * 7"
                          }
                      ],
                      "timeout": {
