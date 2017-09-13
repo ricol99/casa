@@ -45,7 +45,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   //console.log(" -- Receiver socket got: " + _message + " from " + _info.address + ":" + _info.port);
+   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if (_info.address !== this.linkAddress) {
@@ -56,102 +56,74 @@ LightwaveRfService.prototype.messageReceived = function(_message, _info) {
    var parts = message.split(",");
    var code = parts.splice(0,1);
    var content = parts.join(",").replace(/(\r\n|\n|\r)/gm,"");
-   // XXX TBD Check content for error code
 
-   if (this.requests[code.toString()]) {
-      this.requests[code.toString()].complete(null, content);
-      delete this.requests[code.toString()];
-   }
+   // XXX TBD Check content for error code
+   this.completeRequest(code.toString(), null, content);
 };
 	
 LightwaveRfService.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
-
-   this.addToQueue(function(_this, _params, _cb) {
-      console.log(_this.uName + ': turning device on, roomId: ' + _params.roomId + ', deviceId: ' + _params.deviceId);
-      _this.sendMessageToLink("!R" + _params.roomId + "D" + _params.deviceId + "F1|\0", _cb);
-   }, { roomId: _roomId, deviceId: _deviceId } , _callback);
-
-   this.makeNextRequest();
+   this.addToQueue("!R" + _roomId + "D" + _deviceId + "F1|\0", _callback);
 }
 
 LightwaveRfService.prototype.turnDeviceOff = function(_roomId, _deviceId, _callback) {
-
-   this.addToQueue(function(_this, _params, _cb) {
-      console.log(_this.uName + ': turning device off, roomId: ' + _params.roomId + ', deviceId: ' + _params.deviceId);
-      _this.sendMessageToLink("!R" + _params.roomId + "D" + _params.deviceId + "F0|\0", _cb);
-   }, { roomId: _roomId, deviceId: _deviceId } , _callback);
-
-   this.makeNextRequest();
+   this.addToQueue("!R" + _roomId + "D" + _deviceId + "F0|\0", _callback);
 }
 
 LightwaveRfService.prototype.setDeviceDim = function(_roomId, _deviceId, _dimLevel, _callback) {
-
-   this.addToQueue(function(_this, _params, _cb) {
-      console.log(_this.uName + ': turning device on with dim level, roomId: ' + _params.roomId + ', _deviceId: ' + _params.deviceId + ', dimLevel: ' + _params.dimLevel);
-      _this.sendMessageToLink("!R" + _params.roomId + "D" + _params.deviceId + "FdP" + parseInt(_params.dimLevel * 0.32) + "|\0", _cb);
-   }, { roomId: _roomId, deviceId: _deviceId, dimLevel: _dimLevel } , _callback);
-
-   this.makeNextRequest();
+   this.addToQueue("!R" + _roomId + "D" + _deviceId + "FdP" + parseInt(_dimLevel * 0.32) + "|\0", _callback);
 }
 
 LightwaveRfService.prototype.setRoomMood = function(_roomId, _moodId, _callback) {
-
-   this.addToQueue(function(_this, _params, _cb) {
-      console.log(_this.uName + ': setting room mood, roomId: ' + _params.roomId + ' moodId:' + _params.moodId);
-       _this.sendMessageToLink("!R" + _params.roomId + "FmP" + _params.moodId + "|\0", _cb);
-   }, { roomId: _roomId, moodId: _moodId } , _callback);
-
-   this.makeNextRequest();
+   this.addToQueue("!R" + _roomId + "FmP" + _moodId + "|\0", _callback);
 }
 
 LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
-
-   this.addToQueue(function(_this, _params, _cb) {
-      console.log(_this.uName + ': turning room off, roomId: ' + _params.roomId);
-      _this.sendMessageToLink("!R" + _params.deviceId + "Fa\0", _cb);
-   }, { roomId: _roomId } , _callback);
-
-   this.makeNextRequest();
+   this.addToQueue("!R" + _deviceId + "Fa\0", _callback);
 }
 
 LightwaveRfService.prototype.registerWithLink = function(_callback) {
-
-   if (!this.lastRegistrationTime || ((Date.now() - this.lastRegistrationTime) > 60000)) {
-      this.lastRegistrationTime = Date.now();
-
-      this.addToQueue(function(_this, _params, _cb) {
-         console.log(_this.uName + ': Re-registering with link');
-	 _this.sendMessageToLink("!R1Fa", _cb);
-      }, {} , _callback, true);
-   }
+   this.addToQueue("!R1Fa", _callback);
 }
 
-LightwaveRfService.prototype.addToQueue = function(_request, _params, _callback, _noReg) {
-   this.queue.push({ request: _request, params: _params, callback: _callback });
+LightwaveRfService.prototype.addToQueue = function(_message, _callback) {
+   this.queue.push(new Request(this, _message, _callback));
+   this.makeNextRequest();
 }
 
 LightwaveRfService.prototype.makeNextRequest = function() {
-   var that = this;
 
    if ((this.queue.length > 0) && !this.requestPending) {
       this.requestPending = true;
+      this.queue[0].send(this.getMessageCode());
+   }
+}
 
-      this.queue[0].request(this, this.queue[0].params, function(_error, _content) {
-         console.log(that.uName + ': Request done!');
-         that.queue.shift().callback(_error, _content);
+LightwaveRfService.prototype.completeRequest = function(_code, _error, _content) {
+   console.log(this.uName + ': Request done! Code='+_code);
 
-         if (that.queue.length > 0) {
+   if (this.requests[_code]) {
+      this.requests[_code].complete(_error, _content);
 
-            // More in the queue, so reschedule after the link has had time to settle down
-            var delay = setTimeout(function(_this) {
-               _this.requestPending = false;
-               _this.makeNextRequest();
-            }, 250, that);
-         }
-         else {
-            that.requestPending = false;
-         }
-      });
+      if (this.queue.shift().code != _code) {
+         console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
+      }
+
+      delete this.requests[_code];
+
+      if (this.queue.length > 0) {
+
+         // More in the queue, so reschedule after the link has had time to settle down
+         var delay = setTimeout(function(_this) {
+            _this.requestPending = false;
+            _this.makeNextRequest();
+         }, 250, this);
+      }
+      else {
+         this.requestPending = false;
+      }
+   }
+   else {
+      console.error(this.uName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
    }
 }
 
@@ -169,33 +141,32 @@ LightwaveRfService.prototype.getMessageCode = function() {
    return code;
 };
 
-LightwaveRfService.prototype.sendMessageToLink = function(_message, _callback){
-   var code = this.getMessageCode();
-   var buffer = new Buffer(code + "," + _message);
+LightwaveRfService.prototype.sendMessageToLink = function(_request){
+   var buffer = new Buffer(_request.code + "," + _request.message);
 	
    //Broadcast the message
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
+   //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 	
    //Add listener
-   if (_callback) {
-      this.requests[parseInt(code).toString()] = new Request(this, parseInt(code).toString(), _callback);
-   }
+   this.requests[_request.code] = _request;
 }
 
-LightwaveRfService.prototype.deleteRequest = function(_request) {
-   delete this.requests[_request.code];
-};
-
-function Request(_owner, _code, _callback) {
+function Request(_owner, _message, _callback) {
    this.owner = _owner;
-   this.code = _code;
+   this.message = _message;
    this.callback = _callback;
+}
+
+Request.prototype.send = function(_code) {
+   this.code = _code;
+
+   this.owner.sendMessageToLink(this);
 
    this.timeout = setTimeout(function(_this) {
-      _this.callback("Request timed out!", null);
-      _this.owner.deleteRequest(_this);
+      _this.owner.completeRequest(_this.code, 'Request timed out!', null);
    }, this.owner.requestTimeout*1000, this);
-}
+};
 
 Request.prototype.complete = function(_error, _content) {
    clearTimeout(this.timeout);

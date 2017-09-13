@@ -145,9 +145,16 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (this.props.hasOwnProperty(_propName)) {
 
-      if (!(_data && _data.coldStart) && (_propValue === this.props[_propName].value)) {
+      // TBD XXX We have this - changing it for now - may change it back!
+      //if (!(_data && _data.coldStart) && (_propValue === this.props[_propName].value)) {
+         //return;
+      //}
+
+      // New code instead of above
+      if (_propValue === this.props[_propName].value) {
          return;
       }
+
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
