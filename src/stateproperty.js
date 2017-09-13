@@ -57,7 +57,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
    if (source && source.hasOwnProperty("nextState")) {
 
-      if (currentState && (source.nextState === currentState)) {
+      if (currentState && (source.nextState.name === currentState.name)) {XXX
          this.resetStateTimer(currentState);
       }
       else {

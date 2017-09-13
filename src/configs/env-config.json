@@ -360,6 +360,11 @@
                            "property": "movement-in-low-light",
                            "value": true,
                            "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
                         }
                      ]
                   }
@@ -623,6 +628,11 @@
                      "sources": [
                         {
                            "property": "movement-in-low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
+                           "property": "movement-pir",
                            "value": true,
                            "nextState": "users-present-in-low-light"
                         }

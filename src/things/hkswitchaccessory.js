@@ -12,7 +12,7 @@ function HomekitSwitchAccessory(_config) {
    this.thingType = "homekit-switch-accessory";
 
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
-   this.invokeManualMode = _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode ? !this.stateless;
+   this.invokeManualMode = _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode : !this.stateless;
    this.hkService = Service.Switch;
 
    this.hkAccessory
