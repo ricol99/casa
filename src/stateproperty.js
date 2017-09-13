@@ -32,6 +32,7 @@ StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) 
 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ": Event received when in state " + this.value);
+   console.log(this.uName + ": AAAAA SourceListener = "+_sourceListener.uName);
 
    var propertyValue = _data.value;
    var currentState = this.states[this.value];
@@ -55,9 +56,11 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                   this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
    }
 
-   if (source && source.hasOwnProperty("nextState")) {
 
-      if (currentState && (source.nextState.name === currentState.name)) {XXX
+   if (source && source.hasOwnProperty("nextState")) {
+      console.log(this.uName+": AAAAAA source=",source.uName);
+
+      if (currentState && (source.nextState === currentState.name)) {
          this.resetStateTimer(currentState);
       }
       else {
@@ -232,7 +235,7 @@ function State(_config, _owner) {
    }
 
    this.priority = _config.hasOwnProperty("priority") ? _config.priority : 0;
-   this.sources = _config.sources;
+   this.sources = _config.hasOwnProperty("sources") ? _config.sources :(_config.hasOwnProperty("source") ? [ _config.source ] : undefined);
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
    this.timeout = _config.timeout;
