@@ -1675,7 +1675,7 @@
                          },
                          {
                             "name": "pre-wake-up-call-weekend",
-                            "rule": "0 8 * * 6-7"
+                            "rule": "0 8 * * 0,6"
                          }
                      ],
                      "timeout": {

@@ -24,7 +24,7 @@
                   },
                   {
                      "name": "richard-wake-up-call",
-                     "rule": "00 9 * * 6-7",
+                     "rule": "00 9 * * 0,6",
                      "value": "false"
                   }
                ]
@@ -86,7 +86,7 @@
                   },
                   {
                      "name": "natalie-wake-up-call",
-                     "rule": "00 9 * * 6-7",
+                     "rule": "00 9 * * 0,6",
                      "value": "false"
                   }
                ]
@@ -148,7 +148,7 @@
                   },
                   {
                      "name": "dylan-wake-up-call",
-                     "rule": "00 10 * * 6-7",
+                     "rule": "00 10 * * 0,6",
                      "value": "false"
                   }
                ]
@@ -447,7 +447,7 @@
                      "value": true
                   },
                   {
-                     "rule": "30 22 * * 6-7",
+                     "rule": "30 22 * * 0,6",
                      "value": true
                   },
                   {
@@ -455,7 +455,7 @@
                      "value": false
                   },
                   {
-                     "rule": "30 9 * * 6-7",
+                     "rule": "30 9 * * 0,6",
                      "value": false
                   }
                ]

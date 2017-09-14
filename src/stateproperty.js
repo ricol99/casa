@@ -271,6 +271,8 @@ function State(_config, _owner) {
          process.exit();
       }
 
+      // TBD XXX Currently ignoring return value. Should I use it to determine which state we are in mulitple schedules?
+      // Could use state timeout + schedule to do this, may not work though
       this.scheduleService.registerEvents(this, this.schedules);
    }
 }

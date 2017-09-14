@@ -25,7 +25,6 @@ ScheduleService.prototype.registerEvents = function(_owner, _config) {
 };
 
 ScheduleService.prototype.getSunTimes = function() {
-   var that = this;
 
    if (!this.sunTimes) {
       this.sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
@@ -43,7 +42,6 @@ ScheduleService.prototype.refreshSunEvents = function() {
 };
 
 ScheduleService.prototype.coldStart = function() {
-   var that = this;
    var casaSys = CasaSystem.mainInstance();
    this.rampService =  casaSys.findService("rampservice");
 
@@ -145,8 +143,6 @@ Schedule.prototype.determineClosestEvent = function(_now, _currentClosestEventSc
 };
 
 Schedule.prototype.scheduleAllJobs = function() {
-   var that = this;
-
    this.setSunTimes(this.service.getSunTimes());
 
    for (var index = 0; index < this.events.length; ++index) {
@@ -191,21 +187,28 @@ Schedule.prototype.setSunTimes = function(_sunTimes) {
 }
 
 Schedule.prototype.resetJob = function(_event) {
-   var that = this;
    
    if (_event.job) {
      _event.job.cancel();
    }
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
-
-      if (_event.ramp == undefined) {
-         _event.owner.scheduledEventTriggered(_event, _event.value);
+      // this = _event.job
+      if (this.myEvent.hasOwnProperty("ramp")) {
+         this.mySchedule.startNewRamp(this.myEvent);
       }
       else {
-         that.startNewRamp(_event);
+         this.myEvent.owner.scheduledEventTriggered(this.myEvent, this.myEvent.value);
       }
    });
+
+   if (_event.job) {
+      _event.job.myEvent = _event;
+      _event.job.mySchedule = this;
+   }
+   else {
+      console.error(this.uName + ": Unable to schedule rule '" + _event.rule +"' for owner " + _event.owner.uName);
+   }
 }
 
 Schedule.prototype.startNewRamp = function(_event) {
