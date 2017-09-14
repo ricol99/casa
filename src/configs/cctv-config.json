@@ -31,35 +31,6 @@
       }
    ],
    "scenes": [
-      {
-         "name": "scene:on-holiday",
-         "displayName": "On Holiday Scene",
-         "props": [
-            {
-               "name": "ACTIVE",
-               "type": "scheduleproperty",
-               "initialValue": false,
-               "writable": false,
-               "events": [
-                  {
-                     "rule": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
-                     "value": true
-                  },
-                  {
-                     "rule": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
-                     "value": false
-                  }
-               ]
-            }
-         ],
-         "sources": [
-            {
-               "name": "thing:test-cctv",
-               "property": "test-prop-1",
-               "value": true
-            }
-         ]
-      }
    ],
    "things": [
       {

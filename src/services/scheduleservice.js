@@ -194,7 +194,7 @@ Schedule.prototype.resetJob = function(_event) {
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
       // this = _event.job
-      if (this.myEvent.hasOwnProperty("ramp")) {
+      if (this.myEvent.ramp != undefined) {
          this.mySchedule.startNewRamp(this.myEvent);
       }
       else {
@@ -208,6 +208,7 @@ Schedule.prototype.resetJob = function(_event) {
    }
    else {
       console.error(this.uName + ": Unable to schedule rule '" + _event.rule +"' for owner " + _event.owner.uName);
+      process.exit(1);
    }
 }
 

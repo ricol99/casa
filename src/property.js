@@ -45,7 +45,7 @@ function Property(_config, _owner) {
       this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
-         this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].outputValues != undefined);
+         this.hasSourceOutputValues = this.hasSourceOutputValues || _config.sources[index].hasOwnProperty("outputValues");
          _config.sources[index].uName = (_config.sources[index].hasOwnProperty("name")) ? _config.sources[index].name : this.owner.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
@@ -382,6 +382,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
       var sourceListener = this.sourceListeners[_data.sourceEventName];
 
       if (sourceListener && sourceListener.outputValues && sourceListener.outputValues[actualOutputValue] != undefined) {
+      console.log("=============================================AAAAA===== ");
          actualOutputValue = sourceListener.outputValues[actualOutputValue];
       }
    }
