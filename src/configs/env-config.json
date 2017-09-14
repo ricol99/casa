@@ -1191,7 +1191,7 @@
                          },
                          {
                             "name": "pre-wake-up-call-sun",
-                            "rule": "00 9 * * 7"
+                            "rule": "00 9 * * 0"
                          }
                      ],
                      "timeout": {
