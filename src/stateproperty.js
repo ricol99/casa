@@ -32,7 +32,6 @@ StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) 
 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ": Event received when in state " + this.value);
-   console.log(this.uName + ": AAAAA SourceListener = "+_sourceListener.uName);
 
    var propertyValue = _data.value;
    var currentState = this.states[this.value];
@@ -58,7 +57,6 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
 
    if (source && source.hasOwnProperty("nextState")) {
-      console.log(this.uName+": AAAAAA source=",source.uName);
 
       if (currentState && (source.nextState === currentState.name)) {
          this.resetStateTimer(currentState);
