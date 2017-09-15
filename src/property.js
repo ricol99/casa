@@ -369,10 +369,6 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
    }
 };
 
-Property.prototype.setManualMode = function(_manualMode) {
-   // DO NOTHING!
-};
-
 // *** TODO Move this to its own step2
 Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    // Transform new property value based on source

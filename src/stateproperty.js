@@ -24,6 +24,20 @@ StateProperty.prototype.coldStart = function(_data) {
    this.setState(this.value);
    Property.prototype.coldStart.call(this, _data);
 };
+   
+StateProperty.prototype.getRampService = function() {
+
+   if (!this.rampService) {
+      this.rampService =  this.casaSys.findService("rampservice");
+
+      if (!this.rampService) {
+         console.error(this.uName + ": ***** Ramp service not found! *************");
+         process.exit();
+      }
+   }
+
+   return this.rampService;
+}
 
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
    console.log(this.uName + ": state about to change to " + _propertyValue);
@@ -109,8 +123,17 @@ StateProperty.prototype.setState = function(_nextState) {
    this.clearStateTimer();
    this.previousState = this.value;
 
+   if (!this.cold) {
+
+      if (this.states[this.value]) {
+         this.states[this.value].exiting();
+      }
+      else if (this.states["DEFAULT"] && this.states[_nextState]) {
+         this.states["DEFAULT"].exiting();
+      }
+   }
+
    if (this.states[_nextState]) {
-      this.setStateTimer(this.states[_nextState]);
       var immediateNextState = this.states[_nextState].initialise();
 
       if (immediateNextState) {
@@ -119,25 +142,13 @@ StateProperty.prototype.setState = function(_nextState) {
             _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
          }, 100, this, immediateNextState);
       }
+      else {
+         this.setStateTimer(this.states[_nextState]);
+      }
    }
    else if (this.states["DEFAULT"]) {
       this.states["DEFAULT"].alignTargetProperties();
    }
-};
-
-StateProperty.prototype.createRamp = function(_config) {
-
-   if (!this.rampService) {
-      this.rampService =  this.casaSys.findService("rampservice");
-
-      if (!this.rampService) {
-         console.error(this.uName + ": ***** Ramp service not found! *************");
-         process.exit();
-      }
-   }
-
-   var ramp = this.rampService.createRamp(this, _config);
-   ramp.start();
 };
 
 StateProperty.prototype.alignProperty = function(_propName, _propValue, _priority) {
@@ -178,18 +189,6 @@ StateProperty.prototype.applyBufferedAlignProperties = function() {
    this.alignProperties(targets, this.targetPropsPriority);
 };
 
-StateProperty.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   this.alignProperty(_config.property, _value, _config.propertyPriority);
-};
-
-// Override super method in Property and do nothing
-StateProperty.prototype.setManualMode = function(_manualMode) {
-
-   if (!_manualMode) {
-      this.applyBufferedAlignProperties();
-   }
-};
-
 StateProperty.prototype.becomeController = function() {
    this.controllingOwner = true;
    this.applyBufferedAlignProperties();
@@ -197,10 +196,6 @@ StateProperty.prototype.becomeController = function() {
 
 StateProperty.prototype.ceasedToBeController = function(_newController) {
    this.controllingOwner = false;
-};
-
-StateProperty.prototype.rampComplete = function(_ramp, _config) {
-   // DO NOTHING
 };
 
 StateProperty.prototype.sourceIsValid = function(_data) {
@@ -227,6 +222,7 @@ function State(_config, _owner) {
    this.owner = _owner;
    this.uName = _owner.uName + ":state:" + this.name;
    this.sourceMap = {};
+   this.ramps = [];
 
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
@@ -308,7 +304,7 @@ State.prototype.alignTargetProperties = function() {
 
             rampConfig.property = this.targets[i].property;
             rampConfig.propertyPriority = this.priority;
-            this.owner.createRamp(rampConfig);
+            this.createRamp(rampConfig);
          }
       }
    }
@@ -344,10 +340,40 @@ State.prototype.checkSourceProperties = function() {
    return immediateNextState;
 };
 
+State.prototype.exiting = function(_event, _value) {
+
+   for (var i = 0; i < this.ramps.length; ++i) {
+      this.ramps[i].cancel();
+   }
+   this.ramps = [];
+};
+
+State.prototype.createRamp = function(_config) {
+   var ramp = this.owner.getRampService().createRamp(this, _config);
+   this.ramps.push(ramp);
+   ramp.start();
+};
+
 State.prototype.scheduledEventTriggered = function(_event, _value) {
    this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
    this.owner.set(this.name, { sourceName: this.owner.owner });
 }
+
+State.prototype.newValueFromRamp = function(_ramp, _config, _value) {
+   console.log(this.uName + ": New value from ramp, property=" + _config.property + ", value=" + _value);
+   this.owner.alignProperty(_config.property, _value, _config.propertyPriority);
+};
+
+State.prototype.rampComplete = function(_ramp, _config) {
+
+   for (var i = 0; i < this.ramps.length; ++i) {
+
+      if (this.ramps === _ramp) {
+         this.splice(i, 1)
+         break;
+      }
+   }
+};
 
 State.prototype.getRampStartValue = function(_event) {
    return 0;

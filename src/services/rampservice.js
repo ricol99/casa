@@ -69,5 +69,14 @@ Ramp.prototype.nextInterval = function() {
    }, this.interval * 1000, this);
 };
 
+Ramp.prototype.cancel = function() {
+
+   if (this.timer) {
+      clearTimeout(this.timer);
+   }
+
+   delete this;
+};
+
 module.exports = exports = RampService;
  
