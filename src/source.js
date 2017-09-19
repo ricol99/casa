@@ -195,7 +195,7 @@ Source.prototype.setNextProperties = function(_properties) {
          for (var i = 0; i < _props.length; i++) {
             _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
          }
-      }, 100, this, _properties);
+      }, 500, this, _properties);
    }
 };
 

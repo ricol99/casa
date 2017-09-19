@@ -140,7 +140,7 @@ StateProperty.prototype.setState = function(_nextState) {
 
          setTimeout(function(_this, _nextState) {
             _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
-         }, 100, this, immediateNextState);
+         }, 1, this, immediateNextState);
       }
       else {
          this.setStateTimer(this.states[_nextState]);
