@@ -45,7 +45,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
+   console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if (_info.address !== this.linkAddress) {
@@ -101,13 +101,8 @@ LightwaveRfService.prototype.makeNextRequest = function() {
 LightwaveRfService.prototype.completeRequest = function(_code, _error, _content) {
    console.log(this.uName + ': Request done! Code='+_code);
 
-   if (this.requests[_code]) {
-      this.requests[_code].complete(_error, _content);
-
-      if (this.queue.shift().code != _code) {
-         console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
-      }
-
+   if (this.requests[_code] && this.queue.length > 0 && this.queue[0].code === _code) {
+      this.queue.shift().complete(_error, _content);
       delete this.requests[_code];
 
       if (this.queue.length > 0) {
@@ -122,8 +117,11 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
          this.requestPending = false;
       }
    }
-   else {
+   else if (!this.requests[_code]) {
       console.error(this.uName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
+   }
+   else {
+      console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
    }
 }
 
@@ -149,7 +147,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
    //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 	
    //Add listener
-   this.requests[_request.code] = _request;
+   this.requests[parseInt(_request.code).toString()] = _request;
 }
 
 function Request(_owner, _message, _callback) {
