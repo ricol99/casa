@@ -17,7 +17,7 @@ function Source(_config) {
 
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
-   this.controllerPriority = 0;
+   this.controllerPriority = -1;
 
    this.props = {};
 

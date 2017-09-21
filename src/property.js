@@ -59,6 +59,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('target')) {
+      _config.target.uName = (_config.target.hasOwnProperty("name")) ? _config.target.name : this.owner.uName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
       this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,

@@ -78,14 +78,14 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
    this.powerCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(that.uName + ': Error call lightwave service. Error=' + _error);
+         console.error(that.uName + ': Error callling lightwave service for power change. Error=' + _error);
       }
    };
 
    this.brightnessCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(that.uName + ': Error call lightwave service. Error=' + _error);
+         console.error(that.uName + ': Error calling lightwave service for brightness change. Error=' + _error);
       }
    };
 

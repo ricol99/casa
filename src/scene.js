@@ -42,11 +42,17 @@ function Scene(_config) {
    this.sceneProp = _config.hasOwnProperty("sceneProp") ? _config.sceneProp : "ACTIVE";
 
    for (var i = 0; i < _config.sources.length; i++) {
+
+      if (!(_config.sources[i].hasOwnProperty("name"))) {
+         _config.sources[i].name = this.uName;
+      }
+
       this.sources.push(_config.sources[i]);
       var sourceListenerName = _config.sources[i].name + ":" + _config.sources[i].property;
       this.sources[this.sources.length-1].sourceListenerName = sourceListenerName;
 
       if (!this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+         _config.sources[i].uName = _config.sources[i].name;
          this.sourceListeners[sourceListenerName] = new SourceListener(this.sources[i], this);
       }
    }
@@ -81,7 +87,7 @@ Scene.prototype.receivedEventFromSource = function(_data) {
          }
       }
 
-      this.updateProperty(sceneProp, active);
+      this.updateProperty(this.sceneProp, active);
    }
 };
 

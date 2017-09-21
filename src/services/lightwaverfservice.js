@@ -10,7 +10,7 @@ function LightwaveRfService(_config) {
 
    this.queue = [];
    this.requestPending = false;
-   this.messageCounter = 0;
+   this.messageNumber = 0;
 
    this.requests = {};
 
@@ -45,7 +45,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
+   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if (_info.address !== this.linkAddress) {
@@ -94,7 +94,7 @@ LightwaveRfService.prototype.makeNextRequest = function() {
 
    if ((this.queue.length > 0) && !this.requestPending) {
       this.requestPending = true;
-      this.queue[0].send(this.getMessageCode());
+      this.queue[0].send(++this.messageNumber);
    }
 }
 
@@ -122,32 +122,29 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
    }
    else {
       console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
+      console.error(this.uName + ": Code=" + _code + " queue length= " + this.queue.length);
+
+      if (this.queue.length > 0) {
+         console.error(this.uName + ": Top request in queue has code " + this.queue[0].code);
+      }
    }
 }
 
-LightwaveRfService.prototype.getMessageCode = function() {
-   this.messageCounter++;
-	
-   //Get 3 digit code from counter
-   var code = this.messageCounter.toString();
-
-   while (code.length < 3) {
-      code = "0" + code;
-   }
-
-   //Return the code
-   return code;
-};
-
 LightwaveRfService.prototype.sendMessageToLink = function(_request){
-   var buffer = new Buffer(_request.code + "," + _request.message);
+   //Get 3 digit code from counter
+   var zeroPadCode = _request.code;
+
+   while (zeroPadCode.length < 3) {
+      zeroPadCode = "0" + zeroPadCode;
+   }
+   var buffer = new Buffer(zeroPadCode + "," + _request.message);
 	
    //Broadcast the message
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 	
    //Add listener
-   this.requests[parseInt(_request.code).toString()] = _request;
+   this.requests[_request.code] = _request;
 }
 
 function Request(_owner, _message, _callback) {
@@ -157,7 +154,7 @@ function Request(_owner, _message, _callback) {
 }
 
 Request.prototype.send = function(_code) {
-   this.code = _code;
+   this.code = _code.toString();
 
    this.owner.sendMessageToLink(this);
 
