@@ -207,7 +207,7 @@ Request.prototype.send = function(_callback) {
    else {   // Assume "set"
       console.log(this.owner.uName + ': setting light status, deviceId: ' + this.deviceId + ' config=', this.config);
 
-      this.owner.hue.setLightStatus(this.deviceId, this.config, function(_error, _result) {
+      this.owner.hue.setLightState(this.deviceId, this.config, function(_error, _result) {
 
          if (that.timeout) {
             clearTimeout(that.timeout);

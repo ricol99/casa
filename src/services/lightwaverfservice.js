@@ -48,7 +48,7 @@ LightwaveRfService.prototype.messageReceived = function(_message, _info) {
    //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
-   if (_info.address !== this.linkAddress) {
+   if ((_info.address !== this.linkAddress) || !_message || (_message.charAt(0) === '*')) {
       return;
    }
 
