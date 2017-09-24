@@ -1364,6 +1364,27 @@
                                  ]
                               },
                               {
+                                 "name": "dylan-asleep",
+                                 "targets": [
+                                    {
+                                       "property": "brightness",
+                                       "value": 15
+                                    },
+                                    {
+                                       "property": "hue",
+                                       "value": 44
+                                    },
+                                    {
+                                       "property": "saturation",
+                                       "value": 69
+                                    },
+                                    {
+                                       "property": "power",
+                                       "value": true
+                                    }
+                                 ]
+                              },
+                              {
                                  "name": "dylan-waking-up-in-low-light",
                                  "targets": [
                                     {

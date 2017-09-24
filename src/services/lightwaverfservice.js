@@ -111,7 +111,7 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
          var delay = setTimeout(function(_this) {
             _this.requestPending = false;
             _this.makeNextRequest();
-         }, 250, this);
+         }, 600, this);
       }
       else {
          this.requestPending = false;
