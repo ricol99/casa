@@ -190,14 +190,36 @@ Source.prototype.setNextProperties = function(_properties) {
 
    if (_properties && _properties.length > 0) {
 
-      setTimeout(function(_this, _props) {
+      if (!this.timeout) {
+         this.timeout = setTimeout(function(_this, _props) {
+            _this.timeout = null;
 
-         for (var i = 0; i < _props.length; i++) {
-            _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
-         }
-      }, 500, this, _properties);
+            for (var i = 0; i < _props.length; i++) {
+               _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
+            }
+         }, 500, this, copyProperties(_properties));
+      }
+      else {
+         console.error(this.uName +": setNextProperties() Lost Settings!!!");
+      }
    }
 };
+
+function copyProperties(_props) {
+
+   if (_props) {
+      var newProps = [];
+
+      for (var i = 0; i < _props.length; ++i) {
+         newProps.push({ property: _props[i].property, value: _props[i].value });
+      }
+
+      return newProps;
+   }
+   else {
+      return null;
+   }
+}
 
 Source.prototype.rejectPropertyUpdate = function(_propName) {
    this.setNextPropertyValue(_propName, this.props[_propName].value);
