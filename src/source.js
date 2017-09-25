@@ -191,17 +191,16 @@ Source.prototype.setNextProperties = function(_properties) {
    if (_properties && _properties.length > 0) {
 
       if (!this.timeout) {
-         this.timeout = setTimeout(function(_this, _props) {
-            _this.timeout = null;
-
-            for (var i = 0; i < _props.length; i++) {
-               _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
-            }
-         }, 500, this, copyProperties(_properties));
-      }
-      else {
          console.error(this.uName +": setNextProperties() Lost Settings!!!");
       }
+
+      this.timeout = setTimeout(function(_this, _props) {
+         _this.timeout = null;
+
+         for (var i = 0; i < _props.length; i++) {
+            _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
+         }
+      }, 200, this, copyProperties(_properties));
    }
 };
 
