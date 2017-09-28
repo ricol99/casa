@@ -143,6 +143,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          }
       }
       else if (_propName == "power" && !_propValue) {
+         // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
          console.log(this.uName + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
 
          if (!_data.coldStart) {
@@ -155,6 +156,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          var moodName = moodForBrightness(this.moods, brightness);
 
          if (moodName == "off") {
+            // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
             console.log(this.uName + ": Attempting to turn off LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {
@@ -163,6 +165,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             this.updateProperty("mood", "off");
          }
          else {
+            // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
             console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room ID=" + this.roomID);
 
             if (!_data.coldStart) {

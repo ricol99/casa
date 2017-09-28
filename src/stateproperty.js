@@ -190,8 +190,16 @@ StateProperty.prototype.applyBufferedAlignProperties = function() {
 };
 
 StateProperty.prototype.becomeController = function() {
+   // I am now the controller
    this.controllingOwner = true;
+
+   // Empty any buffered target alignments
    this.applyBufferedAlignProperties();
+
+   // Re-apply current state
+   if (this.states[this.value]) {
+      this.states[this.value].alignTargetProperties();
+   }
 };
 
 StateProperty.prototype.ceasedToBeController = function(_newController) {

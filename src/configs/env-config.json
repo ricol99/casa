@@ -332,6 +332,12 @@
                      },
                      "sources": [
                         {
+                           "name": "thing:environment",
+                           "property": "low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
+                        {
                            "property": "movement-in-low-light",
                            "value": true,
                            "nextState": "users-present-in-low-light"
@@ -602,6 +608,12 @@
                         "nextState": "no-users-present"
                      },
                      "sources": [
+                        {
+                           "name": "thing:environment",
+                           "property": "low-light",
+                           "value": true,
+                           "nextState": "users-present-in-low-light"
+                        },
                         {
                            "property": "movement-in-low-light",
                            "value": true,
