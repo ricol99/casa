@@ -187,6 +187,7 @@ Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
 };
 
 Source.prototype.setNextProperties = function(_properties) {
+   console.log(this.uName + ": setNextProperties() ", _properties);
 
    if (_properties && _properties.length > 0) {
 
@@ -198,6 +199,7 @@ Source.prototype.setNextProperties = function(_properties) {
          _this.timeout = null;
 
          for (var i = 0; i < _props.length; i++) {
+            console.log(_this.uName + ": Setting property " + _props[i].property + " to value " + _props[i].value);
             _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
          }
       }, 200, this, copyProperties(_properties));
