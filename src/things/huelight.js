@@ -8,7 +8,7 @@ function HueLight(_config) {
    Thing.call(this, _config);
    this.thingType = "hue-light";
 
-   this.deviceID = _config.deviceID;
+   this.deviceId = _config.deviceId;
    this.displayName = _config.displayName;
    this.powerPending = false;
 
@@ -39,10 +39,10 @@ function HueLight(_config) {
       }
    }
    else {
-      this.hueService.getLightCapability(this.deviceID, function(_err, _result) {
+      this.hueService.getLightCapability(this.deviceId, function(_err, _result) {
 
          if (_err) {
-            console.error(that.uName + ": Not able to find hue light id=", that.deviceID);
+            console.error(that.uName + ": Not able to find hue light id=", that.deviceId);
             return;
          }
 
@@ -82,7 +82,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
-            this.hueService.turnLightOn(this.deviceID, function(_error, _content) {
+            this.hueService.turnLightOn(this.deviceId, function(_error, _content) {
 
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
@@ -93,7 +93,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
             });
          }
          else {
-            this.hueService.turnLightOff(this.deviceID, function(_error, _content) {
+            this.hueService.turnLightOff(this.deviceId, function(_error, _content) {
 
                if (_error) {
                   console.log(that.uName + ': Error turning room off ' + _error.message);
@@ -110,7 +110,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
 HueLight.prototype.syncDeviceProperties = function() {
    var that = this;
 
-   this.hueService.setLightState(this.deviceID, { power: true, brightness: this.getProperty("brightness"),
+   this.hueService.setLightState(this.deviceId, { power: true, brightness: this.getProperty("brightness"),
                                                   hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
                                                   function(_error, _content) {
 
@@ -128,7 +128,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
 
    if (f[_propName]) {
 
-      this.hueService[f[_propName]].call(this.hueService, this.deviceID, _propValue, function(_error, _content) {
+      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue, function(_error, _content) {
 
          if (_error) {
             console.error(that.uName + ': Error turning room off ' + _error.message);
@@ -142,7 +142,7 @@ HueLight.prototype.coldStart = function() {
 
    this.statusTimer = setInterval(function(_this) {
 
-      _this.hueService.getLightState(_this.deviceID, function(_error, _lightStatus) {
+      _this.hueService.getLightState(_this.deviceId, function(_error, _lightStatus) {
          console.log(_this.uName + ": AAAA Lightstate = " + JSON.stringify(_lightStatus));
 
 /*         if (!_error && _lightStatus.state.reachable) {

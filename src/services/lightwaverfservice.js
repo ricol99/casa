@@ -48,11 +48,16 @@ LightwaveRfService.prototype.messageReceived = function(_message, _info) {
    //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
-   if ((_info.address !== this.linkAddress) || !_message || (_message.slice(0, 1) === '*')) {
+   if ((_info.address !== this.linkAddress) || !_message) {
       return;
    }
 
    var message = _message.toString("utf8");
+
+   if (message.slice(0, 1) === '*') {
+      return;
+   }
+
    var parts = message.split(",");
    var code = parts.splice(0,1);
    var content = parts.join(",").replace(/(\r\n|\n|\r)/gm,"");
@@ -137,6 +142,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
    while (zeroPadCode.length < 3) {
       zeroPadCode = "0" + zeroPadCode;
    }
+
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
 	
    //Broadcast the message

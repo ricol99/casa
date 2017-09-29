@@ -117,8 +117,8 @@
       {
          "name": "lightwaverfaccessory:kitchen-ceiling-lights",
          "displayName": "Ceiling Lights - Kitchen",
-         "roomID": 2,
-         "deviceID": 2,
+         "roomId": 2,
+         "deviceId": 2,
          "brightnessSupported": true,
          "props": [
             {

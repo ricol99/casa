@@ -341,7 +341,7 @@
                   {
                      "name": "huelight:dylan-bedroom-lamp",
                      "displayName": "Dylan Bedroom Lamp",
-                     "deviceID": 2,
+                     "deviceId": 2,
                      "propogateToParent": false,
                      "props": [
                         {
@@ -785,7 +785,7 @@
                   {
                      "name": "huelight:natalie-bedroom-lamp",
                      "displayName": "Natalie Bedroom Lamp",
-                     "deviceID": 3,
+                     "deviceId": 3,
                      "propogateToParent": false,
                      "props": [
                         {
@@ -947,7 +947,7 @@
                   {
                      "name": "huelight:richard-bedroom-lamp",
                      "displayName": "Richard Bedroom Lamp",
-                     "deviceID": 4,
+                     "deviceId": 4,
                      "propogateToParent": false,
                      "props": [
                         {

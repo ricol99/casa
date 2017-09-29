@@ -475,8 +475,8 @@
                         {
                            "name": "lightwaverfaccessory:kitchen-ceiling-lights",
                            "displayName": "Ceiling Lights - Kitchen",
-                           "roomID": 2,
-                           "deviceID": 2,
+                           "roomId": 2,
+                           "deviceId": 2,
                            "brightnessSupported": true,
                            "propogateToParent": true,
                            "props": [
@@ -499,8 +499,8 @@
                         {
                            "name": "lightwaverfaccessory:kitchen-island-lights",
                            "displayName": "Island Lights - Kitchen",
-                           "roomID": 2,
-                           "deviceID": 1,
+                           "roomId": 2,
+                           "deviceId": 1,
                            "brightnessSupported": true,
                            "propogateToParent": true,
                            "props": []
@@ -510,7 +510,7 @@
                   {
                      "name": "lightwaverfaccessory:kitchen-cupboards-lights",
                      "displayName": "Kitchen Cupboard Lights",
-                     "roomID": 6,
+                     "roomId": 6,
                      "propogateToParent": false,
                      "moods": [
                         {
@@ -750,8 +750,8 @@
                         {
                            "name": "lightwaverfaccessory:wall-lights",
                            "displayName": "Wall Lights - Lounge",
-                           "roomID": 1,
-                           "deviceID": 1,
+                           "roomId": 1,
+                           "deviceId": 1,
                            "brightnessSupported": true,
                            "propogateToParent": true,
                            "props": [
@@ -773,8 +773,8 @@
                         {
                            "name": "lightwaverfaccessory:table-lamps",
                            "displayName": "Table Lamps - Lounge",
-                           "roomID": 1,
-                           "deviceID": 2,
+                           "roomId": 1,
+                           "deviceId": 2,
                            "propogateToParent": true,
                            "props": []
                         }
@@ -880,8 +880,8 @@
                   {
                      "name": "lightwaverfaccessory:back-door-outside-light",
                      "displayName": "Back Door Outside Light",
-                     "roomID": 3,
-                     "deviceID": 1,
+                     "roomId": 3,
+                     "deviceId": 1,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -890,8 +890,8 @@
                   {
                      "name": "lightwaverfaccessory:bifold-outside-light",
                      "displayName": "Bifold Outside Light",
-                     "roomID": 3,
-                     "deviceID": 2,
+                     "roomId": 3,
+                     "deviceId": 2,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -900,8 +900,8 @@
                   {
                      "name": "lightwaverfaccessory:lounge-outside-light",
                      "displayName": "Lounge Outside Light",
-                     "roomID": 3,
-                     "deviceID": 3,
+                     "roomId": 3,
+                     "deviceId": 3,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -933,8 +933,8 @@
                   {
                      "name": "lightwaverfaccessory:loo-main-light",
                      "displayName": "Loo Lights",
-                     "roomID": 4,
-                     "deviceID": 2,
+                     "roomId": 4,
+                     "deviceId": 2,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -965,8 +965,8 @@
                   {
                      "name": "lightwaverfaccessory:hall-table-lamp",
                      "displayName": "Hall Table Lamp",
-                     "roomID": 4,
-                     "deviceID": 1,
+                     "roomId": 4,
+                     "deviceId": 1,
                      "propogateToParent": true,
                      "props": [
                      ]
@@ -997,8 +997,8 @@
                   {
                      "name": "lightwaverfaccessory:snug-main-light",
                      "displayName": "Snug Lights",
-                     "roomID": 4,
-                     "deviceID": 3,
+                     "roomId": 4,
+                     "deviceId": 3,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -1030,8 +1030,8 @@
                   {
                      "name": "lightwaverfaccessory:utility-main-light",
                      "displayName": "Utility Light",
-                     "roomID": 2,
-                     "deviceID": 3,
+                     "roomId": 2,
+                     "deviceId": 3,
                      "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
@@ -1340,7 +1340,7 @@
                   {
                      "name": "huelight:dylan-bedroom-lamp",
                      "displayName": "Dylan Bedroom Lamp",
-                     "deviceID": 2,
+                     "deviceId": 2,
                      "propogateToParent": false,
                      "props": [
                         {
@@ -1785,7 +1785,7 @@
                   {
                      "name": "huelight:natalie-bedroom-lamp",
                      "displayName": "Natalie Bedroom Lamp",
-                     "deviceID": 3,
+                     "deviceId": 3,
                      "propogateToParent": false,
                      "props": [
                         {
@@ -1926,7 +1926,7 @@
                   {
                      "name": "huelight:richard-bedroom-lamp",
                      "displayName": "Richard Bedroom Lamp",
-                     "deviceID": 4,
+                     "deviceId": 4,
                      "propogateToParent": false,
                      "props": [
                         {

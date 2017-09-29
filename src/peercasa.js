@@ -34,7 +34,7 @@ function PeerCasa(_config) {
    this.connected = false;
    this.valid = true;
    this.socket = null;
-   this.intervalID = null;
+   this.intervalId = null;
    this.unAckedMessages = [];
    this.messageId = 0;
 
@@ -103,9 +103,9 @@ function PeerCasa(_config) {
          if (!that.socket || (that.socket == _data.socket)) {
             console.log(that.uName + ': I have lost my peer!');
 
-            if (that.intervalID) {
-               clearInterval(that.intervalID);
-               that.intervalID = null;
+            if (that.intervalId) {
+               clearInterval(that.intervalId);
+               that.intervalId = null;
             }
 
             if (that.connected) {
@@ -303,9 +303,9 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       this.socket.on('error', function(_error) {
          console.log(that.uName + ': Error received: ' + _error);
 
-         if (that.intervalID) {
-            clearInterval(that.intervalID);
-            that.intervalID = null;
+         if (that.intervalId) {
+            clearInterval(that.intervalId);
+            that.intervalId = null;
          }
 
          if (that.connected) {
@@ -325,9 +325,9 @@ PeerCasa.prototype.connectToPeerCasa = function() {
       this.socket.on('disconnect', function() {
          console.log(that.uName + ': Error disconnect');
 
-         if (that.intervalID) {
-            clearInterval(that.intervalID);
-            that.intervalID = null;
+         if (that.intervalId) {
+            clearInterval(that.intervalId);
+            that.intervalId = null;
          }
 
          if (that.connected) {
@@ -584,10 +584,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
 PeerCasa.prototype.establishHeartbeat = function() {
    this.lastHeartbeat = Date.now() + 10000;
 
-   if (!this.intervalID) {
+   if (!this.intervalId) {
 
       // Establish heartbeat
-      this.intervalID = setInterval(function(_this){
+      this.intervalId = setInterval(function(_this){
 
          if (_this.connected) {
 
