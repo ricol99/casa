@@ -147,7 +147,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
 	
    //Broadcast the message
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
-   //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
+   console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 	
    //Add listener
    this.requests[_request.code] = _request;
