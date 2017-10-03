@@ -18,7 +18,6 @@ function Source(_config) {
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
-
    this.props = {};
 
    if (_config.props) {
@@ -182,48 +181,54 @@ Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _
    // Do nothing by default
 };
 
-Source.prototype.setNextPropertyValue = function(_propName, _nextPropValue) {
-   this.setNextProperties([ { property: _propName, value: _nextPropValue } ]);
+Source.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
+   this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
 };
 
-Source.prototype.setNextProperties = function(_properties) {
-   console.log(this.uName + ": setNextProperties() ", _properties);
+Source.prototype.alignProperties = function(_properties) {
+   console.log(this.uName + ": alignProperties() ", _properties);
 
-   if (_properties && _properties.length > 0) {
+   if (_properties && (_properties.length > 0)) {
+      this.addPropertiesForAlignment(_properties);
+      this.alignNextProperty();
+   }
+};
 
-      if (!this.timeout) {
-         console.error(this.uName +": setNextProperties() Lost Settings!!!");
-      }
+// Internal
+Source.prototype.addPropertiesForAlignment = function(_properties) {
 
-      this.timeout = setTimeout(function(_this, _props) {
-         _this.timeout = null;
+   if (!this.propertyAlignmentQueue) {
+      this.propertyAlignmentQueue = [];
+   }
 
-         for (var i = 0; i < _props.length; i++) {
-            console.log(_this.uName + ": Setting property " + _props[i].property + " to value " + _props[i].value);
-            _this.setProperty(_props[i].property, _props[i].value, { sourceName: this.uName });
+   for (var i = 0; i < _properties.length; ++i) {
+      this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
+   }
+};
+
+// Internal
+Source.prototype.alignNextProperty = function() {
+
+   if (!this.alignmentTimeout && (this.propertyAlignmentQueue.length > 0)) {
+
+      this.alignmentTimeout = setTimeout(function(_this) {
+         _this.alignmentTimeout = null;
+
+         if (_this.propertyAlignmentQueue.length > 0) {
+            var prop = _this.propertyAlignmentQueue.shift();
+            console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);
+            _this.setProperty(prop.property, prop.value, { sourceName: _this.uName });
+            _this.alignNextProperty();
          }
-      }, 200, this, copyProperties(_properties));
+         else {
+            console.error(_this.uName + ": Something has gone wrong as no alignments are in the queue!");
+         }
+      }, 1, this);
    }
 };
-
-function copyProperties(_props) {
-
-   if (_props) {
-      var newProps = [];
-
-      for (var i = 0; i < _props.length; ++i) {
-         newProps.push({ property: _props[i].property, value: _props[i].value });
-      }
-
-      return newProps;
-   }
-   else {
-      return null;
-   }
-}
 
 Source.prototype.rejectPropertyUpdate = function(_propName) {
-   this.setNextPropertyValue(_propName, this.props[_propName].value);
+   this.alignPropertyValue(_propName, this.props[_propName].value);
 };
 
 Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
@@ -259,6 +264,10 @@ function copyData(_sourceData) {
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.uName + ": Going invalid! Previously active state=" + this.props['ACTIVE'].value);
+
+   if (this.alignmentTimeout) {
+      clearTimeout(this.alignmentTimeout);
+   }
 
    var sendData = _sourceData;
    sendData.sourceName = this.uName;

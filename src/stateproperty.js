@@ -107,11 +107,38 @@ StateProperty.prototype.setStateTimer = function(_state) {
 
 StateProperty.prototype.transformNextState = function(_nextState) {
    var nextState = _nextState;
+   var immediateState = null;
 
    switch (_nextState) {
       case "PREVIOUS-STATE":
          nextState = this.previousState;
          break;
+   }
+
+   if (this.states[nextState]) {
+
+      for (var i = 0; i < 10; ++i) {
+         immediateNextState = null;
+
+         if (this.states[nextState]) {
+            immediateNextState = this.states[nextState].checkSourceProperties();
+
+            if (!immediateNextState) {
+               break;
+            }
+            else {
+               nextState = immediateNextState;
+            }
+         }
+         else {
+            break;
+         }
+      }
+
+      if (immediateNextState) {
+         console.error(this.uName + ": State machine is broken as state model has gone through 10 immediate state transitions");
+         process.exit(3);
+      }
    }
 
    return nextState;
@@ -133,8 +160,10 @@ StateProperty.prototype.setState = function(_nextState) {
       }
    }
 
-   if (this.states[_nextState]) {
-      var immediateNextState = this.states[_nextState].initialise();
+   var state = (this.states[_nextState]) ? this.states[_nextState] : this.states["DEFAULT"];
+
+   if (state) {
+      var immediateNextState = state.initialise();
 
       if (immediateNextState) {
 
@@ -143,24 +172,21 @@ StateProperty.prototype.setState = function(_nextState) {
          }, 1, this, immediateNextState);
       }
       else {
-         this.setStateTimer(this.states[_nextState]);
+         this.setStateTimer(state);
       }
    }
-   else if (this.states["DEFAULT"]) {
-      this.states["DEFAULT"].alignTargetProperties();
-   }
 };
 
-StateProperty.prototype.alignProperty = function(_propName, _propValue, _priority) {
-   this.alignProperties([{ property: _propName, value: _propValue }], _priority);
+StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _priority) {
+   this.alignTargetProperties([{ property: _propName, value: _propValue }], _priority);
 };
 
-StateProperty.prototype.alignProperties = function(_targets, _priority) {
+StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
    this.currentPriority = (_priority === undefined) ? this.assignedPriority : _priority;
    this.targetPropsBuffer = {};
 
    if (this.owner.takeControl(this, this.currentPriority)) {
-      this.owner.setNextProperties(_targets);
+      this.owner.alignProperties(_targets);
    }
    else {
       this.bufferAlignProperties(_targets, this.currentPriority);
@@ -186,7 +212,7 @@ StateProperty.prototype.applyBufferedAlignProperties = function() {
       }
    }
 
-   this.alignProperties(targets, this.targetPropsPriority);
+   this.alignTargetProperties(targets, this.targetPropsPriority);
 };
 
 StateProperty.prototype.becomeController = function() {
@@ -198,7 +224,7 @@ StateProperty.prototype.becomeController = function() {
 
    // Re-apply current state
    if (this.states[this.value]) {
-      this.states[this.value].alignTargetProperties();
+      this.states[this.value].alignTargets();
    }
 };
 
@@ -283,7 +309,7 @@ State.prototype.initialise = function() {
    var newImmediateState = this.checkSourceProperties();
 
    if (!newImmediateState) {
-      this.alignTargetProperties();
+      this.alignTargets();
    } 
    else {
       console.log(this.uName + ": Initialise() ImmediateState state transfer to " + newImmediateState);
@@ -292,7 +318,7 @@ State.prototype.initialise = function() {
    return newImmediateState;
 };
 
-State.prototype.alignTargetProperties = function() {
+State.prototype.alignTargets = function() {
    var targets = [];
 
    if (this.targets) {
@@ -317,7 +343,7 @@ State.prototype.alignTargetProperties = function() {
       }
    }
 
-   this.owner.alignProperties(targets, this.priority);
+   this.owner.alignTargetProperties(targets, this.priority);
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -369,7 +395,7 @@ State.prototype.scheduledEventTriggered = function(_event, _value) {
 
 State.prototype.newValueFromRamp = function(_ramp, _config, _value) {
    console.log(this.uName + ": New value from ramp, property=" + _config.property + ", value=" + _value);
-   this.owner.alignProperty(_config.property, _value, _config.propertyPriority);
+   this.owner.alignTargetProperty(_config.property, _value, _config.propertyPriority);
 };
 
 State.prototype.rampComplete = function(_ramp, _config) {
