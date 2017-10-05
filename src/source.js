@@ -324,32 +324,30 @@ Source.prototype.takeControl = function(_newController, _priority) {
          result = false;
       }
    }
-   else {
-      if (_priority != this.controllerPriority) {
-         // Same controlling stateProperty but different priority - reassess if it still should be a controller
-         console.log(this.uName + ": Existing controller "+this.controller.name+" is changing priority");
+   else if (_priority != this.controllerPriority) {
+      // Same controlling stateProperty but different priority - reassess if it still should be a controller
+      console.log(this.uName + ": Existing controller "+this.controller.name+" is changing priority");
 
-         if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
+      if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
 
-            if (_priority >= this.secondaryControllers[0].priority) {
-               console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
-               this.controllerPriority = _priority;
-            }
-            else {
-               console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
-               this.controllerPriority = this.secondaryControllers[0].priority;
-               this.controller = this.secondaryControllers[0].controller;
-               this.secondaryControllers.shift();
-               this.addSecondaryController(_newController, _priority);
-               _newController.ceasedToBeController(this.controller);
-               this.controller.becomeController();
-               result = false;
-            }
-         }
-         else {
+         if (_priority >= this.secondaryControllers[0].priority) {
             console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
             this.controllerPriority = _priority;
          }
+         else {
+            console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
+            this.controllerPriority = this.secondaryControllers[0].priority;
+            this.controller = this.secondaryControllers[0].controller;
+            this.secondaryControllers.shift();
+            this.addSecondaryController(_newController, _priority);
+            _newController.ceasedToBeController(this.controller);
+            this.controller.becomeController();
+            result = false;
+         }
+      }
+      else {
+         console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
+         this.controllerPriority = _priority;
       }
    }
 
