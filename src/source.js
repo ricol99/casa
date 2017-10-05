@@ -310,11 +310,13 @@ Source.prototype.takeControl = function(_newController, _priority) {
       if (_priority >= this.controllerPriority) {
          console.log(this.uName + ": Controller "+_newController.name+" is taking control");
          var oldController = this.controller;
+         var oldControllerPriority = this.controllerPriority;
          this.controller = _newController;
          this.controllerPriority = _priority;
 
          if (oldController) {
             console.log(this.uName + ": Old controller "+oldController.name+" is losing control");
+            this.addSecondaryController(oldController, oldControllerPriority);
             oldController.ceasedToBeController(this.controller);
          }
       }

@@ -205,11 +205,12 @@ StateProperty.prototype.bufferAlignProperties = function(_targets, _priority) {
    }
 
    this.targetPropsBuffer = {};
+   this.targetPropsPriority = _priority;
    
    for (var i = 0; i < _targets.length; ++i) {
       this.targetPropsBuffer[_targets[i].property] = _targets[i].value;
-      this.targetPropsPriority = _priority;
    }
+
 }; 
 
 StateProperty.prototype.applyBufferedAlignProperties = function() {
@@ -222,7 +223,9 @@ StateProperty.prototype.applyBufferedAlignProperties = function() {
       }
    }
 
-   this.alignTargetProperties(targets, this.targetPropsPriority);
+   if (targets.length > 0) {
+      this.alignTargetProperties(targets, this.targetPropsPriority);
+   }
 };
 
 StateProperty.prototype.becomeController = function() {

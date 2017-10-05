@@ -122,12 +122,56 @@
          "brightnessSupported": true,
          "props": [
             {
+               "name": "test-lightwave-state-background",
+               "type": "stateproperty",
+               "initialValue": false,
+               "states": [
+                  {
+                     "name": false,
+                     "priority": 1,
+                     "timeout": {
+                        "duration": 25,
+                        "nextState": true 
+                     },
+                     "targets": [
+                        {
+                           "property": "brightness",
+                           "value": 0
+                        },
+                        {
+                           "property": "power",
+                           "value": false
+                        }
+                     ]
+                  },
+                  {
+                     "name": true,
+                     "priority": 2,
+                     "timeout": {
+                        "duration": 80,
+                        "nextState": false 
+                     },
+                     "targets": [
+                        {
+                           "property": "brightness",
+                           "value": 40
+                        },
+                        {
+                           "property": "power",
+                           "value": true
+                        }
+                     ]
+                  }
+               ]
+            },
+            {
                "name": "test-lightwave-state",
                "type": "stateproperty",
                "initialValue": "off",
                "states": [
                   {
                      "name": "off",
+                     "priority": 1,
                      "timeout": {
                         "duration": 30,
                         "nextState": "on"
@@ -145,14 +189,15 @@
                   },
                   {
                      "name": "on",
+                     "priority": 3,
                      "targets": [
                         {
                            "property": "brightness",
                            "ramp": {
                               "startValue": 50,
                               "endValue": 100,
-                              "step": 5,
-                              "duration": 45
+                              "step": 10,
+                              "duration": 20
                            }
                         },
                         {
@@ -162,7 +207,7 @@
                      ],
                      "source": {
                         "property": "brightness",
-                        "value": 100,
+                        "value": 80,
                         "nextState": "off"
                      }
                   }
