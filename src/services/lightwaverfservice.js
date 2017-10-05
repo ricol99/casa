@@ -136,7 +136,6 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
 }
 
 LightwaveRfService.prototype.sendMessageToLink = function(_request){
-   //Get 3 digit code from counter
    var zeroPadCode = _request.code;
 
    while (zeroPadCode.length < 3) {
@@ -144,12 +143,8 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
    }
 
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
-	
-   //Broadcast the message
-   this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
-	
-   //Add listener
+   this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    this.requests[_request.code] = _request;
 }
 
@@ -161,7 +156,6 @@ function Request(_owner, _message, _callback) {
 
 Request.prototype.send = function(_code) {
    this.code = _code.toString();
-
    this.owner.sendMessageToLink(this);
 
    this.timeout = setTimeout(function(_this) {
