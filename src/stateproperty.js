@@ -10,8 +10,8 @@ function StateProperty(_config, _owner) {
    this.states = {};
    this.targetPropsBuffer = {};
    this.controllingOwner = false;
-   this.assignedPriority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
-   this.currentPriority = this.assignedPriority;
+   this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
+   this.currentPriority = this.priority;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -182,7 +182,12 @@ StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _p
 };
 
 StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
-   this.currentPriority = (_priority === undefined) ? this.assignedPriority : _priority;
+   this.currentPriority = _priority;
+
+   if (this.targetPropsBuffer) {
+      delete this.targetPropsBuffer;
+   }
+
    this.targetPropsBuffer = {};
 
    if (this.owner.takeControl(this, this.currentPriority)) {
@@ -194,6 +199,11 @@ StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
 };
 
 StateProperty.prototype.bufferAlignProperties = function(_targets, _priority) {
+
+   if (this.targetPropsBuffer) {
+      delete this.targetPropsBuffer;
+   }
+
    this.targetPropsBuffer = {};
    
    for (var i = 0; i < _targets.length; ++i) {
@@ -262,7 +272,7 @@ function State(_config, _owner) {
       _config.sources = [ _config.source ];
    }
 
-   this.priority = _config.hasOwnProperty("priority") ? _config.priority : 0;
+   this.priority = _config.hasOwnProperty("priority") ? _config.priority : _owner.priority;
    this.sources = _config.hasOwnProperty("sources") ? _config.sources :(_config.hasOwnProperty("source") ? [ _config.source ] : undefined);
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
