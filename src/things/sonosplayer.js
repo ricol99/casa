@@ -153,9 +153,9 @@ SonosPlayer.prototype.processRenderControlChange = function(_data) {
 
 SonosPlayer.prototype.processGroupRenderControlChange = function(_data) {
    console.log(this.uName + ": processGroupRenderControlChange()", _data);
-   this.updateProperty('volume', _data.GroupVolume);
-   this.updateProperty('volume-writable', (_data.GroupVolumeChangeable != 0));
-   this.updateProperty('muted', (_data.GroupMute != 0));
+   this.alignPropertyValue('volume', _data.GroupVolume);
+   this.alignPropertyValue('volume-writable', (_data.GroupVolumeChangeable != 0));
+   this.alignPropertyValue('muted', (_data.GroupMute != 0));
 };
 
 SonosPlayer.prototype.processAVTransportChange = function(_data) {
@@ -167,10 +167,10 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
 
    switch (_data.LastChangedPlayState) {
       case 'PLAYING':
-         this.updateProperty('playing', true);
+         this.alignPropertyValue('playing', true);
          break;
       case 'PAUSED_PLAYBACK':
-         this.updateProperty('playing', false);
+         this.alignPropertyValue('playing', false);
          break;
       default:
          console.log(this.uName + ": Playstate not processed, state="+_data.LastChangedPlayState);
@@ -292,21 +292,21 @@ SonosPlayer.prototype.saveCurrentState = function(_property) {
                         muted: this.props['muted'].value,
                         playing: this.props['playing'].value };
 
-   if (this.props['muted'].value) {
-      this.props['muted'].set(false, { sourceName: this.uName });
+   if (this.getProperty("muted")) {
+      this.alignPropertyValue("muted", false);
    }
 
-   this.props['volume'].set(this.alarmVolumes[_property], { sourceName: this.uName });
+   this.alignPropertyValue("volume", this.alarmVolumes[_property]);
 };
 
 SonosPlayer.prototype.restoreSavedState = function() {
 
    if (this.props['volume'].value !== this.savedStatus.volume) {
-      this.props['volume'].set(this.savedStatus.volume, { sourceName: this.uName });
+      this.alignPropertyValue("volume", this.savedStatus.volume);
    }
 
    if (this.props['muted'].value !== this.savedStatus.muted) {
-      this.props['muted'].set(this.savedStatus.muted, { sourceName: this.uName });
+      this.alignPropertyValue("muted", this.savedStatus.muted);
    }
 
    if (this.savedStatus.playing) {

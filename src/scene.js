@@ -87,7 +87,7 @@ Scene.prototype.receivedEventFromSource = function(_data) {
          }
       }
 
-      this.updateProperty(this.sceneProp, active);
+      this.alignPropertyValue(this.sceneProp, active);
    }
 };
 

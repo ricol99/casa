@@ -143,35 +143,32 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          }
       }
       else if (_propName == "power" && !_propValue) {
-         // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
          console.log(this.uName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
 
          if (!_data.coldStart) {
             this.lightwaveRfService.turnRoomOff(this.roomId, this.powerCallbackHandler);
          }
-         this.updateProperty("mood", "off");
+         this.alignPropertyValue("mood", "off");
       }
       else {
          var brightness = (_propName == "brightness") ? _propValue : this.props["brightness"].value;
          var moodName = moodForBrightness(this.moods, brightness);
 
          if (moodName == "off") {
-            // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
             console.log(this.uName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
                this.lightwaveRfService.turnRoomOff(this.roomId, this.powerCallbackHandler);
             }
-            this.updateProperty("mood", "off");
+            this.alignPropertyValue("mood", "off");
          }
          else {
-            // XXXX TBD IS this code needed as surely the room will be turned off my the mood property change - see code above
             console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
                this.lightwaveRfService.setRoomMood(this.roomId, this.moods[moodName].id, this.powerCallbackHandler);
             }
-            this.updateProperty("mood", moodName);
+            this.alignPropertyValue("mood", moodName);
          }
       }
    }

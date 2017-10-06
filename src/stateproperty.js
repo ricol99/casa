@@ -76,7 +76,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
          this.resetStateTimer(currentState);
       }
       else {
-         this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+         this.updatePropertyInternal(this.transformNextState(source.nextState));
       }
    }
 };
@@ -100,7 +100,7 @@ StateProperty.prototype.setStateTimer = function(_state) {
 
       this.stateTimer = setTimeout(function(_this, _timeoutState) {
          _this.stateTimer = null;
-         _this.set(_this.transformNextState(_timeoutState), { sourceName: _this.owner });
+         _this.updatePropertyInternal(_this.transformNextState(_timeoutState));
       }, _state.timeout.duration * 1000, this, _state.timeout.nextState);
    }
 };
@@ -168,8 +168,8 @@ StateProperty.prototype.setState = function(_nextState) {
       if (immediateNextState) {
 
          setTimeout(function(_this, _nextState) {
-            _this.set(_this.transformNextState(_nextState), { sourceName: _this.owner });
-         }, 1, this, immediateNextState);
+            _this.updatePropertyInternal(_nextState);
+         }, 1, this, this.transformNextState(immediateNextState));
       }
       else {
          this.setStateTimer(state);
@@ -403,7 +403,7 @@ State.prototype.createRamp = function(_config) {
 
 State.prototype.scheduledEventTriggered = function(_event, _value) {
    this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
-   this.owner.set(this.name, { sourceName: this.owner.owner });
+   this.owner.updatePropertyInternal(this.name);
 }
 
 State.prototype.newValueFromRamp = function(_ramp, _config, _value) {

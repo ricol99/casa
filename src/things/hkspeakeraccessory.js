@@ -50,7 +50,7 @@ function HomekitSpeakerAccessory(_config) {
 util.inherits(HomekitSpeakerAccessory, HomekitAccessory);
 
 HomekitSpeakerAccessory.prototype.setMuted = function(_status) {
-   this.updateProperty("muted", _status ? true : false);
+   this.alignPropertyValue("muted", _status ? true : false);
 };
 
 HomekitSpeakerAccessory.prototype.getMuted = function() {
@@ -60,7 +60,7 @@ HomekitSpeakerAccessory.prototype.getMuted = function() {
 HomekitSpeakerAccessory.prototype.setVolume = function(_status) {
    console.log(this.uName + ": Changing volume to " + _status);
    this.setManualMode("volume");
-   this.updateProperty("volume", _status);
+   this.alignPropertyValue("volume", _status);
 };
 
 HomekitSpeakerAccessory.prototype.getVolume = function() {

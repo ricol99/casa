@@ -183,27 +183,27 @@ AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
 
    if (!this.props['ACTIVE'].value) {
       console.log(this.uName + ": Connection restored to Texecom alarm!");
-      this.updateProperty('ACTIVE', true);
+      this.alignPropertyValue('ACTIVE', true);
    }
 
    if (((flags & FLAG_LINE_FAILURE) != 0) != this.props['line-failure'].value) {
-      this.updateProperty('line-failure', ((flags & FLAG_LINE_FAILURE) != 0));
+      this.alignPropertyValue('line-failure', ((flags & FLAG_LINE_FAILURE) != 0));
    }
 
    if (((flags & FLAG_AC_FAILURE) != 0) != this.props['ac-power-failure'].value) {
-      this.updateProperty('ac-power-failure', ((flags & FLAG_AC_FAILURE) != 0));
+      this.alignPropertyValue('ac-power-failure', ((flags & FLAG_AC_FAILURE) != 0));
    }
 
    if (((flags & FLAG_BATTERY_FAILURE) != 0) != this.props['battery-failure'].value) {
-      this.updateProperty('battery-failure', ((flags & FLAG_BATTERY_FAILURE) != 0));
+      this.alignPropertyValue('battery-failure', ((flags & FLAG_BATTERY_FAILURE) != 0));
    }
 
    if (((flags & FLAG_ARMED) != 0) != this.props['armed-normal'].value) {
-      this.updateProperty('armed-normal', ((flags & FLAG_ARMED) != 0));
+      this.alignPropertyValue('armed-normal', ((flags & FLAG_ARMED) != 0));
    }
 
    if (((flags & FLAG_ENGINEER) != 0) != this.props['engineer-mode'].value) {
-      this.updateProperty('engineer-mode', ((flags & FLAG_ENGINEER) != 0));
+      this.alignPropertyValue('engineer-mode', ((flags & FLAG_ENGINEER) != 0));
    }
 
    console.log(this.uName + ": Poll received from alarm. Flags="+flags);
@@ -232,13 +232,13 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
       this.eventHandlers[_message.event].call(this, _message);
    }
    else if (_message.property != undefined) {
-      this.updateProperty(_message.property, _message.propertyValue); 
+      this.alignPropertyValue(_message.property, _message.propertyValue); 
       console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description, + ", value=" + _message.value);
-      this.updateProperty('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue);
+      this.alignPropertyValue('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue);
    }
    else {
       console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
-      this.updateProperty('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier);
+      this.alignPropertyValue('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier);
    }
 
    setTimeout(function() {
@@ -261,7 +261,7 @@ AlarmTexecom.prototype.restartWatchdog = function() {
          // Lost connection with alarm
          console.info(_this.uName + ": Lost connection to Texecom Alarm!");
          _this.pollsMissed = 0;
-         _this.updateProperty('ACTIVE', false);
+         _this.alignPropertyValue('ACTIVE', false);
       }
       else {
          _this.restartWatchdog();
@@ -288,7 +288,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 
             if ((_propValue !== STATE_DISARMED) && (this.props['current-state'].value !== STATE_DISARMED)) {
                // Don't allow this state transition AWAY<->HOME<->NIGHT<->AWAY, must go via DISARMED state - just move to disarmed state
-               this.setNextPropertyValue(_propName, STATE_DISARMED);
+               this.alignPropertyValue(_propName, STATE_DISARMED);
             }
             else {
                setTimeout(function(_this) {	// Make sure the target-state is set before executing request
@@ -306,7 +306,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
    }
 
    if (_propName == "zone-alarm") {
-      this.updateProperty("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED);
+      this.alignPropertyValue("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED);
    }
 };
 
@@ -586,17 +586,17 @@ AlarmTexecom.prototype.processAlarmStatus = function(_buffer) {
             if (i > 0) {
                partArmed |= this.alarmStateMap[i].value;
             }
-            this.updateProperty(this.alarmStateMap[i].prop.name, this.alarmStateMap[i].value);
+            this.alignPropertyValue(this.alarmStateMap[i].prop.name, this.alarmStateMap[i].value);
 
             if (this.alarmStateMap[i].value) {
-               this.updateProperty("target-state", this.alarmStateMap[i].state);
-               this.updateProperty("current-state", this.alarmStateMap[i].state);
+               this.alignPropertyValue("target-state", this.alarmStateMap[i].state);
+               this.alignPropertyValue("current-state", this.alarmStateMap[i].state);
             }
          }
       }
 
       if (partArmed && !this.props['part-armed'].value) {
-         this.updateProperty('part-armed', true);
+         this.alignPropertyValue('part-armed', true);
       }
    }
 };
@@ -635,13 +635,13 @@ AlarmTexecom.prototype.failedToSendCommand = function() {
    if (this.transactionState !== "idle") {
       this.transactionState = "idle";
       this.socket.destroy();
-      this.updateProperty('target-state', this.props['current-state'].value);
+      this.alignPropertyValue('target-state', this.props['current-state'].value);
    }
 };
 
 AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
    this.cancelAcknowledgeTimer();
-   this.updateProperty(_message.property, _message.propertyValue);
+   this.alignPropertyValue(_message.property, _message.propertyValue);
    this.transactionState = "idle";
 
    if (_message.propertyValue) {
@@ -651,20 +651,20 @@ AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
       }, 3000, this);
    }
    else {
-      this.updateProperty("zone-alarm", false);
-      this.updateProperty("confirmed-alarm", false);
+      this.alignPropertyValue("zone-alarm", false);
+      this.alignPropertyValue("confirmed-alarm", false);
 
       if (this.props["part-armed"].value) {
-         this.updateProperty("night-armed", false);
-         this.updateProperty("stay-armed", false);
-         this.updateProperty("part-armed", false);
+         this.alignPropertyValue("night-armed", false);
+         this.alignPropertyValue("stay-armed", false);
+         this.alignPropertyValue("part-armed", false);
       }
       else if (this.props["away-armed"].value) {
-         this.updateProperty("away-armed", false);
+         this.alignPropertyValue("away-armed", false);
       }
 
-      this.updateProperty("current-state", STATE_DISARMED);
-      this.updateProperty("target-state", STATE_DISARMED);
+      this.alignPropertyValue("current-state", STATE_DISARMED);
+      this.alignPropertyValue("target-state", STATE_DISARMED);
    }
 }
 
@@ -675,23 +675,23 @@ AlarmTexecom.prototype.alarmDownloadHandler = function(_message) {
 AlarmTexecom.prototype.alarmAbortHandler = function(_message) {
 
    if (this.props["part-armed"].value) {
-      this.updateProperty("night-armed", false);
-      this.updateProperty("stay-armed", false);
-      this.updateProperty("part-armed", false);
+      this.alignPropertyValue("night-armed", false);
+      this.alignPropertyValue("stay-armed", false);
+      this.alignPropertyValue("part-armed", false);
    }
    else if (this.props["away-armed"].value) {
-      this.updateProperty("away-armed", false);
+      this.alignPropertyValue("away-armed", false);
    }
   
    if (this.props["armed-normal"].value) {
-      this.updateProperty("armed-normal", false);
+      this.alignPropertyValue("armed-normal", false);
    }
 };
 
 AlarmTexecom.prototype.exitErrorHandler = function(_message) {
 
    if (this.armingMode != "idle") {
-      this.updateProperty("target-state", STATE_DISARMED);
+      this.alignPropertyValue("target-state", STATE_DISARMED);
    }
 };
 

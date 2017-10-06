@@ -90,7 +90,7 @@ function PeerCasa(_config) {
            that.establishHeartbeat();
 
            that.resendUnAckedMessages();
-           that.updateProperty('ACTIVE', true, { sourceName: that.uName });
+           that.alignPropertyValue('ACTIVE', true, { sourceName: that.uName });
         }
       }
    };
@@ -115,7 +115,7 @@ function PeerCasa(_config) {
                that.removeCasaListeners();
                that.invalidateSources();
                that.setCasaArea(null);
-               that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+               that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
             }
 
             that.deleteMeIfNeeded();
@@ -285,7 +285,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
          that.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
       }  
   
-      that.updateProperty('ACTIVE', true, { sourceName: that.uName });
+      that.alignPropertyValue('ACTIVE', true, { sourceName: that.uName });
    });
 
    this.socket.on('loginRREEJJ', function(_data) {
@@ -314,7 +314,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
             that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
             that.removeCasaListeners();
             that.invalidateSources();
-            that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+            that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
             that.socket.disconnect();
          }
 
@@ -336,7 +336,7 @@ PeerCasa.prototype.connectToPeerCasa = function() {
             that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
             that.removeCasaListeners();
             that.invalidateSources();
-            that.updateProperty('ACTIVE', false, { sourceName: that.uName });
+            that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
          }
 
          that.deleteMeIfNeeded();

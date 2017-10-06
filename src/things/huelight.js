@@ -143,19 +143,19 @@ HueLight.prototype.coldStart = function() {
    this.statusTimer = setInterval(function(_this) {
 
       _this.hueService.getLightState(_this.deviceId, function(_error, _lightStatus) {
-         console.log(_this.uName + ": AAAA Lightstate = " + JSON.stringify(_lightStatus));
+         //console.log(_this.uName + ": AAAA Lightstate = " + JSON.stringify(_lightStatus));
 
 /*         if (!_error && _lightStatus.state.reachable) {
 
             if (_this.getProperty("power") != _lightStatus.state.on) {
-               _this.updateProperty("power", _lightStatus.state.on);
+               _this.alignPropertyValue("power", _lightStatus.state.on);
             }
 
             if (_this.brightnessSupported) {
                var deviceBrightness = Math.floor(_lightStatus.state.bri * 100 / 255);
 
                if (deviceBrightness != _this.getProperty("brightness")) {
-                  _this.updateProperty("brightness", deviceBrightness);
+                  _this.alignPropertyValue("brightness", deviceBrightness);
                }
             }
 
@@ -163,7 +163,7 @@ HueLight.prototype.coldStart = function() {
                var deviceHue = Math.floor(_lightStatus.state.hue * 360 / 65535);
 
                if (deviceHue != _this.getProperty("hue")) {
-                  _this.updateProperty("hue", deviceHue);
+                  _this.alignPropertyValue("hue", deviceHue);
                }
             }
 
@@ -171,7 +171,7 @@ HueLight.prototype.coldStart = function() {
                var deviceSaturation = Math.floor(_lightStatus.state.sat * 100 / 255);
 
                if (deviceSaturation != _this.getProperty("saturation")) {
-                  _this.updateProperty("saturation", deviceSaturation);
+                  _this.alignPropertyValue("saturation", deviceSaturation);
                }
             }
          } */

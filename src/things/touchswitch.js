@@ -52,7 +52,7 @@ TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _d
           }
 
           if (!this.stateless) {
-             this.updateProperty(this.switchProp, !(this.getProperty(this.switchProp)));
+             this.alignPropertyValue(this.switchProp, !(this.getProperty(this.switchProp)));
           }
       }
    }

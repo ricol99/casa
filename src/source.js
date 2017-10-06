@@ -47,8 +47,7 @@ function Source(_config) {
                              { initialValue: 'auto',
                                states: [ { name: "auto", priority: -1 },
                                          { name: "manual", priority: 9999999,
-                                           timeout: { duration: 10, nextState: "auto" }}]}, _config);
-                                           //timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
+                                           timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
 
    events.EventEmitter.call(this);
 
@@ -140,6 +139,7 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    this.emit('property-changed', sendData);
 };
 
+// INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (this.props.hasOwnProperty(_propName)) {
@@ -394,7 +394,7 @@ Source.prototype.getManualMode = function() {
 };
 
 Source.prototype.setManualMode = function() {
-   return this.setProperty("MODE", "manual", { sourceName: this.uName });
+   this.alignPropertyValue("MODE", "manual");
 };
 
 Source.prototype.getAutoMode = function() {
@@ -402,7 +402,7 @@ Source.prototype.getAutoMode = function() {
 };
 
 Source.prototype.setAutoMode = function() {
-   return this.setProperty("MODE", "auto", { sourceName: this.uName });
+   this.alignPropertyValue("MODE", "auto");
 };
 
 module.exports = exports = Source;

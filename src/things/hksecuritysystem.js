@@ -66,7 +66,7 @@ HomekitSecuritySystem.prototype.getTargetState = function() {
 HomekitSecuritySystem.prototype.setTargetState = function(_state) {
    console.log(this.uName + ": Changing target state to " + _state);
    this.setManualMode('target-state');
-   this.updateProperty("target-state", _state);
+   this.alignPropertyValue("target-state", _state);
 };
 
 HomekitSecuritySystem.prototype.getSystemFault = function() {
@@ -80,7 +80,7 @@ HomekitSecuritySystem.prototype.getTamperState = function() {
 HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (_propName == "tamper-alarm") {
-      this.updateProperty("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED);
+      this.alignPropertyValue("tamper-state", (_propValue) ? Characteristic.StatusTampered.TAMPERED : Characteristic.StatusTampered.NOT_TAMPERED);
    }
    else if (_propName == "current-state") {
       this.hkAccessory
