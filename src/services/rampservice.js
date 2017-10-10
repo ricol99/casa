@@ -29,13 +29,13 @@ function Ramps(_owner, _config, _service) {
    this.ramps = [];
 
    for (var i = 0; i < _config.length; ++i) {
-      this.ramps[i] = new Ramp(this, _config[i]);
+      this.ramps[i] = new Ramp(this, this.config[i]);
    }
 }
 
-Ramps.prototype.start = function() {
+Ramps.prototype.start = function(_startValue) {
    this.currentRamp = 0;
-   this.ramps[0].start();
+   this.ramps[0].start(_startValue);
 };
 
 Ramps.prototype.cancel = function() {
@@ -62,10 +62,7 @@ Ramps.prototype.rampComplete = function(_ramp) {
       this.owner.rampComplete(this, this.config);
    }
    else {
-      this.startTimeout = setTimeout(function(_this) {
-         _this.startTimeout = null;
-         _this.ramps[_this.currentRamp].start();
-      }, this.ramps[this.currentRamp - 1].interval * 1000, this);
+      this.ramps[this.currentRamp].start(this.ramps[this.currentRamp - 1].endValue);
    }
 };
 
@@ -75,22 +72,25 @@ function Ramp(_ramps, _config) {
    this.ramps = _ramps;
    this.uName = "ramp:" + this.ramps.uName;
 
-   this.value = _config.startValue;
-   this.endValue = _config.endValue;
-   this.duration = _config.duration;
-   this.step = _config.step;
-   this.floorOutput = (_config.floorOutput != undefined) ? _config.floorOutput : true;
+   this.endValue = this.config.endValue;
+   this.duration = this.config.duration;
+   this.step = this.config.step;
+}
+
+Ramp.prototype.start = function(_currentValue) {
+   this.value = this.config.hasOwnProperty("startValue") ? this.config.startValue : _currentValue;
+   this.floorOutput = (this.config.hasOwnProperty("floorOutput")) ? this.config.floorOutput : true;
 
    var difference = Math.abs(this.endValue - this.value);
    var noOfSteps = difference / Math.abs(this.step);
    this.interval = this.duration / noOfSteps;
-}
 
-Ramp.prototype.start = function() {
+   if (this.config.hasOwnProperty("startValue")) {
 
-   setTimeout(function(_this) {
-      _this.ramps.newValueFromRamp(_this, _this.value);
-   }, 1, this);
+      setTimeout(function(_this) {
+         _this.ramps.newValueFromRamp(_this, _this.value);
+      }, 1, this);
+   }
 
    this.nextInterval();
 };

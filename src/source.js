@@ -60,17 +60,14 @@ function Source(_config) {
 util.inherits(Source, events.EventEmitter);
 
 Source.prototype.getRampService = function() {
+  var rampService =  this.casaSys.findService("rampservice");
 
-   if (!this.rampService) {
-      this.rampService =  this.casaSys.findService("rampservice");
-
-      if (!this.rampService) {
-         console.error(this.uName + ": ***** Ramp service not found! *************");
-         process.exit();
-      }
+  if (!rampService) {
+     console.error(this.uName + ": ***** Ramp service not found! *************");
+     process.exit();
    }
 
-   return this.rampService;
+   return rampService;
 };
 
 Source.prototype.isActive = function() {
@@ -100,7 +97,18 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
    else {
       return false;
    } 
-}
+};
+
+Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
+
+   if (this.props.hasOwnProperty(_propName)) {
+      return this.props[_propName].setWithRamp(_ramp, _data);
+   }
+   else {
+      return false;
+   } 
+};
 
 Source.prototype.getAllProperties = function(_allProps) {
 
@@ -195,6 +203,10 @@ Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _
    // Do nothing by default
 };
 
+Source.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
+   this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
+};
+
 Source.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
    this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
 };
@@ -216,7 +228,13 @@ Source.prototype.addPropertiesForAlignment = function(_properties) {
    }
 
    for (var i = 0; i < _properties.length; ++i) {
-      this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
+
+      if (_properties[i].hasOwnProperty("ramp")) {
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: copyConfig(_properties[i].ramp) });
+      }
+      else {
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
+      }
    }
 };
 
@@ -230,8 +248,15 @@ Source.prototype.alignNextProperty = function() {
 
          if (_this.propertyAlignmentQueue.length > 0) {
             var prop = _this.propertyAlignmentQueue.shift();
-            console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-            _this.setProperty(prop.property, prop.value, { sourceName: _this.uName });
+
+            if (prop.hasOwnProperty("ramp")) {
+               console.log(_this.uName + ": Setting property " + prop.property + " to ramp");
+               _this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: _this.uName });
+            }
+            else {
+               console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);
+               _this.setProperty(prop.property, prop.value, { sourceName: _this.uName });
+            }
             _this.alignNextProperty();
          }
          else {
@@ -262,6 +287,21 @@ Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, 
       }
    }
 };
+
+function copyConfig(_config) {
+
+   if (_config instanceof Array) {
+      var newConfig = [];
+
+      for (var i = 0; i < _config.length; ++i) {
+         newConfig.push(copyData(_config[i]));
+      }
+      return newConfig;
+   }
+   else {
+      return copyData(_config);
+   }
+}
 
 function copyData(_sourceData) {
    var newData = {};

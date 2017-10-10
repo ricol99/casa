@@ -8,7 +8,6 @@ function StateProperty(_config, _owner) {
    this.casaSys = CasaSystem.mainInstance();
 
    this.states = {};
-   this.targetPropsBuffer = {};
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
@@ -25,20 +24,6 @@ StateProperty.prototype.coldStart = function(_data) {
    Property.prototype.coldStart.call(this, _data);
 };
    
-StateProperty.prototype.getRampService = function() {
-
-   if (!this.rampService) {
-      this.rampService =  this.casaSys.findService("rampservice");
-
-      if (!this.rampService) {
-         console.error(this.uName + ": ***** Ramp service not found! *************");
-         process.exit();
-      }
-   }
-
-   return this.rampService;
-}
-
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
    console.log(this.uName + ": state about to change to " + _propertyValue);
    this.setState(_propertyValue);
@@ -184,56 +169,14 @@ StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _p
 StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
    this.currentPriority = _priority;
 
-   if (this.targetPropsBuffer) {
-      delete this.targetPropsBuffer;
-   }
-
-   this.targetPropsBuffer = {};
-
-   if (this.owner.takeControl(this, this.currentPriority)) {
+   if (_targets && this.owner.takeControl(this, this.currentPriority)) {
       this.owner.alignProperties(_targets);
-   }
-   else {
-      this.bufferAlignProperties(_targets, this.currentPriority);
-   }
-};
-
-StateProperty.prototype.bufferAlignProperties = function(_targets, _priority) {
-
-   if (this.targetPropsBuffer) {
-      delete this.targetPropsBuffer;
-   }
-
-   this.targetPropsBuffer = {};
-   this.targetPropsPriority = _priority;
-   
-   for (var i = 0; i < _targets.length; ++i) {
-      this.targetPropsBuffer[_targets[i].property] = _targets[i].value;
-   }
-
-}; 
-
-StateProperty.prototype.applyBufferedAlignProperties = function() {
-   var targets = [];
-
-   for (var targetProp in this.targetPropsBuffer) {
-
-      if (this.targetPropsBuffer.hasOwnProperty(targetProp)) {
-         targets.push({ property: targetProp, value: this.targetPropsBuffer[targetProp] });
-      }
-   }
-
-   if (targets.length > 0) {
-      this.alignTargetProperties(targets, this.targetPropsPriority);
    }
 };
 
 StateProperty.prototype.becomeController = function() {
    // I am now the controller
    this.controllingOwner = true;
-
-   // Empty any buffered target alignments
-   this.applyBufferedAlignProperties();
 
    // Re-apply current state
    if (this.states[this.value]) {
@@ -269,7 +212,6 @@ function State(_config, _owner) {
    this.owner = _owner;
    this.uName = _owner.uName + ":state:" + this.name;
    this.sourceMap = {};
-   this.ramps = [];
 
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
@@ -332,33 +274,7 @@ State.prototype.initialise = function() {
 };
 
 State.prototype.alignTargets = function() {
-   var targets = [];
-
-   if (this.targets) {
-
-      for (var i = 0; i < this.targets.length; ++i) {
-
-         if (this.targets[i].hasOwnProperty("value")) {
-            targets.push(this.targets[i]);
-         }
-         else if (this.targets[i].hasOwnProperty("ramp")) {
-
-            var rampConfig = copyObject(this.targets[i].ramp);
-
-            if (!(rampConfig.hasOwnProperty("startValue"))) {
-               rampConfig.startValue = this.owner.owner.props[this.targets[i].property].value;
-            }
-
-            var ramp = this.owner.getRampService().createRamp(this, rampConfig);
-            ramp.property = this.targets[i].property;
-            ramp.propertyPriority = this.priority;
-            this.ramps.push(ramp);
-            ramp.start();
-         }
-      }
-   }
-
-   this.owner.alignTargetProperties(targets, this.priority);
+   this.owner.alignTargetProperties(this.targets, this.priority);
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -390,36 +306,11 @@ State.prototype.checkSourceProperties = function() {
 };
 
 State.prototype.exiting = function(_event, _value) {
-
-   for (var i = 0; i < this.ramps.length; ++i) {
-      this.ramps[i].cancel();
-   }
-   this.ramps = [];
 };
 
-State.prototype.scheduledEventTriggered = function(_event, _value) {
-   this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
+State.prototype.scheduledEventTriggered = function(_event) {
+   this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
    this.owner.set(this.name, { sourceName: this.owner.owner });
-}
-
-State.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   console.log(this.uName + ": New value from ramp, property=" + _ramp.property + ", value=" + _value);
-   this.owner.alignTargetProperty(_ramp.property, _value, _ramp.propertyPriority);
-};
-
-State.prototype.rampComplete = function(_ramp, _config) {
-
-   for (var i = 0; i < this.ramps.length; ++i) {
-
-      if (this.ramps === _ramp) {
-         this.splice(i, 1)
-         break;
-      }
-   }
-};
-
-State.prototype.getRampStartValue = function(_event) {
-   return 0;
 }
 
 function copyObject(_sourceObject) {

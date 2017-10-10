@@ -20,8 +20,8 @@ function Scheduler(_config) {
 
 util.inherits(Scheduler, Thing);
 
-Scheduler.prototype.scheduledEventTriggered = function(_event, _value) {
-   this.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
+Scheduler.prototype.scheduledEventTriggered = function(_event) {
+   this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
 }
 
 Scheduler.prototype.getRampStartValue = function(_event) {

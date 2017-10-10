@@ -58,7 +58,7 @@ BroadbandSpeedTester.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this);
 };
 
-BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event, _value) {
+BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.uName+': Testing broadband speed');
    this.testSpeed();
 }

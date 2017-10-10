@@ -42,20 +42,12 @@ ScheduleService.prototype.refreshSunEvents = function() {
 };
 
 ScheduleService.prototype.coldStart = function() {
-   var casaSys = CasaSystem.mainInstance();
-   this.rampService =  casaSys.findService("rampservice");
-
-   if (!this.rampService) {
-      console.error(this.uName + ": ***** Ramp service not found! *************");
-      process.exit();
-   }
 };
 
 function Schedule(_owner, _config, _service) {
    this.uName = _service.uName + ":" + _owner.uName;
    this.service = _service;
    this.events = [];
-   this.ramps = {};
 
    this.createEventsFromConfig(_owner, _config);
    this.scheduleEvents();
@@ -194,12 +186,7 @@ Schedule.prototype.resetJob = function(_event) {
 
    _event.job = schedule.scheduleJob(_event.rule, function() {
       // this = _event.job
-      if (this.myEvent.ramp != undefined) {
-         this.mySchedule.startNewRamp(this.myEvent);
-      }
-      else {
-         this.myEvent.owner.scheduledEventTriggered(this.myEvent, this.myEvent.value);
-      }
+      this.myEvent.owner.scheduledEventTriggered(this.myEvent);
    });
 
    if (_event.job) {
@@ -211,26 +198,6 @@ Schedule.prototype.resetJob = function(_event) {
       process.exit(1);
    }
 }
-
-Schedule.prototype.startNewRamp = function(_event) {
-   var rampConfig = copyObject(_event.ramp);
-
-   if (!rampConfig.hasOwnProperty("startValue")) {
-      rampConfig.startValue = _event.owner.getRampStartValue(_event);
-   }
-
-   var ramp = this.service.rampService.createRamp(this, rampConfig);
-   ramp.callbackEvent = _event;
-   ramp.start();
-}
-
-Schedule.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   _ramp.callbackEvent.owner.scheduledEventTriggered(_ramp.callbackEvent.name, _value);
-};
-
-Schedule.prototype.rampComplete = function(_ramp, _config) {
-   // DO NOTHING
-};
 
 Schedule.prototype.scheduleEvents = function() {
    this.scheduleAllJobs();

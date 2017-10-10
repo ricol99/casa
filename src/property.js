@@ -160,6 +160,7 @@ Property.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
 // Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.rawPropertyValue = _newPropValue;
+   this.cancelCurrentRamp();
 
    if (_data == undefined) {
       _data = { sourceName: this.owner.uName };
@@ -185,8 +186,51 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 // Output step pipeline still executes
 //
 Property.prototype.set = function(_propValue, _data) {
+   this.cancelCurrentRamp();
    this.updatePropertyandSendToOutputPipeline(_propValue, _data);
    return true;
+};
+
+//
+// Used to set the property directly, ignoring the defined sources and input step pipeline processing
+// Instead of specifying a value, specify a config for the ramp
+// Output step pipeline still executes
+//
+Property.prototype.setWithRamp = function(_config, _data) {
+   this.cancelCurrentRamp();
+   this.createAndStartRamp(_config, _data);
+};
+
+Property.prototype.createAndStartRamp = function(_config, _data) {
+   this.rampConfig = copyConfig(_config);
+   this.rampData = copyData(_data);
+   this.ramp = this.owner.getRampService().createRamp(this, this.rampConfig);
+   this.ramp.start(this.value);
+};
+
+Property.prototype.cancelCurrentRamp = function() {
+
+   if (this.ramp) {
+      this.ramp.cancel();
+      delete this.ramp;
+      delete this.rampConfig;
+      this.ramp = null;
+      this.rampConfig = null;
+      this.rampData = null;
+   }
+};
+
+Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
+   console.log(this.uName + ": New value from ramp, property=" + _ramp.property + ", value=" + _value);
+   this.updatePropertyandSendToOutputPipeline(_value, this.rampData);
+};
+
+Property.prototype.rampComplete = function(_ramp, _config) {
+   delete this.ramp;
+   delete this.rampConfig;
+   this.ramp = null;
+   this.rampConfig = null;
+   this.rampData = null;
 };
 
 //
@@ -254,6 +298,7 @@ Property.prototype.sourceIsValid = function(_data) {
 //
 Property.prototype.goInvalid = function (_data) {
    console.log(this.uName + ': INVALID');
+   this.cancelCurrentRamp();
    this.owner.goInvalid(this.name, _data);
 }
 
@@ -401,6 +446,21 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    }
 
    return actualOutputValue;
+}
+
+function copyConfig(_config) {
+
+   if (_config instanceof Array) {
+      var newConfig = [];
+
+      for (var i = 0; i < _config.length; ++i) {
+         newConfig.push(copyData(_config[i]));
+      }
+      return newConfig;
+   }
+   else {
+      return copyData(_config);
+   }
 }
 
 function copyData(_sourceData) {
