@@ -349,9 +349,11 @@ State.prototype.alignTargets = function() {
                rampConfig.startValue = this.owner.owner.props[this.targets[i].property].value;
             }
 
-            rampConfig.property = this.targets[i].property;
-            rampConfig.propertyPriority = this.priority;
-            this.createRamp(rampConfig);
+            var ramp = this.owner.getRampService().createRamp(this, rampConfig);
+            ramp.property = this.targets[i].property;
+            ramp.propertyPriority = this.priority;
+            this.ramps.push(ramp);
+            ramp.start();
          }
       }
    }
@@ -395,20 +397,14 @@ State.prototype.exiting = function(_event, _value) {
    this.ramps = [];
 };
 
-State.prototype.createRamp = function(_config) {
-   var ramp = this.owner.getRampService().createRamp(this, _config);
-   this.ramps.push(ramp);
-   ramp.start();
-};
-
 State.prototype.scheduledEventTriggered = function(_event, _value) {
    this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _value });
    this.owner.set(this.name, { sourceName: this.owner.owner });
 }
 
 State.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   console.log(this.uName + ": New value from ramp, property=" + _config.property + ", value=" + _value);
-   this.owner.alignTargetProperty(_config.property, _value, _config.propertyPriority);
+   console.log(this.uName + ": New value from ramp, property=" + _ramp.property + ", value=" + _value);
+   this.owner.alignTargetProperty(_ramp.property, _value, _ramp.propertyPriority);
 };
 
 State.prototype.rampComplete = function(_ramp, _config) {

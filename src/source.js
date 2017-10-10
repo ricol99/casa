@@ -59,9 +59,23 @@ function Source(_config) {
 
 util.inherits(Source, events.EventEmitter);
 
+Source.prototype.getRampService = function() {
+
+   if (!this.rampService) {
+      this.rampService =  this.casaSys.findService("rampservice");
+
+      if (!this.rampService) {
+         console.error(this.uName + ": ***** Ramp service not found! *************");
+         process.exit();
+      }
+   }
+
+   return this.rampService;
+};
+
 Source.prototype.isActive = function() {
    return this.props['ACTIVE'].value;
-}
+};
 
 Source.prototype.isPropertyValid = function(_property) {
 
@@ -71,11 +85,11 @@ Source.prototype.isPropertyValid = function(_property) {
    else {
       return true;
    }
-}
+};
 
 Source.prototype.getProperty = function(_property) {
    return (this.props.hasOwnProperty(_property)) ? this.props[_property].value : undefined;
-}
+};
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);

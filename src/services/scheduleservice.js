@@ -224,11 +224,11 @@ Schedule.prototype.startNewRamp = function(_event) {
    ramp.start();
 }
 
-Schedule.prototype.newValueFromRamp = function(_ramp, _rampName, _value) {
-   _ramp.callbackEvent.owner.scheduledEventTriggered(_rampName, _value);
+Schedule.prototype.newValueFromRamp = function(_ramp, _config, _value) {
+   _ramp.callbackEvent.owner.scheduledEventTriggered(_ramp.callbackEvent.name, _value);
 };
 
-Schedule.prototype.rampComplete = function(_ramp, _rampName) {
+Schedule.prototype.rampComplete = function(_ramp, _config) {
    // DO NOTHING
 };
 

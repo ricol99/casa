@@ -10,23 +10,72 @@ function RampService(_config) {
 
 util.inherits(RampService, Service);
 
-RampService.prototype.createRamp = function(_owner, _ramp) {
-   var ramp = new Ramp(_owner, _ramp, this);
-   return ramp;
+RampService.prototype.createRamp = function(_owner, _config) {
+   var rampConfig = (_config instanceof Array) ? _config : [ _config ];
+   var ramps = new Ramps(_owner, rampConfig, this);
+   return ramps;
 };
 
 RampService.prototype.coldStart = function() {
    var that = this;
 };
 
-function Ramp(_owner, _config, _service) {
+function Ramps(_owner, _config, _service) {
    this.name = _config.name;
    this.config = _config;
    this.service = _service;
-   this.uName = _service.uName + ":" + _owner.uName + ":" + _config.name;
+   this.uName = _service.uName + ":ramps:" + _owner.uName + ":" + _config.name;
    this.owner = _owner;
-   this.value = _config.startValue;
+   this.ramps = [];
 
+   for (var i = 0; i < _config.length; ++i) {
+      this.ramps[i] = new Ramp(this, _config[i]);
+   }
+}
+
+Ramps.prototype.start = function() {
+   this.currentRamp = 0;
+   this.ramps[0].start();
+};
+
+Ramps.prototype.cancel = function() {
+
+   if (this.startTimeout) {
+      clearTimeout(this.startTimeout);
+      _this.startTimeout = null;
+   }
+   else {
+      this.ramps[this.currentRamp].cancel();
+   }
+   this.currentRamp = 0;
+}
+
+Ramps.prototype.newValueFromRamp = function(_ramp, _value) {
+   this.owner.newValueFromRamp(this, this.config, _value);
+};
+
+Ramps.prototype.rampComplete = function(_ramp) {
+   this.currentRamp++;
+
+   if (this.currentRamp >= this.ramps.length) {
+      this.currentRamp = 0;
+      this.owner.rampComplete(this, this.config);
+   }
+   else {
+      this.startTimeout = setTimeout(function(_this) {
+         _this.startTimeout = null;
+         _this.ramps[_this.currentRamp].start();
+      }, this.ramps[this.currentRamp - 1].interval * 1000, this);
+   }
+};
+
+function Ramp(_ramps, _config) {
+   this.name = _config.name;
+   this.config = _config;
+   this.ramps = _ramps;
+   this.uName = "ramp:" + this.ramps.uName;
+
+   this.value = _config.startValue;
    this.endValue = _config.endValue;
    this.duration = _config.duration;
    this.step = _config.step;
@@ -35,13 +84,14 @@ function Ramp(_owner, _config, _service) {
    var difference = Math.abs(this.endValue - this.value);
    var noOfSteps = difference / Math.abs(this.step);
    this.interval = this.duration / noOfSteps;
-
-   setTimeout(function(_this) {
-      _this.owner.newValueFromRamp(_this, _this.config, _this.value);
-   }, 10, this);
 }
 
 Ramp.prototype.start = function() {
+
+   setTimeout(function(_this) {
+      _this.ramps.newValueFromRamp(_this, _this.value);
+   }, 1, this);
+
    this.nextInterval();
 };
 
@@ -57,13 +107,13 @@ Ramp.prototype.nextInterval = function() {
      var difference = Math.abs(_this.endValue - _this.value);
 
       if (difference <= Math.abs(_this.step)) {
-         _this.owner.newValueFromRamp(_this, _this.config, _this.endValue);
-         _this.owner.rampComplete(_this, _this.config);
+         _this.ramps.newValueFromRamp(_this, _this.endValue);
+         _this.ramps.rampComplete(_this);
          delete _this;
       }
       else {
          _this.value += _this.step;
-         _this.owner.newValueFromRamp(_this, _this.config, (_this.floorOutput) ? Math.floor(_this.value) : _this.value);
+         _this.ramps.newValueFromRamp(_this, (_this.floorOutput) ? Math.floor(_this.value) : _this.value);
          _this.nextInterval();
       }
    }, this.interval * 1000, this);

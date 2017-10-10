@@ -200,6 +200,7 @@ Request.prototype.send = function(_callback) {
 
          if (that.timeout) {
             clearTimeout(that.timeout);
+            that.timeout = null;
             _callback(that.owner, _error, _result);
          }
       });
@@ -211,6 +212,7 @@ Request.prototype.send = function(_callback) {
 
          if (that.timeout) {
             clearTimeout(that.timeout);
+            that.timeout = null;
             _callback(that.owner, _error, _result);
          }
       });
