@@ -63,8 +63,4 @@ BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event) {
    this.testSpeed();
 }
 
-BroadbandSpeedTester.prototype.getRampStartValue = function(_event) {
-   return 0;
-}
-
 module.exports = exports = BroadbandSpeedTester;

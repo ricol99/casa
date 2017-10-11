@@ -77,8 +77,22 @@ Schedule.prototype.createEventsFromConfig = function(_owner, _eventsConfig) {
          eventRuleDelta = 0;
       }
 
-      this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                          sunTime: false, job: null, value: _eventsConfig[index].value, ramp:  _eventsConfig[index].ramp, owner: _owner });
+      if (_eventsConfig[index].hasOwnProperty("value")) {
+         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                            sunTime: false, job: null, value: _eventsConfig[index].value, owner: _owner });
+      }
+      else if (_eventsConfig[index].hasOwnProperty("ramp")) {
+         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                            sunTime: false, job: null, ramp: _eventsConfig[index].ramp, owner: _owner });
+      }
+      else if (_eventsConfig[index].hasOwnProperty("ramps")) {
+         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                            sunTime: false, job: null, ramps: _eventsConfig[index].ramps, owner: _owner });
+      }
+      else {
+         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                            sunTime: false, job: null, owner: _owner });
+      }
    }
 }
 
@@ -222,7 +236,9 @@ Schedule.prototype.getInitialValue = function() {
    }
 
    console.log(this.uName + ": Closest event is " + closestEvent.rule);
-   return (closestEvent.ramp == undefined) ? closestEvent.value : closestEvent.ramp.endValue;
+
+   return closestEvent.hasOwnProperty("ramps") ? closestEvent.ramps[closestEvent.ramps.length-1].endValue
+                                               : (closestEvent.hasOwnProperty("ramp") ? closestEvent.ramp.endValue : closestEvent.value);
 };
 
 function RefreshScheduler(_schedulerService) {

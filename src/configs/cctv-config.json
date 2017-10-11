@@ -362,11 +362,23 @@
                      ],
                      "target": {
                         "property": "test-state-property",
-                        "ramp": {
-                           "endValue": 50,
-                           "step": 5,
-                           "duration": 5
-                        }
+                        "ramps": [
+                           {
+                              "endValue": 45,
+                              "step": 5,
+                              "duration": 5
+                           },
+                           {
+                              "endValue": 30,
+                              "step": -5,
+                              "duration": 5
+                           },
+                           {
+                              "endValue": 50,
+                              "step": 5,
+                              "duration": 5
+                           }
+                        ]
                      }
                   },
                   {

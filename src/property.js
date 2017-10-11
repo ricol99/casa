@@ -221,7 +221,7 @@ Property.prototype.cancelCurrentRamp = function() {
 };
 
 Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   console.log(this.uName + ": New value from ramp, property=" + _ramp.property + ", value=" + _value);
+   console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
    this.updatePropertyandSendToOutputPipeline(_value, this.rampData);
 };
 

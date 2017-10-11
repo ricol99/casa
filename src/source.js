@@ -232,6 +232,9 @@ Source.prototype.addPropertiesForAlignment = function(_properties) {
       if (_properties[i].hasOwnProperty("ramp")) {
          this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: copyConfig(_properties[i].ramp) });
       }
+      else if (_properties[i].hasOwnProperty("ramps")) {
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramps: copyConfig(_properties[i].ramps) });
+      }
       else {
          this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
       }
@@ -252,6 +255,10 @@ Source.prototype.alignNextProperty = function() {
             if (prop.hasOwnProperty("ramp")) {
                console.log(_this.uName + ": Setting property " + prop.property + " to ramp");
                _this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: _this.uName });
+            }
+            else if (prop.hasOwnProperty("ramps")) {
+               console.log(_this.uName + ": Setting property " + prop.property + " to ramps");
+               _this.setPropertyWithRamp(prop.property, prop.ramps, { sourceName: _this.uName });
             }
             else {
                console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);
