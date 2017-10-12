@@ -26,6 +26,10 @@ function Ramps(_owner, _config, _service) {
    this.uName = _service.uName + ":ramps:" + _owner.uName + ":" + _config.name;
    this.owner = _owner;
    this.ramps = [];
+   this.loop = _config.hasOwnProperty("loop") ? _config.loop : false;
+   this.iterations = _config.hasOwnProperty("iterations") ? _config.iterations : 1;
+   this.iterationCounter = 0;
+   this.startValue;
 
    if (_config.hasOwnProperty("ramps")) {
 
@@ -39,6 +43,7 @@ function Ramps(_owner, _config, _service) {
 }
 
 Ramps.prototype.start = function(_startValue) {
+   this.startValue = _startValue;
    this.currentRamp = 0;
    this.ramps[0].start(_startValue);
 };
@@ -64,7 +69,17 @@ Ramps.prototype.rampComplete = function(_ramp) {
 
    if (this.currentRamp >= this.ramps.length) {
       this.currentRamp = 0;
-      this.owner.rampComplete(this, this.config);
+
+      if (this.loop) {
+         this.start(this.startValue);
+      }
+      else if (this.iterations && (++this.iterationCounter < this.iterations)) {
+         this.start(this.startValue);
+      }
+      else {
+         this.iterationCounter = 0;
+         this.owner.rampComplete(this, this.config);
+      }
    }
    else {
       this.ramps[this.currentRamp].start(this.ramps[this.currentRamp - 1].endValue);

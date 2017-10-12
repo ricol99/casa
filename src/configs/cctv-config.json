@@ -194,7 +194,6 @@
                         {
                            "property": "brightness",
                            "ramp": {
-                              "loop": true,
                               "ramps": [
                                  {
                                     "startValue": 50,
@@ -368,7 +367,6 @@
                      "target": {
                         "property": "test-state-property",
                         "ramp": {
-                           "loop": true,
                            "ramps": [
                               {
                                  "endValue": 45,
@@ -378,12 +376,12 @@
                               {
                                  "endValue": 30,
                                  "step": -5,
-                                 "duration": 5
+                                 "duration": 2
                               },
                               {
                                  "endValue": 50,
                                  "step": 5,
-                                 "duration": 5
+                                 "duration": 2
                               }
                            ]
                         }
