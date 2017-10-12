@@ -202,7 +202,11 @@ Property.prototype.setWithRamp = function(_config, _data) {
 };
 
 Property.prototype.createAndStartRamp = function(_config, _data) {
-   this.rampConfig = copyConfig(_config);
+   this.rampConfig = copyData(_config);
+
+   if (_config.hasOwnProperty("ramps")) {
+      this.rampConfig.ramps = copyConfig(_config.ramps);
+   }
    this.rampData = copyData(_data);
    this.ramp = this.owner.getRampService().createRamp(this, this.rampConfig);
    this.ramp.start(this.value);

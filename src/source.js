@@ -230,10 +230,13 @@ Source.prototype.addPropertiesForAlignment = function(_properties) {
    for (var i = 0; i < _properties.length; ++i) {
 
       if (_properties[i].hasOwnProperty("ramp")) {
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: copyConfig(_properties[i].ramp) });
-      }
-      else if (_properties[i].hasOwnProperty("ramps")) {
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramps: copyConfig(_properties[i].ramps) });
+         var ramp = copyData(_properties[i].ramp);
+
+         if (_properties[i].ramp.hasOwnProperty("ramps")) {
+            ramp.ramps = copyConfig(_properties[i].ramp.ramps);
+         }
+
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
       }
       else {
          this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
@@ -255,10 +258,6 @@ Source.prototype.alignNextProperty = function() {
             if (prop.hasOwnProperty("ramp")) {
                console.log(_this.uName + ": Setting property " + prop.property + " to ramp");
                _this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: _this.uName });
-            }
-            else if (prop.hasOwnProperty("ramps")) {
-               console.log(_this.uName + ": Setting property " + prop.property + " to ramps");
-               _this.setPropertyWithRamp(prop.property, prop.ramps, { sourceName: _this.uName });
             }
             else {
                console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);

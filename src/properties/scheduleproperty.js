@@ -20,7 +20,6 @@ function ScheduleProperty(_config, _owner) {
 
    this.writable = false;
    this.events = [];
-   this.ramps = {};
 
    var val = this.scheduleService.registerEvents(this, _config.events);
 
@@ -35,9 +34,6 @@ ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {
       this.updatePropertyInternal(_event.value, { sourceName: this.owner.uName });
-   }
-   else if (_event.hasOwnProperty("ramps")) {
-      this.setWithRamp(_event.ramps, { sourceName: this.owner.uName });
    }
    else {
       this.setWithRamp(_event.ramp, { sourceName: this.owner.uName });

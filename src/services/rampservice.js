@@ -11,8 +11,7 @@ function RampService(_config) {
 util.inherits(RampService, Service);
 
 RampService.prototype.createRamp = function(_owner, _config) {
-   var rampConfig = (_config instanceof Array) ? _config : [ _config ];
-   var ramps = new Ramps(_owner, rampConfig, this);
+   var ramps = new Ramps(_owner, _config, this);
    return ramps;
 };
 
@@ -28,8 +27,14 @@ function Ramps(_owner, _config, _service) {
    this.owner = _owner;
    this.ramps = [];
 
-   for (var i = 0; i < _config.length; ++i) {
-      this.ramps[i] = new Ramp(this, this.config[i]);
+   if (_config.hasOwnProperty("ramps")) {
+
+      for (var i = 0; i < _config.ramps.length; ++i) {
+         this.ramps.push(new Ramp(this, this.config.ramps[i]));
+      }
+   }
+   else {
+      this.ramps.push(new Ramp(this, this.config));
    }
 }
 

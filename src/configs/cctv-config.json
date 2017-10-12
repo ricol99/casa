@@ -194,10 +194,15 @@
                         {
                            "property": "brightness",
                            "ramp": {
-                              "startValue": 50,
-                              "endValue": 100,
-                              "step": 10,
-                              "duration": 20
+                              "loop": true,
+                              "ramps": [
+                                 {
+                                    "startValue": 50,
+                                    "endValue": 100,
+                                    "step": 10,
+                                    "duration": 20
+                                 }
+                              ]
                            }
                         },
                         {
@@ -362,23 +367,26 @@
                      ],
                      "target": {
                         "property": "test-state-property",
-                        "ramps": [
-                           {
-                              "endValue": 45,
-                              "step": 5,
-                              "duration": 5
-                           },
-                           {
-                              "endValue": 30,
-                              "step": -5,
-                              "duration": 5
-                           },
-                           {
-                              "endValue": 50,
-                              "step": 5,
-                              "duration": 5
-                           }
-                        ]
+                        "ramp": {
+                           "loop": true,
+                           "ramps": [
+                              {
+                                 "endValue": 45,
+                                 "step": 5,
+                                 "duration": 5
+                              },
+                              {
+                                 "endValue": 30,
+                                 "step": -5,
+                                 "duration": 5
+                              },
+                              {
+                                 "endValue": 50,
+                                 "step": 5,
+                                 "duration": 5
+                              }
+                           ]
+                        }
                      }
                   },
                   {
