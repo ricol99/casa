@@ -3,4 +3,4 @@ DONE env: get sunrise to work
 DONE: peercasa: get peers to work
 DONE: huelight: monitor light state changes and reflect in property
 stateproperty: does createRamp leak?
-source: setProperty() used for SetNextProperties - this will set manual mode on property.js- nwhat should we do with manaula mode?
+DONE: source: setProperty() used for SetNextProperties - this will set manual mode on property.js- nwhat should we do with manaula mode?
