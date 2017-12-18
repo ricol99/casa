@@ -1,6 +1,5 @@
 var util = require('util');
 var Service = require('../service');
-var http = require('http');
 
 function SecuritySpyService(_config) {
    Service.call(this, _config);
@@ -10,14 +9,14 @@ function SecuritySpyService(_config) {
    this.userId = _config.userId;
    this.password = _config.password;
 
+   this.secure = (_config.hasOwnProperty("secure")) ? _config.secure : false;
+   this.http = (this.secure) ? require('https') : require('http');
+
    this.options = { hostname: this.hostname, port: this.port, auth: this.userId + ':' + this.password };
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
 
    this.queue = [];
    this.requestPending = false;
-   this.messageNumber = 0;
-
-   this.requests = {};
 }
 
 util.inherits(SecuritySpyService, Service);
