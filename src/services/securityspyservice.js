@@ -16,6 +16,7 @@ function SecuritySpyService(_config) {
    this.options = { hostname: this.hostname, port: this.port, auth: this.userId + ':' + this.password, rejectUnauthorized: false, requestCert: true, agent: false, timeout: this.requestTimeout*1000 };
 
    this.queue = [];
+   this.registeredCameras = {};
    this.requestPending = false;
 }
 
@@ -27,8 +28,18 @@ SecuritySpyService.prototype.coldStart = function() {
 
       if (!_err) {
          console.log(that.uName + ": AAAAAA Result=", _result);
+         that.liveStreamListener = new LiveStreamListener(that);
+         that.liveStreamListener.start();
       }
    });
+};
+
+SecuritySpyService.prototype.registerCamera = function(_cameraId, _camera) {
+   this.cameras[_cameraId.toString()] = _camera;
+};
+
+SecuritySpyService.prototype.deregisterCamera = function(_cameraId, _camera) {
+   delete this.cameras[_cameraId.toString()];
 };
 
 SecuritySpyService.prototype.setContinuousCapture = function(_cameraId, _state, _callback) {
@@ -113,7 +124,7 @@ Request.prototype.send = function() {
       });
 
       _res.on('end', function() {
-         that.processData();
+         that.processAllData();
       });
 
    }).on('error', function(_err) {
@@ -122,7 +133,7 @@ Request.prototype.send = function() {
    });
 };
 
-Request.prototype.processData = function() {
+Request.prototype.processAllData = function() {
    var response = {};
 
    switch (this.requestType) {
@@ -146,6 +157,92 @@ Request.prototype.processData = function() {
 
 Request.prototype.complete = function(_error, _content) {
    this.callback(_error, _content);
+};
+
+function LiveStreamListener(_owner) {
+   this.http = (_owner.secure) ? require('https') : require('http');
+   this.owner = _owner;
+   this.options = { hostname: _owner.hostname, port: _owner.port, auth: _owner.userId + ':' + _owner.password,
+                    path: "/++eventStream/", rejectUnauthorized: false, requestCert: true, agent: false, timeout: _owner.requestTimeout*1000 };
+
+   this.linkOpen = false;
+}
+
+LiveStreamListener.prototype.start = function() {
+   var that = this;
+
+   this.http.get(this.options, function(_res) {
+      //console.log('AAAAA STATUS: ' + _res.statusCode);
+      //console.log('AAAAA HEADERS: ' + JSON.stringify(_res.headers));
+
+      if (_res.statusCode != 200) {
+         _res.resume();
+         that.restartLink();
+         return;
+      }
+
+      that.linkOpen = true;
+      _res.setEncoding('utf8');
+
+      _res.on('data', function(_data) {
+         var lines = _data.split(/\r?\n/);
+         //console.log(that.owner.uName + ": AAAAAAA Lines=", lines);
+
+         for (index in lines) {
+            that.processLine(lines[index]);
+         }
+      });
+
+      _res.on('end', function() {
+         that.restartLink();
+      });
+
+   }).on('error', function(_err) {
+      console.error(that.owner.uName + ": AAAAA Listener connection error=" + _err.message + ". Will reconnect soon");
+      that.lineOpen = false;
+      that.restartLink();
+   });
+
+};
+
+LiveStreamListener.prototype.stop = function() {
+
+   if (this.linkOpen) {
+      this.http.close();
+      this.linkOpen = false;
+   }
+};
+
+LiveStreamListener.prototype.restartLink = function() {
+
+   setTimeout(function(_this) {
+      _this.start();
+   }, 60000, this);
+};
+
+LiveStreamListener.prototype.processLine = function(_line) {
+   //console.log(this.owner.uName + ": AAAAA Line received: ", _line);
+   var params = _line.split(" ");
+
+   if (params.length < 4) {
+      return;
+   }
+
+   var cameraId = params[2].substr(3);
+   var changeParam = params[3].substr(0, params[3].length - 1);
+
+   var change = { ARM_C: { property: "continuous-capture", value: true },
+                  DISARM_C: { property: "continuous-capture", value: false },
+                  ARM_M: { property: "motion-capture", value: true },
+                  DISARM_M: { property: "motion-capture", value: false },
+                  ARM_A: { property: "actions", value: true },
+                  DISARM_A: { property: "actions", value: false },
+                  MOTION: { event: "motion-detected" },
+                  ONLINE: { property: "ACTIVE", value: true },
+                  OFFLINE: { property: "ACTIVE", value: false } };
+
+   console.log(this.owner.uName + ": AAAAAA Camera ID=" + cameraId + ", change=", change[changeParam]);
+
 };
 
 module.exports = exports = SecuritySpyService;

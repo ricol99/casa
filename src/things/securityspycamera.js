@@ -24,6 +24,8 @@ function SecuritySpyCamera(_config) {
       _config.triggerSource.uName = (_config.triggerSource.hasOwnProperty("name")) ? _config.triggerSource.name : this.uName;
       this.triggerSource = new SourceListener(_config.triggerSource, this);
    }
+
+   this.securitySpyService.registerCamera(this.id, this);
 }
 
 util.inherits(SecuritySpyCamera, Thing);
