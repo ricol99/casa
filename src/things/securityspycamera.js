@@ -2,6 +2,7 @@ var http = require('http');
 var util = require('util');
 var Thing = require('../thing');
 var SourceListener = require('../sourcelistener');
+var CasaSystem = require('../casasystem');
 
 function SecuritySpyCamera(_config) {
    this.casaSys = CasaSystem.mainInstance();
@@ -66,21 +67,21 @@ SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propVal
 //
 // Called by SourceListener as a defined source has become valid again (available)
 //
-Property.prototype.sourceIsValid = function(_data) {
+SecuritySpyCamera.prototype.sourceIsValid = function(_data) {
    this.valid = true;
 }
 
 //
 // Called by SourceListener as a defined source has become invalid (unavailable)
 //
-Property.prototype.sourceIsInvalid = function(_data) {
+SecuritySpyCamera.prototype.sourceIsInvalid = function(_data) {
    this.valid = false;
 };
 
 //
 // Called by SourceListener as a defined source has changed it property value
 //
-Property.prototype.receivedEventFromSource = function(_data) {
+SecuritySpyCamera.prototype.receivedEventFromSource = function(_data) {
    var that = this;
 
    if (this.valid) {

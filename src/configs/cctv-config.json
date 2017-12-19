@@ -71,6 +71,10 @@
    ],
    "things": [
       {
+         "name": "securityspycamera:back-garden-gate",
+         "id": 1
+      },
+      {
          "name": "thing:test-state-timers",
          "props": [
             {

@@ -40,9 +40,9 @@ SecuritySpyService.prototype.registerCamera = function(_cameraId, _cameraObj) {
 
    if (!this.cameras[_cameraId.toString()]) {
       this.cameras[_cameraId.toString()] = {};
-      this.cameras[_cameraId.toString()].active = false;
-      this.cameras[_cameraId.toString()][continuous-capture] = false;
-      this.cameras[_cameraId.toString()][motion-capture] = false;
+      this.cameras[_cameraId.toString()].ACTIVE = false;
+      this.cameras[_cameraId.toString()]["continuous-capture"] = false;
+      this.cameras[_cameraId.toString()]["motion-capture"] = false;
       this.cameras[_cameraId.toString()].actions = false;
    }
 
@@ -61,7 +61,7 @@ SecuritySpyService.prototype.deregisterCamera = function(_cameraId, _camera) {
 };
 
 SecuritySpyService.prototype.needToSync = function(_cameraId, _property, _value) {
-   return this.cameras[_cameraId.toString()][_property] === _value;
+   return this.cameras[_cameraId.toString()][_property] !== _value;
 };
 
 SecuritySpyService.prototype.cameraPropUpdateReceivedFromServer = function(_cameraId, _props) {
@@ -78,6 +78,7 @@ SecuritySpyService.prototype.cameraPropUpdateReceivedFromServer = function(_came
 };
 
 SecuritySpyService.prototype.syncWithCameraObj = function(_cameraId) {
+   console.log(this.uName + ": syncWithCameraObj() Camera ID=" + _cameraId);
 
    if (!this.cameras[_cameraId.toString()] || (!this.cameras[_cameraId.toString()].cameraObj)) {
       return;
@@ -98,7 +99,7 @@ SecuritySpyService.prototype.syncWithCameraObj = function(_cameraId) {
    }
 
    if (props.length > 0) {
-      this.addPropertiesForAlignment(props);
+      cameraObj.alignProperties(props);
    }
 };
 
@@ -112,21 +113,21 @@ SecuritySpyService.prototype.newEventFromServer = function(_cameraId, _event) {
 SecuritySpyService.prototype.setContinuousCapture = function(_cameraId, _state, _callback) {
 
    if (this.needToSync(_cameraId, "continuous-capture", _state)) {
-      this.addToQueue("/++ssControlContinuousCapture?cameraNum=" + cameraId + "&arm=" + (_state ? "1" : "0"), "contCapture", _callback);
+      this.addToQueue("/++ssControlContinuousCapture?cameraNum=" + _cameraId + "&arm=" + (_state ? "1" : "0"), "contCapture", _callback);
    }
 };
 
 SecuritySpyService.prototype.setMotionCapture = function(_cameraId, _state, _callback) {
 
    if (this.needToSync(_cameraId, "motion-capture", _state)) {
-      this.addToQueue("/++ssControlMotionCapture?cameraNum=" + cameraId + "&arm=" + (_state ? "1" : "0"), "motionCapture", _callback);
+      this.addToQueue("/++ssControlMotionCapture?cameraNum=" + _cameraId + "&arm=" + (_state ? "1" : "0"), "motionCapture", _callback);
    }
 };
 
 SecuritySpyService.prototype.setActions = function(_cameraId, _state, _callback) {
 
    if (this.needToSync(_cameraId, "actions", _state)) {
-      this.addToQueue("/++ssControlActions?cameraNum=" + cameraId + "&arm=" + (_state ? "1" : "0"), "actions", _callback);
+      this.addToQueue("/++ssControlActions?cameraNum=" + _cameraId + "&arm=" + (_state ? "1" : "0"), "actions", _callback);
    }
 };
 
@@ -248,8 +249,6 @@ LiveStreamListener.prototype.start = function() {
    var that = this;
 
    this.http.get(this.options, function(_res) {
-      //console.log('AAAAA STATUS: ' + _res.statusCode);
-      //console.log('AAAAA HEADERS: ' + JSON.stringify(_res.headers));
 
       if (_res.statusCode != 200) {
          _res.resume();
@@ -262,7 +261,6 @@ LiveStreamListener.prototype.start = function() {
 
       _res.on('data', function(_data) {
          var lines = _data.split(/\r?\n/);
-         //console.log(that.owner.uName + ": AAAAAAA Lines=", lines);
 
          for (index in lines) {
             that.processLine(lines[index]);
@@ -274,7 +272,7 @@ LiveStreamListener.prototype.start = function() {
       });
 
    }).on('error', function(_err) {
-      console.error(that.owner.uName + ": AAAAA Listener connection error=" + _err.message + ". Will reconnect soon");
+      console.error(that.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
       that.lineOpen = false;
       that.restartLink();
    });
@@ -297,7 +295,6 @@ LiveStreamListener.prototype.restartLink = function() {
 };
 
 LiveStreamListener.prototype.processLine = function(_line) {
-   //console.log(this.owner.uName + ": AAAAA Line received: ", _line);
    var params = _line.split(" ");
 
    if (params.length < 4) {
@@ -321,12 +318,9 @@ LiveStreamListener.prototype.processLine = function(_line) {
       return;
    }
 
-   console.log(this.owner.uName + ": AAAAAA Camera ID=" + cameraId + ", change=", change[changeParam]);
-
    if (change[changeParam].hasOwnProperty("property")) {
       var props = {};
       props[change[changeParam].property] = change[changeParam].value;
-      console.log(this.owner.uName + ": AAAAAA Camera Props=" + JSON.stringify(props));
       this.owner.cameraPropUpdateReceivedFromServer(cameraId, props);
    }
    else {
@@ -347,8 +341,6 @@ SystemInfo.prototype.sync = function(_callback) {
    var that = this;
 
    this.http.get(this.options, function(_res) {
-      console.log('AAAAA STATUS: ' + _res.statusCode);
-      console.log('AAAAA HEADERS: ' + JSON.stringify(_res.headers));
 
       if (_res.statusCode != 200) {
          _res.resume();
@@ -366,7 +358,7 @@ SystemInfo.prototype.sync = function(_callback) {
          that.processAllData(_callback);
       });
    }).on('error', function(_err) {
-      console.error(that.owner.uName + ": AAAAA Listener connection error=" + _err.message + ". Will reconnect soon");
+      console.error(that.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
       that.lineOpen = false;
       that.restartLink();
    });
@@ -379,19 +371,23 @@ SystemInfo.prototype.processAllData = function(_callback) {
    parseString(this.data, function (_err, _result) {
 
       if (_err) {
-         console.error(that.owner.uName + ": AAAAAA Unable to parse received XML string!");
+         console.error(that.owner.uName + ": Unable to parse received XML string!");
          _callback(_err);
+         return;
+      }
+
+      if (!_result.hasOwnProperty("system") || !_result.system.hasOwnProperty("cameralist") || !_result.system.cameralist[0].hasOwnProperty("camera")) {
+         console.error(that.owner.uName + ": Unable to parse received XML string!");
+         _callback("Unable to parse XML string!");
          return;
       }
 
       for (index in _result.system.cameralist[0].camera) {
 
-         var props = { "active": _result.system.cameralist[0].camera[index].connected == "yes",
+         var props = { "ACTIVE": _result.system.cameralist[0].camera[index].connected == "yes",
                        "continuous-capture": _result.system.cameralist[0].camera[index]["mode-c"] == "armed",
                        "motion-capture": _result.system.cameralist[0].camera[index]["mode-m"] == "armed",
                        "actions": _result.system.cameralist[0].camera[index]["mode-a"] == "armed" };
-
-         console.log(that.owner.uName + ": AAAAAA Camera Props=" + JSON.stringify(props));
 
          that.owner.cameraPropUpdateReceivedFromServer(_result.system.cameralist[0].camera[index].number, props);
       }
