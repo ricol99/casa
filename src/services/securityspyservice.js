@@ -358,9 +358,7 @@ SystemInfo.prototype.sync = function(_callback) {
          that.processAllData(_callback);
       });
    }).on('error', function(_err) {
-      console.error(that.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
-      that.lineOpen = false;
-      that.restartLink();
+      console.error(that.owner.uName + ": Unable to sync System Info, error=" + _err.message);
    });
 };
 
