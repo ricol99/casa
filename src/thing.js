@@ -10,21 +10,6 @@ function Thing(_config) {
    this.things = {};
 
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
-
-   if (this.schedules) {
-
-      this.scheduleService =  this.casaSys.findService("scheduleservice");
-
-      if (!this.scheduleService) {
-         console.error(this.uName + ": ***** Schedule service not found! *************");
-         process.exit();
-      }
-
-      // TBD XXX Currently ignoring return value. Should I use it to determine which state we are in mulitple schedules?
-      // Could use state timeout + schedule to do this, may not work though
-      this.scheduleService.registerEvents(this, this.schedules);
-   }
-
 }
 
 util.inherits(Thing, Source);
@@ -40,6 +25,25 @@ Thing.prototype.setParent = function(_thing) {
 
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
+};
+
+Thing.prototype.coldStart = function() {
+   Source.prototype.coldStart.call(this);
+
+   if (this.schedules) {
+
+      this.scheduleService =  this.casaSys.findService("scheduleservice");
+
+      if (!this.scheduleService) {
+         console.error(this.uName + ": ***** Schedule service not found! *************");
+         process.exit();
+      }
+
+      // TBD XXX Currently ignoring return value. Should I use it to determine which state we are in mulitple schedules?
+      // Could use state timeout + schedule to do this, may not work though
+      this.scheduleService.registerEvents(this, this.schedules);
+   }
+
 };
 
 Thing.prototype.scheduledEventTriggered = function(_event) {
