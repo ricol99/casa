@@ -266,7 +266,7 @@
                "maxTime": 5000,
                "schedule": {
                   "name": "testing-broadband",
-                  "rule": "39 12 * * *"
+                  "rule": "15 * * * *"
                }
             }
          ]

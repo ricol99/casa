@@ -1047,6 +1047,16 @@
       {
          "name": "room:dylan-bedroom",
          "displayName": "Dylan's Bedroom",
+         "schedules": [
+            {  
+               "name": "bed-time",
+               "rule": "00 21 * * 0-4"
+            },
+            {  
+               "name": "bed-time",
+               "rule": "30 22 * * 5-6"
+            }
+         ],
          "props": [
             {
                "name": "movement-pir",
@@ -1094,6 +1104,10 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
@@ -1118,6 +1132,10 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
@@ -1137,21 +1155,15 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
                   {  
                      "name": "dylan-reading",
-                     "schedules": [
-                         {  
-                            "name": "bedtime-call",
-                            "rule": "00 21 * * 0-4"
-                         },
-                         {  
-                            "name": "bedtime-call-weekend",
-                            "rule": "30 22 * * 5-6"
-                         }
-                     ],
                      "timeout": {
                         "duration": 900,
                         "nextState": "dylan-asleep"
@@ -1467,6 +1479,16 @@
       {
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
+         "schedules": [
+            {
+               "name": "bed-time",
+               "rule": "30 22 * * 0-4"
+            },
+            {
+               "name": "bed-time",
+               "rule": "0 23 * * 5-6"
+            }
+         ],
          "props": [
             {  
                "name": "movement-pir",
@@ -1517,6 +1539,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -1544,6 +1570,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -1566,6 +1596,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -1631,16 +1665,6 @@
                   },
                   {
                      "name": "both-reading",
-                     "schedules": [
-                         {
-                            "name": "bedtime-call",
-                            "rule": "30 22 * * 0-4"
-                         },
-                         {
-                            "name": "bedtime-call-weekend",
-                            "rule": "0 23 * * 5-6"
-                         }
-                     ],
                      "timeout": {
                         "duration": 2700,
                         "nextState": "both-asleep"
