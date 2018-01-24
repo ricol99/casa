@@ -72,8 +72,49 @@
          "id": 4
       },
       {
+         "name": "room:hall-landing",
+         "displayName": "Hall and Landing",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:hall-table-lamp",
+               "displayName": "Hall Table Lamp",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:39",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:hall-table-lamp",
+                     "displayName": "Hall Table Lamp",
+                     "roomId": 4,
+                     "deviceId": 1,
+                     "propogateToParent": true,
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "room:dylan-bedroom",
          "displayName": "Dylan's Bedroom",
+         "schedules": [
+            {  
+               "name": "bed-time",
+               "rule": "00 21 * * 0-4"
+            },
+            {  
+               "name": "bed-time",
+               "rule": "30 22 * * 5-6"
+            }
+         ],
          "props": [
             {
                "name": "movement-pir",
@@ -121,6 +162,10 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
@@ -145,6 +190,10 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
@@ -164,21 +213,15 @@
                            "event": "dylan-bedroom-switch",
                            "value": true,
                            "nextState": "dylan-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "dylan-reading"
                         }
                      ]
                   },
                   {  
                      "name": "dylan-reading",
-                     "schedules": [
-                         {  
-                            "name": "bedtime-call",
-                            "rule": "00 21 * * 0-4"
-                         },
-                         {  
-                            "name": "bedtime-call-weekend",
-                            "rule": "30 22 * * 5-6"
-                         }
-                     ],
                      "timeout": {
                         "duration": 900,
                         "nextState": "dylan-asleep"
@@ -304,6 +347,8 @@
             {
                "name": "hkspeakeraccessory:dylan-bedroom-speakers",
                "displayName": "Dylan's Bedroom Speakers",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3E",
                "manufacturer": "Sonos Corporation",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -492,6 +537,16 @@
       {
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
+         "schedules": [
+            {
+               "name": "bed-time",
+               "rule": "30 22 * * 0-4"
+            },
+            {
+               "name": "bed-time",
+               "rule": "0 23 * * 5-6"
+            }
+         ],
          "props": [
             {  
                "name": "movement-pir",
@@ -542,6 +597,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -569,6 +628,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -591,6 +654,10 @@
                         {
                            "event": "richard-bedroom-switch",
                            "nextState": "richard-reading"
+                        },
+                        {
+                           "event": "bed-time",
+                           "nextState": "both-reading"
                         }
                      ]
                   },
@@ -656,16 +723,6 @@
                   },
                   {
                      "name": "both-reading",
-                     "schedules": [
-                         {
-                            "name": "bedtime-call",
-                            "rule": "30 22 * * 0-4"
-                         },
-                         {
-                            "name": "bedtime-call-weekend",
-                            "rule": "0 23 * * 5-6"
-                         }
-                     ],
                      "timeout": {
                         "duration": 2700,
                         "nextState": "both-asleep"
