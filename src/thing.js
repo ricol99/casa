@@ -173,18 +173,20 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
 Thing.prototype.raiseEvent = function(_eventName, _data) {
 
-   if (_data.alignWithParent) {
-      Source.prototype.raiseEvent.call(this, _eventName, _data);
+   var data = (_data) ? _data : { sourceName: this.uName };
+
+   if (data.alignWithParent) {
+      Source.prototype.raiseEvent.call(this, _eventName, data);
 
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].raiseEvent(_eventName, _data);
+            this.things[thing].raiseEvent(_eventName, data);
          }
       }
    }
    else {
-      this.childRaisedEvent(_eventName, this, _data);
+      this.childRaisedEvent(_eventName, this, data);
    }
 };
 
