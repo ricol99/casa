@@ -218,7 +218,8 @@ LightwaveRF.prototype.sendUdp = function(message, callback){
 
 var util = require('util');
 
-var lightwaveRf = new LightwaveRF({ ip: '192.168.1.236' });
+//var lightwaveRf = new LightwaveRF({ ip: '192.168.1.236' });
+var lightwaveRf = new LightwaveRF({ ip: '192.168.1.49' });
 
 lightwaveRf.register(function(_error, _content) {
    if (_error) {
