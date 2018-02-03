@@ -1014,6 +1014,56 @@
          ]
       },
       {
+         "name": "room:hall",
+         "displayName": "Hall",
+         "props": [
+         ],
+         "things": [
+            {
+               "name": "hklightaccessory:hall-table-lamp",
+               "displayName": "Hall Table Lamp",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:hall-table-lamp",
+                     "displayName": "Hall Table Lamp",
+                     "roomId": 4,
+                     "deviceId": 1,
+                     "propogateToParent": true,
+                     "props": [
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "hklightaccessory:hall-downlighters",
+               "displayName": "Hall Downlighters",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "name": "lightwaverfaccessory:hall-downlighters",
+                     "displayName": "Hall Downlighters",
+                     "roomId": 4,
+                     "deviceId": 2,
+                     "propogateToParent": true,
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "alarm:dumgoyne",
          "displayName": "House Alarm",
          "props": [
