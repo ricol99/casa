@@ -161,7 +161,7 @@
                      ]
                   }
                ]
-            }
+            },
             {
                "name": "user-state",
                "type": "stateproperty",
