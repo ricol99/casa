@@ -465,7 +465,6 @@
                                  "priority": 1,
                                  "targets": [
                                     {
-                                    {
                                        "property": "brightness",
                                        "value": 30
                                     },
@@ -477,6 +476,7 @@
                                        "property": "saturation",
                                        "value": 69
                                     },
+                                    {
                                        "property": "power",
                                        "value": true
                                     }
