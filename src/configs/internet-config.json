@@ -69,7 +69,7 @@
                "sources": [
                   {
                      "name": "thing:home-internet-connection",
-                     "property": "casa-cctv"
+                     "property": "casa-land"
                   },
                   {
                      "name": "thing:home-internet-connection",
@@ -78,14 +78,14 @@
                ]
             },
             {
-               "name": "casa-cctv",
+               "name": "casa-land",
                "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
                "threshold": 60,
                "invalidValue": false,
                "source": {
-                  "name": "casa:cctv",
+                  "name": "casa:land",
                   "property": "ACTIVE"
                }
             },
@@ -212,10 +212,10 @@
                   },
                   {
                      "name": "thing:home-internet-connection",
-                     "property": "casa-cctv",
+                     "property": "casa-land",
                      "transformMap": {
-                        "true": "Casa 'cctv' is active",
-                        "false": "Casa 'cctv' has gone down!"
+                        "true": "Casa 'land' is active",
+                        "false": "Casa 'land' has gone down!"
                      }
                   },
                   {
