@@ -1,5 +1,5 @@
 {
-   "name": "casa:test",
+   "name": "casa:test2",
    "displayName": "Casa Collin TEST System",
    "gang": "casa-collin-v2",
    "parentCasa": {
@@ -9,25 +9,17 @@
          "port": 8096
       }
    },
-   "listeningPort": 8082,
+   "listeningPort": 8083,
    "props": {},
    "services": [
       {
-         "name": "sonosservice"
-      },
-      {
          "name": "webservice",
-         "port": 11001,
+         "port": 11002,
          "mediaPath": "/Users/richardcollin/personal/media",
          "secure": false,
          "serverKey": "",
          "serverCert": "",
          "caCert": ""
-      },
-      {  
-         "name": "lightwaverfservice",
-         "displayName": "LightwaveRF Link Service",
-         "linkAddress": "192.168.1.255"
       },
       {
          "name": "securityspyservice",
@@ -118,10 +110,6 @@
                ]
             }
          ]
-      },
-      {
-         "name": "sonosplayer:dylan-bedroom-room",
-         "zone": "Dylan's Room"
       },
       {
          "name": "thing:home-daylight-sensor",

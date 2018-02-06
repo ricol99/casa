@@ -1,7 +1,7 @@
 {
    "name": "casa:internet",
    "displayName": "Casa Collin Internet Casa",
-   "gang": "casa-collin",
+   "gang": "casa-collin-v2",
    "area": {
       "name": "casaarea:internet",
       "displayName": "Casa Collin Internet"

@@ -138,5 +138,9 @@ PeerSource.prototype.invalidateSource = function() {
    }
 };
 
+PeerSource.prototype.isActive = function() {
+   return this.props['ACTIVE'].value;
+};
+
 module.exports = exports = PeerSource;
 
