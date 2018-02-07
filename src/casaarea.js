@@ -11,8 +11,6 @@ function CasaArea(_config) {
    this.name = _config.name;
 
    Thing.call(this, _config);
-
-   var that = this;
 }
 
 util.inherits(CasaArea, Thing);

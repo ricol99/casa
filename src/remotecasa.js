@@ -17,26 +17,24 @@ function RemoteCasa(_config, _peerCasa) {
 
    this.listenersSetUp = false;
 
-   var that = this;
-
    // Listen to Casa for my remote instance to connect
-   this.peerCasa.on('casa-active', function(_data) {
+   this.peerCasa.on('casa-active', (_data) => {
 
-      if (!that.isActive()) {
-         console.log(that.uName + ': Connected to my peer. Going active.');
+      if (!this.isActive()) {
+         console.log(this.uName + ': Connected to my peer. Going active.');
 
          // listen for source changes from peer casas
-         that.establishListeners(true);
+         this.establishListeners(true);
 
-         that.alignPropertyValue('ACTIVE', true, { sourceName: that.uName });
+         this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
       }
    });
 
-   this.peerCasa.on('casa-inactive', function(_data) {
+   this.peerCasa.on('casa-inactive', (_data) => {
 
-      if (that.isActive()) {
-         console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-         that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
+      if (this.isActive()) {
+         console.log(this.uName + ': Lost connection to my peer. Going inactive.');
+         this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
       }
    });
 }
@@ -46,25 +44,24 @@ util.inherits(RemoteCasa, Source);
 RemoteCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
-      var that = this;
 
       // listen for sourcechanges from peer casas
-      this.peerCasa.on('source-property-changed', function(_data) {
-         console.log(that.uName + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
+      this.peerCasa.on('source-property-changed', (_data) => {
+         console.log(this.uName + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
 
-         if (that.sources[_data.sourceName]) {
-            that.sources[_data.sourceName].sourceHasChangedProperty(_data);
+         if (this.sources[_data.sourceName]) {
+            this.sources[_data.sourceName].sourceHasChangedProperty(_data);
          }
-         that.emit('source-property-changed', _data);
+         this.emit('source-property-changed', _data);
       });
 
-      this.peerCasa.on('source-event-raised', function(_data) {
-         console.log(that.uName + ': Event received from remote casa. Event name: event-raised, source: ' + _data.sourceName);
+      this.peerCasa.on('source-event-raised', (_data) => {
+         console.log(this.uName + ': Event received from remote casa. Event name: event-raised, source: ' + _data.sourceName);
 
-         if (that.sources[_data.sourceName]) {
-            that.sources[_data.sourceName].sourceHasRaisedEvent(_data);
+         if (this.sources[_data.sourceName]) {
+            this.sources[_data.sourceName].sourceHasRaisedEvent(_data);
          }
-         that.emit('source-event-raised', _data);
+         this.emit('source-event-raised', _data);
       });
 
       this.listenersSetUp = true;

@@ -2,34 +2,35 @@ var util = require('util');
 var CasaArea = require('./casaarea');
 
 function PeerCasaArea(_config) {
-
    CasaArea.call(this, _config);
 
-   var that = this;
-
-   this.broadcastListener = function(_message) {
-      console.log(that.uName + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
-
-      // Broadcast to all children - peers and parent already know
-      for(var prop in that.casaSys.childCasaAreas) {
-
-         if(that.casaSys.childCasaAreas.hasOwnProperty(prop)){
-            console.log(that.uName + ': Broadcasting to child area ' + that.casaSys.childCasaAreas[prop].uName);
-            that.casaSys.childCasaAreas[prop].broadcastMessage(_message);
-         }
-      }
-   };
-
-   this.forwardRequestListener = function(_data) {
-      console.log(that.uName + ': Forward event request from peer. Source: ' + _data.data.sourceName);
-   };
-
-   this.forwardResponseListener = function(_data) {
-      console.log(that.uName + ': Forward event response from peer. Source: ' + _data.data.sourceName);
-   };
+   this.broadcastListener = PeerCasaArea.prototype.broadcastCb.bind(this);
+   this.forwardRequestListener = PeerCasaArea.prototype.forwardRequestCb.bind(this);
+   this.forwardResponseListener = PeerCasaArea.prototype.forwardResponseCb.bind(this);
 }
 
 util.inherits(PeerCasaArea, CasaArea);
+
+PeerCasaArea.prototype.broadcastCb = function(_message) {
+   console.log(this.uName + ': Event received from peercasa. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+
+   // Broadcast to all children - peers and parent already know
+   for(var prop in this.casaSys.childCasaAreas) {
+
+      if(this.casaSys.childCasaAreas.hasOwnProperty(prop)){
+         console.log(this.uName + ': Broadcasting to child area ' + this.casaSys.childCasaAreas[prop].uName);
+         this.casaSys.childCasaAreas[prop].broadcastMessage(_message);
+      }
+   }
+};
+
+PeerCasaArea.prototype.forwardRequestCb = function(_data) {
+   console.log(this.uName + ': Forward event request from peer. Source: ' + _data.data.sourceName);
+};
+
+PeerCasaArea.prototype.forwardResponseCb = function(_data) {
+   console.log(this.uName + ': Forward event response from peer. Source: ' + _data.data.sourceName);
+};
 
 PeerCasaArea.prototype.buildCasaForwardingList = function() {
    var casaList = [];
@@ -56,7 +57,6 @@ PeerCasaArea.prototype.buildCasaForwardingList = function() {
 }
 
 PeerCasaArea.prototype.setupCasaListeners = function(_casa) {
-   var that = this;
 
    if (this.casaSys.isUberCasa()) {
 

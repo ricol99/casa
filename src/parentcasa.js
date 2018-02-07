@@ -2,15 +2,11 @@ var util = require('util');
 var PeerCasa = require('./peercasa');
 
 function ParentCasa(_config) {
-
    _config.proActiveConnect = true;
 
    PeerCasa.call(this, _config);
    this.loginAs = 'child';
    this.persistent = true;
-
-   var that = this;
-
 }
 
 util.inherits(ParentCasa, PeerCasa);

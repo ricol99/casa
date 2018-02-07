@@ -33,7 +33,6 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
 
    this.areaId = 1;
 
-   var that = this;
    _mainInstance = this;
 
    this.config.secureMode = _secureMode;
@@ -72,8 +71,8 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
 
    // start conecting to parent, if it exists
    if (this.parentCasa) {
-      setTimeout(function() {
-         that.parentCasa.start();
+      setTimeout( () => {
+         this.parentCasa.start();
       }, 10000);
    }
 
@@ -128,16 +127,15 @@ CasaSystem.prototype.cleverRequire = function(_name, _path) {
 
 // Extract Users
 CasaSystem.prototype.extractUsers = function() {
-   var that = this;
 
    if (this.config.users) {
 
-      this.config.users.forEach(function(user) { 
-         var User = that.cleverRequire(user.name);
-         user.owner = that;
+      this.config.users.forEach( (user) => { 
+         var User = this.cleverRequire(user.name);
+         user.owner = this;
          var userObj = new User(user);
-         that.users[userObj.uName] = userObj;
-         that.allObjects[userObj.uName] = userObj;
+         this.users[userObj.uName] = userObj;
+         this.allObjects[userObj.uName] = userObj;
          console.log('New user: ' + userObj.uName);
       });
    }

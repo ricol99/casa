@@ -29,9 +29,6 @@ function PeerSource(_uName, _props, _peerCasa) {
    }
 
    events.EventEmitter.call(this);
-
-   var that = this;
-
    this.peerCasa.addSource(this);
 }
 

@@ -31,15 +31,13 @@ function PeerCasaService(_config) {
          this.browser = mdns.createBrowser(mdns.tcp('casa'), {resolverSequence: sequence});
          //this.browser = mdns.createBrowser(mdns.tcp('casa'));
 
-         var that = this;
-
-         this.browser.on('serviceUp', function(service) {
+         this.browser.on('serviceUp', (service) => {
             console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
-            if ((!((that.gang || service.txtRecord.gang) && (service.txtRecord.gang != that.gang))) &&
-               (service.name != that.casa.uName && !that.casaSys.remoteCasas[service.name])) {
+            if ((!((this.gang || service.txtRecord.gang) && (service.txtRecord.gang != this.gang))) &&
+               (service.name != this.casa.uName && !this.casaSys.remoteCasas[service.name])) {
 
-               if (!that.casaSys.parentCasa || (that.casaSys.parentCasa.uName != service.name)) {
+               if (!this.casaSys.parentCasa || (this.casaSys.parentCasa.uName != service.name)) {
                   // Found a peer
                   var config  = {
                      name: service.name,
@@ -48,8 +46,8 @@ function PeerCasaService(_config) {
                   };
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-                  if ((!that.casaSys.remoteCasas[service.name]) && (service.name > that.casa.uName)) {
-                     var peerCasa = that.casaSys.createPeerCasa(config);
+                  if ((!this.casaSys.remoteCasas[service.name]) && (service.name > this.casa.uName)) {
+                     var peerCasa = this.casaSys.createPeerCasa(config);
                      peerCasa.start();
                      console.log('New peer casa: ' + peerCasa.uName);
                   }
@@ -57,11 +55,11 @@ function PeerCasaService(_config) {
             }
          });
 
-         this.browser.on('serviceDown', function(service) {
+         this.browser.on('serviceDown', (service) => {
             console.log('service down: casa=' + service.name);
          });
 
-         that.browser.start();
+         this.browser.start();
       } catch (_err) {
          // Not scheduled during time period
          console.log(this.uName + ': Error: ' + _err.message);

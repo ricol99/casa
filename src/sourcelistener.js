@@ -37,27 +37,18 @@ function SourceListener(_config, _owner) {
 
    this.valid = false;
    this.casa.addSourceListener(this);
-
-   var that = this;
 }
 
 SourceListener.prototype.establishListeners = function() {
-   var that = this;
 
    if (this.listeningToPropertyChange) {
-      this.propertyChangedCallback = function(_data) {
-         that.internalSourcePropertyChanged(_data);
-      };
+      this.propertyChangedHandler = SourceListener.prototype.propertyChangedCb.bind(this);
    }
    else {
-      this.eventRaisedCallback = function(_data) {
-         that.internalSourceEventRaised(_data);
-      };
+      this.eventRaisedHandler = SourceListener.prototype.eventRaisedCb.bind(this);
    }
 
-   this.invalidCallback = function(_data) {
-      that.internalSourceIsInvalid(_data);
-   };
+   this.invalidHandler = SourceListener.prototype.invalidCb.bind(this);
 
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
@@ -67,17 +58,29 @@ SourceListener.prototype.establishListeners = function() {
    if (this.valid) {
 
       if (this.listeningToPropertyChange) {
-         this.source.on('property-changed', this.propertyChangedCallback);
+         this.source.on('property-changed', this.propertyChangedHandler);
       }
       else {
-         this.source.on('event-raised', this.eventRaisedCallback);
+         this.source.on('event-raised', this.eventRaisedHandler);
       }
 
-      this.source.on('invalid', this.invalidCallback);
+      this.source.on('invalid', this.invalidHandler);
    }
 
    return this.valid;
 }
+
+SourceListener.prototype.propertyChangedCb = function(_data) {
+   this.internalSourcePropertyChanged(_data);
+};
+
+SourceListener.prototype.eventRaisedCb = function(_data) {
+   this.internalSourceEventRaised(_data);
+};
+
+SourceListener.prototype.invalidCb = function(_data) {
+   this.internalSourceIsInvalid(_data);
+};
 
 SourceListener.prototype.refreshSource = function() {
    var ret = true;
@@ -106,13 +109,13 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.valid = false;
 
       if (this.listeningToPropertyChange) {
-         this.source.removeListener('property-changed', this.propertyChangedCallback);
+         this.source.removeListener('property-changed', this.propertyChangedHandler);
       }
       else {
-         this.source.removeListener('event-raised', this.eventRaisedCallback);
+         this.source.removeListener('event-raised', this.eventRaisedHandler);
       }
 
-      this.source.removeListener('invalid', this.invalidCallback);
+      this.source.removeListener('invalid', this.invalidHandler);
 
       if (this.pipeline) {
          this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));

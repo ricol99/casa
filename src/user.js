@@ -4,8 +4,6 @@ var events = require('events');
 
 function User(_config) {
    Source.call(this, _config);
-
-   var that = this;
 };
 
 util.inherits(User, Source);

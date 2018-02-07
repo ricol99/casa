@@ -32,8 +32,6 @@ function Casa(_config) {
    this.uber = false;
    this.valid = true;
 
-   var that = this;
-
    this.buildSimpleConfig(_config);
    this.createServer();
 }
@@ -41,8 +39,6 @@ function Casa(_config) {
 util.inherits(Casa, events.EventEmitter);
 
 Casa.prototype.createServer = function() {
-   var that = this;
-
    express = require('express');
    app = express();
 
@@ -58,10 +54,7 @@ Casa.prototype.createServer = function() {
       };
 
       http = require('https').Server(serverOptions, app);
-
-      io = require('socket.io')(http, {
-         allowUpgrades: true
-      });
+      io = require('socket.io')(http, { allowUpgrades: true });
    }
    else {
       http = require('http').Server(app);
@@ -72,18 +65,18 @@ Casa.prototype.createServer = function() {
       });
    }
 
-   app.get('/index.html', function(req, res){
+   app.get('/index.html', (req, res) => {
      res.sendFile(__dirname + '/index.html');
    });
 
-   app.get('/configfile/:filename', function(req, res){
-      console.log(that.uName + ": Serving file " + req.params.filename);
-      res.sendFile(that.configPath + '/' + req.params.filename);
+   app.get('/configfile/:filename', (req, res) => {
+      console.log(this.uName + ": Serving file " + req.params.filename);
+      res.sendFile(this.configPath + '/' + req.params.filename);
    });
 
-   app.get('/source/:source', function(req, res) {
+   app.get('/source/:source', (req, res) => {
       var allProps = {};
-      var source = that.casaSys.allObjects[req.params.source];
+      var source = this.casaSys.allObjects[req.params.source];
 
       if (source) {
          source.getAllProperties(allProps);
@@ -92,13 +85,13 @@ Casa.prototype.createServer = function() {
       res.json(allProps);
    });
 
-   io.on('connection', function(_socket) {
+   io.on('connection', (_socket) => {
       console.log('a casa has joined');
-      that.anonymousClients[_socket.id] = new Connection(that, _socket);
+      this.anonymousClients[_socket.id] = new Connection(this, _socket);
    });
 
-   http.listen(this.listeningPort, function(){
-      console.log('listening on *:' + that.listeningPort);
+   http.listen(this.listeningPort, () => {
+      console.log('listening on *:' + this.listeningPort);
    });
 };
 
@@ -169,83 +162,81 @@ function Connection(_server, _socket) {
    this.remoteCasa = null;
    this.peerName = null;
 
-   var that = this;
+   this.socket.on('error', () => {
 
-   this.socket.on('error', function() {
-
-      if (that.peerName) {
-         console.log(that.uName + ': Peer casa ' + that.peerName + ' dropped');
-         that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
+      if (this.peerName) {
+         console.log(this.uName + ': Peer casa ' + this.peerName + ' dropped');
+         this.server.emit('casa-lost', { peerName: this.peerName, socket: this.socket });
       }
-      setTimeout(function() {
-         that.server.deleteMe(that);
+      setTimeout( () => {
+         this.server.deleteMe(this);
       }, 300);
    });
 
-   this.socket.on('disconnect', function() {
+   this.socket.on('disconnect', () => {
 
-      if (that.peerName) {
-         console.log(that.uName + ': Peer casa ' + that.peerName + ' dropped');
-         that.server.emit('casa-lost', { peerName: that.peerName, socket: that.socket });
+      if (this.peerName) {
+         console.log(this.uName + ': Peer casa ' + this.peerName + ' dropped');
+         this.server.emit('casa-lost', { peerName: this.peerName, socket: this.socket });
       }
-      setTimeout(function() {
-         that.server.deleteMe(that);
+      setTimeout( () => {
+         this.server.deleteMe(this);
       }, 300);
    });
 
-   this.socket.on('login', function(_data) {
-      console.log(that.uName + ': login: ' + _data.casaName);
+   this.socket.on('login', (_data) => {
+      console.log(this.uName + ': login: ' + _data.casaName);
 
       if (!_data.messageId) {
          setTimeout(function() {
-            that.server.deleteMe(that);
+            this.server.deleteMe(this);
          }, 300);
          return;
       }
 
-      if (_data.casaVersion && _data.casaVersion < parseFloat(that.server.casaSys.version)) {
-         console.info(that.uName + ': rejecting login from casa' + _data.casaName + '. Version mismatch!');
-         that.socket.emit('loginRREEJJ', { messageId: _data.messageId, casaName: that.server.uName, reason: "version-mismatch" });
+      if (_data.casaVersion && _data.casaVersion < parseFloat(this.server.casaSys.version)) {
+         console.info(this.uName + ': rejecting login from casa' + _data.casaName + '. Version mismatch!');
+         this.socket.emit('loginRREEJJ', { messageId: _data.messageId, casaName: this.server.uName, reason: "version-mismatch" });
 
-         setTimeout(function() {
-            that.server.deleteMe(that);
+         setTimeout( () => {
+            this.server.deleteMe(this);
          }, 300);
          return;
       }
 
-      that.peerName = _data.casaName;
+      this.peerName = _data.casaName;
 
-      if (that.server.clients[that.peerName]) {
+      if (this.server.clients[this.peerName]) {
 
          // old socket still open
-         if (that.server.clients[that.peerName] == that) {
+         if (this.server.clients[this.peerName] == this) {
             // socket has been reused
-            console.log(that.uName + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
+            console.log(this.uName + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
 
-            setTimeout(function() {
-               that.server.deleteMe(that);
+            setTimeout( () => {
+               this.server.deleteMe(this);
             }, 300);
          }
          else {
-            console.log(that.uName + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
-            that.server.emit('casa-lost', { peerName: that.peerName, socket: that.server.clients[that.peerName].socket });
+            console.log(this.uName + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
+            this.server.emit('casa-lost', { peerName: this.peerName, socket: this.server.clients[this.peerName].socket });
 
-            setTimeout(function() {
-               that.server.deleteMe(that.server.clients[that.peerName]);
+            setTimeout( () => {
+               this.server.deleteMe(this.server.clients[this.peerName]);
 
-               console.log(that.uName + ': Establishing new logon session after race with old socket.');
-               that.remoteCasa = that.server.createRemoteCasa(_data);
-               that.server.clientHasBeenNamed(that); 
-               that.server.refreshConfigWithSourcesStatus();
-               that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
+               console.log(this.uName + ': Establishing new logon session after race with old socket.');
+               this.remoteCasa = this.server.createRemoteCasa(_data);
+               this.server.clientHasBeenNamed(this); 
+               this.server.refreshConfigWithSourcesStatus();
+               this.server.emit('casa-joined', { messageId: _data.messageId, peerName: this.peerName, socket: this.socket, data: _data });
             }, 300);
          }
       }
       else {
-         that.remoteCasa = that.server.createRemoteCasa(_data);
-         that.server.clientHasBeenNamed(that); 
-         that.server.refreshConfigWithSourcesStatus();
-         that.server.emit('casa-joined', { messageId: _data.messageId, peerName: that.peerName, socket: that.socket, data: _data });
+         this.remoteCasa = this.server.createRemoteCasa(_data);
+         this.server.clientHasBeenNamed(this); 
+         this.server.refreshConfigWithSourcesStatus();
+         this.server.emit('casa-joined', { messageId: _data.messageId, peerName: this.peerName, socket: this.socket, data: _data });
       }
    });
 }
@@ -318,16 +309,15 @@ Casa.prototype.createRemoteCasa = function(_data) {
 Casa.prototype.addSource = function(_source) {
    console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
    this.sources[_source.uName] = _source;
-   var that = this;
 
-   _source.on('property-changed', function (_data) {
-      console.log(that.uName + ': ' + _data.sourceName + ' has had a property change');
-      that.emit('source-property-changed', _data);
+   _source.on('property-changed', (_data) => {
+      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change');
+      this.emit('source-property-changed', _data);
    });
 
-   _source.on('event-raised', function (_data) {
-      console.log(that.uName + ': ' + _data.sourceName + ' has raised an event');
-      that.emit('source-event-raised', _data);
+   _source.on('event-raised', (_data) => {
+      console.log(this.uName + ': ' + _data.sourceName + ' has raised an event');
+      this.emit('source-event-raised', _data);
    });
 
    console.log(this.uName + ': ' + _source.uName + ' associated!');

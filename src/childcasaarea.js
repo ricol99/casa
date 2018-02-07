@@ -3,50 +3,49 @@ var CasaArea = require('./casaarea');
 var CasaSystem = require('./casasystem');
 
 function ChildCasaArea(_config) {
-
-   // Resolve source and target
    this.casaSys = CasaSystem.mainInstance();
-
    CasaArea.call(this, _config);
 
-   var that = this;
-
-   this.broadcastListener = function(_message) {
-      console.log(that.uName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
-
-      // Broadcast to all my siblings
-      for(var prop in that.casaSys.childCasaAreas) {
-
-         if(that.casaSys.childCasaAreas.hasOwnProperty(prop)){
-            var childCasaArea = that.casaSys.childCasaAreas[prop];
-
-            // Is the area a sibling?
-            if (childCasaArea != that) {
-               console.log(that.uName + ': Broadcasting to child area ' + childCasaArea.uName);
-               childCasaArea.broadcastMessage(_message);
-            }
-         }
-      }
-
-      if (that.casaSys.peerCasaArea) {
-         that.casaSys.peerCasaArea.broadcastMessage(_message);
-      }
-
-      if (that.casaSys.parentCasaArea) {
-         that.parentCasaArea.broadcastMessage(_message);
-      }
-   };
-
-   this.forwardRequestListener = function(_data) {
-      console.log(that.uName + ': Forward event request from child. Source: ' + _data.data.sourceName);
-   };
-
-   this.forwardResponseListener = function(_data) {
-      console.log(that.uName + ': Forward event response from child. Source: ' + _data.data.sourceName);
-   };
+   this.broadcastListener = ChildCasaArea.prototype.broadcastCb.bind(this);
+   this.forwardRequestListener = ChildCasaArea.prototype.forwardRequestCb.bind(this);
+   this.forwardResponseListener = ChildCasaArea.prototype.forwardResponseCb.bind(this);
 }
 
 util.inherits(ChildCasaArea, CasaArea);
+
+ChildCasaArea.prototype.broadcastCb = function(_message) {
+   console.log(this.uName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+
+   // Broadcast to all my siblings
+   for(var prop in this.casaSys.childCasaAreas) {
+
+      if(this.casaSys.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.casaSys.childCasaAreas[prop];
+
+         // Is the area a sibling?
+         if (childCasaArea != this) {
+            console.log(this.uName + ': Broadcasting to child area ' + childCasaArea.uName);
+            childCasaArea.broadcastMessage(_message);
+         }
+      }
+   }
+
+   if (this.casaSys.peerCasaArea) {
+      this.casaSys.peerCasaArea.broadcastMessage(_message);
+   }
+
+   if (this.casaSys.parentCasaArea) {
+      this.parentCasaArea.broadcastMessage(_message);
+   }
+};
+
+ChildCasaArea.prototype.forwardRequestCb = function(_data) {
+   console.log(this.uName + ': Forward event request from child. Source: ' + _data.data.sourceName);
+};
+
+ChildCasaArea.prototype.forwardResponseCb = function(_data) {
+   console.log(this.uName + ': Forward event response from child. Source: ' + _data.data.sourceName);
+};
 
 ChildCasaArea.prototype.buildCasaForwardingList = function() {
    var casaList = [];
@@ -100,7 +99,6 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
 }
 
 ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
-   var that = this;
 
    // BROADCASTING local broadcast (this casa's peer sources) already done by peer casa class
    // BROADCASTING Broadcast to area this casa is running in (not the child casa area);

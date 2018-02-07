@@ -61,95 +61,11 @@ function PeerCasa(_config) {
 
    this.manualDisconnect = false;
 
-   var that = this;
-
-   // Callbacks for event listening
-   this.casaJoinedHandler = function(_data) {
-   
-      if (_data.peerName == that.uName) {
-        console.log(that.uName + ': I am connected to my peer. Socket: ' + _data.socket);
-
-        if (!that.connected) {
-           that.connected = true;
-           that.socket = _data.socket;
-           console.log(that.uName + ': Connected to my peer. Going active.');
-
-           that.ackMessage('login', { messageId: _data.messageId, casaName: that.casa.uName, casaConfig: that.casa.config });
-
-           var casaList = that.casaArea.buildCasaForwardingList();
-           var casaListLen = casaList.length;
-
-           // Send info regarding all relevant casas
-           for (var i = 0; i < casaListLen; ++i) {
-              casaList[i].refreshConfigWithSourcesStatus();
-              that.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
-           }
-
-           // listen for source changes from peer casas
-           that.establishListeners(true);
-           that.establishHeartbeat();
-
-           that.resendUnAckedMessages();
-           that.alignPropertyValue('ACTIVE', true, { sourceName: that.uName });
-        }
-      }
-   };
-
-   this.casaLostHandler = function(_data) {
-
-      if (_data.peerName == that.uName) {
-
-         // Cope with race between old diconnect and new connect - Ignore is sockets do not match
-         if (!that.socket || (that.socket == _data.socket)) {
-            console.log(that.uName + ': I have lost my peer!');
-
-            if (that.intervalId) {
-               clearInterval(that.intervalId);
-               that.intervalId = null;
-            }
-
-            if (that.connected) {
-               console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-               that.connected = false;
-               that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-               that.removeCasaListeners();
-               that.invalidateSources();
-               that.setCasaArea(null);
-               that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
-            }
-
-            that.deleteMeIfNeeded();
-         }
-      }
-   };
-
-   this.sourcePropertyChangedCasaHandler = function(_data) {
-
-      if (that.connected && (_data.sourcePeerCasa != that.uName)) {
-
-         if (!_data.local) {
-            console.log(that.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
-            that.sendMessage('source-property-changed', _data);
-         }
-         else {
-            console.log(that.uName + ': not publishing source ' + _data.sourceName + ' property-changed to peer casa - Not Global');
-         }
-      }
-   };
-
-   this.sourceEventRaisedCasaHandler = function(_data) {
-
-      if (that.connected && (_data.sourcePeerCasa != that.uName)) {
-
-         if (!_data.local) {
-            console.log(that.uName + ': publishing source ' + _data.sourceName + ' event-raised to peer casa');
-            that.sendMessage('source-event-raised', _data);
-         }
-         else {
-            console.log(that.uName + ': not publishing source ' + _data.sourceName + ' event-raised to peer casa - Not Global');
-         }
-      }
-   };
+   // Callbacks for listening to main casa
+   this.casaJoinedHandler = PeerCasa.prototype.casaJoinedCb.bind(this);
+   this.casaLostHandler = PeerCasa.prototype.casaLostCb.bind(this);
+   this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
+   this.sourceEventRaisedCasaHandler = PeerCasa.prototype.sourceEventRaisedCasaCb.bind(this);
 
    if (!this.proActiveConnect) {
       // Listen to Casa for my peer instance to connect
@@ -163,6 +79,93 @@ function PeerCasa(_config) {
 }
 
 util.inherits(PeerCasa, Source);
+
+PeerCasa.prototype.casaJoinedCb = function(_data) {
+
+   if (_data.peerName == this.uName) {
+     console.log(this.uName + ': I am connected to my peer. Socket: ' + _data.socket);
+
+     if (!this.connected) {
+        this.connected = true;
+        this.socket = _data.socket;
+        console.log(this.uName + ': Connected to my peer. Going active.');
+
+        this.ackMessage('login', { messageId: _data.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
+
+        var casaList = this.casaArea.buildCasaForwardingList();
+        var casaListLen = casaList.length;
+
+        // Send info regarding all relevant casas
+        for (var i = 0; i < casaListLen; ++i) {
+           casaList[i].refreshConfigWithSourcesStatus();
+           this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
+        }
+
+        // listen for source changes from peer casas
+        this.establishListeners(true);
+        this.establishHeartbeat();
+
+        this.resendUnAckedMessages();
+        this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+     }
+   }
+};
+
+PeerCasa.prototype.casaLostCb = function(_data) {
+
+   if (_data.peerName == this.uName) {
+
+      // Cope with race between old diconnect and new connect - Ignore is sockets do not match
+      if (!this.socket || (this.socket == _data.socket)) {
+         console.log(this.uName + ': I have lost my peer!');
+
+         if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+         }
+
+         if (this.connected) {
+            console.log(this.uName + ': Lost connection to my peer. Going inactive.');
+            this.connected = false;
+            this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
+            this.removeCasaListeners();
+            this.invalidateSources();
+            this.setCasaArea(null);
+            this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+         }
+
+         this.deleteMeIfNeeded();
+      }
+   }
+};
+
+PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
+
+   if (this.connected && (_data.sourcePeerCasa != this.uName)) {
+
+      if (!_data.local) {
+         console.log(this.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
+         this.sendMessage('source-property-changed', _data);
+      }
+      else {
+         console.log(this.uName + ': not publishing source ' + _data.sourceName + ' property-changed to peer casa - Not Global');
+      }
+   }
+};
+
+PeerCasa.prototype.sourceEventRaisedCasaCb = function(_data) {
+
+   if (this.connected && (_data.sourcePeerCasa != this.uName)) {
+
+      if (!_data.local) {
+         console.log(this.uName + ': publishing source ' + _data.sourceName + ' event-raised to peer casa');
+         this.sendMessage('source-event-raised', _data);
+      }
+      else {
+         console.log(this.uName + ': not publishing source ' + _data.sourceName + ' event-raised to peer casa - Not Global');
+      }
+   }
+};
 
 PeerCasa.prototype.removeCasaListeners = function() {
    console.log(this.uName + ': removing casa listeners');
@@ -178,7 +181,6 @@ PeerCasa.prototype.removeCasaListeners = function() {
    }
 }
 
-
 PeerCasa.prototype.coldStartPeerSources = function() {
 
    for (var prop in this.sources) {
@@ -189,7 +191,6 @@ PeerCasa.prototype.coldStartPeerSources = function() {
       }
    }
 }
-
 
 PeerCasa.prototype.invalidateSources = function() {
 
@@ -206,6 +207,7 @@ PeerCasa.prototype.invalidateSources = function() {
    this.sources = [];
 
    for (var prop in this.remoteCasas) {
+
       if (this.remoteCasas.hasOwnProperty(prop)){
          console.log(this.uName + ': Invaliding remote casa ' + this.remoteCasas[prop].uName);
          var remoteCasa = this.remoteCasas[prop];
@@ -216,6 +218,7 @@ PeerCasa.prototype.invalidateSources = function() {
          delete remoteCasa;
       }
    }
+
    delete this.remoteCasas;
    this.remoteCasas = [];
    this.goInvalid('ACTIVE', { sourceName: this.uName });
@@ -230,120 +233,283 @@ PeerCasa.prototype.getPort = function() {
 };
 
 PeerCasa.prototype.start = function() {
+
    if (this.proActiveConnect) {
       this.connectToPeerCasa();
    }
 }
 
 PeerCasa.prototype.connectToPeerCasa = function() {
-   var that = this;
-
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
 
-   this.socket.on('connect', function() {
-      console.log(that.uName + ': Connected to my peer. Logging in...');
-      that.establishListeners();
-      that.establishHeartbeat();
-      that.casa.refreshConfigWithSourcesStatus();
+   this.socketConnectHandler = PeerCasa.prototype.socketConnectCb.bind(this);
+   this.socketLoginSuccessHandler = PeerCasa.prototype.socketLoginSuccessCb.bind(this);
+   this.socketLoginFailureHandler = PeerCasa.prototype.socketLoginFailureCb.bind(this);
+   this.socketCasaActiveAckHandler = PeerCasa.prototype.socketCasaActiveAckCb.bind(this);
 
-      var messageData = {
-         casaName: that.casa.uName,
-         casaType: that.loginAs,
-         casaConfig: that.casa.config,
-         casaVersion: that.casaSys.version
-      };
+   this.socket.on('connect', this.socketConnectHandler);
+   this.socket.on('loginAACCKK', this.socketLoginSuccessHandler);
+   this.socket.on('loginRREEJJ', this.socketLoginFailureHandler);
+   this.socket.on('casa-activeAACCKK', this.socketCasaActiveAckHandler);
 
-      if (that.loginAs == 'child') {
-         var peers = [];
-         for (var prop in that.casaSys.remoteCasas) {
-            if (that.casaSys.remoteCasas.hasOwnProperty(prop) && (that.casaSys.remoteCasas[prop].loginAs == 'peer')){
-               peers.push(that.casaSys.remoteCasas[prop].uName);
-            }
-         }
-         if (peers.length > 0) {
-            messageData.peers = peers;
+   if (this.proActiveConnect) {
+      this.socketErrorHandler = PeerCasa.prototype.socketErrorCb.bind(this);
+      this.socketDisconnectHandler = PeerCasa.prototype.socketDisconnectCb.bind(this);
+
+      this.socket.on('error', this.socketErrorHandler);
+      this.socket.on('disconnect', this.socketDisconnectHandler);
+   }
+}
+
+//=================
+// Socket Callbacks
+//=================
+PeerCasa.prototype.socketConnectCb = function() {
+   console.log(this.uName + ': Connected to my peer. Logging in...');
+
+   this.establishListeners();
+   this.establishHeartbeat();
+   this.casa.refreshConfigWithSourcesStatus();
+
+   var messageData = {
+      casaName: this.casa.uName,
+      casaType: this.loginAs,
+      casaConfig: this.casa.config,
+      casaVersion: this.casaSys.version
+   };
+
+   if (this.loginAs == 'child') {
+      var peers = [];
+
+      for (var prop in this.casaSys.remoteCasas) {
+
+         if (this.casaSys.remoteCasas.hasOwnProperty(prop) && (this.casaSys.remoteCasas[prop].loginAs == 'peer')){
+            peers.push(this.casaSys.remoteCasas[prop].uName);
          }
       }
 
-      that.sendMessage('login', messageData);
-   });
-
-   this.socket.on('loginAACCKK', function(_data) {
-      console.log(that.uName + ': Login Event ACKed by my peer. Going active.');
-
-      that.messageHasBeenAcked(_data);
-      that.resendUnAckedMessages();
-      that.createSources(_data, that);
-      that.connected = true;
-
-      var casaList = that.casaArea.buildCasaForwardingList();
-      var casaListLen = casaList.length;
-
-      // Send info regarding all relevant casas
-      for (var i = 0; i < casaListLen; ++i) {
-         that.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
-      }  
-  
-      that.alignPropertyValue('ACTIVE', true, { sourceName: that.uName });
-   });
-
-   this.socket.on('loginRREEJJ', function(_data) {
-      console.info(that.uName + ': Login Event REJed by my peer. Exiting.');
-      process.exit(2);
-   });
-
-   this.socket.on('casa-activeAACCKK', function(_data) {
-      console.log(that.uName + ': casa-active Event ACKed by my peer.');
-      that.messageHasBeenAcked(_data);
-   });
-
-   if (this.proActiveConnect) {
-
-      this.socket.on('error', function(_error) {
-         console.log(that.uName + ': Error received: ' + _error);
-
-         if (that.intervalId) {
-            clearInterval(that.intervalId);
-            that.intervalId = null;
-         }
-
-         if (that.connected) {
-            console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-            that.connected = false;
-            that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-            that.removeCasaListeners();
-            that.invalidateSources();
-            that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
-            that.socket.disconnect();
-         }
-
-         that.manualDisconnect = true;
-         that.deleteMeIfNeeded();
-      });
-
-      this.socket.on('disconnect', function() {
-         console.log(that.uName + ': Error disconnect');
-
-         if (that.intervalId) {
-            clearInterval(that.intervalId);
-            that.intervalId = null;
-         }
-
-         if (that.connected) {
-            console.log(that.uName + ': Lost connection to my peer. Going inactive.');
-            that.connected = false;
-            that.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: that.uName }, sourceCasa: that.uName });
-            that.removeCasaListeners();
-            that.invalidateSources();
-            that.alignPropertyValue('ACTIVE', false, { sourceName: that.uName });
-         }
-
-         that.deleteMeIfNeeded();
-      });
+      if (peers.length > 0) {
+         messageData.peers = peers;
+      }
    }
 
-}
+   this.sendMessage('login', messageData);
+};
+
+PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
+   console.log(this.uName + ': Login Event ACKed by my peer. Going active.');
+
+   this.messageHasBeenAcked(_data);
+   this.resendUnAckedMessages();
+   this.createSources(_data, this);
+   this.connected = true;
+
+   var casaList = this.casaArea.buildCasaForwardingList();
+   var casaListLen = casaList.length;
+
+   // Send info regarding all relevant casas
+   for (var i = 0; i < casaListLen; ++i) {
+      this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
+   }  
+
+   this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+};
+
+PeerCasa.prototype.socketLoginFailureCb = function(_data) {
+   console.info(this.uName + ': Login Event REJed by my peer. Exiting.');
+   process.exit(2);
+};
+
+PeerCasa.prototype.socketCasaActiveAckCb = function(_data) {
+   console.log(this.uName + ': casa-active Event ACKed by my peer.');
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketErrorCb = function(_data) {
+   console.log(this.uName + ': Error received: ' + _error);
+
+   if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+   }
+
+   if (this.connected) {
+      console.log(this.uName + ': Lost connection to my peer. Going inactive.');
+      this.connected = false;
+      this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
+      this.removeCasaListeners();
+      this.invalidateSources();
+      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+      this.socket.disconnect();
+   }
+
+   this.manualDisconnect = true;
+   this.deleteMeIfNeeded();
+};
+
+PeerCasa.prototype.socketDisconnectCb = function(_data) {
+   console.log(this.uName + ': Error disconnect');
+
+   if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+   }
+
+   if (this.connected) {
+      console.log(this.uName + ': Lost connection to my peer. Going inactive.');
+      this.connected = false;
+      this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
+      this.removeCasaListeners();
+      this.invalidateSources();
+      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+   }
+
+   this.deleteMeIfNeeded();
+};
+
+PeerCasa.prototype.socketCasaActiveCb = function(_data) {
+   console.log('casa area ' + this.casaArea.uName);
+   console.log(this.uName + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
+   this.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: this.uName });
+
+   if (!this.casaSys.remoteCasas[_data.sourceName] && _data.sourceName != this.casa.uName) {
+      // Create a remote casa to represent the newly available casa
+      RemoteCasa = require('./remotecasa');
+      var remoteCasa = new RemoteCasa(_data.casaConfig, this);
+      this.remoteCasas[remoteCasa.uName] = remoteCasa;
+      this.casaSys.remoteCasas[remoteCasa.uName] = remoteCasa;
+      this.casaSys.allObjects[remoteCasa.uName] = remoteCasa;
+      this.createSources(_data, remoteCasa);
+   }
+   this.emit('casa-active', _data);
+   this.ackMessage('casa-active', _data);
+};
+
+PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: casa-inactive, casa: ' + _data.sourceName);
+   this.emit('broadcast-message', { message: 'casa-inactive', data:_data, sourceCasa: this.uName });
+   this.emit('casa-inactive', _data);
+
+   var remoteCasa = this.casaSys.remoteCasas[_data.sourceName];
+
+   if (remoteCasa && remoteCasa.loginAs == 'remote') {
+      remoteCasa.invalidateSources();
+      delete this.remoteCasas[remoteCasa.uName];
+      delete this.casaSys.remoteCasas[remoteCasa.uName];
+      delete this.casaSys.allObjects[remoteCasa.uName];
+      delete remoteCasa;
+   }
+   this.ackMessage('casa-inactive', _data);
+};
+
+PeerCasa.prototype.socketSourcePropertyChangedCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: property-changed, source: ' + _data.sourceName);
+   this.emit('source-property-changed', _data);
+   this.emit('broadcast-message', { message: 'source-property-changed', data:_data, sourceCasa: this.uName });
+
+   if (this.sources[_data.sourceName]) {
+      _data.sourcePeerCasa = this.uName;
+      this.sources[_data.sourceName].sourceHasChangedProperty(_data);
+   }
+   this.ackMessage('source-property-changed', _data);
+};
+
+PeerCasa.prototype.socketSourcePropertyChangedAckCb = function(_data) {
+   console.log(this.uName + ': Property-changed Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourceEventRaisedCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: event-raised, source: ' + _data.sourceName);
+   this.emit('source-event-raised', _data);
+   this.emit('broadcast-message', { message: 'source-event-raised', data:_data, sourceCasa: this.uName });
+
+   if (this.sources[_data.sourceName]) {
+      _data.sourcePeerCasa = this.uName;
+      this.sources[_data.sourceName].sourceHasRaisedEvent(_data);
+   }
+   this.ackMessage('source-event-raised', _data);
+};
+
+PeerCasa.prototype.socketSourceEventRaisedAckCb = function(_data) {
+   console.log(this.uName + ': Event-raised Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
+   var source = this.casaSys.findSource(_data.sourceName);
+
+   if (source) {
+      _data.acker = this.casa.uName;
+      this.ackMessage('set-source-property-req', _data);
+      var res = source.setProperty(_data.property, _data.value, _data);
+      this.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, requestor: _data.requestor });
+   } 
+   else {
+      // TBD Find the casa that ownes the source and work out how to foward the request
+      this.emit('forward-request', { message: 'set-source-property-req', data: _data, sourceCasa: this.uName });
+   }
+};
+
+PeerCasa.prototype.socketSetSourcePropertyReqAckCb = function(_data) {
+   console.log(this.uName + ': set source property request event ACKed by my peer. *Not confirmed*. Source=' + _data.sourceName);
+
+   if (_data.requestor == this.casa.uName) {
+      // We made the request
+      this.messageHasBeenAcked(_data);
+
+      if (this.incompleteRequests[_data.requestId]) {
+         this.incompleteRequests[_data.requestId].ackRequest();
+      }
+   }
+   else {
+      // we didn't make the request, so forward the ACK
+      this.emit('forward-request', { message: 'set-source-property-reqAACCKK', data: _data});
+   }
+};
+
+PeerCasa.prototype.socketSetSourcePropertyRespCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: set-source-property-resp, source: ' + _data.sourceName);
+
+   if (_data.requestor == this.casa.uName) {
+      // Request origniated from here
+      _data.acker = this.casa.uName;
+      this.ackMessage('set-source-property-resp', _data);
+
+      if (this.incompleteRequests[_data.requestId]) {
+         this.incompleteRequests[_data.requestId].completeRequest(_data.result);
+         delete this.incompleteRequests[_data.requestId];
+      }
+   }
+   else {
+      // Find the casa that ownes the original request and work out how to foward the response
+      this.emit('forward-response', { message: 'set-source-property-resp', data: _data, sourceCasa: this.uName });
+   }
+};
+
+PeerCasa.prototype.socketSetSourcePropertyRespAckCb = function(_data) {
+   console.log(this.uName + ': set source property response event ACKed by my peer. Source=' + _data.sourceName);
+
+   if (_data.requestor == this.casa.uName) {
+      // We made the request
+      this.messageHasBeenAcked(_data);
+   }
+   else {
+      // we didn't make the request, so forward the ACK
+      this.emit('forward-response', { message: 'set-source-property-respAACCKK', data: _data});
+   }
+};
+
+PeerCasa.prototype.socketHeartbeatCb = function(_data) {
+   console.log(this.uName + ': Heartbeat received');
+
+   this.lastHeartbeat = Date.now();
+};
+//========================
+// End of socket callbacks
+//========================
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
 
@@ -434,148 +600,29 @@ PeerCasa.prototype.isActive = function() {
 PeerCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
-      var that = this;
+      this.socketCasaActiveHandler = PeerCasa.prototype.socketCasaActiveCb.bind(this);
+      this.socketCasaInactiveHandler = PeerCasa.prototype.socketCasaInactiveCb.bind(this);
+      this.socketSourcePropertyChangedHandler = PeerCasa.prototype.socketSourcePropertyChangedCb.bind(this);
+      this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
+      this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
+      this.socketSourceEventRaisedAckHandler = PeerCasa.prototype.socketSourceEventRaisedAckCb.bind(this);
+      this.socketSetSourcePropertyReqHandler = PeerCasa.prototype.socketSetSourcePropertyReqCb.bind(this);
+      this.socketSetSourcePropertyReqAckHandler = PeerCasa.prototype.socketSetSourcePropertyReqAckCb.bind(this);
+      this.socketSetSourcePropertyRespHandler = PeerCasa.prototype.socketSetSourcePropertyRespCb.bind(this);
+      this.socketSetSourcePropertyRespAckHandler = PeerCasa.prototype.socketSetSourcePropertyRespAckCb.bind(this);
+      this.socketHeartbeatHandler = PeerCasa.prototype.socketHeartbeatCb.bind(this);
 
-      // listen for remote casas availability from peer casas
-      this.socket.on('casa-active', function(_data) {
-         console.log('casa area ' + that.casaArea.uName);
-         console.log(that.uName + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
-         that.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: that.uName });
-
-         if (!that.casaSys.remoteCasas[_data.sourceName] && _data.sourceName != that.casa.uName) {
-            // Create a remote casa to represent the newly available casa
-            RemoteCasa = require('./remotecasa');
-            var remoteCasa = new RemoteCasa(_data.casaConfig, that);
-            that.remoteCasas[remoteCasa.uName] = remoteCasa;
-            that.casaSys.remoteCasas[remoteCasa.uName] = remoteCasa;
-            that.casaSys.allObjects[remoteCasa.uName] = remoteCasa;
-            that.createSources(_data, remoteCasa);
-         }
-         that.emit('casa-active', _data);
-         that.ackMessage('casa-active', _data);
-      });
-
-      this.socket.on('casa-inactive', function(_data) {
-         console.log(that.uName + ': Event received from my peer. Event name: casa-inactive, casa: ' + _data.sourceName);
-         that.emit('broadcast-message', { message: 'casa-inactive', data:_data, sourceCasa: that.uName });
-         that.emit('casa-inactive', _data);
-
-         var remoteCasa = that.casaSys.remoteCasas[_data.sourceName];
-
-         if (remoteCasa && remoteCasa.loginAs == 'remote') {
-            remoteCasa.invalidateSources();
-            delete that.remoteCasas[remoteCasa.uName];
-            delete that.casaSys.remoteCasas[remoteCasa.uName];
-            delete that.casaSys.allObjects[remoteCasa.uName];
-            delete remoteCasa;
-         }
-         that.ackMessage('casa-inactive', _data);
-      });
-
-      this.socket.on('source-property-changed', function(_data) {
-         console.log(that.uName + ': Event received from my peer. Event name: property-changed, source: ' + _data.sourceName);
-         that.emit('source-property-changed', _data);
-         that.emit('broadcast-message', { message: 'source-property-changed', data:_data, sourceCasa: that.uName });
-
-         if (that.sources[_data.sourceName]) {
-            _data.sourcePeerCasa = that.uName;
-            that.sources[_data.sourceName].sourceHasChangedProperty(_data);
-         }
-         that.ackMessage('source-property-changed', _data);
-      });
-
-      this.socket.on('source-event-raised', function(_data) {
-         console.log(that.uName + ': Event received from my peer. Event name: event-raised, source: ' + _data.sourceName);
-         that.emit('source-event-raised', _data);
-         that.emit('broadcast-message', { message: 'source-event-raised', data:_data, sourceCasa: that.uName });
-
-         if (that.sources[_data.sourceName]) {
-            _data.sourcePeerCasa = that.uName;
-            that.sources[_data.sourceName].sourceHasRaisedEvent(_data);
-         }
-         that.ackMessage('source-event-raised', _data);
-      });
-
-      this.socket.on('set-source-property-req', function(_data) {
-         console.log(that.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
-         var source = that.casaSys.findSource(_data.sourceName);
-
-         if (source) {
-            _data.acker = that.casa.uName;
-            that.ackMessage('set-source-property-req', _data);
-            var res = source.setProperty(_data.property, _data.value, _data);
-            that.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, requestor: _data.requestor });
-         } 
-         else {
-            // TBD Find the casa that ownes the source and work out how to foward the request
-            that.emit('forward-request', { message: 'set-source-property-req', data: _data, sourceCasa: that.uName });
-         }
-      });
-
-      this.socket.on('set-source-property-resp', function(_data) {
-         console.log(that.uName + ': Event received from my peer. Event name: set-source-property-resp, source: ' + _data.sourceName);
-
-         if (_data.requestor == that.casa.uName) {
-            // Request origniated from here
-            _data.acker = that.casa.uName;
-            that.ackMessage('set-source-property-resp', _data);
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].completeRequest(_data.result);
-               delete that.incompleteRequests[_data.requestId];
-            }
-         }
-         else {
-            // Find the casa that ownes the original request and work out how to foward the response
-            that.emit('forward-response', { message: 'set-source-property-resp', data: _data, sourceCasa: that.uName });
-         }
-      });
-
-      this.socket.on('source-property-changedAACCKK', function(_data) {
-         console.log(that.uName + ': Property-changed Event ACKed by my peer. Source=' + _data.sourceName);
-         that.messageHasBeenAcked(_data);
-      });
-
-      this.socket.on('source-event-raisedAACCKK', function(_data) {
-         console.log(that.uName + ': Event-raised Event ACKed by my peer. Source=' + _data.sourceName);
-         that.messageHasBeenAcked(_data);
-      });
-
-      this.socket.on('set-source-property-reqAACCKK', function(_data) {
-         console.log(that.uName + ': set source property request event ACKed by my peer. *Not confirmed*. Source=' + _data.sourceName);
-
-         if (_data.requestor == that.casa.uName) {
-            // We made the request
-            that.messageHasBeenAcked(_data);
-
-            if (that.incompleteRequests[_data.requestId]) {
-               that.incompleteRequests[_data.requestId].ackRequest();
-            }
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-request', { message: 'set-source-property-reqAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('set-source-property-respAACCKK', function(_data) {
-         console.log(that.uName + ': set source property response event ACKed by my peer. Source=' + _data.sourceName);
-
-         if (_data.requestor == that.casa.uName) {
-            // We made the request
-            that.messageHasBeenAcked(_data);
-         }
-         else {
-            // we didn't make the request, so forward the ACK
-            that.emit('forward-response', { message: 'set-source-property-respAACCKK', data: _data});
-         }
-      });
-
-      this.socket.on('heartbeat', function(_data) {
-         console.log(that.uName + ': Heartbeat received');
-
-         that.lastHeartbeat = Date.now();
-      });
+      this.socket.on('casa-active', this.socketCasaActiveHandler);
+      this.socket.on('casa-inactive', this.socketCasaInactiveHandler);
+      this.socket.on('source-property-changed', this.socketSourcePropertyChangedHandler);
+      this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
+      this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
+      this.socket.on('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
+      this.socket.on('set-source-property-req', this.socketSetSourcePropertyReqHandler);
+      this.socket.on('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
+      this.socket.on('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
+      this.socket.on('set-source-property-respAACCKK', this.socketSetSourcePropertyRespAckHandler);
+      this.socket.on('heartbeat', this.socketHeartbeatHandler);
 
       this.listenersSetUp = true;
    }
@@ -592,8 +639,8 @@ PeerCasa.prototype.establishHeartbeat = function() {
          if (_this.connected) {
 
             // Check if we have received a heartbeat from the other side recently
-            if ((Date.now() - _this.lastHeartbeat) > 90000) {
-               console.log(_this.uName + ': No heartbeat received for 1.5 times interval!. Closing socket.');
+            if ((Date.now() - _this.lastHeartbeat) > 120000) {
+               console.log(_this.uName + ': No heartbeat received for two times the interval!. Closing socket.');
                _this.manualDisconnect = true;
                _this.socket.disconnect();
                _this.deleteMeIfNeeded();
@@ -630,7 +677,6 @@ PeerCasa.prototype.messageHasBeenAcked = function(_data) {
 }
 
 PeerCasa.prototype.resendUnAckedMessages = function() {
-   var that = this;
 
    for(var prop in this.unAckedMessages) {
 
@@ -650,8 +696,8 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
    }
 
    // Clean up any already acked messages
-   toDelete.forEach(function(_requestId) {
-      delete that.incompleteRequests[_requestId];
+   toDelete.forEach( (_requestId) => {
+      delete this.incompleteRequests[_requestId];
    });
 
 }
@@ -666,17 +712,16 @@ function RemoteCasaRequestor(_requestId, _callback, _socket) {
 }
 
 RemoteCasaRequestor.prototype.sendRequest = function(_message, _deleteMe) {
-   var that = this;
    this.message = _message;
    this.socket.emit(this.message.message, this.message.data);
-   this.timeout = setTimeout(function() {
-      that.callback(false);
-      _deleteMe(that.requestId);
-   }, 30000);
+
+   this.timeout = setTimeout(function(_this) {
+      _this.callback(false);
+      _deleteMe(_this.requestId);
+   }, 30000, this);
 }
 
 RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
-   var that = this;
 
    if (this.acked) {
       // remote casa has already received the request, we will never know the result :-)
@@ -684,16 +729,17 @@ RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
       _deleteMe(this.requestId);
    }
    else {
+
       if (this.timeout) {
          clearTimeout(this.timeout);
       }
 
       this.socket.emit(this.message.message, this.message.data);
 
-      this.timeout = setTimeout(function() {
-         that.callback(false);
-         _deleteMe(that.requestId);
-      }, 30000);
+      this.timeout = setTimeout(function(_this) {
+         _this.callback(false);
+         _deleteMe(_this.requestId);
+      }, 30000, this);
    }
 }
 
@@ -715,7 +761,6 @@ PeerCasa.prototype.setSourceInactive = function(_source, _data, _callback) {
 }
 
 PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, _data) {
-   var that = this;
 
    if (this.connected) {
       console.log(this.uName + ': requesting source change property ' + _propName + ' to ' + _propValue + ' from peer casa. Source ' + _source.uName);
@@ -725,14 +770,15 @@ PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, 
                                                                   property: _propName, value: _propValue,
                                                                   requestId: id, requestor: this.casa.uName } };
 
-      this.incompleteRequests[id] = new RemoteCasaRequestor(id, function(_err, _res) {
-         console.log(that.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at remote casa ');
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, (_err, _res) => {
+         console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at remote casa ');
       }, this.socket);
 
-      this.incompleteRequests[id].sendRequest(message, function(_requestId) {
-         console.log(that.uName + ': Timeout occurred sending a changeProperty request for source ' + _source.uName);
-         delete that.incompleteRequests[_requestId];
+      this.incompleteRequests[id].sendRequest(message, (_requestId) => {
+         console.log(this.uName + ': Timeout occurred sending a changeProperty request for source ' + _source.uName);
+         delete this.incompleteRequests[_requestId];
       });
+
       return true;
    }
    else {
@@ -753,34 +799,34 @@ PeerCasa.prototype.addWorker = function(_worker) {
 }
 
 PeerCasa.prototype.setCasaArea = function(_casaArea) {
-   var that = this;
-
-   var broadcastCallback = function(_message) {
-      console.log(that.uName + ': received message ' + _message.message + ' originally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
-      console.log(that.connected.toString() + ' ' + _message.sourceCasa + ' ' + that.uName);
-
-      if (that.connected && _message.sourceCasa != that.uName) {
-         console.log(this.uName + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
-         that.sendMessage(_message.message, _message.data);
-      }
-   };
 
    if (this.casaArea != _casaArea) {
 
       if (this.casaArea) {
          this.casaArea.removeCasa(this);
-         this.casaArea.removeListener('broadcast-message', broadcastCallback);
+         this.casaArea.removeListener('broadcast-message', this.broadcastHandler);
       }
 
       this.casaArea = _casaArea;
+      this.broadcastHandler = PeerCasa.prototype.broadcastCb.bind(this);
 
       if (this.casaArea) {
          this.casaArea.addCasa(this);
          // listen for broadcast messages from other nodes to remote casas
-         this.casaArea.on('broadcast-message', broadcastCallback);
+         this.casaArea.on('broadcast-message', this.broadcastHandler);
       }
    }
 }
+
+PeerCasa.prototype.broadcastCb = function(_message) {
+   console.log(this.uName + ': received message ' + _message.message + ' originally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+   console.log(this.connected.toString() + ' ' + _message.sourceCasa + ' ' + this.uName);
+
+   if (this.connected && _message.sourceCasa != this.uName) {
+      console.log(this.uName + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
+      this.sendMessage(_message.message, _message.data);
+   }
+};
 
 module.exports = exports = PeerCasa;
 

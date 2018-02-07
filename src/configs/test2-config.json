@@ -34,7 +34,7 @@
    ],
    "things": [
       {
-         "name": "thing:test-state-timers",
+         "name": "thing:test-state-timers2",
          "props": [
             {
                "name": "test-periodic",
@@ -86,7 +86,7 @@
          ]
       },
       {
-         "name": "thing:test-state-with-boolean-names",
+         "name": "thing:test-state-with-boolean-names2",
          "props": [
             {
                "name": "boolean-state",
@@ -112,7 +112,7 @@
          ]
       },
       {
-         "name": "thing:home-daylight-sensor",
+         "name": "thing:home-daylight-sensor2",
          "displayName": "Home daylight sensor",
          "props": [
             {
@@ -121,7 +121,7 @@
                "initialValue": 100,
                "writable": false,
                "source": {
-                  "name": "thing:test-cctv",
+                  "name": "thing:test-cctv2",
                   "property": "test-prop-2",
                   "outputValues": {
                      "true": 30,
@@ -132,7 +132,7 @@
          ]
       },
       {
-         "name": "thing:test-daylight-sensor",
+         "name": "thing:test-daylight-sensor2",
          "displayName": "Test daylight sensor",
          "props": [
             {
@@ -275,7 +275,7 @@
                "rate": 10,
                "resolution": 5,
                "source": {
-                  "name": "thing:home-daylight-sensor",
+                  "name": "thing:home-daylight-sensor2",
                   "property": "lightLevel"
                }
             },
@@ -287,7 +287,7 @@
                "prioritiseSources": true,
                "sources": [
                   {
-                     "name": "thing:test-cctv",
+                     "name": "thing:test-cctv2",
                      "property": "test-prop-1",
                      "outputValues": {
                         "true": "green",
@@ -295,7 +295,7 @@
                      }
                   },
                   {
-                     "name": "thing:home-daylight-sensor",
+                     "name": "thing:home-daylight-sensor2",
                      "property": "lightLevel",
                      "transform": "$value<50",
                      "outputValues": {
@@ -315,7 +315,7 @@
                "outputMin": 10,
                "outputMax": 0,
                "source": {
-                  "name": "thing:home-daylight-sensor",
+                  "name": "thing:home-daylight-sensor2",
                   "property": "lightLevel"
                }
             },
@@ -356,7 +356,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:test-cctv",
+                  "name": "thing:test-cctv2",
                   "property": "test-prop-2",
                   "transformMap": {
                      "true": "test-prop-2 is True!",
@@ -367,7 +367,7 @@
          ]
       },
       {
-         "name": "thing:test-cctv",
+         "name": "thing:test-cctv2",
          "displayName": "Test CCTV Config",
          "props": [
             {
@@ -440,11 +440,11 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:test-cctv",
+                  "name": "thing:test-cctv2",
                   "property": "test-prop-2"
                },
                "controller": {
-                  "name": "thing:test-cctv",
+                  "name": "thing:test-cctv2",
                   "property": "test-prop-3"
                }
             },
@@ -485,7 +485,7 @@
          ]
       },
       {
-         "name": "thing:dumgoyne-environment",
+         "name": "thing:dumgoyne-environment2",
          "displayName": "Environment Based on Sensors in Dumgoyne",
          "props": [
             {
@@ -516,11 +516,11 @@
                "type": "andproperty",
                "sources": [
                   {
-                     "name": "thing:dumgoyne-environment",
+                     "name": "thing:dumgoyne-environment2",
                      "property": "daylight-sensor"
                   },
                   {
-                     "name": "thing:dumgoyne-environment",
+                     "name": "thing:dumgoyne-environment2",
                      "property": "daylight-possible"
                   }
                ]
@@ -536,7 +536,7 @@
                "writable": true,
                "type": "scheduleproperty",
                "source": {
-                  "name": "thing:dumgoyne-environment",
+                  "name": "thing:dumgoyne-environment2",
                   "property": "daylight",
                   "transform": "!$value"
                },
@@ -555,7 +555,7 @@
          ]
       },
       {
-         "name": "thing:test-composite",
+         "name": "thing:test-composite2",
          "props": [
             {
                "name": "top-level-prop",
@@ -565,14 +565,14 @@
                "name": "all-prop",
                "initialValue": false,
                "source": {
-                  "name": "thing:test-cctv",
+                  "name": "thing:test-cctv2",
                   "property": "test-prop-2"
                }
             }
          ],
          "things": [
             {
-               "name": "thing:test-comp-level-1-1",
+               "name": "thing:test-comp-level-1-12",
                "props": [
                   {
                      "name": "only-lower-levels-prop",
@@ -585,7 +585,7 @@
                ],
                "things": [
                   {
-                     "name": "thing:test-comp-level-2-1",
+                     "name": "thing:test-comp-level-2-12",
                      "props": [
                         {
                            "name": "only-lower-levels-prop",
@@ -599,7 +599,7 @@
                            "name": "only-level-2",
                            "initialValue": false,
                            "source": {
-                              "name": "thing:test-cctv",
+                              "name": "thing:test-cctv2",
                               "property": "test-prop-1"
                            }
                         }
@@ -608,7 +608,7 @@
                ]
             },
             {
-               "name": "thing:test-comp-level-1-2",
+               "name": "thing:test-comp-level-1-22",
                "props": [
                   {
                      "name": "only-lower-levels-prop",

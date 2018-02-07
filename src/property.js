@@ -335,7 +335,6 @@ Property.prototype.sourceIsInvalid = function(_data) {
 // Will invoke this property processing followed by the step pipeline processing
 //
 Property.prototype.receivedEventFromSource = function(_data) {
-   var that = this;
 
    if (this.valid) {
 
@@ -350,7 +349,6 @@ Property.prototype.receivedEventFromSource = function(_data) {
 // Will invoke this property processing followed by the step pipeline processing
 //
 Property.prototype.sourceEventRaised = function(_data) {
-   var that = this;
 
    if (this.valid) {
 
