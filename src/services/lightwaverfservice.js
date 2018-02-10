@@ -87,7 +87,7 @@ LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
 }
 
 LightwaveRfService.prototype.registerWithLink = function(_callback) {
-   this.addToQueue("!R1Fa", _callback);
+   //this.addToQueue("!R1Fa", _callback);
 }
 
 LightwaveRfService.prototype.addToQueue = function(_message, _callback) {
