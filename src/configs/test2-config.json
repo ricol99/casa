@@ -1,7 +1,7 @@
 {
    "name": "casa:test2",
    "displayName": "Casa Collin TEST System",
-   "gang": "casa-collin-v2",
+   "gang": "casa-collin-v2-test",
    "parentCasa": {
       "name": "casa:internet",
       "address": {

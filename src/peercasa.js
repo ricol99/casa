@@ -20,7 +20,7 @@ function PeerCasa(_config) {
    this.casaArea = null;
    this.loginAs = 'peer';
    this.remoteCasas = [];
-   this.persistent = false;
+   this.persistent = true;
    this.deathTime = 500;
 
    Source.call(this, _config);
@@ -242,6 +242,7 @@ PeerCasa.prototype.start = function() {
 PeerCasa.prototype.connectToPeerCasa = function() {
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
+   this.socket.open();
 
    this.socketConnectHandler = PeerCasa.prototype.socketConnectCb.bind(this);
    this.socketLoginSuccessHandler = PeerCasa.prototype.socketLoginSuccessCb.bind(this);
@@ -514,14 +515,11 @@ PeerCasa.prototype.socketHeartbeatCb = function(_data) {
 PeerCasa.prototype.deleteMeIfNeeded = function() {
 
    if (!this.persistent && this.socket) {
+      this.socket.disconnect(true);          //AAAAA
       delete this.socket;
       this.socket = undefined;
       console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');
-
-      if (this.casaSys.remoteCasas[this.uName]) {
-         delete this.casaSys.remoteCasas[this.uName];
-         delete this.casaSys.allObjects[this.uName];
-      }
+      this.casaSys.removeRemoteCasa(this);
 
       setTimeout(function(_this) {
 

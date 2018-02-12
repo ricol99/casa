@@ -381,7 +381,7 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
 
    this.setUberCasa(true);
    return childCasa;
-}
+};
 
 CasaSystem.prototype.createPeerCasa = function(_config) {
    console.log('Creating a peer casa for casa ' + _config.name);
@@ -392,19 +392,28 @@ CasaSystem.prototype.createPeerCasa = function(_config) {
    this.remoteCasas[peerCasa.uName] = peerCasa;
    this.allObjects[peerCasa.uName] = peerCasa;
    return peerCasa;
-}
+};
+
+CasaSystem.prototype.removeRemoteCasa = function(_remoteCasa) {
+
+   if (this.remoteCasas[_remoteCasa.uName]) {
+      delete this.remoteCasas[_remoteCasa.uName];
+      delete this.allObjects[this.uName];
+      console.error(this.uName+": AAAAA this.remoteCasas[uName]="+this.remoteCasas[_remoteCasa.uName]);
+   }
+};
 
 CasaSystem.prototype.findUser = function (_userName) {
    return this.users[_userName];
-}
+};
 
 CasaSystem.prototype.findRemoteCasa = function (_casaName) {
    return this.remoteCasas[_casaName];
-}
+};
 
 CasaSystem.prototype.findSource = function (_sourceName) {
    return this.allObjects[_sourceName];
-}
+};
 
 CasaSystem.prototype.findService = function(_serviceName) {
    return this.services[_serviceName];
@@ -412,7 +421,7 @@ CasaSystem.prototype.findService = function(_serviceName) {
 
 CasaSystem.prototype.resolveObject = function (objName) {
     return this.allObjects[objName];
-}
+};
 
 CasaSystem.prototype.setUberCasa = function(_uberCasa) {
    if (_uberCasa && !this.uberCasa) {
