@@ -326,7 +326,7 @@ PeerCasa.prototype.socketCasaActiveAckCb = function(_data) {
    this.messageHasBeenAcked(_data);
 };
 
-PeerCasa.prototype.socketErrorCb = function(_data) {
+PeerCasa.prototype.socketErrorCb = function(_error) {
    console.log(this.uName + ': Error received: ' + _error);
 
    if (this.intervalId) {
@@ -513,7 +513,7 @@ PeerCasa.prototype.socketHeartbeatCb = function(_data) {
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
 
-   if (!this.persistent) {
+   if (!this.persistent && this.socket) {
       delete this.socket;
       this.socket = undefined;
       console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');
