@@ -34,30 +34,28 @@ util.inherits(SecuritySpyCamera, Thing);
 SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': received property change, property='+ _data.sourceEventName + ' value=' + _data.value);
 
-   var that = this;
-
    switch (_propName) {
       case "continuous-capture":
-         this.securitySpyService.setContinuousCapture(this.id, _propValue, function(_err, _res) {
+         this.securitySpyService.setContinuousCapture(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(that.uName + ": Not able to trigger motion event for camera " + that.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
       case "motion-capture":
-         this.securitySpyService.setMotionCapture(this.id, _propValue, function(_err, _res) {
+         this.securitySpyService.setMotionCapture(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(that.uName + ": Not able to trigger motion event for camera " + that.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
       case "actions":
-         this.securitySpyService.setActions(this.id, _propValue, function(_err, _res) {
+         this.securitySpyService.setActions(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(that.uName + ": Not able to trigger motion event for camera " + that.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
@@ -82,16 +80,15 @@ SecuritySpyCamera.prototype.sourceIsInvalid = function(_data) {
 // Called by SourceListener as a defined source has changed it property value
 //
 SecuritySpyCamera.prototype.receivedEventFromSource = function(_data) {
-   var that = this;
 
    if (this.valid) {
 
       if (this.triggerSource && this.triggerSource.sourceEventName === _data.sourceEventName) {
 
-         this.securitySpyService.triggerMotionRecording(this.id, function(_err, _result) {
+         this.securitySpyService.triggerMotionRecording(this.id, (_err, _result) => {
 
             if (_err) {
-               console.error(that.uName + ": Not able to trigger motion event for camera " + that.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
       }

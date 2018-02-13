@@ -21,25 +21,24 @@ function LightwaveRfService(_config) {
 util.inherits(LightwaveRfService, Service);
 
 LightwaveRfService.prototype.coldStart = function() {
-   var that = this;
 
-   this.receiveSocket.on("message", function (_message, _info) {
-      that.messageReceived(_message, _info);
-   }.bind(this));
+   this.receiveSocket.on("message", (_message, _info) => {
+      this.messageReceived(_message, _info);
+   });
 
-   this.receiveSocket.on("listening", function () {
+   this.receiveSocket.on("listening", () => {
       var address = this.receiveSocket.address();
       console.log(this.uName + ": Receiver socket listening " + address.address + ":" + address.port);
-   }.bind(this));
+   });
 
    //Bind to the receive port
    this.receiveSocket.bind(9761);
 
    // Register with Link
-   this.registerWithLink(function(_error, _content) {
+   this.registerWithLink( (_error, _content) => {
 
       if (_error) {
-         console.error(that.uName + ": Unable to register with link, error = "+ _error);
+         console.error(this.uName + ": Unable to register with link, error = "+ _error);
       }
    });
 };

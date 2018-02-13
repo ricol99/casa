@@ -61,15 +61,15 @@ LatchStep.prototype.restartTimer = function() {
       clearTimeout(this.minOutputTimeObj);
    }
 
-   this.minOutputTimeObj = setTimeout(function(_that) {
-      _that.minOutputTimeObj = null;
+   this.minOutputTimeObj = setTimeout(function(_this) {
+      _this.minOutputTimeObj = null;
 
-      if (!_that.sourceActive) {
-         _that.active = false;
+      if (!_this.sourceActive) {
+         _this.active = false;
 
-         if (_that.lastData) {
-            _that.outputForNextStep(false, _that.lastData);
-            _that.lastData = null;
+         if (_this.lastData) {
+            _this.outputForNextStep(false, _this.lastData);
+            _this.lastData = null;
             return;
          }
       }

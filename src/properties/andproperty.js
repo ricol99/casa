@@ -5,8 +5,6 @@ function AndProperty(_config, _owner) {
 
    _config.allSourcesRequiredForValidity = true;
    Property.call(this, _config, _owner);
-
-   var that = this;
 }
 
 util.inherits(AndProperty, Property);

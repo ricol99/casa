@@ -108,48 +108,46 @@ function AlarmTexecom(_config) {
 util.inherits(AlarmTexecom, Thing);
 
 AlarmTexecom.prototype.newConnection = function(_socket) {
-   var that = this;
    console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
-  _socket.on('data', function (_data) {
+  _socket.on('data', (_data) => {
 
      if (_data.slice(0,3) == '+++') {
         return;
      }
 
      if (_data.slice(-2) != '\r\n') {
-        console.log(that.uName + ": Ignoring line with missing terminator");
+        console.log(this.uName + ": Ignoring line with missing terminator");
         return;
      }
      var newData = _data.slice(0,-2);
 
      if (newData.slice(0,4) == 'POLL') {
-        that.handlePollEvent(_socket, newData);
+        this.handlePollEvent(_socket, newData);
      }
-     else if (that.decoders[newData.slice(0,1)] != undefined) {
-        var message = that.decoders[newData.slice(0,1)].decodeMessage(newData.slice(1));
+     else if (this.decoders[newData.slice(0,1)] != undefined) {
+        var message = this.decoders[newData.slice(0,1)].decodeMessage(newData.slice(1));
 
         if (message != undefined) {
-           that.handleMessage(_socket, message, newData);
+           this.handleMessage(_socket, message, newData);
         }
         else {
-           console.log(that.uName + ": Unhandled Message");
+           console.log(this.uName + ": Unhandled Message");
         }
      }
      else {
-        console.log(that.uName + ": Unhandled Message");
+        console.log(this.uName + ": Unhandled Message");
      }
   });
 };
 
 
 AlarmTexecom.prototype.coldStart = function() {
-   var that = this;
 
-   this.server = net.createServer(function(_socket) {
+   this.server = net.createServer( (_socket) => {
 
-      //if ((that.alarmAddress && _socket.remoteAddress === that.alarmAddress) || (!that.alarmAddress)) {
-         that.newConnection(_socket);
+      //if ((this.alarmAddress && _socket.remoteAddress === this.alarmAddress) || (!this.alarmAddress)) {
+         this.newConnection(_socket);
       //}
       //else {
          //_socket.destroy();
@@ -311,7 +309,6 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 };
 
 AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget, _forceState) {
-   var that = this;
 
    if (!_forceState) {
 
@@ -338,26 +335,26 @@ AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget, _fo
 
    this.socket = net.createConnection({ port: this.alarmPort, host: this.alarmAddress });
 
-   this.socket.on('connect', function(_buffer) {
-      console.log(that.uName + ': Connected to alarm');
-      that.transactionState = "connected";
+   this.socket.on('connect', (_buffer) => {
+      console.log(this.uName + ': Connected to alarm');
+      this.transactionState = "connected";
 
       setTimeout(function(_this) {
          _this.sendNextMessage();
-      }, 1500, that);
+      }, 1500, this);
    });
 
-   this.socket.on('error', function(_error) {
-      console.log(that.uName + ': Error connecting to Texecom alarm, error:'+_error);
-      that.failedToSendCommand();
+   this.socket.on('error', (_error) => {
+      console.log(this.uName + ': Error connecting to Texecom alarm, error:'+_error);
+      this.failedToSendCommand();
    });
 
-   this.socket.on('data', function(_buffer) {
-      that.processResponse(_buffer);
+   this.socket.on('data', (_buffer) => {
+      this.processResponse(_buffer);
    });
 
-   this.socket.on('end', function(_buffer) {
-      that.transactionState = "idle";
+   this.socket.on('end', (_buffer) => {
+      this.transactionState = "idle";
    });
 };
 

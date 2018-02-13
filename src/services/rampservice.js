@@ -16,7 +16,6 @@ RampService.prototype.createRamp = function(_owner, _config) {
 };
 
 RampService.prototype.coldStart = function() {
-   var that = this;
 };
 
 function Ramps(_owner, _config, _service) {

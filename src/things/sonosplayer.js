@@ -39,7 +39,6 @@ function SonosPlayer(_config) {
 util.inherits(SonosPlayer, Thing);
 
 SonosPlayer.prototype.coldStart = function() {
-   var that = this;
 
    if (this.host) {
       this.createDevice({ host: this.host, port: this.port });
@@ -53,10 +52,10 @@ SonosPlayer.prototype.coldStart = function() {
          process.exit(1);
       }
 
-      this.sonosService.registerForHostForZone(this.zone, function(_err, _device) {
+      this.sonosService.registerForHostForZone(this.zone, (_err, _device) => {
 
          if (!_err) {
-            that.createDevice(_device);
+            this.createDevice(_device);
          }
       });
    }
@@ -73,8 +72,6 @@ SonosPlayer.prototype.createDevice = function(_device) {
 };
 
 function SonosDevice(_player, _device) {
-   var that = this;
-
    this.uName = _player.uName + ":" + _device.host;
    this.notifications = {};
    this.player = _player;
@@ -87,20 +84,19 @@ function SonosDevice(_player, _device) {
 }
 
 SonosDevice.prototype.createListener = function() {
-   var that = this;
    var SonosListener = require('../node_modules/sonos/lib/events/listener');
 
    try {
       this.sonosListener = new SonosListener(this.device, { port: this.localListeningPort });
 
-      this.sonosListener.listen(function(_err, _result) {
+      this.sonosListener.listen( (_err, _result) => {
 
          if (_err) {
-            console.error(that.uName + ": ***** Unable to start Sonos listener: " + _err);
+            console.error(this.uName + ": ***** Unable to start Sonos listener: " + _err);
             process.exit(1);
          }
 
-         that.startSyncingStatus();
+         this.startSyncingStatus();
       });
    }
    catch (_err) {
@@ -127,21 +123,19 @@ function InternalListener(_owner, _endpoint, _handler) {
 };
 
 SonosDevice.prototype.startSyncingStatus = function() {
-   var that = this;
-
    var groupRenderingControlListener =  new InternalListener(this, '/MediaRenderer/GroupRenderingControl/Event', SonosPlayer.prototype.processGroupRenderControlChange);
    var renderingControlListener =  new InternalListener(this, '/MediaRenderer/RenderingControl/Event', SonosPlayer.prototype.processRenderControlChange);
    var avTransportListener = new InternalListener(this, '/MediaRenderer/AVTransport/Event', SonosPlayer.prototype.processAVTransportChange);
    var devicePropertiesListener = new InternalListener(this, '/DeviceProperties/Event', SonosPlayer.prototype.processDevicePropertiesChange);
 
-   this.sonosListener.on('serviceEvent', function(_endpoint, _sid, _data) {
-      console.log(that.uName + ": Received notifcation from device.");
+   this.sonosListener.on('serviceEvent', (_endpoint, _sid, _data) => {
+      console.log(this.uName + ": Received notifcation from device.");
 
-      if (that.notifications[_sid]) {
-         that.notifications[_sid].call(that.player, _data);
+      if (this.notifications[_sid]) {
+         this.notifications[_sid].call(this.player, _data);
       }
       else {
-         console.error(that.uName + ": Received notification for sid that has no handler. Sid=", _sid);
+         console.error(this.uName + ": Received notification for sid that has no handler. Sid=", _sid);
       }
    });
 };
@@ -179,7 +173,6 @@ SonosPlayer.prototype.processDevicePropertiesChange = function(_data) {
 };
 
 SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   var that = this;
 
    if (this.sonos && _data.alignWithParent) {
 
@@ -211,79 +204,73 @@ SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 };
 
 SonosPlayer.prototype.setVolume = function(_level) {
-   var that = this;
 
-   this.sonos.setVolume(_level, function(_err, _result) {
+   this.sonos.setVolume(_level, (_err, _result) => {
 
       if (_err) {
-         console.log(that.uName + ": Unable to set Volume!");
+         console.log(this.uName + ": Unable to set Volume!");
       }
    });
 };
 
 SonosPlayer.prototype.setMuted = function(_muted) {
-   var that = this;
 
-   this.sonos.setMuted(_muted, function(_err, _result) {
+   this.sonos.setMuted(_muted, (_err, _result) => {
 
       if (_err) {
-         console.log(that.uName + ": Unable to set mute!");
+         console.log(this.uName + ": Unable to set mute!");
       }
    });
 };
 
 SonosPlayer.prototype.pause = function() {
-   var that = this;
 
-   this.sonos.pause(function(_err, _result) {
+   this.sonos.pause( (_err, _result) => {
 
       if (_err) {
-         console.log(that.uName + ": Unable to pause!");
+         console.log(this.uName + ": Unable to pause!");
       }
    });
 };
 
 SonosPlayer.prototype.play = function(_url) {
-   var that = this;
 
    if (_url) {
-      that.sonos.play(_url, function(_err, _result) {
+      this.sonos.play(_url, (_err, _result) => {
 
          if (_err) {
-            console.log(that.uName + ": Unable to play "+_url+"!");
+            console.log(this.uName + ": Unable to play "+_url+"!");
          }
       });
    }
    else {
-      that.sonos.play(function(_err, _result) {
+      this.sonos.play( (_err, _result) => {
 
          if (_err) {
-            console.log(that.uName + ": Unable to play!");
+            console.log(this.uName + ": Unable to play!");
          }
       });
    }
 };
 
 SonosPlayer.prototype.playNext = function(_stopIfFail) {
-   var that = this;
 
-   this.sonos.next(function(_err, _result) {
+   this.sonos.next( (_err, _result) => {
 
       if (_err) {
-         console.log(that.uName + ": Unable to play next track!");
+         console.log(this.uName + ": Unable to play next track!");
       }
 
       if (!_result && _stopIfFail) {
-         that.stop();
+         this.stop();
       }
    });
 };
 
 SonosPlayer.prototype.stop = function() {
-   var that = this;
 
-   this.sonos.stop(function(_err, _result) {
-      console.log(that.uName + ": Unable to stop music from playing!");
+   this.sonos.stop( (_err, _result) => {
+      console.log(this.uName + ": Unable to stop music from playing!");
    });
 };
 

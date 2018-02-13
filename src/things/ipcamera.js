@@ -7,7 +7,6 @@ function IpCamera(_config) {
 
    Thing.call(this, _config);
    var thingType = "camera";
-   var that = this;
 
    new Cam({ hostname: '192.168.1.177', username: 'admin', password: 'admin' }, function(err) {
       //this.absoluteMove({x: 1, y: 1, zoom: 1});

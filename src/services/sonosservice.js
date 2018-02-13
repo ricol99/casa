@@ -28,34 +28,33 @@ SonosService.prototype.registerForHostForZone = function(_zone, _callback) {
 };
 
 SonosService.prototype.coldStart = function() {
-   var that = this;
-
    search.setMaxListeners(50);
-   search.on('DeviceAvailable', function(_device, _model) {
 
-     _device.getZoneAttrs(function(_err, _attrs) {
+   search.on('DeviceAvailable', (_device, _model) => {
 
-        if (!that.players.hasOwnProperty(_attrs.CurrentZoneName)) {
-           that.players[_attrs.CurrentZoneName] = [ _device ];
-           console.log(that.uName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
+     _device.getZoneAttrs( (_err, _attrs) => {
 
-           if (that.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
+        if (!this.players.hasOwnProperty(_attrs.CurrentZoneName)) {
+           this.players[_attrs.CurrentZoneName] = [ _device ];
+           console.log(this.uName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
 
-              for (var i = 0; i < that.callbacks[_attrs.CurrentZoneName].length; ++i) {
-                 that.callbacks[_attrs.CurrentZoneName][i](null, that.players[_attrs.CurrentZoneName][0]);
+           if (this.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
+
+              for (var i = 0; i < this.callbacks[_attrs.CurrentZoneName].length; ++i) {
+                 this.callbacks[_attrs.CurrentZoneName][i](null, this.players[_attrs.CurrentZoneName][0]);
               }
            }
         }
         else {
-           that.players[_attrs.CurrentZoneName].push(_device);
+           this.players[_attrs.CurrentZoneName].push(_device);
 
-           if (that.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
+           if (this.callbacks.hasOwnProperty(_attrs.CurrentZoneName)) {
 
-              for (var i = 0; i < that.callbacks[_attrs.CurrentZoneName].length; ++i) {
-                 that.callbacks[_attrs.CurrentZoneName][i](null, that.players[_attrs.CurrentZoneName][that.players[_attrs.CurrentZoneName].length - 1]);
+              for (var i = 0; i < this.callbacks[_attrs.CurrentZoneName].length; ++i) {
+                 this.callbacks[_attrs.CurrentZoneName][i](null, this.players[_attrs.CurrentZoneName][this.players[_attrs.CurrentZoneName].length - 1]);
               }
            }
-           console.log(that.uName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
+           console.log(this.uName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
         }
      });
    });

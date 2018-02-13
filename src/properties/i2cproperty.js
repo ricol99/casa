@@ -109,32 +109,32 @@ I2CProperty.prototype.startScanning = function() {
    var out = this.transformInputReading(input);
    this.publishNewPropertyValue(input, out);
 
-   this.intervalTimerId = setInterval(function(_that) {
-      var inputReading = _that.trimInputReading(_that.wire.readVoltage(_that.channel));
+   this.intervalTimerId = setInterval(function(_this) {
+      var inputReading = _this.trimInputReading(_this.wire.readVoltage(_this.channel));
 
-      if (_that.inputResolutionThresholdExceeded(inputReading)) {
-         var outputValue = _that.transformInputReading(inputReading);
-         var outputDifference = Math.abs(outputValue - _that.previousOutputValue);
+      if (_this.inputResolutionThresholdExceeded(inputReading)) {
+         var outputValue = _this.transformInputReading(inputReading);
+         var outputDifference = Math.abs(outputValue - _this.previousOutputValue);
          console.log('Output difference is: ' + outputDifference);
 
-         if (_that.maxChange != undefined) {
+         if (_this.maxChange != undefined) {
 
-            if (outputDifference < _that.maxChange) {
+            if (outputDifference < _this.maxChange) {
                console.log('It\'s a small change, it\'s ok!');
-               _that.publishNewPropertyValue(inputReading, outputValue);
+               _this.publishNewPropertyValue(inputReading, outputValue);
             }
-            else if (_that.maxIgnore != undefined && ((_that.ignoreCounter + 1) < _that.maxIgnore)) {
-                _that.ignoreCounter += 1;
-               console.log('Output difference is too large! Ignoring! Ignored ' + _that.ignoreCounter + ' times...');
+            else if (_this.maxIgnore != undefined && ((_this.ignoreCounter + 1) < _this.maxIgnore)) {
+                _this.ignoreCounter += 1;
+               console.log('Output difference is too large! Ignoring! Ignored ' + _this.ignoreCounter + ' times...');
             }
             else {
-               _that.ignoreCounter = 0;
-               console.log(_that.uName + ': Ignored reading for too many intervals, accepting new value');
-               _that.publishNewPropertyValue(inputReading, outputValue);
+               _this.ignoreCounter = 0;
+               console.log(_this.uName + ': Ignored reading for too many intervals, accepting new value');
+               _this.publishNewPropertyValue(inputReading, outputValue);
             }
          }
          else {
-            _that.publishNewPropertyValue(inputReading, outputValue);
+            _this.publishNewPropertyValue(inputReading, outputValue);
          }
       }
    }, this.interval*1000, this);

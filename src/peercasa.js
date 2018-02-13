@@ -515,7 +515,6 @@ PeerCasa.prototype.socketHeartbeatCb = function(_data) {
 PeerCasa.prototype.deleteMeIfNeeded = function() {
 
    if (!this.persistent && this.socket) {
-      this.socket.disconnect(true);          //AAAAA
       delete this.socket;
       this.socket = undefined;
       console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');

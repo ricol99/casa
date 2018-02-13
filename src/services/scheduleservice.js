@@ -249,10 +249,9 @@ Schedule.prototype.getInitialValue = function() {
 
 function RefreshScheduler(_schedulerService) {
    this.schedulerService = _schedulerService;
-   var that = this;
 
-   var refreshJob = schedule.scheduleJob('10 1 * * *', function() {
-      that.schedulerService.refreshSunEvents();
+   var refreshJob = schedule.scheduleJob('10 1 * * *', () => {
+      this.schedulerService.refreshSunEvents();
    });
 }
 

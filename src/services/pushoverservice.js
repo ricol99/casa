@@ -27,8 +27,6 @@ PushoverService.prototype.sendMessage = function(_user, _messagePriority, _messa
       priority: _messagePriority,
    };
 
-   var that = this;
-
    this.pushService.send(msg, function(_err, _result ) {
 
       if (_err) {

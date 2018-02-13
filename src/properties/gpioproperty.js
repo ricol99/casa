@@ -12,11 +12,9 @@ function GPIOProperty(_config, _owner) {
    this.ready = false;
    this.direction = (this.writable) ? 'out' : 'in';
 
-   var that = this;
-
-   process.on('SIGINT', function() {
-      if (that.gpio) {
-         that.gpio.unexport();
+   process.on('SIGINT', () => {
+      if (this.gpio) {
+         this.gpio.unexport();
       }
    });
  
@@ -25,27 +23,26 @@ function GPIOProperty(_config, _owner) {
 util.inherits(GPIOProperty, Property);
 
 GPIOProperty.prototype.Ready = function() {
-   var that = this;
    this.ready = true;
 
-   this.gpio.read( function(_err, _value) {
-       var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
-       that.value = newValue;
-       that.updatePropertyInternal(newValue == 1, { coldStart: true });
+   this.gpio.read( (_err, _value) => {
+       var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+       this.value = newValue;
+       this.updatePropertyInternal(newValue == 1, { coldStart: true });
    });
 
-   this.gpio.watch(function (_err, _value) {
+   this.gpio.watch( (_err, _value) => {
 
       if (_err) {
-         console.log(that.uName + ": Error from gpio library! Error = " + _err);
+         console.log(this.uName + ": Error from gpio library! Error = " + _err);
       }
       else {
-         var newValue = that.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+         var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
 
-         if (newValue != that.value) {
-            console.log(that.uName + ': Value changed on GPIO Pin ' + that.gpioPin + ' to ' + newValue);
-            that.value = newValue;
-            that.updatePropertyInternal(newValue == 1);
+         if (newValue != this.value) {
+            console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
+            this.value = newValue;
+            this.updatePropertyInternal(newValue == 1);
          }
       }
    });
@@ -53,13 +50,12 @@ GPIOProperty.prototype.Ready = function() {
 
 GPIOProperty.prototype.propertyAboutToChange = function(_propValue, _data) {
 
-   if ((this.direction == 'out' || this.direction == 'inout') && (that.value != _propValue)) {
+   if ((this.direction == 'out' || this.direction == 'inout') && (this.value != _propValue)) {
       this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
    }
 }
 
 GPIOProperty.prototype.set = function(_value, _data) {
-   var that = this;
 
    if (this.ready && this.writable) {
       this.gpio.write(_value);
@@ -67,7 +63,6 @@ GPIOProperty.prototype.set = function(_value, _data) {
 }
 
 GPIOProperty.prototype.coldStart = function() {
-   var that = this;
 
    this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
    this.Ready();

@@ -17,38 +17,36 @@ function HomekitSecuritySystem(_config) {
 
    this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
 
-   var that = this;
-
    this.hkAccessory
       .addService(Service.SecuritySystem, this.displayName)
       .getCharacteristic(Characteristic.SecuritySystemCurrentState)
-      .on('get', function(_callback) {
-         _callback(null, that.getCurrentState());
+      .on('get', (_callback) => {
+         _callback(null, this.getCurrentState());
       });
 
    this.hkAccessory
       .getService(Service.SecuritySystem) 
       .getCharacteristic(Characteristic.SecuritySystemTargetState)
-      .on('set', function(_value, _callback) {
-         that.setTargetState(_value);
+      .on('set', (_value, _callback) => {
+         this.setTargetState(_value);
          _callback();
       })
-      .on('get', function(_callback) {
-         _callback(null, that.getTargetState());
+      .on('get', (_callback) => {
+         _callback(null, this.getTargetState());
       });
 
    this.hkAccessory
       .getService(Service.SecuritySystem)
       .addCharacteristic(Characteristic.StatusFault)
-      .on('get', function(_callback) {
-         _callback(null, that.getSystemFault());
+      .on('get', (_callback) => {
+         _callback(null, this.getSystemFault());
       });
 
    this.hkAccessory
       .getService(Service.SecuritySystem)
       .addCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(_callback) {
-         _callback(null, that.getTamperState());
+      .on('get', (_callback) => {
+         _callback(null, this.getTamperState());
       });
 
 }

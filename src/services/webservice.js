@@ -28,7 +28,6 @@ function WebService(_config) {
 util.inherits(WebService, Service);
 
 WebService.prototype.coldStart = function() {
-   var that = this;
    var http;
 
    if (this.secure) {
@@ -38,13 +37,13 @@ WebService.prototype.coldStart = function() {
       http = require('http').Server(app);
    }
 
-   app.get(/^(.+)$/, function(req, res){ 
-      console.log(that.uName + ": Serving file " + req.params[0]);
-      res.sendFile(that.mediaPath + req.params[0]); 
+   app.get(/^(.+)$/, (req, res) => { 
+      console.log(this.uName + ": Serving file " + req.params[0]);
+      res.sendFile(this.mediaPath + req.params[0]); 
    });
 
-   http.listen(this.port, function(){
-      console.log(that.uName + ': listening on *: ' + that.port);
+   http.listen(this.port, () => {
+      console.log(this.uName + ': listening on *: ' + this.port);
    });
 };
 

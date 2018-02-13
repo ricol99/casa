@@ -16,19 +16,17 @@ function HomekitSpeakerAccessory(_config) {
       this.ensurePropertyExists('volume', 'property', { initialValue: 1 }, _config);
    }
 
-   var that = this;
-
    this.hkAccessory
       .addService(Service.Speaker, this.displayName) // services exposed to the user should have "names" like "Speaker" for this case
       .getCharacteristic(Characteristic.Mute)
-      .on('set', function(_value, _callback) {
-         that.setMuted(_value);
+      .on('set', (_value, _callback) => {
+         this.setMuted(_value);
          _callback();
       })
       // We want to intercept requests for our current power state so we can query the hardware itself instead of
       // allowing HAP-NodeJS to return the cached Characteristic.value.
-      .on('get', function(_callback) {
-         _callback(null, that.getMuted());
+      .on('get', (_callback) => {
+         _callback(null, this.getMuted());
       });
 
    if (this.volumeSupported) {
@@ -37,12 +35,12 @@ function HomekitSpeakerAccessory(_config) {
       this.hkAccessory
         .getService(Service.Speaker)
         .addCharacteristic(Characteristic.Volume)
-        .on('set', function(_value, _callback) {
-          that.setVolume(_value);
+        .on('set', (_value, _callback) => {
+          this.setVolume(_value);
           _callback();
         })
-        .on('get', function(_callback) {
-          _callback(null, that.getVolume());
+        .on('get', (_callback) => {
+          _callback(null, this.getVolume());
         });
    }
 }

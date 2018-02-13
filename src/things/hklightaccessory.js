@@ -17,19 +17,17 @@ function HomekitLightAccessory(_config) {
 
    this.ensurePropertyExists(this.powerProp, 'property', { initialValue: false }, _config);
 
-   var that = this;
-
    this.hkAccessory
       .addService(Service.Lightbulb, this.displayName) // services exposed to the user should have "names" like "Light" for this case
       .getCharacteristic(Characteristic.On)
-      .on('set', function(_value, _callback) {
-         that.setPower(_value);
+      .on('set', (_value, _callback) => {
+         this.setPower(_value);
          _callback();
       })
       // We want to intercept requests for our current power state so we can query the hardware itself instead of
       // allowing HAP-NodeJS to return the cached Characteristic.value.
-      .on('get', function(_callback) {
-         _callback(null, that.getPower());
+      .on('get', (_callback) => {
+         _callback(null, this.getPower());
       });
 
    if (this.brightnessSupported) {
@@ -38,12 +36,12 @@ function HomekitLightAccessory(_config) {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .addCharacteristic(Characteristic.Brightness)
-        .on('set', function(_value, _callback) {
-          that.setBrightness(_value);
+        .on('set', (_value, _callback) => {
+          this.setBrightness(_value);
           _callback();
         })
-        .on('get', function(_callback) {
-          _callback(null, that.getBrightness());
+        .on('get', (_callback) => {
+          _callback(null, this.getBrightness());
         });
    }
 
@@ -53,12 +51,12 @@ function HomekitLightAccessory(_config) {
       this.hkAccessory
         .getService(Service.Lightbulb)
         .addCharacteristic(Characteristic.Saturation)
-        .on('set', function(_value, _callback) {
-           that.setSaturation(_value);
+        .on('set', (_value, _callback) => {
+           this.setSaturation(_value);
            _callback();
         })
-        .on('get', function(_callback) {
-           _callback(null, that.getSaturation());
+        .on('get', (_callback) => {
+           _callback(null, this.getSaturation());
         });
    }
 
@@ -68,12 +66,12 @@ function HomekitLightAccessory(_config) {
       this.hkAccessory
          .getService(Service.Lightbulb)
          .addCharacteristic(Characteristic.Hue)
-         .on('set', function(_value, _callback) {
-            that.setHue(_value);
+         .on('set', (_value, _callback) => {
+            this.setHue(_value);
             _callback();
          })
-         .on('get', function(_callback) {
-            _callback(null, that.getHue());
+         .on('get', (_callback) => {
+            _callback(null, this.getHue());
          });
    }
 }

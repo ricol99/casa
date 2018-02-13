@@ -29,7 +29,6 @@ function HomekitService(_config) {
 util.inherits(HomekitService, CasaService);
 
 HomekitService.prototype.coldStart = function() {
-   var that = this;
 
    // Start by creating our Bridge which will host all loaded Accessories
    this.bridge = new Bridge('Casa Homekit Bridge', uuid.generate('Casa Homekit Bridge'));

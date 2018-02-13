@@ -2,11 +2,9 @@ var util = require('util');
 var Property = require('../property');
 
 function XorProperty(_config, _owner) {
-
    _config.allSourcesRequiredForValidity = false;
-   Property.call(this, _config, _owner);
 
-   var that = this;
+   Property.call(this, _config, _owner);
 }
 
 util.inherits(XorProperty, Property);

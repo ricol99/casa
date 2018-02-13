@@ -24,14 +24,13 @@ function SecuritySpyService(_config) {
 util.inherits(SecuritySpyService, Service);
 
 SecuritySpyService.prototype.coldStart = function() {
-   var that = this;
    this.systemInfo = new SystemInfo(this);
 
-   this.systemInfo.sync(function(_err, _result) {
+   this.systemInfo.sync( (_err, _result) => {
 
       if (!_err) {
-         that.liveStreamListener = new LiveStreamListener(that);
-         that.liveStreamListener.start();
+         this.liveStreamListener = new LiveStreamListener(this);
+         this.liveStreamListener.start();
       }
    });
 };
@@ -184,29 +183,28 @@ function Request(_owner, _requestType, _path, _callback) {
 
 Request.prototype.send = function() {
    this.owner.options.path = this.path;
-   var that = this;
 
-   this.owner.http.get(this.owner.options, function(_res) {
+   this.owner.http.get(this.owner.options, (_res) => {
       //console.log('AAAAA STATUS: ' + _res.statusCode);
       //console.log('AAAAA HEADERS: ' + JSON.stringify(_res.headers));
 
-      if (!that.expectData) {
+      if (!this.expectData) {
          _res.resume();
-         that.owner.completeRequest(null, _res.statusCode == 200);
+         this.owner.completeRequest(null, _res.statusCode == 200);
          return;
       }
 
-      _res.on('data', function(_data) {
-         that.data = Buffer.concat([that.data, _data], that.data.length + _data.length);
+      _res.on('data', (_data) => {
+         this.data = Buffer.concat([this.data, _data], this.data.length + _data.length);
       });
 
-      _res.on('end', function() {
-         that.processAllData();
+      _res.on('end', () => {
+         this.processAllData();
       });
 
-   }).on('error', function(_err) {
-      console.error(that.owner.uName + ": Received error from http link: " + _err.message);
-      that.owner.completeRequest(_err.message, null);
+   }).on('error', (_err) => {
+      console.error(this.owner.uName + ": Received error from http link: " + _err.message);
+      this.owner.completeRequest(_err.message, null);
    });
 };
 
@@ -246,35 +244,34 @@ function LiveStreamListener(_owner) {
 }
 
 LiveStreamListener.prototype.start = function() {
-   var that = this;
 
-   this.http.get(this.options, function(_res) {
+   this.http.get(this.options, (_res) => {
 
       if (_res.statusCode != 200) {
          _res.resume();
-         that.restartLink();
+         this.restartLink();
          return;
       }
 
-      that.linkOpen = true;
+      this.linkOpen = true;
       _res.setEncoding('utf8');
 
-      _res.on('data', function(_data) {
+      _res.on('data', (_data) => {
          var lines = _data.split(/\r?\n/);
 
          for (index in lines) {
-            that.processLine(lines[index]);
+            this.processLine(lines[index]);
          }
       });
 
-      _res.on('end', function() {
-         that.restartLink();
+      _res.on('end', () => {
+         this.restartLink();
       });
 
-   }).on('error', function(_err) {
-      console.error(that.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
-      that.lineOpen = false;
-      that.restartLink();
+   }).on('error', (_err) => {
+      console.error(this.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
+      this.lineOpen = false;
+      this.restartLink();
    });
 
 };
@@ -338,9 +335,8 @@ function SystemInfo(_owner) {
 }
 
 SystemInfo.prototype.sync = function(_callback) {
-   var that = this;
 
-   this.http.get(this.options, function(_res) {
+   this.http.get(this.options, (_res) => {
 
       if (_res.statusCode != 200) {
          _res.resume();
@@ -350,32 +346,31 @@ SystemInfo.prototype.sync = function(_callback) {
 
       _res.setEncoding('utf8');
 
-      _res.on('data', function(_data) {
-         that.data = that.data + _data;
+      _res.on('data', (_data) => {
+         this.data = this.data + _data;
       });
 
-      _res.on('end', function() {
-         that.processAllData(_callback);
+      _res.on('end', () => {
+         this.processAllData(_callback);
       });
-   }).on('error', function(_err) {
-      console.error(that.owner.uName + ": Unable to sync System Info, error=" + _err.message);
+   }).on('error', (_err) => {
+      console.error(this.owner.uName + ": Unable to sync System Info, error=" + _err.message);
    });
 };
 
 SystemInfo.prototype.processAllData = function(_callback) {
-   var that = this;
    var parseString = require('xml2js').parseString;
 
-   parseString(this.data, function (_err, _result) {
+   parseString(this.data, (_err, _result) => {
 
       if (_err) {
-         console.error(that.owner.uName + ": Unable to parse received XML string!");
+         console.error(this.owner.uName + ": Unable to parse received XML string!");
          _callback(_err);
          return;
       }
 
       if (!_result.hasOwnProperty("system") || !_result.system.hasOwnProperty("cameralist") || !_result.system.cameralist[0].hasOwnProperty("camera")) {
-         console.error(that.owner.uName + ": Unable to parse received XML string!");
+         console.error(this.owner.uName + ": Unable to parse received XML string!");
          _callback("Unable to parse XML string!");
          return;
       }
@@ -387,7 +382,7 @@ SystemInfo.prototype.processAllData = function(_callback) {
                        "motion-capture": _result.system.cameralist[0].camera[index]["mode-m"] == "armed",
                        "actions": _result.system.cameralist[0].camera[index]["mode-a"] == "armed" };
 
-         that.owner.cameraPropUpdateReceivedFromServer(_result.system.cameralist[0].camera[index].number, props);
+         this.owner.cameraPropUpdateReceivedFromServer(_result.system.cameralist[0].camera[index].number, props);
       }
 
       this.initialInfoReceived = true;

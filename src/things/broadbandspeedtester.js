@@ -18,26 +18,25 @@ util.inherits(BroadbandSpeedTester, Thing);
 
 BroadbandSpeedTester.prototype.testSpeed = function() {
    var test = speedTest({ maxTime: this.maxTime });
-   var that = this;
 
-   test.on('data', function(_data) {
+   test.on('data', (_data) => {
 
       if (_data.hasOwnProperty('speeds')) {
-         that.alignPropertyValue('download-speed', _data.speeds.download);
-         that.alignPropertyValue('upload-speed', _data.speeds.upload);
+         this.alignPropertyValue('download-speed', _data.speeds.download);
+         this.alignPropertyValue('upload-speed', _data.speeds.upload);
 
          if (_data.hasOwnProperty('server')) {
-            that.alignPropertyValue('ping-time', _data.server.ping);
-            that.alignPropertyValue('server-address', _data.server.host);
+            this.alignPropertyValue('ping-time', _data.server.ping);
+            this.alignPropertyValue('server-address', _data.server.host);
 
-            that.alignPropertyValue('test-result', 'Speed Test: D=' + _data.speeds.download +
+            this.alignPropertyValue('test-result', 'Speed Test: D=' + _data.speeds.download +
                                     ' U=' + _data.speeds.upload + ' P=' + _data.server.ping);
          }
       }
    });
 
-   test.on('error', function(_err) {
-      console.error(that.uName + ": Error performing speed test. Error: " + _err);
+   test.on('error', (_err) => {
+      console.error(this.uName + ": Error performing speed test. Error: " + _err);
    });
 };
 

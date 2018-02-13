@@ -5,8 +5,6 @@ function Alarm(_config) {
 
    Thing.call(this, _config);
 
-   var that = this;
-
    this.ensurePropertyExists('line-failure', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('battery-failure', 'property', { initialValue: false }, _config);

@@ -43,7 +43,6 @@ function HomekitAccessory(_config) {
 util.inherits(HomekitAccessory, Thing);
 
 HomekitAccessory.prototype.coldStart = function() {
-   var that = this;
 
    this.hkAccessory
      .getService(Service.AccessoryInformation)
@@ -54,15 +53,15 @@ HomekitAccessory.prototype.coldStart = function() {
    if (this.homekitService) {
       this.homekitService.addAccessory(this.hkAccessory);
 
-      this.hkAccessory.on('identify', function(_paired, _callback) {
-         that.identify();
+      this.hkAccessory.on('identify', (_paired, _callback) => {
+         this.identify();
          _callback();
       });
    }
    else {
 
-      this.hkAccessory.on('identify', function(_paired, _callback) {
-         that.identify();
+      this.hkAccessory.on('identify', (_paired, _callback) => {
+         this.identify();
          _callback();
       });
 

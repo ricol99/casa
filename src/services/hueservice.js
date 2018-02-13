@@ -17,12 +17,11 @@ function HueService(_config) {
 util.inherits(HueService, Service);
 
 HueService.prototype.coldStart = function() {
-   var that = this;
 
-   Hue.nupnpSearch(function(_err, _bridges) {
+   Hue.nupnpSearch( (_err, _bridges) => {
 
       if (_err || _bridges.length == 0) {
-         console.error(that.uName + ": Unable to find bridge, error=" + _err ? _err : "None Found!");
+         console.error(this.uName + ": Unable to find bridge, error=" + _err ? _err : "None Found!");
          process.exit(1);
       }
 
@@ -30,38 +29,38 @@ HueService.prototype.coldStart = function() {
 
       for (var i = 0; i < _bridges.length; ++i) {
 
-         if (_bridges[i].id == that.linkId) {
-            that.linkAddress = _bridges[i].ipaddress;
+         if (_bridges[i].id == this.linkId) {
+            this.linkAddress = _bridges[i].ipaddress;
             break;
          }
       }
 
-      if (!that.linkAddress) {
-         console.error(that.uName + ": Unable to find bridge, error=" + "Id " + that.linkId + " not Found!");
+      if (!this.linkAddress) {
+         console.error(this.uName + ": Unable to find bridge, error=" + "Id " + this.linkId + " not Found!");
          process.exit(1);
       }
 
-      that.hue = new Hue.HueApi(that.linkAddress, that.userId);
-      that.lightState = Hue.lightState.create();
-      that.ready = true;
+      this.hue = new Hue.HueApi(this.linkAddress, this.userId);
+      this.lightState = Hue.lightState.create();
+      this.ready = true;
 
-      that.hue.lights(function(_err, _result) {
+      this.hue.lights(function(_err, _result) {
 
          if (_err) {
-            console.error(that.uName + ": Unable to get lights status, error=" + _err);
+            console.error(this.uName + ": Unable to get lights status, error=" + _err);
             process.exit(1);
          }
 
          for (var j = 0; j < _result.lights.length; ++j) {
             var light = _result.lights[j];
 
-            if (that.callbacks[light.id]) {
-               extractLightCapability(that, light.id, light, that.callbacks[light.id]);
+            if (this.callbacks[light.id]) {
+               extractLightCapability(this, light.id, light, this.callbacks[light.id]);
             }
          }
 
-         that.callbacks = {};
-         that.lightStatus = _result;
+         this.callbacks = {};
+         this.lightStatus = _result;
       });
    });
 };
@@ -73,7 +72,7 @@ HueService.prototype.getLightCapability = function(_deviceId, _callback) {
       return;
    }
 
-   extractLightCapability(that, _deviceId, null, _callback);
+   extractLightCapability(this, _deviceId, null, _callback);
 };
 
 function extractLightCapability(_this, _deviceId, _light, _callback) {
@@ -191,17 +190,16 @@ function Request(_owner, _request, _deviceId, _config, _callback) {
 }
 
 Request.prototype.send = function(_callback) {
-   var that = this;
 
    if (this.request === "get") {
       console.log(this.owner.uName + ': getting light status, deviceId: ' + this.deviceId);
 
-      this.owner.hue.lightStatus(this.deviceId, function(_error, _result) {
+      this.owner.hue.lightStatus(this.deviceId, (_error, _result) => {
 
-         if (that.timeout) {
-            clearTimeout(that.timeout);
-            that.timeout = null;
-            _callback(that.owner, _error, _result);
+         if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            _callback(this.owner, _error, _result);
          }
       });
    }
@@ -210,10 +208,10 @@ Request.prototype.send = function(_callback) {
 
       this.owner.hue.setLightState(this.deviceId, this.config, function(_error, _result) {
 
-         if (that.timeout) {
-            clearTimeout(that.timeout);
-            that.timeout = null;
-            _callback(that.owner, _error, _result);
+         if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            _callback(this.owner, _error, _result);
          }
       });
    }

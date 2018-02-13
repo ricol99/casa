@@ -24,8 +24,6 @@ function HueLight(_config) {
       process.exit();
    }
 
-   var that = this;
-
    if (_config.hasOwnProperty("hueSupported")) {
 
       if (_config.hueSupported) {
@@ -39,21 +37,21 @@ function HueLight(_config) {
       }
    }
    else {
-      this.hueService.getLightCapability(this.deviceId, function(_err, _result) {
+      this.hueService.getLightCapability(this.deviceId, (_err, _result) => {
 
          if (_err) {
-            console.error(that.uName + ": Not able to find hue light id=", that.deviceId);
+            console.error(this.uName + ": Not able to find hue light id=", this.deviceId);
             return;
          }
 
          if (_result.hue) {
-            that.hueSupported = true;
-            that.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
+            this.hueSupported = true;
+            this.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
          }
 
          if (_result.saturation) {
-            that.saturationSupported = true;
-            that.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
+            this.saturationSupported = true;
+            this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
          }
       });
    }
@@ -75,28 +73,27 @@ function copyObject(_sourceObject) {
 }
 
 HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   var that = this;
 
    if (!_data.coldStart) {
 
       if (_propName == "power") {
 
          if (_propValue) {
-            this.hueService.turnLightOn(this.deviceId, function(_error, _content) {
+            this.hueService.turnLightOn(this.deviceId, (_error, _content) => {
 
                if (_error) {
-                  console.log(that.uName + ': Error turning room off ' + _error.message);
+                  console.log(this.uName + ': Error turning room off ' + _error.message);
                }
                else {
-                  that.syncDeviceProperties();
+                  this.syncDeviceProperties();
                }
             });
          }
          else {
-            this.hueService.turnLightOff(this.deviceId, function(_error, _content) {
+            this.hueService.turnLightOff(this.deviceId, (_error, _content) => {
 
                if (_error) {
-                  console.log(that.uName + ': Error turning room off ' + _error.message);
+                  console.log(this.uName + ': Error turning room off ' + _error.message);
                }
             });
          }
@@ -108,30 +105,28 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
 };
 
 HueLight.prototype.syncDeviceProperties = function() {
-   var that = this;
 
    this.hueService.setLightState(this.deviceId, { power: true, brightness: this.getProperty("brightness"),
                                                   hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
-                                                  function(_error, _content) {
+                                                  (_error, _content) => {
 
          if (_error) {
-            console.error(that.uName + ': Error turning room off ' + _error.message);
+            console.error(this.uName + ': Error turning room off ' + _error.message);
          }
       });
 };
 
 HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
-   var that = this;
 
    var f = { brightness: "setLightBrightness", hue: "setLightHue",
              saturation: "setLightSaturation" };
 
    if (f[_propName]) {
 
-      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue, function(_error, _content) {
+      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue, (_error, _content) => {
 
          if (_error) {
-            console.error(that.uName + ': Error turning room off ' + _error.message);
+            console.error(this.uName + ': Error turning room off ' + _error.message);
          }
       });
    }

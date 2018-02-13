@@ -6,8 +6,6 @@ var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
 function HomekitSwitchAccessory(_config) {
-   var that = this;
-
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-switch-accessory";
 
@@ -18,14 +16,14 @@ function HomekitSwitchAccessory(_config) {
    this.hkAccessory
       .addService(this.hkService, this.displayName) // services exposed to the user should have "names" like "Light" for this case
       .getCharacteristic(Characteristic.On)
-      .on('set', function(_value, _callback) {
-         that.setSwitch(_value);
+      .on('set', (_value, _callback) => {
+         this.setSwitch(_value);
          _callback();
       })
       // We want to intercept requests for our current state so we can query the hardware itself instead of
       // allowing HAP-NodeJS to return the cached Characteristic.value.
-      .on('get', function(_callback) {
-         _callback(null, that.getSwitch());
+      .on('get', (_callback) => {
+         _callback(null, this.getSwitch());
       });
 
    this.eventName = _config.hasOwnProperty("eventName") ? _config.eventName : "switch-event";

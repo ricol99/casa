@@ -30,9 +30,9 @@ function DelayedEvent(_value, _eventData, _step) {
    this.eventData = copyData(_eventData);
    this.step = _step;
 
-   this.timeoutObj = setTimeout(function(_that) {
-      _that.step.outputForNextStep(_that.value, _that.eventData);
-      _that.step.deleteDelayedEvent();
+   this.timeoutObj = setTimeout(function(_this) {
+      _this.step.outputForNextStep(_this.value, _this.eventData);
+      _this.step.deleteDelayedEvent();
    }, this.step.delay*1000, this);
 }
 

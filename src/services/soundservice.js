@@ -54,12 +54,11 @@ SoundService.prototype.coldStart = function() {
    });
 
    this.startAnalysing();
-   var that = this;
 
    var dataArray = new Uint8Array(this.analyser.frequencyBinCount); // Uint8Array should be the same length as the frequencyBinCount 
 
-   setInterval(function() {
-      that.analyser.getByteFrequencyData(dataArray);
+   setInterval( () => {
+      this.analyser.getByteFrequencyData(dataArray);
       //console.log(dataArray);
       if (dataArray[68] > 150) 
          console.log(dataArray[68]);

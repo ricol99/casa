@@ -73,21 +73,20 @@ function moodForBrightness(_moods, _brightness) {
 }
 
 LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   var that = this;
 
    this.powerCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(that.uName + ': Error callling lightwave service for power change. Error=' + _error);
+         console.error(this.uName + ': Error callling lightwave service for power change. Error=' + _error);
       }
-   };
+   }.bind(this);
 
    this.brightnessCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(that.uName + ': Error calling lightwave service for brightness change. Error=' + _error);
+         console.error(this.uName + ': Error calling lightwave service for brightness change. Error=' + _error);
       }
-   };
+   }.bind(this);
 
    if (this.deviceId != undefined) {
       console.log(this.uName + ": Attempting to apply property change to LightwaveRf device Id=" + this.deviceId);

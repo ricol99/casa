@@ -12,13 +12,11 @@ function HomekitLightSensorAccessory(_config) {
 
    this.ensurePropertyExists('light-level', 'property', { initialValue: 1 }, _config);
 
-   var that = this;
-
    this.hkAccessory
       .addService(Service.LightSensor, this.displayName) // services exposed to the user should have "names" like "LightSensor" for this case
       .getCharacteristic(Characteristic.CurrentAmbientLightLevel)
-      .on('get', function(_callback) {
-         _callback(null, that.getCurrentLightLevel());
+      .on('get', (_callback) => {
+         _callback(null, this.getCurrentLightLevel());
       });
 }
 
