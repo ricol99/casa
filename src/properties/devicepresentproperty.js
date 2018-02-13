@@ -31,17 +31,17 @@ DevicePresentProperty.prototype.restartTimer = function() {
       clearTimeout(this.timeoutObj);
    }
 
-   this.timeoutObj = setTimeout(function(_this) {
-      _this.timeoutObj = null;
+   this.timeoutObj = setTimeout( () => {
+      this.timeoutObj = null;
 
-      if (_this.valid) {
+      if (this.valid) {
 
-         ping.sys.probe(_this.host, (_isAlive) => {
+         ping.sys.probe(this.host, (_isAlive) => {
             this.updatePropertyInternal(_isAlive);
             this.restartTimer();
          });
       }
-   }, this.interval * 1000, this);
+   }, this.interval * 1000);
 }
 
 module.exports = exports = DevicePresentProperty;
