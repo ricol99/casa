@@ -44,7 +44,7 @@ HueService.prototype.coldStart = function() {
       this.lightState = Hue.lightState.create();
       this.ready = true;
 
-      this.hue.lights(function(_err, _result) {
+      this.hue.lights( (_err, _result) => {
 
          if (_err) {
             console.error(this.uName + ": Unable to get lights status, error=" + _err);
@@ -206,7 +206,7 @@ Request.prototype.send = function(_callback) {
    else {   // Assume "set"
       console.log(this.owner.uName + ': setting light status, deviceId: ' + this.deviceId + ' config=', this.config);
 
-      this.owner.hue.setLightState(this.deviceId, this.config, function(_error, _result) {
+      this.owner.hue.setLightState(this.deviceId, this.config, (_error, _result) => {
 
          if (this.timeout) {
             clearTimeout(this.timeout);
