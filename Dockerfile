@@ -2,8 +2,12 @@ FROM node:latest
 
 # prepare dir where app will reside
 RUN mkdir -p /src/.certs/secure-config /src/properies /src/steps /src/configs /src/things /src/services
+RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
+RUN apt-get install -y nodejs
+RUN apt-get install -y build-essential
 
 WORKDIR /src
+ENV INTERNETCASA 1
 
 # copy the npm config file and run install
 COPY package.json /src/package.json
