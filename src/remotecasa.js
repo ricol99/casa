@@ -78,7 +78,7 @@ RemoteCasa.prototype.setSourceInactive = function(_source, _callback) {
 
 RemoteCasa.prototype.addSource = function(_source) {
    // Peer source being added to remote casa
-   console.log(this.uName + ': Source '  +_source.name + ' added to remote casa ');
+   console.log(this.uName + ': Source '  +_source.uName + ' added to remote casa ');
    this.sources[_source.uName] = _source;
    console.log(this.uName + ': ' + _source.uName + ' associated!');
 }
