@@ -398,8 +398,7 @@ CasaSystem.prototype.removeRemoteCasa = function(_remoteCasa) {
 
    if (this.remoteCasas[_remoteCasa.uName]) {
       delete this.remoteCasas[_remoteCasa.uName];
-      delete this.allObjects[this.uName];
-      console.error(this.uName+": AAAAA this.remoteCasas[uName]="+this.remoteCasas[_remoteCasa.uName]);
+      delete this.allObjects[_remoteCasa.uName];
    }
 };
 
