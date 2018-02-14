@@ -385,6 +385,10 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
 
 CasaSystem.prototype.createPeerCasa = function(_config) {
    console.log('Creating a peer casa for casa ' + _config.name);
+
+   _config.secureMode = this.config.secureMode;
+   _config.certPath = this.config.certPath;
+
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
    peerCasa.setCasaArea(this.peerCasaArea);

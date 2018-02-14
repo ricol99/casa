@@ -241,6 +241,7 @@ PeerCasa.prototype.start = function() {
 
 PeerCasa.prototype.connectToPeerCasa = function() {
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
+
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
    this.socket.open();
 
