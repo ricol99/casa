@@ -259,4 +259,3 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
 };
 
 module.exports = exports = SourceListener;
- 

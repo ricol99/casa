@@ -249,26 +249,26 @@ Source.prototype.alignNextProperty = function() {
 
    if (!this.alignmentTimeout && (this.propertyAlignmentQueue.length > 0)) {
 
-      this.alignmentTimeout = setTimeout(function(_this) {
-         _this.alignmentTimeout = null;
+      this.alignmentTimeout = setTimeout( () => {
+         this.alignmentTimeout = null;
 
-         if (_this.propertyAlignmentQueue.length > 0) {
-            var prop = _this.propertyAlignmentQueue.shift();
+         if (this.propertyAlignmentQueue.length > 0) {
+            var prop = this.propertyAlignmentQueue.shift();
 
             if (prop.hasOwnProperty("ramp")) {
-               console.log(_this.uName + ": Setting property " + prop.property + " to ramp");
-               _this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: _this.uName });
+               console.log(this.uName + ": Setting property " + prop.property + " to ramp");
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName });
             }
             else {
-               console.log(_this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-               _this.setProperty(prop.property, prop.value, { sourceName: _this.uName });
+               console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
+               this.setProperty(prop.property, prop.value, { sourceName: this.uName });
             }
-            _this.alignNextProperty();
+            this.alignNextProperty();
          }
          else {
-            console.error(_this.uName + ": Something has gone wrong as no alignments are in the queue!");
+            console.error(this.uName + ": Something has gone wrong as no alignments are in the queue!");
          }
-      }, 1, this);
+      }, 1);
    }
 };
 
