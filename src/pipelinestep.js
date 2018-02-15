@@ -82,6 +82,7 @@ PipelineStep.prototype.setNextStep = function(_step) {
 //
 // Internal - called when step in initialised
 PipelineStep.prototype.coldStart = function(_data) {
+   this.cold = false;
    this.nextStep.coldStart(_data);
 };
 

@@ -27,11 +27,6 @@ function PushoverStep(_config, _pipeline) {
 util.inherits(PushoverStep, PipelineStep);
 
 PushoverStep.prototype.process = function(_value, _data) {
-
-   if (_data.coldStart) {
-      return;
-   }
-
    this.pushService.sendMessage(this.userGroup.getProperty('pushoverDestAddr'), this.messagePriority, _value);
    this.outputForNextStep(_value, _data);
 }
