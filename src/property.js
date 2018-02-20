@@ -281,7 +281,7 @@ Property.prototype.amIValid = function() {
 // Called by SourceListener as a defined source has become valid again (available)
 // Property can define its policy regarding whether it decides to go valid/invalid
 // E.g. it may decide it needs all sources to be valid, or just one
-// Override isValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
+// Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
 Property.prototype.sourceIsValid = function(_data) {
 
@@ -313,9 +313,10 @@ Property.prototype.goValid = function (_data) {
 // Called by SourceListener as a defined source has become invalid (unavailable)
 // Property can define its policy regarding whether it decides to go valid/invalid
 // E.g. it may decide it needs all sources to be valid, or just one
-// Override isValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
+// Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
 Property.prototype.sourceIsInvalid = function(_data) {
+   console.log(this.uName + ': Property.prototype.sourceIsInvalid');
 
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -326,6 +327,9 @@ Property.prototype.sourceIsInvalid = function(_data) {
 
       if (this.pipeline) {
          this.pipeline.sourceIsInvalid(_data);
+      }
+      else {
+         this.goInvalid(_data);
       }
    }
 };

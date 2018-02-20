@@ -90,7 +90,7 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
    // Any remotes my parent is aware of
    for(var prop4 in this.casaSys.remoteCasas) {
 
-      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
+      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && this.casaSys.remoteCasas[prop4] && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
          casaList.push(this.casaSys.remoteCasas[prop4]);
       }
    }

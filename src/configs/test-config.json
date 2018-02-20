@@ -3,7 +3,7 @@
    "displayName": "Casa Collin TEST System",
    "gang": "casa-collin-v2-test",
    "parentCasa": {
-      "name": "casa:internet",
+      "name": "casa:internet-test",
       "address": {
          "hostname": "localhost",
          "port": 8096

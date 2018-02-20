@@ -403,6 +403,7 @@ CasaSystem.prototype.removeRemoteCasa = function(_remoteCasa) {
    if (this.remoteCasas[_remoteCasa.uName]) {
       delete this.remoteCasas[_remoteCasa.uName];
       delete this.allObjects[_remoteCasa.uName];
+      this.remoteCasas[_remoteCasa.uName] = null;
    }
 };
 

@@ -32,7 +32,7 @@ function PeerCasaService(_config) {
          //this.browser = mdns.createBrowser(mdns.tcp('casa'));
 
          this.browser.on('serviceUp', (service) => {
-            console.log('service up: casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
+            console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
             if ((!((this.gang || service.txtRecord.gang) && (service.txtRecord.gang != this.gang))) &&
                (service.name != this.casa.uName && !this.casaSys.remoteCasas[service.name])) {
@@ -49,20 +49,20 @@ function PeerCasaService(_config) {
                   if ((!this.casaSys.remoteCasas[service.name]) && (service.name > this.casa.uName)) {
                      var peerCasa = this.casaSys.createPeerCasa(config);
                      peerCasa.start();
-                     console.log('New peer casa: ' + peerCasa.uName);
+                     console.log('peercasaservice: New peer casa: ' + peerCasa.uName);
                   }
                }
             }
          });
 
          this.browser.on('serviceDown', (service) => {
-            console.log('service down: casa=' + service.name);
+            console.log('peercasaservice: service down: casa=' + service.name);
          });
 
          this.browser.start();
       } catch (_err) {
          // Not scheduled during time period
-         console.log(this.uName + ': Error: ' + _err.message);
+         console.log('peercasaservice: Error: ' + _err.message);
       }
    }
 }
@@ -71,12 +71,12 @@ PeerCasaService.prototype.createAdvertisement = function() {
    try {
      this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang }});
      this.ad.on('error', function(err) {
-        console.log('Not advertising service! Error: ' + err);
+        console.log('peercasaservice: Not advertising service! Error: ' + err);
      });
      this.ad.start();
    }
    catch (ex) {
-     console.log('Not advertising service! Error: ' + ex);
+     console.log('peercasaservice: Not advertising service! Error: ' + ex);
    }
 }
 

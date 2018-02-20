@@ -78,27 +78,43 @@
                ]
             },
             {
-               "name": "casa-test2",
-               "type": "debounceproperty",
+               "name": "casa-test2-debounce",
                "initialValue": false,
                "writable": false,
-               "threshold": 60,
-               "invalidValue": false,
                "source": {
                   "name": "casa:test2",
-                  "property": "ACTIVE"
+                  "property": "ACTIVE",
+                  "maskInvalidValue": true,
+                  "maskInvalidTimeout": 10
+               }
+            },
+            {
+               "name": "casa-test2",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "property": "casa-test2-debounce",
+                  "maskInvalidValue": false
+               }
+            },
+            {
+               "name": "casa-test-debounce",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "casa:test",
+                  "property": "ACTIVE",
+                  "maskInvalidTimeout": 10
                }
             },
             {
                "name": "casa-test",
-               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "threshold": 60,
-               "invalidValue": false,
                "source": {
-                  "name": "casa:test",
-                  "property": "ACTIVE"
+                  "name": "thing:home-internet-connection",
+                  "property": "casa-test-debounce",
+                  "maskInvalidValue": false
                }
             },
             {

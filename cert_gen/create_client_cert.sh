@@ -1,3 +1,5 @@
+#!/bin/sh
+  
 # generate private client key
 openssl genrsa -out client.key 2048
 
@@ -13,4 +15,3 @@ openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 
 mkdir -p ~/.casa-keys
 
 cp client.crt client.key ~/.casa-keys/
-

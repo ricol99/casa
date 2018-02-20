@@ -18,6 +18,12 @@ function SourceListener(_config, _owner) {
    this.priority = (_config.priority == undefined) ? 0 : _config.priority;
    this.outputValues = (_config.outputValues == undefined) ? {} : copyData(_config.outputValues);
 
+   this.maskInvalid = _config.hasOwnProperty("maskInvalidTimeout") || _config.hasOwnProperty("maskInvalidValue");
+   this.maskInvalidValueDefined = _config.hasOwnProperty("maskInvalidValue");
+
+   this.maskInvalidTimeout =  _config.hasOwnProperty("maskInvalidTimeout") ? _config.maskInvalidTimeout : -1;
+   this.maskInvalidValue = _config.maskInvalidValue;
+
    this.listeningToPropertyChange = _config.hasOwnProperty("property");
 
    if (this.listeningToPropertyChange) {
@@ -52,7 +58,7 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.casaSys.findSource(this.sourceName);
-   this.valid = (this.source != undefined) ? true : false;
+   this.valid = (this.source != undefined);
 
 
    if (this.valid) {
@@ -90,6 +96,7 @@ SourceListener.prototype.refreshSource = function() {
       console.log(this.uName + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
+         this.stopMaskInvalidTimer();
 
          if (this.pipeline) {
             this.pipeline.sourceIsValid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
@@ -103,9 +110,10 @@ SourceListener.prototype.refreshSource = function() {
 }
 
 SourceListener.prototype.internalSourceIsInvalid = function(_data) {
-   console.log(this.uName + ': INVALID');
 
-   if (this.valid) {
+   if ((_data.name === this.eventName) && this.valid) {
+      console.log(this.uName + ': INVALID');
+
       this.valid = false;
 
       if (this.listeningToPropertyChange) {
@@ -117,11 +125,21 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
       this.source.removeListener('invalid', this.invalidHandler);
 
-      if (this.pipeline) {
-         this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+      if (this.maskInvalid) {
+
+         if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
+            _data.value = this.maskInvalidValue;
+            this.internalSourcePropertyChanged(_data);
+         }
+         this.startMaskInvalidTimer();
       }
       else {
-         this.goInvalid(_data);
+         if (this.pipeline) {
+            this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+         }
+         else {
+            this.goInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+         }
       }
    }
 }
@@ -154,14 +172,55 @@ SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _da
 //
 SourceListener.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) {
    this.goValid();
-}
+};
 
 //
 // Internal method - Called by the last step in the pipeline
 //
 SourceListener.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
    this.goInvalid(_data);
-}
+};
+
+//
+// Internal method
+//
+SourceListener.prototype.startMaskInvalidTimer = function() {
+
+   if (this.maskInvalidTimeout != -1) {
+
+      if (this.maskInvalidTimer) {
+         this.stopMaskInvalidTimer();
+      }
+
+      this.maskInvalidTimer = setTimeout( () => {
+
+         if (!this.valid) {
+
+            if (this.maskInvalidValue != this.sourceRawValue) {
+               this.internalSourcePropertyChanged(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName, value: this.sourceRawValue }));
+            }
+
+            if (this.pipeline) {
+               this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            }
+            else {
+               this.goInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            }
+         }
+      }, this.maskInvalidTimeout*1000);
+   }
+};
+
+//
+// Internal method
+//
+SourceListener.prototype.stopMaskInvalidTimer = function() {
+
+   if (this.maskInvalidTimer) {
+      clearTimeout(this.maskInvalidTimer);
+      this.maskInvalidTimer = null;
+   }
+};
 
 SourceListener.prototype.transformInput = function(_data) {
    var input = _data.value;

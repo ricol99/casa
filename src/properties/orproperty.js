@@ -10,17 +10,31 @@ function OrProperty(_config, _owner) {
 util.inherits(OrProperty, Property);
 
 OrProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   this.updatePropertyInternal(this.calculateOutputValue(), _data);
+};
 
-   // any input active
+OrProperty.prototype.calculateOutputValue = function() {
+
+   // any valid input active
    for (var prop in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners[prop].sourcePropertyValue) {
-         this.updatePropertyInternal(true, _data);
-         return;
+      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners[prop].valid && this.sourceListeners[prop].sourcePropertyValue) {
+         return true;
       }
    }
 
-   this.updatePropertyInternal(false, _data);
+   return false;
+};
+
+OrProperty.prototype.amIValid = function() {
+
+   var ret = Property.prototype.amIValid.call(this);
+
+   if (ret) {
+      this.updatePropertyInternal(this.calculateOutputValue(), { sourceName: this.owner.uName });
+   }
+
+   return ret;
 };
 
 module.exports = exports = OrProperty;

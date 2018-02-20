@@ -6,8 +6,8 @@ function DebounceProperty(_config, _owner) {
    this.threshold = _config.threshold;
    this.invalidValue = _config.invalidValue;
    this.timeoutObj = null;
-   this.sourceActive = false;
-   this.active = false;
+   this.sourceState = false;
+   this.outputState = false;
    this.sourceValid = false;
 
    Property.call(this, _config, _owner);
@@ -20,17 +20,17 @@ DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener
    console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
 
    if (_data.coldStart) {    // Cold start only once
-      this.sourceActive = propValue;
-      this.active = propValue;
+      this.sourceState = propValue;
+      this.outputState = propValue;
       this.updatePropertyInternal(propValue, _data);
       return;
    }
 
-   if (this.active == propValue) {   // Current output is the same as new input, just update input
-      this.sourceActive = propValue;
+   if (this.outputState == propValue) {   // Current output is the same as new input, just update input
+      this.sourceState = propValue;
    }
-   else if (this.sourceActive != propValue) {   // Input has changed, start timer and ignore until timer expires
-      this.sourceActive = propValue;
+   else if (this.sourceState != propValue) {   // Input has changed, start timer and ignore until timer expires
+      this.sourceState = propValue;
       this.lastData = copyData(_data);  // TODO: Should we cache positive and negative case?
 
       // If a timer is already running, ignore. ELSE create one
@@ -68,8 +68,8 @@ DebounceProperty.prototype.sourceIsInvalid = function(_data) {
 
 DebounceProperty.prototype.sourceIsValid = function(_data) {
    this.sourceValid = true;
-   this.sourceActive = false;
-   this.active = false;
+   this.sourceState = false;
+   this.outputState = false;
    this.lastData = null;
    Property.prototype.sourceIsValid.call(this, _data);
 };
@@ -98,8 +98,8 @@ DebounceProperty.prototype.startTimer = function() {
       _this.timeoutObj = null;
 
       if (_this.lastData) {
-         _this.active = _this.sourceActive;
-         _this.updatePropertyInternal(_this.sourceActive, _this.lastData);
+         _this.outputState = _this.sourceState;
+         _this.updatePropertyInternal(_this.sourceState, _this.lastData);
          _this.lastData = null;
       }
 

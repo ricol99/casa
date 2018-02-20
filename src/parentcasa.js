@@ -7,6 +7,10 @@ function ParentCasa(_config) {
    PeerCasa.call(this, _config);
    this.loginAs = 'child';
    this.persistent = true;
+   this.socketOptions.reconnection = true;
+   this.socketOptions.reconnectionDelay = 1000;
+   this.socketOptions.reconnectionDelayMax = 5000;
+   this.socketOptions.reconnectionAttempts = 99999;
 }
 
 util.inherits(ParentCasa, PeerCasa);

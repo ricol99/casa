@@ -20,7 +20,7 @@ function PeerCasa(_config) {
    this.casaArea = null;
    this.loginAs = 'peer';
    this.remoteCasas = [];
-   this.persistent = true;
+   this.persistent = false;
    this.deathTime = 500;
 
    Source.call(this, _config);
@@ -55,6 +55,11 @@ function PeerCasa(_config) {
    else {
       this.http = "http";
       this.socketOptions = { transports: ['websocket'] };
+   }
+
+   if (this.proActiveConnect) {
+      this.socketOptions.forceNew = true;
+      this.socketOptions.reconnection = false;
    }
 
    this.lastHeartbeat = Date.now() + 10000;
@@ -131,7 +136,7 @@ PeerCasa.prototype.casaLostCb = function(_data) {
             this.removeCasaListeners();
             this.invalidateSources();
             this.setCasaArea(null);
-            this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+            //this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
          }
 
          this.deleteMeIfNeeded();
@@ -212,8 +217,7 @@ PeerCasa.prototype.invalidateSources = function() {
          console.log(this.uName + ': Invaliding remote casa ' + this.remoteCasas[prop].uName);
          var remoteCasa = this.remoteCasas[prop];
          this.remoteCasas[prop].invalidateSources();
-         delete this.casaSys.allObjects[this.remoteCasas[prop].uName];
-         delete this.casaSys.remoteCasas[this.remoteCasas[prop].uName];
+         this.casaSys.removeRemoteCasa(this.remoteCasas[prop]);
          delete this.remoteCasas[prop];
          delete remoteCasa;
       }
@@ -286,7 +290,7 @@ PeerCasa.prototype.socketConnectCb = function() {
 
       for (var prop in this.casaSys.remoteCasas) {
 
-         if (this.casaSys.remoteCasas.hasOwnProperty(prop) && (this.casaSys.remoteCasas[prop].loginAs == 'peer')){
+         if (this.casaSys.remoteCasas.hasOwnProperty(prop) && this.casaSys.remoteCasas[prop] && (this.casaSys.remoteCasas[prop].loginAs == 'peer')){
             peers.push(this.casaSys.remoteCasas[prop].uName);
          }
       }
@@ -342,11 +346,10 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
       this.socket.disconnect();
+      this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
    }
 
-   this.manualDisconnect = true;
    this.deleteMeIfNeeded();
 };
 
@@ -364,9 +367,10 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+      //this.socket.disconnect();
    }
 
+   this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
    this.deleteMeIfNeeded();
 };
 
@@ -515,10 +519,31 @@ PeerCasa.prototype.socketHeartbeatCb = function(_data) {
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
 
-   if (!this.persistent && this.socket) {
-      delete this.socket;
-      this.socket = undefined;
-      console.log(this.uName + ': Socket has been deleted - only peercasa object left to delete using death timer');
+   if (this.persistent) {   // Must be proActiveConnect - ie a client
+      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+
+      if (this.manualDisconnect) {
+         // Recreate socket to attempt reconnection
+         this.manualDisconnect = false;
+         console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
+         delete this.socket;
+         this.socket = null;
+         this.connectToPeerCasa();
+      }
+   }
+   else {
+
+      if (this.socket) {
+
+         if (!this.manualDisconnect) {
+            this.socket.disconnect();
+         }
+
+         delete this.socket;
+         this.socket = null;
+      }
+
+      console.log(this.uName + ': Deleting non-persistent Peercasa object - using death timer');
       this.casaSys.removeRemoteCasa(this);
 
       setTimeout(function(_this) {
@@ -528,15 +553,6 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
             delete _this;
          }
       }, this.deathTime, this);
-   }
-   else if (this.manualDisconnect) {
-      // Recreate socket to attempt reconnection
-      this.manualDisconnect = false;
-      console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-
-      if (this.proActiveConnect) {
-         this.socket.open();
-      }
    }
 }
 
