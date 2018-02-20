@@ -78,65 +78,42 @@
                ]
             },
             {
-               "name": "casa-land",
-               "type": "debounceproperty",
+               "name": "casa-env-debounce",
                "initialValue": false,
                "writable": false,
-               "threshold": 60,
-               "invalidValue": false,
                "source": {
-                  "name": "casa:land",
-                  "property": "ACTIVE"
+                  "name": "casa:env",
+                  "property": "ACTIVE",
+                  "maskInvalidTimeout": 60
                }
             },
             {
                "name": "casa-env",
-               "type": "debounceproperty",
                "initialValue": false,
                "writable": false,
-               "threshold": 60,
-               "invalidValue": false,
                "source": {
-                  "name": "casa:env",
-                  "property": "ACTIVE"
+                  "property": "casa-env-debounce",
+                  "maskInvalidValue": false
                }
             },
             {
-               "name": "alarm-armed",
+               "name": "casa-land-debounce",
                "initialValue": false,
+               "writable": false,
                "source": {
-                  "name": "alarmtexecom:dumgoyne",
-                  "property": "armed-normal"
+                  "name": "casa:land",
+                  "property": "ACTIVE",
+                  "maskInvalidTimeout": 60
                }
             },
             {
-               "name": "debounced-alarm-armed",
-               "type": "debounceproperty",
+               "name": "casa-land",
                "initialValue": false,
                "writable": false,
-               "threshold": 30,
-               "invalidValue": false,
                "source": {
-                  "name": "thing:home-internet-connection",
-                  "property": "alarm-armed"
+                  "property": "casa-land-debounce",
+                  "maskInvalidValue": false
                }
-            },
-            {
-               "name": "lost-while-armed",
-               "type": "andproperty",
-               "initialValue": false,
-               "writable": false,
-               "sources": [
-                  {
-                     "name": "casa-env",
-                     "property": "ACTIVE",
-                     "transform": "!$value"
-                  },
-                  {
-                     "name": "thing:home-internet-connection",
-                     "property": "debounced-alarm-armed"
-                  }
-               ]
             }
          ]
       },
