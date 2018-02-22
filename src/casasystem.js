@@ -72,7 +72,7 @@ function CasaSystem(_systemConfig, _config, _connectToPeers, _secureMode, _certP
    // start conecting to parent, if it exists
    if (this.parentCasa) {
       setTimeout( () => {
-         this.parentCasa.start();
+         this.parentCasa.connectToPeerCasa(this.config.parentCasa);
       }, 10000);
    }
 
@@ -245,10 +245,11 @@ CasaSystem.prototype.extractCasa = function() {
 CasaSystem.prototype.extractParentCasa = function() {
 
    if (this.config.parentCasa) {
-      this.config.parentCasa.secureMode = this.config.secureMode;
-      this.config.parentCasa.certPath = this.config.certPath;
-      var ParentCasa = require('./parentcasa');
-      this.parentCasa = new ParentCasa(this.config.parentCasa);
+      this.config.parentCasa.loginAs = "child";
+      this.config.parentCasa.persistent = true;
+
+      var PeerCasa = require('./peercasa');
+      this.parentCasa = new PeerCasa(this.config.parentCasa);
       this.remoteCasas[this.parentCasa.uName] = this.parentCasa;
       this.allObjects[this.parentCasa.uName] = this.parentCasa;
       console.log('New parentcasa: ' + this.parentCasa.uName);
@@ -369,8 +370,8 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
    // Resolve area
    area = this.resolveCasaAreasAndPeers(_config.name, _peers);
 
-   var ChildCasa = require('./childcasa');
-   var childCasa = new ChildCasa(_config);
+   var PeerCasa = require('./peercasa');
+   var childCasa = new PeerCasa(_config);
 
    if (area) {
       childCasa.setCasaArea(area);
@@ -383,19 +384,30 @@ CasaSystem.prototype.createChildCasa = function(_config, _peers) {
    return childCasa;
 };
 
-CasaSystem.prototype.createPeerCasa = function(_config) {
+CasaSystem.prototype.createPeerCasa = function(_config, _anonymous) {
    console.log('Creating a peer casa for casa ' + _config.name);
-
-   _config.secureMode = this.config.secureMode;
-   _config.certPath = this.config.certPath;
 
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config);
    peerCasa.setCasaArea(this.peerCasaArea);
 
-   this.remoteCasas[peerCasa.uName] = peerCasa;
-   this.allObjects[peerCasa.uName] = peerCasa;
+   if (!_anonymous) {
+      this.remoteCasas[peerCasa.uName] = peerCasa;
+      this.allObjects[peerCasa.uName] = peerCasa;
+   }
+
    return peerCasa;
+};
+
+CasaSystem.prototype.addRemoteCasa = function(_peerCasa) {
+
+   if (this.remoteCasas[_peerCasa.uName]) {
+      return false;
+   }
+
+   this.remoteCasas[_peerCasa.uName] = _peerCasa;
+   this.allObjects[_peerCasa.uName] = _peerCasa;
+   return true;
 };
 
 CasaSystem.prototype.removeRemoteCasa = function(_remoteCasa) {

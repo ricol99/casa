@@ -39,16 +39,11 @@ function PeerCasaService(_config) {
 
                if (!this.casaSys.parentCasa || (this.casaSys.parentCasa.uName != service.name)) {
                   // Found a peer
-                  var config  = {
-                     name: service.name,
-                     proActiveConnect: true,
-                     address: { hostname: service.host, port: service.port }
-                  };
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
                   if ((!this.casaSys.remoteCasas[service.name]) && (service.name > this.casa.uName)) {
-                     var peerCasa = this.casaSys.createPeerCasa(config);
-                     peerCasa.start();
+                     var peerCasa = this.casaSys.createPeerCasa({name: service.name});
+                     peerCasa.connectToPeerCasa({ address: { hostname: service.host, port: service.port }});
                      console.log('peercasaservice: New peer casa: ' + peerCasa.uName);
                   }
                }

@@ -11,16 +11,13 @@ function PeerCasa(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
    this.config = _config;
-   this.secureMode = _config.secureMode;
-   this.certPath = _config.certPath;
-   
-   this.proActiveConnect = _config.proActiveConnect;
-   this.address = _config.address;
+   this.secureMode = this.casa.secureMode;
+   this.certPath = this.casa.certPath;
+   this.persistent = false;
+   this.proActiveConnect = false;
 
    this.casaArea = null;
-   this.loginAs = 'peer';
    this.remoteCasas = [];
-   this.persistent = false;
    this.deathTime = 500;
 
    Source.call(this, _config);
@@ -41,42 +38,12 @@ function PeerCasa(_config) {
    this.incompleteRequests = [];
    this.reqId = 0;
 
-   if (this.secureMode) {
-      var fs = require('fs');
-      this.http = "https";
-      this.socketOptions = {
-         secure: true,
-         rejectUnauthorized: false,
-         key: fs.readFileSync(this.certPath+'/client.key'),
-         cert: fs.readFileSync(this.certPath+'/client.crt'),
-         ca: fs.readFileSync(this.certPath+'/ca.crt')
-      };
-   }
-   else {
-      this.http = "http";
-      this.socketOptions = { transports: ['websocket'] };
-   }
-
-   if (this.proActiveConnect) {
-      this.socketOptions.forceNew = true;
-      this.socketOptions.reconnection = false;
-   }
-
    this.lastHeartbeat = Date.now() + 10000;
-
    this.manualDisconnect = false;
 
    // Callbacks for listening to main casa
-   this.casaJoinedHandler = PeerCasa.prototype.casaJoinedCb.bind(this);
-   this.casaLostHandler = PeerCasa.prototype.casaLostCb.bind(this);
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
    this.sourceEventRaisedCasaHandler = PeerCasa.prototype.sourceEventRaisedCasaCb.bind(this);
-
-   if (!this.proActiveConnect) {
-      // Listen to Casa for my peer instance to connect
-      this.casa.on('casa-joined', this.casaJoinedHandler);
-      this.casa.on('casa-lost', this.casaLostHandler);
-   }
 
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
@@ -84,65 +51,6 @@ function PeerCasa(_config) {
 }
 
 util.inherits(PeerCasa, Source);
-
-PeerCasa.prototype.casaJoinedCb = function(_data) {
-
-   if (_data.peerName == this.uName) {
-     console.log(this.uName + ': I am connected to my peer. Socket: ' + _data.socket);
-
-     if (!this.connected) {
-        this.connected = true;
-        this.socket = _data.socket;
-        console.log(this.uName + ': Connected to my peer. Going active.');
-
-        this.ackMessage('login', { messageId: _data.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
-
-        var casaList = this.casaArea.buildCasaForwardingList();
-        var casaListLen = casaList.length;
-
-        // Send info regarding all relevant casas
-        for (var i = 0; i < casaListLen; ++i) {
-           casaList[i].refreshConfigWithSourcesStatus();
-           this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
-        }
-
-        // listen for source changes from peer casas
-        this.establishListeners(true);
-        this.establishHeartbeat();
-
-        this.resendUnAckedMessages();
-        this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
-     }
-   }
-};
-
-PeerCasa.prototype.casaLostCb = function(_data) {
-
-   if (_data.peerName == this.uName) {
-
-      // Cope with race between old diconnect and new connect - Ignore is sockets do not match
-      if (!this.socket || (this.socket == _data.socket)) {
-         console.log(this.uName + ': I have lost my peer!');
-
-         if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-         }
-
-         if (this.connected) {
-            console.log(this.uName + ': Lost connection to my peer. Going inactive.');
-            this.connected = false;
-            this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
-            this.removeCasaListeners();
-            this.invalidateSources();
-            this.setCasaArea(null);
-            //this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
-         }
-
-         this.deleteMeIfNeeded();
-      }
-   }
-};
 
 PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
 
@@ -174,11 +82,6 @@ PeerCasa.prototype.sourceEventRaisedCasaCb = function(_data) {
 
 PeerCasa.prototype.removeCasaListeners = function() {
    console.log(this.uName + ': removing casa listeners');
-
-   if (!this.proActiveConnect) {
-      this.casa.removeListener('casa-joined', this.casaJoinedHandler);
-      this.casa.removeListener('casa-lost', this.casaLostHandler);
-   }
 
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
@@ -236,37 +139,135 @@ PeerCasa.prototype.getPort = function() {
    return this.address.port;
 };
 
-PeerCasa.prototype.start = function() {
+PeerCasa.prototype.serveClient = function(_socket) {
+   console.log(this.uName + ': I am connected to my peer. Socket: ' + _socket);
 
-   if (this.proActiveConnect) {
-      this.connectToPeerCasa();
+   this.connected = true;
+   this.socket = _socket;
+   this.establishListeners();
+   this.establishHeartbeat();
+
+   console.log(this.uName + ': Connected to my peer. Waiting for login.');
+};
+
+PeerCasa.prototype.socketLoginCb = function(_config) {
+   console.log(this.uName + ': login: ' + _config.casaName);
+
+   if (!_config.messageId) {
+      this.deleteMeIfNeeded();
+      return;
    }
-}
 
-PeerCasa.prototype.connectToPeerCasa = function() {
+   if (_config.casaVersion && _config.casaVersion < parseFloat(this.casaSys.version)) {
+      console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
+      this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.uName, reason: "version-mismatch" });
+      this.deleteMeIfNeeded();
+      return;
+   }
+
+   this.config = deepCopyData(_config);
+   this.uName = this.config.casaName;
+   this.name = this.config.casaName;
+   this.createSources(this.config, this);
+
+   if (!this.casaSys.addRemoteCasa(this)) {
+      console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. PeerCasa already running!');
+      this.deleteMeIfNeeded();
+   }
+
+   this.casa.refreshConfigWithSourcesStatus();
+
+   this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
+
+   var casaList = this.casaArea.buildCasaForwardingList();
+   var casaListLen = casaList.length;
+
+   // Send info regarding all relevant casas
+   for (var i = 0; i < casaListLen; ++i) {
+      casaList[i].refreshConfigWithSourcesStatus();
+      this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
+   }
+
+   this.resendUnAckedMessages();
+   this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+};
+
+PeerCasa.prototype.connectToPeerCasa = function(_config) {
+   this.proActiveConnect = true;
+
+   if (_config) {
+      this.loginAs = _config.hasOwnProperty('loginAs') ? _config.loginAs : 'peer';
+      this.persistent = _config.hasOwnProperty('persistent') ? _config.persistent : false;
+      this.address = _config.address;
+   }
+
+   if (this.secureMode) {
+      var fs = require('fs');
+      this.http = "https";
+      this.socketOptions = {
+         secure: true,
+         rejectUnauthorized: false,
+         key: fs.readFileSync(this.certPath+'/client.key'),
+         cert: fs.readFileSync(this.certPath+'/client.crt'),
+         ca: fs.readFileSync(this.certPath+'/ca.crt')
+      };
+   }
+   else {
+      this.http = "http";
+      this.socketOptions = { transports: ['websocket'] };
+   }
+
+   if (this.persistent && this.proActiveConnect) {
+      this.socketOptions.reconnection = true;
+      this.socketOptions.reconnectionDelay = 1000;
+      this.socketOptions.reconnectionDelayMax = 5000;
+      this.socketOptions.reconnectionAttempts = 99999;
+      this.socketOptions.forceNew = true;
+   }
+   else {
+      this.socketOptions.reconnection = false;
+   }
+
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
 
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
    this.socket.open();
+   this.establishListeners();
+};
 
-   this.socketConnectHandler = PeerCasa.prototype.socketConnectCb.bind(this);
-   this.socketLoginSuccessHandler = PeerCasa.prototype.socketLoginSuccessCb.bind(this);
-   this.socketLoginFailureHandler = PeerCasa.prototype.socketLoginFailureCb.bind(this);
-   this.socketCasaActiveAckHandler = PeerCasa.prototype.socketCasaActiveAckCb.bind(this);
+PeerCasa.prototype.deleteSocket = function() {
 
-   this.socket.on('connect', this.socketConnectHandler);
-   this.socket.on('loginAACCKK', this.socketLoginSuccessHandler);
-   this.socket.on('loginRREEJJ', this.socketLoginFailureHandler);
-   this.socket.on('casa-activeAACCKK', this.socketCasaActiveAckHandler);
+   if (this.listenersSetUp)  {
+      this.listenersSetUp = false;
 
-   if (this.proActiveConnect) {
-      this.socketErrorHandler = PeerCasa.prototype.socketErrorCb.bind(this);
-      this.socketDisconnectHandler = PeerCasa.prototype.socketDisconnectCb.bind(this);
+      if (this.proActiveConnect) {
+         this.socket.removeListener('connect', this.socketConnectHandler);
+         this.socket.removeListener('loginAACCKK', this.socketLoginSuccessHandler);
+         this.socket.removeListener('loginRREEJJ', this.socketLoginFailureHandler);
+      }
+      else {
+         this.socket.removeListener('login', this.socketLoginHandler);
+      }
 
-      this.socket.on('error', this.socketErrorHandler);
-      this.socket.on('disconnect', this.socketDisconnectHandler);
+      this.socket.removeListener('error', this.socketErrorHandler);
+      this.socket.removeListener('disconnect', this.socketDisconnectHandler);
+      this.socket.removeListener('casa-active', this.socketCasaActiveHandler);
+      this.socket.removeListener('casa-inactive', this.socketCasaInactiveHandler);
+      this.socket.removeListener('casa-activeAACCKK', this.socketCasaActiveAckHandler);
+      this.socket.removeListener('source-property-changed', this.socketSourcePropertyChangedHandler);
+      this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
+      this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
+      this.socket.removeListener('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
+      this.socket.removeListener('set-source-property-req', this.socketSetSourcePropertyReqHandler);
+      this.socket.removeListener('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
+      this.socket.removeListener('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
+      this.socket.removeListener('set-source-property-respAACCKK', this.socketSetSourcePropertyRespAckHandler);
+      this.socket.removeListener('heartbeat', this.socketHeartbeatHandler);
    }
-}
+
+   delete this.socket;
+   this.socket = null;
+};
 
 //=================
 // Socket Callbacks
@@ -274,7 +275,6 @@ PeerCasa.prototype.connectToPeerCasa = function() {
 PeerCasa.prototype.socketConnectCb = function() {
    console.log(this.uName + ': Connected to my peer. Logging in...');
 
-   this.establishListeners();
    this.establishHeartbeat();
    this.casa.refreshConfigWithSourcesStatus();
 
@@ -346,8 +346,6 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      this.socket.disconnect();
-      this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
    }
 
    this.deleteMeIfNeeded();
@@ -367,7 +365,6 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      //this.socket.disconnect();
    }
 
    this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
@@ -526,8 +523,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
          // Recreate socket to attempt reconnection
          this.manualDisconnect = false;
          console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-         delete this.socket;
-         this.socket = null;
+         this.deleteSocket();
          this.connectToPeerCasa();
       }
    }
@@ -539,8 +535,11 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
             this.socket.disconnect();
          }
 
-         delete this.socket;
-         this.socket = null;
+         this.deleteSocket();
+      }
+
+      if (this.proActiveConnect) {
+         this.setCasaArea(null);	// ** TBD Does this only apply for proActiveConnect?
       }
 
       console.log(this.uName + ': Deleting non-persistent Peercasa object - using death timer');
@@ -574,6 +573,10 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
 
       this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
+}
+
+function deepCopyData(_sourceData) {
+   return JSON.parse(JSON.stringify(_sourceData));
 }
 
 function copyData(_sourceData) {
@@ -614,8 +617,26 @@ PeerCasa.prototype.isActive = function() {
 PeerCasa.prototype.establishListeners = function(_force) {
 
    if (!this.listenersSetUp || _force) {
+
+      if (this.proActiveConnect) {
+         this.socketConnectHandler = PeerCasa.prototype.socketConnectCb.bind(this);
+         this.socketLoginSuccessHandler = PeerCasa.prototype.socketLoginSuccessCb.bind(this);
+         this.socketLoginFailureHandler = PeerCasa.prototype.socketLoginFailureCb.bind(this);
+
+         this.socket.on('connect', this.socketConnectHandler);
+         this.socket.on('loginAACCKK', this.socketLoginSuccessHandler);
+         this.socket.on('loginRREEJJ', this.socketLoginFailureHandler);
+      }
+      else {
+         this.socketLoginHandler = PeerCasa.prototype.socketLoginCb.bind(this);
+         this.socket.on('login', this.socketLoginHandler);
+      }
+
+      this.socketErrorHandler = PeerCasa.prototype.socketErrorCb.bind(this);
+      this.socketDisconnectHandler = PeerCasa.prototype.socketDisconnectCb.bind(this);
       this.socketCasaActiveHandler = PeerCasa.prototype.socketCasaActiveCb.bind(this);
       this.socketCasaInactiveHandler = PeerCasa.prototype.socketCasaInactiveCb.bind(this);
+      this.socketCasaActiveAckHandler = PeerCasa.prototype.socketCasaActiveAckCb.bind(this);
       this.socketSourcePropertyChangedHandler = PeerCasa.prototype.socketSourcePropertyChangedCb.bind(this);
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
@@ -626,8 +647,11 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketSetSourcePropertyRespAckHandler = PeerCasa.prototype.socketSetSourcePropertyRespAckCb.bind(this);
       this.socketHeartbeatHandler = PeerCasa.prototype.socketHeartbeatCb.bind(this);
 
+      this.socket.on('error', this.socketErrorHandler);
+      this.socket.on('disconnect', this.socketDisconnectHandler);
       this.socket.on('casa-active', this.socketCasaActiveHandler);
       this.socket.on('casa-inactive', this.socketCasaInactiveHandler);
+      this.socket.on('casa-activeAACCKK', this.socketCasaActiveAckHandler);
       this.socket.on('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);

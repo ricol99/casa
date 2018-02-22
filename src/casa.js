@@ -87,7 +87,8 @@ Casa.prototype.createServer = function() {
 
    io.on('connection', (_socket) => {
       console.log('a casa has joined');
-      this.anonymousClients[_socket.id] = new Connection(this, _socket);
+      var peerCasa = this.casaSys.createPeerCasa({name: "anonymous"}, true);
+      peerCasa.serveClient(_socket);
    });
 
    http.listen(this.listeningPort, () => {
@@ -123,122 +124,6 @@ Casa.prototype.refreshSourceListeners = function() {
          this.sourceListeners[prop].refreshSource();
       }
    }
-}
-
-Casa.prototype.clientHasBeenNamed = function(_connection) {
-   this.clients[_connection.peerName] = _connection;
-   delete this.anonymousClients[_connection.socket.id];
-}
-
-Casa.prototype.deleteMe = function(_connection) {
-
-   // Deal with race conditions
-   if (_connection.deleted) {
-      return;
-   }
-
-   console.log(this.uName + ': deleting server connection object!');
-
-   var remoteCasa = _connection.remoteCasa;
-
-   if (!_connection.peerName) {
-      console.log(this.uName + ': deleting anonymous connection object!');
-      delete this.anonymousClients[_connection.socket.id];
-   } 
-   else {
-      console.log(this.uName + ': deleting connection object with name ' + _connection.peerName);
-      delete this.clients[_connection.peerName];
-   }
-
-   _connection.deleted = true;
-   delete _connection;
-}
-
-function Connection(_server, _socket) {
-   this.server = _server;
-   this.uName = _server.uName;
-   this.socket = _socket;
-
-   this.remoteCasa = null;
-   this.peerName = null;
-
-   this.socket.on('error', () => {
-
-      if (this.peerName) {
-         console.log(this.uName + ': Peer casa ' + this.peerName + ' dropped');
-         this.server.emit('casa-lost', { peerName: this.peerName, socket: this.socket });
-      }
-      setTimeout( () => {
-         this.server.deleteMe(this);
-      }, 300);
-   });
-
-   this.socket.on('disconnect', () => {
-
-      if (this.peerName) {
-         console.log(this.uName + ': Peer casa ' + this.peerName + ' dropped');
-         this.server.emit('casa-lost', { peerName: this.peerName, socket: this.socket });
-      }
-      setTimeout( () => {
-         this.server.deleteMe(this);
-      }, 300);
-   });
-
-   this.socket.on('login', (_data) => {
-      console.log(this.uName + ': login: ' + _data.casaName);
-
-      if (!_data.messageId) {
-         setTimeout(function() {
-            this.server.deleteMe(this);
-         }, 300);
-         return;
-      }
-
-      if (_data.casaVersion && _data.casaVersion < parseFloat(this.server.casaSys.version)) {
-         console.info(this.uName + ': rejecting login from casa' + _data.casaName + '. Version mismatch!');
-         this.socket.emit('loginRREEJJ', { messageId: _data.messageId, casaName: this.server.uName, reason: "version-mismatch" });
-
-         setTimeout( () => {
-            this.server.deleteMe(this);
-         }, 300);
-         return;
-      }
-
-      this.peerName = _data.casaName;
-
-      if (this.server.clients[this.peerName]) {
-
-         // old socket still open
-         if (this.server.clients[this.peerName] == this) {
-            // socket has been reused
-            console.log(this.uName + ': Old socket has been reused for casa ' + _data.casaName + '. Closing both sessions....');
-
-            setTimeout( () => {
-               this.server.deleteMe(this);
-            }, 300);
-         }
-         else {
-            console.log(this.uName + ': Old socket still open for casa ' + _data.casaName + '. Closing old session and continuing.....');
-            this.server.emit('casa-lost', { peerName: this.peerName, socket: this.server.clients[this.peerName].socket });
-
-            setTimeout( () => {
-               this.server.deleteMe(this.server.clients[this.peerName]);
-
-               console.log(this.uName + ': Establishing new logon session after race with old socket.');
-               this.remoteCasa = this.server.createRemoteCasa(_data);
-               this.server.clientHasBeenNamed(this); 
-               this.server.refreshConfigWithSourcesStatus();
-               this.server.emit('casa-joined', { messageId: _data.messageId, peerName: this.peerName, socket: this.socket, data: _data });
-            }, 300);
-         }
-      }
-      else {
-         this.remoteCasa = this.server.createRemoteCasa(_data);
-         this.server.clientHasBeenNamed(this); 
-         this.server.refreshConfigWithSourcesStatus();
-         this.server.emit('casa-joined', { messageId: _data.messageId, peerName: this.peerName, socket: this.socket, data: _data });
-      }
-   });
 }
 
 Casa.prototype.refreshConfigWithSourcesStatus = function() {

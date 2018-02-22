@@ -3,7 +3,7 @@
    "displayName": "Casa Collin Internet Casa",
    "gang": "casa-collin-v2-test",
    "area": {
-      "name": "casaarea:internet",
+      "name": "casaarea:internet-test",
       "displayName": "Casa Collin Internet"
    },
    "listeningPort": 8096,
