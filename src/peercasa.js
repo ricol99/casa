@@ -160,13 +160,13 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    if (_config.casaVersion && _config.casaVersion < parseFloat(this.casaSys.version)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
-      this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.uName, reason: "version-mismatch" });
+      this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "version-mismatch" });
       this.deleteMeIfNeeded();
       return;
    }
 
    this.config = deepCopyData(_config);
-   this.uName = this.config.casaName;
+   this.changeName(this.config.casaName);
    this.name = this.config.casaName;
    this.createSources(this.config, this);
 
@@ -178,6 +178,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    this.casa.refreshConfigWithSourcesStatus();
 
    this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
+   this.socket.emit('loginAACCKK', { casaName: this.casa.uName });
 
    var casaList = this.casaArea.buildCasaForwardingList();
    var casaListLen = casaList.length;
@@ -305,6 +306,14 @@ PeerCasa.prototype.socketConnectCb = function() {
 
 PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    console.log(this.uName + ': Login Event ACKed by my peer. Going active.');
+
+   if (this.uName != _data.casaName) {
+      console.log(this.uName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
+      this.casaSys.removeRemoteCasa(this);
+      this.changeName(_data.casaName);
+      this.name = _data.casaName;
+      this.casaSys.addRemoteCasa(this);
+   }
 
    this.messageHasBeenAcked(_data);
    this.resendUnAckedMessages();

@@ -24,8 +24,6 @@ function Casa(_config) {
    this.id = _config.id;
    this.gang = _config.gang;
 
-   this.anonymousClients = [];
-   this.clients = [];
    this.sources = [];
    this.sourceListeners = {};
    this.workers = [];
@@ -87,7 +85,7 @@ Casa.prototype.createServer = function() {
 
    io.on('connection', (_socket) => {
       console.log('a casa has joined');
-      var peerCasa = this.casaSys.createPeerCasa({name: "anonymous"}, true);
+      var peerCasa = this.casaSys.createPeerCasa({name: "casa:anonymous:"+Date.now()}, true);
       peerCasa.serveClient(_socket);
    });
 
@@ -209,7 +207,19 @@ Casa.prototype.addSource = function(_source) {
    });
 
    console.log(this.uName + ': ' + _source.uName + ' associated!');
-}
+};
+
+Casa.prototype.renameSource = function(_source, _newName) {
+   console.log(this.uName + ': Renaming source '  + _source.uName + ' to ' + _newName);
+   delete this.sources[_source.uName];
+   this.sources[_newName] = _source;
+
+   // ** TBD Don't like this! HACK!
+   if (this.casaSys.allObjects[_source.uName]) {
+      delete this.casaSys.allObjects[_source.uName];
+   }
+   this.casaSys.allObjects[_newName] = _source;
+};
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
 

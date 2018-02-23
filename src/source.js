@@ -465,5 +465,10 @@ Source.prototype.setAutoMode = function() {
    this.alignPropertyValue("MODE", "auto");
 };
 
+Source.prototype.changeName = function(_newName) {
+   this.casa.renameSource(this, _newName);
+   this.uName = _newName;
+}
+
 module.exports = exports = Source;
  

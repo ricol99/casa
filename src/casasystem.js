@@ -399,14 +399,14 @@ CasaSystem.prototype.createPeerCasa = function(_config, _anonymous) {
    return peerCasa;
 };
 
-CasaSystem.prototype.addRemoteCasa = function(_peerCasa) {
+CasaSystem.prototype.addRemoteCasa = function(_remoteCasa) {
 
-   if (this.remoteCasas[_peerCasa.uName]) {
+   if (this.remoteCasas[_remoteCasa.uName]) {
       return false;
    }
 
-   this.remoteCasas[_peerCasa.uName] = _peerCasa;
-   this.allObjects[_peerCasa.uName] = _peerCasa;
+   this.remoteCasas[_remoteCasa.uName] = _remoteCasa;
+   this.allObjects[_remoteCasa.uName] = _remoteCasa;
    return true;
 };
 
