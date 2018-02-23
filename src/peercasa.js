@@ -161,7 +161,13 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    if (_config.casaVersion && _config.casaVersion < parseFloat(this.casaSys.version)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
       this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "version-mismatch" });
-      this.deleteMeIfNeeded();
+
+      setTimeout( () => {
+         this.socket.disconnect();
+         this.manualDisconnect = true;
+         this.deleteMeIfNeeded();
+      }, 1000);
+
       return;
    }
 
@@ -172,7 +178,15 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    if (!this.casaSys.addRemoteCasa(this)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. PeerCasa already running!');
-      this.deleteMeIfNeeded();
+      this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "already-connected" });
+
+      setTimeout( () => {
+         this.socket.disconnect();
+         this.manualDisconnect = true;
+         this.deleteMeIfNeeded();
+      }, 1000);
+
+      return;
    }
 
    this.casa.refreshConfigWithSourcesStatus();
