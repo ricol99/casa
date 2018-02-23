@@ -6,7 +6,7 @@ function CasaArea(_config) {
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
 
-   this.casas = [];
+   this.casas = {};
    this.casaCount = 0;
    this.name = _config.name;
 
@@ -37,8 +37,11 @@ CasaArea.prototype.removeCasa = function(_casa) {
 CasaArea.prototype.removeAllCasas = function() {
   var len = this.casas.length;
 
-   for (var i = 0 ; i < len; ++i) {
-      this.casas[i].setArea(null);
+   for (var prop in this.casas) {
+
+      if (this.casas.hasOwnProperty(prop)) {
+         this.casas[prop].setArea(null);
+      }
    }
 }
 

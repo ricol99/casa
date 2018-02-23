@@ -145,7 +145,13 @@ PeerCasa.prototype.serveClient = function(_socket) {
    this.connected = true;
    this.socket = _socket;
    this.establishListeners();
-   this.establishHeartbeat();
+
+   this.loginTimer = setTimeout( () => {
+      console.info(this.uName + ': rejecting login from anonymous casa. Timed out!');
+      this.socket.disconnect();
+      this.manualDisconnect = true;
+      this.deleteMeIfNeeded();
+   }, 10000);
 
    console.log(this.uName + ': Connected to my peer. Waiting for login.');
 };
@@ -154,6 +160,8 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    console.log(this.uName + ': login: ' + _config.casaName);
 
    if (!_config.messageId) {
+      this.socket.disconnect();
+      this.manualDisconnect = true;
       this.deleteMeIfNeeded();
       return;
    }
@@ -161,13 +169,9 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    if (_config.casaVersion && _config.casaVersion < parseFloat(this.casaSys.version)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
       this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "version-mismatch" });
-
-      setTimeout( () => {
-         this.socket.disconnect();
-         this.manualDisconnect = true;
-         this.deleteMeIfNeeded();
-      }, 1000);
-
+      this.socket.disconnect();
+      this.manualDisconnect = true;
+      this.deleteMeIfNeeded();
       return;
    }
 
@@ -178,21 +182,19 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    if (!this.casaSys.addRemoteCasa(this)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. PeerCasa already running!');
-      this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "already-connected" });
-
-      setTimeout( () => {
-         this.socket.disconnect();
-         this.manualDisconnect = true;
-         this.deleteMeIfNeeded();
-      }, 1000);
-
+      this.socket.disconnect();
+      this.manualDisconnect = true;
+      this.deleteMeIfNeeded();
       return;
    }
+
+   clearTimeout(this.loginTimer);
+   this.loginTimer = null;
 
    this.casa.refreshConfigWithSourcesStatus();
 
    this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
-   this.socket.emit('loginAACCKK', { casaName: this.casa.uName });
+   this.establishHeartbeat();
 
    var casaList = this.casaArea.buildCasaForwardingList();
    var casaListLen = casaList.length;
@@ -290,7 +292,6 @@ PeerCasa.prototype.deleteSocket = function() {
 PeerCasa.prototype.socketConnectCb = function() {
    console.log(this.uName + ': Connected to my peer. Logging in...');
 
-   this.establishHeartbeat();
    this.casa.refreshConfigWithSourcesStatus();
 
    var messageData = {
@@ -316,10 +317,21 @@ PeerCasa.prototype.socketConnectCb = function() {
    }
 
    this.sendMessage('login', messageData);
+
+   this.loginTimer = setTimeout( () => {
+      console.info(this.uName + ': giving up on login with casa' + this.uName + '. Timed out!');
+      this.socket.disconnect();
+      this.manualDisconnect = true;
+      this.deleteMeIfNeeded();
+   }, 10000);
+
 };
 
 PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    console.log(this.uName + ': Login Event ACKed by my peer. Going active.');
+
+   clearTimeout(this.loginTimer);
+   this.loginTimer = null;
 
    if (this.uName != _data.casaName) {
       console.log(this.uName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
@@ -333,6 +345,8 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    this.resendUnAckedMessages();
    this.createSources(_data, this);
    this.connected = true;
+
+   this.establishHeartbeat();
 
    var casaList = this.casaArea.buildCasaForwardingList();
    var casaListLen = casaList.length;
@@ -399,7 +413,7 @@ PeerCasa.prototype.socketCasaActiveCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: casa-active, casa: ' + _data.sourceName);
    this.emit('broadcast-message', { message: 'casa-active', data:_data, sourceCasa: this.uName });
 
-   if (!this.casaSys.remoteCasas[_data.sourceName] && _data.sourceName != this.casa.uName) {
+   if (!this.casaSys.remoteCasas[_data.sourceName] && _data.sourceName != this.casa.uName && _data.sourceName != this.uName) {
       // Create a remote casa to represent the newly available casa
       RemoteCasa = require('./remotecasa');
       var remoteCasa = new RemoteCasa(_data.casaConfig, this);
@@ -538,6 +552,11 @@ PeerCasa.prototype.socketHeartbeatCb = function(_data) {
 //========================
 
 PeerCasa.prototype.deleteMeIfNeeded = function() {
+
+   if (this.loginTimer) {
+      clearTimeout(this.loginTimer);
+      this.loginTimer = null;
+   }
 
    if (this.persistent) {   // Must be proActiveConnect - ie a client
       this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
