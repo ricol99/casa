@@ -1064,52 +1064,6 @@
          ]
       },
       {
-         "name": "alarm:dumgoyne",
-         "displayName": "House Alarm",
-         "props": [
-            {
-               "name": "tamper-alarm",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 8,
-               "triggerLow": true
-            },
-            {
-               "name": "fire-alarm",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 18,
-               "triggerLow": true
-            },
-            {
-               "name": "zone-alarm",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 24,
-               "triggerLow": true
-            },
-            {
-               "name": "part-armed",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 23,
-               "triggerLow": true
-            },
-            {
-               "name": "fully-armed",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 22,
-               "triggerLow": true
-            }
-         ]
-      },
-      {
          "name": "alarmtexecom:dumgoyne",
          "displayName": "Dumgoyne Alarm",
          "pollingInterval": 2,

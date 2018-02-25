@@ -169,7 +169,7 @@
                "userGroup": "usergroup:key-holders",
                "sources": [
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "tamper-alarm",
                      "transformMap": {
                         "true": "Alarm being tampered with!",
@@ -177,7 +177,7 @@
                      }
                   },
                   {
-                     "name": "alarm:dumgoyne",
+                     "name": "alarmtexecom:dumgoyne",
                      "property": "fire-alarm",
                      "transformMap": {
                         "true": "Fire Alarm!",
