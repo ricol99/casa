@@ -1064,6 +1064,52 @@
          ]
       },
       {
+         "name": "alarm:dumgoyne",
+         "displayName": "House Alarm",
+         "props": [
+            {
+               "name": "alarm-gp8",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 8,
+               "triggerLow": true
+            },
+            {
+               "name": "alarm-gp18",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true
+            },
+            {
+               "name": "alarm-gp24",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 24,
+               "triggerLow": true
+            },
+            {
+               "name": "alarm-gp23",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
+            },
+            {
+               "name": "alarm-gp22",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 22,
+               "triggerLow": true
+            }
+         ]
+      },
+      {
          "name": "alarmtexecom:dumgoyne",
          "displayName": "Dumgoyne Alarm",
          "pollingInterval": 2,
