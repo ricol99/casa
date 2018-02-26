@@ -1061,7 +1061,7 @@
       {
          "name": "movementsensitiveroom:utility-room",
          "displayName": "Utility Room",
-         "movementTimeout": 600,
+         "movementTimeout": 120,
          "props": [
             {
                "name": "movement-pir",
