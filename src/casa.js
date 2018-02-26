@@ -98,20 +98,27 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};
    this.config.name = _config.name;
    this.config.displayName = _config.displayName;
-   if (_config.gang) this.config.gang = _config.gang;
+
+   if (_config.gang) {
+      this.config.gang = _config.gang;
+   }
+
    this.config.sources = [];
    this.config.sourcesStatus = [];
 
-   var len = _config.things.length;
-   for (var j = 0; j < len; ++j) {
-      this.config.sources.push(_config.things[j].name);
-      this.config.sourcesStatus.push({ properties: {}, status: false });
-   }
+   if (_config.hasOwnProperty('things')) {
+      var len = _config.things.length;
 
-   var len = _config.users.length;
-   for (var k = j; k < len + j; ++k) {
-      this.config.sources.push(_config.users[k-j].name);
-      this.config.sourcesStatus.push({ properties: {}, status: false });
+      for (var j = 0; j < len; ++j) {
+         this.config.sources.push(_config.things[j].name);
+         this.config.sourcesStatus.push({ properties: {}, status: false });
+      }
+
+      var len = _config.users.length;
+      for (var k = j; k < len + j; ++k) {
+         this.config.sources.push(_config.users[k-j].name);
+         this.config.sourcesStatus.push({ properties: {}, status: false });
+      }
    }
 }
 
