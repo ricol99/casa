@@ -1164,8 +1164,30 @@
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
+                           "name": "no-users-in-low-light",
+                           "targets": [ { "property": "power", "value": true } ]
+                        },
+                        {
                            "name": "users-present-in-low-light",
                            "targets": [ { "property": "power", "value": true } ]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "override-users",
+                     "type": "stateproperty",
+                     "initialValue": "off",
+                     "states": [
+                        {
+                           "name": "off",
+                           "priority": 0,
+                        },
+                        {
+                           "name": "on",
+                           "priority": 4,
+                           "schedules": [ { "name": "lights-off", "rule": "30 22 * * 0-4" }, { "name": "lights-off", "rule": "00 23 * * 5-6" } ],
+                           "sources": [ { "property": "low-light", "value": false, "nextState": "off" } ],
+                           "targets": [ { "property": "power", "value": false } ]
                         }
                      ]
                   }
