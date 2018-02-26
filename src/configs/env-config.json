@@ -1180,7 +1180,7 @@
                      "states": [
                         {
                            "name": "off",
-                           "priority": 0,
+                           "priority": 0
                         },
                         {
                            "name": "on",

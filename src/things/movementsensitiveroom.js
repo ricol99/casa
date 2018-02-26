@@ -89,7 +89,7 @@ function MovementSensitiveRoom(_config) {
          "initialValue": "off",
          "states": [
             {
-               "name": "off"
+               "name": "off",
                "priority": 0
             },
             {
