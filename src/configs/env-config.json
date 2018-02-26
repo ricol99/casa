@@ -1238,7 +1238,7 @@
                         },
                         {
                            "name": "users-present-in-low-light",
-                           "targets": [ { "property": "brightness", "value": 75 }, { "property": "power", "value": true } ]
+                           "targets": [ { "property": "brightness", "value": 50 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
