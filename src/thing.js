@@ -61,7 +61,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, _data)) {
+      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
          this.emitPropertyChange(_propName, _propValue, data);
       }
 
@@ -77,7 +77,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
       data.propertyOldValue = this.value;
-      Source.prototype.updateProperty.call(this, _propName, _propValue, _data);
+      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
       if (this.parent && this.propogateToParent) {
          this.parent.childPropertyChanged(_propName, _propValue, this, data);

@@ -23,25 +23,13 @@ function b(_bridges) {
 
 HueService.prototype.coldStart = function() {
 
-   Hue.nupnpSearch( (_err, _bridges) => {
-
-      if (_err) {
-         try {
-            Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
-         }
-         catch(_error) {
-            console.error(this.uName + ": No bridges found!");
-            process.exit(1);
-         }
-      }
-      else if (_bridges.length == 0) {
-         console.error(this.uName + ": No bridges found!");
-         process.exit(1);
-      }
-      else {
-         this.bridgesFound(_bridges);
-      }
-   });
+   try {
+      Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
+   }
+   catch(_error) {
+      console.error(this.uName + ": No bridges found!");
+      process.exit(1);
+   }
 };
 
 HueService.prototype.bridgesFound = function(_bridges) {

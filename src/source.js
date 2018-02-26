@@ -171,6 +171,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
+      console.log(this.uName + ': AAAAAAAAA _data.alignWithParent='+_data.alignWithParent);
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? copyData(_data) : {};

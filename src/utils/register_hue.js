@@ -10,26 +10,13 @@ var displayError = function(_err) {
 };
  
 
-Hue.nupnpSearch( (_err, _bridges) => {
-
-   if (_err) {
-      console.log('sdfjhsjdfhjsdh');
-      try {
-         Hue.upnpSearch(3000).then(bridgesFound).done();
-      }
-      catch(_error) {
-         console.error(this.uName + ": No bridges found!");
-         process.exit(1);
-      }
-   }
-   else if (_bridges.length == 0) {
-      console.error(this.uName + ": No bridges found!");
-      process.exit(1);
-   }
-   else {
-      this.bridgesFound(_bridges);
-   }
-});
+try {
+   Hue.upnpSearch(3000).then(bridgesFound).done();
+}
+catch(_error) {
+   console.error("No bridges found! Error =", _err);
+   process.exit(1);
+}
 
 function bridgesFound(_bridges) {
 
