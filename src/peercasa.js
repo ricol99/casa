@@ -566,7 +566,10 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
          this.manualDisconnect = false;
          console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
          this.deleteSocket();
-         this.connectToPeerCasa();
+
+         setTimeout( () => {
+            this.connectToPeerCasa();
+         }, 10000);
       }
    }
    else {
