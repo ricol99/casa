@@ -957,11 +957,11 @@
                         },
                         {
                            "name": "users-present",
-                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                           "targets": [ { "property": "brightness", "value": 40 }, { "property": "power", "value": true } ]
                         },
                         {
                            "name": "users-present-in-low-light",
-                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                           "targets": [ { "property": "brightness", "value": 100 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -982,9 +982,27 @@
          ]
       },
       {
-         "name": "room:snug",
+         "name": "movementsensitiveroom:snug",
          "displayName": "Snug and Music Room",
+         "movementTimeout": 600,
          "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 24,
+               "triggerLow": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "low-light"
+               }
+            }
          ],
          "things": [
             {
@@ -998,6 +1016,24 @@
                "brightnessSupported": true,
                "propogateToParent": true,
                "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "targets": [ { "property": "brightness", "value": 75 }, { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -1015,9 +1051,27 @@
          ]
       },
       {
-         "name": "room:utility-room",
+         "name": "movementsensitiveroom:utility-room",
          "displayName": "Utility Room",
+         "movementTimeout": 600,
          "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 22,
+               "triggerLow": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "low-light"
+               }
+            }
          ],
          "things": [
             {
@@ -1031,6 +1085,24 @@
                "brightnessSupported": true,
                "propogateToParent": true,
                "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "targets": [ { "property": "brightness", "value": 75 }, { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -1048,9 +1120,27 @@
          ]
       },
       {
-         "name": "room:hall",
+         "name": "movementsensitiveroom:hall",
          "displayName": "Hall",
+         "movementTimeout": 600,
          "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "low-light"
+               }
+            }
          ],
          "things": [
             {
@@ -1059,8 +1149,26 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
-               "propogateToParent": true,
+               "propogateToParent": false,
                "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "targets": [ { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -1080,8 +1188,26 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
-               "propogateToParent": true,
+               "propogateToParent": false,
                "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "targets": [ { "property": "brightness", "value": 75 }, { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
