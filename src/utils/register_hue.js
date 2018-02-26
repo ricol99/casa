@@ -9,12 +9,29 @@ var displayError = function(_err) {
     console.log("Unable to create user. Error="+ _err);
 };
  
-Hue.nupnpSearch(function(_err, _bridges) {
 
-   if (_err || _bridges.length == 0) {
-      console.error("Unable to find bridge, error=" + _err ? _err : "None Found!");
+Hue.nupnpSearch( (_err, _bridges) => {
+
+   if (_err) {
+      console.log('sdfjhsjdfhjsdh');
+      try {
+         Hue.upnpSearch(3000).then(bridgesFound).done();
+      }
+      catch(_error) {
+         console.error(this.uName + ": No bridges found!");
+         process.exit(1);
+      }
+   }
+   else if (_bridges.length == 0) {
+      console.error(this.uName + ": No bridges found!");
       process.exit(1);
    }
+   else {
+      this.bridgesFound(_bridges);
+   }
+});
+
+function bridgesFound(_bridges) {
 
    if (process.argv.length == 2) {
       console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
@@ -44,7 +61,7 @@ Hue.nupnpSearch(function(_err, _bridges) {
     .fail(displayError)
     .done();
 
-});
+};
  
 // -------------------------- 
 // Using a callback (with default description and auto generated username) 

@@ -20,48 +20,63 @@ HueService.prototype.coldStart = function() {
 
    Hue.nupnpSearch( (_err, _bridges) => {
 
-      if (_err || _bridges.length == 0) {
-         console.error(this.uName + ": Unable to find bridge, error=" + _err ? _err : "None Found!");
-         process.exit(1);
-      }
-
-      console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
-
-      for (var i = 0; i < _bridges.length; ++i) {
-
-         if (_bridges[i].id == this.linkId) {
-            this.linkAddress = _bridges[i].ipaddress;
-            break;
+      if (_err) {
+         try {
+            Hue.upnpSearch(3000).then(HueService.prototype.bridgesFound.bind(this)).done();
          }
-      }
-
-      if (!this.linkAddress) {
-         console.error(this.uName + ": Unable to find bridge, error=" + "Id " + this.linkId + " not Found!");
-         process.exit(1);
-      }
-
-      this.hue = new Hue.HueApi(this.linkAddress, this.userId);
-      this.lightState = Hue.lightState.create();
-      this.ready = true;
-
-      this.hue.lights( (_err, _result) => {
-
-         if (_err) {
-            console.error(this.uName + ": Unable to get lights status, error=" + _err);
+         catch(_error) {
+            console.error(this.uName + ": No bridges found!");
             process.exit(1);
          }
+      }
+      else if (_bridges.length == 0) {
+         console.error(this.uName + ": No bridges found!");
+         process.exit(1);
+      }
+      else {
+         this.bridgesFound(_bridges);
+      }
+   });
+};
 
-         for (var j = 0; j < _result.lights.length; ++j) {
-            var light = _result.lights[j];
+HueService.prototype.bridgesFound = function(_bridges) {
 
-            if (this.callbacks[light.id]) {
-               extractLightCapability(this, light.id, light, this.callbacks[light.id]);
-            }
+   console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
+
+   for (var i = 0; i < _bridges.length; ++i) {
+
+      if (_bridges[i].id == this.linkId) {
+         this.linkAddress = _bridges[i].ipaddress;
+         break;
+      }
+   }
+
+   if (!this.linkAddress) {
+      console.error(this.uName + ": Unable to find bridge, error=" + "Id " + this.linkId + " not Found!");
+      process.exit(1);
+   }
+
+   this.hue = new Hue.HueApi(this.linkAddress, this.userId);
+   this.lightState = Hue.lightState.create();
+   this.ready = true;
+
+   this.hue.lights( (_err, _result) => {
+
+      if (_err) {
+         console.error(this.uName + ": Unable to get lights status, error=" + _err);
+         process.exit(1);
+      }
+
+      for (var j = 0; j < _result.lights.length; ++j) {
+         var light = _result.lights[j];
+
+         if (this.callbacks[light.id]) {
+            extractLightCapability(this, light.id, light, this.callbacks[light.id]);
          }
+      }
 
-         this.callbacks = {};
-         this.lightStatus = _result;
-      });
+      this.callbacks = {};
+      this.lightStatus = _result;
    });
 };
 
