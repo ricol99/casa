@@ -914,7 +914,7 @@
          ]
       },
       {
-         "name": "room:downstairs-loo",
+         "name": "movementsensitiveroom:downstairs-loo",
          "displayName": "Downstairs Loo",
          "props": [
             {
@@ -926,118 +926,13 @@
                "triggerLow": true
             },
             {
-               "name": "movement-in-low-light",
+               "name": "low-light",
                "initialValue": false,
                "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:environment",
-                     "property": "low-light"
-                  },
-                  {
-                     "property": "movement-pir"
-                  }
-               ]
-            },
-            {
-               "name": "user-state",
-               "type": "stateproperty",
-               "initialValue": "no-users-present",
-               "states": [
-                  {
-                     "name": "no-users-present",
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "lounge-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ],
-                     "targets": [
-                        {
-                           "property": "power",
-                           "value": false
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present",
-                     "timeout": {
-                        "duration": 1800,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "name": "thing:environment",
-                           "property": "low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "loo-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ],
-                     "targets": [
-                        {
-                           "property": "power",
-                           "value": false
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present-in-low-light",
-                     "priority": 2,
-                     "timeout": {
-                        "duration": 1800,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ],
-                     "targets": [
-                        {
-                           "property": "brightness",
-                           "value": 60
-                        },
-                        {
-                           "property": "power",
-                           "value": true
-                        }
-                     ]
-                  }
-               ]
+               "source": {
+                  "name": "thing:environment",
+                  "property": "low-light"
+               }
             }
          ],
          "things": [
@@ -1052,6 +947,24 @@
                "brightnessSupported": true,
                "propogateToParent": true,
                "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present",
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        },
+                        {
+                           "name": "users-present-in-low-light",
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -1175,7 +1088,7 @@
                      "name": "lightwaverfaccessory:hall-downlighters",
                      "displayName": "Hall Downlighters",
                      "roomId": 4,
-                     "deviceId": 2,
+                     "deviceId": 5,
                      "propogateToParent": true,
                      "props": [
                      ]
