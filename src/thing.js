@@ -55,10 +55,6 @@ Thing.prototype.scheduledEventTriggered = function(_event) {
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    var data = (_data) ? _data : { sourceName: this.uName };
 
-   if (!data.coldStart && this.props.hasOwnProperty(_propName) && (_propValue === this.props[_propName].value)) {
-      return true;
-   }
-
    if (data.alignWithParent) {
 
       if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
@@ -76,6 +72,11 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
    else {
+
+      if (!data.coldStart && this.props.hasOwnProperty(_propName) && (_propValue === this.props[_propName].value)) {
+         return true;
+      }
+
       data.propertyOldValue = this.value;
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
