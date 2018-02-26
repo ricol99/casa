@@ -16,13 +16,18 @@ function HueService(_config) {
 
 util.inherits(HueService, Service);
 
+function b(_bridges) {
+   console.log(this.username+": Hue Bridges Found: " + JSON.stringify(_bridges));
+   process.exit(1);
+}
+
 HueService.prototype.coldStart = function() {
 
    Hue.nupnpSearch( (_err, _bridges) => {
 
       if (_err) {
          try {
-            Hue.upnpSearch(3000).then(HueService.prototype.bridgesFound.bind(this)).done();
+            Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
          }
          catch(_error) {
             console.error(this.uName + ": No bridges found!");
@@ -52,7 +57,7 @@ HueService.prototype.bridgesFound = function(_bridges) {
    }
 
    if (!this.linkAddress) {
-      console.error(this.uName + ": Unable to find bridge, error=" + "Id " + this.linkId + " not Found!");
+      console.error(this.uName + ": Unable to find bridge, My link Id=" + this.linkId + " not Found!");
       process.exit(1);
    }
 
