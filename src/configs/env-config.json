@@ -960,6 +960,10 @@
                            "targets": [ { "property": "brightness", "value": 40 }, { "property": "power", "value": true } ]
                         },
                         {
+                           "name": "no-users-in-low-light",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
                            "name": "users-present-in-low-light",
                            "targets": [ { "property": "brightness", "value": 100 }, { "property": "power", "value": true } ]
                         }
@@ -1026,6 +1030,10 @@
                         },
                         {
                            "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "no-users-in-low-light",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
@@ -1222,6 +1230,10 @@
                         },
                         {
                            "name": "users-present",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "no-users-in-low-light",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
