@@ -30,7 +30,7 @@ OrProperty.prototype.amIValid = function() {
 
    var ret = Property.prototype.amIValid.call(this);
 
-   if (ret) {
+   if (ret && !this.cold) {
       this.updatePropertyInternal(this.calculateOutputValue(), { sourceName: this.owner.uName });
    }
 
