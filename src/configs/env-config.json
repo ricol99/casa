@@ -217,6 +217,30 @@
                ]
             },
             {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": true,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "30 22 * * 0-4",
+                     "value": true
+                  },
+                  {
+                     "rule": "00 23 * * 5-6",
+                     "value": true
+                  },
+                  {
+                     "rule": "00 7 * * 1-5",
+                     "value": false
+                  },
+                  {
+                     "rule": "00 8 * * 0,6",
+                     "value": false
+                  }
+               ]
+            },
+            {
                "name": "background-lights",
                "initialValue": false,
                "writable": true,
@@ -228,7 +252,11 @@
                },
                "events": [
                   {
-                     "rule": "30 22 * * *",
+                     "rule": "30 22 * * 0-4",
+                     "value": false
+                  },
+                  {
+                     "rule": "00 23 * * 5-6",
                      "value": false
                   }
                ]
@@ -933,6 +961,15 @@
                   "name": "thing:environment",
                   "property": "low-light"
                }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -951,21 +988,29 @@
                      "name": "room-state",
                      "type": "stateproperty",
                      "states": [
-                        {
-                           "name": "no-users-present",
+                        {  
+                           "name": "no-users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present",
+                        }, 
+                        {  
+                           "name": "users-present-day",
                            "targets": [ { "property": "brightness", "value": 40 }, { "property": "power", "value": true } ]
-                        },
-                        {
-                           "name": "no-users-in-low-light",
+                        }, 
+                        {  
+                           "name": "no-users-present-evening", 
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present-in-low-light",
-                           "targets": [ { "property": "brightness", "value": 100 }, { "property": "power", "value": true } ]
+                        }, 
+                        {  
+                           "name": "users-present-evening",
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        }, 
+                        {  
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        }, 
+                        {  
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -1006,6 +1051,15 @@
                   "name": "thing:environment",
                   "property": "low-light"
                }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -1024,21 +1078,29 @@
                      "name": "room-state",
                      "type": "stateproperty",
                      "states": [
-                        {
-                           "name": "no-users-present",
+                        {  
+                           "name": "no-users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present",
+                        }, 
+                        {  
+                           "name": "users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "no-users-in-low-light",
+                        }, 
+                        {  
+                           "name": "no-users-present-evening", 
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present-in-low-light",
-                           "targets": [ { "property": "brightness", "value": 75 }, { "property": "power", "value": true } ]
+                        }, 
+                        {  
+                           "name": "users-present-evening",
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        }, 
+                        {  
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        }, 
+                        {  
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -1079,6 +1141,15 @@
                   "name": "thing:environment",
                   "property": "low-light"
                }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -1097,21 +1168,29 @@
                      "name": "room-state",
                      "type": "stateproperty",
                      "states": [
-                        {
-                           "name": "no-users-present",
+                        {  
+                           "name": "no-users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present",
+                        }, 
+                        {  
+                           "name": "users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "no-users-in-low-light",
+                        }, 
+                        {  
+                           "name": "no-users-present-evening", 
                            "targets": [ { "property": "power", "value": false } ]
-                        },
-                        {
-                           "name": "users-present-in-low-light",
+                        }, 
+                        {  
+                           "name": "users-present-evening",
                            "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        }, 
+                        {  
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        }, 
+                        {  
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -1152,6 +1231,15 @@
                   "name": "thing:environment",
                   "property": "low-light"
                }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -1168,38 +1256,28 @@
                      "type": "stateproperty",
                      "states": [
                         {
-                           "name": "no-users-present",
+                           "name": "no-users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
-                           "name": "users-present",
+                           "name": "users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
-                           "name": "no-users-in-low-light",
+                           "name": "no-users-present-evening",
                            "targets": [ { "property": "power", "value": true } ]
                         },
                         {
-                           "name": "users-present-in-low-light",
+                           "name": "users-present-evening",
                            "targets": [ { "property": "power", "value": true } ]
-                        }
-                     ]
-                  },
-                  {
-                     "name": "override-users",
-                     "type": "stateproperty",
-                     "initialValue": "off",
-                     "states": [
-                        {
-                           "name": "off",
-                           "priority": 0
                         },
                         {
-                           "name": "on",
-                           "priority": 4,
-                           "schedules": [ { "name": "lights-off-week-day", "rule": "30 22 * * 0-4" }, { "name": "lights-off-weekend", "rule": "00 23 * * 5-6" } ],
-                           "sources": [ { "property": "low-light", "value": false, "nextState": "off" } ],
+                           "name": "no-users-present-night",
                            "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [ { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -1229,20 +1307,28 @@
                      "type": "stateproperty",
                      "states": [
                         {
-                           "name": "no-users-present",
+                           "name": "no-users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
-                           "name": "users-present",
+                           "name": "users-present-day",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
-                           "name": "no-users-in-low-light",
+                           "name": "no-users-present-evening",
+                           "targets": [ { "property": "brightness", "value": 20 }, { "property": "power", "value": true } ]
+                        },
+                        {
+                           "name": "users-present-evening",
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                        },
+                        {
+                           "name": "no-users-present-night",
                            "targets": [ { "property": "power", "value": false } ]
                         },
                         {
-                           "name": "users-present-in-low-light",
-                           "targets": [ { "property": "brightness", "value": 50 }, { "property": "power", "value": true } ]
+                           "name": "users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
                         }
                      ]
                   }
