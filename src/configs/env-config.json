@@ -948,7 +948,7 @@
                "propogateToParent": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
@@ -1021,7 +1021,7 @@
                "propogateToParent": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
@@ -1094,7 +1094,7 @@
                "propogateToParent": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
@@ -1164,7 +1164,7 @@
                "propogateToParent": false,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
@@ -1225,7 +1225,7 @@
                "propogateToParent": false,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {

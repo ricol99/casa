@@ -44,10 +44,10 @@ function Source(_config) {
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
-                             { initialValue: 'auto',
-                               states: [ { name: "auto", priority: -1 },
-                                         { name: "manual", priority: 9999999,
-                                           timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]}, _config);
+                             { "initialValue": 'auto',
+                               "states": [ { name: "auto", priority: -100 },
+                                           { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]},
+                              _config);
 
    events.EventEmitter.call(this);
 
