@@ -1300,6 +1300,7 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
+               "brightnessSupported": true,
                "propogateToParent": false,
                "props": [
                   {
@@ -1339,6 +1340,7 @@
                      "displayName": "Hall Downlighters",
                      "roomId": 4,
                      "deviceId": 5,
+                     "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
                      ]
