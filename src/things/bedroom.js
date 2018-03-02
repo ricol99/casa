@@ -1,11 +1,11 @@
 var util = require('util');
-var MovementSensitiveRoom = require('./room');
+var MovementSensitiveRoom = require('./movementsensitiveroom');
 
 // Please define properties for automated functionality
 // movement-pir - true when there is movement detected
 // low-light - true when light levels are low enough to switch on lights
 // room-switch-event - let the users indicate they are getting ready for bed or going to sleep
-// <username>-switch-event - let each user control their own readyness for bed
+// <username>-switch-event - let each user control their own readiness for bed
 
 // Resulting user-state (s)
 // no-users-present - no movement detected
@@ -61,7 +61,7 @@ function Bedroom(_config) {
       }
 
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists("bedroom-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
+     this.users[i].ensurePropertyExists("bedroom-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
    }
 }
 
