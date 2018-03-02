@@ -1,4 +1,4 @@
-var version = 1.024;
+var version = 1.025;
 var crypto = require('crypto');
 var fs = require('fs');
 var commandLineArgs = require('command-line-args')
