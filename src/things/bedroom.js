@@ -17,34 +17,36 @@ function Bedroom(_config) {
 
    MovementSensitiveRoom.call(this, _config);
 
-   this.users = _config.users;
+   this.users = [];
    this.userStateConfigs = [];
 
    for (var i = 0; i < this.users.length; ++i) {
+      this.users.push(this.casaSys.findSource(_config.users[i].name));
+
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
-         "name": this.users[i].name+"-user-state",
+         "name": this.users[i].sName+"-user-state",
          "type": "stateproperty",
-         "initialValue": this.users[i].name+"-not-present",
+         "initialValue": "not-present",
          "states": [
             {
                "name": "not-present",
-               "sources": [ { "event": this.users[i].name+"-switch-event", "nextState": "reading" } ],
+               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" } ],
             },
             {
-               "name": "reading",
+               "name": "reading-in-bed",
                "priority": 101,
-               "sources": [ { "event": this.users[i].name+"-switch-event", "nextState": "asleep" } ],
+               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" } ],
             },
             {
-               "name": "reading-while-others-asleep",
+               "name": "reading-in-bed-others-asleep",
                "priority": 101,
-               "sources": [ { "property": this.users[i].name+"-switch-event", "nextState": "asleep" } ],
+               "sources": [ { "property": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" } ],
             },
             {
-               "name": "asleep",
+               "name": "asleep-in-bed",
                "priority": 101,
-               "sources": [ { "event": this.users[i].name+"-switch-event", "nextState": "reading" } ],
+               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" } ],
             }
          ]
       };
@@ -52,13 +54,18 @@ function Bedroom(_config) {
       for (var j = 0; j < this.users.length; ++j) {
 
          if (i !== j) {
-            this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].name, "value": "asleep", "nextState": "reading-while-others-asleep" });
+            this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].sName, "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
          }
       }
+
+      this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
+      this.users[i].ensurePropertyExists("bedroom-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
    }
 }
 
-util.inherits(Bedroom, Room);
+util.inherits(Bedroom, MovementSensitiveRoom);
 
 
 module.exports = exports = Bedroom;
