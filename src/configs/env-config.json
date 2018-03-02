@@ -72,8 +72,6 @@
       {
          "name": "hklightsensoraccessory:hk-ambient-light-sensor",
          "displayName": "Ambient Light Level",
-         "pincode": "111-11-111",
-         "username": "CC:22:3D:E3:CE:3D",
          "manufacturer": "Casa Home Automation Ltd",
          "model": "V0.1",
          "serialNumber": "1234567890",
@@ -411,8 +409,6 @@
             {
                "name": "hklightaccessory:kitchen-lights",
                "displayName": "Kitchen Lights",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:33",
                "manufacturer": "Lightwave RF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -688,8 +684,6 @@
             {
                "name": "hklightaccessory:lounge-lights",
                "displayName": "Lounge Lights",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:31",
                "manufacturer": "Lounge Light Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -815,8 +809,6 @@
             {
                "name": "hkspeakeraccessory:lounge-speakers",
                "displayName": "Lounge Speakers",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:3F",
                "manufacturer": "Lounge Speaker Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -897,8 +889,6 @@
             {
                "name": "hklightaccessory:rear-garden-outside-lights",
                "displayName": "Rear Garden South Outside Lights",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:38",
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -976,8 +966,6 @@
             {
                "name": "hklightaccessory:loo-main-light",
                "displayName": "Loo Light",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:3A",
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -1066,8 +1054,6 @@
             {
                "name": "hklightaccessory:snug-main-light",
                "displayName": "Snug Light",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:3B",
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -1156,8 +1142,6 @@
             {
                "name": "hklightaccessory:utility-lights",
                "displayName": "Utility Lights",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:3C",
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
@@ -1408,8 +1392,6 @@
             {
                "name": "hksecuritysystem:dumgoyne",
                "displayName": "Dumgoyne Security System",
-               "pincode": "111-11-111",
-               "username": "CC:22:3D:E3:CE:40",
                "manufacturer": "Casa Home Automation Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
