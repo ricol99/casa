@@ -193,6 +193,12 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    this.casa.refreshConfigWithSourcesStatus();
 
+   // Cold start Peer Casa
+   this.coldStart();
+
+   // Cold start all the peers sources now that everything has been created
+   this.coldStartPeerSources();
+
    this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
    this.establishHeartbeat();
 
@@ -346,6 +352,12 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    this.createSources(_data, this);
    this.connected = true;
 
+   // Cold start Peer Casa
+   this.coldStart();
+
+   // Cold start all the peers sources now that everything has been created
+   this.coldStartPeerSources();
+
    this.establishHeartbeat();
 
    var casaList = this.casaArea.buildCasaForwardingList();
@@ -402,6 +414,7 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
+      this.socket.disconnect();
    }
 
    this.manualDisconnect = true; // *** TBD ADDED temporarily for testing

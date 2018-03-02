@@ -164,41 +164,6 @@ Casa.prototype.isActive = function() {
    return true;
 }
 
-Casa.prototype.createRemoteCasa = function(_data) {
-   var remoteCasa;
-   _data.casaConfig.secureMode = this.secureMode;
-   _data.casaConfig.certPath = this.certPath;
-
-   if (_data.casaType == 'child') {
-      remoteCasa = this.casaSys.createChildCasa(_data.casaConfig, _data.peers);
-   }
-   else if (_data.casaType == 'peer') {
-      remoteCasa = this.casaSys.createPeerCasa(_data.casaConfig);
-   }
-
-   // Build Sources
-   var len = _data.casaConfig.sourcesStatus.length;
-   console.log(this.uName + ': New sources found = ' + len);
-
-   var PeerSource = require('./peersource');
-
-   for (var i = 0; i < len; ++i) {
-      console.log(this.uName + ': Creating peer source named ' + _data.casaConfig.sources[i]);
-      var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, remoteCasa);
-   }
-
-   // Refresh all inactive sources and workers
-   this.refreshSourceListeners();
-
-   // Cold start Peer Casa
-   remoteCasa.coldStart();
-
-   // Cold start all the peers sources now that everything has been created
-   remoteCasa.coldStartPeerSources();
-
-   return remoteCasa;
-}
-
 Casa.prototype.addSource = function(_source) {
    console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
    this.sources[_source.uName] = _source;
