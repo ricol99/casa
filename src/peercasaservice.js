@@ -63,15 +63,16 @@ function PeerCasaService(_config) {
 }
 
 PeerCasaService.prototype.createAdvertisement = function() {
+
    try {
      this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang }});
-     this.ad.on('error', function(err) {
-        console.log('peercasaservice: Not advertising service! Error: ' + err);
+     this.ad.on('error', (_err) => {
+        console.log('peercasaservice: Not advertising service! Error: ' + _err);
      });
      this.ad.start();
    }
-   catch (ex) {
-     console.log('peercasaservice: Not advertising service! Error: ' + ex);
+   catch (_ex) {
+     console.log('peercasaservice: Not advertising service! Error: ' + _ex);
    }
 }
 

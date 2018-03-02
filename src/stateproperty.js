@@ -83,10 +83,10 @@ StateProperty.prototype.setStateTimer = function(_state) {
 
    if (_state.timeout) {
 
-      this.stateTimer = setTimeout(function(_this, _timeoutState) {
-         _this.stateTimer = null;
-         _this.set(_this.transformNextState(_timeoutState), { sourceName: _this.owner });
-      }, _state.timeout.duration * 1000, this, _state.timeout.nextState);
+      this.stateTimer = setTimeout( (_timeoutState) => {
+         this.stateTimer = null;
+         this.set(this.transformNextState(_timeoutState), { sourceName: this.owner });
+      }, _state.timeout.duration * 1000, _state.timeout.nextState);
    }
 };
 
@@ -152,9 +152,9 @@ StateProperty.prototype.setState = function(_nextState) {
 
       if (immediateNextState) {
 
-         setTimeout(function(_this, _nextState) {
-            _this.set(_nextState, { sourceName: _this.owner });
-         }, 1, this, this.transformNextState(immediateNextState));
+         setTimeout( (_nextState) => {
+            this.set(_nextState, { sourceName: this.owner });
+         }, 1, this.transformNextState(immediateNextState));
       }
       else {
          this.setStateTimer(state);

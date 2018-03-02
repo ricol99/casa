@@ -603,13 +603,13 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       console.log(this.uName + ': Deleting non-persistent Peercasa object - using death timer');
       this.casaSys.removeRemoteCasa(this);
 
-      setTimeout(function(_this) {
+      setTimeout( () => {
 
-         if (!_this.connected) {
-            console.log(_this.uName + ': Peercasa object has been deleted - cleanup complete');
-            delete _this;
+         if (!this.connected) {
+            console.log(this.uName + ': Peercasa object has been deleted - cleanup complete');
+            delete this;
          }
-      }, this.deathTime, this);
+      }, this.deathTime);
    }
 }
 
@@ -730,23 +730,23 @@ PeerCasa.prototype.establishHeartbeat = function() {
    if (!this.intervalId) {
 
       // Establish heartbeat
-      this.intervalId = setInterval(function(_this){
+      this.intervalId = setInterval( () => {
 
-         if (_this.connected) {
+         if (this.connected) {
 
             // Check if we have received a heartbeat from the other side recently
-            if ((Date.now() - _this.lastHeartbeat) > 120000) {
-               console.log(_this.uName + ': No heartbeat received for two times the interval!. Closing socket.');
-               _this.manualDisconnect = true;
-               _this.socket.disconnect();
-               _this.deleteMeIfNeeded();
+            if ((Date.now() - this.lastHeartbeat) > 120000) {
+               console.log(this.uName + ': No heartbeat received for two times the interval!. Closing socket.');
+               this.manualDisconnect = true;
+               this.socket.disconnect();
+               this.deleteMeIfNeeded();
             }
             else {
-               console.log(_this.uName + ': Last heartbeat time difference = ', Date.now() - _this.lastHeartbeat);
-               _this.socket.emit('heartbeat', { casaName: _this.casa.uName });
+               console.log(this.uName + ': Last heartbeat time difference = ', Date.now() - this.lastHeartbeat);
+               this.socket.emit('heartbeat', { casaName: this.casa.uName });
             }
          }
-      }, 60000, this);
+      }, 60000);
    }
 }
 
@@ -785,7 +785,7 @@ PeerCasa.prototype.resendUnAckedMessages = function() {
    for(var prop2 in this.incompleteRequests) {
 
       if(this.incompleteRequests.hasOwnProperty(prop2)){
-         this.incompleteRequests[prop2].resendRequest(function(_requestId) {
+         this.incompleteRequests[prop2].resendRequest( (_requestId) => {
             toDelete.push(requestId);
          });
       }
@@ -811,10 +811,10 @@ RemoteCasaRequestor.prototype.sendRequest = function(_message, _deleteMe) {
    this.message = _message;
    this.socket.emit(this.message.message, this.message.data);
 
-   this.timeout = setTimeout(function(_this) {
-      _this.callback(false);
-      _deleteMe(_this.requestId);
-   }, 30000, this);
+   this.timeout = setTimeout( () => {
+      this.callback(false);
+      _deleteMe(this.requestId);
+   }, 30000);
 }
 
 RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
@@ -832,10 +832,10 @@ RemoteCasaRequestor.prototype.resendRequest = function(_deleteMe) {
 
       this.socket.emit(this.message.message, this.message.data);
 
-      this.timeout = setTimeout(function(_this) {
-         _this.callback(false);
-         _deleteMe(_this.requestId);
-      }, 30000, this);
+      this.timeout = setTimeout( () => {
+         this.callback(false);
+         _deleteMe(this.requestId);
+      }, 30000);
    }
 }
 

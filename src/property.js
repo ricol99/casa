@@ -517,10 +517,10 @@ function anyAssocArrayElementsDo(_obj, _func) {
 
 Property.prototype.checkData = function(_this, _value, _data) {
 
-   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
    // ****** TBD TODO why is this line duplicated? Should it be _data.sourceEventName?
-   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
-   if (_data.name == undefined) _data.name = this.name;
+   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
+   if (_data.name == undefined) _data.name = _this.name;
    if (_data.value == undefined) _data.value = _value;
 }
 
