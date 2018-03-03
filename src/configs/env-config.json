@@ -70,21 +70,180 @@
    ],
    "things": [
       {
-         "name": "hklightsensoraccessory:hk-ambient-light-sensor",
-         "displayName": "Ambient Light Level",
-         "manufacturer": "Casa Home Automation Ltd",
-         "model": "V0.1",
-         "serialNumber": "1234567890",
+         "name": "building:dumgoyne",
+         "displayName": "Our home in Sussex",
+         "users": [
+            { "name": "user:richard" },
+            { "name": "user:natalie" },
+            { "name": "user:dylan" }
+         ],
+         "bedrooms": [
+            { "name": "bedroom:master" },
+            { "name": "bedroom:dylan" }
+         ],
          "props": [
             {
-               "name": "light-level",
-               "initialValue": 0,
+               "name": "low-light",
+               "initialValue": false,
                "writable": false,
+               "type": "property",
+               "sources": [
+                  {
+                     "property": "low-light-threshold"
+                  }
+               ]
+            },
+            {
+               "name": "richard-present",
+               "initialValue": false,
+               "writable": false,
+               "type": "devicepresentproperty",
+               "host": "192.168.1.37",
+               "interval": 60,
+               "sourceSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 6000
+                  }
+               ]
+            },
+            {
+               "name": "natalie-present",
+               "initialValue": false,
+               "writable": false,
+               "type": "devicepresentproperty",
+               "host": "192.168.1.195",
+               "interval": 60,
+               "sourceSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 6000
+                  }
+               ]
+            },
+            {
+               "name": "dylan-present",
+               "initialValue": false,
+               "writable": false,
+               "type": "devicepresentproperty",
+               "host": "192.168.1.66",
+               "interval": 60,
+               "sourceSteps": [
+                  {
+                     "type": "latchstep",
+                     "minOutputTime": 6000
+                  }
+               ]
+            },
+            {
+               "name": "daylight-threshold",
+               "type": "thresholdproperty",
+               "initialValue": false,
+               "writable": false,
+               "threshold" : 47,
+               "buffer": 7,
+               "transform": "$value>=47",
                "source": {
-                  "name": "thing:dumgoyne-sensors",
-                  "property": "light-sensor",
-                  "transform": "$value*$value"
+                  "property": "light-sensor"
                }
+            },
+            {
+               "name": "low-light-threshold",
+               "initialValue": false,
+               "writable": false,
+               "type": "thresholdproperty",
+               "threshold" : 63,
+               "buffer": 7,
+               "transform": "$value<=63",
+               "source": {
+                  "property": "light-sensor"
+               }
+            },
+            {
+               "name": "daylight-possible",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "sunrise:-600",
+                     "value": true
+                  },
+                  {
+                     "rule": "sunset:+600",
+                     "value": false
+                  }
+               ]
+            },
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "type": "andproperty",
+               "sources": [
+                  {
+                     "property": "daylight-threshold"
+                  },
+                  {
+                     "property": "daylight-possible"
+                  }
+               ]
+            },
+            {
+               "name": "dark",
+               "initialValue": false,
+               "writable": false,
+               "type": "invertproperty",
+               "sources": [
+                  {
+                     "property": "daylight"
+                  }
+               ]
+            }
+         ],
+         "things": [
+            {
+               "name": "hklightsensoraccessory:hk-ambient-light-sensor",
+               "displayName": "Ambient Light Level",
+               "manufacturer": "Casa Home Automation Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "props": [
+                  {
+                     "name": "light-level",
+                     "initialValue": 0,
+                     "writable": false,
+                     "source": {
+                        "name": "thing:dumgoyne-sensors",
+                        "property": "light-sensor",
+                        "transform": "$value*$value"
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "thing:dumgoyne-sensors",
+               "displayName": "Environment Sensors in Dumgoyne",
+               "props": [
+                  {
+                     "name": "light-sensor",
+                     "type": "i2cproperty",
+                     "initialValue": 0,
+                     "writable": false,
+                     "address1": 104,
+                     "address2": 105,
+                     "channel": 1,
+                     "interval": 5,
+                     "maxChange": 5,
+                     "maxIgnore": 18,
+                     "inputMin": 3.291,
+                     "inputMax": 0,
+                     "outputMin": 1,
+                     "outputMax": 100,
+                     "outputResolution": 99,
+                     "floorOutput": true
+                  }
+               ]
             }
          ]
       },
@@ -112,170 +271,6 @@
          ]
       },
       {
-         "name": "thing:dumgoyne-sensors",
-         "displayName": "Environment Sensors in Dumgoyne",
-         "props": [
-            {
-               "name": "light-sensor",
-               "type": "i2cproperty",
-               "initialValue": 0,
-               "writable": false,
-               "address1": 104,
-               "address2": 105,
-               "channel": 1,
-               "interval": 5,
-               "maxChange": 5,
-               "maxIgnore": 18,
-               "inputMin": 3.291,
-               "inputMax": 0,
-               "outputMin": 1,
-               "outputMax": 100,
-               "outputResolution": 99,
-               "floorOutput": true
-            }
-         ]
-      },
-      {
-         "name": "thing:dumgoyne-environment",
-         "displayName": "Environment Based on Sensors in Dumgoyne",
-         "props": [
-            {
-               "name": "daylight-threshold",
-               "type": "thresholdproperty",
-               "initialValue": false,
-               "writable": false,
-               "threshold" : 47,
-               "buffer": 7,
-               "transform": "$value>=47",
-               "source": {
-                  "name": "thing:dumgoyne-sensors",
-                  "property": "light-sensor"
-               }
-            },
-            {
-               "name": "daylight-possible",
-               "initialValue": false,
-               "writable": false,
-               "type": "scheduleproperty",
-               "events": [
-                  {
-                     "rule": "sunrise:-600",
-                     "value": true
-                  },
-                  {
-                     "rule": "sunset:+600",
-                     "value": false
-                  }
-               ]
-            },
-            {
-               "name": "daylight",
-               "initialValue": false,
-               "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "daylight-threshold"
-                  },
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "daylight-possible"
-                  }
-               ]
-            },
-            {
-               "name": "low-light-threshold",
-               "initialValue": false,
-               "writable": false,
-               "type": "thresholdproperty",
-               "threshold" : 63,
-               "buffer": 7,
-               "transform": "$value<=63",
-               "source": {
-                  "name": "thing:dumgoyne-sensors",
-                  "property": "light-sensor"
-               }
-            },
-            {
-               "name": "low-light",
-               "initialValue": false,
-               "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "low-light-threshold"
-                  },
-                  {
-                     "name": "alarmtexecom:dumgoyne",
-                     "property": "stay-armed",
-                     "transform": "!$value"
-                  }
-               ]
-            },
-            {
-               "name": "night-time",
-               "initialValue": false,
-               "writable": true,
-               "type": "scheduleproperty",
-               "events": [
-                  {
-                     "rule": "30 22 * * 0-4",
-                     "value": true
-                  },
-                  {
-                     "rule": "00 23 * * 5-6",
-                     "value": true
-                  },
-                  {
-                     "rule": "00 7 * * 1-5",
-                     "value": false
-                  },
-                  {
-                     "rule": "00 8 * * 0,6",
-                     "value": false
-                  }
-               ]
-            },
-            {
-               "name": "background-lights",
-               "initialValue": false,
-               "writable": true,
-               "type": "scheduleproperty",
-               "source": {
-                  "name": "thing:dumgoyne-environment",
-                  "property": "daylight",
-                  "transform": "!$value"
-               },
-               "events": [
-                  {
-                     "rule": "30 22 * * 0-4",
-                     "value": false
-                  },
-                  {
-                     "rule": "00 23 * * 5-6",
-                     "value": false
-                  }
-               ]
-            },
-            {
-               "name": "richard-at-home",
-               "initialValue": false,
-               "writable": false,
-               "type": "devicepresentproperty",
-               "host": "192.168.1.128",
-               "interval": 60,
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 600
-                  }
-               ]
-            }
-         ]
-      },
-      {
          "name": "thing:dumgoyne-broadband",
          "displayName": "Dumgoyne Internet Connection",
          "things": [
@@ -291,7 +286,7 @@
          ]
       },
       {
-         "name": "room:kitchen",
+         "name": "movementsensitiveroom:kitchen",
          "displayName": "Kitchen Room",
          "props": [
             {
@@ -304,105 +299,22 @@
                "local": true
             },
             {
-               "name": "movement-in-low-light",
+               "name": "low-light",
                "initialValue": false,
                "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:environment",
-                     "property": "low-light"
-                  },
-                  {
-                     "name": "room:kitchen",
-                     "property": "movement-pir"
-                  }
-               ]
-            },
-            {
-               "name": "background-lights",
-               "initialValue": false,
-               "source" : {
-                  "name": "thing:environment",
-                  "property": "background-lights"
+               "source": {
+                  "name": "building:dumgoyne",
+                  "property": "low-light"
                }
             },
             {
-               "name": "user-state",
-               "type": "stateproperty",
-               "initialValue": "no-users-present",
-               "states": [
-                  {
-                     "name": "no-users-present",
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "kitchen-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present",
-                     "timeout": {
-                        "duration": 600,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "name": "thing:environment",
-                           "property": "low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "kitchen-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present-in-low-light",
-                     "priority": 2,
-                     "timeout": {
-                        "duration": 600,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ]
-                  }
-               ]
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -422,65 +334,29 @@
                      "initialValue": "no-users-present",
                      "states": [
                         {
-                           "name": "no-users-present",
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "name": "no-users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "users-present",
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "name": "users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "users-present-in-low-light",
+                           "name": "no-users-present-evening",
+                           "targets": [ { "property": "brightness", "value": 20 }, { "property": "power", "value": true } ]
+                        },
+                        {
+                           "name": "users-present-evening",
                            "priority": 2,
-                           "targets": [
-                              {
-                                 "property": "brightness",
-                                 "value": 60
-                              },
-                              {
-                                 "property": "power",
-                                 "value": true
-                              }
-                           ]
-                        }
-                     ]
-                  },
-                  {
-                     "name": "background-lights",
-                     "type": "stateproperty",
-                     "states": [
-                        {
-                           "name": false,
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
                         },
                         {
-                           "name": true,
-                           "priority": 1,
-                           "targets": [
-                              {
-                                 "property": "brightness",
-                                 "value": 25
-                              },
-                              {
-                                 "property": "power",
-                                 "value": true
-                              }
-                           ]
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -566,7 +442,7 @@
          ]
       },
       {
-         "name": "room:lounge",
+         "name": "movementsensitiveroom:lounge",
          "displayName": "Lounge Room",
          "props": [
             {
@@ -579,105 +455,22 @@
                "local": true
             },
             {
-               "name": "movement-in-low-light",
+               "name": "low-light",
                "initialValue": false,
                "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:environment",
-                     "property": "low-light"
-                  },
-                  {
-                     "name": "room:lounge",
-                     "property": "movement-pir"
-                  }
-               ]
-            },
-            {
-               "name": "background-lights",
-               "initialValue": false,
-               "source" : {
-                  "name": "thing:environment",
-                  "property": "background-lights"
+               "source": {
+                  "name": "building:dumgoyne",
+                  "property": "low-light"
                }
             },
             {
-               "name": "user-state",
-               "type": "stateproperty",
-               "initialValue": "no-users-present",
-               "states": [
-                  {
-                     "name": "no-users-present",
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "lounge-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present",
-                     "timeout": {
-                        "duration": 600,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "name": "thing:environment",
-                           "property": "low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present"
-                        },
-                        {
-                           "event": "lounge-switch",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ]
-                  },
-                  {
-                     "name": "users-present-in-low-light",
-                     "priority": 2,
-                     "timeout": {
-                        "duration": 600,
-                        "nextState": "no-users-present"
-                     },
-                     "sources": [
-                        {
-                           "property": "movement-in-low-light",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        },
-                        {
-                           "property": "movement-pir",
-                           "value": true,
-                           "nextState": "users-present-in-low-light"
-                        }
-                     ] 
-                  } 
-               ] 
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
@@ -696,65 +489,29 @@
                      "type": "stateproperty",
                      "states": [
                         {
-                           "name": "no-users-present",
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "name": "no-users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "users-present",
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "name": "users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "users-present-in-low-light",
+                           "name": "no-users-present-evening",
+                           "targets": [{ "property": "brightness", "value": 25 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "users-present-in-evening",
                            "priority": 2,
-                           "targets": [
-                              {
-                                 "property": "brightness",
-                                 "value": 60
-                              },
-                              {
-                                 "property": "power",
-                                 "value": true
-                              }
-                           ]
-                        }
-                     ]
-                  },
-                  {
-                     "name": "background-lights",
-                     "type": "stateproperty",
-                     "states": [
-                        {
-                           "name": false,
-                           "targets": [
-                              {
-                                 "property": "power",
-                                 "value": false
-                              }
-                           ]
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                         },
                         {
-                           "name": true,
-                           "priority": 1,
-                           "targets": [
-                              {
-                                 "property": "brightness",
-                                 "value": 25
-                              },
-                              {
-                                 "property": "power",
-                                 "value": true
-                              }
-                           ]
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
                         }
                      ]
                   }
@@ -827,7 +584,7 @@
          ]
       },
       {
-         "name": "room:outside-rear-garden-south",
+         "name": "movementsensitiveroom:outside-rear-garden-south",
          "displayName": "Outside Backdoor and Rear Garden South",
          "props": [
             {
@@ -840,48 +597,21 @@
                "local": true
             },
             {
-               "name": "movement-in-the-dark",
+               "name": "low-light",
                "initialValue": false,
                "writable": false,
-               "type": "andproperty",
-               "sources": [
-                  {
-                     "name": "thing:environment",
-                     "property": "dark"
-                  },
-                  {
-                     "name": "room:outside-rear-garden-south",
-                     "property": "movement-pir"
-                  }
-               ],
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 60
-                  }
-               ]
-            },
-            {
-               "name": "brightness",
-               "initialValue": 0,
-               "writable": false,
                "source": {
-                  "name": "room:outside-rear-garden-south",
-                  "property": "movement-in-the-dark",
-                  "outputValues": {
-                     "true": 100,
-                     "false": 0
-                  }
+                  "name": "building:dumgoyne",
+                  "property": "dark"
                }
             },
             {
-               "name": "power",
+               "name": "night-time",
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "room:outside-rear-garden-south",
-                  "property": "brightness",
-                  "transform": "$value>0"
+                  "name": "thing:environment",
+                  "property": "night-time"
                }
             }
          ],
@@ -895,6 +625,38 @@
                "brightnessSupported": true,
                "propogateToParent": true,
                "props": [
+               "props": [
+                  {
+                     "name": "user-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-evening",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-in-evening",
+                           "priority": 2,
+                           "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "no-users-present-night",
+                           "targets": [ { "property": "power", "value": false } ]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [ { "property": "brightness", "value": 100 }, { "property": "power", "value": true } ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -948,7 +710,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:environment",
+                  "name": "building:dumgoyne",
                   "property": "low-light"
                }
             },
@@ -1036,7 +798,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:environment",
+                  "name": "building:dumgoyne"
                   "property": "low-light"
                }
             },
@@ -1124,7 +886,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:environment",
+                  "name": "building:dumgoyne"
                   "property": "low-light"
                }
             },
@@ -1212,7 +974,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "thing:environment",
+                  "name": "building:dumgoyne"
                   "property": "low-light"
                }
             },

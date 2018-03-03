@@ -95,33 +95,6 @@
                   }
                ]
             },
-            {  
-               "name": "background-lights",
-               "type": "stateproperty",
-               "initialValue": false,
-               "states": [
-                  {  
-                     "name": false,
-                     "schedules": [
-                        {
-                           "name": "background-lights-off-week-night",
-                           "rule": "30 22 * * 0-4"
-                        },
-                        {
-                           "name": "background-lights-off-weekend",
-                           "rule": "00 23 * * 5-6"
-                        }
-                     ]
-                  },
-                  {
-                     "name": true,
-                     "schedule": {
-                        "name": "background-lights-on",
-                        "rule": "sunset:900"
-                     }
-                  }
-               ]
-            },
             {
                "name": "low-light",
                "initialValue": false,
@@ -139,41 +112,25 @@
                ]
             },
             {
-               "name": "bedtime",
+               "name": "night-time",
                "initialValue": false,
-               "writable": false,
+               "writable": true,
                "type": "scheduleproperty",
                "events": [
                   {
-                     "rule": "30 22 * * *",
+                     "rule": "30 22 * * 0-4",
                      "value": true
                   },
                   {
-                     "rule": "15 23 * * *",
-                     "value": false
-                  }
-               ]
-            },
-            {
-               "name": "dylan-in-bed",
-               "initialValue": false,
-               "writable": false,
-               "type": "scheduleproperty",
-               "events": [
-                  {
-                     "rule": "00 21 * * 1-5",
+                     "rule": "00 23 * * 5-6",
                      "value": true
                   },
                   {
-                     "rule": "30 22 * * 0,6",
-                     "value": true
-                  },
-                  {
-                     "rule": "30 7 * * 1-5",
+                     "rule": "00 7 * * 1-5",
                      "value": false
                   },
                   {
-                     "rule": "30 9 * * 0,6",
+                     "rule": "00 8 * * 0,6",
                      "value": false
                   }
                ]
@@ -191,28 +148,12 @@
                "type": "topvalidproperty",
                "sources": [
                   {
-                     "name": "thing:dumgoyne-environment",
+                     "name": "building:dumgoyne",
                      "property": "daylight"
                   },
                   {
                      "name": "thing:timed-environment",
                      "property": "daylight"
-                  }
-               ]
-            },
-            {
-               "name": "background-lights",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "name": "thing:dumgoyne-environment",
-                     "property": "background-lights"
-                  },
-                  {
-                     "name": "thing:timed-environment",
-                     "property": "background-lights"
                   }
                ]
             },
@@ -220,11 +161,11 @@
                "name": "dark",
                "initialValue": false,
                "writable": false,
-               "type": "invertproperty",
                "sources": [
                   {
                      "name": "thing:environment",
-                     "property": "daylight"
+                     "property": "daylight",
+                     "transform": "!$value"
                   }
                ]
             },
@@ -235,7 +176,7 @@
                "type": "topvalidproperty",
                "sources": [
                   {
-                     "name": "thing:dumgoyne-environment",
+                     "name": "building:dumgoyne",
                      "property": "low-light"
                   },
                   {
@@ -245,14 +186,14 @@
                ]
             },
             {
-               "name": "bedtime",
+               "name": "night-time",
                "initialValue": false,
                "writable": false,
                "type": "topvalidproperty",
                "sources": [
                   {
                      "name": "thing:timed-environment",
-                     "property": "bedtime"
+                     "property": "low-light"
                   }
                ]
             }
