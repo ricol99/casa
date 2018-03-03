@@ -56,6 +56,76 @@
    "scenes": [],
    "things": [
       {
+         "name": "thing:landing-gpio",
+         "displayName": "Test Landing Gpio",
+         "props": [
+            {
+               "name": "land-gp8",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 8,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp17",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp18",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp24",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 24,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp25",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 25,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp27",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 27,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp23",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true
+            },
+            {
+               "name": "land-gp22",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 22,
+               "triggerLow": true
+            }
+         ]
+      },
+      {
          "name": "securityspycamera:back-garden-gate",
          "id": 1
       },
