@@ -136,9 +136,6 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
          return prop.set(_data.value, _data);
       }
    }
-   else {
-      this.emitPropertyChange(_data.name, _data.value);
-   }
 };
 
 // Only called by ghost peer source - can cause duplicates! TODO
