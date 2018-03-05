@@ -329,7 +329,7 @@
                "propogateToChild": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "initialValue": "no-users-present",
                      "states": [
@@ -485,7 +485,7 @@
                "propogateToChild": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
@@ -626,7 +626,7 @@
                "propogateToParent": true,
                "props": [
                   {
-                     "name": "user-state",
+                     "name": "room-state",
                      "type": "stateproperty",
                      "states": [
                         {
