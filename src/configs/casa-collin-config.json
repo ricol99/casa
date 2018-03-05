@@ -193,7 +193,7 @@
                "sources": [
                   {
                      "name": "thing:timed-environment",
-                     "property": "low-light"
+                     "property": "night-time"
                   }
                ]
             }

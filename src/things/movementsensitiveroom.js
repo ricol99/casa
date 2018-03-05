@@ -52,7 +52,6 @@ function MovementSensitiveRoom(_config) {
       this.roomStateConfig.states.push({ "name": "no-users-present-evening", "priority": 2,
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-evening" },
                                                      { "property": "night-time", "value": true, "nextState": "no-users-present-night" },
-                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-evening" },
                                                      { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
    }
 
@@ -60,14 +59,14 @@ function MovementSensitiveRoom(_config) {
       this.roomStateConfig.states.push({ "name": "users-present-evening", "priority": 3,
                                          "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-evening" },
                                          "sources": [ { "property": "low-light", "value": false, "nextState": "users-present-day" },
+                                                      { "property": "night-time", "value": true, "nextState": "users-present-night" },
                                                       { "property": "movement-pir", "value": true, "nextState": "users-present-evening" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "no-users-present-night")) {
       this.roomStateConfig.states.push({ "name": "no-users-present-night", "priority": 2,
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-night" },
-                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-evening" },
-                                                     { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
+                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-day" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "users-present-night")) {
@@ -79,37 +78,6 @@ function MovementSensitiveRoom(_config) {
 
    this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
 
-   if (this.backgroundLightsSchedule) {
-
-      this.backgroundLightsConfig = {
-         "name": "background-lights-state",
-         "type": "stateproperty",
-         "initialValue": false,
-         "states": [
-            {
-               "name": false
-            },
-            {
-               "name": true,
-               "priority": 1
-            }
-         ]
-      };
-
-      for (var i = 0; i < this.backgroundLightsSchedule.length; ++i) {
-
-         switch (this.backgroundLightsSchedule[i].name) {
-            case "off":
-               this.backgroundLightsConfig.states[0].schedule = this.backgroundLightsSchedule[i];
-               break;
-            case "on":
-               this.backgroundLightsConfig.states[1].schedule = this.backgroundLightsSchedule[i];
-               break;
-         }
-      }
-
-      this.ensurePropertyExists('background-lights-state', 'stateproperty', this.backgroundLightsConfig, _config);
-   }
 }
 
 util.inherits(MovementSensitiveRoom, Room);
