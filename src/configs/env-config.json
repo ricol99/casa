@@ -288,6 +288,7 @@
       {
          "name": "movementsensitiveroom:kitchen",
          "displayName": "Kitchen Room",
+         "movementTimeout": 600,
          "props": [
             {
                "name": "movement-pir",
@@ -444,6 +445,7 @@
       {
          "name": "movementsensitiveroom:lounge",
          "displayName": "Lounge Room",
+         "movementTimeout": 600,
          "props": [
             {
                "name": "movement-pir",

@@ -18,7 +18,7 @@ function MovementSensitiveRoom(_config) {
 
    Room.call(this, _config);
 
-   this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 60;
+   this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
 
    this.roomStateConfig = (_config.hasOwnProperty('roomStateConfig')) ? _config.roomStateConfig : {};
    this.roomStateConfig.name = "room-state";
