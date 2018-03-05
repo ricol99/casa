@@ -47,18 +47,17 @@ function Building(_config) {
                "priority": 101,
                "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
             }
-         ];
-
-         if (_config.bedrooms) {
-
-            for (var j = 0; j < _config.bedrooms.length; ++j) {
-               this.userStateConfigs[i].states[0].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed");
-               this.userStateConfigs[i].states[1].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed");
-               this.userStateConfigs[i].states[2].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present");
-            }
-         }
-
+         ]
       };
+
+      if (_config.bedrooms) {
+
+         for (var j = 0; j < _config.bedrooms.length; ++j) {
+            this.userStateConfigs[i].states[0].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+            this.userStateConfigs[i].states[1].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
+         }
+      }
 
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});

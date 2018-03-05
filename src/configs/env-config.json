@@ -193,10 +193,10 @@
                "name": "dark",
                "initialValue": false,
                "writable": false,
-               "type": "invertproperty",
                "sources": [
                   {
-                     "property": "daylight"
+                     "property": "daylight",
+                     "transfrom": "!$value"
                   }
                ]
             }
@@ -343,20 +343,20 @@
                         },
                         {
                            "name": "no-users-present-evening",
-                           "targets": [ { "property": "brightness", "value": 20 }, { "property": "power", "value": true } ]
+                           "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                         },
                         {
                            "name": "users-present-evening",
                            "priority": 2,
-                           "targets": [ { "property": "brightness", "value": 60 }, { "property": "power", "value": true } ]
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                         },
                         {
                            "name": "no-users-present-night",
-                           "targets": [ { "property": "power", "value": false } ]
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "users-present-night",
-                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
+                           "targets": [{ "property": "brightness", "value": 30 }, { "property": "power", "value": true }]
                         }
                      ]
                   }
@@ -507,11 +507,11 @@
                         },
                         {
                            "name": "no-users-present-night",
-                           "targets": [ { "property": "power", "value": false } ]
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "users-present-night",
-                           "targets": [ { "property": "brightness", "value": 30 }, { "property": "power", "value": true } ]
+                           "targets": [{ "property": "brightness", "value": 30 }, { "property": "power", "value": true }]
                         }
                      ]
                   }
@@ -625,7 +625,6 @@
                "brightnessSupported": true,
                "propogateToParent": true,
                "props": [
-               "props": [
                   {
                      "name": "user-state",
                      "type": "stateproperty",
@@ -649,11 +648,11 @@
                         },
                         {
                            "name": "no-users-present-night",
-                           "targets": [ { "property": "power", "value": false } ]
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "users-present-night",
-                           "targets": [ { "property": "brightness", "value": 100 }, { "property": "power", "value": true } ]
+                           "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                         }
                      ]
                   }
@@ -798,7 +797,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "building:dumgoyne"
+                  "name": "building:dumgoyne",
                   "property": "low-light"
                }
             },
@@ -886,7 +885,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "building:dumgoyne"
+                  "name": "building:dumgoyne",
                   "property": "low-light"
                }
             },
@@ -974,7 +973,7 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "name": "building:dumgoyne"
+                  "name": "building:dumgoyne",
                   "property": "low-light"
                }
             },
