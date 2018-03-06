@@ -264,7 +264,6 @@ SourceListener.prototype.getSource = function() {
 };
 
 SourceListener.prototype.isValid = function() {
-   console.log(this.uName+": AAAAAAAA Valid="+ this.maskingInvalid ? true : this.valid);
    return this.maskingInvalid ? true : this.valid;
 };
 

@@ -10,8 +10,11 @@ function OrProperty(_config, _owner) {
 util.inherits(OrProperty, Property);
 
 OrProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   console.log(this.uName+": AAAAAAAAA currentValue="+this.value+", newValue="+this.calculateOutputValue());
-   this.updatePropertyInternal(this.calculateOutputValue(), _data);
+   var newValue = this.calculateOutputValue();
+ 
+   if (newValue !== this.value) {
+      this.updatePropertyInternal(newValue, _data);
+   }
 };
 
 OrProperty.prototype.calculateOutputValue = function() {
@@ -33,7 +36,6 @@ OrProperty.prototype.amIValid = function() {
 
    if (ret && !this.cold) {
       var newValue = this.calculateOutputValue();
-   console.log(this.uName+": AAAAAAAAA amIValid() currentValue="+this.value+", newValue="+newValue);
  
       if (newValue !== this.value) {
          this.updatePropertyInternal(newValue, { sourceName: this.owner.uName });
