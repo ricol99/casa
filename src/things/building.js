@@ -24,9 +24,11 @@ function Building(_config) {
    this.userStateConfigs = [];
    var nightTimeConfig = { "name": "users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
-   for (var i = 0; i < this.users.length; ++i) {
-      this.users.push(this.casaSys.findSource(_config.users[i].name));
+   for (var u = 0; u < _config.users.length; ++u) {
+      this.users.push(this.casaSys.findSource(_config.users[u].name));
+   }
 
+   for (var i = 0; i < this.users.length; ++i) {
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
          "name": this.users[i].sName+"-user-state",
@@ -69,17 +71,5 @@ function Building(_config) {
 }
 
 util.inherits(Building, Thing);
-
-function findBedroomForUser(_objArray, _name) {
-
-   for (var i = 0; i < _objArray.length; ++i) {
-
-      if (_objArray[i].name === _name) {
-         return i;
-      }
-   }
-
-   return -1;
-}
 
 module.exports = exports = Building;
