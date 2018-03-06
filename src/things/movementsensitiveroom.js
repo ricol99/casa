@@ -13,6 +13,8 @@ var Room = require('./room');
 // users-present-evening - movement detected in low-light before bed-time
 // no-users-present-night - no movement detected in low-light after bed-time (night light)
 // users-present-night - movement detected in low-light after bed-time (night light when users moving)
+// no-users-present-morning - no movement detected in low-light after wake up call
+// users-present-morning - movement detected in low-light after wake up call
 
 function MovementSensitiveRoom(_config) {
 
@@ -65,18 +67,30 @@ function MovementSensitiveRoom(_config) {
    if (!nameExists(this.roomStateConfig.states, "no-users-present-night")) {
       this.roomStateConfig.states.push({ "name": "no-users-present-night", "priority": 2,
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-night" },
-                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-day" }]});
+                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-morning" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "users-present-night")) {
       this.roomStateConfig.states.push({ "name": "users-present-night", "priority": 3,
                                          "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-night" },
-                                         "sources": [ { "property": "night-time", "value": false, "nextState": "users-present-day" },
+                                         "sources": [ { "property": "night-time", "value": false, "nextState": "users-present-morning" },
                                                       { "property": "movement-pir", "value": true, "nextState": "users-present-night" }]});
    }
 
-   this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
+   if (!nameExists(this.roomStateConfig.states, "no-users-present-morning")) {
+      this.roomStateConfig.states.push({ "name": "no-users-present-morning", "priority": 2,
+                                         "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-morning" },
+                                                     { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
+   }
 
+   if (!nameExists(this.roomStateConfig.states, "users-present-morning")) {
+      this.roomStateConfig.states.push({ "name": "users-present-morning", "priority": 3,
+                                         "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-night" },
+                                         "sources": [ { "property": "movement-pir", "value": true, "nextState": "users-present-morning" },
+                                                      { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
+   }
+
+   this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
 }
 
 util.inherits(MovementSensitiveRoom, Room);

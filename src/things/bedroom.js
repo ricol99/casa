@@ -5,13 +5,17 @@ var MovementSensitiveRoom = require('./movementsensitiveroom');
 // movement-pir - true when there is movement detected
 // low-light - true when light levels are low enough to switch on lights
 // room-switch-event - let the users indicate they are getting ready for bed or going to sleep
+// pre-wake-up-event - event indicating wake up start up sequence (e.g. sunrise ramp)
+// wake-up-event - event indicating wake up alarm call
 // <username>-switch-event - let each user control their own readiness for bed
 
-// Resulting user-state (s)
-// no-users-present - no movement detected
-// users-present - movement detected
-// users-detected-in-low-light - movement detected in low-light
-// no-users-in-low-light - movement detected in low-light
+// Resulting <username>-user-state (s)
+// not-present - user not present in the bedroom
+// reading-in-bed - user present and reading - other users are either not present or reading too
+// reading-in-bed-others-asleep - user present reading - one or more other users are asleep in this bedroom
+// asleep-in-bed - user fasto
+// waking-in-bed - pre-alarm sequence started
+// awake-in-bed - wake up event has happened
 
 function Bedroom(_config) {
 
@@ -19,6 +23,7 @@ function Bedroom(_config) {
 
    this.users = [];
    this.userStateConfigs = [];
+   this.awakeInBedTimeout = (_config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
 
    for (var i = 0; i < this.users.length; ++i) {
       this.users.push(this.casaSys.findSource(_config.users[i].name));
@@ -31,22 +36,35 @@ function Bedroom(_config) {
          "states": [
             {
                "name": "not-present",
-               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" } ],
+               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" }
             },
             {
                "name": "reading-in-bed",
                "priority": 101,
-               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" } ],
+               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }
             },
             {
                "name": "reading-in-bed-others-asleep",
                "priority": 101,
-               "sources": [ { "property": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" } ],
+               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }
             },
             {
                "name": "asleep-in-bed",
                "priority": 101,
-               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" } ],
+               "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
+                            { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
+                            { "event": "wake-up-event", "nextState": "awake-in-bed"} ]
+            },
+            {
+               "name": "waking-up-in-bed",
+               "priority": 101,
+               "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
+            },
+            {
+               "name": "awake-up-in-bed",
+               "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
+               "priority": 101,
+               "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
             }
          ]
       };
@@ -57,6 +75,7 @@ function Bedroom(_config) {
             this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].sName, "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
             this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed", "nextState": "reading-in-bed" });
             this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "asleep-in-bed", "nextState": "reading-in-bed" });
          }
       }
 
@@ -64,8 +83,6 @@ function Bedroom(_config) {
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
                                 { "initialValue": false, source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" },  _config);
-
-      this.users[i].ensurePropertyExists("bedroom-state", 'property', { "initialValue": 'not-present', "source": { "property": this.users[i].sName+"-user-state" }}, {});
    }
 }
 
