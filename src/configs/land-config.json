@@ -174,7 +174,7 @@
          "name": "bedroom:dylan-bedroom",
          "displayName": "Dylan's Bedroom",
          "users": [
-            "user:dylan"
+            { "name": "user:dylan" }
          ],
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,
@@ -337,7 +337,8 @@
          "name": "room:master-bedroom",
          "displayName": "Master Bedroom",
          "users": [
-            "user:dylan"
+            { "name": "user:richard"},
+            { "name": "user:natalie"}
          ],
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,

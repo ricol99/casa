@@ -21,14 +21,14 @@ function Bedroom(_config) {
 
    MovementSensitiveRoom.call(this, _config);
 
-   if (_config.hasOwnProperty('user') {
+   if (_config.hasOwnProperty('user')) {
       _config.users = [ _config.user ];
    }
 
    this.users = [];
    this.userStateConfigs = [];
-   this.awakeInBedTimeout = (_config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
-   this.readingInBedTimeout = (_config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
+   this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
+   this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
    for (var i = 0; i < _config.users.length; ++i) {
       this.users.push(this.casaSys.findSource(_config.users[i].name));
@@ -92,7 +92,7 @@ function Bedroom(_config) {
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
-                                { "initialValue": false, source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" },  _config);
+                                { "initialValue": false, "source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" }},  _config);
    }
 }
 
