@@ -42,6 +42,7 @@ function SourceListener(_config, _owner) {
    }
 
    this.valid = false;
+   this.maskingInvalid = false;
    this.casa.addSourceListener(this);
 }
 
@@ -126,6 +127,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.source.removeListener('invalid', this.invalidHandler);
 
       if (this.maskInvalid) {
+         this.maskingInvalid = true;
 
          if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
             _data.value = this.maskInvalidValue;
@@ -193,10 +195,11 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
       }
 
       this.maskInvalidTimer = setTimeout( () => {
+         this.maskingInvalid = false;
 
          if (!this.valid) {
 
-            if (this.maskInvalidValue != this.sourceRawValue) {
+            if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
                this.internalSourcePropertyChanged(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName, value: this.sourceRawValue }));
             }
 
@@ -215,6 +218,7 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
 // Internal method
 //
 SourceListener.prototype.stopMaskInvalidTimer = function() {
+   this.maskingInvalid = false;
 
    if (this.maskInvalidTimer) {
       clearTimeout(this.maskInvalidTimer);
@@ -260,7 +264,8 @@ SourceListener.prototype.getSource = function() {
 };
 
 SourceListener.prototype.isValid = function() {
-   return this.valid;
+   console.log(this.uName+": AAAAAAAA Valid="+ this.maskingInvalid ? true : this.valid);
+   return this.maskingInvalid ? true : this.valid;
 };
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {

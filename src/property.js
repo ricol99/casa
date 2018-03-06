@@ -267,12 +267,12 @@ Property.prototype.amIValid = function() {
    if (this.allSourcesRequiredForValidity) {
 
       return (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-            return _sourceListener.valid;
+            return _sourceListener.isValid();
       }));
    }
    else {
       return (anyAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
-            return _sourceListener.valid;
+            return _sourceListener.isValid();
       }));
    }
 };

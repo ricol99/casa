@@ -332,7 +332,7 @@
                   {
                      "name": "room-state",
                      "type": "stateproperty",
-                     "initialValue": "no-users-present",
+                     "initialValue": "no-users-present-day",
                      "states": [
                         {
                            "name": "no-users-present-day",
@@ -497,6 +497,7 @@
                   {
                      "name": "room-state",
                      "type": "stateproperty",
+                     "initialValue": "no-users-present-day",
                      "states": [
                         {
                            "name": "no-users-present-day",
@@ -511,7 +512,7 @@
                            "targets": [{ "property": "brightness", "value": 25 }, { "property": "power", "value": true }]
                         },
                         {
-                           "name": "users-present-in-evening",
+                           "name": "users-present-evening",
                            "priority": 2,
                            "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                         },
@@ -660,7 +661,7 @@
                            "targets": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "users-present-in-evening",
+                           "name": "users-present-evening",
                            "priority": 2,
                            "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                         },

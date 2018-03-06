@@ -21,11 +21,16 @@ function Bedroom(_config) {
 
    MovementSensitiveRoom.call(this, _config);
 
+   if (_config.hasOwnProperty('user') {
+      _config.users = [ _config.user ];
+   }
+
    this.users = [];
    this.userStateConfigs = [];
    this.awakeInBedTimeout = (_config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
+   this.readingInBedTimeout = (_config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
-   for (var i = 0; i < this.users.length; ++i) {
+   for (var i = 0; i < _config.users.length; ++i) {
       this.users.push(this.casaSys.findSource(_config.users[i].name));
 
       this.userStateConfigs.push({});
@@ -68,6 +73,11 @@ function Bedroom(_config) {
             }
          ]
       };
+
+      if (this.readingInBedTimeout != -1) {
+         this.userStateConfigs[i].states[1].timeout = { "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[2].timeout = { "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+      }
 
       for (var j = 0; j < this.users.length; ++j) {
 

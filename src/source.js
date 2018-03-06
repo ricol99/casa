@@ -20,7 +20,7 @@ function Source(_config) {
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
    this.props = {};
-
+   
    if (_config.props) {
       var propLen = _config.props.length;
 
@@ -42,6 +42,10 @@ function Source(_config) {
       }
    }
 
+   if (_config.events) {
+      this.events = _config.events;
+   }
+
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
@@ -59,6 +63,29 @@ function Source(_config) {
 }
 
 util.inherits(Source, events.EventEmitter);
+
+Source.prototype.getScheduleService = function() {
+  var scheduleService =  this.casaSys.findService("scheduleservice");
+
+  if (!scheduleService) {
+     console.error(this.uName + ": ***** Schedule service not found! *************");
+     process.exit();
+   }
+
+   return scheduleService;
+};
+
+Source.prototype.scheduledEventTriggered = function(_event) {
+
+   if (_event.hasOwnProperty("ramp")) {
+      console.error(this.uName + ": Ramps are not supported for this type of scheduled event");
+      return;
+   }
+
+   if (_event.hasOwnProperty("name")) {
+      this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+   }
+};
 
 Source.prototype.getRampService = function() {
   var rampService =  this.casaSys.findService("rampservice");
@@ -352,6 +379,11 @@ Source.prototype.raiseEvent = function(_eventName, _data) {
 }
 
 Source.prototype.coldStart = function() {
+
+   if (this.events) {
+      this.scheduleService = this.getScheduleService();
+      this.scheduleService.registerEvents(this, this.events);
+   }
 
    for (var prop in this.props) {
 
