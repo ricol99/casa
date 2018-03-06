@@ -30,9 +30,11 @@ function Bedroom(_config) {
    this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
-   for (var i = 0; i < _config.users.length; ++i) {
-      this.users.push(this.casaSys.findSource(_config.users[i].name));
+   for (var u = 0; u < _config.users.length; ++u) {
+      this.users.push(this.casaSys.findSource(_config.users[u].name));
+   }
 
+   for (var i = 0; i < _config.users.length; ++i) {
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
          "name": this.users[i].sName+"-user-state",
@@ -46,12 +48,12 @@ function Bedroom(_config) {
             {
                "name": "reading-in-bed",
                "priority": 101,
-               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed-others-asleep",
                "priority": 101,
-               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "asleep-in-bed",
@@ -82,10 +84,9 @@ function Bedroom(_config) {
       for (var j = 0; j < this.users.length; ++j) {
 
          if (i !== j) {
-            this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].sName, "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
-            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed", "nextState": "reading-in-bed" });
-            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
-            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName, "value": "asleep-in-bed", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].sName+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
          }
       }
 

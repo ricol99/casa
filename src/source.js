@@ -4,7 +4,7 @@ var CasaSystem = require('./casasystem');
 
 function Source(_config) {
    this.uName = _config.name;
-   this.sName = this.uName.split(":");
+   this.sName = this.uName.split(":")[1];
    this.valid = true;
 
    this.setMaxListeners(50);

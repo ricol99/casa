@@ -334,7 +334,7 @@
          ]
       },
       {
-         "name": "room:master-bedroom",
+         "name": "bedroom:master-bedroom",
          "displayName": "Master Bedroom",
          "users": [
             { "name": "user:richard"},
@@ -386,7 +386,7 @@
                         {
                            "name": "natalie-user-state",
                            "type": "stateproperty",
-                           "initialValue": "no-users-present",
+                           "initialValue": "not-present",
                            "states": [
                               {
                                  "name": "not-present",
@@ -404,7 +404,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "targets": [
-                                    { "property": "brightness", "value": 60 },
+                                    { "property": "brightness", "value": 30 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -413,10 +413,7 @@
                               {
                                  "name": "asleep-in-bed",
                                  "targets": [
-                                    { "property": "brightness", "value": 15 },
-                                    { "property": "hue", "value": 44 },
-                                    { "property": "saturation", "value": 69 },
-                                    { "property": "power", "value": true }
+                                    { "property": "power", "value": false }
                                  ]
                               },
                               {
@@ -451,7 +448,7 @@
                         {
                            "name": "richard-user-state",
                            "type": "stateproperty",
-                           "initialValue": "no-users-present",
+                           "initialValue": "not-present",
                            "states": [
                               {
                                  "name": "not-present",
@@ -469,7 +466,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "targets": [
-                                    { "property": "brightness", "value": 60 },
+                                    { "property": "brightness", "value": 30 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -478,10 +475,7 @@
                               {
                                  "name": "asleep-in-bed",
                                  "targets": [
-                                    { "property": "brightness", "value": 15 },
-                                    { "property": "hue", "value": 44 },
-                                    { "property": "saturation", "value": 69 },
-                                    { "property": "power", "value": true }
+                                    { "property": "power", "value": false }
                                  ]
                               },
                               {
