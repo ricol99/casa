@@ -154,6 +154,7 @@ Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
 //
 // Defines policy for property validity
 // Simple policy based of validity of defined sources and config variable this.allSourcesRequiredForValidity
+// Override this to create a more complex policy
 //
 Property.prototype.amIValid = function() {
 
