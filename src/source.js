@@ -346,7 +346,7 @@ function copyData(_sourceData) {
 }
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {
-   console.log(this.uName + ": Going invalid! Previously active state=" + this.props['ACTIVE'].value);
+   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
    if (this.alignmentTimeout) {
       clearTimeout(this.alignmentTimeout);
@@ -354,8 +354,7 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
 
    var sendData = _sourceData;
    sendData.sourceName = this.uName;
-   sendData.oldState = this.props['ACTIVE'].value;
-   this.props['ACTIVE'].value = false;	// XXX TODO Should this be setProperty()?
+   sendData.oldState = this.props[_propName].value;
    sendData.name = _propName;
    console.log(this.uName + ": Emitting invalid!");
    this.emit('invalid', sendData);
@@ -496,6 +495,13 @@ Source.prototype.setAutoMode = function() {
 Source.prototype.changeName = function(_newName) {
    this.casa.renameSource(this, _newName);
    this.uName = _newName;
+
+   for (var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop)) {
+         this.props[prop].ownerHasNewName();
+      }
+   }
 }
 
 module.exports = exports = Source;

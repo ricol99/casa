@@ -332,6 +332,10 @@ Property.prototype.checkData = function(_value, _data) {
    if (_data.value == undefined) _data.value = _value;
 }
 
+Property.prototype.ownerHasNewName = function() {
+   this.uName = this.owner.uName+":"+this.type+":"+this.name;
+};
+
 function copyConfig(_config) {
 
    if (_config instanceof Array) {

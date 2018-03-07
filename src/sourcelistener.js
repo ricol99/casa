@@ -130,8 +130,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
          this.maskingInvalid = true;
 
          if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
-            _data.value = this.maskInvalidValue;
-            this.internalSourcePropertyChanged(_data);
+            this.internalSourcePropertyChanged(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName, value: this.maskInvalidValue }));
          }
          this.startMaskInvalidTimer();
       }
