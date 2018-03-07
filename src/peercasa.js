@@ -56,12 +56,9 @@ PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
 
    if (this.connected && (_data.sourcePeerCasa != this.uName)) {
 
-      if (!_data.local) {
+      if (!(_data.hasOwnProperty("local") && _data.local)) {
          console.log(this.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          this.sendMessage('source-property-changed', _data);
-      }
-      else {
-         console.log(this.uName + ': not publishing source ' + _data.sourceName + ' property-changed to peer casa - Not Global');
       }
    }
 };

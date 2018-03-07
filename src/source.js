@@ -362,6 +362,7 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
 
 Source.prototype.raiseEvent = function(_eventName, _data) {
    var sendData = (_data) ? copyData(_data) : {};
+   sendData.local = this.local;
    sendData.sourceName = this.uName;
    sendData.name = _eventName;
 
