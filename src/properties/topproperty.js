@@ -21,7 +21,11 @@ function TopProperty(_config, _owner) {
 util.inherits(TopProperty, Property);
 
 TopProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   this.updatePropertyInternal(this.calculateOutputValue(), _data);
+   var newValue = this.calculateOutputValue();
+ 
+   if (newValue !== this.value) {
+      this.updatePropertyInternal(newValue, _data);
+   }
 };
 
 TopProperty.prototype.calculateOutputValue = function() {
@@ -29,7 +33,7 @@ TopProperty.prototype.calculateOutputValue = function() {
    // top valid input
    for (var i = 0; i < this.sources.length; ++i) {
 
-      if (this.sources[i] && this.sources[i].valid) {
+      if (this.sources[i] && this.sources[i].isValid()) {
          return this.sources[i].sourcePropertyValue;
       }
    }
@@ -42,7 +46,11 @@ TopProperty.prototype.amIValid = function() {
    var ret = Property.prototype.amIValid.call(this);
 
    if (ret && !	this.cold) {
-      this.updatePropertyInternal(this.calculateOutputValue(), { sourceName: this.owner.uName });
+      var newValue = this.calculateOutputValue();
+
+      if (newValue !== this.value) {
+         this.updatePropertyInternal(newValue, { sourceName: this.owner.uName });
+      }
    }
 
    return ret;
