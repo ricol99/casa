@@ -226,10 +226,6 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
 }
 
-Source.prototype.propertyOutputStepsComplete = function(_propName, _propValue, _previousPropValue, _data) {
-   // Do nothing by default
-};
-
 Source.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
    this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
 };

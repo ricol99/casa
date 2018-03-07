@@ -1,5 +1,5 @@
 var util = require('util');
-var OutputStepProperty = require('../outputstepproperty');
+var OutputStepProperty = require('../steps/outputstepproperty');
 
 function PushoverProperty(_config, _owner) {
 

@@ -1,5 +1,5 @@
 var util = require('util');
-var SourceStepProperty = require('../sourcestepproperty');
+var SourceStepProperty = require('../steps/sourcestepproperty');
 
 function InvertProperty(_config, _owner) {
    _config.sourceStep = { type: 'invertstep' };

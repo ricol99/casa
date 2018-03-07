@@ -20,19 +20,6 @@ function Property(_config, _owner) {
    this.cold = true;
    this.hasSourceOutputValues = false;	// Sources can influence the final property value (source in charge)
 
-   if (_config.sourceSteps) {
-      this.sourcePipeline = new Pipeline(_config.sourceSteps, this);
-      this.pipeline = this.sourcePipeline;
-   }
-
-   if (_config.outputSteps) {
-      this.outputPipeline = new Pipeline(_config.outputSteps, this);
-
-      if (this.sourcePipeline == undefined) {
-         this.pipeline = this.outputPipeline;
-      }
-   }
-
    this.sourceListeners = {};
    this.noOfSources = 0;
 
@@ -79,84 +66,6 @@ Property.prototype.myValue = function() {
    return this.value;
 };
 
-//
-// Internal method - dispatch processing to output pipeline
-//
-Property.prototype.updatePropertyandSendToOutputPipeline = function(_newValue, _data) {
-   var propValue = this.setPropertyInternal(_newValue, _data);
-
-   if (propValue != undefined) {
-
-      if (this.outputPipeline) {
-         this.outputPipeline.newInputForProcess(propValue, _data);
-      }
-      else {
-         this.outputStepsComplete(propValue, _data);
-         this.owner.propertyOutputStepsComplete(this.name, propValue, this.previousValue, _data);
-      }
-   }
-};
-
-//
-// Internal method - Called by the last step in the pipeline
-//
-Property.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
-
-   if (_pipeline == this.sourcePipeline) {
-      console.log(this.uName+": output from source pipeline. Property Value="+_newValue);
-
-      var propValue = this.transformNewPropertyValue(_newValue, _data);
-
-      if (propValue != undefined) {
-         _data.value = propValue;
-         this.updatePropertyandSendToOutputPipeline(propValue, _data);
-      }
-   }
-   else {
-      console.log(this.uName+": output from output step pipeline. Property Value="+_newValue+". Call hook outputStepsComplete()");
-      this.outputStepsComplete(_newValue, _data);
-      this.owner.propertyOutputStepsComplete(this.name, _newValue, this.previousValue, _data);
-   }
-};
-
-//
-// Internal method - Called by the last step in the pipeline
-//
-Property.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) {
-
-   if (_pipeline == this.sourcePipeline) {
-
-      if (this.outputPipeline) {
-         this.outputPipeline.sourceIsValid(_data);
-      }
-      else {
-         this.goValid(_data);
-      }
-   }
-   else {
-      this.goValid(_data);
-   }
-}
-
-//
-// Internal method - Called by the last step in the pipeline
-//
-Property.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
-
-   if (_pipeline == this.sourcePipeline) {
-
-      if (this.outputPipeline) {
-         this.outputPipeline.sourceIsInvalid(_data);
-      }
-      else {
-         this.goInvalid(_data);
-      }
-   }
-   else {
-      this.goInvalid(_data);
-   }
-}
-
 // Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.rawPropertyValue = _newPropValue;
@@ -168,16 +77,11 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
    this.checkData(this, _newPropValue, _data);
 
-   if (this.sourcePipeline) {
-      this.sourcePipeline.newInputForProcess(_newPropValue, _data);
-   }
-   else {
-      var propValue = this.transformNewPropertyValue(_newPropValue, _data);
+   var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
-      if (propValue != undefined) {
-         _data.value = propValue;
-         this.updatePropertyandSendToOutputPipeline(propValue, _data);
-      }
+   if (propValue != undefined) {
+      _data.value = propValue;
+      this.setPropertyInternal(propValue, _data);
    }
 };
 
@@ -187,7 +91,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 //
 Property.prototype.set = function(_propValue, _data) {
    this.cancelCurrentRamp();
-   this.updatePropertyandSendToOutputPipeline(_propValue, _data);
+   this.setPropertyInternal(_propValue, _data);
    return true;
 };
 
@@ -226,7 +130,7 @@ Property.prototype.cancelCurrentRamp = function() {
 
 Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
    console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
-   this.updatePropertyandSendToOutputPipeline(_value, this.rampData);
+   this.setPropertyInternal(_value, this.rampData);
 };
 
 Property.prototype.rampComplete = function(_ramp, _config) {
@@ -238,16 +142,6 @@ Property.prototype.rampComplete = function(_ramp, _config) {
 };
 
 //
-// Derived Properties can use this to be called after the output pipeline has transformed the property value
-// This is called after all step pipeline processing is done - after the input and output pipelines (property has been already been set)
-// Useful when synchronising an external device with a property value (e.g. gpio out)
-// You cannot stop the property changing or change the value, it is for information only
-//
-Property.prototype.outputStepsComplete = function(_outputValue, _data) {
-   // BY DEFAULT, DO NOTHING
-};
-
-//
 // Derived Properties can use this to be called just before the prooperty is changed
 // This is called after the input step pipeline processing has been done - just before the property is set
 // Useful when synchronising an external device with a property value (e.g. gpio in)
@@ -256,7 +150,6 @@ Property.prototype.outputStepsComplete = function(_outputValue, _data) {
 Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
    // BY DEFAULT, DO NOTHING
 };
-
 
 //
 // Defines policy for property validity
@@ -284,14 +177,9 @@ Property.prototype.amIValid = function() {
 // Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
 Property.prototype.sourceIsValid = function(_data) {
-
    var oldValid = this.valid;
    this.valid = this.amIValid();
    this.target = (this.targetListener) ? this.targetListener.source : null;
-
-   if (this.pipeline) {
-      this.pipeline.sourceIsValid(_data);
-   }
 }
 
 //
@@ -324,13 +212,7 @@ Property.prototype.sourceIsInvalid = function(_data) {
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
       this.target = null;
-
-      if (this.pipeline) {
-         this.pipeline.sourceIsInvalid(_data);
-      }
-      else {
-         this.goInvalid(_data);
-      }
+      this.goInvalid(_data);
    }
 };
 
@@ -415,10 +297,10 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
 
       _data.local = this.local;
       this.owner.updateProperty(this.name, _newValue, _data);
-      return _newValue;
+      return true;
    }
    else {
-      return undefined;
+      return false;
    }
 };
 

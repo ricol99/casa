@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('./property');
+var StepProperty = require('./stepproperty');
 
 function OutputStepProperty(_config, _owner) {
 
@@ -10,9 +10,9 @@ function OutputStepProperty(_config, _owner) {
       _config.outputSteps.push(_config.outputStep);
    }
 
-   Property.call(this, _config, _owner);
+   StepProperty.call(this, _config, _owner);
 }
 
-util.inherits(OutputStepProperty, Property);
+util.inherits(OutputStepProperty, StepProperty);
 
 module.exports = exports = OutputStepProperty;

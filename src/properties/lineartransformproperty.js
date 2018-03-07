@@ -1,5 +1,5 @@
 var util = require('util');
-var SourceStepProperty = require('../sourcestepproperty');
+var SourceStepProperty = require('../steps/sourcestepproperty');
 
 function LinearTransformProperty(_config, _owner) {
    _config.sourceStep = { type: 'lineartransformstep',

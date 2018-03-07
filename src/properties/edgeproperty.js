@@ -1,5 +1,5 @@
 var util = require('util');
-var SourceStepProperty = require('../sourcestepproperty');
+var SourceStepProperty = require('../steps/sourcestepproperty');
 
 function EdgeProperty(_config, _owner) {
 
