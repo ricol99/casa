@@ -91,7 +91,7 @@ StepProperty.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       _data = { sourceName: this.owner.uName };
    }
 
-   this.checkData(this, _newPropValue, _data);
+   this.checkData(_newPropValue, _data);
 
    if (this.sourcePipeline) {
       this.sourcePipeline.newInputForProcess(_newPropValue, _data);

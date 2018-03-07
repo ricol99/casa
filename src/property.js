@@ -75,7 +75,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
       _data = { sourceName: this.owner.uName };
    }
 
-   this.checkData(this, _newPropValue, _data);
+   this.checkData(_newPropValue, _data);
 
    var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
@@ -231,20 +231,6 @@ Property.prototype.receivedEventFromSource = function(_data) {
 };
 
 //
-// Called by SourceListener as a defined source has raised an event
-// Will invoke this property processing followed by the step pipeline processing
-//
-Property.prototype.sourceEventRaised = function(_data) {
-
-   if (this.valid) {
-
-      if (this.sourceListeners[_data.sourceEventName]) {
-         this.newEventReceivedFromSource(this.sourceListeners[_data.sourceEventName], _data);
-      }
-   }
-};
-
-//
 // Called by SourceListener (Target) as the defined target has changed it property value
 //   -- only works if target config ignoreTargetUpdates is set to false (default is true)
 //
@@ -304,7 +290,6 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
    }
 };
 
-// *** TODO Move this to its own step2
 Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    // Transform new property value based on source
    var actualOutputValue = _newPropValue;
@@ -335,6 +320,15 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    }
 
    return actualOutputValue;
+}
+
+Property.prototype.checkData = function(_value, _data) {
+
+   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   // ****** TBD TODO why is this line duplicated? Should it be _data.sourceEventName?
+   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
+   if (_data.name == undefined) _data.name = this.name;
+   if (_data.value == undefined) _data.value = _value;
 }
 
 function copyConfig(_config) {
@@ -395,15 +389,6 @@ function anyAssocArrayElementsDo(_obj, _func) {
       }
    }
    return false;
-}
-
-Property.prototype.checkData = function(_this, _value, _data) {
-
-   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
-   // ****** TBD TODO why is this line duplicated? Should it be _data.sourceEventName?
-   if (_data.sourceName == undefined) _data.sourceName = _this.owner.uName;
-   if (_data.name == undefined) _data.name = _this.name;
-   if (_data.value == undefined) _data.value = _value;
 }
 
 module.exports = exports = Property;
