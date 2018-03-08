@@ -160,6 +160,18 @@
                }
             },
             {
+               "name": "low-light-kitchen",
+               "initialValue": false,
+               "writable": false,
+               "type": "thresholdproperty",
+               "threshold" : 68,
+               "buffer": 7,
+               "transform": "$value<=68",
+               "source": {
+                  "property": "light-sensor"
+               }
+            },
+            {
                "name": "daylight-possible",
                "initialValue": false,
                "writable": false,
@@ -305,7 +317,7 @@
                "writable": false,
                "source": {
                   "name": "building:dumgoyne",
-                  "property": "low-light"
+                  "property": "low-light-kitchen"
                }
             },
             {
