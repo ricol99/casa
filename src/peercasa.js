@@ -238,11 +238,13 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
    }
 
    if (this.persistent && this.proActiveConnect) {
-      this.socketOptions.reconnection = true;
-      this.socketOptions.reconnectionDelay = 1000;
-      this.socketOptions.reconnectionDelayMax = 5000;
-      this.socketOptions.reconnectionAttempts = 99999;
+      //this.socketOptions.reconnection = true;
+      //this.socketOptions.reconnectionDelay = 1000;
+      //this.socketOptions.reconnectionDelayMax = 5000;
+      //this.socketOptions.reconnectionAttempts = 99999;
       this.socketOptions.forceNew = true;
+
+      this.socketOptions.reconnection = true;
    }
    else {
       this.socketOptions.reconnection = false;
@@ -392,8 +394,10 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
+      this.socket.disconnect();
    }
 
+   this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
    this.deleteMeIfNeeded();
 };
 

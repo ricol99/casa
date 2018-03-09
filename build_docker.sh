@@ -9,5 +9,5 @@ hyper rm `hyper ps -a | tail -1 | awk '{print $1}'`
 hyper rmi `hyper images | tail -1 | awk '{print $3}'`
 CONTAINERID=`hyper create --size=s2 --name casa -p 443:8096 ricol99/casa | awk '{print $1}'`
 hyper start $CONTAINERID
-sleep 2
+sleep 30
 hyper fip attach 199.245.56.152 $CONTAINERID
