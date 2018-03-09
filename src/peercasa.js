@@ -179,8 +179,8 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    if (!this.casaSys.addRemoteCasa(this)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. PeerCasa already running!');
-      this.socket.disconnect();
       this.manualDisconnect = true;
+      this.socket.disconnect();
       this.deleteMeIfNeeded();
       return;
    }
@@ -219,41 +219,39 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
       this.loginAs = _config.hasOwnProperty('loginAs') ? _config.loginAs : 'peer';
       this.persistent = _config.hasOwnProperty('persistent') ? _config.persistent : false;
       this.address = _config.address;
-   }
 
-   if (this.secureMode) {
-      var fs = require('fs');
-      this.http = "https";
-      this.socketOptions = {
-         secure: true,
-         rejectUnauthorized: false,
-         key: fs.readFileSync(this.certPath+'/client.key'),
-         cert: fs.readFileSync(this.certPath+'/client.crt'),
-         ca: fs.readFileSync(this.certPath+'/ca.crt')
-      };
-   }
-   else {
-      this.http = "http";
-      this.socketOptions = { transports: ['websocket'] };
-   }
+      if (this.secureMode) {
+         var fs = require('fs');
+         this.http = "https";
+         this.socketOptions = {
+            secure: true,
+            rejectUnauthorized: false,
+            key: fs.readFileSync(this.certPath+'/client.key'),
+            cert: fs.readFileSync(this.certPath+'/client.crt'),
+            ca: fs.readFileSync(this.certPath+'/ca.crt')
+         };
+      }
+      else {
+         this.http = "http";
+         this.socketOptions = { transports: ['websocket'] };
+      }
 
-   if (this.persistent && this.proActiveConnect) {
-      //this.socketOptions.reconnection = true;
-      //this.socketOptions.reconnectionDelay = 1000;
-      //this.socketOptions.reconnectionDelayMax = 5000;
-      //this.socketOptions.reconnectionAttempts = 99999;
-      this.socketOptions.forceNew = true;
-
-      this.socketOptions.reconnection = true;
-   }
-   else {
-      this.socketOptions.reconnection = false;
+      if (this.persistent && this.proActiveConnect) {
+         //this.socketOptions.reconnection = true;
+         //this.socketOptions.reconnectionDelay = 1000;
+         //this.socketOptions.reconnectionDelayMax = 5000;
+         //this.socketOptions.reconnectionAttempts = 99999;
+         this.socketOptions.forceNew = true;
+         this.socketOptions.reconnection = false;
+      }
+      else {
+         this.socketOptions.forceNew = true;
+         this.socketOptions.reconnection = false;
+      }
    }
 
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-
    this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
-   this.socket.open();
    this.establishListeners();
 };
 
@@ -272,6 +270,8 @@ PeerCasa.prototype.deleteSocket = function() {
       }
 
       this.socket.removeListener('error', this.socketErrorHandler);
+      this.socket.removeListener('connect_error', this.socketErrorHandler);
+      this.socket.removeListener('connect_timeout', this.socketErrorHandler);
       this.socket.removeListener('disconnect', this.socketDisconnectHandler);
       this.socket.removeListener('casa-active', this.socketCasaActiveHandler);
       this.socket.removeListener('casa-inactive', this.socketCasaInactiveHandler);
@@ -325,8 +325,8 @@ PeerCasa.prototype.socketConnectCb = function() {
 
    this.loginTimer = setTimeout( () => {
       console.info(this.uName + ': giving up on login with casa' + this.uName + '. Timed out!');
-      this.socket.disconnect();
       this.manualDisconnect = true;
+      this.socket.disconnect();
       this.deleteMeIfNeeded();
    }, 10000);
 
@@ -394,10 +394,10 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      this.socket.disconnect();
    }
 
    this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
+   this.socket.disconnect();
    this.deleteMeIfNeeded();
 };
 
@@ -415,10 +415,10 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-      this.socket.disconnect();
    }
 
    this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
+   this.socket.disconnect();
    this.deleteMeIfNeeded();
 };
 
@@ -587,13 +587,14 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
       if (this.manualDisconnect) {
          // Recreate socket to attempt reconnection
          this.manualDisconnect = false;
-         console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-         this.deleteSocket();
-
-         setTimeout( () => {
-            this.connectToPeerCasa();
-         }, 10000);
       }
+
+      console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
+      this.deleteSocket();
+
+      setTimeout( () => {
+         this.connectToPeerCasa();
+      }, 10000);
    }
    else {
 
@@ -716,6 +717,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketHeartbeatHandler = PeerCasa.prototype.socketHeartbeatCb.bind(this);
 
       this.socket.on('error', this.socketErrorHandler);
+      this.socket.on('connect_error', this.socketErrorHandler);
+      this.socket.on('connect_timeout', this.socketErrorHandler);
       this.socket.on('disconnect', this.socketDisconnectHandler);
       this.socket.on('casa-active', this.socketCasaActiveHandler);
       this.socket.on('casa-inactive', this.socketCasaInactiveHandler);
