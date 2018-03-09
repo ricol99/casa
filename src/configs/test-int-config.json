@@ -85,7 +85,7 @@
                   "name": "casa:test2",
                   "property": "ACTIVE",
                   "maskInvalidValue": true,
-                  "maskInvalidTimeout": 10
+                  "maskInvalidTimeout": 20
                }
             },
             {

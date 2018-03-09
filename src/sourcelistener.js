@@ -43,6 +43,8 @@ function SourceListener(_config, _owner) {
 
    this.valid = false;
    this.maskingInvalid = false;
+   this.wasMaskingInvalid = false;
+
    this.casa.addSourceListener(this);
 }
 
@@ -78,7 +80,13 @@ SourceListener.prototype.establishListeners = function() {
 }
 
 SourceListener.prototype.propertyChangedCb = function(_data) {
-   this.internalSourcePropertyChanged(_data);
+
+   if (this.wasMaskingInvalid && _data.coldStart) {
+      this.wasMaskingInvalid = false;
+   }
+   else {
+      this.internalSourcePropertyChanged(_data);
+   }
 };
 
 SourceListener.prototype.eventRaisedCb = function(_data) {
@@ -128,9 +136,10 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
       if (this.maskInvalid) {
          this.maskingInvalid = true;
+         this.valueBeforeMasking = this.sourceRawValue;
 
          if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
-            this.internalSourcePropertyChanged(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName, value: this.maskInvalidValue }));
+            this.internalSourcePropertyChanged(copyData({ sourceName: this.sourceName, name: this.eventName, value: this.maskInvalidValue }));
          }
          this.startMaskInvalidTimer();
       }
@@ -195,12 +204,9 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
 
       this.maskInvalidTimer = setTimeout( () => {
          this.maskingInvalid = false;
+         this.maskInvalidTimer = null;
 
          if (!this.valid) {
-
-            if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
-               this.internalSourcePropertyChanged(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName, value: this.sourceRawValue }));
-            }
 
             if (this.pipeline) {
                this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
@@ -217,11 +223,16 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
 // Internal method
 //
 SourceListener.prototype.stopMaskInvalidTimer = function() {
-   this.maskingInvalid = false;
 
-   if (this.maskInvalidTimer) {
-      clearTimeout(this.maskInvalidTimer);
-      this.maskInvalidTimer = null;
+   if (this.maskingInvalid) {
+      this.maskingInvalid = false;
+      this.wasMaskingInvalid = true;
+      this.sourceRawValue = this.valueBeforeMasking;
+
+      if (this.maskInvalidTimer) {
+         clearTimeout(this.maskInvalidTimer);
+         this.maskInvalidTimer = null;
+      }
    }
 };
 
