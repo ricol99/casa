@@ -76,6 +76,14 @@ RemoteCasa.prototype.setSourceInactive = function(_source, _callback) {
    peerCasa.setSourceInactive(_source, _callback);
 }
 
+RemoteCasa.prototype.setSourceProperty = function(_source, _property, _value, _callback) {
+   peerCasa.setSourceProperty(_source, _property, _value, _callback);
+}
+
+RemoteCasa.prototype.setSourcePropertyWithRamp = function(_source, _property, _ramp, _callback) {
+   peerCasa.setSourceProperty(_source, _property, _ramp, _callback);
+}
+
 RemoteCasa.prototype.addSource = function(_source) {
    // Peer source being added to remote casa
    console.log(this.uName + ': Source '  +_source.uName + ' added to remote casa ');

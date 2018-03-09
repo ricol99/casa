@@ -86,6 +86,11 @@ PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
    return this.peerCasa.setSourceProperty(this, _propName, _propValue, _data);
 };
 
+PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
+   return this.peerCasa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
+};
+
 PeerSource.prototype.getProperty = function(_propName) {
    return this.props[_propName].value;
 };
@@ -96,6 +101,31 @@ PeerSource.prototype.getAllProperties = function(_allProps) {
 
       if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
          _allProps[prop] = this.props[prop].value;
+      }
+   }
+};
+
+PeerSource.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
+   this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
+};
+
+PeerSource.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
+   this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
+};
+
+PeerSource.prototype.alignProperties = function(_properties) {
+   console.log(this.uName + ": alignProperties() ", _properties);
+
+   if (_properties && (_properties.length > 0)) {
+
+      for (var i = 0; i < _properties.length; ++i) {
+
+         if (_properties[i].hasOwnProperty('ramp')) {
+            this.setPropertyWithRamp(_properties[i].property, _properties[i].ramp, { sourceName: this.uName });
+         }
+         else {
+            this.setProperty(_properties[i].property, _properties[i].value, { sourceName: this.uName });
+         }
       }
    }
 };

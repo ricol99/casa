@@ -494,7 +494,16 @@ PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
    if (source) {
       _data.acker = this.casa.uName;
       this.ackMessage('set-source-property-req', _data);
-      var res = source.setProperty(_data.property, _data.value, _data);
+
+      var res;
+
+      if (_data.hasOwnProperty('ramp')) {
+         res = source.setPropertyWithRamp(_data.property, _data.ramp, _data);
+      }
+      else {
+         res = source.setProperty(_data.property, _data.value, _data);
+      }
+
       this.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, requestor: _data.requestor });
    } 
    else {
@@ -861,6 +870,32 @@ PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, 
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-source-property-req', data: { casaName: this.uName, sourceName: _source.uName,
                                                                   property: _propName, value: _propValue,
+                                                                  requestId: id, requestor: this.casa.uName } };
+
+      this.incompleteRequests[id] = new RemoteCasaRequestor(id, (_err, _res) => {
+         console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at remote casa ');
+      }, this.socket);
+
+      this.incompleteRequests[id].sendRequest(message, (_requestId) => {
+         console.log(this.uName + ': Timeout occurred sending a changeProperty request for source ' + _source.uName);
+         delete this.incompleteRequests[_requestId];
+      });
+
+      return true;
+   }
+   else {
+      return false;
+   }
+}
+
+PeerCasa.prototype.setSourcePropertyWithRamp = function(_source, _propName, _ramp, _data) {
+
+   if (this.connected) {
+      console.log(this.uName + ': requesting source change property ' + _propName + ' to ' + _propValue + ' from peer casa. Source ' + _source.uName);
+      var id = this.uName + ':changeprop:' + this.reqId;
+      this.reqId = (this.reqId +  1) % 10000;
+      var message = { message: 'set-source-property-req', data: { casaName: this.uName, sourceName: _source.uName,
+                                                                  property: _propName, ramp: _ramp,
                                                                   requestId: id, requestor: this.casa.uName } };
 
       this.incompleteRequests[id] = new RemoteCasaRequestor(id, (_err, _res) => {
