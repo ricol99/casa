@@ -208,7 +208,7 @@
                "sources": [
                   {
                      "property": "daylight",
-                     "transfrom": "!$value"
+                     "transform": "!$value"
                   }
                ]
             }
