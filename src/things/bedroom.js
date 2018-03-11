@@ -68,7 +68,7 @@ function Bedroom(_config) {
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
             },
             {
-               "name": "awake-up-in-bed",
+               "name": "awake-in-bed",
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
                "priority": 101,
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
