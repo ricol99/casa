@@ -51,9 +51,7 @@ function Source(_config) {
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { "initialValue": 'auto',
                                "states": [ { name: "auto", priority: -100 },
-                                           { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]},
-                              _config);
-
+                                           { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    events.EventEmitter.call(this);
 
    if (this.casa) {

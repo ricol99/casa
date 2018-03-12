@@ -1,10 +1,9 @@
 var util = require('util');
-var MovementSensitiveRoom = require('./movementsensitiveroom');
+var Room = require('./room');
 
 // Please define properties for automated functionality
-// movement-pir - true when there is movement detected
-// low-light - true when light levels are low enough to switch on lights
-// room-switch-event - let the users indicate they are getting ready for bed or going to sleep
+// movement-pir - true when there is movement detected (room.js)
+// low-light - true when light levels are low enough to switch on lights (room.js)
 // pre-wake-up-event - event indicating wake up start up sequence (e.g. sunrise ramp)
 // wake-up-event - event indicating wake up alarm call
 // <username>-switch-event - let each user control their own readiness for bed
@@ -19,7 +18,7 @@ var MovementSensitiveRoom = require('./movementsensitiveroom');
 
 function Bedroom(_config) {
 
-   MovementSensitiveRoom.call(this, _config);
+   Room.call(this, _config);
 
    if (_config.hasOwnProperty('user')) {
       _config.users = [ _config.user ];
@@ -47,17 +46,17 @@ function Bedroom(_config) {
             },
             {
                "name": "reading-in-bed",
-               "priority": 101,
+               "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed-others-asleep",
-               "priority": 101,
+               "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "asleep-in-bed",
-               "priority": 101,
+               "priority": 5,
                "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
                             { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                             { "event": "wake-up-event", "nextState": "awake-in-bed"} ]
@@ -97,7 +96,7 @@ function Bedroom(_config) {
    }
 }
 
-util.inherits(Bedroom, MovementSensitiveRoom);
+util.inherits(Bedroom, Room);
 
 
 module.exports = exports = Bedroom;
