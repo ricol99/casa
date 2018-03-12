@@ -290,10 +290,12 @@
                "name": "broadbandspeedtester:dumgoyne",
                "propogateToParent": true,
                "maxTime": 5000,
-               "event": {
-                  "name": "testing-broadband",
-                  "rule": "0 2 * * *"
-               }
+               "events": [
+                  {
+                     "name": "testing-broadband",
+                     "rule": "0 2 * * *"
+                  }
+               ]
             }
          ]
       },
