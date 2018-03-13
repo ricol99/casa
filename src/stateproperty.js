@@ -254,9 +254,9 @@ function State(_config, _owner) {
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
    this.timeout = _config.timeout;
+   this.inheritTimeout = {};
 
    if (_config.hasOwnProperty('inheritTimeout') && _config.inheritTimeout.hasOwnProperty('states')) {
-      this.inheritTimeout = {};
 
       for (var z = 0; z < _config.inheritTimeout.states.length; ++z) {
          this.inheritTimeout[_config.inheritTimeout.states[z]] = true;
