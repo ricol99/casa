@@ -46,11 +46,13 @@ function Bedroom(_config) {
             },
             {
                "name": "reading-in-bed",
+               "inheritTimeout": { "states": [ "reading-in-bed-others-asleep" ] },
                "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed-others-asleep",
+               "inheritTimeout": { "states": [ "reading-in-bed" ] },
                "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },

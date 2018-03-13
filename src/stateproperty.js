@@ -72,22 +72,41 @@ StateProperty.prototype.resetStateTimer = function(_state) {
 };
 
 StateProperty.prototype.clearStateTimer = function() {
+   var result = { timerActive: false };
    
    if (this.stateTimer) {
       clearTimeout(this.stateTimer);
+      result.timerActive = true;
+      result.timeLeft = this.timeoutDuration + this.timerStartedAt - Date.now();
+      this.timerStartedAt = 0;
       this.stateTimer = null;
+   }
+
+   return result;
+};
+
+StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
+
+   if ((_timeoutDuration == undefined) && (_state.timeout == undefined)) {
+      return;
+   }
+
+   if (_timeoutDuration != undefined) {
+      this.timeoutDuration = (_timeoutDuration < _state.timeout.duration) ? _timeoutDuration * 1000 : _state.timeout.duration * 1000;
+   }
+   else {
+      this.timeoutDuration = (_state.timeout.duration != undefined) ? _state.timeout.duration * 1000 : null;
+   }
+
+   if (this.timeoutDuration) {
+      this.timerStartedAt = Date.now();
+      this.stateTimer = setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, _state.timeout.nextState);
    }
 };
 
-StateProperty.prototype.setStateTimer = function(_state) {
-
-   if (_state.timeout) {
-
-      this.stateTimer = setTimeout( (_timeoutState) => {
-         this.stateTimer = null;
-         this.set(this.transformNextState(_timeoutState), { sourceName: this.owner });
-      }, _state.timeout.duration * 1000, _state.timeout.nextState);
-   }
+StateProperty.prototype.timeoutInternal = function(_timeoutState) {
+   this.stateTimer = null;
+   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner });
 };
 
 StateProperty.prototype.transformNextState = function(_nextState) {
@@ -129,35 +148,48 @@ StateProperty.prototype.transformNextState = function(_nextState) {
    return nextState;
 }
 
-StateProperty.prototype.setState = function(_nextState) {
-   console.log(this.uName+": setState state="+_nextState);
-
-   this.clearStateTimer();
+StateProperty.prototype.setState = function(_nextStateName) {
+   console.log(this.uName+": setState state="+_nextStateName);
    this.previousState = this.value;
+
+   var clearTimerResult = this.clearStateTimer();
+   console.log(this.uName+": AAAAAAA clearTimerResult=", clearTimerResult);
+
+   if ((clearTimerResult.timeLeft <= 0) && (this.states[this.value].timeout != undefined)) {
+      // Edge case where the timeout has already expired and waiting for the event loop to schedule.
+      // This is a problem if we inherit the timer from the last state as it has just expired and
+      // we should call the timeout code straight away in the new state, not reset the timer
+      console.log(this.uName + ": Edge case - previous state inherited timer has already expired and is waiting to be scheduled, immediately firing timeout in new state");
+      setTimeout(StateProperty.prototype.timeoutInternal.bind(this), 1, this.states[this.value].timeout.nextState);
+      return;
+   }
 
    if (!this.cold) {
 
       if (this.states[this.value]) {
          this.states[this.value].exiting();
       }
-      else if (this.states["DEFAULT"] && this.states[_nextState]) {
+      else if (this.states["DEFAULT"] && this.states[_nextStateName]) {
          this.states["DEFAULT"].exiting();
       }
    }
 
-   var state = (this.states[_nextState]) ? this.states[_nextState] : this.states["DEFAULT"];
+   var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.states["DEFAULT"];
 
-   if (state) {
-      var immediateNextState = state.initialise();
+   if (nextState) {
+      var immediateNextState = nextState.initialise();
 
       if (immediateNextState) {
 
-         setTimeout( (_nextState) => {
-            this.set(_nextState, { sourceName: this.owner });
+         setTimeout( (_nextStateName) => {
+            this.set(_nextStateName, { sourceName: this.owner });
          }, 1, this.transformNextState(immediateNextState));
       }
+      else if (clearTimerResult.timerActive && nextState.inheritTimeout[this.value] && (this.states[this.value].timeout != undefined)) {
+         this.setStateTimer(nextState, clearTimerResult.timeLeft/1000.0);
+      }
       else {
-         this.setStateTimer(state);
+         this.setStateTimer(nextState);
       }
    }
 };
@@ -222,6 +254,14 @@ function State(_config, _owner) {
    this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
    this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
    this.timeout = _config.timeout;
+
+   if (_config.hasOwnProperty('inheritTimeout') && _config.inheritTimeout.hasOwnProperty('states')) {
+      this.inheritTimeout = {};
+
+      for (var z = 0; z < _config.inheritTimeout.states.length; ++z) {
+         this.inheritTimeout[_config.inheritTimeout.states[z]] = true;
+      }
+   }
 
    if (this.sources) {
 
