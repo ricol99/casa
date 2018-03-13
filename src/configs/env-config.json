@@ -94,48 +94,6 @@
                ]
             },
             {
-               "name": "richard-present",
-               "initialValue": false,
-               "writable": false,
-               "type": "devicepresentproperty",
-               "host": "192.168.1.37",
-               "interval": 60,
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 6000
-                  }
-               ]
-            },
-            {
-               "name": "natalie-present",
-               "initialValue": false,
-               "writable": false,
-               "type": "devicepresentproperty",
-               "host": "192.168.1.195",
-               "interval": 60,
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 6000
-                  }
-               ]
-            },
-            {
-               "name": "dylan-present",
-               "initialValue": false,
-               "writable": false,
-               "type": "devicepresentproperty",
-               "host": "192.168.1.66",
-               "interval": 60,
-               "sourceSteps": [
-                  {
-                     "type": "latchstep",
-                     "minOutputTime": 6000
-                  }
-               ]
-            },
-            {
                "name": "daylight-threshold",
                "type": "thresholdproperty",
                "initialValue": false,
@@ -255,6 +213,39 @@
                      "outputResolution": 99,
                      "floorOutput": true
                   }
+               ]
+            },
+            {
+               "name": "hkswitchaccessory:richard-at-home",
+               "displayName": "Richard at Home",
+               "manufacturer": "Casa Home Automation Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "switchProp": "richard-present",
+               "propogateToParent": true,
+               "props": [
+               ]
+            },
+            {
+               "name": "hkswitchaccessory:natalie-at-home",
+               "displayName": "Natalie at Home",
+               "manufacturer": "Casa Home Automation Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "switchProp": "natalie-present",
+               "propogateToParent": true,
+               "props": [
+               ]
+            },
+            {
+               "name": "hkswitchaccessory:dylan-at-home",
+               "displayName": "Dylan at Home",
+               "manufacturer": "Casa Home Automation Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "switchProp": "dylan-present",
+               "propogateToParent": true,
+               "props": [
                ]
             }
          ]
