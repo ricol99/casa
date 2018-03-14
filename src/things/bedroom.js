@@ -46,13 +46,11 @@ function Bedroom(_config) {
             },
             {
                "name": "reading-in-bed",
-               "inheritTimeout": { "states": [ "reading-in-bed-others-asleep" ] },
                "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed-others-asleep",
-               "inheritTimeout": { "states": [ "reading-in-bed" ] },
                "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
@@ -78,8 +76,8 @@ function Bedroom(_config) {
       };
 
       if (this.readingInBedTimeout != -1) {
-         this.userStateConfigs[i].states[1].timeout = { "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
-         this.userStateConfigs[i].states[2].timeout = { "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[1].timeout = { "from": [ "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[2].timeout = { "from": [ "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
       }
 
       for (var j = 0; j < this.users.length; ++j) {

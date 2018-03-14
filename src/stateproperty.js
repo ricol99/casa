@@ -67,8 +67,8 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 };
 
 StateProperty.prototype.resetStateTimer = function(_state) {
-   this.clearStateTimer();
-   this.setStateTimer(_state);
+   var res = this.clearStateTimer();
+   this.setStateTimer(_state, res);
 };
 
 StateProperty.prototype.clearStateTimer = function() {
@@ -87,20 +87,40 @@ StateProperty.prototype.clearStateTimer = function() {
 
 StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
-   if ((_timeoutDuration == undefined) && (_state.timeout == undefined)) {
-      return;
-   }
+   if (_state.hasOwnProperty('timeout')) {
 
-   if (_timeoutDuration != undefined) {
-      this.timeoutDuration = (_timeoutDuration < _state.timeout.duration) ? _timeoutDuration * 1000 : _state.timeout.duration * 1000;
-   }
-   else {
-      this.timeoutDuration = (_state.timeout.duration != undefined) ? _state.timeout.duration * 1000 : null;
-   }
+      if (_state.timeout.inheritsFrom[this.states[this.value]]) {
 
-   if (this.timeoutDuration) {
+         if (_timeoutDuration == undefined) {
+
+            if (_state.timeout.hasOwnProperty('duration')) {
+               this.timeoutDuration = _state.timeout.duration * 1000;
+            }
+            else {
+               return;
+            }
+         }
+         else if (_state.timeout.hasOwnProperty('duration')) {
+            this.timeoutDuration = (_timeoutDuration < _state.timeout.duration * 1000) ? _timeoutDuration : _state.timeout.duration * 1000;
+         }
+         else {
+            this.timeoutDuration = _timeoutDuration;
+         }
+
+         if (_state.timeout.hasOwnProperty('nextState')) {
+            this.timeoutNextState = _state.timeout.nextState;
+         }
+      }
+      else if (_state.timeout.hasOwnProperty('duration')) {
+         this.timeoutDuration = _state.timeout.duration * 1000;
+         this.timeoutNextState = _state.timeout.nextState;
+      }
+      else {
+         return;
+      }
+
       this.timerStartedAt = Date.now();
-      this.stateTimer = setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, _state.timeout.nextState);
+      this.stateTimer = setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, this.timeoutNextState);
    }
 };
 
@@ -155,11 +175,10 @@ StateProperty.prototype.setState = function(_nextStateName) {
    var clearTimerResult = this.clearStateTimer();
    console.log(this.uName+": AAAAAAA clearTimerResult=", clearTimerResult);
 
-   if ((clearTimerResult.timeLeft <= 0) && (this.states[this.value].timeout != undefined)) {
+   if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
       // Edge case where the timeout has already expired and waiting for the event loop to schedule.
-      // This is a problem if we inherit the timer from the last state as it has just expired and
-      // we should call the timeout code straight away in the new state, not reset the timer
-      console.log(this.uName + ": Edge case - previous state inherited timer has already expired and is waiting to be scheduled, immediately firing timeout in new state");
+      // We should call the timeout code straight away in the new state, not reset the timer
+      console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, immediately firing timeout in new state");
       setTimeout(StateProperty.prototype.timeoutInternal.bind(this), 1, this.states[this.value].timeout.nextState);
       return;
    }
@@ -185,12 +204,8 @@ StateProperty.prototype.setState = function(_nextStateName) {
             this.set(_nextStateName, { sourceName: this.owner });
          }, 1, this.transformNextState(immediateNextState));
       }
-      else if (clearTimerResult.timerActive && nextState.inheritTimeout[this.value] && (this.states[this.value].timeout != undefined)) {
-         this.setStateTimer(nextState, clearTimerResult.timeLeft/1000.0);
-      }
-      else {
-         this.setStateTimer(nextState);
-      }
+
+      this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
 };
 
@@ -250,16 +265,37 @@ function State(_config, _owner) {
    }
 
    this.priority = _config.hasOwnProperty("priority") ? _config.priority : _owner.priority;
-   this.sources = _config.hasOwnProperty("sources") ? _config.sources :(_config.hasOwnProperty("source") ? [ _config.source ] : undefined);
-   this.targets = _config.hasOwnProperty("targets") ? _config.targets : (_config.hasOwnProperty("target") ? [ _config.target ] : undefined);
-   this.schedules = _config.hasOwnProperty("schedules") ? _config.schedules : (_config.hasOwnProperty("schedule") ? [ _config.schedule ] : undefined);
-   this.timeout = _config.timeout;
-   this.inheritTimeout = {};
 
-   if (_config.hasOwnProperty('inheritTimeout') && _config.inheritTimeout.hasOwnProperty('states')) {
+   if (_config.hasOwnProperty("sources")) {
+      this.sources = _config.sources;
+   }
+   else if (_config.hasOwnProperty("source")) {
+      this.sources = [ _config.source ];
+   }
 
-      for (var z = 0; z < _config.inheritTimeout.states.length; ++z) {
-         this.inheritTimeout[_config.inheritTimeout.states[z]] = true;
+   if (_config.hasOwnProperty("targets")) {
+      this.targets = _config.targets;
+   }
+   else if (_config.hasOwnProperty("target")) {
+      this.targets = [ _config.target ];
+   }
+
+   if (_config.hasOwnProperty("schedules")) {
+      this.schedules = _config.schedules;
+   }
+   else if (_config.hasOwnProperty("schedule")) {
+      this.schedules = [ _config.schedule ];
+   }
+
+   if (_config.hasOwnProperty("timeout")) {
+      this.timeout = _config.timeout;
+      this.timeout.inheritsFrom = {};
+
+      if (_config.timeout.hasOwnProperty('from')) {
+   
+         for (var z = 0; z < _config.timeout.from.length; ++z) {
+            this.timeout.inheritsFrom[_config.timeout.from[z]] = true;
+         }
       }
    }
 
