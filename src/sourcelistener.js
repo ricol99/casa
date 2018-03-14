@@ -10,18 +10,23 @@ function SourceListener(_config, _owner) {
 
    this.sourceName = _config.uName;
 
-   this.transform = _config.transform; 
-   this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
+   if (_config.hasOwnProperty('transform')) {
+      this.transform = _config.transform;
+   }
 
-   this.ignoreSourceUpdates = (_config.ignoreSourceUpdates == undefined) ? false : _config.ignoreSourceUpdates;
-   this.isTarget = (_config.isTarget == undefined) ? false : _config.isTarget;
-   this.priority = (_config.priority == undefined) ? 0 : _config.priority;
-   this.outputValues = (_config.outputValues == undefined) ? {} : copyData(_config.outputValues);
+   if (_config.hasOwnProperty('transformMap')) {
+      this.transformMap = copyData(_config.transformMap);
+   }
 
-   this.maskInvalid = _config.hasOwnProperty("maskInvalidTimeout") || _config.hasOwnProperty("maskInvalidValue");
-   this.maskInvalidValueDefined = _config.hasOwnProperty("maskInvalidValue");
+   this.ignoreSourceUpdates = (_config.hasOwnProperty('ignoreSourceUpdates')) ? _config.ignoreSourceUpdates : false;
+   this.isTarget = (_config.hasOwnProperty('isTarget')) ? _config.isTarget : false;
+   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
+   this.outputValues = (_config.hasOwnProperty('outputValues')) ? copyData(_config.outputValues) : {};
 
-   this.maskInvalidTimeout =  _config.hasOwnProperty("maskInvalidTimeout") ? _config.maskInvalidTimeout : -1;
+   this.maskInvalid = (_config.hasOwnProperty('maskInvalidTimeout')) || _config.hasOwnProperty("maskInvalidValue");
+   this.maskInvalidValueDefined = _config.hasOwnProperty('maskInvalidValue');
+
+   this.maskInvalidTimeout =  (_config.hasOwnProperty('maskInvalidTimeout')) ? _config.maskInvalidTimeout : -1;
    this.maskInvalidValue = _config.maskInvalidValue;
 
    this.listeningToPropertyChange = _config.hasOwnProperty("property");

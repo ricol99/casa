@@ -6,7 +6,7 @@ var CasaSystem = require('./casasystem');
 
 function PeerCasa(_config) {
    this.name = _config.name;
-   this.uName = (_config.uName != undefined) ? _config.uName : _config.code + ":" + _config.name;
+   this.uName = (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name;
 
    this.casaSys = CasaSystem.mainInstance();
    this.casa = this.casaSys.casa;
@@ -217,7 +217,7 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
 
    if (_config) {
       this.loginAs = _config.hasOwnProperty('loginAs') ? _config.loginAs : 'peer';
-      this.persistent = _config.hasOwnProperty('persistent') ? _config.persistent : false;
+      this.persistent = (_config.hasOwnProperty('persistent')) ? _config.persistent : false;
       this.address = _config.address;
 
       if (this.secureMode) {

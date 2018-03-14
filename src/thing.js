@@ -5,8 +5,8 @@ function Thing(_config) {
    Source.call(this, _config);
 
    this.displayName = _config.displayName;
-   this.propogateToParent = _config.hasOwnProperty("propogateToParent") ? _config.propogateToParent : true;
-   this.propogateToChildren = _config.hasOwnProperty("propogateToChildren") ? _config.propogateToChildren : true;
+   this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
+   this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
    this.things = {};
 }
 

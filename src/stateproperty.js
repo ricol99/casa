@@ -263,7 +263,7 @@ function State(_config, _owner) {
       _config.sources = [ _config.source ];
    }
 
-   this.priority = _config.hasOwnProperty("priority") ? _config.priority : _owner.priority;
+   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 
    if (_config.hasOwnProperty("sources")) {
       this.sources = _config.sources;
@@ -308,7 +308,7 @@ function State(_config, _owner) {
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;
-         var val = this.sources[i].hasOwnProperty("value") ? this.sources[i].value : "DEFAULT_VALUE";
+         var val = (this.sources[i].hasOwnProperty('value')) ? this.sources[i].value : "DEFAULT_VALUE";
 
          if (!this.sourceMap[sourceListener.sourceEventName]) {
             this.sourceMap[sourceListener.sourceEventName] = {};

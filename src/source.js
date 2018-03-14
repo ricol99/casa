@@ -27,7 +27,7 @@ function Source(_config) {
       for (var i = 0; i < propLen; ++i) {
          var Prop;
 
-         if (_config.props[i].type == undefined) {
+         if (!_config.props[i].hasOwnProperty('type')) {
             _config.props[i].type = 'property';
          }
 

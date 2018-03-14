@@ -152,10 +152,10 @@ function copyData(_sourceData) {
 
 PipelineStep.prototype.checkData = function(_value, _data) {
 
-   if (_data.sourceName == undefined) _data.sourceName = this.lastData.sourceName;
-   if (_data.sourceEventName == undefined) _data.sourceEventName = this.lastData.sourceEventName;
-   if (_data.name == undefined) _data.name = this.lastData.name;
-   if (_data.value == undefined) _data.value = _value;
+   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.lastData.sourceName;
+   if (!_data.hasOwnProperty('sourceEventName')) _data.sourceEventName = this.lastData.sourceEventName;
+   if (!_data.hasOwnProperty('name')) _data.name = this.lastData.name;
+   if (!_data.hasOwnProperty('value')) _data.value = _value;
 
 };
 

@@ -13,8 +13,13 @@ function Property(_config, _owner) {
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
 
-   this.transform = _config.transform;
-   this.transformMap = (_config.transformMap) ? copyData(_config.transformMap) : undefined;
+   if (_config.hasOwnProperty('transform')) {
+      this.transform = _config.transform;
+   }
+
+   if (_config.hasOwnProperty('transformMap')) {
+      this.transformMap = copyData(_config.transformMap);
+   }
 
    this.valid = false;
    this.cold = true;
@@ -23,11 +28,11 @@ function Property(_config, _owner) {
    this.sourceListeners = {};
    this.noOfSources = 0;
 
-   if (_config.source) {
+   if (_config.hasOwnProperty('source')) {
       _config.sources = [_config.source];
    }
 
-   if (_config.sources) {
+   if (_config.hasOwnProperty('sources')) {
       this.valid = false;
       this.constructing = true;
 
@@ -49,6 +54,7 @@ function Property(_config, _owner) {
       _config.target.uName = (_config.target.hasOwnProperty("name")) ? _config.target.name : this.owner.uName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
+
       this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
                                                  transformMap:_config.targetTransformMap}, this);
@@ -295,7 +301,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    // Transform new property value based on source
    var actualOutputValue = _newPropValue;
 
-   if (_data.sourceEventName != undefined) {
+   if (_data.hasOwnProperty('sourceEventName')) {
       var sourceListener = this.sourceListeners[_data.sourceEventName];
 
       if (sourceListener && sourceListener.outputValues && sourceListener.outputValues[actualOutputValue] != undefined) {
@@ -325,11 +331,9 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
 
 Property.prototype.checkData = function(_value, _data) {
 
-   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
-   // ****** TBD TODO why is this line duplicated? Should it be _data.sourceEventName?
-   if (_data.sourceName == undefined) _data.sourceName = this.owner.uName;
-   if (_data.name == undefined) _data.name = this.name;
-   if (_data.value == undefined) _data.value = _value;
+   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.uName;
+   if (!_data.hasOwnProperty('name')) _data.name = this.name;
+   if (!_data.hasOwnProperty('value')) _data.value = _value;
 }
 
 Property.prototype.ownerHasNewName = function() {

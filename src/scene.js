@@ -39,7 +39,7 @@ function Scene(_config) {
 
    this.sources = [];
    this.sourceListeners = {};
-   this.sceneProp = _config.hasOwnProperty("sceneProp") ? _config.sceneProp : "ACTIVE";
+   this.sceneProp = (_config.hasOwnProperty("sceneProp")) ? _config.sceneProp : "ACTIVE";
 
    for (var i = 0; i < _config.sources.length; i++) {
 
