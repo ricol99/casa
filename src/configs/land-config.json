@@ -608,6 +608,53 @@
                            ]
                         }
                      ]
+                  },
+                  {
+                     "name": "huelightgroup:master-bedroom-all",
+                     "displayName": "Master Bedroom - All lights",
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "room-state",
+                           "type": "stateproperty",
+                           "initialValue": "no-users-present-day",
+                           "states": [
+                              {
+                                 "name": "no-users-present-day",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-day",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "no-users-present-evening",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-evening",
+                                 "priority": 2,
+                                 "targets": [{ "property": "scene", "value": "iWHPzij-DlNyy9o" }]
+                              },
+                              {
+                                 "name": "no-users-present-night",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-night",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "no-users-present-morning",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-morning",
+                                 "targets": [{ "property": "scene", "value": "r7OvR4wgEMf9-N6" }]
+                              }
+                           ]
+                        }
+                     ]
                   }
                ]
             },

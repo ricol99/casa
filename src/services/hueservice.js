@@ -109,6 +109,14 @@ HueService.prototype.setLightState = function(_deviceId, _config, _callback) {
    this.addToQueue("set", _deviceId, _config, _callback);
 };
 
+HueService.prototype.setLightGroupState = function(_groupId, _config, _callback) {
+   this.addToQueue("setGroup", _groupId, _config, _callback);
+};
+
+HueService.prototype.setScene = function(_sceneId, _callback) {
+   this.addToQueue("setScene", _sceneId, {}, _callback);
+};
+
 HueService.prototype.turnLightOn = function(_deviceId, _callback) {
    this.addToQueue("set", _deviceId, { power: true }, _callback);
 };
@@ -211,10 +219,34 @@ Request.prototype.send = function(_callback) {
          }
       });
    }
-   else {   // Assume "set"
+   else if (this.request === "set") {
       console.log(this.owner.uName + ': setting light status, deviceId: ' + this.deviceId + ' config=', this.config);
 
       this.owner.hue.setLightState(this.deviceId, this.config, (_error, _result) => {
+
+         if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            _callback(this.owner, _error, _result);
+         }
+      });
+   }
+   else if (this.request === "setGroup") {
+      console.log(this.owner.uName + ': setting light status, groupId: ' + this.deviceId + ' config=', this.config);
+
+      this.owner.hue.setGroupLightState(this.deviceId, this.config, (_error, _result) => {
+
+         if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            _callback(this.owner, _error, _result);
+         }
+      });
+   }
+   else if (this.request === "setScene") {
+      console.log(this.owner.uName + ': setting light scene, sceneId: ' + this.deviceId);
+
+      this.owner.hue.activateScene(this.deviceId, (_error, _result) => {
 
          if (this.timeout) {
             clearTimeout(this.timeout);

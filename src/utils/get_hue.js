@@ -33,15 +33,33 @@ Hue.nupnpSearch(function(_err, _bridges) {
 
    var hue = new Hue.HueApi(linkAddress, userId);
 
-   if (process.argv.length ==2 ) {
+   if (process.argv.length == 2 ) {
       hue.lights(function(_err, _result) {
          console.log("Lights: " + JSON.stringify(_result));
       });
    }
    else {
-      hue.getLightStatus(process.argv[2], function(_err, _result) {
-         console.log("Light Status: " + JSON.stringify(_result));
-      });
+      switch (process.argv[2]) {
+      case "lights":
+         hue.getLightStatus(process.argv[2], function(_err, _result) {
+            console.log("Light Status: " + JSON.stringify(_result));
+         });
+         break;
+      case "groups":
+         hue.lightGroups(function(_err, _result) {
+            console.log("Group Status: " + JSON.stringify(_result));
+         });
+         break;
+      case "scenes":
+         hue.scenes(function(_err, _result) {
+            console.log("Scene Status: " + JSON.stringify(_result, null, 2));
+         });
+         break;
+      default:
+         hue.getLightStatus(process.argv[2], function(_err, _result) {
+            console.log("Light Status: " + JSON.stringify(_result));
+         });
+      }
    }
 });
  

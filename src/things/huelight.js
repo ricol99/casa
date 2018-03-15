@@ -3,8 +3,6 @@ var Thing = require('../thing');
 var CasaSystem = require('../casasystem');
 
 function HueLight(_config) {
-   this.casaSys = CasaSystem.mainInstance();
-
    Thing.call(this, _config);
    this.thingType = "hue-light";
 
