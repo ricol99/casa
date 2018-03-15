@@ -145,6 +145,33 @@
          "name": "room:landing",
          "displayName": "Landing",
          "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 8,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "low-light"
+               }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
+            }
          ],
          "things": [
             {
@@ -155,6 +182,46 @@
                "serialNumber": "1234567890",
                "propogateToParent": true,
                "props": [
+                  {
+                     "name": "room-state",
+                     "type": "stateproperty",
+                     "initialValue": "no-users-present-day",
+                     "states": [
+                        {
+                           "name": "no-users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-evening",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-evening",
+                           "priority": 2,
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "no-users-present-night",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [{ "property": "brightness", "value": 30 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "no-users-present-morning",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-morning",
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -353,14 +420,55 @@
             { "name": "wake-up-event", "rule": "03 8 * * 0,6" }
          ],
          "props": [
-            {  
+            {
                "name": "movement-pir",
                "initialValue": true,
                "writable": false,
-               "TYPE": "gpioproperty",
-               "gpioPin": 17, 
+               "local": true,
+               "sources": [
+                  {
+                     "property": "movement-pir-door"
+                  },
+                  {
+                     "property": "movement-pir-main"
+                  }
+               ]
+            },
+            {
+               "name": "movement-pir-door",
+               "initialValue": true,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 22, 
                "triggerLow": true,
-               "local": true
+               "local": true,
+            },
+            {
+               "name": "movement-pir-main",
+               "initialValue": true,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 24, 
+               "triggerLow": true,
+               "local": true,
+            },
+            {  
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "building:dumgoyne",
+                  "property": "low-light-kitchen"
+               }
+            }, 
+            {  
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "name": "thing:environment",
+                  "property": "night-time"
+               }
             }
          ],
          "things": [
