@@ -65,7 +65,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 8,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp17",
@@ -73,7 +74,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 17,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp18",
@@ -81,7 +83,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 18,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp24",
@@ -89,7 +92,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 24,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp25",
@@ -97,7 +101,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 25,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp27",
@@ -105,7 +110,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 27,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp23",
@@ -113,7 +119,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 23,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             },
             {
                "name": "land-gp22",
@@ -121,7 +128,8 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 22,
-               "triggerLow": true
+               "triggerLow": true,
+               "local": true
             }
          ]
       },
