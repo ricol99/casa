@@ -23,7 +23,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
 
    if (!_data.coldStart) {
 
-      if (_propName == "scene") {
+      if ((_propName == "scene") && (_propValue != "CLEARED")) {
 
          this.hueService.setScene(_propValue, (_error, _content) => {
 
@@ -31,6 +31,8 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
                console.log(this.uName + ': Error activating scene: ', _error);
             }
          });
+
+         this.alignPropertyValue({ property: _propName, value: "CLEARED" });
       }
       else if (_propName == "power") {
 
