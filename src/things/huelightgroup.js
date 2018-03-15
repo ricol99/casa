@@ -28,7 +28,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
          this.hueService.setScene(_propValue, (_error, _content) => {
 
             if (_error) {
-               console.log(this.uName + ': Error activating scene' + _error.message);
+               console.log(this.uName + ': Error activating scene: ', _error);
             }
          });
       }
