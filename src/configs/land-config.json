@@ -60,15 +60,6 @@
          "displayName": "Test Landing Gpio",
          "props": [
             {
-               "name": "land-gp8",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 8,
-               "triggerLow": true,
-               "local": true
-            },
-            {
                "name": "land-gp17",
                "initialValue": false,
                "writable": false,
@@ -83,15 +74,6 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 18,
-               "triggerLow": true,
-               "local": true
-            },
-            {
-               "name": "land-gp24",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 24,
                "triggerLow": true,
                "local": true
             },
@@ -119,15 +101,6 @@
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 23,
-               "triggerLow": true,
-               "local": true
-            },
-            {
-               "name": "land-gp22",
-               "initialValue": false,
-               "writable": false,
-               "type": "gpioproperty",
-               "gpioPin": 22,
                "triggerLow": true,
                "local": true
             }
@@ -236,7 +209,7 @@
                      "name": "lightwaverfaccessory:landing-main-light",
                      "displayName": "Landing Main Light",
                      "roomId": 4,
-                     "deviceId": 3,
+                     "deviceId": 4,
                      "propogateToParent": true,
                      "props": [
                      ]

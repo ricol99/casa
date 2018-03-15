@@ -1,5 +1,3 @@
-#!/usr/local/bin/node
-
 var CasaSystem = require('../casasystem');
 casaSys = new CasaSystem({}, {"name": "casa:util", "displayName": "Utility Casa", "gang": "casa-collin-v2", "listeningPort": 8097}, false, false, null, null, 1);
 
