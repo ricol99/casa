@@ -615,7 +615,7 @@
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "targets": [{ "property": "scene", "value": "iWHPzij-DlNyy9o" }]
+                                 "targets": [{ "property": "power", "value": true }, { "property": "scene", "value": "iWHPzij-DlNyy9o" }]
                               },
                               {
                                  "name": "no-users-present-night",
