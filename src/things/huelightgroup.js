@@ -32,7 +32,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
             }
          });
 
-         this.alignPropertyValue({ property: _propName, value: "CLEARED" });
+         this.alignPropertyValue(_propName, "CLEARED");
       }
       else if (_propName == "power") {
 
