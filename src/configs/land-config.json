@@ -441,7 +441,7 @@
                "type": "gpioproperty",
                "gpioPin": 22, 
                "triggerLow": true,
-               "local": true,
+               "local": true
             },
             {
                "name": "movement-pir-main",
@@ -450,7 +450,7 @@
                "type": "gpioproperty",
                "gpioPin": 24, 
                "triggerLow": true,
-               "local": true,
+               "local": true
             },
             {  
                "name": "low-light",
