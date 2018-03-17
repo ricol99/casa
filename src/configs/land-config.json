@@ -481,7 +481,6 @@
                                  "name": "reading-in-bed",
                                  "priority": 4,
                                  "targets": [
-                                    { "property": "room-state", "value": "no-users-present-day" },
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -548,7 +547,6 @@
                                  "name": "reading-in-bed",
                                  "priority": 4,
                                  "targets": [
-                                    { "property": "room-state", "value": "no-users-present-day" },
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
