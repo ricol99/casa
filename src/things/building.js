@@ -22,7 +22,7 @@ function Building(_config) {
 
    this.users = [];
    this.userStateConfigs = [];
-   var nightTimeConfig = { "name": "users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
+   var nightTimeConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.casaSys.findSource(_config.users[u].name));
@@ -67,7 +67,7 @@ function Building(_config) {
       nightTimeConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });
    }
 
-   this.ensurePropertyExists("night-time", 'property', nightTimeConfig, _config);
+   this.ensurePropertyExists("all-users-in-bed", 'andproperty', nightTimeConfig, _config);
 }
 
 util.inherits(Building, Thing);

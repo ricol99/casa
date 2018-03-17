@@ -192,6 +192,10 @@
                "type": "topvalidproperty",
                "sources": [
                   {
+                     "name": "building:dumgoyne",
+                     "property": "all-users-in-bed"
+                  },
+                  {
                      "name": "thing:timed-environment",
                      "property": "night-time"
                   }

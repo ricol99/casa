@@ -5,7 +5,13 @@ var CasaSystem = require('../casasystem');
 function HueLightGroup(_config) {
    Thing.call(this, _config);
    this.thingType = "hue-light-group";
-   this.lightGroupId = _config.lightGroupId;
+
+   if (_config.hassOwnProperty('lightGroupId') {
+      this.lightGroupId = _config.lightGroupId;
+   }
+   else if (_config.hasOwnproperty('hueGroupName') {
+      this.hueGroupName = _config.hueGroupName;
+   }
 
    this.hueService =  this.casaSys.findService("hueservice");
 
@@ -45,5 +51,35 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
       }
    }
 };
+
+HueLightGroup.prototype.coldStart = function() {
+
+   if (this.hueGroupName) {
+
+      hue.groups( (_err, _result) => {
+
+         if (_err) {
+            console.error(this.uName + ": Unable to find room on Hue Bridge!");
+         }
+         else {
+            for (var i = 0; i < _result.length; ++i) {
+               var check = (this.groupType) ? (_result[i].type === this.groupType) : true;
+
+               if (check && (_result[i].name == this.hueGroupName)) {
+                  this.lightGroupId = _result[i].id;
+                  break;
+               }
+            }
+
+            if (!this.hasOwnProperty('lightGroupId')) {
+               console.error(this.uName + ": Unable to find room on Hue Bridge!");
+            }
+
+            Thing.prototype.coldStart.call(this);
+         }
+      });
+   }
+};
+
 
 module.exports = exports = HueLightGroup;

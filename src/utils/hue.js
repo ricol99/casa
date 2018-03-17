@@ -34,8 +34,12 @@ Hue.nupnpSearch(function(_err, _bridges) {
    var hue = new Hue.HueApi(linkAddress, userId);
 
    if (process.argv.length == 2 ) {
+
       hue.lights(function(_err, _result) {
-         console.log("Lights: " + JSON.stringify(_result));
+         for (var i = 0; i < _result.lights.length; ++i) {
+            console.log(_result.lights[i].id + "\t" + _result.lights[i].name);
+         }
+         //console.log("Lights: " + JSON.stringify(_result, null, 2));
       });
    }
    else {
@@ -53,6 +57,11 @@ Hue.nupnpSearch(function(_err, _bridges) {
       case "scenes":
          hue.scenes(function(_err, _result) {
             console.log("Scene Status: " + JSON.stringify(_result, null, 2));
+         });
+         break;
+      case "createGroup":
+         hue.createGroup(process.argv[3], process.argv.slice(4), (err, result) => {
+            console.log("Group creation result: " + JSON.stringify(_result, null, 2));
          });
          break;
       default:
