@@ -141,6 +141,10 @@ HueService.prototype.getLightState = function(_deviceId, _callback) {
    this.addToQueue("get", _deviceId, {}, _callback);
 };
 
+HueService.prototype.getLightGroups = function(_callback) {
+   this.addToQueue("getLightGroups", null, {}, _callback);
+};
+
 HueService.prototype.addToQueue = function(_request, _deviceId, _config, _callback) {
 
    if (!this.ready) {
@@ -247,6 +251,18 @@ Request.prototype.send = function(_callback) {
       console.log(this.owner.uName + ': setting light scene, sceneId: ' + this.deviceId);
 
       this.owner.hue.activateScene(this.deviceId, (_error, _result) => {
+
+         if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            _callback(this.owner, _error, _result);
+         }
+      });
+   }
+   else if (this.request === "getLightGroups") {
+      console.log(this.owner.uName + ': getting light groups');
+
+      this.owner.hue.groups( (_error, _result) => {
 
          if (this.timeout) {
             clearTimeout(this.timeout);

@@ -237,7 +237,7 @@
          "props": [
             {
                "name": "movement-pir",
-               "initialValue": true,
+               "initialValue": false,
                "writable": false,
                "TYPE": "gpioproperty",
                "gpioPin": 17,
@@ -399,7 +399,7 @@
          "props": [
             {
                "name": "movement-pir",
-               "initialValue": true,
+               "initialValue": false,
                "writable": false,
                "local": true,
                "sources": [
@@ -413,7 +413,7 @@
             },
             {
                "name": "movement-pir-door",
-               "initialValue": true,
+               "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 22, 
@@ -422,7 +422,7 @@
             },
             {
                "name": "movement-pir-main",
-               "initialValue": true,
+               "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
                "gpioPin": 24, 
@@ -597,7 +597,7 @@
                   {
                      "name": "huelightgroup:master-bedroom-downlighters",
                      "displayName": "Master Bedroom - Downlighters",
-                     "hueGroupName": "Main Bedroom Downlighters",
+                     "lightGroupId": 8,
                      "propogateToParent": false,
                      "props": [
                         {
