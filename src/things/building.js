@@ -24,7 +24,7 @@ function Building(_config) {
 
    this.users = [];
    this.userStateConfigs = [];
-   var allUsersAwayConfig = { "name": "all-users-away", "type": "andproperty", "initialValue": false, "sources": [] };
+   var allUsersAwayConfig = { "name": "all-users-away", "type": "andproperty", "initialValue": true, "sources": [] };
    var someUsersInBedConfig = { "name": "some-users-in-bed", "type": "orproperty", "initialValue": false, "sources": [] };
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
@@ -68,7 +68,7 @@ function Building(_config) {
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
 
-      allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"not-present\"" });
+      allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"not-present\"" });
       allUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });
       someUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"in-bed\"" });
    }
