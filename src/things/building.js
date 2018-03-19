@@ -20,9 +20,13 @@ function Building(_config) {
 
    Thing.call(this, _config);
 
+   this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout') ? _config.bedtimeTimeout : 3600 + 1800;
+
    this.users = [];
    this.userStateConfigs = [];
-   var nightTimeConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
+   var allUsersAwayConfig = { "name": "all-users-away", "type": "andproperty", "initialValue": false, "sources": [] };
+   var someUsersInBedConfig = { "name": "some-users-in-bed", "type": "orproperty", "initialValue": false, "sources": [] };
+   var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.casaSys.findSource(_config.users[u].name));
@@ -64,10 +68,36 @@ function Building(_config) {
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
 
-      nightTimeConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });
+      allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"not-present\"" });
+      allUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });
+      someUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"in-bed\"" });
    }
 
-   this.ensurePropertyExists("all-users-in-bed", 'andproperty', nightTimeConfig, _config);
+   allUsersInBedConfig.sources.push({ "property": "all-users-away", "transform": "!$value" });
+
+   this.ensurePropertyExists("all-users-away", 'andproperty', allUsersAwayConfig, _config);
+   this.ensurePropertyExists("all-users-in-bed", 'andproperty', allUsersInBedConfig, _config);
+   this.ensurePropertyExists("some-users-in-bed", 'orproperty', someUsersInBedConfig, _config);
+
+   this.ensurePropertyExists("users-state", "stateProperty",
+                             { initialValue": "empty",
+                               states: [ name: "empty",
+                                         source: { property: "all-users-away", value: false, nextState: "occupied" }],
+
+                                       [ name: "occupied-awake",
+                                         sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
+                                                   { property: "all-users-away", value: true, nextState: "empty"}]],
+
+                                       [ name: "occupied-going-to-bed",
+                                         timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
+                                         source: { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }],
+
+                                       [ name: "occupied-asleep",
+                                         source: [{ property: "all-users-in-bed", value: false, nextState: "occupied-awake" }], _config);
+                                                  { property: "all-users-away", value: true, nextState: "empty" }], _config);
+
+
+   this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", value: "occupied-asleep" }}, _config);
 }
 
 util.inherits(Building, Thing);

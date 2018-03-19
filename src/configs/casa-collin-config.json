@@ -193,7 +193,7 @@
                "sources": [
                   {
                      "name": "building:dumgoyne",
-                     "property": "all-users-in-bed"
+                     "property": "night-time"
                   },
                   {
                      "name": "thing:timed-environment",
