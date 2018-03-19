@@ -169,23 +169,5 @@ PeerSource.prototype.isActive = function() {
    return this.props['ACTIVE'].value;
 };
 
-PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
-
-   if (!this.props.hasOwnProperty(_propName)) {
-      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
-      var Prop = require('./' + loadPath + _propType);
-      _config.name = _propName;
-      _config.type = _propType;
-      this.props[_propName]  = new Prop(_config, this);
-
-      if (!_mainConfig.hasOwnProperty("props")) {
-         _mainConfig.props = [ _config ];
-      }
-      else {
-         _mainConfig.props.push(_config);
-      }
-   }
-};
-
 module.exports = exports = PeerSource;
 

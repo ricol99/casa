@@ -170,13 +170,13 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
          return true;
       }
    }
-   else {
-      var sendData = copyData(_data);
-      sendData.local = true;
-      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
-      this.emit('property-changed', sendData);
+   //else {
+      //var sendData = copyData(_data);
+      //sendData.local = true;
+      //console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
+      //this.emit('property-changed', sendData);
       return true;
-   }
+   //}
 };
 
 // Only called by ghost peer source - can cause duplicates! TODO
