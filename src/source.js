@@ -154,19 +154,36 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
    var prop = this.props[_data.name];
 
    // Only update if the property has a different value
-   if (prop && (prop.value != _data.value)) {
+   if (prop) {
 
-      // Only update if the property has no processing attached to it
-      if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
-         return prop.set(_data.value, _data);
+      if (prop.value != _data.value) {
+
+         // Only update if the property has no processing attached to it
+         if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
+            return prop.set(_data.value, _data);
+         }
+         else {
+            return false;
+         }
       }
+      else {
+         return true;
+      }
+   }
+   else {
+      var sendData = copyData(_data);
+      sendData.local = true;
+      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
+      this.emit('property-changed', sendData);
+      return true;
    }
 };
 
 // Only called by ghost peer source - can cause duplicates! TODO
 Source.prototype.sourceHasRaisedEvent = function(_data) {
    console.log(this.uName + ': received event-raised event from peer (duplicate) source');
-   this.raiseEvent(_data.uName, _data);
+   _data.local = true;
+   this.raiseEvent(_data.name, _data);
 };
 
 // Override this for last output hook - e.g. sync and external property with the final property value
@@ -176,7 +193,7 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
-   console.info('Child Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
+   console.info(this.uName + ': Child Property Changed: ' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.uName;
@@ -212,7 +229,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.props[_propName].propertyAboutToChange(_propValue, sendData);
       this.propertyAboutToChange(_propName, _propValue, sendData);
 
-      console.info('Property Changed: ' + this.uName + ':' + _propName + ': ' + _propValue);
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management

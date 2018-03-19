@@ -34,10 +34,10 @@
    ],
    "things": [
       {
-         "name": "thing:test-state-timers2",
+         "name": "thing:test-state-timers",
          "props": [
             {
-               "name": "test-periodic-1",
+               "name": "test-periodic-3",
                "type": "stateproperty",
                "initialValue": "off",
                "states": [
@@ -59,7 +59,7 @@
                ]
             },
             {
-               "name": "test-periodic-2",
+               "name": "test-periodic-4",
                "type": "stateproperty",
                "initialValue": "off",
                "states": [

@@ -45,7 +45,7 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
       }
    }
    else {
-      console.info('Property Changed: ' + this.uName + ':' + _data.name + ': ' + _data.value);
+      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + _data.value);
       this.props[_data.name] = { value: _data.value };
       this.emit('property-changed', copyData(_data));
    }
@@ -142,7 +142,7 @@ PeerSource.prototype.coldStart = function() {
             sendData.name = prop;
             sendData.value = this.props[prop].value;
             sendData.coldStart = true;
-            console.info('Property Changed: ' + this.uName + ':' + prop + ': ' + sendData.value);
+            console.info(this.uName + ': Property Changed: ' + prop + ': ' + sendData.value);
             this.emit('property-changed', copyData(sendData));
          }
       }
@@ -167,6 +167,24 @@ PeerSource.prototype.invalidateSource = function() {
 
 PeerSource.prototype.isActive = function() {
    return this.props['ACTIVE'].value;
+};
+
+PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
+
+   if (!this.props.hasOwnProperty(_propName)) {
+      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
+      var Prop = require('./' + loadPath + _propType);
+      _config.name = _propName;
+      _config.type = _propType;
+      this.props[_propName]  = new Prop(_config, this);
+
+      if (!_mainConfig.hasOwnProperty("props")) {
+         _mainConfig.props = [ _config ];
+      }
+      else {
+         _mainConfig.props.push(_config);
+      }
+   }
 };
 
 module.exports = exports = PeerSource;

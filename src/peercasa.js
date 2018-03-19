@@ -52,6 +52,18 @@ function PeerCasa(_config) {
 
 util.inherits(PeerCasa, Source);
 
+PeerCasa.prototype.coldStart = function() {
+   Source.prototype.coldStart.call(this);
+
+   for (var prop in this.sources) {
+
+      if (this.sources.hasOwnProperty(prop)){
+         console.log(this.uName + ': Cold starting peer source ' + this.sources[prop].uName);
+         this.sources[prop].coldStart();
+      }
+   }
+};
+
 PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
 
    if (this.connected && (_data.sourcePeerCasa != this.uName)) {
@@ -83,17 +95,6 @@ PeerCasa.prototype.removeCasaListeners = function() {
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
       this.casa.removeListener('source-event-raised', this.sourceEventRaisedCasaHandler);
-   }
-}
-
-PeerCasa.prototype.coldStartPeerSources = function() {
-
-   for (var prop in this.sources) {
-
-      if (this.sources.hasOwnProperty(prop)){
-         console.log(this.uName + ': Cold starting peer source ' + this.sources[prop].uName);
-         this.sources[prop].coldStart();
-      }
    }
 }
 
@@ -190,11 +191,8 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    this.casa.refreshConfigWithSourcesStatus();
 
-   // Cold start Peer Casa
+   // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
-
-   // Cold start all the peers sources now that everything has been created
-   this.coldStartPeerSources();
 
    this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
    this.establishHeartbeat();
@@ -351,11 +349,8 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    this.createSources(_data, this);
    this.connected = true;
 
-   // Cold start Peer Casa
+   // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
-
-   // Cold start all the peers sources now that everything has been created
-   this.coldStartPeerSources();
 
    this.establishHeartbeat();
 
