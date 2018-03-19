@@ -219,7 +219,7 @@
          ]
       },
       {
-         "name": "bedroom:dylan-bedroom",
+         "name": "bedroom:dylan",
          "displayName": "Dylan's Bedroom",
          "users": [
             { "name": "user:dylan" }
@@ -382,7 +382,7 @@
          ]
       },
       {
-         "name": "bedroom:master-bedroom",
+         "name": "bedroom:master",
          "displayName": "Master Bedroom",
          "users": [
             { "name": "user:richard"},

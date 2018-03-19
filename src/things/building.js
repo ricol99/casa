@@ -52,7 +52,7 @@ function Building(_config) {
          ]
       };
 
-      if (_config.bedrooms) {
+      if (_config.hasOwnProperty('bedrooms') {
 
          for (var j = 0; j < _config.bedrooms.length; ++j) {
             this.userStateConfigs[i].states[0].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
