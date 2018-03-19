@@ -81,7 +81,7 @@ function Building(_config) {
 
    this.ensurePropertyExists("users-state", "stateproperty",
                              { initialValue: "empty",
-                               states: [ { name: "empty", source: { property: "all-users-away", value: false, nextState: "occupied" }},
+                               states: [ { name: "empty", source: { property: "all-users-away", value: false, nextState: "occupied-awake" }},
                                          { name: "occupied-awake", sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
                                                                              { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-going-to-bed", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
