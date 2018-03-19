@@ -20,7 +20,7 @@ function Building(_config) {
 
    Thing.call(this, _config);
 
-   this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout') ? _config.bedtimeTimeout : 3600 + 1800;
+   this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout')) ? _config.bedtimeTimeout : 3600 + 1800;
 
    this.users = [];
    this.userStateConfigs = [];
@@ -56,7 +56,7 @@ function Building(_config) {
          ]
       };
 
-      if (_config.hasOwnProperty('bedrooms') {
+      if (_config.hasOwnProperty('bedrooms')) {
 
          for (var j = 0; j < _config.bedrooms.length; ++j) {
             this.userStateConfigs[i].states[0].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
@@ -79,23 +79,15 @@ function Building(_config) {
    this.ensurePropertyExists("all-users-in-bed", 'andproperty', allUsersInBedConfig, _config);
    this.ensurePropertyExists("some-users-in-bed", 'orproperty', someUsersInBedConfig, _config);
 
-   this.ensurePropertyExists("users-state", "stateProperty",
-                             { initialValue": "empty",
-                               states: [ name: "empty",
-                                         source: { property: "all-users-away", value: false, nextState: "occupied" }],
-
-                                       [ name: "occupied-awake",
-                                         sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
-                                                   { property: "all-users-away", value: true, nextState: "empty"}]],
-
-                                       [ name: "occupied-going-to-bed",
-                                         timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
-                                         source: { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }],
-
-                                       [ name: "occupied-asleep",
-                                         source: [{ property: "all-users-in-bed", value: false, nextState: "occupied-awake" }], _config);
-                                                  { property: "all-users-away", value: true, nextState: "empty" }], _config);
-
+   this.ensurePropertyExists("users-state", "stateproperty",
+                             { initialValue: "empty",
+                               states: [ { name: "empty", source: { property: "all-users-away", value: false, nextState: "occupied" }},
+                                         { name: "occupied-awake", sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
+                                                                             { property: "all-users-away", value: true, nextState: "empty" }]},
+                                         { name: "occupied-going-to-bed", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
+                                           source: { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }},
+                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-awake" },
+                                                                              { property: "all-users-away", value: true, nextState: "empty" }] }]}, _config);
 
    this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", value: "occupied-asleep" }}, _config);
 }
