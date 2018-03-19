@@ -89,7 +89,7 @@ function Building(_config) {
                                          { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-awake" },
                                                                               { property: "all-users-away", value: true, nextState: "empty" }] }]}, _config);
 
-   this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", value: "occupied-asleep" }}, _config);
+   this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", transform: "$value===\"occupied-asleep\"" }}, _config);
 }
 
 util.inherits(Building, Thing);
