@@ -208,13 +208,6 @@ StateProperty.prototype.setState = function(_nextStateName) {
             this.set(_nextStateName, { sourceName: this.owner });
          }, 1, this.transformNextState(immediateNextState));
       }
-      else  {
-         this.currentPriority = nextState.priority;
-
-         if (this.owner.takeControl(this, this.currentPriority)) {
-            nextState.alignTargets();
-         }
-      }
 
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
@@ -227,8 +220,7 @@ StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _p
 StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
    this.currentPriority = _priority;
 
-   //if (_targets && this.owner.takeControl(this, this.currentPriority)) {
-   if (_targets && this.controllingOwner) {
+   if (this.owner.takeControl(this, this.currentPriority) && _targets) {
       this.owner.alignProperties(_targets);
    }
 };
@@ -349,7 +341,13 @@ function State(_config, _owner) {
 }
 
 State.prototype.initialise = function() {
-   return this.checkSourceProperties();
+   var immediateState = this.checkSourceProperties();
+
+   if (!immediateState) {
+      this.alignTargets();
+   }
+
+   return immediateState;
 };
 
 State.prototype.alignTargets = function() {
