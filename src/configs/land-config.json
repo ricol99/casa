@@ -293,7 +293,7 @@
                      "name": "ACTIVE",
                      "initialValue": false,
                      "source": {
-                        "name": "huelight:dylan-bedroom-lamp",
+                        "name": "huelight:dylan-bedroom-lights",
                         "property": "power"
                      }
                   }
