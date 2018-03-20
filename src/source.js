@@ -49,7 +49,7 @@ function Source(_config) {
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
-                             { "initialValue": 'auto',
+                             { "initialValue": 'auto', "takeControlWithoutTargets": true,
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    events.EventEmitter.call(this);
@@ -170,13 +170,13 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
          return true;
       }
    }
-   //else {
-      //var sendData = copyData(_data);
-      //sendData.local = true;
-      //console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
-      //this.emit('property-changed', sendData);
+   else {
+      var sendData = copyData(_data);
+      sendData.local = true;
+      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
+      this.emit('property-changed', sendData);
       return true;
-   //}
+   }
 };
 
 // Only called by ghost peer source - can cause duplicates! TODO
@@ -193,7 +193,6 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
-   console.info(this.uName + ': Child Property Changed: ' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? copyData(_data) : {};
    sendData.sourceName = this.uName;
@@ -404,6 +403,7 @@ Source.prototype.coldStart = function() {
    }
 }
 
+// Called by stateproperty to take control based on setting a target property
 Source.prototype.takeControl = function(_newController, _priority) {
    console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
@@ -429,36 +429,65 @@ Source.prototype.takeControl = function(_newController, _priority) {
          result = false;
       }
    }
-   else if (_priority != this.controllerPriority) {
+   else {
+      result = this.reprioritiseCurrentController(_priority);
+   }
+
+   return result;
+};
+
+// Called by stateproperty to realign control based on a state transition
+// If it is the controller, check it still should be
+// If it is not the controller and its priority than the controller, add or reassign
+// priotity as a secondary controller
+Source.prototype.updateControllerPriority = function(_controller, _newPriority) {
+
+   if (_controller == this.controller) {
+      this.reprioritiseCurrentController(_newPriority);
+   }
+   else if (_newPriority <= this.controllerPriority) {
+      this.addSecondaryController(_controller, _newPriority);
+   }
+   // else do nothing as stateproperty will not take control with this method
+   // control is only taken (via takeControl()) when targets are specified in a state
+};
+
+// Internal
+Source.prototype.reprioritiseCurrentController = function(_newPriority) {
+   var result = true;
+
+   if (_newPriority != this.controllerPriority) {
       // Same controlling stateProperty but different priority - reassess if it still should be a controller
       console.log(this.uName + ": Existing controller "+this.controller.name+" is changing priority");
 
       if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
 
-         if (_priority >= this.secondaryControllers[0].priority) {
+         if (_newPriority >= this.secondaryControllers[0].priority) {
             console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
-            this.controllerPriority = _priority;
+            this.controllerPriority = _newPriority;
          }
          else {
             console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
+            var losingController = this.controller;
             this.controllerPriority = this.secondaryControllers[0].priority;
             this.controller = this.secondaryControllers[0].controller;
             this.secondaryControllers.shift();
-            this.addSecondaryController(_newController, _priority);
-            _newController.ceasedToBeController(this.controller);
+            this.addSecondaryController(losingController, _newPriority);
+            losingController.ceasedToBeController(this.controller);
             this.controller.becomeController();
             result = false;
          }
       }
       else {
          console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
-         this.controllerPriority = _priority;
+         this.controllerPriority = _newPriority;
       }
    }
 
    return result;
 };
 
+// Internal
 Source.prototype.addSecondaryController = function(_controller, _priority) {
    var placed = false;
 

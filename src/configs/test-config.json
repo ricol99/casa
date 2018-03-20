@@ -163,6 +163,7 @@
                "name": "MODE",
                "type": "stateproperty",
                "initialValue": "auto",
+               "takeControlWithoutTargets": true,
                "states": [
                   {
                      "name": "auto",

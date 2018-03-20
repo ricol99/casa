@@ -3,6 +3,9 @@ var Property = require('./property');
 var SourceListener = require('./sourcelistener');
 var CasaSystem = require('./casasystem');
 
+// Will only take control of a source if targets have been specified in the state
+// Once control has been taken, it will reassess its control at each state transition
+
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.casaSys = CasaSystem.mainInstance();
@@ -11,6 +14,7 @@ function StateProperty(_config, _owner) {
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
+   this.takeControlWithoutTargets = (_config.hasOwnProperty('takeControlWithoutTargets')) ? _config.takeControlWithoutTargets : false;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -198,10 +202,18 @@ StateProperty.prototype.setState = function(_nextStateName) {
       var immediateNextState = nextState.initialise();
 
       if (immediateNextState) {
+         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + newImmediateState);
 
          setTimeout( (_nextStateName) => {
             this.set(_nextStateName, { sourceName: this.owner });
          }, 1, this.transformNextState(immediateNextState));
+      }
+      else  {
+         this.currentPriority = nextState.priority;
+
+         if (this.owner.takeControl(this, this.currentPriority)) {
+            nextState.alignTargets();
+         }
       }
 
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
@@ -215,7 +227,8 @@ StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _p
 StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
    this.currentPriority = _priority;
 
-   if (_targets && this.owner.takeControl(this, this.currentPriority)) {
+   //if (_targets && this.owner.takeControl(this, this.currentPriority)) {
+   if (_targets && this.controllingOwner) {
       this.owner.alignProperties(_targets);
    }
 };
@@ -336,16 +349,7 @@ function State(_config, _owner) {
 }
 
 State.prototype.initialise = function() {
-   var newImmediateState = this.checkSourceProperties();
-
-   if (!newImmediateState) {
-      this.alignTargets();
-   } 
-   else {
-      console.log(this.uName + ": Initialise() ImmediateState state transfer to " + newImmediateState);
-   }
-
-   return newImmediateState;
+   return this.checkSourceProperties();
 };
 
 State.prototype.alignTargets = function() {
