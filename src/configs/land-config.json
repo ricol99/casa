@@ -313,9 +313,9 @@
                ],
                "things": [
                   {
-                     "name": "huelight:dylan-bedroom-lamp",
-                     "displayName": "Dylan Bedroom Lamp",
-                     "deviceId": 2,
+                     "name": "huelight:dylan-bedside-lamp",
+                     "displayName": "Dylan Bedroom Bedside Lamp",
+                     "deviceId": 5,
                      "propogateToParent": false,
                      "props": [
                         {
@@ -363,6 +363,68 @@
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
                                     { "property": "power", "value": true }
                                  ] 
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 60 },
+                                    { "property": "saturation", "value": 70 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "huelight:dylan-main-light",
+                     "displayName": "Dylan Bedroom Main Light",
+                     "deviceId": 6,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "dylan-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "no-users-present",
+                           "states": [
+                              {
+                                 "name": "not-present",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 2,
+                                 "targets": [
+                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
+                                    { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
+                                    { "property": "power", "value": true }
+                                 ]
                               },
                               {
                                  "name": "awake-up-in-bed",
