@@ -191,7 +191,7 @@
                         },
                         {
                            "name": "users-present-night",
-                           "targets": [{ "property": "brightness", "value": 10 }, { "property": "power", "value": true }]
+                           "targets": [{ "property": "brightness", "value": 1 }, { "property": "power", "value": true }]
                         },
                         {
                            "name": "no-users-present-morning",
@@ -491,7 +491,7 @@
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
                                  "targets": [
-                                    { "property": "brightness", "value": 30 },
+                                    { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -557,7 +557,7 @@
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
                                  "targets": [
-                                    { "property": "brightness", "value": 30 },
+                                    { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
