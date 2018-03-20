@@ -1,4 +1,4 @@
-var version = 1.033;
+var version = 1.034;
 var crypto = require('crypto');
 var fs = require('fs');
 var commandLineArgs = require('command-line-args')
@@ -19,7 +19,7 @@ if (options.local == undefined) {
    process.exit(1);
 }
 
-require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: false, info: true, error: true });
+require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true, error: true });
 
 var systemConfigFile = (options.system == undefined) ? 'casa-collin-config.json' : options.system;
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
