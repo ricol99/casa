@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var Source = require('./source');
 var S = require('string');
 var io = require('socket.io-client');
@@ -173,7 +173,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
-   this.config = deepCopyData(_config);
+   this.config = util.copy(_config, true);
    this.changeName(this.config.casaName);
    this.name = this.config.casaName;
    this.createSources(this.config, this);
@@ -638,26 +638,26 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
          }
       }
 
-      this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i]].isActive() });
+      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
 }
 
-function deepCopyData(_sourceData) {
-   return JSON.parse(JSON.stringify(_sourceData));
-}
+//function deepCopyData(_sourceData) {
+   //return JSON.parse(JSON.stringify(_sourceData));
+//}
 
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
+//function util.copy(_sourceData) {
+   //var newData = {};
+//
+   //for (var prop in _sourceData) {
+//
+      //if (_sourceData.hasOwnProperty(prop)){
+         //newData[prop] = _sourceData[prop];
+      //}
+   //}
+//
+   //return newData;
+//}
 
 PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 

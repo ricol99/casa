@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var Property = require('../property');
 
 function LatchProperty(_config, _owner) {
@@ -118,19 +118,6 @@ LatchProperty.prototype.restartTimer = function() {
          }
       }
    }, this.minOutputTime*1000, this);
-}
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
 }
 
 module.exports = exports = LatchProperty;

@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
@@ -171,7 +171,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
       }
    }
    else {
-      var sendData = copyData(_data);
+      var sendData = util.copy(_data);
       sendData.local = true;
       console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
       this.emit('property-changed', sendData);
@@ -194,7 +194,7 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
 
-   var sendData = (_data) ? copyData(_data) : {};
+   var sendData = (_data) ? util.copy(_data) : {};
    sendData.sourceName = this.uName;
    sendData.name = _propName;
    sendData.value = _propValue;
@@ -214,7 +214,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
       var oldValue = this.props[_propName].value;
-      var sendData = (_data) ? copyData(_data) : {};
+      var sendData = (_data) ? util.copy(_data) : {};
       sendData.sourceName = this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
@@ -267,10 +267,10 @@ Source.prototype.addPropertiesForAlignment = function(_properties) {
    for (var i = 0; i < _properties.length; ++i) {
 
       if (_properties[i].hasOwnProperty("ramp")) {
-         var ramp = copyData(_properties[i].ramp);
+         var ramp = util.copy(_properties[i].ramp);
 
          if (_properties[i].ramp.hasOwnProperty("ramps")) {
-            ramp.ramps = copyConfig(_properties[i].ramp.ramps);
+            ramp.ramps = util.copy(_properties[i].ramp.ramps, true);
          }
 
          this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
@@ -331,34 +331,6 @@ Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, 
    }
 };
 
-function copyConfig(_config) {
-
-   if (_config instanceof Array) {
-      var newConfig = [];
-
-      for (var i = 0; i < _config.length; ++i) {
-         newConfig.push(copyData(_config[i]));
-      }
-      return newConfig;
-   }
-   else {
-      return copyData(_config);
-   }
-}
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
-
 Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
@@ -375,7 +347,7 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
 }
 
 Source.prototype.raiseEvent = function(_eventName, _data) {
-   var sendData = (_data) ? copyData(_data) : {};
+   var sendData = (_data) ? util.copy(_data) : {};
    sendData.local = this.local;
    sendData.sourceName = this.uName;
    sendData.name = _eventName;

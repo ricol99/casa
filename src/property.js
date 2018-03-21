@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var SourceListener = require('./sourcelistener');
 var Pipeline = require('./pipeline');
 
@@ -18,7 +18,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('transformMap')) {
-      this.transformMap = copyData(_config.transformMap);
+      this.transformMap = util.copy(_config.transformMap);
    }
 
    this.valid = false;
@@ -112,12 +112,12 @@ Property.prototype.setWithRamp = function(_config, _data) {
 };
 
 Property.prototype.createAndStartRamp = function(_config, _data) {
-   this.rampConfig = copyData(_config);
+   this.rampConfig = util.copy(_config);
 
    if (_config.hasOwnProperty("ramps")) {
-      this.rampConfig.ramps = copyConfig(_config.ramps);
+      this.rampConfig.ramps = util.copy(_config.ramps, true);
    }
-   this.rampData = copyData(_data);
+   this.rampData = util.copy(_data);
    this.ramp = this.owner.getRampService().createRamp(this, this.rampConfig);
    this.ramp.start(this.value);
 };
@@ -166,12 +166,12 @@ Property.prototype.amIValid = function() {
 
    if (this.allSourcesRequiredForValidity) {
 
-      return (allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
+      return (util.allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
             return _sourceListener.isValid();
       }));
    }
    else {
-      return (anyAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
+      return (util.anyAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
             return _sourceListener.isValid();
       }));
    }
@@ -339,65 +339,5 @@ Property.prototype.checkData = function(_value, _data) {
 Property.prototype.ownerHasNewName = function() {
    this.uName = this.owner.uName+":"+this.type+":"+this.name;
 };
-
-function copyConfig(_config) {
-
-   if (_config instanceof Array) {
-      var newConfig = [];
-
-      for (var i = 0; i < _config.length; ++i) {
-         newConfig.push(copyData(_config[i]));
-      }
-      return newConfig;
-   }
-   else {
-      return copyData(_config);
-   }
-}
-
-function copyData(_sourceData) {
-
-   if (_sourceData) {
-      var newData = {};
-
-      for (var prop in _sourceData) {
-
-         if (_sourceData.hasOwnProperty(prop)){
-            newData[prop] = _sourceData[prop];
-         }
-      }
-
-      return newData;
-   }
-   else {
-      return undefined;
-   }
-}
-
-function allAssocArrayElementsDo(_obj, _func) {
-   
-   for (var prop in _obj) {
-
-      if (_obj.hasOwnProperty(prop)){
-         if (!_func(_obj[prop])) {
-            return false;
-         }
-      }
-   }
-   return true;
-}
-
-function anyAssocArrayElementsDo(_obj, _func) {
-
-   for (var prop in _obj) {
-
-      if (_obj.hasOwnProperty(prop)){
-         if (_func(_obj[prop])) {
-            return true;
-         }
-      }
-   }
-   return false;
-}
 
 module.exports = exports = Property;

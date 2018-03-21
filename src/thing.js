@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var Source = require('./source');
 
 function Thing(_config) {
@@ -165,24 +165,5 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
       this.childRaisedEvent(_eventName, this, data);
    }
 };
-
-function copyData(_sourceData) {
-
-   if (_sourceData) {
-      var newData = {};
-
-      for (var prop in _sourceData) {
-
-         if (_sourceData.hasOwnProperty(prop)){
-            newData[prop] = _sourceData[prop];
-         }
-      }
-
-      return newData;
-   }
-   else {
-      return undefined;
-   }
-}
 
 module.exports = exports = Thing;

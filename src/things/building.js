@@ -19,6 +19,7 @@ var Thing = require('../thing');
 function Building(_config) {
 
    Thing.call(this, _config);
+   this.thingType = "building";
 
    this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout')) ? _config.bedtimeTimeout : 3600 + 1800;
 

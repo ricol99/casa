@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var PipelineStep = require('../pipelinestep');
 
 function DelayStep(_config, _pipeline) {
@@ -27,26 +27,13 @@ DelayStep.prototype.deleteDelayedEvent = function() {
 
 function DelayedEvent(_value, _eventData, _step) {
    this.value = _value;
-   this.eventData = copyData(_eventData);
+   this.eventData = util.copy(_eventData);
    this.step = _step;
 
    this.timeoutObj = setTimeout(function(_this) {
       _this.step.outputForNextStep(_this.value, _this.eventData);
       _this.step.deleteDelayedEvent();
    }, this.step.delay*1000, this);
-}
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
 }
 
 module.exports = exports = DelayStep;

@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 
 //
 // Constructor
@@ -25,7 +25,7 @@ function PipelineStep(_config, _pipeline) {
 // Call outputForNextStep() to pass on output to next step (when required)
 //
 PipelineStep.prototype.newInputForProcess = function(_value, _data) {
-   this.lastData = copyData(_data);
+   this.lastData = util.copy(_data);
    this.process(_value, _data);
 }
 
@@ -97,7 +97,7 @@ PipelineStep.prototype.outputForNextStep = function(_outputValue, _data) {
    }
 
    this.checkData(_outputValue, _data);
-   this.lastData = copyData(_data);
+   this.lastData = util.copy(_data);
 
    if (this.nextStep) {
       this.nextStep.newInputForProcess(_outputValue, _data);
@@ -136,19 +136,6 @@ PipelineStep.prototype.goInvalid = function(_data) {
 // ==================== 
 // NON-EXPORTED METHODS
 // ==================== 
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
 
 PipelineStep.prototype.checkData = function(_value, _data) {
 

@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var Source = require('./source');
 var CasaSystem = require('./casasystem');
 var Pipeline = require('./pipeline');
@@ -15,13 +15,13 @@ function SourceListener(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('transformMap')) {
-      this.transformMap = copyData(_config.transformMap);
+      this.transformMap = util.copy(_config.transformMap);
    }
 
    this.ignoreSourceUpdates = (_config.hasOwnProperty('ignoreSourceUpdates')) ? _config.ignoreSourceUpdates : false;
    this.isTarget = (_config.hasOwnProperty('isTarget')) ? _config.isTarget : false;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
-   this.outputValues = (_config.hasOwnProperty('outputValues')) ? copyData(_config.outputValues) : {};
+   this.outputValues = (_config.hasOwnProperty('outputValues')) ? util.copy(_config.outputValues) : {};
 
    this.maskInvalid = (_config.hasOwnProperty('maskInvalidTimeout')) || _config.hasOwnProperty("maskInvalidValue");
    this.maskInvalidValueDefined = _config.hasOwnProperty('maskInvalidValue');
@@ -113,7 +113,7 @@ SourceListener.prototype.refreshSource = function() {
          this.stopMaskInvalidTimer();
 
          if (this.pipeline) {
-            this.pipeline.sourceIsValid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            this.pipeline.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
          else {
             this.goValid();
@@ -144,27 +144,27 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
          this.valueBeforeMasking = this.sourceRawValue;
 
          if (this.maskInvalidValueDefined && (this.maskInvalidValue != this.sourceRawValue)) {
-            this.internalSourcePropertyChanged(copyData({ sourceName: this.sourceName, name: this.eventName, value: this.maskInvalidValue }));
+            this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.maskInvalidValue }));
          }
          this.startMaskInvalidTimer();
       }
       else {
          if (this.pipeline) {
-            this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
          else {
-            this.goInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            this.goInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
       }
    }
 }
 
 SourceListener.prototype.goValid = function() {
-   this.owner.sourceIsValid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+   this.owner.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
 SourceListener.prototype.goInvalid = function(_data) {
-   this.owner.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+   this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
 //
@@ -175,10 +175,10 @@ SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _da
    this.sourcePropertyValue = _newValue;
 
    if (this.isTarget) {
-      this.owner.receivedEventFromTarget(copyData(_data));
+      this.owner.receivedEventFromTarget(util.copy(_data));
    }
    else {
-      this.owner.receivedEventFromSource(copyData(_data));
+      this.owner.receivedEventFromSource(util.copy(_data));
    }
 };
 
@@ -214,10 +214,10 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
          if (!this.valid) {
 
             if (this.pipeline) {
-               this.pipeline.sourceIsInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+               this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
             }
             else {
-               this.goInvalid(copyData({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+               this.goInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
             }
          }
       }, this.maskInvalidTimeout*1000);
@@ -257,19 +257,6 @@ SourceListener.prototype.transformInput = function(_data) {
    return newInput;
 }
 
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
-
 SourceListener.prototype.getPropertyValue = function() {
    return this.sourcePropertyValue;
 };
@@ -287,7 +274,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
    if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       console.log(this.uName + ": processing source property change, property=" + _data.name);
 
-      this.lastData = copyData(_data);
+      this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
       this.sourceRawValue = _data.value;
 
@@ -302,10 +289,10 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
          this.sourcePropertyValue = this.lastData.value;
 
          if (this.isTarget) {
-            this.owner.receivedEventFromTarget(copyData(this.lastData));
+            this.owner.receivedEventFromTarget(util.copy(this.lastData));
          }
          else {
-            this.owner.receivedEventFromSource(copyData(this.lastData));
+            this.owner.receivedEventFromSource(util.copy(this.lastData));
          }
       }
    }
@@ -316,7 +303,7 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
    if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       console.log(this.uName + ": processing source event raised, event=" + _data.name);
 
-      this.lastData = copyData(_data);
+      this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
       this.sourceRawValue = _data.value;
 
@@ -328,10 +315,10 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
          this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
       }
       else if (this.isTarget) {
-         this.owner.receivedEventFromTarget(copyData(this.lastData));
+         this.owner.receivedEventFromTarget(util.copy(this.lastData));
       }
       else {
-         this.owner.receivedEventFromSource(copyData(this.lastData));
+         this.owner.receivedEventFromSource(util.copy(this.lastData));
       }
    }
 };

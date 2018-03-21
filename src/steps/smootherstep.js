@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var PipelineStep = require('../pipelinestep');
 
 function SmootherStep(_config, _pipeline) {
@@ -16,19 +16,6 @@ function SmootherStep(_config, _pipeline) {
 }
 
 util.inherits(SmootherStep, PipelineStep);
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
 
 SmootherStep.prototype.restartTimer = function() {
 

@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var events = require('events');
 var CasaSystem = require('./casasystem');
 
@@ -47,7 +47,7 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    else {
       console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + _data.value);
       this.props[_data.name] = { value: _data.value };
-      this.emit('property-changed', copyData(_data));
+      this.emit('property-changed', util.copy(_data));
    }
 };
 
@@ -60,22 +60,9 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
    }
    else {
       console.info('Event Raised: ' + this.uName + ':' + _data.uName);
-      this.emit('event-raised', copyData(_data));
+      this.emit('event-raised', util.copy(_data));
    }
 };
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
 
 PeerSource.prototype.isPropertyValid = function(_property) {
    return true;
@@ -143,7 +130,7 @@ PeerSource.prototype.coldStart = function() {
             sendData.value = this.props[prop].value;
             sendData.coldStart = true;
             console.info(this.uName + ': Property Changed: ' + prop + ': ' + sendData.value);
-            this.emit('property-changed', copyData(sendData));
+            this.emit('property-changed', util.copy(sendData));
          }
       }
    }

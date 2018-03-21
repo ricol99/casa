@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var Property = require('../property');
 
 function DebounceProperty(_config, _owner) {
@@ -31,7 +31,7 @@ DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener
    }
    else if (this.sourceState != propValue) {   // Input has changed, start timer and ignore until timer expires
       this.sourceState = propValue;
-      this.lastData = copyData(_data);  // TODO: Should we cache positive and negative case?
+      this.lastData = util.copy(_data);  // TODO: Should we cache positive and negative case?
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
@@ -51,7 +51,7 @@ DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener
 
 DebounceProperty.prototype.sourceIsInvalid = function(_data) {
    console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
-   this.invalidData = copyData(_data);
+   this.invalidData = util.copy(_data);
 
    if (this.valid) {
       this.sourceValid = false;
@@ -77,19 +77,6 @@ DebounceProperty.prototype.sourceIsValid = function(_data) {
 // ====================
 // NON-EXPORTED METHODS
 // ====================
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
-}
 
 DebounceProperty.prototype.startTimer = function() {
 

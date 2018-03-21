@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('./util');
 var events = require('events');
 var express;
 var app;
@@ -143,21 +143,8 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
       if (source) {
          source.getAllProperties(allProps);
       }
-      this.config.sourcesStatus.push({ properties: copyData(allProps), status: this.sources[this.config.sources[i]].isActive() });
+      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
-}
-
-function copyData(_sourceData) {
-   var newData = {};
-
-   for (var prop in _sourceData) {
-
-      if (_sourceData.hasOwnProperty(prop)){
-         newData[prop] = _sourceData[prop];
-      }
-   }
-
-   return newData;
 }
 
 Casa.prototype.isActive = function() {
