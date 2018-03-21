@@ -1,4 +1,4 @@
-var util = require('./util');
+var util = require('../util');
 var PipelineStep = require('../pipelinestep');
 
 function LatchStep(_config, _pipeline) {

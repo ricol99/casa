@@ -1,4 +1,4 @@
-var util = require('./util');
+var util = require('../util');
 var Property = require('../property');
 
 function LatchProperty(_config, _owner) {
