@@ -3,9 +3,6 @@ var Property = require('./property');
 var SourceListener = require('./sourcelistener');
 var CasaSystem = require('./casasystem');
 
-// Will only take control of a source if targets have been specified in the state
-// Once control has been taken, it will reassess its control at each state transition
-
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.casaSys = CasaSystem.mainInstance();

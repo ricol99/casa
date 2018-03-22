@@ -21,10 +21,10 @@ function ScheduleProperty(_config, _owner) {
    this.writable = false;
    this.events = [];
 
-   var val = this.scheduleService.registerEvents(this, _config.events);
+   this.scheduleService.registerEvents(this, _config.events);
 
    if (_config.events.length > 1) {
-      this.value = val;
+      this.value = this.scheduleService.getInitialValue(this);
    }
 }
 
