@@ -43,7 +43,7 @@ function Source(_config) {
    }
 
    if (_config.events) {
-      this.events = _config.events;
+      this.events = util.copy(_config.events, true);
    }
 
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
@@ -345,6 +345,60 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.uName + ": Emitting invalid!");
    this.emit('invalid', sendData);
 }
+
+Source.prototype.updateEvent = function(_modifiedEvent) {
+   var eventIndex = this.getEventIndex(_eventName);
+
+   if (eventIndex === -1) {
+      return false;
+   }
+
+   for (var prop in _modifiedEvent) {
+
+      if (_modifiedEvent.hasOwnProperty(prop)) {
+         this.events[eventIndex][prop] = _modifiedEvent[prop];
+      }
+   }
+
+   if (this.deleteEvent(_modifiedEvent.name)) {
+      this.addEvent(this.events[eventIndex]);
+      return true;
+   }
+   else {
+      return false;
+   }
+};
+
+Source.prototype.addEvent = function(_event) {
+   this.events.push(_event);
+   this.scheduleService.addEvent(this, _event);
+};
+
+Source.prototype.getEventIndex = function(_eventName) {
+   var eventIndex = -1;
+
+   for (var i = 0; i < this.events.length; ++i) {
+      if (this.events[i].name = _eventName) {
+         eventIndex = i;
+         break;
+      }
+   }
+
+   return eventIndex;
+};
+
+Source.prototype.deleteEvent = function(_eventName) {
+
+   var eventIndex = this.getEventIndex(_eventName);
+
+   if (eventIndex === -1) {
+      return false;
+   }
+
+   this.events.splice(eventNumber, 1);
+   this.scheduleService.removeEvent(this, _eventName);
+   return true;
+};
 
 Source.prototype.raiseEvent = function(_eventName, _data) {
    var sendData = (_data) ? util.copy(_data) : {};

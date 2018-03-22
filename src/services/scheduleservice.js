@@ -13,15 +13,34 @@ function ScheduleService(_config) {
    this.longitude = (_config.hasOwnProperty("longitude")) ? _config.longitude : -0.1;
 
    this.refreshScheduler = new RefreshScheduler(this);
-   this.schedules = [];
+   this.schedules = {};
 }
 
 util.inherits(ScheduleService, Service);
 
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
    var sched = new Schedule(_owner, _config, this);
-   this.schedules.push(sched);
+   this.schedules[_owner.uName] = sched;
    return sched.getInitialValue();
+};
+
+ScheduleService.prototype.addEvent = function(_owner, _event) {
+
+   if (!this.schedules.hasOwnProperty(_owner.uName)) {
+      this.registerEvents(_owner, [ _event ]);
+   }
+   else {
+      this.schedules[_owner.uName].addEvent(_event);
+   }
+};
+
+ScheduleService.prototype.removeEvent = function(_owner, _eventName) {
+
+   if (!this.schedules.hasOwnProperty(_owner.uName)) {
+      return false;
+   }
+
+   return this.schedules[_owner.uName].removeEvent(_eventName);
 };
 
 ScheduleService.prototype.getSunTimes = function() {
@@ -36,8 +55,11 @@ ScheduleService.prototype.getSunTimes = function() {
 ScheduleService.prototype.refreshSunEvents = function() {
    this.sunTimes = SunCalc.getTimes(new Date(), this.latitude, this.longitude);
 
-   for (var index = 0; index < this.schedules.length; ++index) {
-      this.schedules[index].refreshSunEvents(this.sunTimes);
+   for (var index in this.schedules) {
+
+      if (this.schedules.hasOwnProperty(index)) {
+         this.schedules[index].refreshSunEvents(this.sunTimes);
+      }
    }
 };
 
@@ -50,47 +72,51 @@ function Schedule(_owner, _config, _service) {
    this.events = [];
 
    this.createEventsFromConfig(_owner, _config);
-   this.scheduleEvents();
+   this.scheduleAllEvents();
 };
 
 Schedule.prototype.createEventsFromConfig = function(_owner, _eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
 
    for (var index = 0; index < eventsConfigLen; ++index) {
-      var origEventRule;
-      var eventRuleDelta;
+      this.createEventFromConfig(_owner, _eventsConfig[index]);
+   }
+};
 
-      if (typeof _eventsConfig[index].rule == "string") {
-         var arr = _eventsConfig[index].rule.split(':');
+Schedule.prototype.createEventFromConfig = function(_owner, _eventConfig) {
+   var origEventRule;
+   var eventRuleDelta;
 
-         if (arr.length == 2) {
-            origEventRule = arr[0];
-            eventRuleDelta = parseInt(arr[1]);
-         }
-         else {
-            origEventRule = _eventsConfig[index].rule;
-            eventRuleDelta = 0;
-         }
+   if (typeof _eventConfig.rule == "string") {
+      var arr = _eventConfig.rule.split(':');
+
+      if (arr.length == 2) {
+         origEventRule = arr[0];
+         eventRuleDelta = parseInt(arr[1]);
       }
       else {
-         origEventRule = _eventsConfig[index].rule;
+         origEventRule = _eventConfig.rule;
          eventRuleDelta = 0;
       }
-
-      if (_eventsConfig[index].hasOwnProperty("value")) {
-         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                            sunTime: false, job: null, value: _eventsConfig[index].value, owner: _owner });
-      }
-      else if (_eventsConfig[index].hasOwnProperty("ramp")) {
-         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                            sunTime: false, job: null, ramp: _eventsConfig[index].ramp, owner: _owner });
-      }
-      else {
-         this.events.push({ name: _eventsConfig[index].name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
-                            sunTime: false, job: null, owner: _owner });
-      }
    }
-}
+   else {
+      origEventRule = _eventConfig.rule;
+      eventRuleDelta = 0;
+   }
+
+   if (_eventConfig.hasOwnProperty("value")) {
+      this.events.push({ name: _eventConfig.name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                         sunTime: false, job: null, value: _eventConfig.value, owner: _owner, active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true });
+   }
+   else if (_eventConfig.hasOwnProperty("ramp")) {
+      this.events.push({ name: _eventConfig.name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                         sunTime: false, job: null, ramp: _eventConfig.ramp, owner: _owner, active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true });
+   }
+   else {
+      this.events.push({ name: _eventConfig.name, rule: origEventRule, originalRule: origEventRule, ruleDelta: eventRuleDelta,
+                         sunTime: false, job: null, owner: _owner, active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true });
+   }
+};
 
 Schedule.prototype.lastEventScheduledBeforeNow = function(_now, _event) {
 
@@ -144,22 +170,29 @@ Schedule.prototype.determineClosestEvent = function(_now, _currentClosestEventSc
    }
 };
 
-Schedule.prototype.scheduleAllJobs = function() {
+Schedule.prototype.scheduleAllEvents = function() {
    this.setSunTimes(this.service.getSunTimes());
 
    for (var index = 0; index < this.events.length; ++index) {
+      this.scheduleEvent(this.events[index]);
+   }
+}
 
-      if (this.events[index].sunTime) {
+Schedule.prototype.scheduleEvent = function(_event) {
 
-         if (this.events[index].rule > new Date()) {
-            this.resetJob(this.events[index]);
+   if (_event.active) {
+
+      if (_event.sunTime) {
+
+         if (_event.rule > new Date()) {
+            this.resetJob(_event);
          }
       }
       else {
-         this.resetJob(this.events[index]);
+         this.resetJob(_event);
       }
    }
-}
+};
 
 Schedule.prototype.refreshSunEvents = function(_sunTimes) {
    this.setSunTimes(_sunTimes);
@@ -209,10 +242,6 @@ Schedule.prototype.resetJob = function(_event) {
    }
 }
 
-Schedule.prototype.scheduleEvents = function() {
-   this.scheduleAllJobs();
-};
-
 Schedule.prototype.getInitialValue = function() {
    var closestEvent = null;
    var closestEventSchedule = null;
@@ -245,6 +274,35 @@ Schedule.prototype.getInitialValue = function() {
    else {
       return closestEvent.value;
    }
+};
+
+Schedule.prototype.addEvent = function(_event) {
+   this.createEventFromConfig(_owner, _event);
+   this.scheduleEvent(this.events[this.events.length - 1]);
+};
+
+Schedule.prototype.removeEvent = function(_eventName) {
+   var index = -1;
+
+   for (var i = 0; i < this.events.length; ++i) {
+
+      if (this.events[i].name === _eventName) {
+         index = i;
+         break;
+      }
+   }
+
+   if (index === -1) {
+      return false;
+   }
+
+   if (this.events[index].job) {
+     this.events[index].job.cancel();
+     this.events[index].job = null;
+   }
+
+   this.events.splice(index, 1);
+   return true;
 };
 
 function RefreshScheduler(_schedulerService) {
