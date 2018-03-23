@@ -87,6 +87,7 @@ Schedule.prototype.createEventsFromConfig = function(_owner, _eventsConfig) {
 };
 
 Schedule.prototype.createRuleFromConfig = function(_event, _ruleConfig) {
+   console.log(this.uName + ": createRuleFromConfig() ruleConfig="+JSON.stringify(_ruleConfig));
    var rule = { event: _event, sunTime: false, job: null };
 
    if (typeof _ruleConfig == "string") {
@@ -98,14 +99,14 @@ Schedule.prototype.createRuleFromConfig = function(_event, _ruleConfig) {
          rule.delta = parseInt(arr[1]);
       }
       else {
-         rule.original = _eventConfig.rule;
-         rule.rule = _eventConfig.rule;
+         rule.original = _ruleConfig;
+         rule.rule = _ruleConfig;
          rule.delta = 0;
       }
    }
    else {
-      rule.original = _ruleConfig.rule;
-      rule.rule = _ruleConfig.rule;
+      rule.original = _ruleConfig;
+      rule.rule = _ruleConfig;
       rule.delta = 0;
    }
 
@@ -119,13 +120,13 @@ Schedule.prototype.createEventFromConfig = function(_owner, _eventConfig) {
       _eventConfig.rules = [ _eventConfig.rule ];
    }
 
-   var event = { name: _eventConfig.name, owner: _owner, active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true };
+   var event = { name: _eventConfig.name, owner: _owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true };
 
-   for (var i = 0; i < _eventConfig.length; ++i) {
-      rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
+   for (var i = 0; i < _eventConfig.rules.length; ++i) {
+      event.rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
    }
 
-   event.rules = util.copy(rules);
+   //event.rules = util.copy(rules);
 
    if (_eventConfig.hasOwnProperty("value")) {
       event.value = _eventConfig.value;
@@ -270,7 +271,7 @@ Schedule.prototype.resetJob = function(_rule) {
 
    _rule.job = schedule.scheduleJob(_rule.rule, function() {
       // this = _event.job
-      this.myEvent.owner.scheduledEventTriggered(this.myRule.event);
+      this.myRule.event.owner.scheduledEventTriggered(this.myRule.event);
    });
 
    if (_rule.job) {
@@ -301,7 +302,7 @@ Schedule.prototype.getInitialValue = function() {
       closestEvent = this.events[this.events.length-1];
    }
 
-   console.log(this.uName + ": Closest event is " + closestEvent.rule);
+   console.log(this.uName + ": Closest event is " + closestEvent.rules[0].rule);
 
    if (closestEvent.hasOwnProperty("ramp")) {
 

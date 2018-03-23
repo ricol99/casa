@@ -450,6 +450,8 @@
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,
          "events": [
+            { "name": "natalie-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
+            { "name": "richard-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
             { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "00 8 * * 1-5" ]},
             { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "03 8 * * 0,6" ]}
          ],

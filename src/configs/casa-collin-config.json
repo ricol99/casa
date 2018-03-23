@@ -118,19 +118,11 @@
                "type": "scheduleproperty",
                "events": [
                   {
-                     "rule": "30 22 * * 0-4",
+                     "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ],
                      "value": true
                   },
                   {
-                     "rule": "00 23 * * 5-6",
-                     "value": true
-                  },
-                  {
-                     "rule": "00 7 * * 1-5",
-                     "value": false
-                  },
-                  {
-                     "rule": "00 8 * * 0,6",
+                     "rules": [ "00 7 * * 1-5", "00 8 * * 0,6" ],
                      "value": false
                   }
                ]
@@ -191,10 +183,6 @@
                "writable": false,
                "type": "topvalidproperty",
                "sources": [
-                  {
-                     "name": "building:dumgoyne",
-                     "property": "night-time"
-                  },
                   {
                      "name": "thing:timed-environment",
                      "property": "night-time"
