@@ -210,6 +210,7 @@
                      "displayName": "Landing Main Light",
                      "roomId": 4,
                      "deviceId": 4,
+                     "brightnessSupported": true,
                      "propogateToParent": true,
                      "props": [
                      ]
