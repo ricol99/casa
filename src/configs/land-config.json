@@ -193,7 +193,7 @@
                         },
                         {
                            "name": "users-present-night",
-                           "targets": [{ "property": "brightness", "value": 1 }, { "property": "power", "value": true }]
+                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "no-users-present-morning",
