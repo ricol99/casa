@@ -161,7 +161,9 @@
                "manufacturer": "LightwaveRF Ltd",
                "model": "V0.1",
                "serialNumber": "1234567890",
-               "propogateToParent": true,
+               "brightnessSupported": true,
+               "propogateToParent": false,
+               "propogateToChild": true,
                "props": [
                   {
                      "name": "room-state",
@@ -291,7 +293,7 @@
                      "name": "ACTIVE",
                      "initialValue": false,
                      "source": {
-                        "name": "huelight:dylan-bedroom-lights",
+                        "name": "hklightaccessory:dylan-bedroom-lights",
                         "property": "power"
                      }
                   }
