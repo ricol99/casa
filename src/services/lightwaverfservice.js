@@ -44,7 +44,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
+   console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if ((_info.address !== this.linkAddress) || !_message) {
@@ -109,17 +109,11 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
       this.queue.shift().complete(_error, _content);
       delete this.requests[_code];
 
-      if (this.queue.length > 0) {
-
-         // More in the queue, so reschedule after the link has had time to settle down
-         var delay = setTimeout(function(_this) {
-            _this.requestPending = false;
-            _this.makeNextRequest();
-         }, 750, this);
-      }
-      else {
-         this.requestPending = false;
-      }
+      // More in the queue, so reschedule after the link has had time to settle down
+      var delay = setTimeout(function(_this) {
+         _this.requestPending = false;
+         _this.makeNextRequest();
+      }, 750, this);
    }
    else if (!this.requests[_code]) {
       console.error(this.uName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
@@ -142,7 +136,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
    }
 
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
-   //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
+   console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    this.requests[_request.code] = _request;
