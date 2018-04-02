@@ -13,6 +13,7 @@ function LightwaveRfService(_config) {
    this.messageNumber = 0;
 
    this.requests = {};
+   this.messageGap = 500;
 
    this.sendSocket = Dgram.createSocket("udp4");
    this.receiveSocket = Dgram.createSocket("udp4");
@@ -44,7 +45,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
+   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if ((_info.address !== this.linkAddress) || !_message) {
@@ -58,11 +59,26 @@ LightwaveRfService.prototype.messageReceived = function(_message, _info) {
    }
 
    var parts = message.split(",");
-   var code = parts.splice(0,1);
-   var content = parts.join(",").replace(/(\r\n|\n|\r)/gm,"");
+
+   if (parts.length < 2) {
+      return;
+   }
+
+   var code = parts[0];
+   var returnCode = parts[1];
+   var error = null;
+   var errorCode;
+
+   if (returnCode === "ERR") {
+      errorCode = (parts.length >= 3) ? parts[2] : 0;
+      error = (parts.length >= 4) ? errorCode + ": " + parts[3] : errorCode + ": Unspecified Error!";
+   }
+
+   //var code = parts.splice(0,1);
+   //var content = parts.join(",").replace(/(\r\n|\n|\r)/gm,"");
 
    // XXX TBD Check content for error code
-   this.completeRequest(code.toString(), null, content);
+   this.completeRequest(code.toString(), errorCode, error);
 };
 	
 LightwaveRfService.prototype.turnDeviceOn = function(_roomId, _deviceId, _callback) {
@@ -102,18 +118,25 @@ LightwaveRfService.prototype.makeNextRequest = function() {
    }
 }
 
-LightwaveRfService.prototype.completeRequest = function(_code, _error, _content) {
+LightwaveRfService.prototype.completeRequest = function(_code, _errorCode, _error) {
    console.log(this.uName + ': Request done! Code='+_code);
 
    if (this.requests[_code] && this.queue.length > 0 && this.queue[0].code === _code) {
-      this.queue.shift().complete(_error, _content);
+
+      if ((_error) && (_errorCode == "6") && (this.queue[0].sendCount < 3)) {
+         this.messageGap += 50;
+         console.log(this.uName + ": Buffer full in link so slowing down requests to 1 every " + this.messageGap + "ms");
+      }
+      else {
+         this.queue.shift().complete(_error);
+      }
       delete this.requests[_code];
 
       // More in the queue, so reschedule after the link has had time to settle down
       var delay = setTimeout(function(_this) {
          _this.requestPending = false;
          _this.makeNextRequest();
-      }, 750, this);
+      }, this.messageGap, this);
    }
    else if (!this.requests[_code]) {
       console.error(this.uName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
@@ -128,7 +151,7 @@ LightwaveRfService.prototype.completeRequest = function(_code, _error, _content)
    }
 }
 
-LightwaveRfService.prototype.sendMessageToLink = function(_request){
+LightwaveRfService.prototype.sendMessageToLink = function(_request) {
    var zeroPadCode = _request.code;
 
    while (zeroPadCode.length < 3) {
@@ -136,7 +159,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request){
    }
 
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
-   console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
+   //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    this.requests[_request.code] = _request;
@@ -146,20 +169,27 @@ function Request(_owner, _message, _callback) {
    this.owner = _owner;
    this.message = _message;
    this.callback = _callback;
+   this.sendCount = 0;
 }
 
 Request.prototype.send = function(_code) {
+
+   if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+   }
+
    this.code = _code.toString();
    this.owner.sendMessageToLink(this);
 
    this.timeout = setTimeout(function(_this) {
-      _this.owner.completeRequest(_this.code, 'Request timed out!', null);
+      _this.owner.completeRequest(_this.code, "1", 'Request timed out!');
    }, this.owner.requestTimeout*1000, this);
 };
 
-Request.prototype.complete = function(_error, _content) {
+Request.prototype.complete = function(_error) {
    clearTimeout(this.timeout);
-   this.callback(_error, _content);
+   this.callback(_error, true);
 };
 
 module.exports = exports = LightwaveRfService;
