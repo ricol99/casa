@@ -160,22 +160,16 @@ HueService.prototype.makeNextRequest = function() {
 
    if ((this.queue.length > 0) && !this.requestPending) {
       this.requestPending = true;
-      this.queue[0].send(function(_this, _error, _result) {
-         console.log(_this.uName + ': Request done! Error='+_error);
-         _this.queue[0].complete(_error, _result);
-         delete _this.queue.shift();
 
-         if (_this.queue.length > 0) {
+      this.queue[0].send( (_error, _result) => {
+         console.log(this.uName + ': Request done! Error='+_error);
+         this.queue[0].complete(_error, _result);
+         delete this.queue.shift();
 
-            // More in the queue, so reschedule after the link has had time to settle down
-            var delay = setTimeout(function(__this) {
-               __this.requestPending = false;
-               __this.makeNextRequest();
-            }, 100, _this);
-         }
-         else {
+         var delay = setTimeout(function(_this) {
             _this.requestPending = false;
-         }
+            _this.makeNextRequest();
+         }, 100, this);
       });
    }
 };

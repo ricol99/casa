@@ -77,15 +77,15 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
-            this.hueService.turnLightOn(this.deviceId, (_error, _content) => {
+            //this.hueService.turnLightOn(this.deviceId, (_error, _content) => {
 
-               if (_error) {
-                  console.log(this.uName + ': Error turning room off ' + _error.message);
-               }
-               else {
+               //if (_error) {
+                  //console.log(this.uName + ': Error turning room on ' + _error.message);
+               //}
+               //else {
                   this.syncDeviceProperties();
-               }
-            });
+               //}
+            //});
          }
          else {
             this.hueService.turnLightOff(this.deviceId, (_error, _content) => {
@@ -108,10 +108,10 @@ HueLight.prototype.syncDeviceProperties = function() {
                                                   hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
                                                   (_error, _content) => {
 
-         if (_error) {
-            console.error(this.uName + ': Error turning room off ' + _error.message);
-         }
-      });
+      if (_error) {
+         console.error(this.uName + ': Error syncing device properites -  ' + _error.message);
+      }
+   });
 };
 
 HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
