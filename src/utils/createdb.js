@@ -3,6 +3,8 @@ var Db = require('../db');
 
 var configFilename = process.argv[2];
 var inputConfig = require('./' + configFilename);
+parseConfigForSecureConfig(inputConfig);
+
 var gangDb = inputConfig.hasOwnProperty("gang");
 
 var dbName = process.env['HOME']+'/.casa-keys/secure-config/' + ((gangDb) ? inputConfig.gang.uName.split(":")[1]+"-gang" : inputConfig.casa.uName.split(":")[1]) + ".db";
@@ -71,3 +73,58 @@ function paramCount(_obj) {
 
    return count;
 }
+
+function parseConfigForSecureConfig(_config) {
+
+   if (_config instanceof Array) {
+
+      for (var i = 0; i < _config.length; ++i) {
+         parseConfigForSecureConfig(_config[i]);
+      }
+   }
+   else if (_config.hasOwnProperty("secureConfig") && _config.secureConfig) {
+      loadSecureConfig(_config.uName, _config);
+   }
+   else {
+      for (var prop in _config) {
+
+         if (_config.hasOwnProperty(prop) &&  (typeof _config[prop] === 'object')) {
+            parseConfigForSecureConfig(_config[prop]);
+         }
+      }
+   }
+}
+
+function loadSecureConfig(_uName, _config) {
+   var secureConfig = secureRequire(_uName);
+
+   if (!secureConfig) {
+      return;
+   }
+
+   for (var conf in secureConfig) {
+
+      if (secureConfig.hasOwnProperty(conf)) {
+
+         if (_config.hasOwnProperty(conf)) {
+
+            if (Array.isArray(_config[conf]) && Array.isArray(secureConfig[conf])) {
+
+               for (var i = 0; i < secureConfig[conf].length; ++i) {
+                  _config[conf].push(secureConfig[conf][i]);
+               }
+            }
+         }
+         else {
+            _config[conf] = secureConfig[conf];
+         }
+      }
+   }
+
+   return secureConfig;
+}
+
+function secureRequire(_name) {
+   return require(process.env['HOME']+'/.casa-keys/secure-config/' + _name);
+};
+
