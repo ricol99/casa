@@ -1,0 +1,837 @@
+{
+   "casa": {
+      "uName": "casa:land",
+      "displayName": "Casa Collin Landing",
+      "gang": "gang:collin",
+      "listeningPort": 8082,
+      "parentCasa": {
+         "uName": "casa:internet",
+         "address": {
+            "hostname": "199.245.56.152",
+            "port": 443
+         }
+      }
+   },
+   "services": [
+      {
+         "uName": "homekitservice",
+         "displayName": "Homekit Service Upstairs",
+         "pincode": "111-11-111",
+         "username": "CC:22:3D:E4:CF:EE",
+         "manufacturer": "Casa Collin Ltd",
+         "model": "V0.1",
+         "serialNumber": "1234567890"
+      },
+      {
+         "uName": "sonosservice",
+         "displayName": "Sonos Discovery Service"
+      },
+      {
+         "uName": "webservice",
+         "displayName": "Web Server Service",
+         "port": 80,
+         "mediaPath": "/web/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      },
+      {
+         "uName": "lightwaverfservice",
+         "displayName": "LightwaveRF Link Service",
+         "linkAddress": "192.168.1.49"
+      },
+      {
+         "uName": "hueservice",
+         "displayName": "Hue Link Services",
+         "secureConfig": true
+      },
+      {
+         "uName": "securityspyservice",
+         "hostname": "collin.viewcam.me",
+         "port": 8001,
+         "secure": true,
+         "secureConfig": true
+      }
+   ],
+   "scenes": [],
+   "things": [
+      {
+         "uName": "thing:landing-gpio",
+         "displayName": "Test Landing Gpio",
+         "props": [
+            {
+               "name": "land-gp17",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp18",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp25",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 25,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp27",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 27,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp23",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 23,
+               "triggerLow": true,
+               "local": true
+            }
+         ]
+      },
+      {
+         "uName": "securityspycamera:back-garden-gate",
+         "id": 1
+      },
+      {
+         "uName": "securityspycamera:driveway",
+         "id": 2
+      },
+      {
+         "uName": "securityspycamera:front-door",
+         "id": 3
+      },
+      {
+         "uName": "securityspycamera:back-door",
+         "id": 4
+      },
+      {
+         "uName": "room:landing",
+         "displayName": "Landing",
+         "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 8,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "thing:environment",
+                  "property": "low-light"
+               }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "thing:environment",
+                  "property": "night-time"
+               }
+            }
+         ],
+         "things": [
+            {
+               "uName": "hklightaccessory:landing-main-light",
+               "displayName": "Landing Main Light",
+               "manufacturer": "LightwaveRF Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "propogateToParent": false,
+               "propogateToChild": true,
+               "props": [
+                  {
+                     "name": "room-state",
+                     "type": "stateproperty",
+                     "initialValue": "no-users-present-day",
+                     "states": [
+                        {
+                           "name": "no-users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-day",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-evening",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-evening",
+                           "priority": 2,
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "no-users-present-night",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-morning",
+                           "targets": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-morning",
+                           "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  }
+               ],
+               "things": [
+                  {
+                     "uName": "lightwaverfaccessory:landing-main-light",
+                     "displayName": "Landing Main Light",
+                     "roomId": 4,
+                     "deviceId": 4,
+                     "brightnessSupported": true,
+                     "propogateToParent": true,
+                     "props": [
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "uName": "bedroom:dylan",
+         "displayName": "Dylan's Bedroom",
+         "users": [
+            { "uName": "user:dylan" }
+         ],
+         "readingInBedTimeout": 900,
+         "awakeInBedTimeout": 900,
+         "events": [
+            { "name": "dylan-switch-event", "rules": [ "30 21 * * 0-4", "00 23 * * 5-6" ]},
+            { "name": "pre-wake-up-event", "rules": [ "45 6 * * 1-5", "00 9 * * 1-5" ]},
+            { "name": "wake-up-event", "rules": [ "15 7 * * 1-5", "30 9 * * 0,6" ]}
+         ],
+         "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "TYPE": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true,
+               "local": true
+            }
+         ],
+         "things": [
+            {
+               "uName": "hkspeakeraccessory:dylan-bedroom-speakers",
+               "displayName": "Dylan's Bedroom Speakers",
+               "pincode": "111-11-111",
+               "username": "CC:22:3D:E3:CE:3E",
+               "manufacturer": "Sonos Corporation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "volumeSupported": true,
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "uName": "sonosplayer:dylan-bedroom",
+                     "displayName": "Sonos Player for Dylan's Bedroom",
+                     "zone": "Dylan's Room",
+                     "propogateToParent": true,
+                     "props": [
+                        {
+                           "name": "playing",
+                           "type": "edgeproperty",
+                           "writable": true,
+                           "leadingEdgeOutput": false,
+                           "source": {
+                              "uName": "alarmtexecom:dumgoyne",
+                              "property": "stay-armed"
+                           }
+                        }
+                     ]
+                  }
+               ]
+            },
+            {
+               "uName": "hkswitchaccessory:dylan-bedroom-switch",
+               "displayName": "Dylan Bedroom Switch",
+               "manufacturer": "Casa Home Automation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "eventName": "dylan-switch-event",
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "props": [
+                  {
+                     "name": "ACTIVE",
+                     "initialValue": false,
+                     "source": {
+                        "uName": "hklightaccessory:dylan-bedroom-lights",
+                        "property": "power"
+                     }
+                  }
+               ]
+            },
+            {
+               "uName": "hklightaccessory:dylan-bedroom-lights",
+               "displayName": "Dylan Bedroom Lights",
+               "manufacturer": "Hue Philips Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "hueSupported": true,
+               "saturationSupported": true,
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "uName": "huelight:dylan-bedside-lamp",
+                     "displayName": "Dylan Bedroom Bedside Lamp",
+                     "deviceId": 5,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "dylan-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "no-users-present",
+                           "states": [
+                              {
+                                 "name": "not-present",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 15 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 2,
+                                 "targets": [
+                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
+                                    { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
+                                    { "property": "power", "value": true }
+                                 ] 
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 60 },
+                                    { "property": "saturation", "value": 70 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "uName": "huelight:dylan-main-light",
+                     "displayName": "Dylan Bedroom Main Light",
+                     "deviceId": 6,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "dylan-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "no-users-present",
+                           "states": [
+                              {
+                                 "name": "not-present",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 2,
+                                 "targets": [
+                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
+                                    { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 60 },
+                                    { "property": "saturation", "value": 70 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "uName": "bedroom:master",
+         "displayName": "Master Bedroom",
+         "users": [
+            { "uName": "user:richard"},
+            { "uName": "user:natalie"}
+         ],
+         "readingInBedTimeout": 900,
+         "awakeInBedTimeout": 900,
+         "events": [
+            { "name": "natalie-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
+            { "name": "richard-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
+            { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "00 8 * * 0,6" ]},
+            { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "30 8 * * 0,6" ]}
+         ],
+         "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "local": true,
+               "sources": [
+                  {
+                     "property": "movement-pir-door"
+                  },
+                  {
+                     "property": "movement-pir-main"
+                  }
+               ]
+            },
+            {
+               "name": "movement-pir-door",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 22, 
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "movement-pir-main",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 24, 
+               "triggerLow": true,
+               "local": true
+            },
+            {  
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "building:dumgoyne",
+                  "property": "low-light-kitchen"
+               }
+            }, 
+            {  
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "thing:environment",
+                  "property": "night-time"
+               }
+            }
+         ],
+         "things": [
+            {
+               "uName": "hklightaccessory:master-bedroom-lights",
+               "displayName": "Bedroom Lights",
+               "manufacturer": "Hue Philips Ltd",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "brightnessSupported": true,
+               "hueSupported": true,
+               "saturationSupported": true,
+               "propogateToParent": true,
+               "props": [
+               ],
+               "things": [
+                  {
+                     "uName": "huelight:natalie-bedroom-lamp",
+                     "displayName": "Natalie Bedroom Lamp",
+                     "deviceId": 3,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "natalie-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "not-present",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 15 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
+                                    { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 60 },
+                                    { "property": "saturation", "value": 70 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "uName": "huelight:richard-bedroom-lamp",
+                     "displayName": "Richard Bedroom Lamp",
+                     "deviceId": 4,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "richard-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "not-present",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 15 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
+                                    { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 60 },
+                                    { "property": "saturation", "value": 70 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  },
+                  {
+                     "uName": "huelightgroup:master-bedroom-downlighters",
+                     "displayName": "Master Bedroom - Downlighters",
+                     "lightGroupId": 8,
+                     "propogateToParent": false,
+                     "props": [
+                        {
+                           "name": "room-state",
+                           "type": "stateproperty",
+                           "initialValue": "no-users-present-day",
+                           "states": [
+                              {
+                                 "name": "no-users-present-day",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-day",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "no-users-present-evening",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-evening",
+                                 "priority": 2,
+                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                              },
+                              {
+                                 "name": "no-users-present-night",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-night",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "no-users-present-morning",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "users-present-morning",
+                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                              }
+                           ]
+                        },
+                        {
+                           "name": "richard-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              }
+                           ]
+                        },
+                        {
+                           "name": "natalie-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed-others-asleep",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "asleep-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "waking-up-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
+                                 "name": "awake-up-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              }
+                           ]
+                        }
+                     ]
+                  }
+               ]
+            },
+            {
+               "uName": "hkswitchaccessory:natalie-bedroom-switch",
+               "displayName": "Natalie Bedroom Switch",
+               "manufacturer": "Casa Home Automation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "eventName": "natalie-switch-event",
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "props": [
+                  {
+                     "name": "ACTIVE",
+                     "initialValue": false,
+                     "source": {
+                        "uName": "huelight:natalie-bedroom-lamp",
+                        "property": "power"
+                     }
+                  }
+               ]
+            },
+            {
+               "uName": "hkswitchaccessory:richard-bedroom-switch",
+               "displayName": "Richard Bedroom Switch",
+               "manufacturer": "Casa Home Automation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "eventName": "richard-switch-event",
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "props": [
+                  {
+                     "name": "ACTIVE",
+                     "initialValue": false,
+                     "source": {
+                        "uName": "huelight:richard-bedroom-lamp",
+                        "property": "power"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

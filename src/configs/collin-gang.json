@@ -1,29 +1,26 @@
 {
-   "name": "casasys:collin",
-   "displayName": "Casa Collin Home Automation System",
-   "gang": "casa-collin",
-   "location": {
-      "latitude": 51.5,
-      "longitude": -0.1
+   "gang": {
+      "uName": "gang:collin",
+      "displayName": "Casa Collin Home Automation System"
    },
    "users": [ 
       {
-         "name": "user:richard",
+         "uName": "user:richard",
          "displayName": "Richard",
          "props": []
       },
       {
-         "name": "user:natalie",
+         "uName": "user:natalie",
          "displayName": "Natalie",
          "props": []
       },
       {
-         "name": "user:dylan",
+         "uName": "user:dylan",
          "displayName": "Dylan",
          "props": []
       },
       {
-         "name": "usergroup:family",
+         "uName": "usergroup:family",
          "displayName": "Collin Family",
          "users": [
            "user:richard",
@@ -33,7 +30,7 @@
          "props": []
       },
       {
-         "name": "usergroup:admins",
+         "uName": "usergroup:admins",
          "displayName": "Administrators",
          "users": [
            "user:richard"
@@ -47,7 +44,7 @@
          ]
       },
       {
-         "name": "usergroup:key-holders",
+         "uName": "usergroup:key-holders",
          "displayName": "Key Holders",
          "users": [
            "user:richard",
@@ -64,18 +61,18 @@
    ],
    "services": [
       {
-         "name": "scheduleservice",
+         "uName": "scheduleservice",
          "latitude":  51.5,
          "longitude": -0.1,
          "forecastKey": "5d3be692ae5ea4f3b785973e1f9ea520"
       },
       {
-         "name": "rampservice"
+         "uName": "rampservice"
       }
    ],
    "things": [ 
       {
-         "name": "thing:timed-environment",
+         "uName": "thing:timed-environment",
          "displayName": "Timed Environment",
          "props": [
             {
@@ -129,7 +126,7 @@
          ]
       },
       {
-         "name": "thing:environment",
+         "uName": "thing:environment",
          "displayName": "Environment",
          "props": [
             {
@@ -139,11 +136,11 @@
                "type": "topvalidproperty",
                "sources": [
                   {
-                     "name": "building:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "daylight"
                   },
                   {
-                     "name": "thing:timed-environment",
+                     "uName": "thing:timed-environment",
                      "property": "daylight"
                   }
                ]
@@ -154,7 +151,7 @@
                "writable": false,
                "sources": [
                   {
-                     "name": "thing:environment",
+                     "uName": "thing:environment",
                      "property": "daylight",
                      "transform": "!$value"
                   }
@@ -167,11 +164,11 @@
                "type": "topvalidproperty",
                "sources": [
                   {
-                     "name": "building:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "low-light"
                   },
                   {
-                     "name": "thing:timed-environment",
+                     "uName": "thing:timed-environment",
                      "property": "low-light"
                   }
                ]
@@ -183,7 +180,7 @@
                "type": "topvalidproperty",
                "sources": [
                   {
-                     "name": "thing:timed-environment",
+                     "uName": "thing:timed-environment",
                      "property": "night-time"
                   }
                ]
