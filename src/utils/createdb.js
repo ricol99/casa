@@ -7,8 +7,7 @@ parseConfigForSecureConfig(inputConfig);
 
 var gangDb = inputConfig.hasOwnProperty("gang");
 
-var dbName = process.env['HOME']+'/.casa-keys/secure-config/' + ((gangDb) ? inputConfig.gang.uName.split(":")[1]+"-gang" : inputConfig.casa.uName.split(":")[1]) + ".db";
-var db = new Db(dbName);
+var db = new Db((gangDb) ? inputConfig.gang.uName : inputConfig.casa.uName, undefined, true);
 
 db.on('connected', () => {
    populateDbFromConfig();
@@ -17,8 +16,8 @@ db.on('connected', () => {
 function populateDbFromConfig() {
 
    var configs = {};
-   configs.gang = { "uName": "", "displayName": "" };
-   configs.casa = { "uName": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0, "parentCasa": {} };
+   configs.gang = { "uName": "", "displayName": "", "parentCasa": {} };
+   configs.casa = { "uName": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
    configs.users = [];
    configs.services = [];
    configs.scenes = [];

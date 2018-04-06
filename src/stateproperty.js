@@ -1,12 +1,12 @@
 var util = require('util');
 var Property = require('./property');
 var SourceListener = require('./sourcelistener');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);
-   this.casaSys = CasaSystem.mainInstance();
 
+   this.gang = Gang.mainInstance();
    this.states = {};
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
@@ -243,7 +243,7 @@ StateProperty.prototype.sourceIsInvalid = function(_data) {
 };
 
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
-   var sourceListenerName = _config.name + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
+   var sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
@@ -323,7 +323,7 @@ function State(_config, _owner) {
    if (this.schedules) {
 
       if (!this.scheduleService) {
-         this.scheduleService =  this.owner.casaSys.findService("scheduleservice");
+         this.scheduleService =  this.owner.gang.findService("scheduleservice");
       }
 
       if (!this.scheduleService) {
@@ -359,7 +359,7 @@ State.prototype.checkSourceProperties = function() {
       for (var i = 0; i < this.sources.length; i++) {
 
          if (this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
-            var sourceName = this.sources[i].hasOwnProperty("name") ? this.sources[i].name : this.owner.owner.uName;
+            var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
             var sourceEventName = sourceName + ":" + this.sources[i].property;
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;

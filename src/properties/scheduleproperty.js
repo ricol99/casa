@@ -4,14 +4,14 @@ var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 var Forecast = require('forecast.io');
 var Parser = require('cron-parser');
-var CasaSystem = require('../casasystem');
+var Gang = require('../gang');
 
 function ScheduleProperty(_config, _owner) {
 
    Property.call(this, _config, _owner);
 
-   var casaSys = CasaSystem.mainInstance();
-   this.scheduleService = casaSys.findService("scheduleservice");
+   this.gang = Gang.mainInstance();
+   this.scheduleService = this.gang.findService("scheduleservice");
 
    if (!this.scheduleService) {
       console.error(this.uName + ": ***** Schedule service not found! *************");

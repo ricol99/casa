@@ -2,22 +2,41 @@ var util = require('./util');
 var events = require('events');
 var TinyDB = require('tinydb');
 
-function Db(_dbName) {
-   this.dbName = _dbName;
-   this.uName = "db:"+this.dbName;
+function Db(_dbName, _dbPath, _newDb) {
 
+   if (_dbPath == undefined) {
+      this.dbPath = process.env['HOME']+'/.casa-keys/secure-config/';
+   }
+   else {
+      this.dbPath = _dbPath;
+   }
+
+   this.dbName = this.dbPath + "/" + _dbName + ".db";
+   this.uName = "db:"+this.dbName;
    events.EventEmitter.call(this);
 
+   if (_newDb) {
+
+      fs.unlink(this.dbName, (_err) => {
+         this.connect();
+      });
+   }
+   else {
+      this.connect();
+   }
+}
+
+Db.prototype.connect = function() {
    this.db = new TinyDB(this.dbName);
  
    this.db.onReady = function() {
-     this.emit('connected');
+      this.emit('connected');
    }.bind(this);
  
-  this.db.onError = function(_error) { 
-     console.error(this.uName + ": Unable to connect to DB. Error=", _err);
-     process.exit(1);
-  }.bind(this);
+   this.db.onError = function(_error) { 
+      console.error(this.uName + ": Unable to connect to DB. Error=", _err);
+      process.exit(1);
+   }.bind(this);
 };
 
 util.inherits(Db, events.EventEmitter);

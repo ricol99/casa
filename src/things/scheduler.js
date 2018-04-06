@@ -1,14 +1,11 @@
 var util = require('util');
 var Thing = require('../thing');
-var CasaSystem = require('../casasystem');
 
 function Scheduler(_config) {
-   this.casaSys = CasaSystem.mainInstance();
-
    Thing.call(this, _config);
    this.thingType = "scheduler";
 
-   this.scheduleService =  this.casaSys.findService("scheduleservice");
+   this.scheduleService =  this.gang.findService("scheduleservice");
 
    if (!this.scheduleService) {
       console.error(this.uName + ": ***** Schedule service not found! *************");

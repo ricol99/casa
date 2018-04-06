@@ -1,0 +1,217 @@
+{
+   "casa": {
+      "uName": "casa:internet",
+      "displayName": "Casa Collin Internet Casa",
+      "gang": "gang:collin",
+      "listeningPort": 8096
+   },
+   "services": [
+      {
+         "uName": "pushoverservice",
+         "displayName": "Pushover Messaging Service",
+         "secureConfig": true
+      }
+   ],
+   "things": [
+      {
+         "uName": "thing:home-internet-connection",
+         "displayName": "Home Internet Connection",
+         "props": [
+            {
+               "name": "ACTIVE",
+               "type": "orproperty",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "casa-land"
+                  },
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "casa-env"
+                  }
+               ]
+            },
+            {
+               "name": "casa-env-debounce",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "casa:env",
+                  "property": "ACTIVE",
+                  "maskInvalidTimeout": 60
+               }
+            },
+            {
+               "name": "casa-env",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "property": "casa-env-debounce",
+                  "maskInvalidValue": false
+               }
+            },
+            {
+               "name": "casa-land-debounce",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "casa:land",
+                  "property": "ACTIVE",
+                  "maskInvalidTimeout": 60
+               }
+            },
+            {
+               "name": "casa-land",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "property": "casa-land-debounce",
+                  "maskInvalidValue": false
+               }
+            }
+         ]
+      },
+      {
+         "uName": "thing:pushover-messenger",
+         "displayName": "Pushover Messenger",
+         "props": [
+            {
+               "name": "priority-message",
+               "type": "pushoverproperty",
+               "initialValue": false,
+               "writable": false,
+               "priority": 2,
+               "userGroup": "usergroup:key-holders",
+               "sources": [
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "tamper-alarm",
+                     "transformMap": {
+                        "true": "Alarm being tampered with!",
+                        "false": "Alarm no longer in tamper mode"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "fire-alarm",
+                     "transformMap": {
+                        "true": "Fire Alarm!",
+                        "false": "Fire alarm reset"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "zone-alarm",
+                     "transformMap": {
+                        "true": "Alarm triggered",
+                        "false": "Alarm trigger reset"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "confirmed-alarm",
+                     "transformMap": {
+                        "true": "Alarm confirmed - call police!",
+                        "false": "Confirmed alarm reset"
+                     }
+                  },
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "lost-while-armed",
+                     "transformMap": {
+                        "true": "Internet connection to home has been lost while alarm is fully armed!",
+                        "false": "Internet connection to home restored"
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "urgent-message",
+               "type": "pushoverproperty",
+               "initialValue": false,
+               "writable": false,
+               "priority": 1,
+               "userGroup": "usergroup:admins",
+               "sources": [
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "ACTIVE",
+                     "transformMap": {
+                        "true": "Internet connection to home restored",
+                        "false": "Internet connection to home has been lost!"
+                     }
+                  },
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "casa-land",
+                     "transformMap": {
+                        "true": "Casa 'land' is active",
+                        "false": "Casa 'land' has gone down!"
+                     }
+                  },
+                  {
+                     "uName": "thing:home-internet-connection",
+                     "property": "casa-env",
+                     "transformMap": {
+                        "true": "Casa 'env' is active",
+                        "false": "Casa 'env' has gone down!"
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "normal-message",
+               "type": "pushoverproperty",
+               "initialValue": false,
+               "writable": false,
+               "priority": 0,
+               "userGroup": "usergroup:admins",
+               "sources": [
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "away-armed",
+                     "transformMap": {
+                        "true": "Alarm fully armed - House empty",
+                        "false": "Alarm disarmed"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "stay-armed",
+                     "transformMap": {
+                        "true": "Alarm armed - Doggies at home",
+                        "false": "Alarm disarmed"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "night-armed",
+                     "transformMap": {
+                        "true": "Alarm armed - Family at home",
+                        "false": "Alarm disarmed"
+                     }
+                  },
+                  {
+                     "uName": "thing:environment",
+                     "property": "low-light",
+                     "transformMap": {
+                        "true": "Lights movement sensitive",
+                        "false": "Lights ignoring movement"
+                     }
+                  },
+                  {
+                     "uName": "alarmtexecom:dumgoyne",
+                     "property": "alarm-error"
+                  },
+                  {
+                     "uName": "thing:dumgoyne-broadband",
+                     "property": "test-result"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

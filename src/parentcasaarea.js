@@ -15,11 +15,11 @@ ParentCasaArea.prototype.broadcastCb = function(_message) {
    console.log(this.uName + ': Event received from parent. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
    // Broadcast to all children - peers already know
-   for(var prop in this.casaSys.childCasaAreas) {
+   for(var prop in this.gang.childCasaAreas) {
 
-      if(this.casaSys.childCasaAreas.hasOwnProperty(prop)){
-         console.log(this.uName + ': Broadcasting to child area ' + this.casaSys.childCasaAreas[prop].uName);
-         this.casaSys.childCasaAreas[prop].broadcastMessage(_message);
+      if(this.gang.childCasaAreas.hasOwnProperty(prop)){
+         console.log(this.uName + ': Broadcasting to child area ' + this.gang.childCasaAreas[prop].uName);
+         this.gang.childCasaAreas[prop].broadcastMessage(_message);
       }
    }
 };
@@ -36,13 +36,13 @@ ParentCasaArea.prototype.buildCasaForwardingList = function() {
    var casaList = [];
 
    // My child
-   casaList.push(this.casaSys.casa);
+   casaList.push(this.gang.casa);
 
    // All my grand children
-   for (var prop in this.casaSys.childCasaAreas) {
+   for (var prop in this.gang.childCasaAreas) {
 
-      if (this.casaSys.childCasaAreas.hasOwnProperty(prop)){
-         var childCasaArea = this.casaSys.childCasaAreas[prop];
+      if (this.gang.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.gang.childCasaAreas[prop];
 
          for(var prop2 in childCasaArea.casas) {
 
@@ -54,10 +54,10 @@ ParentCasaArea.prototype.buildCasaForwardingList = function() {
    }
 
    // Any remotes my child is aware of
-   for(var prop4 in this.casaSys.remoteCasas) {
+   for(var prop4 in this.gang.remoteCasas) {
 
-      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && this.casaSys.remoteCasas[prop4] && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
-         casaList.push(this.casaSys.remoteCasas[prop4]);
+      if ((this.gang.remoteCasas.hasOwnProperty(prop4)) && this.gang.remoteCasas[prop4] && (this.gang.remoteCasas[prop4].loginAs == 'remote')) {
+         casaList.push(this.gang.remoteCasas[prop4]);
       }
    }
 
@@ -66,7 +66,7 @@ ParentCasaArea.prototype.buildCasaForwardingList = function() {
 
 ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
 
-   if (this.casaSys.isUberCasa()) {
+   if (this.gang.isUberCasa()) {
 
       // BROADCASTING local broadcast (this casa's peer sources) already done by peer casa class
       // BROADCASTING Broadcast to area this casa is running in (not the child casa area);
@@ -88,7 +88,7 @@ ParentCasaArea.prototype.setupCasaListeners = function(_casa) {
 
 ParentCasaArea.prototype.removeCasaListeners = function(_casa) {
 
-   if (this.casaSys.isUberCasa()) {
+   if (this.gang.isUberCasa()) {
       _casa.removeListener('broadcast-message', this.broadcastListener);
       _casa.removeListener('forward-request', this.forwardRequestListener);
       _casa.removeListener('forward-response', this.forwardResponseListener);

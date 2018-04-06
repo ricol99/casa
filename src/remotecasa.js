@@ -2,11 +2,11 @@ var util = require('util');
 var Source = require('./source');
 var S = require('string');
 var io = require('socket.io-client');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function RemoteCasa(_config, _peerCasa) {
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
    this.peerCasa = _peerCasa;
 
    Source.call(this, _config);
@@ -98,7 +98,7 @@ RemoteCasa.prototype.invalidateSources = function() {
       if(this.sources.hasOwnProperty(prop)){
          console.log(this.uName + ': Invaliding source ' + this.sources[prop].uName);
          this.sources[prop].invalidateSource();
-         delete this.casaSys.allObjects[this.sources[prop].uName];
+         delete this.gang.allObjects[this.sources[prop].uName];
          delete this.sources[prop];
       }
    }

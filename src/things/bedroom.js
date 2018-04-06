@@ -30,7 +30,7 @@ function Bedroom(_config) {
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.casaSys.findSource(_config.users[u].name));
+      this.users.push(this.gang.findSource(_config.users[u].uName));
    }
 
    for (var i = 0; i < _config.users.length; ++i) {

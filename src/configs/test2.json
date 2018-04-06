@@ -1,0 +1,88 @@
+{
+   "casa": {
+      "uName": "casa:test2",
+      "displayName": "Casa Collin TEST System",
+      "gang": "gang:collin-test",
+      "listeningPort": 8083
+   },
+   "services": [
+      {
+         "uName": "webservice",
+         "port": 11002,
+         "mediaPath": "/Users/richardcollin/personal/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      },
+      {
+         "uName": "securityspyservice",
+         "hostname": "collin.viewcam.me",
+         "port": 8001,
+         "secure": true,
+         "userId": "rich",
+         "password": "Pobbles99"
+      }
+   ],
+   "scenes": [
+   ],
+   "things": [
+      {
+         "uName": "thing:test-state-timers",
+         "props": [
+            {
+               "name": "test-prop-target",
+               "initialValue": false
+            },
+            {
+               "name": "test-periodic-3",
+               "type": "stateproperty",
+               "initialValue": "off",
+               "states": [
+                  {
+                     "name": "off",
+                     "timeout": { "duration": 20, "nextState": "on" }
+                  },
+                  {
+                     "name": "on",
+                     "priority": 2,
+                     "sources": [ { "property": "test-periodic-2", "value": "on", "nextState": "on-others" },
+                                  { "property": "test-periodic-2", "value": "on-others", "nextState": "on-others" } ],
+                     "timeout": { "from": [ "on-off" ], "duration": 20, "nextState": "off" },
+                     "targets": { "property": "test-prop-target", "value": true }
+                  },
+                  {
+                     "name": "on-others",
+                     "priority": 2,
+                     "source": { "property": "test-periodic-2", "value": "off", "nextState": "on" },
+                     "timeout": { "from": [ "on" ], "duration": 20, "nextState": "off" }
+                  }
+               ]
+            },
+            {
+               "name": "test-periodic-4",
+               "type": "stateproperty",
+               "initialValue": "off",
+               "states": [
+                  {
+                     "name": "off",
+                     "timeout": { "duration": 45, "nextState": "on" }
+                  },
+                  {
+                     "name": "on",
+                     "sources": [ { "property": "test-periodic-1", "value": "on", "nextState": "on-others" },
+                                  { "property": "test-periodic-1", "value": "on-others", "nextState": "on-others" } ],
+                     "timeout": { "from": [ "on-off" ], "duration": 20, "nextState": "off" },
+                     "targets": { "property": "test-prop-target", "value": false }
+                  },
+                  {
+                     "name": "on-others",
+                     "source": { "property": "test-periodic-1", "value": "off", "nextState": "on" },
+                     "timeout": { "from": [ "on" ], "duration": 20, "nextState": "off" }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

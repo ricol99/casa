@@ -1,10 +1,7 @@
 var util = require('util');
 var Thing = require('../thing');
-var CasaSystem = require('../casasystem');
 
 function TouchSwitch(_config) {
-   this.casaSys = CasaSystem.mainInstance();
-
    Thing.call(this, _config);
    this.thingType = "touch-switch";
 

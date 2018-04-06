@@ -30,7 +30,7 @@ COPY .certs/* /src/.certs/
 COPY .certs/secure-config/* /src/.certs/secure-config/
 
 EXPOSE 8096
-CMD [ "node", "app.js", "--system", "configs/casa-collin-config.json", "configs/internet-config.json", "--nopeer", "--secure", "--certs", ".certs" ]
+CMD [ "node", "app.js", "--nopeer", "--noparent", "--secure", "--certs", ".certs", "internet" ]
 
 # get us off these annoying broken persistent volumes
 RUN mkdir /logs

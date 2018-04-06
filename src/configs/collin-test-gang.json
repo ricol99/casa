@@ -1,12 +1,12 @@
 {
    "gang": {
-      "uName": "gang:collin",
-      "displayName": "Casa Collin Home Automation System",
+      "uName": "gang:collin-test",
+      "displayName": "Test Casa Collin Home Automation System",
       "parentCasa": {
-         "uName": "casa:internet",
+         "uName": "casa:tint",
          "address": {
-            "hostname": "199.245.56.152",
-            "port": 443
+            "hostname": "localhost",
+            "port": 8096
          }
       }
    },

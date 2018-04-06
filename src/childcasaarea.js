@@ -1,9 +1,9 @@
 var util = require('util');
 var CasaArea = require('./casaarea');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function ChildCasaArea(_config) {
-   this.casaSys = CasaSystem.mainInstance();
+   this.gang = Gang.mainInstance();
    CasaArea.call(this, _config);
 
    this.broadcastListener = ChildCasaArea.prototype.broadcastCb.bind(this);
@@ -17,10 +17,10 @@ ChildCasaArea.prototype.broadcastCb = function(_message) {
    console.log(this.uName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
    // Broadcast to all my siblings
-   for(var prop in this.casaSys.childCasaAreas) {
+   for(var prop in this.gang.childCasaAreas) {
 
-      if(this.casaSys.childCasaAreas.hasOwnProperty(prop)){
-         var childCasaArea = this.casaSys.childCasaAreas[prop];
+      if(this.gang.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.gang.childCasaAreas[prop];
 
          // Is the area a sibling?
          if (childCasaArea != this) {
@@ -30,11 +30,11 @@ ChildCasaArea.prototype.broadcastCb = function(_message) {
       }
    }
 
-   if (this.casaSys.peerCasaArea) {
-      this.casaSys.peerCasaArea.broadcastMessage(_message);
+   if (this.gang.peerCasaArea) {
+      this.gang.peerCasaArea.broadcastMessage(_message);
    }
 
-   if (this.casaSys.parentCasaArea) {
+   if (this.gang.parentCasaArea) {
       this.parentCasaArea.broadcastMessage(_message);
    }
 };
@@ -51,13 +51,13 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
    var casaList = [];
 
    // My parent
-   casaList.push(this.casaSys.casa);
+   casaList.push(this.gang.casa);
 
    // All my siblings
-   for (var prop in this.casaSys.childCasaAreas) {
+   for (var prop in this.gang.childCasaAreas) {
 
-      if (this.casaSys.childCasaAreas.hasOwnProperty(prop)){
-         var childCasaArea = this.casaSys.childCasaAreas[prop];
+      if (this.gang.childCasaAreas.hasOwnProperty(prop)){
+         var childCasaArea = this.gang.childCasaAreas[prop];
 
          // Is the area a sibling?
          if (childCasaArea != this) {
@@ -72,26 +72,26 @@ ChildCasaArea.prototype.buildCasaForwardingList = function() {
       }
    }
 
-   if (this.casaSys.peerCasaArea) {
+   if (this.gang.peerCasaArea) {
       // All my uncles and aunties
-      for(var prop3 in this.casaSys.peerCasaArea.casas) {
+      for(var prop3 in this.gang.peerCasaArea.casas) {
 
-         if (this.casaSys.peerCasaArea.casas.hasOwnProperty(prop3)){
-            casaList.push(this.casaSys.peerCasaArea.casas[prop3]);
+         if (this.gang.peerCasaArea.casas.hasOwnProperty(prop3)){
+            casaList.push(this.gang.peerCasaArea.casas[prop3]);
          }
       }
    }
 
-   if (this.casaSys.parentCasaArea) {
+   if (this.gang.parentCasaArea) {
       // My grand parent
-      casaList.push(this.casaSys.parentCasaArea.casas[0]);
+      casaList.push(this.gang.parentCasaArea.casas[0]);
    }
 
    // Any remotes my parent is aware of
-   for(var prop4 in this.casaSys.remoteCasas) {
+   for(var prop4 in this.gang.remoteCasas) {
 
-      if ((this.casaSys.remoteCasas.hasOwnProperty(prop4)) && this.casaSys.remoteCasas[prop4] && (this.casaSys.remoteCasas[prop4].loginAs == 'remote')) {
-         casaList.push(this.casaSys.remoteCasas[prop4]);
+      if ((this.gang.remoteCasas.hasOwnProperty(prop4)) && this.gang.remoteCasas[prop4] && (this.gang.remoteCasas[prop4].loginAs == 'remote')) {
+         casaList.push(this.gang.remoteCasas[prop4]);
       }
    }
 
@@ -105,7 +105,7 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
    // BROADCASTING Broadcast to parent area (Uber casa) of the casa we are running in (not the the parent area of this child casa area);
    // BROADCASTING Broadcast to child areas (Uber casa) of the casa we are running in except source area (not the the parent area of this child casa area);
 
-   if (this.casaSys.isUberCasa()) {
+   if (this.gang.isUberCasa()) {
 
       _casa.on('broadcast-message', this.broadcastListener);
 
@@ -122,7 +122,7 @@ ChildCasaArea.prototype.setupCasaListeners = function(_casa) {
 
 ChildCasaArea.prototype.removeCasaListeners = function(_casa) {
 
-   if (this.casaSys.isUberCasa()) {
+   if (this.gang.isUberCasa()) {
       _casa.removeListener('broadcast-message', this.broadcastListener);
       _casa.removeListener('forward-request', this.forwardRequestListener);
       _casa.removeListener('forward-response', this.forwardResponseListener);

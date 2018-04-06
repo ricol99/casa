@@ -1,12 +1,9 @@
 var util = require('../util');
 var Db = require('../db');
-
-var dbName = process.env['HOME']+'/.casa-keys/secure-config/'+process.argv[2]+".db";
+var db = new Db(process.argv[2]);
 
 var configFilename = process.argv[3];
 var inputConfig = require('./' + configFilename);
-
-var db = new Db(dbName);
 
 db.on('connected', () => {
    updateDbFromConfig();

@@ -2,10 +2,8 @@ var http = require('http');
 var util = require('util');
 var Thing = require('../thing');
 var SourceListener = require('../sourcelistener');
-var CasaSystem = require('../casasystem');
 
 function SecuritySpyCamera(_config) {
-   this.casaSys = CasaSystem.mainInstance();
    Thing.call(this, _config);
 
    this.id = _config.id;
@@ -14,7 +12,7 @@ function SecuritySpyCamera(_config) {
    this.ensurePropertyExists('motion-capture', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('actions', 'property', { initialValue: false }, _config);
 
-   this.securitySpyService =  this.casaSys.findService("securityspyservice");
+   this.securitySpyService =  this.gang.findService("securityspyservice");
 
    if (!this.securitySpyService) {
       console.error(this.uName + ": ***** Security Spy service not found! *************");
@@ -22,7 +20,7 @@ function SecuritySpyCamera(_config) {
    }
 
    if (_config.hasOwnProperty("triggerSource")) {
-      _config.triggerSource.uName = (_config.triggerSource.hasOwnProperty("name")) ? _config.triggerSource.name : this.uName;
+      _config.triggerSource.uName = (_config.triggerSource.hasOwnProperty("uName")) ? _config.triggerSource.uName : this.uName;
       this.triggerSource = new SourceListener(_config.triggerSource, this);
    }
 

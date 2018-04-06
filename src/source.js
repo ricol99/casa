@@ -1,19 +1,19 @@
 var util = require('./util');
 var events = require('events');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function Source(_config) {
-   this.uName = _config.name;
+   this.uName = _config.uName;
    this.sName = this.uName.split(":")[1];
    this.valid = true;
 
    this.setMaxListeners(50);
 
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
 
    if (_config.secureConfig) {
-      this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
+      this.secureConfig = this.gang.loadSecureConfig(this.uName, _config);
    }
 
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
@@ -63,7 +63,7 @@ function Source(_config) {
 util.inherits(Source, events.EventEmitter);
 
 Source.prototype.getScheduleService = function() {
-  var scheduleService =  this.casaSys.findService("scheduleservice");
+  var scheduleService =  this.gang.findService("scheduleservice");
 
   if (!scheduleService) {
      console.error(this.uName + ": ***** Schedule service not found! *************");
@@ -86,7 +86,7 @@ Source.prototype.scheduledEventTriggered = function(_event) {
 };
 
 Source.prototype.getRampService = function() {
-  var rampService =  this.casaSys.findService("rampservice");
+  var rampService =  this.gang.findService("rampservice");
 
   if (!rampService) {
      console.error(this.uName + ": ***** Ramp service not found! *************");

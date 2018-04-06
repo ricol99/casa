@@ -1,14 +1,14 @@
 var util = require('./util');
 var events = require('events');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function PeerSource(_uName, _props, _peerCasa) {
    this.uName = _uName;
    this.peerCasa = _peerCasa;
    this.valid = true;
 
-   var casaSys = CasaSystem.mainInstance();
-   var source = casaSys.findSource(_uName);
+   this.gang = Gang.mainInstance();
+   var source = this.gang.findSource(_uName);
 
    if (source) {
       this.ghostMode = true;
@@ -16,7 +16,7 @@ function PeerSource(_uName, _props, _peerCasa) {
       console.log(this.uName + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
    }
    else {
-      casaSys.allObjects[this.uName] = this;
+      this.gang.allObjects[this.uName] = this;
    }
 
    this.props = {};
@@ -148,7 +148,7 @@ PeerSource.prototype.invalidateSource = function() {
          }
       }
 
-      delete this.peerCasa.casaSys.allObjects[this.uName];
+      delete this.peerCasa.gang.allObjects[this.uName];
    }
 };
 

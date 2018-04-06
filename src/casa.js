@@ -5,11 +5,11 @@ var app;
 var http;
 var io;
 
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function Casa(_config) {
-   this.uName = _config.name;
-   this.casaSys = CasaSystem.mainInstance();
+   this.uName = _config.uName;
+   this.gang = Gang.mainInstance();
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
    this.ports = {};
@@ -22,7 +22,6 @@ function Casa(_config) {
    events.EventEmitter.call(this);
 
    this.id = _config.id;
-   this.gang = _config.gang;
 
    this.sources = [];
    this.sourceListeners = {};
@@ -74,7 +73,7 @@ Casa.prototype.createServer = function() {
 
    app.get('/source/:source', (req, res) => {
       var allProps = {};
-      var source = this.casaSys.allObjects[req.params.source];
+      var source = this.gang.allObjects[req.params.source];
 
       if (source) {
          source.getAllProperties(allProps);
@@ -85,7 +84,7 @@ Casa.prototype.createServer = function() {
 
    io.on('connection', (_socket) => {
       console.log('a casa has joined');
-      var peerCasa = this.casaSys.createPeerCasa({name: "casa:anonymous:"+Date.now()}, true);
+      var peerCasa = this.gang.createPeerCasa({uName: "casa:anonymous:"+Date.now()}, true);
       peerCasa.serveClient(_socket);
    });
 
@@ -96,7 +95,7 @@ Casa.prototype.createServer = function() {
 
 Casa.prototype.buildSimpleConfig = function(_config) {
    this.config = {};
-   this.config.name = _config.name;
+   this.config.uName = _config.uName;
    this.config.displayName = _config.displayName;
 
    if (_config.gang) {
@@ -110,13 +109,13 @@ Casa.prototype.buildSimpleConfig = function(_config) {
       var len = _config.things.length;
 
       for (var j = 0; j < len; ++j) {
-         this.config.sources.push(_config.things[j].name);
+         this.config.sources.push(_config.things[j].uName);
          this.config.sourcesStatus.push({ properties: {}, status: false });
       }
 
       var len = _config.users.length;
       for (var k = j; k < len + j; ++k) {
-         this.config.sources.push(_config.users[k-j].name);
+         this.config.sources.push(_config.users[k-j].uName);
          this.config.sourcesStatus.push({ properties: {}, status: false });
       }
    }
@@ -174,10 +173,10 @@ Casa.prototype.renameSource = function(_source, _newName) {
    this.sources[_newName] = _source;
 
    // ** TBD Don't like this! HACK!
-   if (this.casaSys.allObjects[_source.uName]) {
-      delete this.casaSys.allObjects[_source.uName];
+   if (this.gang.allObjects[_source.uName]) {
+      delete this.gang.allObjects[_source.uName];
    }
-   this.casaSys.allObjects[_newName] = _source;
+   this.gang.allObjects[_newName] = _source;
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {

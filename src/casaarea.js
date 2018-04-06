@@ -1,14 +1,14 @@
 var util = require('util');
 var Thing = require('./thing');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function CasaArea(_config) {
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
 
    this.casas = {};
    this.casaCount = 0;
-   this.name = _config.name;
+   this.uName = _config.uName;
 
    Thing.call(this, _config);
 }
@@ -30,7 +30,7 @@ CasaArea.prototype.removeCasa = function(_casa) {
 
    // delete area if empty!
    if (this.casaCount == 0) {
-      this.casaSys.deleteCasaArea(this);
+      this.gang.deleteCasaArea(this);
    }
 }
 

@@ -1,13 +1,13 @@
 var util = require('util');
 var PipelineStep = require('../pipelinestep');
 var push = require( 'pushover-notifications' );
-var CasaSystem = require('../casasystem');
+var Gang = require('../gang');
 
 function PushoverStep(_config, _pipeline) {
    this.messagePriority = (_config.priority) ? _config.priority : 0;
 
-   var casaSys = CasaSystem.mainInstance();
-   this.userGroup = casaSys.findSource(_config.userGroup);
+   this.gang = Gang.mainInstance();
+   this.userGroup = this.gang.findSource(_config.userGroup);
 
    if (!this.userGroup) {
       console.error(this.uName + ": ***** UserGroup not found! *************");
@@ -16,7 +16,7 @@ function PushoverStep(_config, _pipeline) {
 
    PipelineStep.call(this, _config, _pipeline);
 
-   this.pushService = casaSys.findService("pushoverservice");
+   this.pushService = this.gang.findService("pushoverservice");
 
    if (!this.pushService) {
       console.error(this.uName + ": ***** Pushover service not found! *************");

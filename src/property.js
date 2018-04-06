@@ -38,7 +38,7 @@ function Property(_config, _owner) {
 
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].outputValues != undefined);
-         _config.sources[index].uName = (_config.sources[index].hasOwnProperty("name")) ? _config.sources[index].name : this.owner.uName;
+         _config.sources[index].uName = (_config.sources[index].hasOwnProperty("uName")) ? _config.sources[index].uName : this.owner.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
@@ -51,7 +51,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('target')) {
-      _config.target.uName = (_config.target.hasOwnProperty("name")) ? _config.target.name : this.owner.uName;
+      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.uName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
 

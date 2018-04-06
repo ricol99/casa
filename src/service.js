@@ -1,15 +1,11 @@
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 function Service(_config) {
-   this.uName = _config.name;
+   this.uName = _config.uName;
    this.displayName = _config.displayName;
 
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
-
-   if (_config.secureConfig) {
-      this.secureConfig = this.casaSys.loadSecureConfig(this.uName, _config);
-   }
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
 }
 
 Service.prototype.coldStart = function() {

@@ -30,7 +30,7 @@ function Building(_config) {
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.casaSys.findSource(_config.users[u].name));
+      this.users.push(this.gang.findSource(_config.users[u].uName));
    }
 
    for (var i = 0; i < this.users.length; ++i) {
@@ -60,14 +60,14 @@ function Building(_config) {
       if (_config.hasOwnProperty('bedrooms')) {
 
          for (var j = 0; j < _config.bedrooms.length; ++j) {
-            this.userStateConfigs[i].states[0].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-            this.userStateConfigs[i].states[1].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-            this.userStateConfigs[i].states[2].sources.push({ "name": _config.bedrooms[j].name, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
+            this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+            this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
          }
       }
 
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "name": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
+      this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
 
       allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"not-present\"" });
       allUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });

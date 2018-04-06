@@ -1,11 +1,11 @@
 var util = require('./util');
 var Source = require('./source');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 var Pipeline = require('./pipeline');
 
 function SourceListener(_config, _owner) {
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
    this.owner = _owner;
 
    this.sourceName = _config.uName;
@@ -65,7 +65,7 @@ SourceListener.prototype.establishListeners = function() {
    this.invalidHandler = SourceListener.prototype.invalidCb.bind(this);
 
    // refresh source
-   this.source = this.casaSys.findSource(this.sourceName);
+   this.source = this.gang.findSource(this.sourceName);
    this.valid = (this.source != undefined);
 
 

@@ -3,14 +3,7 @@
       "uName": "casa:land",
       "displayName": "Casa Collin Landing",
       "gang": "gang:collin",
-      "listeningPort": 8082,
-      "parentCasa": {
-         "uName": "casa:internet",
-         "address": {
-            "hostname": "199.245.56.152",
-            "port": 443
-         }
-      }
+      "listeningPort": 8082
    },
    "services": [
       {

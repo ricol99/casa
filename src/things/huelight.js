@@ -1,6 +1,5 @@
 var util = require('util');
 var Thing = require('../thing');
-var CasaSystem = require('../casasystem');
 
 function HueLight(_config) {
    Thing.call(this, _config);
@@ -15,7 +14,7 @@ function HueLight(_config) {
    this.brightnessSupported = true;
    this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
 
-   this.hueService =  this.casaSys.findService("hueservice");
+   this.hueService =  this.gang.findService("hueservice");
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");

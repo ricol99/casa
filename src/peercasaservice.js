@@ -1,7 +1,7 @@
 var util = require('util');
 var events = require('events');
 var PeerCasa = require('./peercasa');
-var CasaSystem = require('./casasystem');
+var Gang = require('./gang');
 
 if (!process.env.INTERNETCASA) {
    var mdns = require('mdns');
@@ -15,10 +15,8 @@ if (!process.env.INTERNETCASA) {
 }
 
 function PeerCasaService(_config) {
-   this.gang = _config.gang;
-
-   this.casaSys = CasaSystem.mainInstance();
-   this.casa = this.casaSys.casa;
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
 
    this.listeningPort = this.casa.listeningPort;
    this.uName = this.casa.uName;
@@ -34,15 +32,15 @@ function PeerCasaService(_config) {
          this.browser.on('serviceUp', (service) => {
             console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
-            if ((!((this.gang || service.txtRecord.gang) && (service.txtRecord.gang != this.gang))) &&
-               (service.name != this.casa.uName && !this.casaSys.remoteCasas[service.name])) {
+            if ((!((this.gang.uName || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.uName))) &&
+               (service.name != this.casa.uName && !this.gang.remoteCasas[service.name])) {
 
-               if (!this.casaSys.parentCasa || (this.casaSys.parentCasa.uName != service.name)) {
+               if (!this.gang.parentCasa || (this.gang.parentCasa.uName != service.name)) {
                   // Found a peer
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-                  if ((!this.casaSys.remoteCasas[service.name]) && (service.name > this.casa.uName)) {
-                     var peerCasa = this.casaSys.createPeerCasa({name: service.name});
+                  if ((!this.gang.remoteCasas[service.name]) && (service.name > this.casa.uName)) {
+                     var peerCasa = this.gang.createPeerCasa({uName: service.name});
                      peerCasa.connectToPeerCasa({ address: { hostname: service.host, port: service.port }});
                      console.log('peercasaservice: New peer casa: ' + peerCasa.uName);
                   }
@@ -65,7 +63,7 @@ function PeerCasaService(_config) {
 PeerCasaService.prototype.createAdvertisement = function() {
 
    try {
-     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang }});
+     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang.uName }});
      this.ad.on('error', (_err) => {
         console.log('peercasaservice: Not advertising service! Error: ' + _err);
      });

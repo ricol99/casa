@@ -8,12 +8,12 @@ function TopProperty(_config, _owner) {
    this.sources = [];
 
    if (_config.hasOwnProperty('source')) {
-      this.sources.push(this.sourceListeners[_config.source.name]);
+      this.sources.push(this.sourceListeners[_config.source.uName]);
    }
    else if (_config.hasOwnProperty('sources')) {
 
       for (var i = 0; i < _config.sources.length; ++i) {
-         this.sources.push(this.sourceListeners[_config.sources[i].name];
+         this.sources.push(this.sourceListeners[_config.sources[i].uName];
       }
    }
 }

@@ -1,9 +1,7 @@
 var util = require('util');
 var Thing = require('../thing');
-var CasaSystem = require('../casasystem');
 
 function LightwaveRfAccessory(_config) {
-   this.casaSys = CasaSystem.mainInstance();
    this.roomId = _config.roomId;
 
    Thing.call(this, _config);
@@ -36,7 +34,7 @@ function LightwaveRfAccessory(_config) {
 
    this.displayName = _config.displayName;
 
-   this.lightwaveRfService =  this.casaSys.findService("lightwaverfservice");
+   this.lightwaveRfService =  this.gang.findService("lightwaverfservice");
 
    if (!this.lightwaveRfService) {
       console.error(this.uName + ": ***** LightwaveRf service not found! *************");
