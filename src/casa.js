@@ -188,28 +188,32 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
 
    console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
    this.sourceListeners[_sourceListener.uName] = _sourceListener;
-}
+};
 
 Casa.prototype.addWorker = function(_worker) {
    console.log(this.uName + ': Worker '  + _worker.uName + ' added to casa ');
    this.workers[_worker.uName] = _worker;
-}
+};
 
 Casa.prototype.setUber = function(_uber) {
    this.uber = _uber;
-}
+};
 
 Casa.prototype.isUber = function() {
    return this.uber;
-}
+};
 
 Casa.prototype.allocatePort = function(_uName) {
    this.ports[_uName] = this.nextPortToAllocate;
    return this.nextPortToAllocate++;
-}
+};
 
 Casa.prototype.getProperty = function(_property) {
    return true;
-}
+};
+
+Casa.prototype.addRouteToMainServer = function(_route, _callback) {
+   return app.get(_route, _callback);
+};
 
 module.exports = exports = Casa;

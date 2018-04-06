@@ -16,6 +16,7 @@
     "forecast.io": "0.0.11",
     "hap-nodejs": "^0.4.21",
     "lightwaverf": "0.0.1",
+    "nedb": "^1.8.0",
     "node-hue-api": "^2.4.2",
     "node-persist": "^2.0.7",
     "node-schedule": "~0.1.16",
@@ -27,7 +28,6 @@
     "speedtest-net": "^1.2.12",
     "string": "~3.0.0",
     "suncalc": "~1.6.0",
-    "tinydb": "^0.1.0",
     "xml2js": "^0.4.19"
   }
 }

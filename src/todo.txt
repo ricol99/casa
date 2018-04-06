@@ -4,4 +4,4 @@ DONE: peercasa: get peers to work
 DONE: huelight: monitor light state changes and reflect in property
 DONE: stateproperty: does createRamp leak?
 DONE: source: setProperty() used for SetNextProperties - this will set manual mode on property.js- nwhat should we do with manaula mode?
-Fix manual mode
+DONE: Fix manual mode

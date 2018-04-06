@@ -1,6 +1,7 @@
 var util = require('./util');
+var fs = require('fs');
 var events = require('events');
-var TinyDB = require('tinydb');
+var Datastore = require('nedb');
 
 function Db(_dbName, _dbPath, _newDb) {
 
@@ -27,22 +28,16 @@ function Db(_dbName, _dbPath, _newDb) {
 }
 
 Db.prototype.connect = function() {
-   this.db = new TinyDB(this.dbName);
- 
-   this.db.onReady = function() {
+   this.db = new Datastore({ filename: this.dbName, autoload: true });
+
+   setTimeout( () => {
       this.emit('connected');
-   }.bind(this);
- 
-   this.db.onError = function(_error) { 
-      console.error(this.uName + ": Unable to connect to DB. Error=", _err);
-      process.exit(1);
-   }.bind(this);
+   }, 1);
 };
 
 util.inherits(Db, events.EventEmitter);
 
-Db.prototype.close = function(_collectionName) {
-   this.db.flush();
+Db.prototype.close = function() {
    //this.db.close();
 };
 
@@ -50,51 +45,33 @@ Db.prototype.readCollection = function(_collectionName, _callback) {
    return this.db.find({ _collection: _collectionName }, _callback);
 };
 
-Db.prototype.appendToCollection = function(_collectionName, _config) {
+Db.prototype.appendToCollection = function(_collectionName, _config, _callback) {
 
    if (_config instanceof Array) {
 
       for (var i = 0; i < _config.length; ++i) {
          _config[i]._collection = _collectionName;
-         this.db.appendItem(_config[i]);
+         _config[i]._id = _config[i].uName;
       }
+      return this.db.insert(_config, _callback);
    }
    else {
       _config._collection = _collectionName;
-      this.db.appendItem(_config);
+      _config._id = _config.uName;
+      return this.db.insert(_config, _callback);
    }
 };
 
-Db.prototype.find = function(_uName) {
-   return this.db.find({ uName: uName });
+Db.prototype.find = function(_uName, _callback) {
+   return this.db.findOne({ _id: uName }, _callback);
 };
 
-Db.prototype.remove = function(_uName) {
-   return this.db.findByIdAndRemove({ uName: _uName });
+Db.prototype.remove = function(_uName, _callback) {
+   return this.db.remove({ _id: _uName }, {}, _callback);
 };
 
 Db.prototype.update = function(_config, _callback) {
-   this.db.find({ uName: _config.uName }, (_err, _res) => {
-
-      if (_err) {
-         return _callback(_err);
-      }
-
-      if (_res.length > 1) {
-         return _callback("Error: multiple matches!");
-      }
-
-      var collection = _res[0]._collection;
-
-      this.db.findByIdAndRemove(_res[0]._id, (_err, res) => {
-
-         if (_err) {
-            return _callback(_err);
-         }
-
-         _callback(this.appendToCollection(collection, _config), true);
-      });
-   });
+   return db.update({ _id: _config.uName }, _config, {}. _callback);
 };
 
 

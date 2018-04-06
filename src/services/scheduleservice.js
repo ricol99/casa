@@ -3,7 +3,6 @@ var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 var Parser = require('cron-parser');
 var Service = require('../service');
-var CasaSystem = require('../casasystem');
 
 function ScheduleService(_config) {
    Service.call(this, _config);

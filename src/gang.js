@@ -498,15 +498,23 @@ Gang.prototype.setUberCasa = function(_uberCasa) {
       // Losing uber casa status
       this.uberCasa = _uberCasa;
    }
-}
+};
 
 Gang.prototype.isUberCasa = function() {
   return this.uberCasa;
-}
+};
+
+Gang.prototype.inSecureMode = function() {
+   return this.config.secureMode;
+};
+
+Gang.prototype.mainListeningPort = function() {
+   return (this.casa) ? this.casa.listeningPort : 0
+};
 
 Gang.mainInstance = function() {
    return _mainInstance;
-}
+};
 
 module.exports = exports = Gang;
 

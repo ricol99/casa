@@ -10,6 +10,10 @@
          "uName": "pushoverservice",
          "displayName": "Pushover Messaging Service",
          "secureConfig": true
+      },
+      {
+         "uName": "dbservice",
+         "displayName": "Database Maintenance Service"
       }
    ],
    "things": [
