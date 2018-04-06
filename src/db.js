@@ -41,6 +41,10 @@ Db.prototype.close = function() {
    //this.db.close();
 };
 
+Db.prototype.readAll = function(_callback) {
+   this.db.find({ _collection: { $exists: true }}, _callback);
+};
+
 Db.prototype.readCollection = function(_collectionName, _callback) {
    return this.db.find({ _collection: _collectionName }, _callback);
 };
