@@ -32,55 +32,94 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
    _mainInstance = this;
 
-   this.casaDb = new Db(this.casaName);
+   this.casaDb = new Db(this.casaName, _configPath);
 
    this.casaDb.on('connected', () => {
 
-      this.casaDb.readCollection("casa", (_err, _config) => {
+      this.loadConfig(this.casaDb, "casa", (_err, _res) => {
 
          if (_err) {
             console.error("Unable to load casa DB. Error=" + _err);
             process.exit(2);
          }
 
-         this.config = _config[0];
          this.config.connectToPeers = _connectToPeers;
          this.config.connectToParent = _connectToParent;
          this.config.secureMode = _secureMode;
          this.config.certPath = _certPath;
          this.config.configPath = _configPath;
-
          this.uName = this.config.gang;
+         this.loadSystemServices();
 
-         this.loadConfig(this.casaDb, this.config, (_err, _res) => {
+         this.gangDb = new Db(this.uName, _configPath);
 
-            if (_err) {
-               console.error("Unable to load casa DB. Error=" + _err);
-               process.exit(2);
-            }
+         this.gangDb.on('connected', () => {
 
-            this.gangDb = new Db(this.uName);
+            this.loadConfig(this.gangDb, "gang", (_err, _config) => {
 
-            this.gangDb.on('connected', () => {
+               if (_err) {
 
-               this.gangDb.readCollection("gang", (_err, _config) => {
-
-                  if (_err) {
-                     console.error("Unable to load casa DB. Error=" + _err);
-                     process.exit(2);
-                  }
-
-                  this.gangConfig = _config[0];
-
-                  this.loadConfig(this.gangDb, this.gangConfig, (_err, _res) => {
+                  this.attemptToFetchGangDbFromPeer( (_err, _res) => {
 
                      if (_err) {
-                        console.error("Unable to load casa DB. Error=" + _err);
+                        console.error("Unable to fetch gang DB from peer. Exiting... Error=" + _err);
                         process.exit(2);
                      }
+                     else {
 
-                     this.init();
+                        this.loadConfig(this.gangDb, "gang", (_err, _config) => {
+
+                           if (_err) {
+                              console.error("Unable to load casa DB. Error=" + _err);
+                              process.exit(2);
+                           }
+                           else {
+                              this.init();
+                           }
+                        });
+                     }
                   });
+               }
+               else {
+                  this.init();
+               }
+            });
+         });
+      });
+   });
+};
+
+Gang.prototype.loadConfig = function(_db, _collection, _callback) {
+
+   _db.readCollection(_collection, (_err, _mainConfig) => {
+
+      if (_err || (_mainConfig.length == 0)) {
+         return _callback("No main config found!");
+      }
+
+      var config;
+
+      if (_collection === "gang") {
+         this.gangConfig = _mainConfig[0];
+         config = this.gangConfig;
+      }
+      else {
+         this.config = _mainConfig[0];
+         config = this.config;
+      }
+
+      _db.readCollection("users", (_err, _users) => {
+         if (!_err) config.users = _users;
+
+         _db.readCollection("services", (_err, _services) => {
+            if (!_err) config.services = _services;
+
+            _db.readCollection("scenes", (_err, _scenes) => {
+               if (!_err) config.scenes = _scenes;
+
+               _db.readCollection("things", (_err, _things) => {
+                  if (!_err) config.things = _things;
+                  _callback(null, true);
                });
             });
          });
@@ -88,24 +127,18 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    });
 };
 
-Gang.prototype.loadConfig = function(_db, _config, _callback) {
+Gang.prototype.attemptToFetchGangDbFromPeer = function(_callback) {
 
-   _db.readCollection("users", (_err, _users) => {
-      if (!_err) _config.users = _users;
+   var deathTimeout = setTimeout( () => {
+      this.peerCasaService.setDbCallback(null);
+      return _callback("No peer found to fetch DB from!");
+   }, 20000);
 
-      _db.readCollection("services", (_err, _services) => {
-         if (!_err) _config.services = _services;
-
-         _db.readCollection("scenes", (_err, _scenes) => {
-            if (!_err) _config.scenes = _scenes;
-
-            _db.readCollection("things", (_err, _things) => {
-               if (!_err) _config.things = _things;
-               _callback(null, true);
-            });
-         });
-      });
+   this.connectToPeers( (_err, _res) => {
+      clearTimeout(deathTimeout);
+      _callback(_err, _res);
    });
+
 };
 
 Gang.prototype.init = function() {
@@ -148,11 +181,31 @@ Gang.prototype.init = function() {
       }, 10000);
    }
 
-   if (this.config.connectToPeers) {
-      var PeerCasaService = require('./peercasaservice');
-      this.peerCasaService = new PeerCasaService({ gang: this.config.gang });
-   }
+   this.connectToPeers();
 }
+
+Gang.prototype.loadSystemServices = function(_dbCallback) {
+   this.extractServices([ { uName: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                          { uName: "rampservice" }, { uName: "dbservice" } ], true);
+};
+
+Gang.prototype.connectToPeers = function(_dbCallback) {
+
+   if (this.config.connectToPeers) {
+
+      if (this.peerCasaService) {
+         this.peerCasaService.exitFetchDbMode();
+      }
+      else {
+         var PeerCasaService = require('./peercasaservice');
+         this.peerCasaService = new PeerCasaService({ gang: this.config.gang, fetchDbMode: (_dbCallback != undefined) });
+
+         if (_dbCallback) {
+            this.peerCasaService.setDbCallback(_dbCallback);
+         }
+      }
+   }
+};
 
 Gang.prototype.cleverRequire = function(_name, _path) {
    var str = S(_name).between('', ':').s;
@@ -185,7 +238,7 @@ Gang.prototype.extractUsers = function() {
    }
 };
 
-Gang.prototype.extractServices = function(_config) {
+Gang.prototype.extractServices = function(_config, _noColdStart) {
 
    if (_config) {
       console.log('Extracting services...');
@@ -196,11 +249,20 @@ Gang.prototype.extractServices = function(_config) {
          this.services[_config[index].uName] = new Service(_config[index]);
       }
 
-      console.log('Cold starting services...');
+      if (!_noColdStart) {
+         this.coldStartServices();
+      }
+   }
+};
 
-      for (index = 0; index < _config.length; ++index) {
-         console.log('Cold starting service '+ _config[index].uName);
-         this.services[_config[index].uName].coldStart();
+Gang.prototype.coldStartServices = function() {
+   console.log('Cold starting services...');
+
+   for (var serviceName in this.services) {
+
+      if (this.services.hasOwnProperty(serviceName)) {
+         console.log('Cold starting service '+ this.services[serviceName].uName);
+         this.services[serviceName].coldStart();
       }
    }
 };
@@ -510,6 +572,18 @@ Gang.prototype.inSecureMode = function() {
 
 Gang.prototype.mainListeningPort = function() {
    return (this.casa) ? this.casa.listeningPort : 0
+};
+
+Gang.prototype.configPath = function() {
+   return this.config.configPath;
+};
+
+Gang.prototype.certPath = function() {
+   return this.config.certPath;
+};
+
+Gang.prototype.getDbs = function() {
+   return [ this.uName, this.casa.uName ];
 };
 
 Gang.mainInstance = function() {

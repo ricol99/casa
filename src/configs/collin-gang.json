@@ -67,15 +67,6 @@
       }
    ],
    "services": [
-      {
-         "uName": "scheduleservice",
-         "latitude":  51.5,
-         "longitude": -0.1,
-         "forecastKey": "5d3be692ae5ea4f3b785973e1f9ea520"
-      },
-      {
-         "uName": "rampservice"
-      }
    ],
    "things": [ 
       {

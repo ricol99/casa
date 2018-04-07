@@ -23,10 +23,14 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var connectToParent = (options.noparent == undefined) ? true : !options.noparent;
 var secureMode = (options.secure == undefined) ? false : options.secure;
-var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : './'+options.certs;
-var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-configs' : options.config;
+var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : checkPath(options.certs);
+var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : checkPath(options.config);
 var casaName = options.casa;
 
 Gang = require('./gang');
 var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version);
+
+function checkPath(_path) {
+   return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;
+}
 

@@ -27,6 +27,19 @@ function Db(_dbName, _dbPath, _newDb) {
    }
 }
 
+Db.prototype.lastModified = function(_callback) {
+
+   fs.stat(this.dbName, (_err, _stats) => {
+
+      if (_err){
+         return _callback(_err);
+      }
+      else {
+         return _callback(null, _stats.mtime);
+      }
+   });
+};
+
 Db.prototype.connect = function() {
    this.db = new Datastore({ filename: this.dbName, autoload: true });
 
@@ -47,6 +60,10 @@ Db.prototype.readAll = function(_callback) {
 
 Db.prototype.readCollection = function(_collectionName, _callback) {
    return this.db.find({ _collection: _collectionName }, _callback);
+};
+
+Db.prototype.append = function(_config, _callback) {
+   return this.db.insert(_config, _callback);
 };
 
 Db.prototype.appendToCollection = function(_collectionName, _config, _callback) {
