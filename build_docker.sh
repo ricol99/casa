@@ -14,7 +14,6 @@ do
    echo $absolute
    node src/utils/createdb $absolute
 done
-exit
 
 mkdir .certs
 cp -R ~/.casa-keys/* .certs
