@@ -1,8 +1,10 @@
 var util = require('../util');
 var Db = require('../db');
+var cjson = require('cjson');
 
 var configFilename = process.argv[2];
-var inputConfig = require('./' + configFilename);
+//var inputConfig = require('./' + configFilename);
+var inputConfig = cjson.load(configFilename);
 parseConfigForSecureConfig(inputConfig);
 
 var gangDb = inputConfig.hasOwnProperty("gang");

@@ -1,3 +1,21 @@
+usage() {
+	echo `basename $0`: ERROR: $* 1>&2
+	echo usage: `basename $0` '[db-files]' 1>&2
+	exit 1
+}
+
+for i in $*
+do
+   case $i in
+     /*) absolute=$i;;
+     *) absolute=$PWD/$i;;
+   esac
+
+   echo $absolute
+   node src/utils/createdb $absolute
+done
+exit
+
 mkdir .certs
 cp -R ~/.casa-keys/* .certs
 docker build -t ricol99/casa .
