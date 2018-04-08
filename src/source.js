@@ -12,10 +12,6 @@ function Source(_config) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
 
-   if (_config.secureConfig) {
-      this.secureConfig = this.gang.loadSecureConfig(this.uName, _config);
-   }
-
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
