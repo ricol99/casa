@@ -145,12 +145,12 @@ DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) 
          _callback("Unable to retrieve peer db, err: " + _err);
       }
       else {
-         var Db = require('../db');
-         var db = new Db(this.gang.uName, this.gang.configPath(), true);
+         //var Db = require('../db');
+         //var db = new Db(this.gang.uName, this.gang.configPath(), true);
 
-         db.on('connected', () => {
-            db.append(_docs, _callback);
-         });
+         //db.on('connected', () => {
+            this.gang.gangDb.append(_docs, _callback);
+         //});
       }
    });
 };

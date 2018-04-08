@@ -44,7 +44,13 @@ function PeerCasaService(_config) {
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
                   if (!this.gang.remoteCasas[service.name]) {
 
-                     if (this.inFetchDbMode || (service.name > this.uName)) {
+                     if (this.inFetchDbMode) {
+                        this.dbService.updateGangDbFromPeer(service.host, service.port, (_err, _res) => {
+                           this.dbCallback(_err, _res);
+                           this.dbCallback = null;
+                        });
+                     }
+                     else if (service.name > this.uName) {
                         this.establishConnectionWithPeer(service);
                      }
                   }
@@ -110,14 +116,8 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
                      this.createPeerCasa(_service);
                   }
                   else {
-                     if (this.dbCallback) {
-                        this.dbCallback(null, true);
-                        this.dbCallback = null;
-                     }
-                     else {
-                        // Exit, wehave to restart with new Db
-                        process.exit(1);
-                     }
+                     // Exit, we have to restart with new Db
+                     process.exit(1);
                   }
                });
             }
