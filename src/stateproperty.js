@@ -304,8 +304,8 @@ function State(_config, _owner) {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (!this.sources[i].hasOwnProperty("name")) {
-            this.sources[i].name = this.owner.owner.uName;
+         if (!this.sources[i].hasOwnProperty("uName")) {
+            this.sources[i].uName = this.owner.owner.uName;
          }
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
