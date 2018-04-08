@@ -247,7 +247,7 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
-      _config.uName = _config.name;
+      _config.uName = _config.uName;
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
    }
