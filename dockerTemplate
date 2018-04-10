@@ -30,7 +30,7 @@ COPY .certs/* /src/.certs/
 COPY .certs/secure-config/* /src/.certs/secure-config/
 
 EXPOSE 8096
-CMD [ "node", "app.js", "--nopeer", "--noparent", "--secure", "--certs", ".certs", "--config", ".certs/secure-config", "internet" ]
+CMD [ "node", "app.js", "--nopeer", "--noparent", "--secure", "--certs", ".certs", "--config", ".certs/secure-config", "REPLACEWITHCASANAME" ]
 
 # get us off these annoying broken persistent volumes
 RUN mkdir /logs
