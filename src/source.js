@@ -3,6 +3,7 @@ var events = require('events');
 var Gang = require('./gang');
 
 function Source(_config) {
+   this.config = _config;
    this.uName = _config.uName;
    this.sName = this.uName.split(":")[1];
    this.valid = true;
@@ -45,7 +46,7 @@ function Source(_config) {
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
-                             { "initialValue": 'auto', "takeControlWithoutTargets": true,
+                             { "initialValue": 'auto',
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    events.EventEmitter.call(this);

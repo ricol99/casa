@@ -11,7 +11,6 @@ function StateProperty(_config, _owner) {
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
-   this.takeControlWithoutTargets = (_config.hasOwnProperty('takeControlWithoutTargets')) ? _config.takeControlWithoutTargets : false;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -259,6 +258,7 @@ function State(_config, _owner) {
    this.name = _config.name;
    this.owner = _owner;
    this.uName = _owner.uName + ":state:" + this.name;
+   this._id = this.uName;
    this.sourceMap = {};
 
    if (_config.hasOwnProperty("source")) {

@@ -46,13 +46,12 @@ function WebService(_config) {
    if (!this.hangingOffMainServer) {
 
       if (this.secure) {
-         this.certDir = _config.certDir;
          var fs = require('fs');
 
          this.serverOptions = {
-            key: fs.readFileSync(this.certDir+'/'+_config.serverKey),
-            cert: fs.readFileSync(this.certDir+'/'+_config.serverCert),
-            ca: fs.readFileSync(this.certDir+'/'+_config.caCert),
+            key: fs.readFileSync(this.gang.certPath()+'/client.key'),
+            cert: fs.readFileSync(this.gang.certPath()+'/client.crt'),
+            ca: fs.readFileSync(this.gang.certPath()+'/ca.crt'),
             requestCert: true,
             rejectUnauthorized: true
          };
@@ -102,4 +101,7 @@ WebService.prototype.addRoute = function(_route, _callback) {
    return (this.hangingOffMainServer) ? this.gang.casa.addRouteToMainServer(_route, _callback) : app.get(_route, _callback);
 };
 
+WebService.setGang = function(_gang) {
+   Service.setGang(_gang);
+}
 module.exports = exports = WebService;

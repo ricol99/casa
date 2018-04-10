@@ -7,6 +7,7 @@ var _mainInstance = null;
 function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPath, _configPath, _version) {
    this.casaName = "casa:" + _casaName;
    this.version = _version;
+   this._id = true;	// TDB!!!
 
    this.uberCasa = false;
    this.users = [];
@@ -89,6 +90,16 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    });
 };
 
+Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
+
+   if (_objects) {
+
+      for (var i = 0; i < _objects.length; ++i) {
+         _objects[i][_markId] = _markValue;
+      }
+   }
+};
+
 Gang.prototype.loadConfig = function(_db, _collection, _callback) {
 
    _db.readCollection(_collection, (_err, _mainConfig) => {
@@ -109,16 +120,32 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
       }
 
       _db.readCollection("users", (_err, _users) => {
-         if (!_err) config.users = _users;
+
+         if (!_err) {
+            config.users = _users;
+            this.markObjects(config.users, "_db", config.uName); 
+         }
 
          _db.readCollection("services", (_err, _services) => {
-            if (!_err) config.services = _services;
+
+            if (!_err) {
+               config.services = _services;
+               this.markObjects(config.sevices, "_db", config.uName); 
+            }
 
             _db.readCollection("scenes", (_err, _scenes) => {
-               if (!_err) config.scenes = _scenes;
+
+               if (!_err) {
+                  config.scenes = _scenes;
+                  this.markObjects(config.scenes, "_db", config.uName); 
+               }
 
                _db.readCollection("things", (_err, _things) => {
-                  if (!_err) config.things = _things;
+
+                  if (!_err) {
+                     config.things = _things;
+                     this.markObjects(config.things, "_db", config.uName); 
+                  }
                   _callback(null, true);
                });
             });
@@ -317,7 +344,6 @@ Gang.prototype.extractThings = function(_config, _parent) {
 Gang.prototype.mergeConfigs = function() {
 
    if (this.config.connectToParent) {
-      console.log('AAAAAAAA******************AAAAAAAAAAAAAAAAAAAAAAAAAAAAA*******************');
       this.config.parentCasa = this.gangConfig.parentCasa;
    }
 

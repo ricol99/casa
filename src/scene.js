@@ -4,7 +4,7 @@ var SourceListener = require('./sourcelistener');
 
 /************************
 {
-   "name": "scene:on-holiday",
+   "uName": "scene:on-holiday",
    "displayName": "On Holiday Scene",
    "props": [
       {
@@ -26,7 +26,7 @@ var SourceListener = require('./sourcelistener');
    ],
    "sources": [
       {
-         "name": "alarmtexecom:dumgoyne",
+         "uName": "alarmtexecom:dumgoyne",
          "property": "target-state",
          "value": "armed-full"
       }
@@ -43,16 +43,16 @@ function Scene(_config) {
 
    for (var i = 0; i < _config.sources.length; i++) {
 
-      if (!(_config.sources[i].hasOwnProperty("name"))) {
-         _config.sources[i].name = this.uName;
+      if (!(_config.sources[i].hasOwnProperty("uName"))) {
+         _config.sources[i].uName = this.uName;
       }
 
       this.sources.push(_config.sources[i]);
-      var sourceListenerName = _config.sources[i].name + ":" + _config.sources[i].property;
+      var sourceListenerName = _config.sources[i].uName + ":" + _config.sources[i].property;
       this.sources[this.sources.length-1].sourceListenerName = sourceListenerName;
 
       if (!this.sourceListeners.hasOwnProperty(sourceListenerName)) {
-         _config.sources[i].uName = _config.sources[i].name;
+         _config.sources[i].uName = _config.sources[i].uName;
          this.sourceListeners[sourceListenerName] = new SourceListener(this.sources[i], this);
       }
    }
@@ -66,7 +66,7 @@ Scene.prototype.receivedEventFromSource = function(_data) {
 
    for (var i = 0; i < this.sources.length; i++) {
 
-      if ((this.sources[i].name === _data.sourceName) &&
+      if ((this.sources[i].uName === _data.sourceName) &&
           (this.sources[i].property === _data.name) &&
           (this.sources[i].currentValue !== _data.value)) {
 

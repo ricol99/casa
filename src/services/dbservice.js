@@ -32,6 +32,15 @@ DbService.prototype.coldStart = function() {
    this.addRoute('/dbhash/:dbName/:peerHash', DbService.prototype.dbHashRequested.bind(this));
    this.addRoute('/dbs', DbService.prototype.dbsRequested.bind(this));
 
+   this.addRoute('/scene/:sceneName', DbService.prototype.sceneRequested.bind(this));
+   this.addRoute('/scenes', DbService.prototype.scenesRequested.bind(this));
+
+   this.addRoute('/service/:serviceName', DbService.prototype.serviceRequested.bind(this));
+   this.addRoute('/services', DbService.prototype.servicesRequested.bind(this));
+
+   this.addRoute('/thing/:thingName', DbService.prototype.thingRequested.bind(this));
+   this.addRoute('/things', DbService.prototype.thingsRequested.bind(this));
+
    WebService.prototype.coldStart.call(this);
 };
 
@@ -75,6 +84,71 @@ DbService.prototype.dbHashRequested = function(_request, _response) {
          }
       });
    }
+};
+
+DbService.prototype.sceneRequested = function(_request, _response) {
+   console.log(this.uName+": sceneRequested() request=", _request.params);
+};
+
+DbService.prototype.scenesRequested = function(_request, _response) {
+   console.log(this.uName+": scenesRequested() request=", _request.params);
+
+   if (_request.params.hasOwnProperty("scenes")) {
+      var allProps = {};
+      var source = this.gang.allObjects[_request.params.source];
+
+      if (source) {
+         source.getAllProperties(allProps);
+      }
+
+      _response.json(allProps);
+   }
+   else {
+      this.sendFail(_request, _response);
+   }
+};
+
+DbService.prototype.serviceRequested = function(_request, _response) {
+   console.log(this.uName+": serviceRequested() request=", _request.params);
+};
+
+DbService.prototype.servicesRequested = function(_request, _response) {
+   console.log(this.uName+": servicesRequested() request=", _request.params);
+};
+
+DbService.prototype.thingRequested = function(_request, _response) {
+   console.log(this.uName+": thingRequested() request=", _request.params);
+
+   if (_request.params.hasOwnProperty("thingName")) {
+      var allProps = {};
+      var thing = this.gang.allObjects[_request.params.thingName];
+
+      if (thing) {
+         thing.getAllProperties(allProps);
+         _response.json({config: thing.config, currentPropState: allProps });
+      }
+      else {
+         this.sendFail(_request, _response);
+      }
+   }
+   else {
+      this.sendFail(_request, _response);
+   }
+};
+
+DbService.prototype.thingsRequested = function(_request, _response) {
+   console.log(this.uName+": thingsRequested() request=", _request.params);
+
+   var names = [];
+
+   for (var thingName in this.gang.casa.sources) {
+
+      if (this.gang.casa.sources.hasOwnProperty(thingName)) {
+         names.push(thingName);
+      }
+   }
+
+   _response.json(names);
 };
 
 DbService.prototype.getDbHash = function(_dbName, _callback) {
@@ -171,12 +245,33 @@ DbService.prototype.getPeerDb = function(_dbName, _address, _port, _callback) {
 
    request(this.http + "://" + _address + ":" + _port + "/db/" + _dbName, this.socketOptions, (_err, _res, _body) => {
 
-      if (_err) {
-         return _callback(_err);
+      if (_err || _body.hasOwnProperty("error")) {
+         return _callback(_err ? _err : _body.error);
       }
 
       _callback(null, _body);
    });
 };
+
+DbService.prototype.getAndWritePeerDb = function(_dbName, _address, _port, _outputPath, _callback) {
+
+   this.getPeerDb(_dbName, _address, _port, (_err, _docs) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var Db = require('../db');
+      var db = new Db(_dbName, _outputPath, true);
+
+      db.on('connected', () => {
+         db.append(_docs, _callback);
+      });
+   });
+};
+
+DbService.setGang = function(_gang) {
+   WebService.setGang(_gang);
+}
 
 module.exports = exports = DbService;

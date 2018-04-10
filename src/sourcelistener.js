@@ -42,6 +42,8 @@ function SourceListener(_config, _owner) {
    console.log('AAAAAAAAAAAAA '+ _owner.uName + " - " + this.sourceName + " - " + this.eventName);
    this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceName + ":" + this.eventName;
 
+   this._id = this.uName;   // *** TBD
+
 
    if (_config.steps) {
       this.pipeline = new Pipeline(_config.steps, this);

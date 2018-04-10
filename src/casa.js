@@ -10,6 +10,7 @@ var Gang = require('./gang');
 function Casa(_config) {
    this.uName = _config.uName;
    this.gang = Gang.mainInstance();
+   this._id = true;     // TDB!!!
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
    this.ports = {};
