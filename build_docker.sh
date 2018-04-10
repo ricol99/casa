@@ -71,7 +71,6 @@ fi
 
 sed s/REPLACEWITHCASANAME/${casaShortName}/ dockerTemplate > Dockerfile
 
-exit
 docker build -t ricol99/casa .
 docker push ricol99/casa
 rm Dockerfile
