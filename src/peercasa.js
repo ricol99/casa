@@ -392,7 +392,10 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
    }
 
    this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
-   this.socket.disconnect();
+
+   if (this.socket) {
+      this.socket.disconnect();
+   }
    this.deleteMeIfNeeded();
 };
 
