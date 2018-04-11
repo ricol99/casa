@@ -111,9 +111,9 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             if (_propValue == 0) {
                this.lightwaveRfService.turnDeviceOff(this.roomId, this.deviceId, this.brightnessCallbackHandler);
             }
-            //else {
-               //this.lightwaveRfService.setDeviceDim(this.roomId, this.deviceId, _propValue, this.brightnessCallbackHandler);
-            //}
+            else {
+               this.lightwaveRfService.setDeviceDim(this.roomId, this.deviceId, _propValue, this.brightnessCallbackHandler);
+            }
          }
       }
    }
