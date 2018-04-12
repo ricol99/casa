@@ -103,5 +103,6 @@ WebService.prototype.addRoute = function(_route, _callback) {
 
 WebService.setGang = function(_gang) {
    Service.setGang(_gang);
-}
+};
+
 module.exports = exports = WebService;

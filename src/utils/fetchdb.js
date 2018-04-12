@@ -28,24 +28,28 @@ var port = (options.port != undefined) ? options.port : ((secure) ? 443 : 80);
 var casaName = options.casa;
 var outputPath = options.output;
 
-function Gang() {
-}
+var Gang = require('./dummygang');
+var gang = new Gang({certPath: certPath, secure: secure});
 
-Gang.prototype.inSecureMode = function() {
-   return secure;
-};
+//function Gang() {
+//}
 
-Gang.prototype.certPath = function() {
-   return certPath;
-};
+//Gang.prototype.inSecureMode = function() {
+   //return secure;
+//};
 
-Gang.prototype.mainListeningPort = function() {
-   return 8000; 
-};
+//Gang.prototype.certPath = function() {
+   //return certPath;
+//};
+
+//Gang.prototype.mainListeningPort = function() {
+   //return 8000; 
+//};
 
 var util = require('../util');
 var DbService = require('../services/dbservice');
-DbService.setGang(new Gang());
+//DbService.setGang(new Gang());
+DbService.setGang(gang);
 
 dbService = new DbService({});
 

@@ -165,6 +165,10 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request) {
    this.requests[_request.code] = _request;
 }
 
+LightwaveRfService.setGang = function(_gang) {
+   Service.setGang(_gang);
+};
+
 function Request(_owner, _message, _callback) {
    this.owner = _owner;
    this.message = _message;

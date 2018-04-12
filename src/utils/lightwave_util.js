@@ -1,7 +1,9 @@
-var CasaSystem = require('../casasystem');
-casaSys = new CasaSystem({}, {"name": "casa:util", "displayName": "Utility Casa", "gang": "casa-collin-v2", "listeningPort": 8097}, false, false, null, null, 1);
+var Gang = require('./dummygang');
+var gang = new Gang({});
 
 var LightWaveRF = require('../services/lightwaverfservice');
+LightWaveRF.setGang(gang);
+
 var lrf = new LightWaveRF({ name: "lightwaverservice:utility", linkAddress: "192.168.1.49" });
 lrf.coldStart();
 
