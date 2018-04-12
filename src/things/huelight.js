@@ -113,40 +113,40 @@ HueLight.prototype.syncDeviceProperties = function() {
    });
 };
 
+//HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
+
+   //if (!this.getProperty("power")) {
+      //return;
+   //}
+
+   //var config = { power: true, brightness: this.getProperty("brightness"), hue: this.getProperty("hue"), saturation: this.getProperty("saturation") };
+   //config[_propName] = _propValue;
+
+   //this.hueService.setLightState(this.deviceId, { power: true, brightness: this.getProperty("brightness"),
+                                                  //hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
+                                                  //(_error, _content) => {
+
+      //if (_error) {
+         //console.error(this.uName + ': Error syncing device properites -  ' + _error.message);
+      //}
+   //});
+//};
+
 HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
 
-   if (!this.getProperty("power")) {
-      return;
+   var f = { brightness: "setLightBrightness", hue: "setLightHue",
+             saturation: "setLightSaturation" };
+
+   if (f[_propName]) {
+
+      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue, (_error, _content) => {
+
+         if (_error) {
+            console.error(this.uName + ': Error turning room off ' + _error.message);
+         }
+      });
    }
-
-   var config = { power: true, brightness: this.getProperty("brightness"), hue: this.getProperty("hue"), saturation: this.getProperty("saturation") };
-   config[_propName] = _propValue;
-
-   this.hueService.setLightState(this.deviceId, { power: true, brightness: this.getProperty("brightness"),
-                                                  hue: this.getProperty("hue"), saturation: this.getProperty("saturation") },
-                                                  (_error, _content) => {
-
-      if (_error) {
-         console.error(this.uName + ': Error syncing device properites -  ' + _error.message);
-      }
-   });
 };
-
-//§HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
-
-   //var f = { brightness: "setLightBrightness", hue: "setLightHue",
-             //saturation: "setLightSaturation" };
-
-   //if (f[_propName]) {
-
-      //this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue, (_error, _content) => {
-
-         //if (_error) {
-            //console.error(this.uName + ': Error turning room off ' + _error.message);
-         //}
-      //});
-   //}
-//};
 
 HueLight.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this);
