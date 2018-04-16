@@ -426,6 +426,18 @@ Source.prototype.coldStart = function() {
    }
 }
 
+Source.prototype.invalidate = function() {
+   this.valid = false;
+
+   for(var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop)) {
+         this.emit('invalid', { sourceName: this.uName, name: prop });
+      }
+   }
+   this.casa.removeSource(this);
+};
+
 // Called by stateproperty to take control based on setting a target property
 Source.prototype.takeControl = function(_newController, _priority) {
    console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);

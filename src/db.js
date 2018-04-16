@@ -2,6 +2,7 @@ var util = require('./util');
 var fs = require('fs');
 var events = require('events');
 var Datastore = require('nedb');
+var md5 = require('md5');
 
 function Db(_dbName, _dbPath, _newDb) {
 
@@ -27,6 +28,8 @@ function Db(_dbName, _dbPath, _newDb) {
    }
 }
 
+util.inherits(Db, events.EventEmitter);
+
 Db.prototype.lastModified = function(_callback) {
 
    fs.stat(this.dbName, (_err, _stats) => {
@@ -40,15 +43,48 @@ Db.prototype.lastModified = function(_callback) {
    });
 };
 
+Db.prototype.updateHashInternal = function(_callback) {
+
+   this.readAll( (_err, _docs) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.lastModified( (_err, _lastModified) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         this.hash = { hash: md5(JSON.stringify(_docs)), lastModified: _lastModified };
+         return _callback(null, this.hash);
+      });
+   });
+};
+
+Db.prototype.getHash = function() {
+   return this.hash;
+};
+
 Db.prototype.connect = function() {
    this.db = new Datastore({ filename: this.dbName, autoload: true });
 
-   setTimeout( () => {
-      this.emit('connected');
-   }, 1);
+   this.updateHashInternal( (_err, _hash) => {
+      var eventName = 'connected';
+      var data = null;
+
+      if (_err) {
+         eventName = 'error';
+         data = _err;
+      }
+
+      setTimeout( () => {
+         this.emit(eventName, data);
+      }, 1);
+   });
 };
 
-util.inherits(Db, events.EventEmitter);
 
 Db.prototype.close = function() {
    //this.db.close();

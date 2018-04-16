@@ -7,6 +7,7 @@ var Room = require('./room');
 // pre-wake-up-event - event indicating wake up start up sequence (e.g. sunrise ramp)
 // wake-up-event - event indicating wake up alarm call
 // <username>-switch-event - let each user control their own readiness for bed
+// room-switch-event - room entrance switch
 
 // Resulting <username>-user-state (s)
 // not-present - user not present in the bedroom
@@ -26,7 +27,7 @@ function Bedroom(_config) {
 
    this.users = [];
    this.userStateConfigs = [];
-   this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*15;
+   this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*30;
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
    for (var u = 0; u < _config.users.length; ++u) {
@@ -42,7 +43,8 @@ function Bedroom(_config) {
          "states": [
             {
                "name": "not-present",
-               "source": { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" }
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
+                           { "event": "room-switch-event", "nextState": "reading-in-bed" }]
             },
             {
                "name": "reading-in-bed",

@@ -136,7 +136,7 @@ PeerSource.prototype.coldStart = function() {
    }
 }
 
-PeerSource.prototype.invalidateSource = function() {
+PeerSource.prototype.invalidate = function() {
 
    if (!this.ghostMode) {
       this.valid = false;

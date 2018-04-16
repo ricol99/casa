@@ -1,7 +1,6 @@
 var util = require('util');
 var WebService = require('./webservice');
 var request = require('request');
-var md5 = require('md5');
 
 function DbService(_config) {
    WebService.call(this, _config);
@@ -71,18 +70,13 @@ DbService.prototype.dbHashRequested = function(_request, _response) {
       this.sendFail(_request, _response);
    }
    else {
-      this.getDbHash(_request.params.dbName, (_err, _hash) => {
+      var hash = this.getDbHash(_request.params.dbName);
 
-         if (_err) {
-            this.sendFail(_request, _response);
-         }
-         else {
-            if (_request.params.hasOwnProperty("peerHash") && (_hash.hash !== _request.params.peerHash)) {
-               console.log('AAAAAAAAAAAAA OH DEAR!!!!!!!!');
-            }
-            _response.send(_hash);
-         }
-      });
+      if (_request.params.hasOwnProperty("peerHash") && (hash.hash !== _request.params.peerHash)) {
+         console.log('AAAAAAAAAAAAA OH DEAR!!!!!!!!');
+      }
+
+      _response.send(hash);
    }
 };
 
@@ -151,20 +145,9 @@ DbService.prototype.thingsRequested = function(_request, _response) {
    _response.json(names);
 };
 
-DbService.prototype.getDbHash = function(_dbName, _callback) {
+DbService.prototype.getDbHash = function(_dbName) {
    var db = (_dbName === this.gang.uName) ? this.gang.gangDb : this.gang.casaDb;
-
-   if (!db) {
-      _callback("DB not found!");
-   }
-   else {
-      db.readAll( (_err, _docs) => {
-
-         db.lastModified( (_err, _lastModified) => {
-            _callback(null, { hash: md5(JSON.stringify(_docs)), lastModified: _lastModified });
-         });
-      });
-   }
+   return db.getHash();
 };
 
 DbService.prototype.dbsRequested = function(_request, _response) {
@@ -185,28 +168,19 @@ DbService.prototype.sendFail = function(_request, _response) {
 
  
 DbService.prototype.checkGangDbAgainstPeer = function(_address, _port, _callback) {
+   var localHash = this.getDbHash(this.gang.uName);
 
-   this.getDbHash(this.gang.uName, (_err, _localHash) => {
+   this.getPeerDbHash(this.gang.uName, localHash.hash, _address, _port, (_err, _peerHash) => {
 
       if (_err) {
-         _callback("Unable to retrieve local db hash, err: " + _err);
+         _callback("Unable to retrieve peer db hash, err: " + _err);
+      }
+      else if (_peerHash.hash === localHash.hash) {
+         // Dbs are the same!
+         _callback(null, { identical: true });
       }
       else {
-         this.getPeerDbHash(this.gang.uName, _localHash.hash, _address, _port, (_err, _peerHash) => {
-
-            if (_err) {
-               _callback("Unable to retrieve peer db hash, err: " + _err);
-            }
-            else if (_peerHash.hash === _localHash.hash) {
-               // Dbs are the same!
-               console.log("AAAAAAAAAAAAAA local", _localHash);
-               console.log("AAAAAAAAAAAAAA peer", _peerHash);
-               _callback(null, { identical: true });
-            }
-            else {
-               _callback(null, { identical: false, localNewer: (_localHash.lastModified >= _peerHash.lastModified) });
-            }
-         });
+         _callback(null, { identical: false, localNewer: (localHash.lastModified >= _peerHash.lastModified) });
       }
    });
 };
@@ -219,12 +193,12 @@ DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) 
          _callback("Unable to retrieve peer db, err: " + _err);
       }
       else {
-         //var Db = require('../db');
-         //var db = new Db(this.gang.uName, this.gang.configPath(), true);
+         var Db = require('../db');
+         this.gang.gangDb = new Db(this.gang.uName, this.gang.configPath(), true);
 
-         //db.on('connected', () => {
+         this.gang.gangDb.on('connected', () => {
             this.gang.gangDb.append(_docs, _callback);
-         //});
+         });
       }
    });
 };

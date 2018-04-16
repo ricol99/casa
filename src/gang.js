@@ -323,6 +323,11 @@ Gang.prototype.createThing = function(_config, _parent) {
    return thingObj;
 };
 
+Gang.prototype.removeThing = function(_thing) {
+   delete this.things[_thing.uName];
+   delete this.allObjects[_thing.uName];
+};
+
 Gang.prototype.extractThings = function(_config, _parent) {
 
    if (_config) {
@@ -614,6 +619,33 @@ Gang.prototype.getDbs = function() {
 
 Gang.mainInstance = function() {
    return _mainInstance;
+};
+
+Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
+   var dbService = this.findService("dbservice");
+
+   dbService.updateGangDbFromPeer(_parentCasa.address.hostname, _parentCasa.address.port, (_err, _res) => {
+
+      if (_err) {
+         console.error(this.uName + ": Unable to update my gang db from parent. Error: " + _err);
+         process.exit(2);
+      }
+      else {
+         // Exit, we have to restart with new Db
+         console.log(this.uName + ": Gang db updated from parent. Need to restart. Exiting....");
+         process.exit(1);
+
+         this.gangDb.close();
+         this.gangDb = new Db(this.uName, this.configPath());
+
+         this.gangDb.on('connected', () => {
+
+            this.loadConfig(this.gangDb, "gang", (_err, _config) => {
+            });
+
+         });
+      }
+   });
 };
 
 module.exports = exports = Gang;

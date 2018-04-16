@@ -180,6 +180,12 @@ Casa.prototype.renameSource = function(_source, _newName) {
    this.gang.allObjects[_newName] = _source;
 };
 
+Casa.prototype.removeSource = function(_source) {
+   console.log(this.uName + ': Deleting source '  + _source.uName);
+   this.gang.removeThing(_source);
+   delete this.sources[_source.uName];
+};
+
 Casa.prototype.addSourceListener = function(_sourceListener) {
 
    if (this.sourceListeners[_sourceListener.uName]) {

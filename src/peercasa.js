@@ -104,7 +104,7 @@ PeerCasa.prototype.invalidateSources = function() {
 
       if(this.sources.hasOwnProperty(prop)){
          console.log(this.uName + ': Invaliding source ' + this.sources[prop].uName);
-         this.sources[prop].invalidateSource();
+         this.sources[prop].invalidate();
          delete this.sources[prop];
       }
    }
@@ -194,7 +194,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
 
-   this.ackMessage('login', { messageId: _config.messageId, casaName: this.casa.uName, casaConfig: this.casa.config });
+   this.ackMessage('login', { messageId: _config.messageId, gangHash: this.gang.gangDb.getHash(), casaName: this.casa.uName, casaConfig: this.casa.config });
    this.establishHeartbeat();
 
    var casaList = this.casaArea.buildCasaForwardingList();
@@ -342,6 +342,13 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
       this.changeName(_data.casaName);
       this.uName = _data.casaName;
       this.gang.addRemoteCasa(this);
+   }
+
+   if ((this.loginAs === 'child') && _data.hasOwnProperty("gangHash") && _data.gangHash.hasOwnProperty("hash")) {
+
+      if (this.gang.gangDb.getHash().hash !== _data.gangHash.hash) {
+         this.gang.updateGangDbFromParent(this);
+      }
    }
 
    this.messageHasBeenAcked(_data);
@@ -644,23 +651,6 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
       this.config.sourcesStatus.push({ properties: util.copy(allProps), status: this.sources[this.config.sources[i]].isActive() });
    }
 }
-
-//function deepCopyData(_sourceData) {
-   //return JSON.parse(JSON.stringify(_sourceData));
-//}
-
-//function util.copy(_sourceData) {
-   //var newData = {};
-//
-   //for (var prop in _sourceData) {
-//
-      //if (_sourceData.hasOwnProperty(prop)){
-         //newData[prop] = _sourceData[prop];
-      //}
-   //}
-//
-   //return newData;
-//}
 
 PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
