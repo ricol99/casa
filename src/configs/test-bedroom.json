@@ -1,0 +1,104 @@
+{
+   "casa": {
+      "uName": "casa:test-bedroom",
+      "displayName": "Casa Collin Test Bedroom",
+      "gang": "gang:collin-test",
+      "listeningPort": 8084
+   },
+   "services": [
+      {
+         "uName": "webservice",
+         "port": 11002,
+         "mediaPath": "/Users/richardcollin/personal/media",
+         "secure": false,
+         "serverKey": "",
+         "serverCert": "",
+         "caCert": ""
+      }
+   ],
+   "scenes": [
+   ],
+   "things": [
+      {
+         "uName": "bedroom:test-bedroom",
+         "displayName": "Test Bedroom",
+         "users": [
+            { "uName": "user:test-1" },
+            { "uName": "user:test-2" }
+         ],
+         "readingInBedTimeout": 10,
+         "awakeInBedTimeout": 10,
+         "events": [],
+         "props": [
+            {
+               "name": "movement-pir",
+               "initialValue": false,
+               "writable": false,
+               "TYPE": "gpioproperty",
+               "gpioPin": 17,
+               "triggerLow": true,
+               "local": true
+            }
+         ],
+         "things": [
+            {
+               "uName": "testsequence:bedroom",
+               "displayName": "Test Bedroom Sequence",
+               "sources": [
+                  { "uName": "bedroom:test-bedroom", "property": "test-1-user-state" },
+                  { "uName": "bedroom:test-bedroom", "property": "test-2-user-state" }
+               ],
+               "sequence": [
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+               ],
+               "props": [
+                  {
+                     "name": "event-state-property",
+                     "type": "stateproperty",
+                     "ignoreControl": true,
+                     "initialValue": "off",
+                     "states": [
+                        {
+                           "name": "off",
+                           "timeout": { "duration": 20, "nextState": "test-1-going-to-bed" }
+                        },
+                        {
+                           "name": "test-1-going-to-bed",
+                           "timeout": { "duration": 2, "nextState": "test-2-going-to-bed" },
+                           "events": [ { "name": "test-1-switch-event" } ]
+                        },
+                        {
+                           "name": "test-2-going-to-bed",
+                           "timeout": { "duration": 2, "nextState": "test-1-going-to-sleep" },
+                           "events": [ { "name": "test-2-switch-event" } ]
+                        },
+                        {
+                           "name": "test-1-going-to-sleep",
+                           "timeout": { "duration": 2, "nextState": "test-2-going-to-sleep" },
+                           "events": [ { "name": "test-1-switch-event" } ]
+                        },
+                        {
+                           "name": "test-2-going-to-sleep",
+                           "timeout": { "duration": 2, "nextState": "wake-up" },
+                           "events": [ { "name": "test-2-switch-event" } ]
+                        },
+                        {
+                           "name": "wake-up",
+                           "events": [ { "name": "wake-up-event" } ]
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

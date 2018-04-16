@@ -11,6 +11,7 @@ function StateProperty(_config, _owner) {
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
+   this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -209,15 +210,21 @@ StateProperty.prototype.setState = function(_nextStateName) {
    }
 };
 
-StateProperty.prototype.alignTargetProperty = function(_propName, _propValue, _priority) {
-   this.alignTargetProperties([{ property: _propName, value: _propValue }], _priority);
-};
-
-StateProperty.prototype.alignTargetProperties = function(_targets, _priority) {
+StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
    this.currentPriority = _priority;
 
-   if (this.owner.takeControl(this, this.currentPriority) && _targets) {
-      this.owner.alignProperties(_targets);
+   if (this.ignoreControl || this.owner.takeControl(this, this.currentPriority)) {
+
+      if (_targets) {
+         this.owner.alignProperties(_targets);
+      }
+
+      if (_events) {
+
+         for (var i = 0; i < _events.length; ++i) {
+            this.owner.raiseEvent(_events[i].name);
+         }
+      }
    }
 };
 
@@ -227,7 +234,7 @@ StateProperty.prototype.becomeController = function() {
 
    // Re-apply current state
    if (this.states[this.value]) {
-      this.states[this.value].alignTargets();
+      this.states[this.value].alignTargetsAndEvents();
    }
 };
 
@@ -279,6 +286,13 @@ function State(_config, _owner) {
    }
    else if (_config.hasOwnProperty("target")) {
       this.targets = [ _config.target ];
+   }
+
+   if (_config.hasOwnProperty("events")) {
+      this.events = _config.events;
+   }
+   else if (_config.hasOwnProperty("event")) {
+      this.events = [ _config.event ];
    }
 
    if (_config.hasOwnProperty("schedules")) {
@@ -341,14 +355,14 @@ State.prototype.initialise = function() {
    var immediateState = this.checkSourceProperties();
 
    if (!immediateState) {
-      this.alignTargets();
+      this.alignTargetsAndEvents();
    }
 
    return immediateState;
 };
 
-State.prototype.alignTargets = function() {
-   this.owner.alignTargetProperties(this.targets, this.priority);
+State.prototype.alignTargetsAndEvents = function() {
+   this.owner.alignTargetPropertiesAndEvents(this.targets, this.events, this.priority);
 };
 
 State.prototype.checkSourceProperties = function() {

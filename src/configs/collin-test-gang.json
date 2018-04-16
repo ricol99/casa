@@ -12,65 +12,30 @@
    },
    "users": [ 
       {
-         "uName": "user:richard",
-         "displayName": "Richard C",
+         "uName": "user:test-1",
+         "displayName": "Test 1",
          "props": []
       },
       {
-         "uName": "user:natalie",
-         "displayName": "Natalie",
-         "props": []
-      },
-      {
-         "uName": "user:dylan",
-         "displayName": "Dylan",
+         "uName": "user:test-2",
+         "displayName": "Test 2",
          "props": []
       },
       {
          "uName": "usergroup:family",
-         "displayName": "Collin Family",
+         "displayName": "Test Family",
          "users": [
-           "user:richard",
-           "user:natalie",
-           "user:dylan"
+           "user:test-1",
+           "user:test-2"
          ],
          "props": []
-      },
-      {
-         "uName": "usergroup:admins",
-         "displayName": "Administrators",
-         "users": [
-           "user:richard"
-         ],
-         "props": [
-            {
-               "name": "pushoverDestAddr",
-               "initialValue": "gX5JLc28t775dYr1yjuo4p38t7hziV",
-               "writable": false
-            }
-         ]
-      },
-      {
-         "uName": "usergroup:key-holders",
-         "displayName": "Key Holders",
-         "users": [
-           "user:richard",
-           "user:natalie"
-         ],
-         "props": [
-            {
-               "name": "pushoverDestAddr",
-               "initialValue": "g7KTUJvsJbPUNH5SL8oEitXBBuL32j",
-               "writable": false
-            }
-         ]
       }
    ],
    "services": [],
    "things": [ 
       {
-         "uName": "thing:timed-environment",
-         "displayName": "Timed Environment",
+         "uName": "thing:environment",
+         "displayName": "Test Timed Environment",
          "props": [
             {
                "name": "daylight",
@@ -119,28 +84,6 @@
                      "value": false
                   }
                ]
-            }
-         ]
-      },
-      {
-         "uName": "thing:environment",
-         "displayName": "Environment",
-         "props": [
-            {
-               "name": "daylight",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "building:dumgoyne",
-                     "property": "daylight"
-                  },
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "daylight"
-                  }
-               ]
             },
             {
                "name": "dark",
@@ -151,34 +94,6 @@
                      "uName": "thing:environment",
                      "property": "daylight",
                      "transform": "!$value"
-                  }
-               ]
-            },
-            {
-               "name": "low-light",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "building:dumgoyne",
-                     "property": "low-light"
-                  },
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "low-light"
-                  }
-               ]
-            },
-            {
-               "name": "night-time",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "night-time"
                   }
                ]
             }

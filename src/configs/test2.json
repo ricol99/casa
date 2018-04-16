@@ -49,7 +49,7 @@
                      "sources": [ { "property": "test-periodic-2", "value": "on", "nextState": "on-others" },
                                   { "property": "test-periodic-2", "value": "on-others", "nextState": "on-others" } ],
                      "timeout": { "from": [ "on-off" ], "duration": 20, "nextState": "off" },
-                     "targets": { "property": "test-prop-target", "value": true }
+                     "targets": [{ "property": "test-prop-target", "value": true }]
                   },
                   {
                      "name": "on-others",
