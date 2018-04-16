@@ -322,7 +322,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "reading-in-bed",
+                                 "name": "intial-reading-in-bed",
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -331,9 +331,18 @@
                                  ]
                               },
                               {
+                                 "name": "reading-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 40 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
                                  "name": "reading-in-bed-others-asleep",
                                  "targets": [
-                                    { "property": "brightness", "value": 60 },
+                                    { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -387,7 +396,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "reading-in-bed",
+                                 "name": "intial-reading-in-bed",
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -396,9 +405,18 @@
                                  ]
                               },
                               {
+                                 "name": "reading-in-bed",
+                                 "targets": [
+                                    { "property": "brightness", "value": 40 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
                                  "name": "reading-in-bed-others-asleep",
                                  "targets": [
-                                    { "property": "brightness", "value": 60 },
+                                    { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -524,6 +542,22 @@
                      "deviceId": 3,
                      "propogateToParent": false,
                      "props": [
+                        {  
+                           "name": "richard-user-state",
+                           "type": "stateproperty",
+                           "states": [
+                              {
+                                 "name": "intial-reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        },
                         {
                            "name": "natalie-user-state",
                            "type": "stateproperty",
@@ -534,10 +568,20 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "reading-in-bed",
+                                 "name": "intial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -591,6 +635,22 @@
                      "propogateToParent": false,
                      "props": [
                         {
+                           "name": "natalie-user-state",
+                           "type": "stateproperty",
+                           "states": [
+                              {
+                                 "name": "intial-reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              }
+                           ]
+                        },
+                        {
                            "name": "richard-user-state",
                            "type": "stateproperty",
                            "initialValue": "not-present",
@@ -600,10 +660,20 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "reading-in-bed",
+                                 "name": "intial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
+                              },
+                              {
+                                 "name": "reading-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }

@@ -43,8 +43,13 @@ function Bedroom(_config) {
          "states": [
             {
                "name": "not-present",
-               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "intial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "reading-in-bed" }]
+            },
+            {
+               "name": "initial-reading-in-bed",
+               "priority": 4,
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed",
@@ -78,16 +83,18 @@ function Bedroom(_config) {
       };
 
       if (this.readingInBedTimeout != -1) {
-         this.userStateConfigs[i].states[1].timeout = { "from": [ "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
-         this.userStateConfigs[i].states[2].timeout = { "from": [ "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[1].timeout = { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[2].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[3].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
       }
 
       for (var j = 0; j < this.users.length; ++j) {
 
          if (i !== j) {
             this.userStateConfigs[i].states[1].sources.push({ "property": this.users[j].sName+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
-            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed", "nextState": "reading-in-bed" });
-            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].sName+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
+            this.userStateConfigs[i].states[3].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[3].sources.push({ "property": this.users[j].sName+"-user-state", "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
          }
       }
 
