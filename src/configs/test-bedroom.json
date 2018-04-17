@@ -8,7 +8,7 @@
    "services": [
       {
          "uName": "webservice",
-         "port": 11002,
+         "port": 11003,
          "mediaPath": "/Users/richardcollin/personal/media",
          "secure": false,
          "serverKey": "",
