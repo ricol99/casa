@@ -41,7 +41,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
          if (_err) {
             console.error("Unable to load casa DB. Error=" + _err);
-            process.exit(2);
+            process.exit(1);
          }
 
          this.config.connectToPeers = _connectToPeers;
@@ -72,7 +72,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
                            if (_err) {
                               console.error("Unable to load casa DB. Error=" + _err);
-                              process.exit(2);
+                              process.exit(1);
                            }
                            else {
                               this.init();
@@ -633,7 +633,7 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
       else {
          // Exit, we have to restart with new Db
          console.log(this.uName + ": Gang db updated from parent. Need to restart. Exiting....");
-         process.exit(1);
+         process.exit(2);
 
          this.gangDb.close();
          this.gangDb = new Db(this.uName, this.configPath());

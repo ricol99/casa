@@ -117,7 +117,7 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
                   }
                   else {
                      // Exit, we have to restart with new Db
-                     process.exit(1);
+                     process.exit(2);
                   }
                });
             }

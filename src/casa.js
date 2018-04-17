@@ -190,7 +190,7 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
 
    if (this.sourceListeners[_sourceListener.uName]) {
       console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
-      process.exit();
+      process.exit(1);
    }
 
    console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
