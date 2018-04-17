@@ -16,6 +16,7 @@ function Source(_config) {
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
+   this.controller = null;
    this.props = {};
    
    if (_config.props) {
@@ -443,7 +444,12 @@ Source.prototype.takeControl = function(_newController, _priority) {
    console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
 
-   if (_newController != this.controller) {
+   if (this.controller === null) {
+      console.log(this.uName + ": Controller "+_newController.name+" is taking control");
+      this.controller = _newController;
+      this.controllerPriority = _priority;
+   }
+   else if (_newController != this.controller) {
 
       if (_priority >= this.controllerPriority) {
          console.log(this.uName + ": Controller "+_newController.name+" is taking control");
@@ -459,7 +465,8 @@ Source.prototype.takeControl = function(_newController, _priority) {
          }
       }
       else {
-         console.log(this.uName + ": Controller "+_newController.name+" failed to take control");
+         console.log(this.uName + ": Controller "+_newController.name+" failed to take control from " + this.controller.name);
+         console.log(this.uName + ": Controller "+_newController.name+" failed priority=" + _priority + " vs " + this.controller.name + " priority=" + this.controllerPriority);
          this.addSecondaryController(_newController, _priority);
          result = false;
       }

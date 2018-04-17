@@ -511,16 +511,7 @@
                   "uName": "building:dumgoyne",
                   "property": "low-light-kitchen"
                }
-            }, 
-            {  
-               "name": "night-time",
-               "initialValue": false,
-               "writable": false,
-               "source": {
-                  "uName": "thing:environment",
-                  "property": "night-time"
-               }
-            }
+            } 
          ],
          "things": [
             {

@@ -49,7 +49,8 @@ function Bedroom(_config) {
             {
                "name": "initial-reading-in-bed",
                "priority": 4,
-               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }],
+               "targets": [{ "property": "night-time", "value": true }]
             },
             {
                "name": "reading-in-bed",
@@ -63,21 +64,22 @@ function Bedroom(_config) {
             },
             {
                "name": "asleep-in-bed",
-               "priority": 5,
+               "priority": 4,
                "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
                             { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                             { "event": "wake-up-event", "nextState": "awake-in-bed"} ]
             },
             {
                "name": "waking-up-in-bed",
-               "priority": 101,
+               "priority": 4,
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
             },
             {
                "name": "awake-in-bed",
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
-               "priority": 101,
-               "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
+               "priority": 4,
+               "source": { "event": "wake-up-event", "nextState": "awake-in-bed" },
+               "targets": [{ "property": "night-time", "value": false }]
             }
          ]
       };
@@ -98,6 +100,7 @@ function Bedroom(_config) {
          }
       }
 
+      this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
