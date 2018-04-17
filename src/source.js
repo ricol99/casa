@@ -65,7 +65,7 @@ Source.prototype.getScheduleService = function() {
 
   if (!scheduleService) {
      console.error(this.uName + ": ***** Schedule service not found! *************");
-     process.exit(1);
+     process.exit(3);
    }
 
    return scheduleService;
@@ -88,7 +88,7 @@ Source.prototype.getRampService = function() {
 
   if (!rampService) {
      console.error(this.uName + ": ***** Ramp service not found! *************");
-     process.exit(1);
+     process.exit(3);
    }
 
    return rampService;

@@ -342,7 +342,7 @@ function State(_config, _owner) {
 
       if (!this.scheduleService) {
          console.error(this.uName + ": ***** Schedule service not found! *************");
-         process.exit(1);
+         process.exit(3);
       }
 
       // TBD XXX Currently ignoring return value. Should I use it to determine which state we are in mulitple schedules?
