@@ -20,58 +20,79 @@
    ],
    "things": [
       {
-         "uName": "bedroom:test-bedroom",
-         "displayName": "Test Bedroom",
-         "users": [
-            { "uName": "user:test-1" },
-            { "uName": "user:test-2" }
+         "uName": "tester:bedroom",
+         "displayName": "Test Bedroom Things with two users",
+         "sources": [
+            { "uName": "bedroom:test-bedroom", "property": "test-1-user-state" },
+            { "uName": "bedroom:test-bedroom", "property": "test-2-user-state" }
          ],
-         "readingInBedTimeout": 10,
-         "awakeInBedTimeout": 5,
-         "events": [],
-         "props": [
+         "testCases": [
             {
-               "name": "movement-pir",
-               "initialValue": false,
-               "writable": false,
-               "TYPE": "gpioproperty",
-               "gpioPin": 17,
-               "triggerLow": true,
-               "local": true
+               "name": "Normal - both going to bed slightly different times",
+               "driveSequence": [
+                  { "wait": 13, "event": "test-1-switch-event" },
+                  { "wait": 2, "event": "test-2-switch-event" },
+                  { "wait": 2, "event": "test-1-switch-event" },
+                  { "wait": 2, "event": "test-2-switch-event" },
+                  { "wait": 2, "event": "wake-up-event" }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+               ]
+            },
+            {
+               "name": "Normal - timed both going to bed after timer has lit the bedroom - simultaneous move to initial-reading-in-bed",
+               "driveSequence": [
+                  { "wait": 4, "event": "test-1-switch-event" },
+                  { "event": "test-2-switch-event" },
+                  { "wait": 2, "event": "test-1-switch-event" },
+                  { "wait": 2, "event": "test-2-switch-event" },
+                  { "wait": 2, "event": "wake-up-event" }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+               ]
             }
          ],
+         "props": [],
          "things": [
             {
-               "uName": "tester:bedroom",
-               "displayName": "Test Bedroom Things with two users",
-               "sources": [
-                  { "uName": "bedroom:test-bedroom", "property": "test-1-user-state" },
-                  { "uName": "bedroom:test-bedroom", "property": "test-2-user-state" }
+               "uName": "bedroom:test-bedroom",
+               "displayName": "Test Bedroom",
+               "users": [
+                  { "uName": "user:test-1" },
+                  { "uName": "user:test-2" }
                ],
-               "testCases": [
+               "readingInBedTimeout": 10,
+               "awakeInBedTimeout": 5,
+               "events": [],
+               "props": [
                   {
-                     "name": "Normal both going to bed",
-                     "driveSequence": [
-                        { "wait": 13, "event": "test-1-switch-event" },
-                        { "wait": 2, "event": "test-2-switch-event" },
-                        { "wait": 2, "event": "test-1-switch-event" },
-                        { "wait": 2, "event": "test-2-switch-event" },
-                        { "wait": 2, "event": "wake-up-event" }
-                     ],
-                     "expectedSequence": [
-                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
-                     ]
+                     "name": "movement-pir",
+                     "initialValue": false,
+                     "writable": false,
+                     "TYPE": "gpioproperty",
+                     "gpioPin": 17,
+                     "triggerLow": true,
+                     "local": true
                   }
-               ],
-               "props": []
+               ]
             }
          ]
       }

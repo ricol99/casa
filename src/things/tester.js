@@ -69,9 +69,7 @@ Tester.prototype.runTestStep = function() {
       this.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
    }
 
-   setTimeout( () => {
-      this.initiateNextTestStep();
-   }, 1);
+   this.initiateNextTestStep();
 };
 
 Tester.prototype.sourceIsInvalid = function(_data) {
@@ -102,6 +100,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
 
          if (++this.currentTestCase < this.testCases.length) {
             this.currentTestStep = 0;
+            this.expectedPosition = 0;
             this.initiateTestStep();
          }
          else {
