@@ -322,7 +322,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -396,7 +396,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -538,7 +538,7 @@
                            "type": "stateproperty",
                            "states": [
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
@@ -559,7 +559,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
@@ -630,7 +630,7 @@
                            "type": "stateproperty",
                            "states": [
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
@@ -651,7 +651,7 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "intial-reading-in-bed",
+                                 "name": "initial-reading-in-bed",
                                  "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
@@ -763,6 +763,13 @@
                            "initialValue": "not-present",
                            "states": [
                               {
+                                 "name": "initial-reading-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
+                              {
                                  "name": "reading-in-bed",
                                  "priority": 3,
                                  "targets": [
@@ -804,6 +811,13 @@
                            "type": "stateproperty",
                            "initialValue": "not-present",
                            "states": [
+                              {
+                                 "name": "initial-reading-in-bed",
+                                 "priority": 3,
+                                 "targets": [
+                                    { "property": "power", "value": false }
+                                 ]
+                              },
                               {
                                  "name": "reading-in-bed",
                                  "priority": 3,
