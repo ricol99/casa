@@ -106,6 +106,7 @@
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
+                  { "wait": 0.5, "event": "pre-wake-up-event" },
                   { "wait": 0.5, "event": "wake-up-event" },
                   { "wait": 3, "property": "low-light", "value": false }
                ],
@@ -118,6 +119,8 @@
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-morning" },
@@ -127,7 +130,7 @@
                ]
             },
             {
-               "name": "5) Same as TC4 but with low-light happening before wake-up call",
+               "name": "5) Same as TC4 but with low-light happening before pre-wake-up call",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
                   { "wait": 0.5, "property": "movement-pir", "value": true },
@@ -136,7 +139,8 @@
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 3, "property": "low-light", "value": false },
+                  { "wait": 1, "property": "low-light", "value": false },
+                  { "wait": 0.5, "event": "pre-wake-up-event" },
                   { "wait": 0.5, "event": "wake-up-event" }
                ],
                "expectedSequence": [
@@ -148,6 +152,73 @@
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+               ]
+            },
+            {
+               "name": "6) Same as TC4 but with low-light happening during awake-in-bed state",
+               "driveSequence": [
+                  { "wait": 1, "property": "low-light", "value": true },
+                  { "wait": 0.5, "property": "movement-pir", "value": true },
+                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 1, "event": "test-1-switch-event" },
+                  { "wait": 0.5, "event": "test-1-switch-event" },
+                  { "wait": 0.5, "event": "room-switch-event" },
+                  { "wait": 0.5, "event": "test-2-switch-event" },
+                  { "wait": 0.5, "event": "pre-wake-up-event" },
+                  { "wait": 0.5, "event": "wake-up-event" },
+                  { "wait": 0.2, "property": "low-light", "value": false }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-morning" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+               ]
+            },
+            {
+               "name": "7) Same as TC4 but with low-light happening during waking-up-in-bed state",
+               "driveSequence": [
+                  { "wait": 1, "property": "low-light", "value": true },
+                  { "wait": 0.5, "property": "movement-pir", "value": true },
+                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 1, "event": "test-1-switch-event" },
+                  { "wait": 0.5, "event": "test-1-switch-event" },
+                  { "wait": 0.5, "event": "room-switch-event" },
+                  { "wait": 0.5, "event": "test-2-switch-event" },
+                  { "wait": 0.5, "event": "pre-wake-up-event" },
+                  { "wait": 0.5, "property": "low-light", "value": false },
+                  { "wait": 0.5, "event": "wake-up-event" }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
@@ -166,7 +237,7 @@
                   { "uName": "user:test-2" }
                ],
                "readingInBedTimeout": 10,
-               "awakeInBedTimeout": 3,
+               "awakeInBedTimeout": 1,
                "movementTimeout": 2,
                "events": [],
                "props": [
