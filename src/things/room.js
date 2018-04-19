@@ -50,14 +50,14 @@ function Room(_config) {
    }
 
    if (!nameExists(this.roomStateConfig.states, "no-users-present-evening")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-evening", "priority": 2,
+      this.roomStateConfig.states.push({ "name": "no-users-present-evening",
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-evening" },
                                                      { "property": "night-time", "value": true, "nextState": "no-users-present-night" },
                                                      { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "users-present-evening")) {
-      this.roomStateConfig.states.push({ "name": "users-present-evening", "priority": 3,
+      this.roomStateConfig.states.push({ "name": "users-present-evening",
                                          "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-evening" },
                                          "sources": [ { "property": "low-light", "value": false, "nextState": "users-present-day" },
                                                       { "property": "night-time", "value": true, "nextState": "users-present-night" },
@@ -65,26 +65,26 @@ function Room(_config) {
    }
 
    if (!nameExists(this.roomStateConfig.states, "no-users-present-night")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-night", "priority": 2,
+      this.roomStateConfig.states.push({ "name": "no-users-present-night",
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-night" },
                                                      { "property": "night-time", "value": false, "nextState": "no-users-present-morning" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "users-present-night")) {
-      this.roomStateConfig.states.push({ "name": "users-present-night", "priority": 3,
+      this.roomStateConfig.states.push({ "name": "users-present-night",
                                          "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-night" },
                                          "sources": [ { "property": "night-time", "value": false, "nextState": "users-present-morning" },
                                                       { "property": "movement-pir", "value": true, "nextState": "users-present-night" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "no-users-present-morning")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-morning", "priority": 2,
+      this.roomStateConfig.states.push({ "name": "no-users-present-morning",
                                          "sources": [{ "property": "movement-pir", "value": true, "nextState": "users-present-morning" },
                                                      { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "users-present-morning")) {
-      this.roomStateConfig.states.push({ "name": "users-present-morning", "priority": 3,
+      this.roomStateConfig.states.push({ "name": "users-present-morning",
                                          "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-night" },
                                          "sources": [ { "property": "movement-pir", "value": true, "nextState": "users-present-morning" },
                                                       { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
