@@ -323,6 +323,7 @@
                               },
                               {
                                  "name": "initial-reading-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -332,6 +333,7 @@
                               },
                               {
                                  "name": "reading-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
@@ -341,6 +343,7 @@
                               },
                               {
                                  "name": "reading-in-bed-others-asleep",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
@@ -350,6 +353,7 @@
                               },
                               {
                                  "name": "asleep-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
@@ -359,7 +363,7 @@
                               },
                               {
                                  "name": "waking-up-in-bed",
-                                 "priority": 2,
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
@@ -369,6 +373,7 @@
                               },
                               {
                                  "name": "awake-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
@@ -397,6 +402,7 @@
                               },
                               {
                                  "name": "initial-reading-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
@@ -406,6 +412,7 @@
                               },
                               {
                                  "name": "reading-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
@@ -415,6 +422,7 @@
                               },
                               {
                                  "name": "reading-in-bed-others-asleep",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
@@ -424,13 +432,14 @@
                               },
                               {
                                  "name": "asleep-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "power", "value": false }
                                  ]
                               },
                               {
                                  "name": "waking-up-in-bed",
-                                 "priority": 2,
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
@@ -440,6 +449,7 @@
                               },
                               {
                                  "name": "awake-in-bed",
+                                 "priority": 4,
                                  "targets": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
@@ -736,6 +746,40 @@
                      "propogateToParent": false,
                      "props": [
                         {
+                           "name": "richard-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "DEFAULT",
+                                 "priority": 4,
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "not-present",
+                                 "priority": 0,
+                                 "targets": [{ "property": "power", "value": false }]
+                              }
+                           ]
+                        },
+                        {
+                           "name": "natalie-user-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-present",
+                           "states": [
+                              {
+                                 "name": "DEFAULT",
+                                 "priority": 4,
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "not-present",
+                                 "priority": 0,
+                                 "targets": [{ "property": "power", "value": false }]
+                              }
+                           ]
+                        },
+                        {
                            "name": "room-state",
                            "type": "stateproperty",
                            "initialValue": "no-users-present-day",
@@ -754,7 +798,7 @@
                               },
                               {
                                  "name": "users-present-evening",
-                                 "priority": 1,
+                                 "priority": 4,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
@@ -771,42 +815,8 @@
                               },
                               {
                                  "name": "users-present-morning",
-                                 "priority": 1,
+                                 "priority": 4,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
-                              }
-                           ]
-                        },
-                        {
-                           "name": "richard-user-state",
-                           "type": "stateproperty",
-                           "initialValue": "not-present",
-                           "states": [
-                              {
-                                 "name": "DEFAULT",
-                                 "priority": 3,
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "not-present",
-                                 "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
-                              }
-                           ]
-                        },
-                        {
-                           "name": "natalie-user-state",
-                           "type": "stateproperty",
-                           "initialValue": "not-present",
-                           "states": [
-                              {
-                                 "name": "DEFAULT",
-                                 "priority": 3,
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "not-present",
-                                 "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
                               }
                            ]
                         }
