@@ -7,8 +7,9 @@ var optionDefinitions = [
   { name: 'secure', type: Boolean },
   { name: 'certs', type: String },
   { name: 'config', type: String },
+  { name: 'logs', type: String },
   { name: 'nopeer', type: Boolean },
-  { name: 'noparent', type: Boolean }
+  { name: 'noparent', type: Boolean },
 ]
 
 var options = commandLineArgs(optionDefinitions)
@@ -18,7 +19,6 @@ if (options.casa == undefined) {
    process.exit(1);
 }
 
-require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, { log: true, info: true, error: true });
 
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var connectToParent = (options.noparent == undefined) ? true : !options.noparent;
@@ -26,6 +26,9 @@ var secureMode = (options.secure == undefined) ? false : options.secure;
 var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : checkPath(options.certs);
 var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : checkPath(options.config);
 var casaName = options.casa;
+var logs = (options.logs == undefined) ? { log: true, info: true, error: true} : { log: (options.logs == "log"), info: ((options.logs == "info") || (options.logs == "log")), error: true };
+
+require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 
 Gang = require('./gang');
 var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version);
