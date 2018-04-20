@@ -18,7 +18,6 @@ var Room = require('./room');
 // awake-in-bed - wake up event has happened
 
 function Bedroom(_config) {
-
    Room.call(this, _config);
 
    if (_config.hasOwnProperty('user')) {

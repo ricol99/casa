@@ -43,7 +43,8 @@ Tester.prototype.initiateTestStep = function(_cold) {
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("wait")) {
 
-      setTimeout( () => {
+      this.timeout = setTimeout( () => {
+         this.timeout = null;
          this.runTestStep();
       }, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].wait * 1000);
    }
@@ -53,8 +54,8 @@ Tester.prototype.initiateTestStep = function(_cold) {
 };
 
 Tester.prototype.initiateNextTestStep = function() {
-
-   if (++this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length) {
+   if (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1) {
+      ++this.currentTestStep;
       this.initiateTestStep();
    }
 };
@@ -88,14 +89,22 @@ Tester.prototype.receivedEventFromSource = function(_data) {
           (_data.name === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].property) &&
           (_data.value === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].value)) {
 
-         console.info(this.uName + ": STEP " + (this.expectedPosition + 1) + " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
+         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
+                      " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
-         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) + " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
+         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
+                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);
       }
 
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
+
+         if ((this.timeout) || (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
+            console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete");
+            process.exit(5);
+         }
+
          console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED");
 
          if (++this.currentTestCase < this.testCases.length) {

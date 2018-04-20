@@ -5,6 +5,7 @@ var Thing = require('../thing');
 // movement-pir - true when there is movement detected
 // low-light - true when light levels are low enough to switch on lights
 // night-time - true when head to bed and no longer want any background lights
+// room-switch-event - room entrance switch
 
 // Resulting room-state (s)
 // no-users-present - no movement detected
@@ -19,6 +20,7 @@ var Thing = require('../thing');
 function Room(_config) {
    Thing.call(this, _config);
    this.thingType = "room";
+   this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
 
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
 
@@ -91,6 +93,11 @@ function Room(_config) {
    }
 
    this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
+
+   this.ensurePropertyExists('user-override-state', 'stateproperty', { initialValue: 'not-active',
+                                                                       states: [{ name: "not-active", source: { event: "room-switch-event", nextState: "active" }},
+                                                                                { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
+                                                                                  timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]}, _config);
 }
 
 util.inherits(Room, Thing);
