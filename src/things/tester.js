@@ -91,7 +91,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          console.info(this.uName + ": STEP " + (this.expectedPosition + 1) + " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
-         console.error(this.uName + ": STEP " + (this.expectedPosition + 1) + " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
+         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) + " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);
       }
 

@@ -40,6 +40,7 @@ function Bedroom(_config) {
          "name": this.users[i].sName+"-user-state",
          "type": "stateproperty",
          "initialValue": "not-present",
+         "ignoreControl": true,
          "states": [
             {
                "name": "not-present",
@@ -48,36 +49,30 @@ function Bedroom(_config) {
             },
             {
                "name": "initial-reading-in-bed",
-               "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }],
                "targets": [{ "property": "night-time", "value": true }]
             },
             {
                "name": "reading-in-bed",
-               "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "reading-in-bed-others-asleep",
-               "priority": 4,
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
                "name": "asleep-in-bed",
-               "priority": 4,
                "sources": [ { "event": this.users[i].sName+"-switch-event", "nextState": "reading-in-bed" },
                             { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                             { "event": "wake-up-event", "nextState": "awake-in-bed"} ]
             },
             {
                "name": "waking-up-in-bed",
-               "priority": 4,
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
             },
             {
                "name": "awake-in-bed",
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
-               "priority": 4,
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" },
                "targets": [{ "property": "night-time", "value": false }]
             }
@@ -109,6 +104,5 @@ function Bedroom(_config) {
 }
 
 util.inherits(Bedroom, Room);
-
 
 module.exports = exports = Bedroom;
