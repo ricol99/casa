@@ -365,7 +365,7 @@
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
                                  "targets": [
-                                    { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
+                                    { "property": "brightness", "ramp": { "startValue": 2, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
                                     { "property": "power", "value": true }
