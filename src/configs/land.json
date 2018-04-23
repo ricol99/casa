@@ -165,33 +165,12 @@
                      "initialValue": "no-users-present-day",
                      "states": [
                         {
-                           "name": "no-users-present-day",
-                           "targets": [{ "property": "power", "value": false }]
-                        },
-                        {
-                           "name": "users-present-day",
-                           "targets": [{ "property": "power", "value": false }]
-                        },
-                        {
-                           "name": "no-users-present-evening",
+                           "name": "DEFAULT",
                            "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "users-present-evening",
-                           "priority": 2,
                            "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
-                        },
-                        {
-                           "name": "no-users-present-night",
-                           "targets": [{ "property": "power", "value": false }]
-                        },
-                        {
-                           "name": "users-present-night",
-                           "targets": [{ "property": "power", "value": false }]
-                        },
-                        {
-                           "name": "no-users-present-morning",
-                           "targets": [{ "property": "power", "value": false }]
                         },
                         {
                            "name": "users-present-morning",
@@ -785,33 +764,13 @@
                            "initialValue": "no-users-present-day",
                            "states": [
                               {
-                                 "name": "no-users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "no-users-present-evening",
+                                 "name": "DEFAULT",
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-evening",
                                  "priority": 4,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
-                              },
-                              {
-                                 "name": "no-users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "no-users-present-morning",
-                                 "targets": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-morning",
