@@ -136,10 +136,12 @@
                "type": "scheduleproperty",
                "events": [
                   {
+                     "name": "daybreak",
                      "rule": "sunrise:-600",
                      "value": true
                   },
                   {
+                     "name": "sundown",
                      "rule": "sunset:+600",
                      "value": false
                   }

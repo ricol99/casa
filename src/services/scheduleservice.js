@@ -253,7 +253,7 @@ Schedule.prototype.setSunTimes = function(_sunTimes) {
 
          if ((typeof this.events[index].rules[rindex].original == 'string') && _sunTimes[this.events[index].rules[rindex].original]) {
             console.log(this.uName + ': Rule ' + this.events[index].rules[rindex].original + ' is a sun time');
-            this.events[index].rules[rindex].rule = new Date(_sunTimes[this.events[index].originalRule]);
+            this.events[index].rules[rindex].rule = new Date(_sunTimes[this.events[index].rules[rindex].original]);
             this.events[index].rules[rindex].rule.setTime(this.events[index].rules[rindex].rule.getTime() + (this.events[index].rules[rindex].delta * 1000));
             this.events[index].rules[rindex].sunTime = true;
             console.log(this.uName + ': Sun time ' + this.events[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.events[index].rules[rindex].rule);
