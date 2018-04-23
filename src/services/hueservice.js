@@ -161,7 +161,7 @@ HueService.prototype.makeNextRequest = function() {
    if ((this.queue.length > 0) && !this.requestPending) {
       this.requestPending = true;
 
-      this.queue[0].send( (_error, _result) => {
+      this.queue[0].send( (_owner, _error, _result) => {
          console.log(this.uName + ': Request done! Error='+_error);
          this.queue[0].complete(_error, _result);
          delete this.queue.shift();
