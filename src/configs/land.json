@@ -518,8 +518,8 @@
                "initialValue": false,
                "writable": false,
                "source": {
-                  "uName": "building:dumgoyne",
-                  "property": "low-light-kitchen"
+                  "uName": "thing:environment",
+                  "property": "low-light"
                }
             } 
          ],

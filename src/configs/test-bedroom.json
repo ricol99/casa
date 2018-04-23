@@ -355,6 +355,40 @@
                   { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
+            },
+            {
+               "name": "8) Same as TC3 - timed both going to bed after timer has lit the bedroom - wait for timeout",
+               "driveSequence": [
+                  { "wait": 1, "event": "test-1-switch-event" },
+                  { "event": "test-2-switch-event" },
+                  { "wait": 6.0, "event": "wake-up-event" }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+               ]
             }
          ],
          "props": [],
@@ -366,7 +400,7 @@
                   { "uName": "user:test-1" },
                   { "uName": "user:test-2" }
                ],
-               "readingInBedTimeout": 10,
+               "readingInBedTimeout": 4,
                "awakeInBedTimeout": 1,
                "movementTimeout": 2,
                "events": [],

@@ -90,7 +90,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
    if (_state.hasOwnProperty('timeout')) {
 
-      if (_state.timeout.inheritsFrom[this.states[this.value]]) {
+      if (_state.timeout.inheritsFrom[this.states[this.value].name]) {
 
          if (_timeoutDuration == undefined) {
 
@@ -179,8 +179,9 @@ StateProperty.prototype.setState = function(_nextStateName) {
       // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
       // We should call the timeout code straight away in the current state, not reset the timer and enter the new state
       console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, call the timeout code manually");
-      setTimeout(StateProperty.prototype.timeoutInternal.bind(this), 1, this.states[this.value].timeout.nextState);
-      return;
+      //setTimeout(StateProperty.prototype.timeoutInternal.bind(this), 1, this.states[this.value].timeout.nextState);
+      //return;
+      clearTimerResult.timeLeft = 1;
    }
 
    if (!this.cold) {
