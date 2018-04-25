@@ -1,0 +1,111 @@
+{
+   "casa": {
+      "uName": "casa:test-stateproperty",
+      "displayName": "Casa Collin Test State Property",
+      "gang": "gang:collin-test",
+      "listeningPort": 8085
+   },
+   "services": [],
+   "scenes": [],
+   "things": [
+      {
+         "uName": "tester:stateproperty",
+         "displayName": "Test property:stateproperty",
+         "sources": [
+            { "uName": "thing:test-thing", "property": "test-state-1" }
+         ],
+         "testCases": [
+            {
+               "name": "1) Normal - Test basic transition on event and timeout based transition ",
+               "driveSequence": [
+                  { "wait": 5, "event": "start-test" },
+                  { "wait": 6, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "2) Normal - Test basic transition on event and timeout based transition with intermediate inherited timer ",
+               "driveSequence": [
+                  { "wait": 2, "event": "start-test" },
+                  { "wait": 3, "event": "jump-to-timer-inherited-state" },
+                  { "wait": 3, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-timer-inherited-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "3) Normal - Test basic transition on event and timeout based transition with intermediate non-inherited timer ",
+               "driveSequence": [
+                  { "wait": 2, "event": "start-test" },
+                  { "wait": 3, "event": "jump-to-timer-non-inherited-state" },
+                  { "wait": 6, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-timer-non-inherited-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            }
+         ],
+         "props": [],
+         "things": [
+            {
+               "uName": "thing:test-thing",
+               "displayName": "Test thing",
+               "events": [],
+               "props": [
+                  {
+                     "name": "test-prop-1",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "test-prop-2",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "test-state-1",
+                     "type": "stateproperty",
+                     "initialValue": "test-idle-state",
+                     "states": [
+                        {
+                           "name": "test-idle-state",
+                           "sources": [{ "event": "start-test", "nextState": "test-started" }]
+                        },
+                        {
+                           "name": "test-started",
+                           "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
+                           "sources": [{ "event": "jump-to-timer-inherited-state", "nextState": "test-timer-inherited-state" },
+                                       { "event": "jump-to-timer-non-inherited-state", "nextState": "test-timer-non-inherited-state" }]
+                        },
+                        {
+                           "name": "test-timer-inherited-state",
+                           "timeout": { "from": ["test-started"], "duration": 6, "nextState": "test-timed-out-state" },
+                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                        },
+                        {
+                           "name": "test-timer-non-inherited-state",
+                           "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
+                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                        },
+                        {
+                           "name": "test-timed-out-state",
+                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                        }
+                     ]
+                  }
+               ],
+               "things": []
+            }
+         ]
+      }
+   ]
+}

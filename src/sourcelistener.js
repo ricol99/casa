@@ -39,7 +39,6 @@ function SourceListener(_config, _owner) {
    }
 
    this.sourceEventName = this.sourceName + ":" + this.eventName;
-   console.log('AAAAAAAAAAAAA '+ _owner.uName + " - " + this.sourceName + " - " + this.eventName);
    this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceName + ":" + this.eventName;
 
    this._id = this.uName;   // *** TBD

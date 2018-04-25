@@ -40,6 +40,7 @@ Tester.prototype.coldStart = function() {
 };
 
 Tester.prototype.initiateTestStep = function(_cold) {
+   console.log("initiateTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("wait")) {
 
@@ -54,6 +55,8 @@ Tester.prototype.initiateTestStep = function(_cold) {
 };
 
 Tester.prototype.initiateNextTestStep = function() {
+   console.log("initiateNextTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
+
    if (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1) {
       ++this.currentTestStep;
       this.initiateTestStep();
@@ -61,6 +64,8 @@ Tester.prototype.initiateNextTestStep = function() {
 };
 
 Tester.prototype.runTestStep = function() {
+   console.log("runTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
+   var tc = this.currentTestCase;
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("event")) {
       this.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].event);
@@ -70,7 +75,9 @@ Tester.prototype.runTestStep = function() {
       this.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
    }
 
-   this.initiateNextTestStep();
+   if (tc == this.currentTestCase) {
+      this.initiateNextTestStep();
+   }
 };
 
 Tester.prototype.sourceIsInvalid = function(_data) {
