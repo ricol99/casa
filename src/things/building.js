@@ -46,12 +46,10 @@ function Building(_config) {
             },
             {
                "name": "present",
-               "priority": 101,
                "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
             },
             {
                "name": "in-bed",
-               "priority": 101,
                "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
             }
          ]
@@ -66,6 +64,7 @@ function Building(_config) {
          }
       }
 
+      this.ensurePropertyExists(this.users[i].sName+"-present", 'property', { name: this.users[i].sName+"-present", initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
 
@@ -74,7 +73,7 @@ function Building(_config) {
       someUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"in-bed\"" });
    }
 
-   allUsersInBedConfig.sources.push({ "property": "all-users-away", "transform": "!$value" });
+   allUsersInBedConfig.sources.push({ "property": "some-users-in-bed" });
 
    this.ensurePropertyExists("all-users-away", 'andproperty', allUsersAwayConfig, _config);
    this.ensurePropertyExists("all-users-in-bed", 'andproperty', allUsersInBedConfig, _config);
@@ -87,8 +86,11 @@ function Building(_config) {
                                                                              { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-going-to-bed", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
                                            source: { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }},
-                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-awake" },
-                                                                              { property: "all-users-away", value: true, nextState: "empty" }] }]}, _config);
+                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-waking-up" },
+                                                                              { property: "all-users-away", value: true, nextState: "empty" }] },
+                                         { name: "occupied-waking-up", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-awake" },
+                                           sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
+                                                     { property: "all-users-away", value: true, nextState: "empty" }] }]}, _config);
 
    this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", transform: "$value===\"occupied-asleep\"" }}, _config);
 }

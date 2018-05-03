@@ -66,13 +66,18 @@ Tester.prototype.initiateNextTestStep = function() {
 Tester.prototype.runTestStep = function() {
    console.log("runTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
    var tc = this.currentTestCase;
+   var target = this;
+
+   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("target")) {
+      target = this.gang.findSource(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].target);
+   }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("event")) {
-      this.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].event);
+      target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].event);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("property")) {
-      this.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
+      target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
    }
 
    if (tc == this.currentTestCase) {

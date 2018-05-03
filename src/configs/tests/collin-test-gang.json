@@ -22,6 +22,11 @@
          "props": []
       },
       {
+         "uName": "user:test-3",
+         "displayName": "Test 3",
+         "props": []
+      },
+      {
          "uName": "usergroup:family",
          "displayName": "Test Family",
          "users": [
