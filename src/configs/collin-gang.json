@@ -178,6 +178,10 @@
                "type": "topvalidproperty",
                "sources": [
                   {
+                     "uName": "building:dumgoyne",
+                     "property": "night-time"
+                  },
+                  {
                      "uName": "thing:timed-environment",
                      "property": "night-time"
                   }

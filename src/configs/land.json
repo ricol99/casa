@@ -203,7 +203,6 @@
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,
          "events": [
-            { "name": "dylan-switch-event", "rules": [ "30 21 * * 0-4", "00 23 * * 5-6" ]},
             { "name": "pre-wake-up-event", "rules": [ "45 6 * * 1-5", "00 9 * * 1-5" ]},
             { "name": "wake-up-event", "rules": [ "15 7 * * 1-5", "30 9 * * 0,6" ]}
          ],
@@ -454,8 +453,6 @@
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,
          "events": [
-            { "name": "natalie-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
-            { "name": "richard-switch-event", "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ]},
             { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "00 8 * * 0,6" ]},
             { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "30 8 * * 0,6" ]}
          ],
