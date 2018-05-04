@@ -33,6 +33,9 @@ function Bedroom(_config) {
       this.users.push(this.gang.findSource(_config.users[u].uName));
    }
 
+   this.bedStatusConfig = { name: "bed-state" , initialState: "empty" };
+   this.bedFullConfig = { initialState: false, sources: [] };
+
    for (var i = 0; i < _config.users.length; ++i) {
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
@@ -94,12 +97,17 @@ function Bedroom(_config) {
          }
       }
 
-      this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" }},  _config);
+
+      this.bedFullConfig.sources.push({ property: this.users[i].sName+"-in-bed" });
    }
+
+   this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
+   this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
+   this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
 }
 
 util.inherits(Bedroom, Room);

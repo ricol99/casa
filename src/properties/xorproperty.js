@@ -24,7 +24,7 @@ XorProperty.prototype.calculateOutputValue = function() {
    // all inputs active
    for (var prop in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners[prop].isValid() && this.sourceListeners.[prop].sourcePropertyValue) {
+      if (this.sourceListeners.hasOwnProperty(prop) && this.sourceListeners[prop] && this.sourceListeners[prop].isValid() && this.sourceListeners[prop].sourcePropertyValue) {
          oneInputActive = true;
       }
       else {
@@ -32,10 +32,10 @@ XorProperty.prototype.calculateOutputValue = function() {
       }
    }
 
-   return allInputsActive ? false : oneInputActive);
+   return allInputsActive ? false : oneInputActive;
 };
 
-OrProperty.prototype.amIValid = function() {
+XorProperty.prototype.amIValid = function() {
 
    var ret = Property.prototype.amIValid.call(this);
 
