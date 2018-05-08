@@ -453,8 +453,8 @@
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 900,
          "events": [
-            { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "00 8 * * 0,6" ]},
-            { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "30 8 * * 0,6" ]}
+            { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "30 7 * * 0,6" ]},
+            { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "00 8 * * 0,6" ]}
          ],
          "props": [
             {

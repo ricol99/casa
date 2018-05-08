@@ -107,7 +107,7 @@ function Bedroom(_config) {
 
    this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
-   this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists("night-time", 'scheduleproperty', { initialValue: false, events: [ { rule: "05 02 * * *", value: true } ]}, _config);
 }
 
 util.inherits(Bedroom, Room);
