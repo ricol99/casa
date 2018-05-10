@@ -96,16 +96,12 @@ Thing.prototype.setProperty = function(_propName, _propValue, _data) {
 
    var ret = Source.prototype.setProperty.call(this, _propName, _propValue, _data);
 
-   if (!ret) {
+   for (var thing in this.things) {
 
-      for (var thing in this.things) {
+      if (this.things.hasOwnProperty(thing)) {
 
-         if (this.things.hasOwnProperty(thing)) {
-
-            if (this.things[thing].setProperty(_propName, _propValue, _data)) {
-               ret = true;
-               break;
-            }
+         if (this.things[thing].setProperty(_propName, _propValue, _data)) {
+            ret = true;
          }
       }
    }

@@ -134,10 +134,8 @@ StateProperty.prototype.transformNextState = function(_nextState) {
    var nextState = _nextState;
    var immediateState = null;
 
-   switch (_nextState) {
-      case "PREVIOUS-STATE":
-         nextState = this.previousState;
-         break;
+   if (_nextState === "PREVIOUS-STATE") {
+      nextState = this.previousState;
    }
 
    if (this.states[nextState]) {
