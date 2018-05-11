@@ -30,7 +30,16 @@ function Tester(_config) {
       this.constructing = false;
    }
 
-   this.testCases = _config.testCases;
+   if (_config.hasOwnProperty("testRun")) {
+      this.testCases = [];
+
+      for (var i = 0; i < _config.testRun.length; ++i) {
+         this.testCases.push(_config.testCases[_config.testRun[i]]);
+      }
+   }
+   else {
+      this.testCases = _config.testCases;
+   }
 }
 
 util.inherits(Tester, Thing);
@@ -100,11 +109,11 @@ Tester.prototype.receivedEventFromSource = function(_data) {
           (_data.name === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].property) &&
           (_data.value === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].value)) {
 
-         console.info(this.uName + ": TC"+ (this.testCases.length - this.currentTestCase) + " STEP " + (this.expectedPosition + 1) +
+         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
-         console.error(this.uName + ": TC"+ (this.testCases.length - this.currentTestCase) + " STEP " + (this.expectedPosition + 1) +
+         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);
       }
@@ -112,11 +121,11 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
 
          if ((this.timeout) || (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
-            console.info(this.uName + ": TEST CASE " + (this.testCases.length - this.currentTestCase) + " FAILED as all expected events have occurred but drive sequence not complete");
+            console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete");
             process.exit(5);
          }
 
-         console.info(this.uName + ": TEST CASE " + (this.testCases.length - this.currentTestCase) + " PASSED");
+         console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED");
 
          if (++this.currentTestCase < this.testCases.length) {
             this.currentTestStep = 0;
