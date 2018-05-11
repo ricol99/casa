@@ -113,14 +113,14 @@ function Building(_config) {
    if (_config.hasOwnProperty('bedrooms')) {
          
       for (var j = 0; j < _config.bedrooms.length; ++j) {
-         movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement-pir" });
+         movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement" });
       }
    }
 
    if (_config.hasOwnProperty('rooms')) {
          
       for (var r = 0; r < _config.rooms.length; ++r) {
-         movementConfig.sources.push({ "uName": _config.rooms[r].uName, "property": "movement-pir" });
+         movementConfig.sources.push({ "uName": _config.rooms[r].uName, "property": "movement" });
       }
    }
 
@@ -194,7 +194,7 @@ function Building(_config) {
          },
          {
             "name": "zone-alarm",
-            "sources": [{ "property": "zone-armed", "value": false, "nextState": "not-armed" },
+            "sources": [{ "property": "zone-alarm", "value": false, "nextState": "not-armed" },
                         { "property": "confirmed-alarm", "value": true, "nextState": "confirmed-alarm" },
                         { "property": "fire-alarm", "value": true, "nextState": "fire-alarm" }],
          },

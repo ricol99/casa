@@ -2,7 +2,7 @@ var util = require('util');
 var Room = require('./room');
 
 // Please define properties for automated functionality
-// movement-pir - true when there is movement detected (room.js)
+// movement - true when there is movement detected (room.js)
 // low-light - true when light levels are low enough to switch on lights (room.js)
 // pre-wake-up-event - event indicating wake up start up sequence (e.g. sunrise ramp)
 // wake-up-event - event indicating wake up alarm call

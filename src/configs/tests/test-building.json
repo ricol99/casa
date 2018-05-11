@@ -20,28 +20,86 @@
             { "uName": "building:test", "property": "some-users-in-bed" },
             { "uName": "building:test", "property": "users-state" },
             { "uName": "building:test", "property": "night-time" },
-            { "uName": "bedroom:test-1", "property": "test-1-user-state" },
-            { "uName": "bedroom:test-1", "property": "test-2-user-state" },
-            { "uName": "bedroom:test-1", "property": "room-state" },
-            { "uName": "bedroom:test-2", "property": "test-3-user-state" },
-            { "uName": "bedroom:test-2", "property": "room-state" },
             { "uName": "building:test", "property": "alarm-state" },
             { "uName": "building:test", "property": "movement" }
          ],
          "testCases": [
+            {
+               "name": "6) Normal - Fire alarm in all states",
+               "driveSequence": [
+                  { "wait": 3.0, "property": "fire-alarm", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": false },
+                  { "wait": 0.5, "property": "stay-armed", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": false },
+                  { "wait": 1, "target": "bedroom:test-1", "property": "movement", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": true },
+                  { "wait": 2, "target": "bedroom:test-1", "property": "movement", "value": false },
+                  { "wait": 0.5, "property": "fire-alarm", "value": false },
+                  { "wait": 0.5, "property": "stay-armed", "value": false },
+                  { "wait": 3, "property": "test-1-present", "value": true },
+                  { "wait": 0.5, "property": "test-2-present", "value": true },
+                  { "wait": 0.5, "property": "test-3-present", "value": true },
+                  { "wait": 0.5, "property": "stay-armed", "value": true },
+                  { "wait": 3.5, "property": "fire-alarm", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": false },
+                  { "wait": 3.5, "property": "zone-alarm", "value": "true" },
+                  { "wait": 0.5, "property": "fire-alarm", "value": true },
+                  { "wait": 0.5, "property": "fire-alarm", "value": false },
+                  { "wait": 0.5, "property": "zone-alarm", "value": "false" },
+                  { "wait": 0.5, "property": "stay-armed", "value": false },
+                  { "wait": 1, "property": "test-1-present", "value": false },
+                  { "wait": 0.5, "property": "test-2-present", "value": false },
+                  { "wait": 0.5, "property": "test-3-present", "value": false }
+               ],
+               "expectedSequence": [
+                  { "source": "building:test", "property": "users-state", "value": "empty" },
+                  { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },
+                  { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },
+                  { "source": "building:test", "property": "movement", "value": true },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-animals-present" },
+                  { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "movement", "value": false },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },
+                  { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
+                  { "source": "building:test", "property": "test-1-user-state", "value": "present" },
+                  { "source": "building:test", "property": "all-users-away", "value": false },
+                  { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
+                  { "source": "building:test", "property": "test-2-user-state", "value": "present" },
+                  { "source": "building:test", "property": "test-3-user-state", "value": "present" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-occupied" },
+                  { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-occupied" },
+                  { "source": "building:test", "property": "alarm-state", "value": "zone-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed" },
+                  { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
+                  { "source": "building:test", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "building:test", "property": "test-2-user-state", "value": "not-present" },
+                  { "source": "building:test", "property": "test-3-user-state", "value": "not-present" },
+                  { "source": "building:test", "property": "all-users-away", "value": true }
+               ]
+            },
             {
                "name": "5) Normal - Arm the alarm for stay and have people present, they then leave, movement detected so dogs at home",
                "driveSequence": [
                   { "wait": 3, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
-                  { "wait": 0.5, "property": "stay-armed", "value": "true" },
-                  { "wait": 1, "property": "test-1-present", "value": false },
+                  { "wait": 0.5, "property": "stay-armed", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false },
                   { "wait": 0.5, "property": "test-3-present", "value": false },
-                  { "wait": 2, "property": "movement-pir", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": false },
-                  { "wait": 0.5, "property": "stay-armed", "value": "false" }
+                  { "wait": 2, "target": "bedroom:test-1", "property": "movement", "value": true },
+                  { "wait": 1.5, "target": "bedroom:test-1", "property": "movement", "value": false },
+                  { "wait": 0.5, "property": "zone-alarm", "value": "true" },
+                  { "wait": 1.5, "property": "zone-alarm", "value": "false" },
+                  { "wait": 1.5, "property": "stay-armed", "value": "false" }
                ],
                "expectedSequence": [
                   { "source": "building:test", "property": "users-state", "value": "empty" },
@@ -59,12 +117,10 @@
                   { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },
                   { "source": "building:test", "property": "movement", "value": true },
                   { "source": "building:test", "property": "alarm-state", "value": "stay-armed-animals-present" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "users-present-day" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "users-present-day" },
                   { "source": "building:test", "property": "movement", "value": false },
-                  { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-day" }
+                  { "source": "building:test", "property": "alarm-state", "value": "zone-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },
+                  { "source": "building:test", "property": "alarm-state", "value": "not-armed" }
                ]
             },
             {
@@ -73,13 +129,14 @@
                   { "wait": 3, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "wake-up-event" },
                   { "wait": 1.5, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false },
                   { "wait": 0.5, "property": "test-3-present", "value": false }
@@ -90,36 +147,19 @@
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-going-to-bed" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-asleep" },
                   { "source": "building:test", "property": "night-time", "value": true },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "present" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-waking-up" },
                   { "source": "building:test", "property": "night-time", "value": false },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
@@ -134,11 +174,12 @@
                "driveSequence": [
                   { "wait": 5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "wake-up-event" },
                   { "wait": 1.5, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false },
                   { "wait": 0.5, "property": "test-3-present", "value": false }
@@ -149,29 +190,17 @@
                   { "source": "building:test", "property": "all-users-away", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-going-to-bed" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-asleep" },
                   { "source": "building:test", "property": "night-time", "value": true },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "present" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-waking-up" },
                   { "source": "building:test", "property": "night-time", "value": false },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
@@ -185,11 +214,11 @@
                "driveSequence": [
                   { "wait": 5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "wake-up-event" },
                   { "wait": 1.5, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false }
                ],
@@ -199,28 +228,17 @@
                   { "source": "building:test", "property": "all-users-away", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-going-to-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-asleep" },
                   { "source": "building:test", "property": "night-time", "value": true },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "present" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-waking-up" },
                   { "source": "building:test", "property": "night-time", "value": false },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" }, 
@@ -235,13 +253,14 @@
                   { "wait": 5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-3-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 0.5, "target": "bedroom:test-1", "event": "wake-up-event" },
+                  { "wait": 0.5, "target": "bedroom:test-2", "event": "wake-up-event" },
                   { "wait": 1.5, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false },
                   { "wait": 0.5, "property": "test-3-present", "value": false }
@@ -253,35 +272,19 @@
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-going-to-bed" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "in-bed" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": true },
                   { "source": "building:test", "property": "users-state", "value": "occupied-asleep" },
                   { "source": "building:test", "property": "night-time", "value": true },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-1", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-2", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-1", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "present" },
                   { "source": "building:test", "property": "all-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-waking-up" },
                   { "source": "building:test", "property": "night-time", "value": false },
-                  { "source": "bedroom:test-1", "property": "test-2-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-2-user-state", "value": "present" },
-                  { "source": "bedroom:test-2", "property": "test-3-user-state", "value": "not-present" },
                   { "source": "building:test", "property": "test-3-user-state", "value": "present" },
                   { "source": "building:test", "property": "some-users-in-bed", "value": false },
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" },
@@ -297,109 +300,95 @@
             {
                "uName": "building:test",
                "displayName": "Test Building",
-               "users": [
-                  { "uName": "user:test-1" },
-                  { "uName": "user:test-2" },
-                  { "uName": "user:test-3" }
-               ],
-               "bedrooms": [
-                  { "uName": "bedroom:test-1" },
-                  { "uName": "bedroom:test-2" }
-               ],
-               "rooms": [
-                  { "uName": "room:test-1" },
-                  { "uName": "room:test-2" }
-               ],
+               "users": [ { "uName": "user:test-1" }, { "uName": "user:test-2" }, { "uName": "user:test-3" } ],
+               "bedrooms": [ { "uName": "bedroom:test-1" }, { "uName": "bedroom:test-2" } ],
+               "rooms": [ { "uName": "room:test-1" }, { "uName": "room:test-2" } ],
+               "allUsersLeftTimeout": 2,
                "propogateToParent": false,
                "things": []
-            },
-            {
-               "uName": "bedroom:test-1",
-               "displayName": "Test Bedroom 1",
-               "users": [
-                  { "uName": "user:test-1" },
-                  { "uName": "user:test-2" }
-               ],
-               "readingInBedTimeout": 4,
-               "awakeInBedTimeout": 1,
-               "movementTimeout": 2,
-               "propogateToParent": false,
-               "events": [],
-               "props": [
-                  {
-                     "name": "movement-pir",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "low-light",
-                     "initialValue": false
-                  }
-               ],
-               "things": [
-               ]
-            },
-            {
-               "uName": "bedroom:test-2",
-               "displayName": "Test Bedroom 2",
-               "users": [
-                  { "uName": "user:test-3" }
-               ],
-               "readingInBedTimeout": 4,
-               "awakeInBedTimeout": 1,
-               "movementTimeout": 2,
-               "propogateToParent": false,
-               "events": [],
-               "props": [
-                  {
-                     "name": "movement-pir",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "low-light",
-                     "initialValue": false
-                  }
-               ],
-               "things": [
-               ]
-            },
-            {
-               "uName": "room:test-1",
-               "displayName": "Test Room 1",
-               "movementTimeout": 2,
-               "propogateToParent": false,
-               "events": [],
-               "props": [
-                  {
-                     "name": "movement-pir",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "low-light",
-                     "initialValue": false
-                  }
-               ],
-               "things": [
-               ]
-            },
-            {
-               "uName": "room:test-2",
-               "displayName": "Test Room 2",
-               "movementTimeout": 2,
-               "propogateToParent": false,
-               "events": [],
-               "props": [
-                  {
-                     "name": "movement-pir",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "low-light",
-                     "initialValue": false
-                  }
-               ],
-               "things": [
-               ]
             }
+         ]
+      },
+      {
+         "uName": "bedroom:test-1",
+         "displayName": "Test Bedroom 1",
+         "users": [ { "uName": "user:test-1" }, { "uName": "user:test-2" } ],
+         "readingInBedTimeout": 4,
+         "awakeInBedTimeout": 1,
+         "movementTimeout": 2,
+         "propogateToParent": false,
+         "events": [],
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false
+            },
+            {
+               "name": "low-light",
+               "initialValue": false
+            }
+         ],
+         "things": [
+         ]
+      },
+      {
+         "uName": "bedroom:test-2",
+         "displayName": "Test Bedroom 2",
+         "users": [ { "uName": "user:test-3" } ],
+         "readingInBedTimeout": 4,
+         "awakeInBedTimeout": 1,
+         "movementTimeout": 2,
+         "propogateToParent": false,
+         "events": [],
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false
+            },
+            {
+               "name": "low-light",
+               "initialValue": false
+            }
+         ],
+         "things": [
+         ]
+      },
+      {
+         "uName": "room:test-1",
+         "displayName": "Test Room 1",
+         "movementTimeout": 2,
+         "propogateToParent": false,
+         "events": [],
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false
+            },
+            {
+               "name": "low-light",
+               "initialValue": false
+            }
+         ],
+         "things": [
+         ]
+      },
+      {
+         "uName": "room:test-2",
+         "displayName": "Test Room 2",
+         "movementTimeout": 2,
+         "propogateToParent": false,
+         "events": [],
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false
+            },
+            {
+               "name": "low-light",
+               "initialValue": false
+            }
+         ],
+         "things": [
          ]
       }
    ]

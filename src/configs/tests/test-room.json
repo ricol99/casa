@@ -32,8 +32,8 @@
                "name": "2) Normal - initiation by movement and timeout",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": true },
-                  { "wait": 2.0, "property": "movement-pir", "value": false }
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 2.0, "property": "movement", "value": false }
                ],
                "expectedSequence": [
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
@@ -55,7 +55,7 @@
                "events": [],
                "props": [
                   {
-                     "name": "movement-pir",
+                     "name": "movement",
                      "initialValue": false
                   },
                   {

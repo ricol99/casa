@@ -121,7 +121,7 @@
          "displayName": "Landing",
          "props": [
             {
-               "name": "movement-pir",
+               "name": "movement",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
@@ -208,7 +208,7 @@
          ],
          "props": [
             {
-               "name": "movement-pir",
+               "name": "movement",
                "initialValue": false,
                "writable": false,
                "TYPE": "gpioproperty",
@@ -458,21 +458,21 @@
          ],
          "props": [
             {
-               "name": "movement-pir",
+               "name": "movement",
                "initialValue": false,
                "writable": false,
                "local": true,
                "sources": [
                   {
-                     "property": "movement-pir-door"
+                     "property": "movement-door"
                   },
                   {
-                     "property": "movement-pir-main"
+                     "property": "movement-main"
                   }
                ]
             },
             {
-               "name": "movement-pir-door",
+               "name": "movement-door",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
@@ -481,7 +481,7 @@
                "local": true
             },
             {
-               "name": "movement-pir-main",
+               "name": "movement-main",
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",

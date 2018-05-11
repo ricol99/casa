@@ -146,8 +146,8 @@
                "name": "4) Normal - both going to bed at slightly different times - 1st initiates by movement, then bed switch, 2nd using room switch",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
@@ -200,8 +200,8 @@
                "name": "5) Same as TC4 but with low-light happening before pre-wake-up call",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
@@ -253,8 +253,8 @@
                "name": "6) Same as TC4 but with low-light happening during awake-in-bed state",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
@@ -307,8 +307,8 @@
                "name": "7) Same as TC4 but with low-light happening during waking-up-in-bed state",
                "driveSequence": [
                   { "wait": 1, "property": "low-light", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": true },
-                  { "wait": 0.5, "property": "movement-pir", "value": false },
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
@@ -406,7 +406,7 @@
                "events": [],
                "props": [
                   {
-                     "name": "movement-pir",
+                     "name": "movement",
                      "initialValue": false
                   },
                   {
