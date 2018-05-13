@@ -151,6 +151,7 @@ StateProperty.prototype.transformNextState = function(_nextState) {
             }
             else {
                nextState = immediateNextState;
+               console.info(this.uName+": AAAAAAA Immediate State transition, nextState="+nextState);
             }
          }
          else {
@@ -379,6 +380,7 @@ State.prototype.checkSourceProperties = function() {
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
                   immediateNextState = this.sources[i].nextState;
+                  console.info(this.uName+": AAAAAAA match! source="+this.sources[i].uName+" property="+this.sources[i].property+" value="+this.sources[i].value);
                   break;
                }
             }
