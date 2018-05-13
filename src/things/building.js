@@ -64,7 +64,8 @@ function Building(_config) {
             },
             {
                "name": "in-bed",
-               "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
+               //"sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
+               "sources": []
             }
          ]
       };
