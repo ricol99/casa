@@ -763,6 +763,11 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
+                                 "name": "awake-in-bed",
+                                 "priority": 0,
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
                                  "name": "not-present",
                                  "priority": 0,
                                  "targets": [{ "property": "power", "value": false }]
@@ -777,6 +782,11 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "awake-in-bed",
+                                 "priority": 0,
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
@@ -797,12 +807,12 @@
                               },
                               {
                                  "name": "users-present-evening",
-                                 "priority": 4,
+                                 "priority": 2,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "users-present-morning",
-                                 "priority": 4,
+                                 "priority": 2,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
@@ -813,13 +823,12 @@
                            "states": [
                               {
                                  "name": "not-active",
-                                 "priority": 3,
-                                 "targets": [{ "property": "power", "value": true }]
+                                 "targets": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "active",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 70 }, { "property": "power", "value": true }]
+                                 "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                               }
                            ]
                         }

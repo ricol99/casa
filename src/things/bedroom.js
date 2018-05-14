@@ -47,7 +47,12 @@ function Bedroom(_config) {
             {
                "name": "not-present",
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
-                           { "event": "room-switch-event", "nextState": "reading-in-bed" }]
+                           { "event": "room-switch-event", "nextState": "room-switch-touched" }]
+            },
+            {
+               "name": "room-switch-touched",
+               "sources": [{ "property": "night-time", "value": true, "nextState": "reading-in-bed" },
+                           { "property": "night-time", "value": false, "nextState": "not-present" }]
             },
             {
                "name": "initial-reading-in-bed",
