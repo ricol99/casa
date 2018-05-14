@@ -97,6 +97,33 @@
                "gpioPin": 23,
                "triggerLow": true,
                "local": true
+            },
+            {
+               "name": "land-gp5",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 5,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp6",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 6,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp13",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 13,
+               "triggerLow": true,
+               "local": true
             }
          ]
       },
