@@ -209,21 +209,48 @@ StateProperty.prototype.setState = function(_nextStateName) {
 
 StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
    this.currentPriority = _priority;
+   var newTargets = this.filterTargetsAndEvents(_targets);
+   var newEvents = this.filterTargetsAndEvents(_events);
 
-   if (this.ignoreControl || this.owner.takeControl(this, this.currentPriority)) {
+   if (((newTargets && newTargets.length > 0) || (newEvents && newEvents.length > 0)) && (this.ignoreControl || this.owner.takeControl(this, this.currentPriority))) {
 
-      if (_targets) {
-         this.owner.alignProperties(_targets);
+      if (newTargets) {
+         this.owner.alignProperties(newTargets);
       }
 
-      if (_events) {
+      if (newEvents) {
 
-         for (var i = 0; i < _events.length; ++i) {
-            this.owner.raiseEvent(_events[i].name);
+         for (var i = 0; i < newEvents.length; ++i) {
+            this.owner.raiseEvent(newEvents[i].name);
          }
       }
    }
 };
+
+StateProperty.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
+
+   if (!_targetsOrEvents) {
+      return null;
+   }
+
+   var newTargetsOrEvents = [];
+
+   for (var i = 0; i < _targetsOrEvents.length; ++i) {
+
+      if (_targetsOrEvents[i].hasOwnProperty("guardProperty")) {
+         var guardPropertyValue = _targetsOrEvents[i].hasOwnProperty("guardPropertyValue") ? _targetsOrEvents[i].guardPropertyValue : true;
+
+         if (this.getProperty(_targetsOrEvents[i].guardProperty) === guardPropertyValue) {
+            newTargetsOrEvents.push(_targetsOrEvents[i]);
+         }
+      }
+      else {
+         newTargetsOrEvents.push(_targetsOrEvents[i]);
+      }
+   }
+
+   return newTargetsOrEvents;
+}
 
 StateProperty.prototype.becomeController = function() {
    // I am now the controller
