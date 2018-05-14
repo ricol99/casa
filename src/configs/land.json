@@ -806,6 +806,22 @@
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
+                        },
+                        {
+                           "name": "user-override-state",
+                           "type": "stateproperty",
+                           "states": [
+                              {
+                                 "name": "not-active",
+                                 "priority": 3,
+                                 "targets": [{ "property": "power", "value": true }]
+                              },
+                              {
+                                 "name": "active",
+                                 "priority": 3,
+                                 "targets": [{ "property": "brightness", "value": 70 }, { "property": "power", "value": true }]
+                              }
+                           ]
                         }
                      ]
                   }
