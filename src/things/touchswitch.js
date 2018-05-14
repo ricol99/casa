@@ -8,7 +8,7 @@ function TouchSwitch(_config) {
    this.gpioTouchPin = _config.gpioTouchPin;
    this.triggerLow = _config.hasOwnProperty("triggerLow") ? _config.triggerLow : true,
 
-   this.gpioFeedbackPin = _config.hasOwnProperty("gpioFeedbackPin") ? _config.gpioFeedbackPin : undefined,
+   this.gpioFeedbackPin = _config.hasOwnProperty("gpioFeedbackPin") ? _config.gpioFeedbackPin : null,
    this.feedbackProp = _config.hasOwnProperty("feedbackProp") ? _config.feedbackProp : "ACTIVE";
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
 
@@ -16,8 +16,12 @@ function TouchSwitch(_config) {
    this.invokeManualMode =  _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode : !this.stateless;
    this.displayName = _config.displayName;
 
-   this.ensurePropertyExists('touch', 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow,
-                                                        "sourceSteps": [ { "type": "latchstep", "minOutputTime": 2 } ] }, _config);
+   this.gpioService =  this.gang.findService("gpioservice");
+
+   if (!this.gpioService) {
+      console.error(this.uName + ": ***** GpioService service not found! *************");
+      process.exit(1);
+   }
 
    if (this.gpioFeedbackPin) {
       this.ensurePropertyExists(this.feedbackProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioFeedbackPin, direction: "out" }, _config);
@@ -29,28 +33,32 @@ function TouchSwitch(_config) {
    if (!this.stateless) {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
 
-      if (this.switchProp !== this.feedbackProp) {
-         this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
-      }
+      this.ensurePropertyExists(this.switchProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow,
+                                                                   sourceSteps: [ { type: "latchstep", minOutputTime: 2 } ] }, _config);
+   }
+   else {
+      this.gpioService.createPin(this, this.gpioTouchPin, "in", this.triggerLow);
    }
 }
 
 util.inherits(TouchSwitch, Thing);
 
+TouchSwitch.prototype.gpioPinStatusChanged = function(_pin, _value) {
+
+   if (_value) {
+      this.raiseEvent(this.eventName);
+   }
+}
+
 TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (!_data.coldStart) {
 
-      if (_propName == "touch") {
-          this.raiseEvent(this.eventName, { value: _propValue });
+      if (_propName === this.switchProp) {
 
-          if (this.invokeManualMode) {
-             this.setManualMode();
-          }
-
-          if (!this.stateless) {
-             this.alignPropertyValue(this.switchProp, !(this.getProperty(this.switchProp)));
-          }
+         if (this.invokeManualMode) {
+            this.setManualMode();
+         }
       }
    }
 };

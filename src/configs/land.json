@@ -16,6 +16,10 @@
          "serialNumber": "1234567890"
       },
       {
+         "uName": "gpioservice",
+         "displayName": "GPIO Service"
+      },
+      {
          "uName": "sonosservice",
          "displayName": "Sonos Discovery Service"
       },
@@ -806,6 +810,42 @@
                      ]
                   }
                ]
+            },
+            {
+               "uName": "touchswitch:natalie-bedroom-switch",
+               "displayName": "Natalie Bedroom Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 6,
+               "stateless": true,
+               "eventName": "natalie-switch-event",
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "uName": "touchswitch:richard-bedroom-switch",
+               "displayName": "Richard Bedroom Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 5,
+               "stateless": true,
+               "eventName": "richard-switch-event",
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "uName": "touchswitch:main-bedroom-switch",
+               "displayName": "Main Bedroom Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 13,
+               "stateless": true,
+               "eventName": "room-switch-event",
+               "triggerLow": true,
+               "local": true
             },
             {
                "uName": "hkswitchaccessory:natalie-bedroom-switch",
