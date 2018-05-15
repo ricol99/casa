@@ -202,6 +202,10 @@
                      }
                   },
                   {
+                     "uName": "building:dumgoyne",
+                     "property": "alarm-state"
+                  },
+                  {
                      "uName": "alarmtexecom:dumgoyne",
                      "property": "alarm-error"
                   },
