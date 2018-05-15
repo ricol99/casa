@@ -269,14 +269,26 @@
                      "propogateToParent": true,
                      "props": [
                         {
-                           "name": "playing",
-                           "type": "edgeproperty",
-                           "writable": true,
-                           "leadingEdgeOutput": false,
+                           "name": "alarm-state",
+                           "type": "stateproperty",
                            "source": {
-                              "uName": "alarmtexecom:dumgoyne",
-                              "property": "stay-armed"
-                           }
+                              "uName": "building:dumgoyne",
+                              "property": "alarm-state"
+                           },
+                           "states": [
+                              {
+                                 "name": "stay-armed-house-empty",
+                                 "target": { "property": "playing", "value": false }
+                              },
+                              {
+                                 "name": "stay-armed-animals-present",
+                                 "target": { "property": "playing", "value": false }
+                              },
+                              {
+                                 "name": "away-armed",
+                                 "target": { "property": "playing", "value": false }
+                              }
+                           ]
                         }
                      ]
                   }

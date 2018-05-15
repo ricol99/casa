@@ -56,7 +56,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    }
 
 
-   if (source && source.hasOwnProperty("nextState")) {
+   if (source && source.hasOwnProperty("nextState") && this.checkGuard(source)) {
 
       if (currentState && (source.nextState === currentState.name)) {
          this.resetStateTimer(currentState);
@@ -227,6 +227,21 @@ StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _eve
    }
 };
 
+StateProperty.prototype.checkGuard = function(_guardedObject) {
+
+   if (!_guardedObject) {
+      return false;
+   }
+
+   if (_guardedObject.hasOwnProperty("guardProperty")) {
+      var guardPropertyValue = _guardedObject[i].hasOwnProperty("guardPropertyValue") ? _guardedObject.guardPropertyValue : true;
+      return (this.getProperty(_guardedObject.guardProperty) === guardPropertyValue);
+   }
+   else {
+      return true;
+   }
+};
+
 StateProperty.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
    if (!_targetsOrEvents) {
@@ -237,14 +252,7 @@ StateProperty.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
    for (var i = 0; i < _targetsOrEvents.length; ++i) {
 
-      if (_targetsOrEvents[i].hasOwnProperty("guardProperty")) {
-         var guardPropertyValue = _targetsOrEvents[i].hasOwnProperty("guardPropertyValue") ? _targetsOrEvents[i].guardPropertyValue : true;
-
-         if (this.getProperty(_targetsOrEvents[i].guardProperty) === guardPropertyValue) {
-            newTargetsOrEvents.push(_targetsOrEvents[i]);
-         }
-      }
-      else {
+      if (this.checkGuard(_targetsOrEvents[i])) {
          newTargetsOrEvents.push(_targetsOrEvents[i]);
       }
    }
@@ -396,7 +404,7 @@ State.prototype.checkSourceProperties = function() {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
+         if (this.owner.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
             var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
             var sourceEventName = sourceName + ":" + this.sources[i].property;
             var sourceListener = this.owner.sourceListeners[sourceEventName];

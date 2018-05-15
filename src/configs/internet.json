@@ -86,7 +86,7 @@
                "userGroup": "usergroup:key-holders",
                "sources": [
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "tamper-alarm",
                      "transformMap": {
                         "true": "Alarm being tampered with!",
@@ -94,7 +94,7 @@
                      }
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "fire-alarm",
                      "transformMap": {
                         "true": "Fire Alarm!",
@@ -102,7 +102,7 @@
                      }
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "zone-alarm",
                      "transformMap": {
                         "true": "Alarm triggered",
@@ -110,7 +110,7 @@
                      }
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "confirmed-alarm",
                      "transformMap": {
                         "true": "Alarm confirmed - call police!",
@@ -170,7 +170,7 @@
                "userGroup": "usergroup:admins",
                "sources": [
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "away-armed",
                      "transformMap": {
                         "true": "Alarm fully armed - House empty",
@@ -178,7 +178,7 @@
                      }
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "stay-armed",
                      "transformMap": {
                         "true": "Alarm armed - Doggies at home",
@@ -186,7 +186,7 @@
                      }
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "night-armed",
                      "transformMap": {
                         "true": "Alarm armed - Family at home",
@@ -206,7 +206,7 @@
                      "property": "alarm-state"
                   },
                   {
-                     "uName": "alarmtexecom:dumgoyne",
+                     "uName": "building:dumgoyne",
                      "property": "alarm-error"
                   },
                   {
