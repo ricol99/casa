@@ -10,62 +10,35 @@ function GPIOProperty(_config, _owner) {
    Property.call(this, _config, _owner);
 
    this.ready = false;
-   this.direction = (this.writable) ? 'out' : 'in';
+   this.direction = (_config.hasOwnProperty("direction")) ? _config.direction : ((this.writable) ? 'out' : 'in');
 
-   process.on('SIGINT', () => {
-      if (this.gpio) {
-         this.gpio.unexport();
-      }
-   });
- 
+   this.gpioService =  this.owner.gang.findService("gpioservice");
+
+   if (!this.gpioService) {
+      console.error(this.uName + ": ***** GpioService service not found! *************");
+      process.exit(1);
+   }
 }
 
 util.inherits(GPIOProperty, Property);
 
-GPIOProperty.prototype.Ready = function() {
-   this.ready = true;
+GPIOProperty.prototype.gpioPinStatusChanged = function(_gpioPin, _newValue) {
 
-   this.gpio.read( (_err, _value) => {
-       var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
-       this.value = newValue;
-       this.updatePropertyInternal(newValue == 1, { coldStart: true });
-   });
-
-   this.gpio.watch( (_err, _value) => {
-
-      if (_err) {
-         console.log(this.uName + ": Error from gpio library! Error = " + _err);
-      }
-      else {
-         var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
-
-         if (newValue != this.value) {
-            console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
-            this.value = newValue;
-            this.updatePropertyInternal(newValue == 1);
-         }
-      }
-   });
+   if (_newValue != this.value) {
+      console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _newValue);
+      this.updatePropertyInternal_(newValue);
+   }
 }
 
 GPIOProperty.prototype.propertyAboutToChange = function(_propValue, _data) {
 
    if ((this.direction == 'out' || this.direction == 'inout') && (this.value != _propValue)) {
-      this.set(_propValue, (_propValue) ? (this.triggerLow ? 0 : 1) : (this.triggerLow ? 1 : 0), _data);
-   }
-}
-
-GPIOProperty.prototype.set = function(_value, _data) {
-
-   if (this.ready && this.writable) {
-      this.gpio.write(_value);
+      this.gpio.set(this.value);
    }
 }
 
 GPIOProperty.prototype.coldStart = function() {
-
-   this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
-   this.Ready();
+   this.gpio = this.gpioService.createPin(this, this.gpioPin, this.direction, this.triggerLow);
 }
 
 module.exports = exports = GPIOProperty;
