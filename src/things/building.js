@@ -100,7 +100,7 @@ function Building(_config) {
                                          { name: "occupied-awake", sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
                                                                              { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-going-to-bed", sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
-                                                                                    { property: "all-users-away", value: true, nextState: "empty" }},
+                                                                                    { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-waking-up" },
                                                                               { property: "all-users-away", value: true, nextState: "empty" }] },
                                          { name: "occupied-waking-up", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-awake" },
