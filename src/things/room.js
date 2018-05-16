@@ -6,6 +6,7 @@ var Thing = require('../thing');
 // low-light - true when light levels are low enough to switch on lights
 // night-time - true when head to bed and no longer want any background lights
 // room-switch-event - room entrance switch
+ 
 
 // Resulting room-state (s)
 // no-users-present - no movement detected
@@ -17,6 +18,18 @@ var Thing = require('../thing');
 // no-users-present-morning - no movement detected in low-light after wake up call
 // users-present-morning - movement detected in low-light after wake up call
 
+// Resulting alarm-state
+// not-armed - alarm not armed
+// stay-armed - alarm stay armed (perimeter alarm. ie. no movement sensors) (transitional state until movement status is decided - DO NOT USE)
+// stay-armed-house-empty - alarm stay armed, no users present§ and no movement detected
+// stay-armed-house-occupied - alarm stay armed with users present
+// stay-armed-animals-present - alarm stay armed and movement detected, but no users present
+// night-armed - alarm stay armed (perimeter alarm. ie. no movement sensors) - users present assumed
+// away-armed - alarm fully armed (movement sensors active)
+// zone-alarm - zone has been triggered
+// confirmed-alarm - mulitple zones have been triggered
+// fire-alarm - fire detector has been triggered
+
 function Room(_config) {
    Thing.call(this, _config);
    this.thingType = "room";
@@ -27,6 +40,9 @@ function Room(_config) {
    this.roomStateConfig = (_config.hasOwnProperty('roomStateConfig')) ? _config.roomStateConfig : {};
    this.roomStateConfig.name = "room-state";
    this.roomStateConfig.type = "stateproperty";
+   this.buildingName = _config.buildingName;
+
+   this.ensurePropertyExists('alarm-state', 'property', { source: { name: this.buildingName, property: "alarm-state"}}, _config);
 
    if (!this.roomStateConfig.hasOwnProperty("initialValue")) {
       this.roomStateConfig.initialValue = "no-users-present-day";

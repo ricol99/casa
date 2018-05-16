@@ -150,6 +150,7 @@
       {
          "uName": "room:landing",
          "displayName": "Landing",
+         "buildingName": "building:dumgoyne",
          "props": [
             {
                "name": "movement",
@@ -228,11 +229,12 @@
       {
          "uName": "bedroom:dylan",
          "displayName": "Dylan's Bedroom",
+         "buildingName": "building:dumgoyne",
          "users": [
             { "uName": "user:dylan" }
          ],
          "readingInBedTimeout": 900,
-         "awakeInBedTimeout": 900,
+         "awakeInBedTimeout": 1800,
          "events": [
             { "name": "pre-wake-up-event", "rules": [ "45 6 * * 1-5", "00 9 * * 1-5" ]},
             { "name": "wake-up-event", "rules": [ "15 7 * * 1-5", "30 9 * * 0,6" ]}
@@ -269,24 +271,26 @@
                      "propogateToParent": true,
                      "props": [
                         {
-                           "name": "alarm-state",
+                           "name": "dylan-user-state",
                            "type": "stateproperty",
-                           "source": {
-                              "uName": "building:dumgoyne",
-                              "property": "alarm-state"
-                           },
                            "states": [
                               {
-                                 "name": "stay-armed-house-empty",
-                                 "target": { "property": "playing", "value": false }
+                                 "name": "DEFAULT",
+                                 "priority": 4,
+                                 "targets": [{ "property": "playing", "value": false }]
                               },
                               {
-                                 "name": "stay-armed-animals-present",
-                                 "target": { "property": "playing", "value": false }
+                                 "name": "waking-up-in-bed",
+                                 "priority": 4,
+                                 "targets": [
+                                    { "property": "volume", "ramp": { "startValue": 2, "endValue": 30, "step": 2, "duration": 1800 }},
+                                    { "property": "playing", "value": true }
+                                 ]
                               },
                               {
-                                 "name": "away-armed",
-                                 "target": { "property": "playing", "value": false }
+                                 "name": "awake-in-bed",
+                                 "priority": 4,
+                                 "targets": [{ "property": "volume", "value": 30 }, { "property": "playing", "value": true }]
                               }
                            ]
                         }
@@ -325,6 +329,31 @@
                "saturationSupported": true,
                "propogateToParent": true,
                "props": [
+                  {
+                     "name": "alarm-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "fire-alarm",
+                           "targets": [
+                              { "property": "brightness", "ramp": { "loop": true,
+                                                                    "ramps": [{ "startValue": 2, "endValue": 100, "step": 20, "duration": 2 },
+                                                                              { "startValue": 100, "endValue": 99, "step": -1, "duration": 4 },
+                                                                              { "startValue": 100, "endValue": 2, "step": -20, "duration": 2 }]}},
+                              { "property": "hue", "value": 0 },
+                              { "property": "saturation", "ramp": { "loop": true,
+                                                                    "ramps": [{ "startValue": 98, "endValue": 100, "step": 1, "duration": 2 },
+                                                                              { "startValue": 100, "endValue": 0, "step": -20, "duration": 2 },
+                                                                              { "startValue": 0, "endValue": 100, "step": 20, "duration": 2 },
+                                                                              { "startValue": 100, "endValue": 98, "step": -1, "duration": 2 }]}},
+                              { "property": "brightness", "ramp": { "loop": true,
+                                                                    "ramps": [{ "startValue": 2, "endValue": 100, "step": 20, "duration": 2 }, 
+                                                                              { "startValue": 100, "endValue": 2, "step": 20, "duration": 2 }]}},
+                              { "property": "power", "value": true }
+                           ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
@@ -489,12 +518,13 @@
       {
          "uName": "bedroom:master",
          "displayName": "Master Bedroom",
+         "buildingName": "building:dumgoyne",
          "users": [
             { "uName": "user:richard"},
             { "uName": "user:natalie"}
          ],
          "readingInBedTimeout": 900,
-         "awakeInBedTimeout": 900,
+         "awakeInBedTimeout": 1800,
          "events": [
             { "name": "pre-wake-up-event", "rules": [ "30 6 * * 1-5", "30 7 * * 0,6" ]},
             { "name": "wake-up-event", "rules": [ "00 7 * * 1-5", "00 8 * * 0,6" ]}
@@ -554,6 +584,28 @@
                "saturationSupported": true,
                "propogateToParent": true,
                "props": [
+                  {  
+                     "name": "alarm-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {  
+                           "name": "fire-alarm",
+                           "targets": [
+                              { "property": "brightness", "ramp": { "loop": true,
+                                                                    "ramps": [{ "startValue": 2, "endValue": 100, "step": 20, "duration": 2 }, 
+                                                                              { "startValue": 100, "endValue": 99, "step": -1, "duration": 4 },
+                                                                              { "startValue": 100, "endValue": 2, "step": -20, "duration": 2 }]}},
+                              { "property": "hue", "value": 0 },
+                              { "property": "saturation", "ramp": { "loop": true,
+                                                                    "ramps": [{ "startValue": 98, "endValue": 100, "step": 1, "duration": 2 }, 
+                                                                              { "startValue": 100, "endValue": 0, "step": -20, "duration": 2 },
+                                                                              { "startValue": 0, "endValue": 100, "step": 20, "duration": 2 },
+                                                                              { "startValue": 100, "endValue": 98, "step": -1, "duration": 2 }]}},
+                              { "property": "power", "value": true }
+                           ]
+                        }
+                     ]
+                  }
                ],
                "things": [
                   {
