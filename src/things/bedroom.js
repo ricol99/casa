@@ -18,7 +18,7 @@ var Room = require('./room');
 // awake-in-bed - wake up event has happened
 
 function Bedroom(_config) {
-   
+   this.overrideTimeout = (_config.hasOwnProperty("overrideProperty")) ? _config.overrideProperty : 600;
    _config.userOverrideConfig =  { initialValue: 'not-active',
                                    states: [{ name: "not-active",
                                               source: { guard: { property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
