@@ -832,6 +832,7 @@
                         {
                            "name": "user-override-state",
                            "type": "stateproperty",
+                           "initialValue": "not-active",
                            "states": [
                               {
                                  "name": "not-active",

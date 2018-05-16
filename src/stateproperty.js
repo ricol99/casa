@@ -35,7 +35,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
    var propertyValue = _data.value;
    var currentState = this.states[this.value];
-   var source = null;
+   var sources = null;
 
    if (!this.sourceListeners[_sourceListener.sourceEventName]) {
       console.log(this.uName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
@@ -44,25 +44,32 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
 
    if (currentState && currentState.sourceMap[_sourceListener.sourceEventName]) {
-      source = (currentState.sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
-                  currentState.sourceMap[_sourceListener.sourceEventName][propertyValue] :
-                  currentState.sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
+      sources = (currentState.sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
+                    currentState.sourceMap[_sourceListener.sourceEventName][propertyValue] :
+                    currentState.sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
    }
 
-   if (!source && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
-      source = (this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
-                  this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue] :
-                  this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
+   if (!sources && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
+      sources = (this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
+                    this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue] :
+                    this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
    }
 
 
-   if (source && source.hasOwnProperty("nextState") && this.checkGuard(source)) {
+   if (sources) {
 
-      if (currentState && (source.nextState === currentState.name)) {
-         this.resetStateTimer(currentState);
-      }
-      else {
-         this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+      for (var i = 0; i < sources.length; ++i) {
+
+         if (sources[i].hasOwnProperty("nextState") && this.checkGuard(sources[i])) {
+
+            if (currentState && (sources[i].nextState === currentState.name)) {
+               this.resetStateTimer(currentState);
+            }
+            else {
+               this.set(this.transformNextState(sources[i].nextState), { sourceName: this.owner });
+            }
+            break;
+         }
       }
    }
 };
@@ -233,13 +240,22 @@ StateProperty.prototype.checkGuard = function(_guardedObject) {
       return false;
    }
 
-   if (_guardedObject.hasOwnProperty("guardProperty")) {
-      var guardPropertyValue = _guardedObject[i].hasOwnProperty("guardPropertyValue") ? _guardedObject.guardPropertyValue : true;
-      return (this.getProperty(_guardedObject.guardProperty) === guardPropertyValue);
+   if (_guardedObject.hasOwnProperty("guard")) {
+      var guardPropertyValue = _guardedObject.guard.hasOwnProperty("value") ? _guardedObject.guard.value : true;
+      return (this.owner.getProperty(_guardedObject.guard.property) === guardPropertyValue);
    }
-   else {
-      return true;
+   else if (_guardedObject.hasOwnProperty("guards")) {
+
+      for (var i = 0; i < _guardedObject.guards.length; ++i) {
+         var guardPropertyValue = _guardedObject.guards[i].hasOwnProperty("value") ? _guardedObject.guards[i].value : true;
+
+         if (this.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
+            return false;
+         }
+      }
    }
+
+   return true;
 };
 
 StateProperty.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
@@ -362,7 +378,11 @@ function State(_config, _owner) {
             this.sourceMap[sourceListener.sourceEventName] = {};
          }
 
-         this.sourceMap[sourceListener.sourceEventName][val] = this.sources[i];
+         if (!this.sourceMap[sourceListener.sourceEventName][val]) {
+            this.sourceMap[sourceListener.sourceEventName][val] = [];
+         }
+
+         this.sourceMap[sourceListener.sourceEventName][val].push(this.sources[i]);
       }
    }
 

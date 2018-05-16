@@ -64,7 +64,6 @@ function Building(_config) {
             },
             {
                "name": "in-bed",
-               //"sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
                "sources": []
             }
          ]
@@ -100,8 +99,8 @@ function Building(_config) {
                                states: [ { name: "empty", source: { property: "all-users-away", value: false, nextState: "occupied-awake" }},
                                          { name: "occupied-awake", sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
                                                                              { property: "all-users-away", value: true, nextState: "empty" }]},
-                                         { name: "occupied-going-to-bed", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-asleep" },
-                                           source: { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }},
+                                         { name: "occupied-going-to-bed", sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
+                                                                                    { property: "all-users-away", value: true, nextState: "empty" }},
                                          { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-waking-up" },
                                                                               { property: "all-users-away", value: true, nextState: "empty" }] },
                                          { name: "occupied-waking-up", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-awake" },

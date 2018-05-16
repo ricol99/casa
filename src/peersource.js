@@ -59,7 +59,7 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
       this.myRealSource.sourceHasRaisedEvent(_data);
    }
    else {
-      console.info('Event Raised: ' + this.uName + ':' + _data.uName);
+      console.info('Event Raised: ' + this.uName + ':' + _data.name);
       this.emit('event-raised', util.copy(_data));
    }
 };

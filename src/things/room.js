@@ -94,10 +94,13 @@ function Room(_config) {
 
    this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
 
-   this.ensurePropertyExists('user-override-state', 'stateproperty', { initialValue: 'not-active',
-                                                                       states: [{ name: "not-active", source: { event: "room-switch-event", nextState: "active" }},
-                                                                                { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
-                                                                                  timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]}, _config);
+   var userOverrideConfig = (_config.hasOwnProperty("userOverrideConfig")) ? _config.userOverrideConfig
+                                                                           : { initialValue: 'not-active',
+                                                                               states: [{ name: "not-active", source: { event: "room-switch-event", nextState: "active" }},
+                                                                                        { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
+                                                                                          timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]};
+
+   this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
 }
 
 util.inherits(Room, Thing);
