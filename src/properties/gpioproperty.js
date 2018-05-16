@@ -26,7 +26,7 @@ GPIOProperty.prototype.gpioPinStatusChanged = function(_gpioPin, _newValue) {
 
    if (_newValue != this.value) {
       console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _newValue);
-      this.updatePropertyInternal_(newValue);
+      this.updatePropertyInternal(_newValue);
    }
 }
 
