@@ -69,6 +69,8 @@ SonosPlayer.prototype.createDevice = function(_device) {
    if (this.devices.length == 1) {
       this.props['ACTIVE'].set(true, { sourceName: this.uName, coldStart: true });
    }
+
+   console.log(this.uName + ": Successfully attached to sonos device in zone " + this.zone + ", host=" + _device.host);
 };
 
 function SonosDevice(_player, _device) {
@@ -239,7 +241,7 @@ SonosPlayer.prototype.play = function(_url) {
       this.sonos.play(_url, (_err, _result) => {
 
          if (_err) {
-            console.log(this.uName + ": Unable to play "+_url+"!");
+            console.error(this.uName + ": Unable to play "+_url+"!");
          }
       });
    }
@@ -247,7 +249,7 @@ SonosPlayer.prototype.play = function(_url) {
       this.sonos.play( (_err, _result) => {
 
          if (_err) {
-            console.log(this.uName + ": Unable to play!");
+            console.error(this.uName + ": Unable to play!");
          }
       });
    }
@@ -258,7 +260,7 @@ SonosPlayer.prototype.playNext = function(_stopIfFail) {
    this.sonos.next( (_err, _result) => {
 
       if (_err) {
-         console.log(this.uName + ": Unable to play next track!");
+         console.error(this.uName + ": Unable to play next track!");
       }
 
       if (!_result && _stopIfFail) {
