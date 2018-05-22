@@ -21,7 +21,7 @@ function Bedroom(_config) {
    this.overrideTimeout = (_config.hasOwnProperty("overrideProperty")) ? _config.overrideProperty : 600;
    _config.userOverrideConfig =  { initialValue: 'not-active',
                                    states: [{ name: "not-active",
-                                              source: { guard: { property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
+                                              source: { guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
                                             { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]};
    Room.call(this, _config);

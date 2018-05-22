@@ -62,18 +62,45 @@
                   { "wait": 2, "event": "start-test" },
                   { "wait": 3, "event": "jump-to-guarded-source-state" },
                   { "wait": 1, "event": "go-through-guard-1" },
-                  { "wait": 1, "property": "test-guard-prop-1", "value": true },
-                  { "wait": 1, "event": "go-through-guard-1" },
-                  { "wait": 1, "property": "test-guard-prop-1", "value": false },
+                  { "wait": 3, "property": "test-guard-prop-1", "value": true },
+                  //{ "wait": 1, "event": "go-through-guard-1" },
+                  { "wait": 3, "property": "test-guard-prop-1", "value": false },
                   { "wait": 1, "property": "test-prop-3", "value": false },
                   { "wait": 1, "event": "back-to-test-guarded-source-state" },
                   { "wait": 1, "property": "test-guard-prop-2", "value": true },
                   { "wait": 1, "event": "go-through-guard-1" },
+                  { "wait": 1, "property": "test-guard-prop-2", "value": false },
                   { "wait": 1, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
+                  { "source": "thing:test-thing", "property": "test-prop-3", "value": true },
+                  { "source": "thing:test-thing", "property": "test-prop-3", "value": false },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "5) Normal - Test basic transition with non-active guard on source",
+               "driveSequence": [
+                  { "wait": 2, "event": "start-test" },
+                  { "wait": 3, "event": "jump-to-non-active-guarded-source-state" },
+                  { "wait": 1, "event": "go-through-guard-1" },
+                  { "wait": 3, "property": "test-guard-prop-1", "value": true },
+                  { "wait": 1, "event": "go-through-guard-1" },
+                  { "wait": 3, "property": "test-guard-prop-1", "value": false },
+                  { "wait": 1, "property": "test-prop-3", "value": false },
+                  { "wait": 1, "event": "back-to-test-guarded-source-state" },
+                  { "wait": 1, "property": "test-guard-prop-2", "value": true },
+                  { "wait": 1, "event": "go-through-guard-1" },
+                  { "wait": 1, "property": "test-guard-prop-2", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": true },
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": false },
@@ -123,7 +150,8 @@
                            "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
                            "sources": [{ "event": "jump-to-timer-inherited-state", "nextState": "test-timer-inherited-state" },
                                        { "event": "jump-to-timer-non-inherited-state", "nextState": "test-timer-non-inherited-state" },
-                                       { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" }]
+                                       { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" },
+                                       { "event": "jump-to-non-active-guarded-source-state", "nextState": "test-non-active-guarded-source-state" }]
                         },
                         {
                            "name": "test-timer-inherited-state",
@@ -141,7 +169,13 @@
                         },
                         {
                            "name": "test-guarded-source-state",
-                           "sources": [{ "guard": { "property": "test-guard-prop-1" },
+                           "sources": [{ "guard": { "active": true, "property": "test-guard-prop-1" },
+                                         "event": "go-through-guard-1", "nextState": "test-guard-1-state" },
+                                       { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                        },
+                        {
+                           "name": "test-non-active-guarded-source-state",
+                           "sources": [{ "guard": { "active": false, "property": "test-guard-prop-1" },
                                          "event": "go-through-guard-1", "nextState": "test-guard-1-state" },
                                        { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
                         },

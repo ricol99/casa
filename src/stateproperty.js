@@ -33,43 +33,30 @@ StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ": Event received when in state " + this.value);
 
-   var propertyValue = _data.value;
+   var name = _data.name
+   var value = _data.value;
    var currentState = this.states[this.value];
-   var sources = null;
+   var source = null;
 
    if (!this.sourceListeners[_sourceListener.sourceEventName]) {
       console.log(this.uName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
       return;
    }
 
-
-   if (currentState && currentState.sourceMap[_sourceListener.sourceEventName]) {
-      sources = (currentState.sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
-                    currentState.sourceMap[_sourceListener.sourceEventName][propertyValue] :
-                    currentState.sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
+   if (currentState) {
+      source = currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
+   }
+   else if (this.states["DEFAULT"]) {
+      source = this.states["DEFAULT"].processSourceEvent(_sourceListener.sourceEventName, name, value);
    }
 
-   if (!sources && this.states["DEFAULT"] && this.states["DEFAULT"].sourceMap[_data.sourceEventName]) {
-      sources = (this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue]) ?
-                    this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName][propertyValue] :
-                    this.states["DEFAULT"].sourceMap[_sourceListener.sourceEventName]["DEFAULT_VALUE"];
-   }
+   if (source) {
 
-
-   if (sources) {
-
-      for (var i = 0; i < sources.length; ++i) {
-
-         if (sources[i].hasOwnProperty("nextState") && this.checkGuard(sources[i])) {
-
-            if (currentState && (sources[i].nextState === currentState.name)) {
-               this.resetStateTimer(currentState);
-            }
-            else {
-               this.set(this.transformNextState(sources[i].nextState), { sourceName: this.owner });
-            }
-            break;
-         }
+      if (currentState && (source.nextState === currentState.name)) {
+         this.resetStateTimer(currentState);
+      }
+      else {
+         this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
       }
    }
 };
@@ -216,65 +203,21 @@ StateProperty.prototype.setState = function(_nextStateName) {
 
 StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
    this.currentPriority = _priority;
-   var newTargets = this.filterTargetsAndEvents(_targets);
-   var newEvents = this.filterTargetsAndEvents(_events);
 
-   if (((newTargets && newTargets.length > 0) || (newEvents && newEvents.length > 0)) && (this.ignoreControl || this.owner.takeControl(this, this.currentPriority))) {
+   if (((_targets && _targets.length > 0) || (_events && _events.length > 0)) && (this.ignoreControl || this.owner.takeControl(this, this.currentPriority))) {
 
-      if (newTargets) {
-         this.owner.alignProperties(newTargets);
+      if (_targets) {
+         this.owner.alignProperties(_targets);
       }
 
-      if (newEvents) {
+      if (_events) {
 
-         for (var i = 0; i < newEvents.length; ++i) {
-            this.owner.raiseEvent(newEvents[i].name);
+         for (var i = 0; i < _events.length; ++i) {
+            this.owner.raiseEvent(_events[i].name);
          }
       }
    }
 };
-
-StateProperty.prototype.checkGuard = function(_guardedObject) {
-
-   if (!_guardedObject) {
-      return false;
-   }
-
-   if (_guardedObject.hasOwnProperty("guard")) {
-      var guardPropertyValue = _guardedObject.guard.hasOwnProperty("value") ? _guardedObject.guard.value : true;
-      return (this.owner.getProperty(_guardedObject.guard.property) === guardPropertyValue);
-   }
-   else if (_guardedObject.hasOwnProperty("guards")) {
-
-      for (var i = 0; i < _guardedObject.guards.length; ++i) {
-         var guardPropertyValue = _guardedObject.guards[i].hasOwnProperty("value") ? _guardedObject.guards[i].value : true;
-
-         if (this.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
-            return false;
-         }
-      }
-   }
-
-   return true;
-};
-
-StateProperty.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
-
-   if (!_targetsOrEvents) {
-      return null;
-   }
-
-   var newTargetsOrEvents = [];
-
-   for (var i = 0; i < _targetsOrEvents.length; ++i) {
-
-      if (this.checkGuard(_targetsOrEvents[i])) {
-         newTargetsOrEvents.push(_targetsOrEvents[i]);
-      }
-   }
-
-   return newTargetsOrEvents;
-}
 
 StateProperty.prototype.becomeController = function() {
    // I am now the controller
@@ -315,6 +258,7 @@ function State(_config, _owner) {
    this.uName = _owner.uName + ":state:" + this.name;
    this._id = this.uName;
    this.sourceMap = {};
+   this.activeGuardedSources = [];
 
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
@@ -324,9 +268,13 @@ function State(_config, _owner) {
 
    if (_config.hasOwnProperty("sources")) {
       this.sources = _config.sources;
-   }
-   else if (_config.hasOwnProperty("source")) {
-      this.sources = [ _config.source ];
+
+      for (var k = 0; k < this.sources.length; ++k) {
+
+         if (this.sources[k].hasOwnProperty('guard')) {
+            this.sources[k].guards = [ this.sources[k].guard ];
+         }
+      }
    }
 
    if (_config.hasOwnProperty("targets")) {
@@ -383,6 +331,14 @@ function State(_config, _owner) {
          }
 
          this.sourceMap[sourceListener.sourceEventName][val].push(this.sources[i]);
+
+         if (this.sources[i].hasOwnProperty("guards")) {
+
+            for (var k = 0; k < this.sources[i].guards.length; ++k) {
+               this.sources[i].guards[k].uName = this.owner.owner.uName;
+               this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
+            }
+         }
       }
    }
 
@@ -413,8 +369,104 @@ State.prototype.initialise = function() {
    return immediateState;
 };
 
+State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
+   var sources = null;
+   var source = this.checkActiveGuards(_name, _value);
+
+   if (source) {
+      console.log(this.uName+": processSourceEvent() active guard is now met");
+      return source;
+   }
+
+   if (this.sourceMap[_sourceEventName]) {
+      sources = (this.sourceMap[_sourceEventName][_value]) ? this.sourceMap[_sourceEventName][_value] : this.sourceMap[_sourceEventName]["DEFAULT_VALUE"];
+   }
+   
+   if (sources) {
+      
+      for (var i = 0; i < sources.length; ++i) {
+         
+         if (sources[i].hasOwnProperty("nextState")) { 
+            
+            if (this.checkGuard(sources[i], true)) {
+               return sources[i];
+            }
+         }
+      }
+   }
+
+   return null;
+};
+
+State.prototype.checkGuard = function(_guardedObject, _addToActiveQueueOnFailiure) {
+
+   if (!_guardedObject) {
+      return false;
+   }
+
+   if (_guardedObject.hasOwnProperty("guards")) {
+
+      for (var i = 0; i < _guardedObject.guards.length; ++i) {
+         var guardPropertyValue = _guardedObject.guards[i].hasOwnProperty("value") ? _guardedObject.guards[i].value : true;
+
+         if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
+
+            if (_addToActiveQueueOnFailiure && ((_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)
+                                                 || !_guardedObject.guards[i].hasOwnProperty("active"))) {
+
+               this.activeGuardedSources.push(_guardedObject);
+            }
+            return false;
+         }
+      }
+   }
+
+   return true;
+};
+
+State.prototype.checkActiveGuards = function(_propName, _propValue) {
+
+   for (var a = 0; a < this.activeGuardedSources.length; ++a) {
+
+      for (var i = 0; i < this.activeGuardedSources[a].guards.length; ++i) {
+         var guardActive = (this.activeGuardedSources[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedSources[a].guards[i].active : true;
+
+         if (guardActive && (this.activeGuardedSources[a].guards[i].property === _propName)) {
+            var guardPropertyValue = this.activeGuardedSources[a].guards[i].hasOwnProperty("value") ? this.activeGuardedSources[a].guards[i].value : true;
+
+            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedSources[a])) {
+               console.log(this.uName + ": checkActiveGuards() Found active guard!");
+               return this.activeGuardedSources[a];
+            }
+         }
+      }
+   }
+
+   return null;
+};
+
+State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
+
+   if (!_targetsOrEvents) {
+      return null;
+   }
+
+   var newTargetsOrEvents = [];
+
+   for (var i = 0; i < _targetsOrEvents.length; ++i) {
+
+      if (this.checkGuard(_targetsOrEvents[i])) {
+         newTargetsOrEvents.push(_targetsOrEvents[i]);
+      }
+   }
+
+   return newTargetsOrEvents;
+}
+
 State.prototype.alignTargetsAndEvents = function() {
-   this.owner.alignTargetPropertiesAndEvents(this.targets, this.events, this.priority);
+   var newTargets = this.filterTargetsAndEvents(this.targets);
+   var newEvents = this.filterTargetsAndEvents(this.events);
+   this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -424,7 +476,7 @@ State.prototype.checkSourceProperties = function() {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (this.owner.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
+         if (this.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
             var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
             var sourceEventName = sourceName + ":" + this.sources[i].property;
             var sourceListener = this.owner.sourceListeners[sourceEventName];
@@ -447,6 +499,7 @@ State.prototype.checkSourceProperties = function() {
 };
 
 State.prototype.exiting = function(_event, _value) {
+   this.activeGuardedSources = [];
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
