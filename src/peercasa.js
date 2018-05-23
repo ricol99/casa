@@ -396,12 +396,14 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.uName }, sourceCasa: this.uName });
       this.removeCasaListeners();
       this.invalidateSources();
-   }
 
-   if (this.socket) {
-      this.socket.disconnect();
+      if (this.socket) {
+         this.socket.disconnect();
+      }
    }
-   //this.deleteMeIfNeeded();
+   else {
+      this.deleteMeIfNeeded();
+   }
 };
 
 PeerCasa.prototype.socketDisconnectCb = function(_data) {
