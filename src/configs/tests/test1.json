@@ -7,9 +7,6 @@
    },
    "services": [
       {
-         "uName": "sonosservice"
-      },
-      {
          "uName": "webservice",
          "port": 11001,
          "mediaPath": "/Users/richardcollin/personal/media",
@@ -112,10 +109,6 @@
                ]
             }
          ]
-      },
-      {
-         "uName": "sonosplayer:dylan-bedroom-room",
-         "zone": "Dylan's Room"
       },
       {
          "uName": "thing:home-daylight-sensor",

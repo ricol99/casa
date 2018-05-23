@@ -398,12 +398,10 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.invalidateSources();
    }
 
-   this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
-
    if (this.socket) {
       this.socket.disconnect();
    }
-   this.deleteMeIfNeeded();
+   //this.deleteMeIfNeeded();
 };
 
 PeerCasa.prototype.socketDisconnectCb = function(_data) {
@@ -422,11 +420,11 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.invalidateSources();
    }
 
-   this.manualDisconnect = true; // *** TBD ADDED temporarily for testing
+   this.manualDisconnect = true;
 
-   if (this.socket) {
-      this.socket.disconnect();
-   }
+   //if (this.socket) {
+      //this.socket.disconnect();
+   //}
    this.deleteMeIfNeeded();
 };
 
