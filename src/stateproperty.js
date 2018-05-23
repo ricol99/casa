@@ -259,6 +259,7 @@ function State(_config, _owner) {
    this._id = this.uName;
    this.sourceMap = {};
    this.activeGuardedSources = [];
+   this.activeGuardedTargets = [];
 
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
@@ -371,7 +372,7 @@ State.prototype.initialise = function() {
 
 State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    var sources = null;
-   var source = this.checkActiveGuards(_name, _value);
+   var source = this.checkActiveSourceGuards(_name, _value);
 
    if (source) {
       console.log(this.uName+": processSourceEvent() active guard is now met");
@@ -388,7 +389,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
          
          if (sources[i].hasOwnProperty("nextState")) { 
             
-            if (this.checkGuard(sources[i], true)) {
+            if (this.checkGuard(sources[i], this.activeGuardedSources)) {
                return sources[i];
             }
          }
@@ -398,7 +399,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    return null;
 };
 
-State.prototype.checkGuard = function(_guardedObject, _addToActiveQueueOnFailiure) {
+State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 
    if (!_guardedObject) {
       return false;
@@ -411,10 +412,10 @@ State.prototype.checkGuard = function(_guardedObject, _addToActiveQueueOnFailiur
 
          if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
 
-            if (_addToActiveQueueOnFailiure && ((_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)
-                                                 || !_guardedObject.guards[i].hasOwnProperty("active"))) {
+            if (_activeQueue && ((_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)
+                                 || !_guardedObject.guards[i].hasOwnProperty("active"))) {
 
-               this.activeGuardedSources.push(_guardedObject);
+               _activeQueue.push(_guardedObject);
             }
             return false;
          }
@@ -424,19 +425,27 @@ State.prototype.checkGuard = function(_guardedObject, _addToActiveQueueOnFailiur
    return true;
 };
 
-State.prototype.checkActiveGuards = function(_propName, _propValue) {
+State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
+   return this.checkActiveGuards(_propName, _propValue, this.activeGuardedSources);
+};
 
-   for (var a = 0; a < this.activeGuardedSources.length; ++a) {
+State.prototype.checkActiveTargetGuards = function(_propName, _propValue) {
+   return this.checkActiveGuards(_propName, _propValue, this.activeGuardedTargets);
+};
 
-      for (var i = 0; i < this.activeGuardedSources[a].guards.length; ++i) {
-         var guardActive = (this.activeGuardedSources[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedSources[a].guards[i].active : true;
+State.prototype.checkActiveGuards = function(_propName, _propValue, _activeGuardQueue) {
 
-         if (guardActive && (this.activeGuardedSources[a].guards[i].property === _propName)) {
-            var guardPropertyValue = this.activeGuardedSources[a].guards[i].hasOwnProperty("value") ? this.activeGuardedSources[a].guards[i].value : true;
+   for (var a = 0; a < _activeGuardQueue.length; ++a) {
 
-            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedSources[a])) {
-               console.log(this.uName + ": checkActiveGuards() Found active guard!");
-               return this.activeGuardedSources[a];
+      for (var i = 0; i < _activeGuardQueue[a].guards.length; ++i) {
+         var guardActive = (_activeGuardQueue[a].guards[i].hasOwnProperty("active")) ? _activeGuardQueue[a].guards[i].active : true;
+
+         if (guardActive && (_activeGuardQueue[a].guards[i].property === _propName)) {
+            var guardPropertyValue = _activeGuardQueue[a].guards[i].hasOwnProperty("value") ? _activeGuardQueue[a].guards[i].value : true;
+
+            if ((_propValue === guardPropertyValue) && this.checkGuard(_activeGuardQueue[a])) {
+               console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
+               return _activeGuardQueue[a];
             }
          }
       }
@@ -455,7 +464,7 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
    for (var i = 0; i < _targetsOrEvents.length; ++i) {
 
-      if (this.checkGuard(_targetsOrEvents[i])) {
+      if (this.checkGuard(_targetsOrEvents[i]), this.activeGuardedTargets) {
          newTargetsOrEvents.push(_targetsOrEvents[i]);
       }
    }
@@ -500,6 +509,7 @@ State.prototype.checkSourceProperties = function() {
 
 State.prototype.exiting = function(_event, _value) {
    this.activeGuardedSources = [];
+   this.activeGuardedTargets = [];
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
