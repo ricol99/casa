@@ -47,7 +47,7 @@ function Source(_config) {
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
-                             { "initialValue": 'auto',
+                             { "initialValue": 'auto', "takeControlOnTransition": true,
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    events.EventEmitter.call(this);

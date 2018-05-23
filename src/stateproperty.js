@@ -12,6 +12,7 @@ function StateProperty(_config, _owner) {
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
+   this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
 
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
@@ -201,10 +202,14 @@ StateProperty.prototype.setState = function(_nextStateName) {
    }
 };
 
-StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
+StateProperty.prototype.takeControl = function(_priority) {
    this.currentPriority = _priority;
+   return this.owner.takeControl(this, this.currentPriority);
+};
 
-   if (((_targets && _targets.length > 0) || (_events && _events.length > 0)) && (this.ignoreControl || this.owner.takeControl(this, this.currentPriority))) {
+StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
+
+   if (((_targets && _targets.length > 0) || (_events && _events.length > 0)) && (this.ignoreControl || this.takeControl(_priority))) {
 
       if (_targets) {
          this.owner.alignProperties(_targets);
@@ -364,7 +369,10 @@ State.prototype.initialise = function() {
    var immediateState = this.checkSourceProperties();
 
    if (!immediateState) {
-      this.alignTargetsAndEvents();
+
+      if (!this.alignTargetsAndEvents() && this.owner.takeControlOnTransition) {
+         this.owner.takeControl(this.priority);
+      }
    }
 
    return immediateState;
@@ -476,6 +484,7 @@ State.prototype.alignTargetsAndEvents = function() {
    var newTargets = this.filterTargetsAndEvents(this.targets);
    var newEvents = this.filterTargetsAndEvents(this.events);
    this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
+   return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
 };
 
 State.prototype.checkSourceProperties = function() {
