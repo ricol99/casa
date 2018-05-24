@@ -107,5 +107,9 @@ RemoteCasa.prototype.invalidateSources = function() {
    this.sources = [];
 }
 
+// Do nothing!
+RemoteCasa.prototype.disconnectFromClient = function() {
+};
+
 module.exports = exports = RemoteCasa;
 
