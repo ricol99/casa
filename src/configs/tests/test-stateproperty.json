@@ -13,6 +13,7 @@
          "displayName": "Test property:stateproperty",
          "sources": [
             { "uName": "thing:test-thing", "property": "test-state-1" },
+            { "uName": "thing:test-thing", "property": "test-guard-prop-2" },
             { "uName": "thing:test-thing", "property": "test-prop-3" }
          ],
          "testCases": [
@@ -79,11 +80,13 @@
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": true },
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": true },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": false },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {
-               "name": "5) Normal - Test basic transition with non-active guard on source",
+               "name": "5) Normal - Test basic transition with active guard on target",
                "driveSequence": [
                   { "wait": 2, "event": "start-test" },
                   { "wait": 3, "event": "jump-to-non-active-guarded-source-state" },
@@ -105,6 +108,28 @@
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": true },
                   { "source": "thing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": true },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": false },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {  
+               "name": "6) Normal - Test basic transition with non-active guard on source",
+               "driveSequence": [
+                  { "wait": 2, "event": "start-test" },
+                  { "wait": 1, "property": "test-guard-prop-2", "value": true },
+                  { "wait": 1, "event": "jump-to-guard-1-state" },
+                  { "wait": 1, "property": "test-guard-prop-2", "value": false },
+                  { "wait": 1, "property": "test-prop-3", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-started" },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": true },
+                  { "source": "thing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
+                  { "source": "thing:test-thing", "property": "test-guard-prop-2", "value": false },
+                  { "source": "thing:test-thing", "property": "test-prop-3", "value": true },
+                  { "source": "thing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "thing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
                ]
             }
@@ -151,6 +176,7 @@
                            "sources": [{ "event": "jump-to-timer-inherited-state", "nextState": "test-timer-inherited-state" },
                                        { "event": "jump-to-timer-non-inherited-state", "nextState": "test-timer-non-inherited-state" },
                                        { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" },
+                                       { "event": "jump-to-guard-1-state", "nextState": "test-guard-1-state" },
                                        { "event": "jump-to-non-active-guarded-source-state", "nextState": "test-non-active-guarded-source-state" }]
                         },
                         {

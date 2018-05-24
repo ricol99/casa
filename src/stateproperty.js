@@ -283,11 +283,19 @@ function State(_config, _owner) {
       }
    }
 
+   if (_config.hasOwnProperty("target")) {
+      _config.targets = [ _config.target ];
+   }
+
    if (_config.hasOwnProperty("targets")) {
       this.targets = _config.targets;
-   }
-   else if (_config.hasOwnProperty("target")) {
-      this.targets = [ _config.target ];
+
+      for (var l = 0; l < this.targets.length; ++l) {
+
+         if (this.targets[l].hasOwnProperty('guard')) {
+            this.targets[l].guards = [ this.targets[l].guard ];
+         }
+      }
    }
 
    if (_config.hasOwnProperty("events")) {
@@ -348,6 +356,20 @@ function State(_config, _owner) {
       }
    }
 
+   if (this.targets) {
+
+      for (var l = 0; l < this.targets.length; l++) {
+
+         if (this.targets[l].hasOwnProperty("guards")) {
+
+            for (var m = 0; m < this.targets[l].guards.length; ++m) {
+               this.targets[l].guards[m].uName = this.owner.owner.uName;
+               this.targets[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.targets[l].guards[m]);
+            }
+         }
+      }
+   }
+
    if (this.schedules) {
 
       if (!this.scheduleService) {
@@ -403,6 +425,9 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
          }
       }
    }
+   else if (this.processActiveTargetGuards(_name, _value)) {
+      return null;
+   }
 
    return null;
 };
@@ -433,27 +458,65 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
    return true;
 };
 
+State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
+   var targetPropertiesMet = [];
+   var targetEventsMet = [];
+
+   for (var a = 0; a < this.activeGuardedTargets.length; ++a) {
+
+      for (var i = 0; i < this.activeGuardedTargets[a].guards.length; ++i) {
+         var guardActive = (this.activeGuardedTargets[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedTargets[a].guards[i].active : true;
+
+         if (guardActive && (this.activeGuardedTargets[a].guards[i].property === _propName)) {
+            var guardPropertyValue = this.activeGuardedTargets[a].guards[i].hasOwnProperty("value") ? this.activeGuardedTargets[a].guards[i].value : true;
+
+            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedTargets[a])) {
+               console.log(this.uName + ": checkActiveTargetGuards() Found active guard!");
+               this.activeGuardedTargets[a]._index = a;
+
+               if (this.activeGuardedTargets[a].hasOwnProperty("property")) {
+                  targetPropertiesMet.push(this.activeGuardedTargets[a]);
+               }
+               else {
+                  targetEventsMet.push(this.activeGuardedTargets[a]);
+               }
+            }
+         }
+      }
+   }
+
+   // Remove met targets from active queue
+   for (var b = 0; b < targetPropertiesMet.length; ++b) {
+      this.activeGuardedTargets.splice(targetPropertiesMet[b]._index-b, 1);
+   }
+
+   for (var c = 0; c < targetEventsMet.length; ++c) {
+      this.activeGuardedTargets.splice(targetEventsMet[c]._index-c-b, 1);
+   }
+
+   // Process met targets
+   if ((targetPropertiesMet.length > 0) || (targetEventsMet.length > 0)) {
+      this.owner.alignTargetPropertiesAndEvents(targetPropertiesMet, targetEventsMet, this.priority);
+      return true;
+   }
+   else {
+      return false;
+   }
+};
+
 State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
-   return this.checkActiveGuards(_propName, _propValue, this.activeGuardedSources);
-};
 
-State.prototype.checkActiveTargetGuards = function(_propName, _propValue) {
-   return this.checkActiveGuards(_propName, _propValue, this.activeGuardedTargets);
-};
+   for (var a = 0; a < this.activeGuardedSources.length; ++a) {
 
-State.prototype.checkActiveGuards = function(_propName, _propValue, _activeGuardQueue) {
+      for (var i = 0; i < this.activeGuardedSources[a].guards.length; ++i) {
+         var guardActive = (this.activeGuardedSources[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedSources[a].guards[i].active : true;
 
-   for (var a = 0; a < _activeGuardQueue.length; ++a) {
+         if (guardActive && (this.activeGuardedSources[a].guards[i].property === _propName)) {
+            var guardPropertyValue = this.activeGuardedSources[a].guards[i].hasOwnProperty("value") ? this.activeGuardedSources[a].guards[i].value : true;
 
-      for (var i = 0; i < _activeGuardQueue[a].guards.length; ++i) {
-         var guardActive = (_activeGuardQueue[a].guards[i].hasOwnProperty("active")) ? _activeGuardQueue[a].guards[i].active : true;
-
-         if (guardActive && (_activeGuardQueue[a].guards[i].property === _propName)) {
-            var guardPropertyValue = _activeGuardQueue[a].guards[i].hasOwnProperty("value") ? _activeGuardQueue[a].guards[i].value : true;
-
-            if ((_propValue === guardPropertyValue) && this.checkGuard(_activeGuardQueue[a])) {
+            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedSources[a])) {
                console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
-               return _activeGuardQueue[a];
+               return this.activeGuardedSources[a];
             }
          }
       }
@@ -472,7 +535,7 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
    for (var i = 0; i < _targetsOrEvents.length; ++i) {
 
-      if (this.checkGuard(_targetsOrEvents[i]), this.activeGuardedTargets) {
+      if (this.checkGuard(_targetsOrEvents[i], this.activeGuardedTargets)) {
          newTargetsOrEvents.push(_targetsOrEvents[i]);
       }
    }
