@@ -92,21 +92,24 @@ Schedule.prototype.createRuleFromConfig = function(_event, _ruleConfig) {
    if (typeof _ruleConfig == "string") {
       var arr = _ruleConfig.split(':');
 
-      if (arr.length == 2) {
+      if (arr.length >= 2) {
          rule.original = arr[0];
          rule.rule = arr[0];
          rule.delta = parseInt(arr[1]);
+         rule.random = (arr.length === 3) ? (arr[2] === "random") : false;
       }
       else {
          rule.original = _ruleConfig;
          rule.rule = _ruleConfig;
          rule.delta = 0;
+         rule.random = false;
       }
    }
    else {
       rule.original = _ruleConfig;
       rule.rule = _ruleConfig;
       rule.delta = 0;
+      rule.random = false;
    }
 
    return rule;
@@ -257,6 +260,9 @@ Schedule.prototype.setSunTimes = function(_sunTimes) {
             this.events[index].rules[rindex].rule.setTime(this.events[index].rules[rindex].rule.getTime() + (this.events[index].rules[rindex].delta * 1000));
             this.events[index].rules[rindex].sunTime = true;
             console.log(this.uName + ': Sun time ' + this.events[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.events[index].rules[rindex].rule);
+         }
+         else if (this.events[index].rules[rindex].random) {
+            //  *** TBD how do we intepret CRON? Only a subset, one time per day per rule?
          }
       }
    }
