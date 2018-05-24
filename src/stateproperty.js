@@ -334,7 +334,7 @@ function State(_config, _owner) {
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;
-         var val = (this.sources[i].hasOwnProperty('value')) ? this.sources[i].value : "DEFAULT_VALUE";
+         var val = (this.sources[i].hasOwnProperty('value')) ? this.sources[i].value : true;
 
          if (!this.sourceMap[sourceListener.sourceEventName]) {
             this.sourceMap[sourceListener.sourceEventName] = {};
@@ -410,7 +410,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    }
 
    if (this.sourceMap[_sourceEventName]) {
-      sources = (this.sourceMap[_sourceEventName][_value]) ? this.sourceMap[_sourceEventName][_value] : this.sourceMap[_sourceEventName]["DEFAULT_VALUE"];
+      sources = (this.sourceMap[_sourceEventName][_value]);
    }
    
    if (sources) {
@@ -461,6 +461,7 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
    var targetPropertiesMet = [];
    var targetEventsMet = [];
+   var indexes = [];
 
    for (var a = 0; a < this.activeGuardedTargets.length; ++a) {
 
@@ -472,7 +473,7 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
 
             if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedTargets[a])) {
                console.log(this.uName + ": checkActiveTargetGuards() Found active guard!");
-               this.activeGuardedTargets[a]._index = a;
+               indexes.push(a);
 
                if (this.activeGuardedTargets[a].hasOwnProperty("property")) {
                   targetPropertiesMet.push(this.activeGuardedTargets[a]);
@@ -485,17 +486,14 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
       }
    }
 
-   // Remove met targets from active queue
-   for (var b = 0; b < targetPropertiesMet.length; ++b) {
-      this.activeGuardedTargets.splice(targetPropertiesMet[b]._index-b, 1);
-   }
 
-   for (var c = 0; c < targetEventsMet.length; ++c) {
-      this.activeGuardedTargets.splice(targetEventsMet[c]._index-c-b, 1);
+   // Remove met targets from active queue
+   for (var b = 0; b < indexes.length; ++b) {
+      this.activeGuardedTargets.splice(indexes[b]-b, 1);
    }
 
    // Process met targets
-   if ((targetPropertiesMet.length > 0) || (targetEventsMet.length > 0)) {
+   if (indexes.length > 0) {
       this.owner.alignTargetPropertiesAndEvents(targetPropertiesMet, targetEventsMet, this.priority);
       return true;
    }
