@@ -542,9 +542,9 @@ Gang.prototype.createPeerCasa = function(_config, _anonymous) {
    return peerCasa;
 };
 
-Gang.prototype.addRemoteCasa = function(_remoteCasa) {
+Gang.prototype.addRemoteCasa = function(_remoteCasa, _force) {
 
-   if (this.remoteCasas[_remoteCasa.uName]) {
+   if (!_force && this.remoteCasas[_remoteCasa.uName]) {
       return false;
    }
 
