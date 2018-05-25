@@ -68,7 +68,7 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.gang.findSource(this.sourceName);
-   this.valid = (this.source != undefined);
+   this.valid = (this.source != undefined) || (this.source != null);;
 
 
    if (this.valid) {

@@ -22,6 +22,7 @@ function PeerCasaService(_config) {
    this.id = this.gang.config.uName
    this.listeningPort = this.gang.config.listeningPort;
    this.inFetchDbMode = _config.fetchDbMode;
+   this.casasBeingEstablished = {};
 
    this.dbService =  this.gang.findService("dbservice");
 
@@ -42,7 +43,7 @@ function PeerCasaService(_config) {
                   // Found a peer
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-                  if (!this.gang.remoteCasas[service.name]) {
+                  if (!this.gang.remoteCasas[service.name] && !this.casasBeingEstablished[service.name]) {
 
                      if (this.inFetchDbMode) {
                         this.dbService.updateGangDbFromPeer(service.host, service.port, (_err, _res) => {
@@ -51,6 +52,7 @@ function PeerCasaService(_config) {
                         });
                      }
                      else if (service.name > this.uName) {
+                        this.casasBeingEstablished[service.name] = true;
                         this.establishConnectionWithPeer(service);
                      }
                   }
@@ -134,6 +136,8 @@ PeerCasaService.prototype.createPeerCasa = function(_service) {
    if (!this.inFetchDbMode) {
       var peerCasa = this.gang.createPeerCasa({uName: _service.name});
       peerCasa.connectToPeerCasa({ address: { hostname: _service.host, port: _service.port }});
+      this.casasBeingEstablished[_service.name] = null;
+      delete this.casasBeingEstablished[_service.name];
       console.log('peercasaservice: New peer casa: ' + peerCasa.uName);
    }
    else {

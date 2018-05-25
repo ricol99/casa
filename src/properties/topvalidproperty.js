@@ -20,7 +20,7 @@ function findHighestPriorityValidSource(_this) {
       if (_this.sourceListeners.hasOwnProperty(sourceEventName)){
          var sourceListener = _this.sourceListeners[sourceEventName];
 
-         if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.valid) {
+         if (sourceListener && (sourceListener.priority < highestPriorityFound) && sourceListener.isValid()) {
             highestPriorityFound = sourceListener.priority;
             highestPrioritySource = sourceListener;
          }
@@ -31,10 +31,12 @@ function findHighestPriorityValidSource(_this) {
 }
 
 TopValidProperty.prototype.sourceIsValid = function(_data) {
+   var oldHighestSource = this.highestValidSource;
 
    this.highestValidSource = findHighestPriorityValidSource(this);
 
-   if (this.highestValidSource && (this.highestValidSource.sourceEventName != _data.sourceEventName)) {
+   if (this.highestValidSource && (oldHighestSource != this.highestValidSource)) {
+   //if (this.highestValidSource && (this.highestValidSource.sourceEventName != _data.sourceEventName)) {
 
       this.value = this.highestValidSource.getPropertyValue();
       _data.value = this.value;
@@ -47,23 +49,23 @@ TopValidProperty.prototype.sourceIsValid = function(_data) {
 TopValidProperty.prototype.sourceIsInvalid = function(_data) {
 
    if (this.highestValidSource && (this.highestValidSource.sourceEventName == _data.sourceEventName)) {
+
       // Current output is based off a now invalid source - rescan
       var newHighestSource = findHighestPriorityValidSource(this);
 
       if (newHighestSource && (newHighestSource != this.highestValidSource)) {
          this.highestValidSource = newHighestSource;
          _data.value = this.highestValidSource.getPropertyValue();
-
-         //if (_data.value !== undefined) {
-            this.updatePropertyInternal(_data.value, _data);
-         //}
+         this.updatePropertyInternal(_data.value, _data);
       }
       else {
          this.highestValidSource = newHighestSource;
       }
    }
 
-   Property.prototype.sourceIsInvalid.call(this, _data);
+   if (!this.highestValidSource) {
+      Property.prototype.sourceIsInvalid.call(this, _data);
+   }
 }
 
 TopValidProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
