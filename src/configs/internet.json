@@ -40,7 +40,7 @@
                "source": {
                   "uName": "casa:env",
                   "property": "ACTIVE",
-                  "maskInvalidTimeout": 60
+                  "maskInvalidTimeout": 120
                }
             },
             {
@@ -59,7 +59,7 @@
                "source": {
                   "uName": "casa:land",
                   "property": "ACTIVE",
-                  "maskInvalidTimeout": 60
+                  "maskInvalidTimeout": 120
                }
             },
             {
