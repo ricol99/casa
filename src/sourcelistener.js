@@ -307,11 +307,15 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
 
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
-      this.sourceRawValue = _data.value;
 
-      if (this.transform || this.transformMap) {
+      if (!this.lastData.hasOwnProperty("value")) {
+         this.lastData.value = true;
+      }
+      else if (this.transform || this.transformMap) {
          this.lastData.value = this.transformInput(_data);
       }
+
+      this.sourceRawValue = this.lastData.value;
 
       if (this.pipeline) {
          this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
