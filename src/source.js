@@ -79,7 +79,13 @@ Source.prototype.scheduledEventTriggered = function(_event) {
    }
 
    if (_event.hasOwnProperty("name")) {
-      this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+
+      if (_event.hasOwnProperty("value")) {
+         this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+      }
+      else {
+         this.raiseEvent(_event.name, { sourceName: this.uName });
+      }
    }
 };
 
