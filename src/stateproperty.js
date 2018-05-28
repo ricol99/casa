@@ -583,7 +583,14 @@ State.prototype.exiting = function(_event, _value) {
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
-   this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+
+   if (_event.hasOwnProperty("value")) {
+      this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+   }
+   else {
+      this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName });
+   }
+
    this.owner.set(this.name, { sourceName: this.owner.owner });
 }
 
