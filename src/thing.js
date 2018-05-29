@@ -76,7 +76,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 Thing.prototype.getProperty = function(_property) {
    var value =  Source.prototype.getProperty.call(this, _property);
 
-   if ((value == undefined) && this.propogateToChildren) {
+   if ((value === undefined) && this.propogateToChildren) {
 
       for (var thing in this.things) {
 
