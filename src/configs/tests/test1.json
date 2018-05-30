@@ -15,6 +15,10 @@
          "serverCert": "",
          "caCert": ""
       },
+      {
+         "uName": "sonosservice",
+         "displayName": "Sonos Discovery Service"
+      },
       {  
          "uName": "lightwaverfservice",
          "displayName": "LightwaveRF Link Service",
@@ -32,6 +36,14 @@
    "scenes": [
    ],
    "things": [
+      {
+         "uName": "sonosplayer:living-room",
+         "displayName": "Sonos Player for Living Room",
+         "zone": "Living Room",
+         "propogateToParent": true,
+         "props": [
+         ]
+      },
       {
          "uName": "thing:test-state-timers",
          "props": [

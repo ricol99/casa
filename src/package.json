@@ -27,7 +27,7 @@
     "request": "^2.85.0",
     "socket.io": "~1.3.3",
     "socket.io-client": "~1.3.4",
-    "sonos": "^0.14.1",
+    "sonos": "^1.1.2",
     "speedtest-net": "^1.2.12",
     "string": "~3.0.0",
     "suncalc": "~1.6.0",

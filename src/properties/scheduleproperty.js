@@ -1,9 +1,5 @@
 var util = require('util');
 var Property = require('../property');
-var schedule = require('node-schedule');
-var SunCalc = require('suncalc');
-var Forecast = require('forecast.io');
-var Parser = require('cron-parser');
 var Gang = require('../gang');
 
 function ScheduleProperty(_config, _owner) {
