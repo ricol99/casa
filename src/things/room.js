@@ -42,7 +42,7 @@ function Room(_config) {
    this.roomStateConfig.type = "stateproperty";
    this.buildingName = _config.buildingName;
 
-   this.ensurePropertyExists('alarm-state', 'property', { source: { name: this.buildingName, property: "alarm-state"}}, _config);
+   this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
 
    if (!this.roomStateConfig.hasOwnProperty("initialValue")) {
       this.roomStateConfig.initialValue = "no-users-present-day";
