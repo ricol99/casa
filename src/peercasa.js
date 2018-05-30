@@ -40,6 +40,7 @@ function PeerCasa(_config) {
 
    this.lastHeartbeat = Date.now() + 10000;
    this.manualDisconnect = false;
+   this.waitingToConnect = false;
 
    // Callbacks for listening to main casa
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
@@ -596,19 +597,24 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
    }
 
    if (this.persistent) {   // Must be proActiveConnect - ie a client
-      this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
 
-      if (this.manualDisconnect) {
-         // Recreate socket to attempt reconnection
-         this.manualDisconnect = false;
+      if (!this.waitingToConnect) {
+         this.waitingToConnect = true;
+         this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+
+         if (this.manualDisconnect) {
+            // Recreate socket to attempt reconnection
+            this.manualDisconnect = false;
+         }
+
+         console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
+         this.deleteSocket();
+
+         setTimeout( () => {
+            this.waitingToConnect = false;
+            this.connectToPeerCasa();
+         }, 10000);
       }
-
-      console.log(this.uName + ': Attempting to re-establish connection after manual disconnection');
-      this.deleteSocket();
-
-      setTimeout( () => {
-         this.connectToPeerCasa();
-      }, 10000);
    }
    else {
 
