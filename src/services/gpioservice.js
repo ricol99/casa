@@ -6,7 +6,7 @@ function GpioService(_config, _owner) {
    Service.call(this, _config, _owner);
 
    this.gpios = {};
-
+   process.setMaxListeners(50);
 }
 
 util.inherits(GpioService, Service);
