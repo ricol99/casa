@@ -157,8 +157,8 @@
                   { "wait": 3, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
@@ -188,7 +188,7 @@
                   { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-morning" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
                   { "source": "thing:test-1-lamp", "property": "power", "value": false },
@@ -211,8 +211,8 @@
                   { "wait": 3.0, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
@@ -264,8 +264,8 @@
                   { "wait": 0.2, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
@@ -295,7 +295,7 @@
                   { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-morning" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
@@ -318,8 +318,8 @@
                   { "wait": 1.0, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
@@ -640,11 +640,11 @@
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "no-users-present-morning",
+                                 "name": "no-users-present-dull-day",
                                  "targets": [{ "property": "power", "value": false }]
                               },
                               {
-                                 "name": "users-present-morning",
+                                 "name": "users-present-dull-day",
                                  "priority": 4,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }

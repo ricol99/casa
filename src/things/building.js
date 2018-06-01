@@ -43,6 +43,12 @@ function Building(_config) {
    var someUsersInBedConfig = { "name": "some-users-in-bed", "type": "orproperty", "initialValue": false, "sources": [] };
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
+   this.ensurePropertyExists("evening-possible", 'stateproperty',
+                             { ignoreControl: true, initialValue: false,
+                               states: [ { name: false },
+                                         { name: true, schedule: { "rule": "sunset:-1800"},
+                                           source: { property: "night-time", value: true, nextState: false }}]}, _config);
+
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.gang.findSource(_config.users[u].uName));
    }

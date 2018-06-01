@@ -205,7 +205,7 @@
                            "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                         },
                         {
-                           "name": "users-present-morning",
+                           "name": "users-present-dull-day",
                            "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                         }
                      ]
@@ -875,7 +875,7 @@
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
-                                 "name": "users-present-morning",
+                                 "name": "users-present-dull-day",
                                  "priority": 2,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
