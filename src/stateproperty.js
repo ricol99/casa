@@ -14,6 +14,11 @@ function StateProperty(_config, _owner) {
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
    this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
 
+   if (_config.hasOwnProperty("stateProcessor")) {
+      var StateProcessor = require(_config.stateProcessor);
+      this.stateProcessor = new StateProcessor(this);
+   }
+
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
    }
@@ -23,6 +28,11 @@ util.inherits(StateProperty, Property);
 
 StateProperty.prototype.coldStart = function(_data) {
    this.setState(this.value);
+
+   if (this.stateProcessor) {
+      this.stateProcessor.coldStart(_data);
+   }
+
    Property.prototype.coldStart.call(this, _data);
 };
    
@@ -36,7 +46,6 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
    var name = _data.name
    var value = _data.value;
-   var currentState = this.states[this.value];
    var source = null;
 
    if (!this.sourceListeners[_sourceListener.sourceEventName]) {
@@ -44,20 +53,17 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       return;
    }
 
-   if (currentState) {
-      source = currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
-   }
-   else if (this.states["DEFAULT"]) {
-      source = this.states["DEFAULT"].processSourceEvent(_sourceListener.sourceEventName, name, value);
-   }
+   if (this.currentState) {
+      source = this.currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
 
-   if (source) {
+      if (source) {
 
-      if (currentState && (source.nextState === currentState.name)) {
-         this.resetStateTimer(currentState);
-      }
-      else {
-         this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+         if (source.nextState === this.currentState.name) {
+            this.resetStateTimer(this.currentState);
+         }
+         else {
+            this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+         }
       }
    }
 };
@@ -197,6 +203,9 @@ StateProperty.prototype.setState = function(_nextStateName) {
             this.set(_nextStateName, { sourceName: this.owner });
          }, 1, this.transformNextState(immediateNextState));
       }
+      else {
+         this.currentState = nextState;
+      }
 
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
@@ -205,6 +214,17 @@ StateProperty.prototype.setState = function(_nextStateName) {
 StateProperty.prototype.takeControl = function(_priority) {
    this.currentPriority = _priority;
    return this.owner.takeControl(this, this.currentPriority);
+};
+
+StateProperty.prototype.raiseEvent = function(_eventName, _data) {
+   this.owner.raiseEvent(_eventName, _data);
+};
+
+StateProperty.prototype.alignProperties = function(_properties) {
+
+   if ((_properties && _properties.length > 0) && (this.ignoreControl || this.takeControl((this.currentState) ? this.currentState.priority : this.priority))) {
+      this.owner.alignProperties(_properties);
+   }
 };
 
 StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
@@ -218,7 +238,7 @@ StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _eve
       if (_events) {
 
          for (var i = 0; i < _events.length; ++i) {
-            this.owner.raiseEvent(_events[i].name);
+            this.raiseEvent(_events[i].name);
          }
       }
    }
@@ -229,8 +249,8 @@ StateProperty.prototype.becomeController = function() {
    this.controllingOwner = true;
 
    // Re-apply current state
-   if (this.states[this.value]) {
-      this.states[this.value].alignTargetsAndEvents();
+   if (this.currentState) {
+      this.currentState.alignTargetsAndEvents();
    }
 };
 
@@ -255,6 +275,15 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    }
 
    return sourceListener;
+};
+
+StateProperty.prototype.launchTargetFunction = function(_targetFunction, _priority) {
+
+   if (this.ignoreControl || this.takeControl(_priority)) {
+       return this.stateProcessor[_targetFunction](this.currentState);
+   }
+
+   return false;
 };
 
 function State(_config, _owner) {
@@ -303,6 +332,10 @@ function State(_config, _owner) {
    }
    else if (_config.hasOwnProperty("event")) {
       this.events = [ _config.event ];
+   }
+
+   if (_config.hasOwnProperty("targetFunction")) {
+      this.targetFunction = _config.targetFunction;
    }
 
    if (_config.hasOwnProperty("schedules")) {
@@ -542,10 +575,16 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 }
 
 State.prototype.alignTargetsAndEvents = function() {
-   var newTargets = this.filterTargetsAndEvents(this.targets);
-   var newEvents = this.filterTargetsAndEvents(this.events);
-   this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
-   return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
+
+   if (this.targetFunction) {
+      return this.owner.launchTargetFunction(this.targetFunction, this.priority);
+   }
+   else {
+      var newTargets = this.filterTargetsAndEvents(this.targets);
+      var newEvents = this.filterTargetsAndEvents(this.events);
+      this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
+      return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
+   }
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -585,10 +624,10 @@ State.prototype.exiting = function(_event, _value) {
 State.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {
-      this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+      this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
    }
    else {
-      this.owner.owner.raiseEvent(_event.name, { sourceName: this.uName });
+      this.owner.raiseEvent(_event.name, { sourceName: this.uName });
    }
 
    this.owner.set(this.name, { sourceName: this.owner.owner });

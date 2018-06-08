@@ -53,7 +53,6 @@
                   { "wait": 0.5, "property": "test-3-present", "value": false }
                ],
                "expectedSequence": [
-                  { "source": "building:test", "property": "users-state", "value": "empty" },
                   { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
                   { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
                   { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-empty" },

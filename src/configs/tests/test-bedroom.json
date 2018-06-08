@@ -64,8 +64,8 @@
                   { "source": "thing:test-1-lamp", "property": "power", "value": true },
                   { "source": "thing:test-2-lamp", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -101,8 +101,8 @@
                   { "source": "thing:test-1-lamp", "property": "power", "value": true },
                   { "source": "thing:test-2-lamp", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -137,8 +137,8 @@
                   { "source": "thing:test-1-lamp", "property": "power", "value": true },
                   { "source": "thing:test-2-lamp", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -190,8 +190,8 @@
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" }
                ]
@@ -244,8 +244,8 @@
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -298,8 +298,8 @@
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -351,8 +351,8 @@
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             },
@@ -385,8 +385,8 @@
                   { "source": "thing:test-1-lamp", "property": "power", "value": true },
                   { "source": "thing:test-2-lamp", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
+		  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false }
                ]
             }

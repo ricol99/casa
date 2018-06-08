@@ -3,7 +3,7 @@ var Gang = require('./gang');
 var _gangInstance = null;
 
 function Service(_config) {
-   this.confg = _config;
+   this.config = _config;
    this.uName = _config.uName;
    this.displayName = _config.displayName;
 

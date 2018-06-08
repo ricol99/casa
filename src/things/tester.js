@@ -101,14 +101,46 @@ Tester.prototype.sourceIsInvalid = function(_data) {
 Tester.prototype.sourceIsValid = function(_data) {
 }
 
+Tester.prototype.matchExpectedEvent = function(_data, _index) {
+   var name;
+
+   if (this.testCases[this.currentTestCase].expectedSequence[_index].hasOwnProperty('property')) {
+      name = this.testCases[this.currentTestCase].expectedSequence[_index].property;
+   }
+   else {
+      name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
+   }
+
+   return ((_data.sourceName === this.testCases[this.currentTestCase].expectedSequence[_index].source) &&
+       (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));
+};
+
 Tester.prototype.receivedEventFromSource = function(_data) {
 
    if (!_data.coldStart) {
+      let result = false;
+      let fuzzFactor = 0;
 
-      if ((_data.sourceName === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].source) &&
-          (_data.name === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].property) &&
-          (_data.value === this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].value)) {
+      if (this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].hasOwnProperty('fuzz')) {
+         fuzzFactor = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition].fuzz;
+      }
 
+      for (var i = this.expectedPosition; (i <= (this.expectedPosition + fuzzFactor)) && (i < this.testCases[this.currentTestCase].expectedSequence.length); ++i) {
+         result = this.matchExpectedEvent(_data, i);
+
+         if (result) {
+
+            if (i !== this.expectedPosition) {
+               let temp = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition];
+               this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition] = this.testCases[this.currentTestCase].expectedSequence[i];
+               this.testCases[this.currentTestCase].expectedSequence[i] = temp;
+               this.testCases[this.currentTestCase].expectedSequence[i].fuzz = 0;
+            }
+            break;
+         }
+      }
+
+      if (result) {
          console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
