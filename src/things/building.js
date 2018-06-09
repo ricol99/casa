@@ -133,7 +133,7 @@ function Building(_config) {
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
 
    // night-time property
-   this.ensurePropertyExists("night-time", 'scheduleproperty', { intialValue: false, events: [ { rule: "05 02 * * *", value: true } ],
+   this.ensurePropertyExists("night-time", 'scheduleproperty', { intialValue: false, events: [ { rule: "05 03 * * *", value: true } ],
                                                                  source: { property: "users-state", transform: "$value===\"occupied-asleep\"" }}, _config);
 
    // Alarm state property definition

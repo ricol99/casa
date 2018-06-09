@@ -53,7 +53,9 @@ function Bedroom(_config) {
             {
                "name": "not-present",
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
-                           { "event": "room-switch-event", "nextState": "room-switch-touched" }]
+                           { "event": "room-switch-event", "nextState": "room-switch-touched" }],
+               "schedule": { "rule": "5 2 * * *", "nextState": "asleep-in-bed" }
+
             },
             {
                "name": "room-switch-touched",

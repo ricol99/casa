@@ -623,14 +623,19 @@ State.prototype.exiting = function(_event, _value) {
 
 State.prototype.scheduledEventTriggered = function(_event) {
 
-   if (_event.hasOwnProperty("value")) {
-      this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+   //if (_event.hasOwnProperty("value")) {
+      //this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+   //}
+   //else {
+      //this.owner.raiseEvent(_event.name, { sourceName: this.uName });
+   //}
+
+   if (_event.hasOwnProperty("nextState") && (this.owner.currentState === this)) {
+      this.owner.set(_event.nextState, { sourceName: this.owner.owner });
    }
    else {
-      this.owner.raiseEvent(_event.name, { sourceName: this.uName });
+      this.owner.set(this.name, { sourceName: this.owner.owner });
    }
-
-   this.owner.set(this.name, { sourceName: this.owner.owner });
 }
 
 function copyObject(_sourceObject) {
