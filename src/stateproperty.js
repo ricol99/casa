@@ -414,8 +414,6 @@ function State(_config, _owner) {
          process.exit(3);
       }
 
-      // TBD XXX Currently ignoring return value. Should I use it to determine which state we are in mulitple schedules?
-      // Could use state timeout + schedule to do this, may not work though
       this.scheduleService.registerEvents(this, this.schedules);
    }
 }
@@ -622,16 +620,23 @@ State.prototype.exiting = function(_event, _value) {
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
+   console.log(this.uName + ": scheduledEventTriggered() event name=" + _event.name);
 
-   //if (_event.hasOwnProperty("value")) {
-      //this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
-   //}
-   //else {
-      //this.owner.raiseEvent(_event.name, { sourceName: this.uName });
-   //}
+   if (_event.hasOwnProperty("name")) {
 
-   if (_event.hasOwnProperty("nextState") && (this.owner.currentState === this)) {
-      this.owner.set(_event.nextState, { sourceName: this.owner.owner });
+      if (_event.hasOwnProperty("value")) {
+         this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+      }
+      else {
+         this.owner.raiseEvent(_event.name, { sourceName: this.uName });
+      }
+   }
+
+   if (_event.hasOwnProperty("nextState")) {
+
+      if (this.owner.currentState === this) {
+         this.owner.set(_event.nextState, { sourceName: this.owner.owner });
+      }
    }
    else {
       this.owner.set(this.name, { sourceName: this.owner.owner });
