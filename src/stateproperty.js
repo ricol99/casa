@@ -265,7 +265,15 @@ StateProperty.prototype.sourceIsInvalid = function(_data) {
 };
 
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
-   var sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
+   var sourceListenerName;
+
+   if (_config.hasOwnProperty("value")) {
+      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
+   }
+   else {
+      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
+   }
+
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
@@ -370,14 +378,10 @@ function State(_config, _owner) {
          var val = (this.sources[i].hasOwnProperty('value')) ? this.sources[i].value : true;
 
          if (!this.sourceMap[sourceListener.sourceEventName]) {
-            this.sourceMap[sourceListener.sourceEventName] = {};
+            this.sourceMap[sourceListener.sourceEventName] = [];
          }
 
-         if (!this.sourceMap[sourceListener.sourceEventName][val]) {
-            this.sourceMap[sourceListener.sourceEventName][val] = [];
-         }
-
-         this.sourceMap[sourceListener.sourceEventName][val].push(this.sources[i]);
+         this.sourceMap[sourceListener.sourceEventName].push(this.sources[i]);
 
          if (this.sources[i].hasOwnProperty("guards")) {
 
@@ -441,7 +445,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    }
 
    if (this.sourceMap[_sourceEventName]) {
-      sources = (this.sourceMap[_sourceEventName][_value]);
+      sources = (this.sourceMap[_sourceEventName]);
    }
    
    if (sources) {
@@ -594,7 +598,7 @@ State.prototype.checkSourceProperties = function() {
 
          if (this.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
             var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
-            var sourceEventName = sourceName + ":" + this.sources[i].property;
+            var sourceEventName = sourceName + ":" + this.sources[i].property + ":" + this.sources[i].value.toString();
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;
 

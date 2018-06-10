@@ -38,8 +38,17 @@ function SourceListener(_config, _owner) {
       this.eventName = _config.event;
    }
 
-   this.sourceEventName = this.sourceName + ":" + this.eventName;
-   this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceName + ":" + this.eventName;
+   this.matchingValueDefined = _config.hasOwnProperty('value');
+
+   if (this.matchingValueDefined) {
+      this.matchingValue = _config.value;
+      this.sourceEventName = this.sourceName + ":" + this.eventName + ":" + this.matchingValue.toString();
+   }
+   else {
+      this.sourceEventName = this.sourceName + ":" + this.eventName;
+   }
+
+   this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceEventName;
 
    this._id = this.uName;   // *** TBD
 
@@ -169,12 +178,11 @@ SourceListener.prototype.goInvalid = function(_data) {
    this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
-//
-// Internal method - Called by the last step in the pipeline
-//
-SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
-   _data.value = _newValue;
-   this.sourcePropertyValue = _newValue;
+SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
+
+   if (this.matchingValueDefined && (_data.value !== this.matchingValue)) {
+      return;
+   }
 
    if (this.isTarget) {
       this.owner.receivedEventFromTarget(util.copy(_data));
@@ -182,6 +190,16 @@ SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _da
    else {
       this.owner.receivedEventFromSource(util.copy(_data));
    }
+};
+
+//
+// Internal method - Called by the last step in the pipeline
+//
+SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
+   _data.value = _newValue;
+   this.sourcePropertyValue = _newValue;
+
+   this.makeClientAwareOfEvent(_data);
 };
 
 //
@@ -289,13 +307,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
       }
       else {
          this.sourcePropertyValue = this.lastData.value;
-
-         if (this.isTarget) {
-            this.owner.receivedEventFromTarget(util.copy(this.lastData));
-         }
-         else {
-            this.owner.receivedEventFromSource(util.copy(this.lastData));
-         }
+         this.makeClientAwareOfEvent(this.lastData);
       }
    }
 };
@@ -320,11 +332,8 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
       if (this.pipeline) {
          this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
       }
-      else if (this.isTarget) {
-         this.owner.receivedEventFromTarget(util.copy(this.lastData));
-      }
       else {
-         this.owner.receivedEventFromSource(util.copy(this.lastData));
+         this.makeClientAwareOfEvent(this.lastData);
       }
    }
 };

@@ -43,10 +43,10 @@
                   { "wait": 0.5, "target": "thing:test-alarm", "property": "stay-armed", "value": true },
                   { "wait": 3.5, "target": "thing:test-alarm", "property": "fire-alarm", "value": true },
                   { "wait": 0.5, "target": "thing:test-alarm", "property": "fire-alarm", "value": false },
-                  { "wait": 3.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": "true" },
+                  { "wait": 3.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": true },
                   { "wait": 0.5, "target": "thing:test-alarm", "property": "fire-alarm", "value": true },
                   { "wait": 0.5, "target": "thing:test-alarm", "property": "fire-alarm", "value": false },
-                  { "wait": 0.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": "false" },
+                  { "wait": 0.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": false },
                   { "wait": 0.5, "target": "thing:test-alarm", "property": "stay-armed", "value": false },
                   { "wait": 1, "property": "test-1-present", "value": false },
                   { "wait": 0.5, "property": "test-2-present", "value": false },
@@ -76,6 +76,7 @@
                   { "source": "building:test", "property": "alarm-state", "value": "stay-armed-house-occupied" },
                   { "source": "building:test", "property": "alarm-state", "value": "zone-alarm" },
                   { "source": "building:test", "property": "alarm-state", "value": "fire-alarm" },
+                  { "source": "building:test", "property": "alarm-state", "value": "zone-alarm" },
                   { "source": "building:test", "property": "alarm-state", "value": "stay-armed" },
                   { "source": "building:test", "property": "alarm-state", "value": "not-armed" },
                   { "source": "building:test", "property": "test-1-user-state", "value": "not-present" },
@@ -96,9 +97,9 @@
                   { "wait": 0.5, "property": "test-3-present", "value": false },
                   { "wait": 2, "target": "bedroom:test-1", "property": "movement", "value": true },
                   { "wait": 1.5, "target": "bedroom:test-1", "property": "movement", "value": false },
-                  { "wait": 0.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": "true" },
-                  { "wait": 1.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": "false" },
-                  { "wait": 1.5, "target": "thing:test-alarm", "property": "stay-armed", "value": "false" }
+                  { "wait": 0.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": true },
+                  { "wait": 1.5, "target": "thing:test-alarm", "property": "zone-alarm", "value": false },
+                  { "wait": 1.5, "target": "thing:test-alarm", "property": "stay-armed", "value": false }
                ],
                "expectedSequence": [
                   { "source": "building:test", "property": "users-state", "value": "empty" },

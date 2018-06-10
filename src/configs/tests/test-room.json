@@ -41,8 +41,8 @@
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
                   { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
+                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day", "fuzz": 1 },
+                  { "source": "thing:test-main-lights", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
                ],
                "cleanupSequence": [
@@ -77,7 +77,7 @@
                   { "source": "room:test-room", "property": "room-state", "value": "users-present-evening" },
                   { "source": "thing:test-main-lights", "property": "power", "value": true },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
+                  { "source": "thing:test-main-lights", "property": "power", "value": false, "fuzz": 1 },
                   { "source": "building:test", "property": "evening-possible", "value": false },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
                   { "source": "room:test-room", "property": "room-state", "value": "users-present-night" },
