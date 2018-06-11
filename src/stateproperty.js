@@ -197,7 +197,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
       var immediateNextState = nextState.initialise();
 
       if (immediateNextState) {
-         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + newImmediateState);
+         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
          setTimeout( (_nextStateName) => {
             this.set(_nextStateName, { sourceName: this.owner });
