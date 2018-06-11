@@ -180,7 +180,7 @@ SourceListener.prototype.goInvalid = function(_data) {
 
 SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
 
-   if (this.matchingValueDefined && (_data.value !== this.matchingValue)) {
+   if (this.matchingValueDefined && (this.sourceRawValue !== this.matchingValue)) {
       return;
    }
 

@@ -636,10 +636,10 @@ State.prototype.scheduledEventTriggered = function(_event) {
       }
    }
 
-   if (_event.hasOwnProperty("nextState")) {
+   if (_event.config.hasOwnProperty("nextState")) {
 
       if (this.owner.currentState === this) {
-         this.owner.set(_event.nextState, { sourceName: this.owner.owner });
+         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
       }
    }
    else {

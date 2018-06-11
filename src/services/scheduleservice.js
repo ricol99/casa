@@ -122,7 +122,7 @@ Schedule.prototype.createEventFromConfig = function(_owner, _eventConfig) {
       _eventConfig.rules = [ _eventConfig.rule ];
    }
 
-   var event = { name: _eventConfig.name, owner: _owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true };
+   var event = { name: _eventConfig.name, owner: _owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true, config: _eventConfig };
 
    for (var i = 0; i < _eventConfig.rules.length; ++i) {
       event.rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
