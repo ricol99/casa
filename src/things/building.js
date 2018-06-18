@@ -44,7 +44,7 @@ function Building(_config) {
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    this.ensurePropertyExists("evening-possible", 'scheduleproperty',
-                             { "initialValue": false, "events": [ { "rule": "sunset:-3600", "value": true }],
+                             { "initialValue": false, "events": [ { "rule": "sunset:-7200", "value": true }],
                                "source": { "property": "night-time", "value": true, "transform": "!$value" }}, _config);
 
    for (var u = 0; u < _config.users.length; ++u) {

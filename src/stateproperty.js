@@ -346,11 +346,19 @@ function State(_config, _owner) {
       this.targetFunction = _config.targetFunction;
    }
 
+   if (_config.hasOwnProperty("schedule")) {
+      _config.schedules = [ _config.schedule ];
+   }
+
    if (_config.hasOwnProperty("schedules")) {
       this.schedules = _config.schedules;
-   }
-   else if (_config.hasOwnProperty("schedule")) {
-      this.schedules = [ _config.schedule ];
+
+      for (var x = 0; x < this.schedules.length; ++x) {
+
+         if (this.schedules[x].hasOwnProperty('guard')) {
+            this.schedules[x].guards = [ this.schedules[x].guard ];
+         }
+      }
    }
 
    if (_config.hasOwnProperty("timeout")) {
@@ -639,7 +647,23 @@ State.prototype.scheduledEventTriggered = function(_event) {
    if (_event.config.hasOwnProperty("nextState")) {
 
       if (this.owner.currentState === this) {
-         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
+         var guardsOk = true;
+
+         if (_event.config.hasOwnProperty("guards")) { 
+
+            for (var a = 0; a < _event.config.guards.length; ++a) {
+               var value = _event.config.guards[a].hasOwnProperty("value") ? _event.config.guards[a].value : true;
+
+               if (this.owner.owner.getProperty(_event.config.guards[a].property) !== value) {
+                  guardsOk = false;
+                  break;
+               }
+            }
+         }
+
+         if (guardsOk) {
+            this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
+         }
       }
    }
    else {

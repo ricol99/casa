@@ -54,7 +54,8 @@ function Bedroom(_config) {
                "name": "not-present",
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" }],
-               "schedule": { "rule": "5 2 * * *", "nextState": "asleep-in-bed" }
+               "schedule": { "rule": "5 2 * * *", "guard": { "property": this.users[i].sName+"-in-building" },
+                             "nextState": "asleep-in-bed" }
 
             },
             {
@@ -114,6 +115,10 @@ function Bedroom(_config) {
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" }},  _config);
+
+      this.ensurePropertyExists(this.users[i].sName+"-in-building", 'property',
+                                { "initialValue": false, "source": { "uName": this.buildingName, "property": this.users[i].sName+"-user-state",
+                                  "transform": "$value !== \"not-present\"" }}, _config);
 
       this.bedFullConfig.sources.push({ property: this.users[i].sName+"-in-bed" });
    }
