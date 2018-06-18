@@ -488,9 +488,7 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 
          if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
 
-            if (_activeQueue && ((_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)
-                                 || !_guardedObject.guards[i].hasOwnProperty("active"))) {
-
+            if (_activeQueue && (_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)) {
                _activeQueue.push(_guardedObject);
             }
             return false;
@@ -646,24 +644,8 @@ State.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.config.hasOwnProperty("nextState")) {
 
-      if (this.owner.currentState === this) {
-         var guardsOk = true;
-
-         if (_event.config.hasOwnProperty("guards")) { 
-
-            for (var a = 0; a < _event.config.guards.length; ++a) {
-               var value = _event.config.guards[a].hasOwnProperty("value") ? _event.config.guards[a].value : true;
-
-               if (this.owner.owner.getProperty(_event.config.guards[a].property) !== value) {
-                  guardsOk = false;
-                  break;
-               }
-            }
-         }
-
-         if (guardsOk) {
-            this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
-         }
+      if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
+         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
       }
    }
    else {

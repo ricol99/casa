@@ -65,7 +65,6 @@
                   { "wait": 3, "event": "jump-to-guarded-source-state" },
                   { "wait": 1, "event": "go-through-guard-1" },
                   { "wait": 3, "property": "test-guard-prop-1", "value": true },
-                  //{ "wait": 1, "event": "go-through-guard-1" },
                   { "wait": 3, "property": "test-guard-prop-1", "value": false },
                   { "wait": 1, "property": "test-prop-3", "value": false },
                   { "wait": 1, "event": "back-to-test-guarded-source-state" },
@@ -229,7 +228,7 @@
                            "name": "test-guard-1-state",
                            "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" },
                                        { "event": "back-to-test-guarded-source-state", "nextState": "test-guarded-source-state" }],
-                           "target": { "guard": { "property": "test-guard-prop-2", "value": false },
+                           "target": { "guard": { "active": true, "property": "test-guard-prop-2", "value": false },
                                        "property": "test-prop-3", "value": true }
                         },
                         {
