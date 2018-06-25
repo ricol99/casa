@@ -6,7 +6,7 @@ var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
 function HomekitSecuritySystem(_config) {
-
+   _config.invokeManualMode = false;
    HomekitAccessory.call(this, _config);
    this.thingType = "homekit-security-system-accessory";
 

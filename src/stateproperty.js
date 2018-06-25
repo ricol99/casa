@@ -457,7 +457,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
       
       for (var i = 0; i < sources.length; ++i) {
          
-         if (sources[i].hasOwnProperty("nextState")) { 
+         if (sources[i].hasOwnProperty("nextState") || sources[i].hasOwnProperty("handler")) { 
             
             if (this.checkGuard(sources[i], this.activeGuardedSources)) {
                return sources[i];
@@ -573,9 +573,12 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
       if (_targetsOrEvents[i].hasOwnProperty("delay")) {
 
-         this.targetTimeouts.push({ targetOrEvent: _targetOrEvent, timeout: setTimeout( (_index) => {
+         this.targetTimeouts.push({ targetOrEvent: _targetsOrEvents[i], timeout: setTimeout( (_index) => {
 
-            if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("property")) {
+            if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("handler")) {
+               this.launchTargetHandlers([ this.targetTimeouts[_index].targetOrEvent]);
+            }
+            else if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("property")) {
                this.owner.alignTargetPropertiesAndEvents([this.targetTimeouts[_index].targetOrEvent], null, this.priority);
             }
             else {
@@ -583,7 +586,7 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
             }
             this.targetTimeouts[_index] = null;
 
-         }, _targetOrEvent.delay*1000, this.targetTimeouts.length)});
+         }, _targetsOrEvents[i].delay*1000, this.targetTimeouts.length)});
       }
       else if (this.checkGuard(_targetsOrEvents[i], this.activeGuardedTargets)) {
          newTargetsOrEvents.push(_targetsOrEvents[i]);
