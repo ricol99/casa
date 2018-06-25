@@ -106,6 +106,7 @@ LightwaveRfService.prototype.registerWithLink = function(_callback) {
 }
 
 LightwaveRfService.prototype.addToQueue = function(_message, _callback) {
+   console.log(this.uName + ": Added request to queue, message=" + _message);
    this.queue.push(new Request(this, _message, _callback));
    this.makeNextRequest();
 }
@@ -159,7 +160,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request) {
    }
 
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
-   //console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
+   console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    this.requests[_request.code] = _request;

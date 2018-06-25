@@ -14,11 +14,6 @@ function StateProperty(_config, _owner) {
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
    this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
 
-   if (_config.hasOwnProperty("stateProcessor")) {
-      var StateProcessor = require(_config.stateProcessor);
-      this.stateProcessor = new StateProcessor(this);
-   }
-
    for (var i = 0; i < _config.states.length; ++i) {
       this.states[_config.states[i].name] = new State(_config.states[i], this);
    }
@@ -28,11 +23,6 @@ util.inherits(StateProperty, Property);
 
 StateProperty.prototype.coldStart = function(_data) {
    this.setState(this.value);
-
-   if (this.stateProcessor) {
-      this.stateProcessor.coldStart(_data);
-   }
-
    Property.prototype.coldStart.call(this, _data);
 };
    
@@ -58,11 +48,17 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
       if (source) {
 
-         if (source.nextState === this.currentState.name) {
-            this.resetStateTimer(this.currentState);
+         if (source.hasOwnProperty('nextState')) {
+
+            if (source.nextState === this.currentState.name) {
+               this.resetStateTimer(this.currentState);
+            }
+            else {
+               this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+            }
          }
-         else {
-            this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+         else if (source.hasOwnProperty('handler')) {
+            this.owner[source.handler](this.currentState, _data);
          }
       }
    }
@@ -285,10 +281,10 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    return sourceListener;
 };
 
-StateProperty.prototype.launchTargetFunction = function(_targetFunction, _priority) {
+StateProperty.prototype.launchTargetFunction = function(_targetHandler, _priority) {
 
    if (this.ignoreControl || this.takeControl(_priority)) {
-       return this.stateProcessor[_targetFunction](this.currentState);
+       return this.owner[_targetHandler](this.currentState);
    }
 
    return false;
@@ -302,6 +298,7 @@ function State(_config, _owner) {
    this.sourceMap = {};
    this.activeGuardedSources = [];
    this.activeGuardedTargets = [];
+   this.targetTimeouts = [];
 
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
@@ -342,8 +339,8 @@ function State(_config, _owner) {
       this.events = [ _config.event ];
    }
 
-   if (_config.hasOwnProperty("targetFunction")) {
-      this.targetFunction = _config.targetFunction;
+   if (_config.hasOwnProperty("targetHandler")) {
+      this.targetHandler = _config.targetHandler;
    }
 
    if (_config.hasOwnProperty("schedule")) {
@@ -574,7 +571,21 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
 
    for (var i = 0; i < _targetsOrEvents.length; ++i) {
 
-      if (this.checkGuard(_targetsOrEvents[i], this.activeGuardedTargets)) {
+      if (_targetsOrEvents[i].hasOwnProperty("delay")) {
+
+         this.targetTimeouts.push({ targetOrEvent: _targetOrEvent, timeout: setTimeout( (_index) => {
+
+            if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("property")) {
+               this.owner.alignTargetPropertiesAndEvents([this.targetTimeouts[_index].targetOrEvent], null, this.priority);
+            }
+            else {
+               this.owner.alignTargetPropertiesAndEvents(null, [this.targetTimeouts[_index].targetOrEvent], this.priority);
+            }
+            this.targetTimeouts[_index] = null;
+
+         }, _targetOrEvent.delay*1000, this.targetTimeouts.length)});
+      }
+      else if (this.checkGuard(_targetsOrEvents[i], this.activeGuardedTargets)) {
          newTargetsOrEvents.push(_targetsOrEvents[i]);
       }
    }
@@ -582,17 +593,34 @@ State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
    return newTargetsOrEvents;
 }
 
-State.prototype.alignTargetsAndEvents = function() {
+State.prototype.launchTargetHandlers = function(_targets) {
+   var propertyTargets = [];
 
-   if (this.targetFunction) {
-      return this.owner.launchTargetFunction(this.targetFunction, this.priority);
+   if (!_targets) {
+      return _targets;
    }
-   else {
-      var newTargets = this.filterTargetsAndEvents(this.targets);
-      var newEvents = this.filterTargetsAndEvents(this.events);
-      this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
-      return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
+
+   for (var i = 0; i < _targets.length; ++i) {
+
+      if (_targets[i].hasOwnProperty("handler")) {
+         this.owner.launchTargetFunction(_targets[i].handler, this.priority);
+      }
+      else {
+         propertyTargets.push(_targets[i]);
+      }
    }
+
+   return propertyTargets;
+};
+
+State.prototype.alignTargetsAndEvents = function() {
+   var filteredTargets = this.filterTargetsAndEvents(this.targets);
+   var newTargets = this.launchTargetHandlers(filteredTargets);
+   var newEvents = this.filterTargetsAndEvents(this.events);
+
+   this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
+
+   return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -627,6 +655,15 @@ State.prototype.checkSourceProperties = function() {
 State.prototype.exiting = function(_event, _value) {
    this.activeGuardedSources = [];
    this.activeGuardedTargets = [];
+
+   for (var i = 0; i < this.targetTimeouts.length; ++i) {
+
+      if (this.targetTimeouts[i]) {
+         cancelTimeout(this.targetTimeouts[i].timeout);
+      }
+   }
+
+   this.targetTimeouts = [];
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
@@ -651,19 +688,6 @@ State.prototype.scheduledEventTriggered = function(_event) {
    else {
       this.owner.set(this.name, { sourceName: this.owner.owner });
    }
-}
-
-function copyObject(_sourceObject) {
-   var newObject = {};
-
-   for (var prop in _sourceObject) {
-
-      if (_sourceObject.hasOwnProperty(prop)){
-         newObject[prop] = _sourceObject[prop];
-      }
-   }
-
-   return newObject;
 }
 
 module.exports = exports = StateProperty;

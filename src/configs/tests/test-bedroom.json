@@ -373,7 +373,7 @@
                   { "source": "thing:test-2-lamp", "property": "power", "value": true },
                   { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
                   { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed", "fuzz": 1 },
                   { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
                   { "source": "thing:test-1-lamp", "property": "power", "value": false },
                   { "source": "thing:test-2-lamp", "property": "power", "value": false },
