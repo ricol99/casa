@@ -376,7 +376,7 @@ AlarmTexecom.prototype.setAcknowledgementTimer = function() {
 
    this.acknowledgementTimer = setTimeout( () => {
       console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
-      this.alignPropertyValue("target-state", this.getProperty("current-state");
+      this.alignPropertyValue("target-state", this.getProperty("current-state"));
    });
 };
 
@@ -392,7 +392,7 @@ AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget) {
    this.clearAcknowledgementTimer();
 
    if (this.getProperty('alarm-connection-state') !== "idle-state") {
-      console.log(this.uName+": "Request for new transaction received while servicing another transaction, queue it up!");
+      console.log(this.uName + ": Request for new transaction received while servicing another transaction, queue it up!");
       this.transactionTarget = _transactionTarget;
       return;
    }
