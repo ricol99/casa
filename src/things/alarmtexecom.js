@@ -139,8 +139,7 @@ function AlarmTexecom(_config) {
              target: { handler: "armAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleArmResponse" },
-                       { event: "wait-for-acknowledgement", nextState: "wait-for-acknowledgement-state" },
-                       { event: "cancel-transaction", nextState: "transaction-cancelling-state" },
+                       { event: "transaction-complete", nextState: "transaction-complete-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
@@ -148,6 +147,7 @@ function AlarmTexecom(_config) {
              target: { handler: "disarmAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleDisarmResponse" },
+                       { event: "transaction-complete", nextState: "transaction-complete-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
@@ -159,25 +159,12 @@ function AlarmTexecom(_config) {
                        { event: "error", nextState: "error-state"}]
           },
           {
-             name: "wait-for-acknowledgement-state",
-             timeout: { duration: 60, nextState: 'error-state' },
-             sources: [{ event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
-                       { event: "error", nextState: "error-state"}]
-          },
-          {
              name: "transaction-complete-state",
              target: { handler: "transactionComplete" },
              sources: [{ event: "go-idle", nextState: "idle-state" },
                        { event: "arm-alarm", nextState: "arm-alarm-state" },
                        { event: "disarm-alarm", nextState: "disarm-alarm-state" },
                        { event: "retrieve-info-from-alarm", nextState: "retrieve-info-from-alarm-state" }]
-          },
-          {
-             name: "transaction-cancelling-state",
-             timeout: { duration: 5,from: [ "arm-alarm-state" ], nextState: "error-state" },
-             sources: [{ event: "data-received-from-alarm", handler: "handleCancelledTransactionResponse" },
-                       { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
-                       { event: "error", nextState: "error-state"}]
           },
           {
              name: "error-state",
@@ -377,12 +364,6 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
                }, 10);
             }
          }
-         if (this.getProperty('alarm-connection-state') != "idle-state") {
-
-            setTimeout( () => {        // Make sure the target-state is set before executing request
-               this.cancelOngoingRequest();
-            }, 10);
-         }
       }
    }
 
@@ -391,15 +372,28 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
    }
 };
 
-AlarmTexecom.prototype.cancelOngoingRequest = function() {
-   this.raiseEvent('cancel-transaction');
+AlarmTexecom.prototype.setAcknowledgementTimer = function() {
+
+   this.acknowledgementTimer = setTimeout( () => {
+      console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
+      this.alignPropertyValue("target-state", this.getProperty("current-state");
+   });
+};
+
+AlarmTexecom.prototype.clearAcknowledgementTimer = function() {
+
+   if (this.acknowledgementTimer) {
+      clearTimeout(this.acknowledgementTimer);
+      this.acknowledgementTimer = null;
+   }
 };
 
 AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget) {
+   this.clearAcknowledgementTimer();
 
    if (this.getProperty('alarm-connection-state') !== "idle-state") {
-      console.log(this.uName+": Already requesting another action - cancelling it!");
-      this.cancelOngoingRequest();
+      console.log(this.uName+": "Request for new transaction received while servicing another transaction, queue it up!");
+      this.transactionTarget = _transactionTarget;
       return;
    }
 
@@ -619,9 +613,8 @@ AlarmTexecom.prototype.handleArmResponse = function(_currentState, _data) {
 
    if (this.receiveBuffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
       console.log(this.uName + ": Arm command acknowledged by Texecom alarm");
-      this.socket.destroy();
-      this.socket = null;
-      this.raiseEvent('wait-for-acknowledgement');
+      this.setAcknowledgementTimer();
+      this.raiseEvent('alarm-transaction-complete');
    }
    else {
       console.error(this.uName + ": Unable to arm alarm!");
@@ -667,7 +660,6 @@ AlarmTexecom.prototype.transactionComplete = function(_currentState) {
 
    if (this.transactionTarget === this.getProperty('target-state')) {
       this.socket.end();
-      this.alignPropertyValue('current-value', this.transactionTarget);
       this.raiseEvent('go-idle');
    }
    else {
@@ -684,10 +676,6 @@ AlarmTexecom.prototype.errorHasOccurred = function(_currentState) {
 
    this.alignPropertyValue('target-state', this.getProperty('current-state'));
    this.raiseEvent('go-idle');
-};
-
-AlarmTexecom.prototype.handleCancelledTransactionResponse = function(_currentState, _data) {
-   this.raiseEvent('alarm-transaction-complete');
 };
 
 module.exports = exports = AlarmTexecom;
