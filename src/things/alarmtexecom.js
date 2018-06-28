@@ -28,6 +28,7 @@ var STATE_NIGHT_ARM = 2;
 var STATE_DISARMED = 3;
 var STATE_ALARM_TRIGGERED = 4;
 
+var REQUEST_STATE_IDLE = 999;
 var REQUEST_STATE = 100;
 
 function AlarmTexecom(_config) {
@@ -46,7 +47,7 @@ function AlarmTexecom(_config) {
    this.stayPartArmNumber = _config.hasOwnProperty("stayPartArmNumber") ? _config.stayPartArmNumber : 1;
    this.nightPartArmNumber = _config.hasOwnProperty("nightPartArmNumber") ? _config.nightPartArmNumber : 2;
 
-   this.transactionTarget = STATE_DISARMED;
+   this.transactionTarget = REQUEST_STATE_IDLE;
 
    this.ensurePropertyExists('current-state', 'property', { initialValue: STATE_DISARMED }, _config);
    this.ensurePropertyExists('target-state', 'property', { initialValue: STATE_DISARMED }, _config);
@@ -285,17 +286,6 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
    buf[0] = _data[0];
    _socket.write(buf);
 
-   var info = {
-      protocol: _message.protocol,
-      accountNumber: _message.accountNumber,
-      area: _message.area,
-      event: _message.event,
-      value: _message.value,
-      valueType: _message.valueName,
-      extraText: _message.extraText,
-      description: _message.description
-   };
-
    if (this.eventHandlers.hasOwnProperty(_message.event)) {
       this.eventHandlers[_message.event].call(this, _message);
    }
@@ -322,12 +312,12 @@ AlarmTexecom.prototype.restartWatchdog = function() {
    }
 
    this.watchdog = setTimeout( () => {
-      this.watchdog = undefined;
+      this.watchdog = null;
       this.pollsMissed++;
 
       if (this.pollsMissed > this.maxPollMisses) {
          // Lost connection with alarm
-         console.info(this.uName + ": Lost connection to Texecom Alarm!");
+         console.error(this.uName + ": Lost connection to Texecom Alarm!");
          this.pollsMissed = 0;
          this.alignPropertyValue('ACTIVE', false);
       }
@@ -342,7 +332,7 @@ AlarmTexecom.prototype.stopWatchdog = function() {
 
    if (this.watchdog) {
       this.clearTimeout(this.watchdog);
-      this.watchdog = undefined;
+      this.watchdog = null;
    }
 };
 
@@ -648,6 +638,7 @@ AlarmTexecom.prototype.handleRetrieveInfoResponse = function(_currentState, _dat
       console.log(this.uName + ":  Received status from alarm");
       this.processAlarmStatus(this.receiveBuffer);
       this.socket.end();
+      this.transactionTarget = REQUEST_STATE_IDLE;
       this.raiseEvent('go-idle');
    }
    else {
@@ -660,6 +651,7 @@ AlarmTexecom.prototype.transactionComplete = function(_currentState) {
 
    if (this.transactionTarget === this.getProperty('target-state')) {
       this.socket.end();
+      this.transactionTarget = REQUEST_STATE_IDLE;
       this.raiseEvent('go-idle');
    }
    else {
@@ -675,6 +667,7 @@ AlarmTexecom.prototype.errorHasOccurred = function(_currentState) {
    }
 
    this.alignPropertyValue('target-state', this.getProperty('current-state'));
+   this.transactionTarget = REQUEST_STATE_IDLE;
    this.raiseEvent('go-idle');
 };
 

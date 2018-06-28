@@ -237,7 +237,7 @@
                      "initialValue": false,
                      "source": {
                         "uName": "hklightaccessory:dylan-bedroom-lights",
-                        "property": "power"
+                        "property": "any-light-powered"
                      }
                   }
                ]
@@ -277,6 +277,13 @@
                            ]
                         }
                      ]
+                  },
+                  {
+                     "name": "any-light-powered",
+                     "type": "orproperty",
+                     "initialValue": false,
+                     "sources": [{ "uName": "huelight:dylan-bedside-lamp", "property": "power" },
+                                 { "uName": "huelight:dylan-main-light", "property": "power" }]
                   }
                ],
                "things": [
@@ -529,6 +536,14 @@
                            ]
                         }
                      ]
+                  },
+                  {
+                     "name": "any-light-powered",
+                     "type": "orproperty",
+                     "initialValue": false,
+                     "sources": [{ "uName": "huelight:natalie-bedroom-lamp", "property": "power" },
+                                 { "uName": "huelight:richard-bedroom-lamp", "property": "power" },
+                                 { "uName": "huelightgroup:master-bedroom-downlighters", "property": "power" }]
                   }
                ],
                "things": [
