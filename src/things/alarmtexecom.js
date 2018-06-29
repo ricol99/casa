@@ -104,6 +104,7 @@ function AlarmTexecom(_config) {
 
    this.ensurePropertyExists('alarm-connection-state', 'stateproperty', {
        initialValue: "idle-state",
+       ignoreControl: true,
        states: [
           {
              name: "idle-state",
@@ -140,7 +141,7 @@ function AlarmTexecom(_config) {
              target: { handler: "armAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleArmResponse" },
-                       { event: "transaction-complete", nextState: "transaction-complete-state" },
+                       { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
@@ -148,7 +149,7 @@ function AlarmTexecom(_config) {
              target: { handler: "disarmAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleDisarmResponse" },
-                       { event: "transaction-complete", nextState: "transaction-complete-state" },
+                       { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
@@ -156,7 +157,7 @@ function AlarmTexecom(_config) {
              target: { handler: "retrieveInfoFromAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleRetrieveInfoResponse" },
-                       { event: "go-idle", nextState: "idle-state" },
+                       { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
@@ -447,7 +448,6 @@ AlarmTexecom.prototype.processAlarmStatus = function(_buffer) {
 
 AlarmTexecom.prototype.alarmArmNormalHandler = function(_message) {
    this.alignPropertyValue(_message.property, _message.propertyValue);
-   this.raiseEvent("alarm-transaction-complete");
 
    if (_message.propertyValue) {
 
@@ -637,9 +637,7 @@ AlarmTexecom.prototype.handleRetrieveInfoResponse = function(_currentState, _dat
    if ((this.receiveBuffer.slice(0,7).equals(Buffer.from([0x47,0x57,0x0,0x17,0xb2,0x40,0xf], 'ascii'))) && (this.receiveBuffer.length >= 71)) {
       console.log(this.uName + ":  Received status from alarm");
       this.processAlarmStatus(this.receiveBuffer);
-      this.socket.end();
-      this.transactionTarget = REQUEST_STATE_IDLE;
-      this.raiseEvent('go-idle');
+      this.raiseEvent('alarm-transaction-complete');
    }
    else {
       console.error(this.uName + ": Unable to retrieve info from alarm!");
