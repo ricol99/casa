@@ -648,7 +648,7 @@ AlarmTexecom.prototype.handleRetrieveInfoResponse = function(_currentState, _dat
 };
 
 AlarmTexecom.prototype.transactionComplete = function(_currentState) {
-   var targetState = (this.transactionTarget === REQUEST_STATE) ? this.getProperty('current-state') ? this.transactionTarget;
+   var targetState = (this.transactionTarget === REQUEST_STATE) ? this.getProperty('current-state') : this.transactionTarget;
 
    if (targetState === this.getProperty('target-state')) {
       this.socket.end();
