@@ -124,13 +124,15 @@ function AlarmTexecom(_config) {
              timeout: { duration: 6.5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleWakeUpResponse" },
                        { event: "log-in-to-panel", nextState: "log-in-to-panel-state" },
-                       { event: "error", nextState: "error-state"}]
+                       { event: "error", nextState: "error-state"},
+                       { event: "socket-closed", nextState: "error-state"}]
           },
           {
              name: "log-in-to-panel-state",
              target: { handler: "logInToPanel" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleLoginResponse" },
+                       { event: "socket-closed", nextState: "error-state"},
                        { event: "error", nextState: "error-state"},
                        { event: "arm-alarm", nextState: "arm-alarm-state" },
                        { event: "disarm-alarm", nextState: "disarm-alarm-state" },
@@ -504,7 +506,7 @@ AlarmTexecom.prototype.connectToAlarm = function(_currentState) {
    console.log(this.uName + ': Connecting to Texecom alarm');
    console.log(this.uName + ': Connecting to ip='+this.alarmAddress+' port='+this.alarmPort);
 
-   if (!this.socket) {
+   if (!this.socket || this.socket.destroyed) {
       this.socket = net.createConnection({ port: this.alarmPort, host: this.alarmAddress });
 
       this.socket.on('connect', (_buffer) => {
@@ -646,8 +648,9 @@ AlarmTexecom.prototype.handleRetrieveInfoResponse = function(_currentState, _dat
 };
 
 AlarmTexecom.prototype.transactionComplete = function(_currentState) {
+   var targetState = (this.transactionTarget === REQUEST_STATE) ? this.getProperty('current-state') ? this.transactionTarget;
 
-   if (this.transactionTarget === this.getProperty('target-state')) {
+   if (targetState === this.getProperty('target-state')) {
       this.socket.end();
       this.transactionTarget = REQUEST_STATE_IDLE;
       this.raiseEvent('go-idle');
