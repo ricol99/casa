@@ -39,10 +39,18 @@
                ],
                "expectedSequence": [
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day", "fuzz": 1 },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false, "fuzz": 1 },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
                ],
                "cleanupSequence": [
@@ -67,23 +75,43 @@
                ],
                "expectedSequence": [
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" },
                   { "source": "building:test", "property": "evening-possible", "value": true },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "room:test-room", "property": "room-state", "value": "users-present-evening" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
-                  { "source": "building:test", "property": "evening-possible", "value": false },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "room:test-room", "property": "room-state", "value": "users-present-night" },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "users-present-evening" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false, "fuzz": 1 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "building:test", "property": "evening-possible", "value": false },
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "room:test-room", "property": "room-state", "value": "users-present-night" },
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
+                     ]
+                  }
                ],
                "cleanupSequence": [
                ]
