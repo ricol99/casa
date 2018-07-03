@@ -343,26 +343,22 @@ AlarmTexecom.prototype.stopWatchdog = function() {
 
 AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (_data.alignWithParent) {
+   if (_propName == "target-state") {
 
-      if (_propName == "target-state") {
+      if (_propValue != this.getProperty('current-state')) {
 
-         if (_propValue != this.getProperty('current-state')) {
-
-            if ((_propValue !== STATE_DISARMED) && (this.getProperty('current-state') !== STATE_DISARMED)) {
-               // Don't allow this state transition AWAY<->HOME<->NIGHT<->AWAY, must go via DISARMED state - just move to disarmed state
-               this.alignPropertyValue(_propName, STATE_DISARMED);
-            }
-            else {
-               setTimeout( () => {     // Make sure the target-state is set before executing request
-                   this.initiateNewTransaction(_propValue);
-               }, 10);
-            }
+         if ((_propValue !== STATE_DISARMED) && (this.getProperty('current-state') !== STATE_DISARMED)) {
+            // Don't allow this state transition AWAY<->HOME<->NIGHT<->AWAY, must go via DISARMED state - just move to disarmed state
+            this.alignPropertyValue("target-state", this.getProperty('current-state'));
+         }
+         else {
+            setTimeout( () => {     // Make sure the target-state is set before executing request
+                this.initiateNewTransaction(_propValue);
+            }, 10);
          }
       }
    }
-
-   if (_propName == "zone-alarm") {
+   else if (_propName == "zone-alarm") {
       this.alignPropertyValue("current-state", (_propValue) ? STATE_ALARM_TRIGGERED : STATE_DISARMED);
    }
 };
@@ -372,7 +368,7 @@ AlarmTexecom.prototype.setAcknowledgementTimer = function() {
    this.acknowledgementTimer = setTimeout( () => {
       console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
       this.alignPropertyValue("target-state", this.getProperty("current-state"));
-   });
+   }, 60000);
 };
 
 AlarmTexecom.prototype.clearAcknowledgementTimer = function() {
