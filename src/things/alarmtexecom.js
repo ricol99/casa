@@ -165,7 +165,8 @@ function AlarmTexecom(_config) {
           {
              name: "transaction-complete-state",
              target: { handler: "transactionComplete" },
-             sources: [{ event: "go-idle", nextState: "idle-state" },
+             sources: [{ event: "socket-closed", nextState: "idle-state"},
+                       { event: "go-idle", nextState: "idle-state" },
                        { event: "arm-alarm", nextState: "arm-alarm-state" },
                        { event: "disarm-alarm", nextState: "disarm-alarm-state" },
                        { event: "retrieve-info-from-alarm", nextState: "retrieve-info-from-alarm-state" }]
@@ -194,6 +195,7 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
         console.log(this.uName + ": Ignoring line with missing terminator");
         return;
      }
+
      var newData = _data.slice(0,-2);
 
      if (newData.slice(0,4) == 'POLL') {
@@ -651,7 +653,8 @@ AlarmTexecom.prototype.transactionComplete = function(_currentState) {
    var targetState = (this.transactionTarget === REQUEST_STATE) ? this.getProperty('current-state') : this.transactionTarget;
 
    if (targetState === this.getProperty('target-state')) {
-      this.socket.end();
+      this.socket.destroy();
+      this.socket = null;
       this.transactionTarget = REQUEST_STATE_IDLE;
       this.raiseEvent('go-idle');
    }
@@ -664,7 +667,8 @@ AlarmTexecom.prototype.transactionComplete = function(_currentState) {
 AlarmTexecom.prototype.errorHasOccurred = function(_currentState) {
 
    if (this.socket) {
-      this.socket.end();
+      this.socket.destroy();
+      this.socket = null;
    }
 
    this.alignPropertyValue('target-state', this.getProperty('current-state'));

@@ -18,6 +18,7 @@ function Source(_config) {
    this.controllerPriority = -1;
    this.controller = null;
    this.props = {};
+   this.eventQueue = [];
    
    if (_config.props) {
       var propLen = _config.props.length;
@@ -178,7 +179,7 @@ Source.prototype.sourceHasChangedProperty = function(_data) {
       var sendData = util.copy(_data);
       sendData.local = true;
       console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
-      this.emit('property-changed', sendData);
+      this.asyncEmit('property-changed', sendData);
       return true;
    }
 };
@@ -203,7 +204,7 @@ Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
-   this.emit('property-changed', sendData);
+   this.asyncEmit('property-changed', sendData);
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
@@ -236,7 +237,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management
-      this.emit('property-changed', sendData);
+      this.asyncEmit('property-changed', sendData);
       return true;
    }
    else {
@@ -347,7 +348,7 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
    sendData.oldState = this.props[_propName].value;
    sendData.name = _propName;
    console.log(this.uName + ": Emitting invalid!");
-   this.emit('invalid', sendData);
+   this.asyncEmit('invalid', sendData);
 }
 
 Source.prototype.updateEvent = function(_modifiedEvent) {
@@ -404,6 +405,27 @@ Source.prototype.deleteEvent = function(_eventName) {
    return true;
 };
 
+Source.prototype.asyncEmit = function(_eventName, _data) {
+   this.eventQueue.push({ eventName: _eventName, data: util.copy(_data)});
+   this.setAsyncEmitTimer();
+};
+
+Source.prototype.setAsyncEmitTimer = function() {
+
+   if (!this.asyncEmitTimer) {
+
+      this.asyncEmitTimer = setTimeout( () => {
+         this.asyncEmitTimer = null;
+         let event = this.eventQueue.pop();
+         this.emit(event.eventName, event.data);
+
+         if (this.eventQueue.length >= 1) {
+            this.setAsyncEmitTimer();
+         }
+      }, 1);
+   }
+};
+
 Source.prototype.raiseEvent = function(_eventName, _data) {
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.local = this.local;
@@ -415,7 +437,7 @@ Source.prototype.raiseEvent = function(_eventName, _data) {
    }
 
    console.log(this.uName + ": Emitting event " + _eventName);
-   this.emit('event-raised', sendData);
+   this.asyncEmit('event-raised', sendData);
 }
 
 Source.prototype.coldStart = function() {
@@ -439,7 +461,7 @@ Source.prototype.invalidate = function() {
    for(var prop in this.props) {
 
       if (this.props.hasOwnProperty(prop)) {
-         this.emit('invalid', { sourceName: this.uName, name: prop });
+         this.asyncEmit('invalid', { sourceName: this.uName, name: prop });
       }
    }
    this.casa.removeSource(this);
