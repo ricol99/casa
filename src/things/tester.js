@@ -30,22 +30,48 @@ function Tester(_config) {
       this.constructing = false;
    }
 
-   if (_config.hasOwnProperty("testRun")) {
-      this.testCases = [];
-
-      for (var i = 0; i < _config.testRun.length; ++i) {
-         this.testCases.push(_config.testCases[_config.testRun[i]]);
-      }
-   }
-   else {
-      this.testCases = _config.testCases;
-   }
+   this.buildTestCases(_config.testRun, _config.testCases);
 }
 
 util.inherits(Tester, Thing);
 
 Tester.prototype.coldStart = function() {
    this.initiateTestStep();
+};
+
+Tester.prototype.buildTestCase = function(_testCase) {
+   this.testCases.push({ driveSequence: _testCase.driveSequence, expectedSequence: [] });
+
+   for (var i = 0; i < _testCase.expectedSequence.length; ++i) {
+
+      if (_testCase.expectedSequence[i].hasOwnProperty("simultaneous")) {
+         var fuzzFactor = _testCase.expectedSequence[i].simultaneous.length - 1;
+
+         for (var j = 0; j < _testCase.expectedSequence[i].simultaneous.length; ++j) {
+            _testCase.expectedSequence[i].simultaneous[j].fuzz = fuzzFactor--;
+            this.testCases[this.testCases.length - 1].expectedSequence.push(_testCase.expectedSequence[i].simultaneous[j]);
+         }
+      }
+      else {
+         this.testCases[this.testCases.length - 1].expectedSequence.push(_testCase.expectedSequence[i]);
+      }
+   }
+};
+
+Tester.prototype.buildTestCases = function(_testRun, _testCases) {
+   this.testCases = [];
+
+   if (_testRun) {
+
+      for (var i = 0; i < _testRun.length; ++i) {
+         this.buildTestCase(_testCases[_testRun[i]]);
+      }
+   }
+   else {
+      for (var j = 0; j < _testCases.length; ++j) {
+         this.buildTestCase(_testCases[j]);
+      }
+   }
 };
 
 Tester.prototype.initiateTestStep = function(_cold) {
@@ -134,7 +160,10 @@ Tester.prototype.receivedEventFromSource = function(_data) {
                let temp = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition];
                this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition] = this.testCases[this.currentTestCase].expectedSequence[i];
                this.testCases[this.currentTestCase].expectedSequence[i] = temp;
-               this.testCases[this.currentTestCase].expectedSequence[i].fuzz = 0;
+
+               var newFuzzFactor = fuzzFactor - (i - this.expectedPosition);
+               newFuzzFactor = (newFuzzFactor < 0) ? 0 : newFuzzFactor;
+               this.testCases[this.currentTestCase].expectedSequence[i].fuzz = newFuzzFactor;
             }
             break;
          }

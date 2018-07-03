@@ -76,8 +76,8 @@
                "expectedSequence": [
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
                   { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
+                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
                   { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
                   { "source": "testthing:test-thing", "property": "test-guard-prop-2", "value": true },
@@ -104,8 +104,8 @@
                "expectedSequence": [
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
                   { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
+                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guard-1-state" },
                   { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
                   { "source": "testthing:test-thing", "property": "test-guard-prop-2", "value": true },
@@ -134,7 +134,7 @@
                ]
             },
             {  
-               "name": "6) Normal - Test target function",
+               "name": "7) Normal - Test target function",
                "driveSequence": [
                   { "wait": 2, "event": "start-test" },
                   { "wait": 1, "event": "jump-to-target-function-state" },
@@ -143,9 +143,9 @@
                ],
                "expectedSequence": [
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "event": "test-target-function-event", "value": true },
+                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": true, "fuzz": 1 },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-target-function-state" },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
+                  { "source": "testthing:test-thing", "event": "test-target-function-event", "value": true },
                   { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
                   { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
                ]

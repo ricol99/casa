@@ -40,33 +40,57 @@
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
-                  { "wait": 0.5, "event": "wake-up-event" }
+                  { "wait": 1.0, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -79,31 +103,55 @@
                   { "wait": 0.5, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  { 
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -116,30 +164,50 @@
                   { "wait": 0.5, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -158,42 +226,82 @@
                ],
                "expectedSequence": [
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -212,41 +320,81 @@
                ],
                "expectedSequence": [
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }, 
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 }, 
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {     
+                     "simultaneous": [
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]  
+                  },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" }
+                     ]  
+                  },
+                  {  
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]  
+                  }
                ]
             },
             {
@@ -265,42 +413,82 @@
                ],
                "expectedSequence": [
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -319,41 +507,81 @@
                ],
                "expectedSequence": [
                   { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-dull-day" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
-                  { "source": "thing:test-main-lights", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-main-lights", "property": "power", "value": false },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "waking-up-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 50 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 50 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             },
             {
@@ -364,30 +592,50 @@
                   { "wait": 6.0, "event": "wake-up-event" }
                ],
                "expectedSequence": [
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed", "fuzz": 1 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
-                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
-                  { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": true },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": true },
-                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
-                  { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
-		  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
-                  { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "initial-reading-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 60 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "reading-in-bed-others-asleep" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 15 },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                        { "source": "thing:test-1-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-2-lamp", "property": "brightness", "value": 100 },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": true },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false, "fuzz": 1 },
+		        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" },
+                        { "source": "thing:test-2-lamp", "property": "power", "value": false }
+                     ]
+                  }
                ]
             }
          ],
