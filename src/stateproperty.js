@@ -662,7 +662,7 @@ State.prototype.exiting = function(_event, _value) {
    for (var i = 0; i < this.targetTimeouts.length; ++i) {
 
       if (this.targetTimeouts[i]) {
-         cancelTimeout(this.targetTimeouts[i].timeout);
+         clearTimeout(this.targetTimeouts[i].timeout);
       }
    }
 
