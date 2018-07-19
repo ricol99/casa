@@ -485,7 +485,7 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 
          if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
 
-            if (_activeQueue && (_guardedObject.guards[i].hasOwnProperty("active") && _guardedObject.guards[i].active)) {
+            if (_activeQueue && (_guardedObject.guards[i].hasOwnProperty("active") ? _guardedObject.guards[i].active : true)) {
                _activeQueue.push(_guardedObject);
             }
             return false;
@@ -522,12 +522,6 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
             }
          }
       }
-   }
-
-
-   // Remove met targets from active queue
-   for (var b = 0; b < indexes.length; ++b) {
-      this.activeGuardedTargets.splice(indexes[b]-b, 1);
    }
 
    // Process met targets
