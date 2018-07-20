@@ -391,8 +391,13 @@ function State(_config, _owner) {
          if (this.sources[i].hasOwnProperty("guards")) {
 
             for (var k = 0; k < this.sources[i].guards.length; ++k) {
-               this.sources[i].guards[k].uName = this.owner.owner.uName;
-               this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
+               util.ensureExists(this.sources[i].guards[k], "value", true);
+               util.ensureExists(this.sources[i].guards[k], "active", true);
+
+               if (this.sources[i].guards[k].active) {
+                  this.sources[i].guards[k].uName = this.owner.owner.uName;
+                  this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
+               }
             }
          }
       }
@@ -405,8 +410,13 @@ function State(_config, _owner) {
          if (this.targets[l].hasOwnProperty("guards")) {
 
             for (var m = 0; m < this.targets[l].guards.length; ++m) {
-               this.targets[l].guards[m].uName = this.owner.owner.uName;
-               this.targets[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.targets[l].guards[m]);
+               util.ensureExists(this.targets[l].guards[m], "value", true);
+               util.ensureExists(this.targets[l].guards[m], "active", true);
+
+               if (this.targets[l].guards[m].active) {
+                  this.targets[l].guards[m].uName = this.owner.owner.uName;
+                  this.targets[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.targets[l].guards[m]);
+               }
             }
          }
       }
@@ -421,6 +431,22 @@ function State(_config, _owner) {
       if (!this.scheduleService) {
          console.error(this.uName + ": ***** Schedule service not found! *************");
          process.exit(3);
+      }
+
+      for (var n = 0; n < this.schedules.length; n++) {
+
+         if (this.schedules[n].hasOwnProperty("guards")) {
+
+            for (var p = 0; p < this.schedules[n].guards.length; ++p) {
+               util.ensureExists(this.schedules[n].guards[p], "value", true);
+               util.ensureExists(this.schedules[n].guards[p], "active", true);
+
+               if (this.schedules[n].guards[p].active) {
+                  this.schedules[n].guards[p].uName = this.owner.owner.uName;
+                  this.schedules[n].guards[p].sourceListener = this.owner.fetchOrCreateSourceListener(this.schedules[n].guards[p]);
+               }
+            }
+         }
       }
 
       this.scheduleService.registerEvents(this, this.schedules);
@@ -481,11 +507,10 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
    if (_guardedObject.hasOwnProperty("guards")) {
 
       for (var i = 0; i < _guardedObject.guards.length; ++i) {
-         var guardPropertyValue = _guardedObject.guards[i].hasOwnProperty("value") ? _guardedObject.guards[i].value : true;
 
-         if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== guardPropertyValue) {
+         if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== _guardedObject.guards[i].value) {
 
-            if (_activeQueue && (_guardedObject.guards[i].hasOwnProperty("active") ? _guardedObject.guards[i].active : true)) {
+            if (_activeQueue && _guardedObject.guards[i].active) {
                _activeQueue.push(_guardedObject);
             }
             return false;
@@ -504,12 +529,10 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
    for (var a = 0; a < this.activeGuardedTargets.length; ++a) {
 
       for (var i = 0; i < this.activeGuardedTargets[a].guards.length; ++i) {
-         var guardActive = (this.activeGuardedTargets[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedTargets[a].guards[i].active : true;
 
-         if (guardActive && (this.activeGuardedTargets[a].guards[i].property === _propName)) {
-            var guardPropertyValue = this.activeGuardedTargets[a].guards[i].hasOwnProperty("value") ? this.activeGuardedTargets[a].guards[i].value : true;
+         if (this.activeGuardedTargets[a].guards[i].active && (this.activeGuardedTargets[a].guards[i].property === _propName)) {
 
-            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedTargets[a])) {
+            if ((_propValue === this.activeGuardedTargets[a].guards[i].value) && this.checkGuard(this.activeGuardedTargets[a])) {
                console.log(this.uName + ": checkActiveTargetGuards() Found active guard!");
                indexes.push(a);
 
@@ -539,12 +562,10 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
    for (var a = 0; a < this.activeGuardedSources.length; ++a) {
 
       for (var i = 0; i < this.activeGuardedSources[a].guards.length; ++i) {
-         var guardActive = (this.activeGuardedSources[a].guards[i].hasOwnProperty("active")) ? this.activeGuardedSources[a].guards[i].active : true;
 
-         if (guardActive && (this.activeGuardedSources[a].guards[i].property === _propName)) {
-            var guardPropertyValue = this.activeGuardedSources[a].guards[i].hasOwnProperty("value") ? this.activeGuardedSources[a].guards[i].value : true;
+         if (this.activeGuardedSources[a].guards[i].active && (this.activeGuardedSources[a].guards[i].property === _propName)) {
 
-            if ((_propValue === guardPropertyValue) && this.checkGuard(this.activeGuardedSources[a])) {
+            if ((_propValue === this.activeGuardedSources[a].guards[i].value) && this.checkGuard(this.activeGuardedSources[a])) {
                console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
                return this.activeGuardedSources[a];
             }

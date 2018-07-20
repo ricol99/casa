@@ -129,4 +129,15 @@ function stringifyInternal(_source, _level) {
    }
 };
 
+Util.ensureExists = function(_obj, _name, _value) {
+
+   if (_obj && !_obj.hasOwnProperty(_name)) {
+      _obj[_name] = _value;
+      return true;
+   }
+   else {
+      return false;
+   }
+};
+
 module.exports = exports = Util;
