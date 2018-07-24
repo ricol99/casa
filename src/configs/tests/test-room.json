@@ -35,7 +35,7 @@
                   { "wait": 1, "property": "low-light", "value": true },
                   { "wait": 0.5, "property": "movement", "value": true },
                   { "wait": 2.0, "property": "movement", "value": false },
-                  { "wait": 1, "property": "low-light", "value": false }
+                  { "wait": 1.5, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
