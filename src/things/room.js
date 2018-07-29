@@ -34,8 +34,8 @@ function Room(_config) {
    Thing.call(this, _config);
    this.thingType = "room";
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
-
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
+   this.dullDayMovementTimeout = (_config.hasOwnProperty('dullDayMovementTimeout')) ? _config.dullDayMovementTimeout : 3600;
 
    this.roomStateConfig = (_config.hasOwnProperty('roomStateConfig')) ? _config.roomStateConfig : {};
    this.roomStateConfig.name = "room-state";
@@ -78,11 +78,10 @@ function Room(_config) {
 
    if (!nameExists(this.roomStateConfig.states, "users-present-dull-day")) {
       this.roomStateConfig.states.push({ "name": "users-present-dull-day",
-                                         "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-dull-day" },
+                                         "timeout": { "duration": this.dullDayMovementTimeout, "nextState": "no-users-present-dull-day" },
                                          "sources": [ { "property": "movement", "value": true, "nextState": "users-present-dull-day" },
                                                       { "property": "evening-possible", "value": true, "nextState": "users-present-evening" },
-                                                      { "property": "night-time", "value": true, "nextState": "users-present-night" },
-                                                      { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
+                                                      { "property": "night-time", "value": true, "nextState": "users-present-night" }]});
    }
 
    if (!nameExists(this.roomStateConfig.states, "no-users-present-evening")) {
