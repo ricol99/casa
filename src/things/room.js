@@ -79,8 +79,7 @@ function Room(_config) {
    if (!nameExists(this.roomStateConfig.states, "users-present-dull-day")) {
       this.roomStateConfig.states.push({ "name": "users-present-dull-day",
                                          "timeout": { "duration": this.dullDayMovementTimeout, "nextState": "no-users-present-dull-day" },
-                                         "sources": [ { "property": "movement", "value": true, "nextState": "users-present-dull-day" },
-                                                      { "property": "evening-possible", "value": true, "nextState": "users-present-evening" },
+                                         "sources": [ { "property": "evening-possible", "value": true, "nextState": "users-present-evening" },
                                                       { "property": "night-time", "value": true, "nextState": "users-present-night" }]});
    }
 
