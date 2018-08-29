@@ -73,17 +73,41 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
 };
 
-Thing.prototype.getProperty = function(_property) {
-   var value =  Source.prototype.getProperty.call(this, _property);
+Thing.prototype.hasProperty = function(_property) {
+   var result = Source.prototype.hasProperty.call(this, _property);
 
-   if ((value === undefined) && this.propogateToChildren) {
+   if (!result && this.propogateToChildren) {
 
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            value = this.things[thing].getProperty(_property);
+            result = this.things[thing].hasProperty(_property);
 
-            if (value != undefined) {
+            if (result) {
+               break;
+            }
+         }
+      }
+   }
+
+   return result;
+};
+
+Thing.prototype.getProperty = function(_property) {
+   var value;
+
+   if (Source.prototype.hasProperty.call(this, _property)) {
+      value = Source.prototype.getProperty.call(this, _property); 
+   }
+   else if (this.propogateToChildren) {
+
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            var exists = this.things[thing].hasProperty(_property);
+
+            if (exists) {
+               value = this.things[thing].getProperty(_property);
                break;
             }
          }

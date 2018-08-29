@@ -35,7 +35,7 @@ function Room(_config) {
    this.thingType = "room";
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
-   this.dullDayMovementTimeout = (_config.hasOwnProperty('dullDayMovementTimeout')) ? _config.dullDayMovementTimeout : 3600;
+   this.dullDayMovementTimeout = (_config.hasOwnProperty('dullDayMovementTimeout')) ? _config.dullDayMovementTimeout : 1800;
 
    this.roomStateConfig = (_config.hasOwnProperty('roomStateConfig')) ? _config.roomStateConfig : {};
    this.roomStateConfig.name = "room-state";

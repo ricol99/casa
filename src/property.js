@@ -37,7 +37,7 @@ function Property(_config, _owner) {
       this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
-         this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].outputValues != undefined);
+         this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
          _config.sources[index].uName = (_config.sources[index].hasOwnProperty("uName")) ? _config.sources[index].uName : this.owner.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
@@ -68,7 +68,7 @@ function Property(_config, _owner) {
 // *NOTE* The value may be different to what step thinks as many steps can interact with the property
 // Steps are encouraged to use this.step.value to understand what they set previously
 //
-Property.prototype.myValue = function() {
+Property.prototype.getValue = function() {
    return this.value;
 };
 
@@ -85,10 +85,8 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 
    var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
-   if (propValue != undefined) {
-      _data.value = propValue;
-      this.setPropertyInternal(propValue, _data);
-   }
+   _data.value = propValue;
+   this.setPropertyInternal(propValue, _data);
 };
 
 //
@@ -304,7 +302,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    if (_data.hasOwnProperty('sourceEventName')) {
       var sourceListener = this.sourceListeners[_data.sourceEventName];
 
-      if (sourceListener && sourceListener.outputValues && sourceListener.outputValues[actualOutputValue] != undefined) {
+      if (sourceListener && sourceListener.outputValues && sourceListener.outputValues.hasOwnProperty(actualOutputValue)) {
          actualOutputValue = sourceListener.outputValues[actualOutputValue];
       }
    }
@@ -319,7 +317,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
          eval("newOutput = " + exp);
       }
 
-      if (this.transformMap && this.transformMap[newOutput] != undefined) {
+      if (this.transformMap && this.transformMap.hasOwnProperty(newOutput)) {
          newOutput = this.transformMap[newOutput];
       }
 

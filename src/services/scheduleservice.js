@@ -319,6 +319,7 @@ Schedule.prototype.getInitialValue = function() {
       }
    }
    else {
+      console.log(this.uName + ": Closest Event - initial value = " + closestEvent.value);
       return closestEvent.value;
    }
 };

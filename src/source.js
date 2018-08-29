@@ -107,7 +107,7 @@ Source.prototype.isActive = function() {
 
 Source.prototype.isPropertyValid = function(_property) {
 
-   if (this.props[_property] != undefined) {
+   if (this.props.hasOwnProperty(_property)) {
       return this.props[_property].valid;
    }
    else {
@@ -116,7 +116,11 @@ Source.prototype.isPropertyValid = function(_property) {
 };
 
 Source.prototype.getProperty = function(_property) {
-   return (this.props.hasOwnProperty(_property)) ? this.props[_property].value : undefined;
+   return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
+};
+
+Source.prototype.hasProperty = function(_property) {
+   return this.props.hasOwnProperty(_property);
 };
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
@@ -254,9 +258,9 @@ Source.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
 };
 
 Source.prototype.alignProperties = function(_properties) {
-   console.log(this.uName + ": alignProperties() ", _properties);
 
    if (_properties && (_properties.length > 0)) {
+      console.log(this.uName + ": alignProperties() ", _properties.length);
       this.addPropertiesForAlignment(_properties);
       this.alignNextProperty();
    }

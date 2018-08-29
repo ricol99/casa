@@ -184,6 +184,8 @@ SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
       return;
    }
 
+   console.log(this.uName + ": processing source event raised, event=" + _data.name);
+
    if (this.isTarget) {
       this.owner.receivedEventFromTarget(util.copy(_data));
    }
@@ -292,8 +294,6 @@ SourceListener.prototype.isValid = function() {
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
    if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
-      console.log(this.uName + ": processing source property change, property=" + _data.name);
-
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
       this.sourceRawValue = _data.value;
@@ -315,8 +315,6 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 SourceListener.prototype.internalSourceEventRaised = function(_data) {
 
    if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
-      console.log(this.uName + ": processing source event raised, event=" + _data.name);
-
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
 

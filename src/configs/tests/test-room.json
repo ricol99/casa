@@ -132,6 +132,7 @@
                "uName": "room:test-room",
                "displayName": "Test Room",
                "movementTimeout": 3,
+               "dullDayMovementTimeout": 3,
                "buildingName": "building:test",
                "events": [],
                "props": [

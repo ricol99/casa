@@ -300,11 +300,11 @@ function State(_config, _owner) {
    this.activeGuardedTargets = [];
    this.targetTimeouts = [];
 
+   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
+
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
    }
-
-   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 
    if (_config.hasOwnProperty("sources")) {
       this.sources = _config.sources;
@@ -533,7 +533,7 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
          if (this.activeGuardedTargets[a].guards[i].active && (this.activeGuardedTargets[a].guards[i].property === _propName)) {
 
             if ((_propValue === this.activeGuardedTargets[a].guards[i].value) && this.checkGuard(this.activeGuardedTargets[a])) {
-               console.log(this.uName + ": checkActiveTargetGuards() Found active guard!");
+               console.log(this.uName + ": checkActiveTargetGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
                indexes.push(a);
 
                if (this.activeGuardedTargets[a].hasOwnProperty("property")) {
