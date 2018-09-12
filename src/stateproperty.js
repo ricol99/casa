@@ -504,21 +504,23 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
       return false;
    }
 
+   var ret = true;
+
    if (_guardedObject.hasOwnProperty("guards")) {
 
       for (var i = 0; i < _guardedObject.guards.length; ++i) {
 
-         if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== _guardedObject.guards[i].value) {
+         if (_activeQueue && _guardedObject.guards[i].active) {
+            _activeQueue.push(_guardedObject);
+         }
 
-            if (_activeQueue && _guardedObject.guards[i].active) {
-               _activeQueue.push(_guardedObject);
-            }
-            return false;
+         if (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== _guardedObject.guards[i].value) {
+            ret = false;
          }
       }
    }
 
-   return true;
+   return ret;
 };
 
 State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
