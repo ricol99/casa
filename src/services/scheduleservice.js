@@ -222,7 +222,7 @@ Schedule.prototype.scheduleEvent = function(_event) {
 
          if (_event.rules[i].sunTime) {
 
-            if (_event.rules[i] > new Date()) {
+            if (_event.rules[i].rule > new Date()) {
                this.resetJob(_event.rules[i]);
             }
          }
@@ -303,24 +303,25 @@ Schedule.prototype.getInitialValue = function() {
       }
    }
 
-   if (!closestEvent) {
-      closestEvent = this.events[this.events.length-1];
-   }
+   if (closestEvent) {
+      console.log(this.uName + ": Closest event is " + closestEvent.rules[0].rule);
 
-   console.log(this.uName + ": Closest event is " + closestEvent.rules[0].rule);
+      if (closestEvent.hasOwnProperty("ramp")) {
 
-   if (closestEvent.hasOwnProperty("ramp")) {
-
-      if (closestEvent.ramp.hasOwnProperty("ramps")) {
-         return closestEvent.ramp.ramps[closestEvent.ramp.ramps.length-1].endValue;
+         if (closestEvent.ramp.hasOwnProperty("ramps")) {
+            return { initialValueFound: true, value: closestEvent.ramp.ramps[closestEvent.ramp.ramps.length-1].endValue };
+         }
+         else {
+            return { initialValueFound: true, value: closestEvent.ramp.endValue };
+         }
       }
       else {
-         return closestEvent.ramp.endValue;
+         console.log(this.uName + ": Closest Event - initial value = " + closestEvent.value);
+         return { initialValueFound: true, value: closestEvent.value };
       }
    }
    else {
-      console.log(this.uName + ": Closest Event - initial value = " + closestEvent.value);
-      return closestEvent.value;
+      return { initialValueFound: false };
    }
 };
 

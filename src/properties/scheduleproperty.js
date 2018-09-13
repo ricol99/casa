@@ -19,8 +19,10 @@ function ScheduleProperty(_config, _owner) {
 
    this.scheduleService.registerEvents(this, _config.events);
 
-   if (_config.events.length > 1) {
-      this.value = this.scheduleService.getInitialValue(this);
+   var ret = this.scheduleService.getInitialValue(this);
+
+   if (ret.initialValueFound) {
+      this.value = ret.value;
    }
 }
 

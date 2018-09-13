@@ -17,7 +17,6 @@
             { "uName": "testthing:test-thing", "property": "test-prop-3" },
             { "uName": "testthing:test-thing", "event": "test-target-function-event" }
          ],
-         "testRun": [4],
          "testCases": [
             {
                "name": "1) Normal - Test basic transition on event and timeout based transition ",
