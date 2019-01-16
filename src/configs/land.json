@@ -455,7 +455,7 @@
             { "uName": "user:natalie"}
          ],
          "readingInBedTimeout": 900,
-         "awakeInBedTimeout": 900,
+         "awakeInBedTimeout": 1800,
          "events": [
             { "name": "pre-wake-up-event", "rules": [ "30 5 * * 1-5", "30 7 * * 0,6" ]},
             { "name": "wake-up-event", "rules": [ "00 6 * * 1-5", "00 8 * * 0,6" ]}
