@@ -44,6 +44,11 @@
          "port": 8001,
          "secure": true,
          "secureConfig": true
+      },
+      {
+         "uName": "pushoverservice",
+         "displayName": "Pushover Messaging Service",
+         "secureConfig": true
       }
    ],
    "scenes": [],
@@ -862,6 +867,30 @@
                      "source": {
                         "uName": "huelight:richard-bedroom-lamp",
                         "property": "power"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "uName": "thing:pushover-messenger",
+         "displayName": "Pushover Messenger",
+         "props": [
+            {
+               "name": "urgent-message",
+               "type": "pushoverproperty",
+               "initialValue": false,
+               "writable": false,
+               "priority": 1,
+               "userGroup": "usergroup:admins",
+               "sources": [
+                  {
+                     "uName": "casa:env",
+                     "property": "ACTIVE",
+                     "transformMap": {
+                        "true": "Casa 'env' is active",
+                        "false": "Casa 'env' has gone down!"
                      }
                   }
                ]
