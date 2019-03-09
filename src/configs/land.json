@@ -136,6 +136,24 @@
                "gpioPin": 13,
                "triggerLow": true,
                "local": true
+            },
+            {
+               "name": "land-gp19",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 19,
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "name": "land-gp26",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 26,
+               "triggerLow": true,
+               "local": true
             }
          ]
       },
@@ -226,6 +244,30 @@
                      ]
                   }
                ]
+            },
+            {
+               "uName": "touchswitch:dylan-bed-switch",
+               "displayName": "Dylan Bed Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 19,
+               "stateless": true,
+               "eventName": "dylan-switch-event",
+               "triggerLow": true,
+               "local": true
+            },
+            {
+               "uName": "touchswitch:dylan-bedroom-switch",
+               "displayName": "Dylan Bedroom Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 26,
+               "stateless": true,
+               "eventName": "room-switch-event",
+               "triggerLow": true,
+               "local": true
             },
             {
                "uName": "hkswitchaccessory:dylan-bedroom-switch",
