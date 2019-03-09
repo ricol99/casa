@@ -21,7 +21,7 @@ if (options.casa == undefined) {
 
 
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
-var connectToParent = (options.noparent == undefined) ? true : !options.noparent;
+var connectToParent = (options.noparent == undefined) ? false : !options.noparent;
 var secureMode = (options.secure == undefined) ? false : options.secure;
 var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : checkPath(options.certs);
 var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : checkPath(options.config);

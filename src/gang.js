@@ -387,7 +387,7 @@ Gang.prototype.extractCasa = function() {
 
 Gang.prototype.extractParentCasa = function() {
 
-   if (this.config.parentCasa) {
+   if (this.config.hasOwnProperty("parentCasa") && this.config.parentCasa) {
       this.config.parentCasa.loginAs = "child";
       this.config.parentCasa.persistent = true;
 
