@@ -39,7 +39,7 @@ function PeerCasaService(_config) {
             if ((!((this.gang.uName || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.uName))) &&
                (service.name != this.uName && !this.gang.remoteCasas[service.name])) {
 
-               if (!this.gang.parentCasa || (this.gang.parentCasa.uName != service.name)) {
+               if (!(this.gang.hasOwnProperty("parentCasa") && this.gang.parentCasa && (this.gang.parentCasa.uName == service.name))) {
                   // Found a peer
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
