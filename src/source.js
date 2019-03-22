@@ -160,30 +160,26 @@ Source.prototype.getAllProperties = function(_allProps) {
 Source.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer (duplicate) source');
 
+   if (!this.props.hasOwnProperty(_data.name)) {
+      var Prop = require('./property');
+      this.props[_data.name] = new Prop({ name: _data.name, type: 'property', initialValue: _data.value }, this);
+      this.props[_data.name].coldStart(_data);
+   }
+
    var prop = this.props[_data.name];
 
    // Only update if the property has a different value
-   if (prop) {
+   if (prop.value != _data.value) {
 
-      if (prop.value != _data.value) {
-
-         // Only update if the property has no processing attached to it
-         if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
-            return prop.set(_data.value, _data);
-         }
-         else {
-            return false;
-         }
+      // Only update if the property has no processing attached to it
+      if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
+         return prop.set(_data.value, _data);
       }
       else {
-         return true;
+         return false;
       }
    }
    else {
-      var sendData = util.copy(_data);
-      sendData.local = true;
-      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + sendData.value);
-      this.asyncEmit('property-changed', sendData);
       return true;
    }
 };

@@ -344,7 +344,57 @@ Gang.prototype.extractThings = function(_config, _parent) {
          }
       }
    }
-}
+};
+
+Gang.prototype.mergeThing = function(_sourceThing, _destThing, _override) {
+
+   if (!_sourceThing.hasOwnProperty("props")) {
+      return;
+   }
+
+   if (!_destThing.hasOwnProperty("props")) {
+      _destThing.props = _sourceThing.props;
+      return;
+   }
+
+   var tempAssoc = {};
+
+   for (var j = 0; j < _destThing.props.length; ++j) {
+      tempAssoc[_destThing.props[j].name] = j;
+   }
+
+   for (var i = 0; i < _sourceThing.props.length; ++i) {
+
+      if (tempAssoc.hasOwnProperty(_sourceThing.props[i].name)) {
+
+         if (_override) {
+            _destThing.props[tempAssoc[_sourceThing.props[i].name]] = _sourceThing.props[i];
+         }
+      }
+      else {
+         _destThing.props.push(_sourceThing.props[i]);
+      }
+   }
+
+};
+
+Gang.prototype.mergeThings = function(_sourceThings, _destThings, _override) {
+   var tempAssoc = {};
+
+   for (var j = 0; j < _destThings.length; ++j) {
+      tempAssoc[_destThings[j].uName] = j;
+   }
+
+   for (var i = 0; i < _sourceThings.length; ++i) {
+
+      if (tempAssoc.hasOwnProperty(_sourceThings[i].uName)) {
+         this.mergeThing(_sourceThings[i], _destThings[tempAssoc[_sourceThings[i].uName]]);
+      }
+      else {
+         _destThings.push(_sourceThings[i]);
+      }
+   }
+};
 
 Gang.prototype.mergeConfigs = function() {
 
@@ -354,9 +404,9 @@ Gang.prototype.mergeConfigs = function() {
 
    this.config.users = this.gangConfig.users;
 
-   if (this.gangConfig.services) {
+   if (this.gangConfig.hasOwnProperty("services")) {
 
-      if (!this.config.services) {
+      if (!this.config.hasOwnProperty("services") || !this.config.services) {
          this.config.services = [];
       }
 
@@ -365,15 +415,22 @@ Gang.prototype.mergeConfigs = function() {
       }
    }
 
-   if (this.gangConfig.things) {
+   if (this.gangConfig.hasOwnProperty("things")) {
 
-      if (!this.config.things) {
-         this.config.things = [];
+      if (this.config.hasOwnProperty("things")) {
+         this.mergeThings(this.gangConfig.things, this.config.things, false);
+      }
+      else {
+         this.config.things = this.gangConfig.things;
       }
 
-      for (var i = 0; i < this.gangConfig.things.length; ++i) {
-         this.config.things.push(this.gangConfig.things[i]);
-      }
+      //if (!this.config.hasOwnProperty("things") || !this.config.things) {
+         //this.config.things = [];
+      //}
+
+      //for (var i = 0; i < this.gangConfig.things.length; ++i) {
+         //this.config.things.push(this.gangConfig.things[i]);
+      //}
    }
 }
 

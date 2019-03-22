@@ -2,7 +2,7 @@
    "casa": {
       "uName": "casa:test1",
       "displayName": "Casa Collin TEST System",
-      "gang": "gang:collin-test",
+      "gang": "gang:collin-test-noparent",
       "listeningPort": 8082
    },
    "services": [
@@ -36,6 +36,34 @@
    "scenes": [
    ],
    "things": [
+      {
+         "uName": "thing:test-environment",
+         "displayName": "Test Timed Environment",
+         "props": [
+            {
+               "name": "test-state-1",
+               "initialValue": false,
+               "writable": true,
+               "type": "stateproperty",
+               "states": [
+                  {  
+                     "name": false,
+                     "timeout": {
+                        "duration": 20,
+                        "nextState": true
+                     }
+                  }, 
+                  {  
+                     "name": true,
+                     "timeout": {
+                        "duration": 5,
+                        "nextState": false
+                     }
+                  }
+               ]
+            }  
+         ]
+      },
       {
          "uName": "sonosplayer:living-room",
          "displayName": "Sonos Player for Living Room",

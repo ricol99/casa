@@ -1,0 +1,101 @@
+{
+   "gang": {
+      "uName": "gang:collin-test-noparent",
+      "displayName": "Test Casa Collin Home Automation System"
+   },
+   "users": [ 
+      {
+         "uName": "user:test-1",
+         "displayName": "Test 1",
+         "props": []
+      },
+      {
+         "uName": "user:test-2",
+         "displayName": "Test 2",
+         "props": []
+      },
+      {
+         "uName": "user:test-3",
+         "displayName": "Test 3",
+         "props": []
+      },
+      {
+         "uName": "usergroup:family",
+         "displayName": "Test Family",
+         "users": [
+           "user:test-1",
+           "user:test-2"
+         ],
+         "props": []
+      }
+   ],
+   "services": [],
+   "things": [ 
+      {
+         "uName": "thing:test-environment",
+         "displayName": "Test Timed Environment",
+         "props": [
+            {
+               "name": "daylight",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "sunrise:1800",
+                     "value": true
+                  },
+                  {
+                     "rule": "sunset:-1800",
+                     "value": false
+                  }
+               ]
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "sunset:-2700",
+                     "value": true
+                  },
+                  {
+                     "rule": "sunrise:3600",
+                     "value": false
+                  }
+               ]
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": true,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rules": [ "30 22 * * 0-4", "00 23 * * 5-6" ],
+                     "value": true
+                  },
+                  {
+                     "rules": [ "00 7 * * 1-5", "00 8 * * 0,6" ],
+                     "value": false
+                  }
+               ]
+            },
+            {
+               "name": "dark",
+               "initialValue": false,
+               "writable": false,
+               "sources": [
+                  {
+                     "uName": "thing:environment",
+                     "property": "daylight",
+                     "transform": "!$value"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
