@@ -1,8 +1,9 @@
 var util = require('./util');
-var events = require('events');
+var AsyncEmitter = require('./asyncemitter');
 var Gang = require('./gang');
 
 function Source(_config) {
+   AsyncEmitter.call(this);
    this.config = _config;
    this.uName = _config.uName;
    this.sName = this.uName.split(":")[1];
@@ -18,7 +19,6 @@ function Source(_config) {
    this.controllerPriority = -1;
    this.controller = null;
    this.props = {};
-   this.eventQueue = [];
    
    if (_config.props) {
       var propLen = _config.props.length;
@@ -51,15 +51,13 @@ function Source(_config) {
                              { "initialValue": 'auto', "takeControlOnTransition": true,
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
-   events.EventEmitter.call(this);
-
    if (this.casa) {
       console.log(this.uName + ': Source casa: ' + this.casa.uName);
       this.casa.addSource(this);
    }
 }
 
-util.inherits(Source, events.EventEmitter);
+util.inherits(Source, AsyncEmitter);
 
 Source.prototype.getScheduleService = function() {
   var scheduleService =  this.gang.findService("scheduleservice");
@@ -404,27 +402,6 @@ Source.prototype.deleteEvent = function(_eventName) {
    this.events.splice(eventNumber, 1);
    this.scheduleService.removeEvent(this, _eventName);
    return true;
-};
-
-Source.prototype.asyncEmit = function(_eventName, _data) {
-   this.eventQueue.push({ eventName: _eventName, data: util.copy(_data)});
-   this.setAsyncEmitTimer();
-};
-
-Source.prototype.setAsyncEmitTimer = function() {
-
-   if (!this.asyncEmitTimer) {
-
-      this.asyncEmitTimer = setTimeout( () => {
-         this.asyncEmitTimer = null;
-         let event = this.eventQueue.pop();
-         this.emit(event.eventName, event.data);
-
-         if (this.eventQueue.length >= 1) {
-            this.setAsyncEmitTimer();
-         }
-      }, 1);
-   }
 };
 
 Source.prototype.raiseEvent = function(_eventName, _data) {

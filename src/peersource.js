@@ -1,8 +1,10 @@
 var util = require('./util');
-var events = require('events');
+var AsyncEmitter = require('./asyncemitter');
 var Gang = require('./gang');
 
 function PeerSource(_uName, _props, _peerCasa) {
+   AsyncEmitter.call(this);
+
    this.uName = _uName;
    this.peerCasa = _peerCasa;
    this.valid = true;
@@ -20,18 +22,16 @@ function PeerSource(_uName, _props, _peerCasa) {
    }
 
    this.props = {};
-   this.eventQueue = [];
 
    for (var prop in _props) {
       this.ensurePropertyExists(prop, 'property', { name: prop });
       this.props[prop].set(_props[prop], {});
    }
 
-   events.EventEmitter.call(this);
    this.peerCasa.addSource(this);
 }
 
-util.inherits(PeerSource, events.EventEmitter);
+util.inherits(PeerSource, AsyncEmitter);
 
 PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
 
@@ -47,27 +47,6 @@ PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _conf
       return false;
    }
 }
-
-PeerSource.prototype.asyncEmit = function(_eventName, _data) {
-   this.eventQueue.push({ eventName: _eventName, data: util.copy(_data)});
-   this.setAsyncEmitTimer();
-};
-
-PeerSource.prototype.setAsyncEmitTimer = function() {
-
-   if (!this.asyncEmitTimer) {
-
-      this.asyncEmitTimer = setTimeout( () => {
-         this.asyncEmitTimer = null;
-         let event = this.eventQueue.pop();
-         this.emit(event.eventName, event.data);
-
-         if (this.eventQueue.length >= 1) {
-            this.setAsyncEmitTimer();
-         }
-      }, 1);
-   }
-};
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
 PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
@@ -135,7 +114,7 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
    }
    else {
       console.info('Event Raised: ' + this.uName + ':' + _data.name);
-      this.emit('event-raised', util.copy(_data));
+      this.asyncEmit('event-raised', util.copy(_data));
    }
 };
 
@@ -205,7 +184,7 @@ PeerSource.prototype.coldStart = function() {
             sendData.value = this.props[prop].value;
             sendData.coldStart = true;
             console.info(this.uName + ': Property Changed: ' + prop + ': ' + sendData.value);
-            this.emit('property-changed', util.copy(sendData));
+            this.asyncEmit('property-changed', util.copy(sendData));
          }
       }
    }
@@ -219,7 +198,7 @@ PeerSource.prototype.invalidate = function() {
       for(var prop in this.props) {
 
          if (this.props.hasOwnProperty(prop)) {
-            this.emit('invalid', { sourceName: this.uName, name: prop });
+            this.asyncEmit('invalid', { sourceName: this.uName, name: prop });
          }
       }
 
