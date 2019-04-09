@@ -61,17 +61,17 @@ function Building(_config) {
             {
                "name": "not-present",
                "sources": [{ "property": this.users[i].sName+"-present", "value": true, "nextState": "present" }],
-               "target": { "event": "user-left", "value": this.users[i].sName }
+               "event": { "name": "user-left", "value": this.users[i].sName }
             },
             {
                "name": "present",
                "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }],
-               "target": { "event": "user-arrived", "value": this.users[i].sName }
+               "event": { "name": "user-arrived", "value": this.users[i].sName }
             },
             {
                "name": "in-bed",
                "sources": [],
-               "target": { "event": "user-went-to-bed", "value": this.users[i].sName }
+               "event": { "name": "user-went-to-bed", "value": this.users[i].sName }
             }
          ]
       };
