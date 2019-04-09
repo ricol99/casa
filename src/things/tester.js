@@ -111,6 +111,7 @@ Tester.prototype.runTestStep = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("property")) {
+      console.log(this.uName+": runTestStep() ", this.testCases[this.currentTestCase].driveSequence[this.currentTestStep]);
       target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
    }
 

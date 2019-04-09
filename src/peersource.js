@@ -20,12 +20,11 @@ function PeerSource(_uName, _props, _peerCasa) {
    }
 
    this.props = {};
+   this.eventQueue = [];
 
    for (var prop in _props) {
-
-      if (_props.hasOwnProperty(prop)){
-         this.props[prop] = { value: _props[prop] };
-      }
+      this.ensurePropertyExists(prop, 'property', { name: prop });
+      this.props[prop].set(_props[prop], {});
    }
 
    events.EventEmitter.call(this);
@@ -34,20 +33,96 @@ function PeerSource(_uName, _props, _peerCasa) {
 
 util.inherits(PeerSource, events.EventEmitter);
 
+PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
+
+   if (!this.props.hasOwnProperty(_propName)) {
+      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
+      var Prop = require('./' + loadPath + _propType);
+      _config.name = _propName;
+      _config.type = _propType;
+      this.props[_propName]  = new Prop(_config, this);
+      return true;
+   }
+   else {
+      return false;
+   }
+}
+
+PeerSource.prototype.asyncEmit = function(_eventName, _data) {
+   this.eventQueue.push({ eventName: _eventName, data: util.copy(_data)});
+   this.setAsyncEmitTimer();
+};
+
+PeerSource.prototype.setAsyncEmitTimer = function() {
+
+   if (!this.asyncEmitTimer) {
+
+      this.asyncEmitTimer = setTimeout( () => {
+         this.asyncEmitTimer = null;
+         let event = this.eventQueue.pop();
+         this.emit(event.eventName, event.data);
+
+         if (this.eventQueue.length >= 1) {
+            this.setAsyncEmitTimer();
+         }
+      }, 1);
+   }
+};
+
+// INTERNAL METHOD AND FOR USE BY PROPERTIES
+PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
+
+   if (this.ghostMode) {
+      let oldValue = this.props[_propName].value;
+      this.props[_propName].value = _propValue;
+      this.props[_propName].previousValue = oldValue;
+      return true;
+   }
+   else if (this.props.hasOwnProperty(_propName)) {
+
+      if ((!(_data && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
+         return true;
+      }
+
+      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
+
+      var oldValue = this.props[_propName].value;
+      var sendData = (_data) ? util.copy(_data) : {};
+      sendData.sourceName = this.uName;
+      sendData.name = _propName;
+      sendData.propertyOldValue = oldValue;
+      sendData.value = _propValue;
+      sendData.local = true;
+
+      // Call the final hooks
+      this.props[_propName].propertyAboutToChange(_propValue, sendData);
+
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
+      this.props[_propName].value = _propValue;
+      this.props[_propName].previousValue = oldValue;
+      sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
+      this.asyncEmit('property-changed', sendData);
+      return true;
+   }
+   else {
+      return false;
+   }
+}
+
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer.');
+
+   this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
    // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
    if (this.ghostMode) {
 
       if (this.myRealSource.sourceHasChangedProperty(_data)) {
-         this.props[_data.name] = { value: _data.value };
+         this.props[_data.name].set(_data.value, _data);
       }
    }
    else {
-      console.info(this.uName + ': Property Changed: ' + _data.name + ': ' + _data.value);
-      this.props[_data.name] = { value: _data.value };
-      this.emit('property-changed', util.copy(_data));
+      this.props[_data.name].set(_data.value, _data);
    }
 };
 

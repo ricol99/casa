@@ -60,15 +60,18 @@ function Building(_config) {
          "states": [
             {
                "name": "not-present",
-               "sources": [{ "property": this.users[i].sName+"-present", "value": true, "nextState": "present" }]
+               "sources": [{ "property": this.users[i].sName+"-present", "value": true, "nextState": "present" }],
+               "target": { "event": "user-left", "value": this.users[i].sName }
             },
             {
                "name": "present",
-               "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }]
+               "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }],
+               "target": { "event": "user-arrived", "value": this.users[i].sName }
             },
             {
                "name": "in-bed",
-               "sources": []
+               "sources": [],
+               "target": { "event": "user-went-to-bed", "value": this.users[i].sName }
             }
          ]
       };
@@ -105,8 +108,11 @@ function Building(_config) {
                                                                              { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-going-to-bed", sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
                                                                                     { property: "all-users-away", value: true, nextState: "empty" }]},
-                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-waking-up" },
+                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-may-be-waking-up" },
+                                                                              { event: "user-arrived", nextState: "occupied-going-to-bed" },
                                                                               { property: "all-users-away", value: true, nextState: "empty" }] },
+                                         { name: "occupied-may-be-waking-up", timeout: { duration: 5, nextState: "occupied-waking-up" },
+                                           sources: [ { event: "user-arrived", nextState: "occupied-going-to-bed" }] },
                                          { name: "occupied-waking-up", timeout: { duration: this.bedtimeTimeout, nextState: "occupied-awake" },
                                            sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
                                                      { property: "all-users-away", value: true, nextState: "empty" }] }]}, _config);

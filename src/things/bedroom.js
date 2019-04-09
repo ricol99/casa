@@ -52,7 +52,8 @@ function Bedroom(_config) {
          "states": [
             {
                "name": "not-present",
-               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
+               "sources": [{ "guards": [{ active: false, property: "evening-possible", value: true }, { active: false, property: "night-time", value: true }],
+                             "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" }],
                "schedule": { "rule": "5 2 * * *", "guard": { "active": false, "property": this.users[i].sName+"-in-building", "value": true },
                              "nextState": "asleep-in-bed" }
@@ -126,6 +127,7 @@ function Bedroom(_config) {
    this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists("evening-possible", 'property', { initialValue: false, source: { "uName": this.buildingName, "property": "evening-possible" }}, _config);
 }
 
 util.inherits(Bedroom, Room);

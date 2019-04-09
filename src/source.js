@@ -160,10 +160,8 @@ Source.prototype.getAllProperties = function(_allProps) {
 Source.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer (duplicate) source');
 
-   if (!this.props.hasOwnProperty(_data.name)) {
-      var Prop = require('./property');
-      this.props[_data.name] = new Prop({ name: _data.name, type: 'property', initialValue: _data.value }, this);
-      this.props[_data.name].coldStart(_data);
+   if (this.ensurePropertyExists(_data.name, 'property', { initialValue: _data.value }, this.config))  {
+      this.props[_data.name].coldStart();
    }
 
    var prop = this.props[_data.name];
@@ -281,6 +279,7 @@ Source.prototype.addPropertiesForAlignment = function(_properties) {
          this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
       }
       else {
+         console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
          this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
       }
    }
@@ -333,7 +332,9 @@ Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, 
       else {
          _mainConfig.props.push(_config);
       }
+      return true;
    }
+   return false;
 };
 
 Source.prototype.goInvalid = function(_propName, _sourceData) {
