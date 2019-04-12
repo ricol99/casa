@@ -5,6 +5,7 @@ var SourceListener = require('../sourcelistener');
 function Tester(_config) {
    Thing.call(this, _config);
    this.thingType = "testsequence";
+   this.config = _config;
 
    this.currentTestCase = 0;
    this.currentTestStep = 0;
@@ -39,7 +40,48 @@ Tester.prototype.coldStart = function() {
    this.initiateTestStep();
 };
 
+Tester.prototype.findTestCase = function(_name) {
+
+   for (var i = 0; i < this.config.testCases.length; ++i) {
+
+      if (this.config.testCases[i].name === _name) {
+         return this.config.testCases[i];
+      }
+   }
+   return null;
+};
+
+Tester.prototype.replaceInnerTestCases = function(_testCase) {
+
+   for (var i = 0; i < _testCase.driveSequence.length; ++i) {
+
+      if (_testCase.driveSequence[i].hasOwnProperty("testCase")) {
+         let innerTestCase = this.findTestCase(_testCase.driveSequence[i].testCase);
+
+         if (innerTestCase) {
+            this.replaceInnerTestCases(innerTestCase);
+            _testCase.driveSequence.splice(i, 1, ...innerTestCase.driveSequence);
+            i += innerTestCase.driveSequence.length - 1;
+         }
+      }
+   }
+
+   for (var j = 0; j < _testCase.expectedSequence.length; ++j) {
+
+      if (_testCase.expectedSequence[j].hasOwnProperty("testCase")) {
+         let innerTestCase = this.findTestCase(_testCase.expectedSequence[j].testCase);
+
+         if (innerTestCase) {
+            this.replaceInnerTestCases(innerTestCase);
+            _testCase.expectedSequence.splice(j, 1, ...(innerTestCase.expectedSequence));
+            j += innerTestCase.expectedSequence.length - 1;
+         }
+      }
+   }
+};
+
 Tester.prototype.buildTestCase = function(_testCase) {
+   this.replaceInnerTestCases(_testCase);
    this.testCases.push({ driveSequence: _testCase.driveSequence, expectedSequence: [] });
 
    for (var i = 0; i < _testCase.expectedSequence.length; ++i) {

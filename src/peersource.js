@@ -10,11 +10,9 @@ function PeerSource(_uName, _props, _peerCasa) {
    this.valid = true;
 
    this.gang = Gang.mainInstance();
-   var source = this.gang.findSource(_uName);
 
-   if (source) {
+   if (this.gang.findSource(_uName)) {
       this.ghostMode = true;
-      this.myRealSource = source;
       console.log(this.uName + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
    }
    else {
@@ -91,16 +89,20 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer.');
 
-   this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
+   let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
    // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
    if (this.ghostMode) {
+      var source = this.gang.findSource(this.uName);
 
-      if (this.myRealSource.sourceHasChangedProperty(_data)) {
+      if (source && source.sourceHasChangedProperty(_data)) {
          this.props[_data.name].set(_data.value, _data);
       }
    }
    else {
+      if (newPropAdded) {
+         this.props[_data.name].coldStart();
+      }
       this.props[_data.name].set(_data.value, _data);
    }
 };
@@ -110,7 +112,11 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
 
    // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
    if (this.ghostMode) {
-      this.myRealSource.sourceHasRaisedEvent(_data);
+      var source = this.gang.findSource(this.uName);
+
+      if (source) {
+         source.sourceHasRaisedEvent(_data);
+      }
    }
    else {
       console.info('Event Raised: ' + this.uName + ':' + _data.name);
@@ -203,11 +209,18 @@ PeerSource.prototype.invalidate = function() {
       }
 
       delete this.peerCasa.gang.allObjects[this.uName];
+      this.peerCasa.updateAllGhosts(this.uName);
    }
 };
 
 PeerSource.prototype.isActive = function() {
    return this.props['ACTIVE'].value;
+};
+
+PeerSource.prototype.endGhostMode = function() {
+   console.log(this.uName + ": Ending ghost mode and becoming main source in casa (peercasa)");
+   this.ghostMode = false;
+   this.gang.allObjects[this.uName] = this;
 };
 
 module.exports = exports = PeerSource;

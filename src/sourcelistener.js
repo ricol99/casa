@@ -9,6 +9,9 @@ function SourceListener(_config, _owner) {
    this.owner = _owner;
 
    this.sourceName = _config.uName;
+   if (_config.uName == undefined) {
+   console.log("AAAA sourceName undefined = "+this.sourceName);
+   }
 
    if (_config.hasOwnProperty('transform')) {
       this.transform = _config.transform;

@@ -705,5 +705,31 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
    });
 };
 
+Gang.prototype.addPeerCasa = function(_peerCasa) {
+  this.peerCasas[_peerCasa.uName] = _peerCasa;
+};
+
+Gang.prototype.removePeerCasa = function(_peerCasa) {
+
+  if (this.peerCasas.hasOwnProperty(_peerCasa.uName)) {
+     delete this.peerCasas[_peerCasa.uName];
+  }
+};
+
+Gang.prototype.findNewPeerSource = function(_sourceName, _peerCasa) {
+
+   for (var peerCasaName in this.peerCasas) {
+
+      if (this.peerCasas.hasOwnProperty(peerCasaName) && peerCasaName != _peerCasa.uName) {
+         let newSource = this.peerCasas[peerCasaName].findNewSource(_sourceName);
+
+         if (newSource) {
+            return newSource;
+         }
+      }
+   }
+   return null;
+};
+
 module.exports = exports = Gang;
 

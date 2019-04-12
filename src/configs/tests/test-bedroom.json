@@ -36,7 +36,8 @@
             {
                "name": "1) Normal - both going to bed slightly different times - initiation by bed switches",
                "driveSequence": [
-                  { "wait": 5, "event": "test-1-switch-event" },
+                  { "wait": 5, "property": "evening-possible", "value": true },
+                  { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 0.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },

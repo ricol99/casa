@@ -49,6 +49,8 @@ function PeerCasa(_config) {
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
    this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
+
+   this.gang.addPeerCasa(this);
 }
 
 util.inherits(PeerCasa, Source);
@@ -964,6 +966,18 @@ PeerCasa.prototype.broadcastCb = function(_message) {
       console.log(this.uName + ': publishing message ' + _message.message + ' orginally from ' + _message.data.sourceName + ' passed on from casa ' + _message.sourceCasa);
       this.sendMessage(_message.message, _message.data);
    }
+};
+
+PeerCasa.prototype.updateAllGhosts = function(_sourceName) {
+   let source = this.gang.findNewPeerSource(_sourceName, this);
+
+   if (source) {
+      source.endGhostMode();
+   }
+};
+
+PeerCasa.prototype.findNewSource = function(_sourceName) {
+   return (this.sources.hasOwnProperty(_sourceName)) ? this.sources[_sourceName] : null;
 };
 
 module.exports = exports = PeerCasa;
