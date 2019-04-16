@@ -6,9 +6,10 @@ function Tester(_config) {
    Thing.call(this, _config);
    this.thingType = "testsequence";
    this.config = _config;
+   this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
 
    this.currentTestCase = 0;
-   this.currentTestStep = 0;
+   this.currentTestEvent = 0;
 
    this.expectedPosition = 0;
 
@@ -37,51 +38,65 @@ function Tester(_config) {
 util.inherits(Tester, Thing);
 
 Tester.prototype.coldStart = function() {
-   this.initiateTestStep();
+   this.initiateTestEvent();
 };
 
-Tester.prototype.findTestCase = function(_name) {
+Tester.prototype.findTestCaseStep = function(_name, _type) {
 
-   for (var i = 0; i < this.config.testCases.length; ++i) {
+   if (this.config.hasOwnProperty(_type)) {
 
-      if (this.config.testCases[i].name === _name) {
-         return this.config.testCases[i];
+      for (var i = 0; i < this.config[_type].length; ++i) {
+
+         if (this.config[_type][i].name === _name) {
+            return this.config[_type][i];
+         }
       }
    }
    return null;
 };
 
-Tester.prototype.replaceInnerTestCases = function(_testCase) {
+Tester.prototype.replaceInnerTestCases = function(_testCaseStep) {
 
-   for (var i = 0; i < _testCase.driveSequence.length; ++i) {
+   for (var i = 0; i < _testCaseStep.driveSequence.length; ++i) {
 
-      if (_testCase.driveSequence[i].hasOwnProperty("testCase")) {
-         let innerTestCase = this.findTestCase(_testCase.driveSequence[i].testCase);
+      let innerTestCaseStep = null;
 
-         if (innerTestCase) {
-            this.replaceInnerTestCases(innerTestCase);
-            _testCase.driveSequence.splice(i, 1, ...innerTestCase.driveSequence);
-            i += innerTestCase.driveSequence.length - 1;
-         }
+      if (_testCaseStep.driveSequence[i].hasOwnProperty("testCase")) {
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testCase, "testCases");
+      }
+      else if (_testCaseStep.driveSequence[i].hasOwnProperty("testStep")) {
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testCase, "testSteps");
+      }
+
+      if (innerTestCaseStep) {
+         this.replaceInnerTestCases(innerTestCaseStep);
+         _testCaseStep.driveSequence.splice(i, 1, ...innerTestCaseStep.driveSequence);
+         i += innerTestCaseStep.driveSequence.length - 1;
       }
    }
 
-   for (var j = 0; j < _testCase.expectedSequence.length; ++j) {
+   for (var j = 0; j < _testCaseStep.expectedSequence.length; ++j) {
 
-      if (_testCase.expectedSequence[j].hasOwnProperty("testCase")) {
-         let innerTestCase = this.findTestCase(_testCase.expectedSequence[j].testCase);
+      let innerTestCaseStep = null;
 
-         if (innerTestCase) {
-            this.replaceInnerTestCases(innerTestCase);
-            _testCase.expectedSequence.splice(j, 1, ...(innerTestCase.expectedSequence));
-            j += innerTestCase.expectedSequence.length - 1;
-         }
+      if (_testCaseStep.expectedSequence[j].hasOwnProperty("testCase")) {
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testCase, "testCases");
+      }
+      else if (_testCaseStep.expectedSequence[j].hasOwnProperty("testStep")) {
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testCase, "testSteps");
+      }
+
+      if (innerTestCaseStep) {
+         this.replaceInnerTestCases(innerTestCaseStep);
+         _testCaseStep.expectedSequence.splice(j, 1, ...(innerTestCaseStep.expectedSequence));
+         j += innerTestCaseStep.expectedSequence.length - 1;
       }
    }
 };
 
 Tester.prototype.buildTestCase = function(_testCase) {
    this.replaceInnerTestCases(_testCase);
+   _testCase.driveSequence[0].wait = (_testCase.driveSequence[0].hasOwnProperty("wait")) ? _testCase.driveSequence[0].wait + this.settleTime : this.settleTime;
    this.testCases.push({ driveSequence: _testCase.driveSequence, expectedSequence: [] });
 
    for (var i = 0; i < _testCase.expectedSequence.length; ++i) {
@@ -116,49 +131,49 @@ Tester.prototype.buildTestCases = function(_testRun, _testCases) {
    }
 };
 
-Tester.prototype.initiateTestStep = function(_cold) {
+Tester.prototype.initiateTestEvent = function(_cold) {
 
-   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("wait")) {
+   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("wait")) {
 
       this.timeout = setTimeout( () => {
          this.timeout = null;
-         this.runTestStep();
-      }, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].wait * 1000);
+         this.runTestEvent();
+      }, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].wait * 1000);
    }
    else {
-      this.runTestStep();
+      this.runTestEvent();
    }
 };
 
-Tester.prototype.initiateNextTestStep = function() {
-   console.log("initiateNextTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
+Tester.prototype.initiateNextTestEvent = function() {
+   console.log("initiateNextTestEvent(): called - tc="+this.currentTestCase+" te="+this.currentTestEvent);
 
-   if (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1) {
-      ++this.currentTestStep;
-      this.initiateTestStep();
+   if (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1) {
+      ++this.currentTestEvent;
+      this.initiateTestEvent();
    }
 };
 
-Tester.prototype.runTestStep = function() {
-   console.log("runTestStep(): called - tc="+this.currentTestCase+" ts="+this.currentTestStep);
+Tester.prototype.runTestEvent = function() {
+   console.log("runTestEvent(): called - tc="+this.currentTestCase+" te="+this.currentTestEvent);
    var tc = this.currentTestCase;
    var target = this;
 
-   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("target")) {
-      target = this.gang.findSource(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].target);
+   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
+      target = this.gang.findSource(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
    }
 
-   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("event")) {
-      target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].event);
+   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
+      target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 
-   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].hasOwnProperty("property")) {
-      console.log(this.uName+": runTestStep() ", this.testCases[this.currentTestCase].driveSequence[this.currentTestStep]);
-      target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestStep].value);
+   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("property")) {
+      console.log(this.uName+": runTestEvent() ", this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent]);
+      target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
    }
 
    if (tc == this.currentTestCase) {
-      this.initiateNextTestStep();
+      this.initiateNextTestEvent();
    }
 };
 
@@ -213,18 +228,18 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
+         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " EVENT " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
-         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " STEP " + (this.expectedPosition + 1) +
+         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " EVENT " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);
       }
 
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
 
-         if ((this.timeout) || (this.currentTestStep < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
+         if ((this.timeout) || (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
             console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete");
             process.exit(5);
          }
@@ -232,9 +247,9 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED");
 
          if (++this.currentTestCase < this.testCases.length) {
-            this.currentTestStep = 0;
+            this.currentTestEvent = 0;
             this.expectedPosition = 0;
-            this.initiateTestStep();
+            this.initiateTestEvent();
          }
          else {
             console.info(this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED");
