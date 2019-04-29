@@ -120,15 +120,78 @@ Tester.prototype.buildTestCases = function(_testRun, _testCases) {
 
    if (_testRun) {
 
-      for (var i = 0; i < _testRun.length; ++i) {
-         this.buildTestCase(_testCases[_testRun[i]]);
+      if (!_testRun.hasOwnProperty("testCases")) {
+         _testRun.testCases = [];
+
+         for (var k = 0; k < _testCases.length; ++k) {
+            _testRun.testCases.push(k+1);
+         }
       }
+
+      if (_testRun.hasOwnProperty("preAmble")) {
+         this.addPreAmble(_testRun.preAmble, _testCases[_testRun.testCases[0]-1]);
+      }
+
+      if (_testRun.hasOwnProperty("postAmble")) {
+         this.addPostAmble(_testRun.postAmble, _testCases[_testRun.testCases[_testRun.testCases.length-1]-1]);
+      }
+
+      for (var i = 0; i < _testRun.testCases.length; ++i) {
+         this.buildTestCase(_testCases[_testRun.testCases[i]-1]);
+      }
+
    }
    else {
       for (var j = 0; j < _testCases.length; ++j) {
          this.buildTestCase(_testCases[j]);
       }
    }
+};
+
+Tester.prototype.addPostAmble = function(_postAmble, _testCase) {
+
+    if (_postAmble.hasOwnProperty("driveSequence")) {
+
+       if (_testCase.hasOwnProperty("driveSequence")) {
+          _testCase.driveSequence.push(..._postAmble.driveSequence);
+       }
+       else {
+          _testCase.driveSequence = _postAmble.driveSequence;
+       }
+    }
+
+    if (_postAmble.hasOwnProperty("expectedSequence")) {
+
+       if (_testCase.hasOwnProperty("expectedSequence")) {
+          _testCase.expectedSequence.push(..._postAmble.expectedSequence);
+       }
+       else {
+          _testCase.expectedSequence = _postAmble.expectedSequence;
+       }
+    }
+};
+
+Tester.prototype.addPreAmble = function(_preAmble, _testCase) {
+
+    if (_preAmble.hasOwnProperty("driveSequence")) {
+
+       if (_testCase.hasOwnProperty("driveSequence")) {
+          _testCase.driveSequence.unshift(..._preAmble.driveSequence);
+       }
+       else {
+          _testCase.driveSequence = _preAmble.driveSequence;
+       }
+    }
+
+    if (_preAmble.hasOwnProperty("expectedSequence")) {
+
+       if (_testCase.hasOwnProperty("expectedSequence")) {
+          _testCase.expectedSequence.unshift(..._preAmble.expectedSequence);
+       }
+       else {
+          _testCase.expectedSequence = _preAmble.expectedSequence;
+       }
+    }
 };
 
 Tester.prototype.initiateTestEvent = function(_cold) {
@@ -146,6 +209,7 @@ Tester.prototype.initiateTestEvent = function(_cold) {
 };
 
 Tester.prototype.initiateNextTestEvent = function() {
+
    console.log("initiateNextTestEvent(): called - tc="+this.currentTestCase+" te="+this.currentTestEvent);
 
    if (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1) {
@@ -159,16 +223,21 @@ Tester.prototype.runTestEvent = function() {
    var tc = this.currentTestCase;
    var target = this;
 
+   if (this.currentTestEvent === 0) {
+      console.info(this.uName + ": ========= TEST CASE " + (this.currentTestCase + 1) + " =========");
+   }
+
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
       target = this.gang.findSource(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
+      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SENDING EVENT event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("property")) {
-      console.log(this.uName+": runTestEvent() ", this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent]);
+      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property + " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
       target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
    }
 
@@ -228,11 +297,11 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " EVENT " + (this.expectedPosition + 1) +
+         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
-         console.error(this.uName + ": TC"+ (this.currentTestCase + 1) + " EVENT " + (this.expectedPosition + 1) +
+         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);
       }

@@ -66,7 +66,7 @@ function Building(_config) {
             {
                "name": "present",
                "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }],
-               "event": { "name": "user-arrived", "value": this.users[i].sName }
+               "event": { "guard": { "previousState": "not-present"}, "name": "user-arrived", "value": this.users[i].sName }
             },
             {
                "name": "in-bed",
