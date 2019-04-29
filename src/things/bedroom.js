@@ -52,8 +52,9 @@ function Bedroom(_config) {
          "states": [
             {
                "name": "not-present",
-               "sources": [{ "guard": { active: false, property: "evening-possible", value: true }, "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
-                           { "guard": { active: false, property: "night-time", value: true }, "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
+               //"sources": [{ "guard": { active: false, property: "evening-possible", value: true }, "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
+                           //{ "guard": { active: false, property: "night-time", value: true }, "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
+               "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" }],
                "schedule": { "rule": "5 2 * * *", "guard": { "active": false, "property": this.users[i].sName+"-in-building", "value": true }, "nextState": "asleep-in-bed" }
             },
