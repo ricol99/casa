@@ -63,8 +63,9 @@
    ],
    "things": [ 
       {
-         "uName": "thing:timed-environment",
-         "displayName": "Timed Environment",
+         "uName": "building:dumgoyne",
+         "displayName": "Our home in Sussex - Timed",
+         "type": "thing",
          "props": [
             {
                "name": "daylight",
@@ -113,28 +114,6 @@
                      "value": false
                   }
                ]
-            }
-         ]
-      },
-      {
-         "uName": "thing:environment",
-         "displayName": "Environment",
-         "props": [
-            {
-               "name": "daylight",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "building:dumgoyne",
-                     "property": "daylight"
-                  },
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "daylight"
-                  }
-               ]
             },
             {
                "name": "dark",
@@ -142,41 +121,9 @@
                "writable": false,
                "sources": [
                   {
-                     "uName": "thing:environment",
+                     "uName": "building:dumgoyne",
                      "property": "daylight",
                      "transform": "!$value"
-                  }
-               ]
-            },
-            {
-               "name": "low-light",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "building:dumgoyne",
-                     "property": "low-light"
-                  },
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "low-light"
-                  }
-               ]
-            },
-            {
-               "name": "night-time",
-               "initialValue": false,
-               "writable": false,
-               "type": "topvalidproperty",
-               "sources": [
-                  {
-                     "uName": "building:dumgoyne",
-                     "property": "night-time"
-                  },
-                  {
-                     "uName": "thing:timed-environment",
-                     "property": "night-time"
                   }
                ]
             }

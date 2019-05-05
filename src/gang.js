@@ -234,8 +234,8 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
    }
 };
 
-Gang.prototype.cleverRequire = function(_name, _path) {
-   var str = S(_name).between('', ':').s;
+Gang.prototype.cleverRequire = function(_name, _path, _type) {
+   var str = (_type) ? _type : S(_name).between('', ':').s;
    var path = '';
 
    if (_path && (_path !== str+'s')) {
@@ -314,7 +314,7 @@ Gang.prototype.extractScenes = function(_config, _parent) {
 
 // Extract Things
 Gang.prototype.createThing = function(_config, _parent) {
-   var Thing = this.cleverRequire(_config.uName, 'things');
+   var Thing = this.cleverRequire(_config.uName, 'things', _config.type);
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
    this.things[thingObj.uName] = thingObj;
@@ -717,18 +717,33 @@ Gang.prototype.removePeerCasa = function(_peerCasa) {
 };
 
 Gang.prototype.findNewPeerSource = function(_sourceName, _peerCasa) {
+   var topPriority = -1;
+   var highestPrioritySource = null;
 
    for (var peerCasaName in this.peerCasas) {
 
-      if (this.peerCasas.hasOwnProperty(peerCasaName) && peerCasaName != _peerCasa.uName) {
-         let newSource = this.peerCasas[peerCasaName].findNewSource(_sourceName);
+      if (this.peerCasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.uName)) {
+         console.log(this.uName+": AAAAA peerCasaName="+peerCasaName+" _peerCasa.uName="+_peerCasa.uName);
+         let newSource = this.peerCasas[peerCasaName].getSource(_sourceName);
 
          if (newSource) {
-            return newSource;
+
+            if (newSource.priority > topPriority) {
+               topPriority = newSource.priority;
+               highestPrioritySource = newSource;
+            }
          }
       }
    }
-   return null;
+   return highestPrioritySource;
+};
+
+Gang.prototype.changePeerCasaName = function(_peerCasa, _newName) {
+
+   if (this.peerCasas.hasOwnProperty(_peerCasa.uName)) {
+      delete this.peerCasas[_peerCasa.uName];
+   }
+   this.peerCasas[_newName] = _peerCasa;
 };
 
 module.exports = exports = Gang;

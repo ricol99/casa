@@ -104,6 +104,7 @@ Casa.prototype.buildSimpleConfig = function(_config) {
    }
 
    this.config.sources = [];
+   this.config.sourcesPriority = [];
    this.config.sourcesStatus = [];
 
    if (_config.hasOwnProperty('things')) {
@@ -111,6 +112,7 @@ Casa.prototype.buildSimpleConfig = function(_config) {
 
       for (var j = 0; j < len; ++j) {
          this.config.sources.push(_config.things[j].uName);
+         this.config.sourcesPriority.push((_config.things[j].hasOwnProperty('priority')) ? _config.things[j].priority : 0);
          this.config.sourcesStatus.push({ properties: {}, status: false });
       }
 
@@ -118,6 +120,7 @@ Casa.prototype.buildSimpleConfig = function(_config) {
       for (var k = j; k < len + j; ++k) {
          this.config.sources.push(_config.users[k-j].uName);
          this.config.sourcesStatus.push({ properties: {}, status: false });
+         this.config.sourcesPriority.push((_config.users[k-j].hasOwnProperty('priority')) ? _config.users[k-j].priority : 0);
       }
    }
 }
@@ -138,14 +141,20 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
 
    for (var i = 0; i < len; ++i) {
       var allProps = {}; 
-      var source = this.sources[this.config.sources[i]];
+      console.log(this.uName+": AAAA SOURCE NAME="+this.config.sources[i]);
+      var source = this.gang.findSource(this.config.sources[i]);
 
       if (source) {
          source.getAllProperties(allProps);
       }
-      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: this.sources[this.config.sources[i]].isActive() });
+      console.log(this.uName+": AAAA REFRESH SOURCE FOR CASA LIST casa="+this.config.sources[i]);
+      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: source.isActive() });
    }
 }
+
+Casa.prototype.getSource = function(_sourceName) {
+   return this.sources[_sourceName];
+};
 
 Casa.prototype.isActive = function() {
    return true;
@@ -178,10 +187,12 @@ Casa.prototype.renameSource = function(_source, _newName) {
       delete this.gang.allObjects[_source.uName];
    }
    this.gang.allObjects[_newName] = _source;
+   console.log(this.uName + ": AAAAA Source: "+_source.uName+" is now referred to in casa as "+ _newName);
 };
 
 Casa.prototype.removeSource = function(_source) {
    console.log(this.uName + ': Deleting source '  + _source.uName);
+
    this.gang.removeThing(_source);
    delete this.sources[_source.uName];
 };

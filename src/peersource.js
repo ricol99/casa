@@ -1,61 +1,47 @@
 var util = require('./util');
-var AsyncEmitter = require('./asyncemitter');
-var Gang = require('./gang');
+var SourceBase = require('./sourcebase');
 
-function PeerSource(_uName, _props, _peerCasa) {
-   AsyncEmitter.call(this);
-
+function PeerSource(_uName, _priority, _props, _peerCasa) {
+   SourceBase.call(this);
    this.uName = _uName;
-   this.peerCasa = _peerCasa;
-   this.valid = true;
+   this.sName = this.uName.split(":")[1];
 
-   this.gang = Gang.mainInstance();
+   this.priority = _priority;
+   this.casa = _peerCasa;
 
-   if (this.gang.findSource(_uName)) {
-      this.ghostMode = true;
-      console.log(this.uName + ': Creating a ghost peer source as a source with the same name already exists in this local casa.');
+   this.config = { local: true };
+   this.local = true;
+
+   var existingSource = this.gang.findSource(_uName);
+
+   if (existingSource) {
+
+      if (existingSource.deferToPeer(this)) {
+         this.gang.allObjects[this.uName] = this;
+         console.log(this.uName + ": AAAA PEERSOURCE ADDED to gang all objects!");
+      }
+      else {
+         this.bowToOtherSource();
+      }
    }
    else {
       this.gang.allObjects[this.uName] = this;
    }
-
-   this.props = {};
 
    for (var prop in _props) {
       this.ensurePropertyExists(prop, 'property', { name: prop });
       this.props[prop].set(_props[prop], {});
    }
 
-   this.peerCasa.addSource(this);
+   this.casa.addSource(this);
 }
 
-util.inherits(PeerSource, AsyncEmitter);
-
-PeerSource.prototype.ensurePropertyExists = function(_propName, _propType, _config) {
-
-   if (!this.props.hasOwnProperty(_propName)) {
-      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
-      var Prop = require('./' + loadPath + _propType);
-      _config.name = _propName;
-      _config.type = _propType;
-      this.props[_propName]  = new Prop(_config, this);
-      return true;
-   }
-   else {
-      return false;
-   }
-}
+util.inherits(PeerSource, SourceBase);
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
 PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.ghostMode) {
-      let oldValue = this.props[_propName].value;
-      this.props[_propName].value = _propValue;
-      this.props[_propName].previousValue = oldValue;
-      return true;
-   }
-   else if (this.props.hasOwnProperty(_propName)) {
+   if (this.props.hasOwnProperty(_propName)) {
 
       if ((!(_data && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
          return true;
@@ -86,78 +72,31 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
 }
 
+PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
+   console.log(this.uName + ': Attempting to set source property');
+   return this.casa.setSourceProperty(this, _propName, _propValue, _data);
+};
+
+PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
+   return this.casa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
+};
+
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer.');
 
    let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
-   // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
-   if (this.ghostMode) {
-      var source = this.gang.findSource(this.uName);
-
-      if (source && source.sourceHasChangedProperty(_data)) {
-         this.props[_data.name].set(_data.value, _data);
-      }
+   if (newPropAdded) {
+      this.props[_data.name].coldStart();
    }
-   else {
-      if (newPropAdded) {
-         this.props[_data.name].coldStart();
-      }
-      this.props[_data.name].set(_data.value, _data);
-   }
+   this.props[_data.name].set(_data.value, _data);
 };
 
 PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
    console.log(this.uName + ': received event-raised event from peer.');
-
-   // If I am a ghost source (the source also exists in this casa), then tell it. Otherwise, act like I am the source
-   if (this.ghostMode) {
-      var source = this.gang.findSource(this.uName);
-
-      if (source) {
-         source.sourceHasRaisedEvent(_data);
-      }
-   }
-   else {
-      console.info('Event Raised: ' + this.uName + ':' + _data.name);
-      this.asyncEmit('event-raised', util.copy(_data));
-   }
-};
-
-PeerSource.prototype.isPropertyValid = function(_property) {
-   return true;
-};
-
-PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': Attempting to set source property');
-   return this.peerCasa.setSourceProperty(this, _propName, _propValue, _data);
-};
-
-PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
-   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
-   return this.peerCasa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
-};
-
-PeerSource.prototype.getProperty = function(_propName) {
-   return this.props[_propName].value;
-};
-
-PeerSource.prototype.getAllProperties = function(_allProps) {
-
-   for (var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
-         _allProps[prop] = this.props[prop].value;
-      }
-   }
-};
-
-PeerSource.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
-   this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
-};
-
-PeerSource.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
-   this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
+   console.info('Event Raised: ' + this.uName + ':' + _data.name);
+   this.asyncEmit('event-raised', util.copy(_data));
 };
 
 PeerSource.prototype.alignProperties = function(_properties) {
@@ -177,50 +116,19 @@ PeerSource.prototype.alignProperties = function(_properties) {
    }
 };
 
-PeerSource.prototype.coldStart = function() {
-
-   if (!this.ghostMode) {
-
-      for (var prop in this.props) {
-
-         if (this.props.hasOwnProperty(prop)) {
-            var sendData = {};
-            sendData.sourceName = this.uName;
-            sendData.name = prop;
-            sendData.value = this.props[prop].value;
-            sendData.coldStart = true;
-            console.info(this.uName + ': Property Changed: ' + prop + ': ' + sendData.value);
-            this.asyncEmit('property-changed', util.copy(sendData));
-         }
-      }
-   }
-}
-
 PeerSource.prototype.invalidate = function() {
 
-   if (!this.ghostMode) {
-      this.valid = false;
+   this.valid = false;
 
-      for(var prop in this.props) {
+   for(var prop in this.props) {
 
-         if (this.props.hasOwnProperty(prop)) {
-            this.asyncEmit('invalid', { sourceName: this.uName, name: prop });
-         }
+      if (this.props.hasOwnProperty(prop)) {
+         this.emit('invalid', { sourceName: this.uName, name: prop });
       }
-
-      delete this.peerCasa.gang.allObjects[this.uName];
-      this.peerCasa.updateAllGhosts(this.uName);
    }
-};
 
-PeerSource.prototype.isActive = function() {
-   return this.props['ACTIVE'].value;
-};
-
-PeerSource.prototype.endGhostMode = function() {
-   console.log(this.uName + ": Ending ghost mode and becoming main source in casa (peercasa)");
-   this.ghostMode = false;
-   this.gang.allObjects[this.uName] = this;
+   delete this.gang.allObjects[this.uName];
+   this.casa.findNewMainSource(this);
 };
 
 module.exports = exports = PeerSource;

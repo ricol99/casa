@@ -130,6 +130,7 @@ PeerCasa.prototype.invalidateSources = function() {
    delete this.remoteCasas;
    this.remoteCasas = [];
    this.goInvalid('ACTIVE', { sourceName: this.uName });
+   this.gang.casa.refreshSourceListeners();
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -184,6 +185,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    }
 
    this.config = util.copy(_config, true);
+   this.gang.changePeerCasaName(this, this.config.casaName);
    this.changeName(this.config.casaName);
    this.uName = this.config.casaName;
    this.createSources(this.config, this);
@@ -348,6 +350,7 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    if (this.uName != _data.casaName) {
       console.log(this.uName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
       this.gang.removeRemoteCasa(this);
+      this.gang.changePeerCasaName(this, _data.casaName);
       this.changeName(_data.casaName);
       this.uName = _data.casaName;
       this.gang.addRemoteCasa(this);
@@ -668,15 +671,16 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
 
 PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
-   if (_data.casaConfig &&  _data.casaConfig.sources && _data.casaConfig.sourcesStatus) {
+   if (_data.casaConfig &&  _data.casaConfig.sources && _data.casaConfig.sourcesPriority && _data.casaConfig.sourcesStatus) {
       var len = _data.casaConfig.sources.length;
       console.log(_peerCasa.uName + ': New sources found = ' + len);
       console.log(_peerCasa.uName + ': New sources status found = ' + _data.casaConfig.sourcesStatus.length);
 
       var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.uName + ': Creating peer source named ' + _data.casaConfig.sources[i]);
-         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
+         console.log(_peerCasa.uName + ': AAAA', _data.casaConfig);
+         console.log(_peerCasa.uName + ': Creating peer source named ' + _data.casaConfig.sources[i] + ' priority =' + _data.casaConfig.sourcesPriority[i]);
+         var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesPriority[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
       }
    }
 
@@ -968,16 +972,62 @@ PeerCasa.prototype.broadcastCb = function(_message) {
    }
 };
 
-PeerCasa.prototype.updateAllGhosts = function(_sourceName) {
-   let source = this.gang.findNewPeerSource(_sourceName, this);
+PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
+   console.log(this.uName + ": Finding new main source as current main source has gone invalid");
+   var currentPriority = 0;
+   var topPriority = 0;
+
+   // Check to see if source exists before looking for peers
+   var source = this.gang.casa.getSource(_oldPeerSource.uName);
 
    if (source) {
-      source.endGhostMode();
+      console.log(this.uName+": AAAAA Found Source!!!!");
+      currentPriority = source.priority;
+      topPriority = currentPriority;
+   }
+
+   var peerSource = this.gang.findNewPeerSource(_oldPeerSource.uName, this);
+   var newMainSource = null;
+
+   if (peerSource && source) {
+      console.log(this.uName+": AAAAA Found Peer Source and Source!!!!");
+
+      if (peerSource.priority > source.priority) {
+         newMainSource = peerSource;
+      }
+      else {
+         newMainSource = source;
+      }
+   }
+   else if (peerSource) {
+      console.log(this.uName+": AAAAA Found Peer Source!!!!");
+      newMainSource = peerSource;
+   }
+   else if (source) {
+      console.log(this.uName+": AAAAA Found Source!!!!");
+      newMainSource = source;
+   }
+
+   if (newMainSource) {
+      newMainSource.becomeMainSource(_oldPeerSource);
+      this.gang.casa.refreshSourceListeners();
    }
 };
 
-PeerCasa.prototype.findNewSource = function(_sourceName) {
-   return (this.sources.hasOwnProperty(_sourceName)) ? this.sources[_sourceName] : null;
+PeerCasa.prototype.getSource = function(_sourceName) {
+   return this.sources[_sourceName];
+};
+
+PeerCasa.prototype.renameSource = function(_source, _newName) {
+   console.log(this.uName + ': Renaming source '  + _source.uName + ' to ' + _newName);
+   delete this.sources[_source.uName];
+   this.sources[_newName] = _source;
+
+   // ** TBD Don't like this! HACK!
+   if (this.gang.allObjects[_source.uName]) {
+      delete this.gang.allObjects[_source.uName];
+   }
+   this.gang.allObjects[_newName] = _source;
 };
 
 module.exports = exports = PeerCasa;

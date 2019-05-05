@@ -47,6 +47,10 @@ function Building(_config) {
                              { "initialValue": false, "events": [ { "rule": "sunset:-7200", "value": true }],
                                "source": { "property": "night-time", "value": true, "transform": "!$value" }}, _config);
 
+   this.ensurePropertyExists("dark", 'property',
+                             { "name": "dark", "initialValue": false, "writable": false,
+                               "source": { "property": "daylight", "transform": "!$value" }}, _config);
+
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.gang.findSource(_config.users[u].uName));
    }

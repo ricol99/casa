@@ -32,6 +32,34 @@
    "services": [],
    "things": [ 
       {
+         "uName": "thing:test-global-bow",
+         "displayName": "Test Global Bow",
+         "props": [
+            {
+               "name": "test-bow-1",
+               "initialValue": "global-1",
+               "writable": true,
+               "type": "stateproperty",
+               "states": [
+                  {
+                     "name": "global-1",
+                     "timeout": {
+                        "duration": 5,
+                        "nextState": "global-2"
+                     }
+                  },
+                  {
+                     "name": "global-2",
+                     "timeout": {
+                        "duration": 5,
+                        "nextState": "global-1"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "uName": "thing:test-environment",
          "displayName": "Test Timed Environment",
          "props": [

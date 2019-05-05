@@ -1,24 +1,20 @@
 var util = require('./util');
-var AsyncEmitter = require('./asyncemitter');
-var Gang = require('./gang');
+var SourceBase = require('./sourcebase');
 
 function Source(_config) {
-   AsyncEmitter.call(this);
+   SourceBase.call(this);
    this.config = _config;
    this.uName = _config.uName;
    this.sName = this.uName.split(":")[1];
-   this.valid = true;
 
    this.setMaxListeners(50);
 
-   this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
-
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
+   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
    this.controller = null;
-   this.props = {};
    
    if (_config.props) {
       var propLen = _config.props.length;
@@ -57,7 +53,7 @@ function Source(_config) {
    }
 }
 
-util.inherits(Source, AsyncEmitter);
+util.inherits(Source, SourceBase);
 
 Source.prototype.getScheduleService = function() {
   var scheduleService =  this.gang.findService("scheduleservice");
@@ -99,29 +95,8 @@ Source.prototype.getRampService = function() {
    return rampService;
 };
 
-Source.prototype.isActive = function() {
-   return this.props['ACTIVE'].value;
-};
-
-Source.prototype.isPropertyValid = function(_property) {
-
-   if (this.props.hasOwnProperty(_property)) {
-      return this.props[_property].valid;
-   }
-   else {
-      return true;
-   }
-};
-
-Source.prototype.getProperty = function(_property) {
-   return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
-};
-
-Source.prototype.hasProperty = function(_property) {
-   return this.props.hasOwnProperty(_property);
-};
-
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
+
    console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
@@ -143,64 +118,8 @@ Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
    } 
 };
 
-Source.prototype.getAllProperties = function(_allProps) {
-
-   for (var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
-         _allProps[prop] = this.props[prop].value;
-      }
-   }
-};
-
-
-// Only called by ghost peer source
-Source.prototype.sourceHasChangedProperty = function(_data) {
-   console.log(this.uName + ': received changed-property event from peer (duplicate) source');
-
-   if (this.ensurePropertyExists(_data.name, 'property', { initialValue: _data.value }, this.config))  {
-      this.props[_data.name].coldStart();
-   }
-
-   var prop = this.props[_data.name];
-
-   // Only update if the property has a different value
-   if (prop.value != _data.value) {
-
-      // Only update if the property has no processing attached to it
-      if (prop.type === 'property' && !prop.pipeline && !prop.hasSourceOutputValues) {
-         return prop.set(_data.value, _data);
-      }
-      else {
-         return false;
-      }
-   }
-   else {
-      return true;
-   }
-};
-
-// Only called by ghost peer source - can cause duplicates! TODO
-Source.prototype.sourceHasRaisedEvent = function(_data) {
-   console.log(this.uName + ': received event-raised event from peer (duplicate) source');
-   _data.local = true;
-   this.raiseEvent(_data.name, _data);
-};
-
 // Override this for last output hook - e.g. sync and external property with the final property value
 Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-};
-
-// INTERNAL METHOD AND FOR USE BY PROPERTIES 
-Source.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
-
-   var sendData = (_data) ? util.copy(_data) : {};
-   sendData.sourceName = this.uName;
-   sendData.name = _propName;
-   sendData.value = _propValue;
-   sendData.local = this.local;
-   this.asyncEmit('property-changed', sendData);
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
@@ -233,6 +152,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management
+
       this.asyncEmit('property-changed', sendData);
       return true;
    }
@@ -311,30 +231,6 @@ Source.prototype.alignNextProperty = function() {
    }
 };
 
-Source.prototype.rejectPropertyUpdate = function(_propName) {
-   this.alignPropertyValue(_propName, this.props[_propName].value);
-};
-
-Source.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
-
-   if (!this.props.hasOwnProperty(_propName)) {
-      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
-      var Prop = require('./' + loadPath + _propType);
-      _config.name = _propName;
-      _config.type = _propType;
-      this.props[_propName]  = new Prop(_config, this);
-
-      if (!_mainConfig.hasOwnProperty("props")) {
-         _mainConfig.props = [ _config ];
-      }
-      else {
-         _mainConfig.props.push(_config);
-      }
-      return true;
-   }
-   return false;
-};
-
 Source.prototype.goInvalid = function(_propName, _sourceData) {
    console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
@@ -347,7 +243,8 @@ Source.prototype.goInvalid = function(_propName, _sourceData) {
    sendData.oldState = this.props[_propName].value;
    sendData.name = _propName;
    console.log(this.uName + ": Emitting invalid!");
-   this.asyncEmit('invalid', sendData);
+
+   this.emit('invalid', sendData);
 }
 
 Source.prototype.updateEvent = function(_modifiedEvent) {
@@ -404,20 +301,6 @@ Source.prototype.deleteEvent = function(_eventName) {
    return true;
 };
 
-Source.prototype.raiseEvent = function(_eventName, _data) {
-   var sendData = (_data) ? util.copy(_data) : {};
-   sendData.local = this.local;
-   sendData.sourceName = this.uName;
-   sendData.name = _eventName;
-
-   if (!sendData.hasOwnProperty("value")) {
-      sendData.value = true;
-   }
-
-   console.log(this.uName + ": Emitting event " + _eventName);
-   this.asyncEmit('event-raised', sendData);
-}
-
 Source.prototype.coldStart = function() {
 
    if (this.events) {
@@ -425,25 +308,8 @@ Source.prototype.coldStart = function() {
       this.scheduleService.registerEvents(this, this.events);
    }
 
-   for (var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop)) {
-         this.props[prop].coldStart();
-      }
-   }
+   SourceBase.prototype.coldStart.call(this);
 }
-
-Source.prototype.invalidate = function() {
-   this.valid = false;
-
-   for(var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop)) {
-         this.asyncEmit('invalid', { sourceName: this.uName, name: prop });
-      }
-   }
-   this.casa.removeSource(this);
-};
 
 // Called by stateproperty to take control based on setting a target property
 Source.prototype.takeControl = function(_newController, _priority) {
@@ -584,18 +450,6 @@ Source.prototype.getAutoMode = function() {
 Source.prototype.setAutoMode = function() {
    this.alignPropertyValue("MODE", "auto");
 };
-
-Source.prototype.changeName = function(_newName) {
-   this.casa.renameSource(this, _newName);
-   this.uName = _newName;
-
-   for (var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop)) {
-         this.props[prop].ownerHasNewName();
-      }
-   }
-}
 
 module.exports = exports = Source;
  

@@ -28,6 +28,17 @@
    ],
    "things": [
       {
+         "uName": "banana:test-bow-override",
+         "type": "thing",
+         "displayName": "Test Bow Override",
+         "props": [
+            {
+               "name": "bow-value",
+               "source": { "uName": "thing:test-global-bow", "property": "test-bow-1" }
+            }
+         ]
+      },
+      {
          "uName": "thing:test-environment",
          "displayName": "Test Timed Environment",
          "props": [
