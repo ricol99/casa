@@ -520,7 +520,11 @@
                               {
                                  "name": "active",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                                 "targets": [{ "property": "brightness", "value": 100 },
+                                             { "property": "hue", "value": 60 },
+                                             { "property": "saturation", "value": 70 },
+                                             { "property": "power", "value": true }
+                                 ]
                               }
                            ]
                         }
