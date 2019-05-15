@@ -155,7 +155,6 @@ SourceBase.prototype.deferToPeer = function(_newSource) {
       this.bowing = true;
       this.local = true;
       console.log(this.uName+": Bowing to new source");
-      console.info(this.uName+": AAAAAA bowing to new source");
       this.dropSourceListeners();
       this.bowToOtherSource();
       return true;

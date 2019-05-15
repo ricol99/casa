@@ -723,7 +723,6 @@ Gang.prototype.findNewPeerSource = function(_sourceName, _peerCasa) {
    for (var peerCasaName in this.peerCasas) {
 
       if (this.peerCasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.uName)) {
-         console.log(this.uName+": AAAAA peerCasaName="+peerCasaName+" _peerCasa.uName="+_peerCasa.uName);
          let newSource = this.peerCasas[peerCasaName].getSource(_sourceName);
 
          if (newSource) {

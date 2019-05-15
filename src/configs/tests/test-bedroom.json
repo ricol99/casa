@@ -655,6 +655,26 @@
                      ]
                   }
                ]
+            },
+            {  
+               "name": "9) Use bed-switch to ovveride main light during the day time",
+               "driveSequence": [
+                  { "property": "evening-possible", "value": false },
+                  { "wait": 1, "event": "test-1-switch-event" },
+                  { "wait": 2, "event": "test-1-switch-event" }
+               ],
+               "expectedSequence": [
+                  {  
+                     "simultaneous": [
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  }, 
+                  {  
+                     "simultaneous": [
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  }
+               ]
             }
          ],
          "props": [],
@@ -913,6 +933,24 @@
                                  "name": "users-present-dull-day",
                                  "priority": 4,
                                  "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                              }
+                           ]
+                        },
+                        {
+                           "name": "user-override-state",
+                           "type": "stateproperty",
+                           "initialValue": "not-active",
+                           "states": [
+                              {
+                                 "name": "not-active",
+                                 "targets": [{ "property": "power", "value": false }]
+                              },
+                              {
+                                 "name": "active",
+                                 "priority": 5,
+                                 "targets": [{ "property": "brightness", "value": 100 },
+                                             { "property": "power", "value": true }
+                                 ]
                               }
                            ]
                         },

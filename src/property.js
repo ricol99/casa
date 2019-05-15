@@ -278,6 +278,7 @@ Property.prototype.coldStart = function(_data) {
 // ====================
 
 Property.prototype.setPropertyInternal = function(_newValue, _data) {
+   console.log(this.name+": setPropertyInternal value="+_newValue);
 
    if (this.value !== _newValue || this.cold) {
 

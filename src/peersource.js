@@ -18,7 +18,6 @@ function PeerSource(_uName, _priority, _props, _peerCasa) {
 
       if (existingSource.deferToPeer(this)) {
          this.gang.allObjects[this.uName] = this;
-         console.log(this.uName + ": AAAA PEERSOURCE ADDED to gang all objects!");
       }
       else {
          this.bowToOtherSource();

@@ -141,13 +141,11 @@ Casa.prototype.refreshConfigWithSourcesStatus = function() {
 
    for (var i = 0; i < len; ++i) {
       var allProps = {}; 
-      console.log(this.uName+": AAAA SOURCE NAME="+this.config.sources[i]);
       var source = this.gang.findSource(this.config.sources[i]);
 
       if (source) {
          source.getAllProperties(allProps);
       }
-      console.log(this.uName+": AAAA REFRESH SOURCE FOR CASA LIST casa="+this.config.sources[i]);
       this.config.sourcesStatus.push({ properties: util.copy(allProps), status: source.isActive() });
    }
 }
@@ -187,7 +185,7 @@ Casa.prototype.renameSource = function(_source, _newName) {
       delete this.gang.allObjects[_source.uName];
    }
    this.gang.allObjects[_newName] = _source;
-   console.log(this.uName + ": AAAAA Source: "+_source.uName+" is now referred to in casa as "+ _newName);
+   console.log(this.uName + ": Source: "+_source.uName+" is now referred to in casa as "+ _newName);
 };
 
 Casa.prototype.removeSource = function(_source) {

@@ -124,6 +124,7 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
+   console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
 

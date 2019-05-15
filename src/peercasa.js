@@ -678,7 +678,6 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
 
       var PeerSource = require('./peersource');
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.uName + ': AAAA', _data.casaConfig);
          console.log(_peerCasa.uName + ': Creating peer source named ' + _data.casaConfig.sources[i] + ' priority =' + _data.casaConfig.sourcesPriority[i]);
          var source = new PeerSource(_data.casaConfig.sources[i], _data.casaConfig.sourcesPriority[i], _data.casaConfig.sourcesStatus[i].properties, _peerCasa);
       }
@@ -981,7 +980,6 @@ PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
    var source = this.gang.casa.getSource(_oldPeerSource.uName);
 
    if (source) {
-      console.log(this.uName+": AAAAA Found Source!!!!");
       currentPriority = source.priority;
       topPriority = currentPriority;
    }
@@ -990,7 +988,6 @@ PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
    var newMainSource = null;
 
    if (peerSource && source) {
-      console.log(this.uName+": AAAAA Found Peer Source and Source!!!!");
 
       if (peerSource.priority > source.priority) {
          newMainSource = peerSource;
@@ -1000,11 +997,9 @@ PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
       }
    }
    else if (peerSource) {
-      console.log(this.uName+": AAAAA Found Peer Source!!!!");
       newMainSource = peerSource;
    }
    else if (source) {
-      console.log(this.uName+": AAAAA Found Source!!!!");
       newMainSource = source;
    }
 
