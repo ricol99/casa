@@ -66,7 +66,7 @@ function Bedroom(_config) {
             {
                "name": "initial-reading-in-bed",
                "sources": [{ "event": this.users[i].sName+"-switch-event", "nextState": "asleep-in-bed" }],
-               "targets": [{ "property": "night-time", "value": true }]
+               "actions": [{ "property": "night-time", "value": true }]
             },
             {
                "name": "reading-in-bed",
@@ -90,7 +90,7 @@ function Bedroom(_config) {
                "name": "awake-in-bed",
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" },
-               "targets": [{ "property": "night-time", "value": false }]
+               "actions": [{ "property": "night-time", "value": false }]
             }
          ]
       };
@@ -129,7 +129,7 @@ function Bedroom(_config) {
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
 
-   this.userMonitorConfig.states.push({ name: "room-switch-event-required", target: { "event": "room-switch-event" }, "timeout": { "duration": 0.5, "nextState": "PREVIOUS-STATE" }}),
+   this.userMonitorConfig.states.push({ name: "room-switch-event-required", action: { "event": "room-switch-event" }, "timeout": { "duration": 0.5, "nextState": "PREVIOUS-STATE" }}),
    this.ensurePropertyExists("monitor-users", 'stateproperty', this.userMonitorConfig, _config);
 }
 

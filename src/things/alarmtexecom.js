@@ -108,19 +108,19 @@ function AlarmTexecom(_config) {
        states: [
           {
              name: "idle-state",
-             target: { handler: "handleIdleState" },
+             action: { handler: "handleIdleState" },
              source: { event: "connect-to-alarm", nextState: "connect-to-alarm-state" }
           },
           {
              name: "connect-to-alarm-state",
-             target: { handler: "connectToAlarm" },
+             action: { handler: "connectToAlarm" },
              timeout: { duration: 10, nextState: "error-state" },
              sources: [{ event: "connected", nextState: "wake-up-panel-state" },
                        { event: "error", nextState: "error-state"}]
           },
           {
              name: "wake-up-panel-state",
-             target: { delay: 1.5, handler: "wakeUpPanel" },
+             action: { delay: 1.5, handler: "wakeUpPanel" },
              timeout: { duration: 6.5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleWakeUpResponse" },
                        { event: "log-in-to-panel", nextState: "log-in-to-panel-state" },
@@ -129,7 +129,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "log-in-to-panel-state",
-             target: { handler: "logInToPanel" },
+             action: { handler: "logInToPanel" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleLoginResponse" },
                        { event: "socket-closed", nextState: "error-state"},
@@ -140,7 +140,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "arm-alarm-state",
-             target: { handler: "armAlarm" },
+             action: { handler: "armAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleArmResponse" },
                        { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
@@ -148,7 +148,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "disarm-alarm-state",
-             target: { handler: "disarmAlarm" },
+             action: { handler: "disarmAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleDisarmResponse" },
                        { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
@@ -156,7 +156,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "retrieve-info-from-alarm-state",
-             target: { handler: "retrieveInfoFromAlarm" },
+             action: { handler: "retrieveInfoFromAlarm" },
              timeout: { duration: 5, nextState: "error-state" },
              sources: [{ event: "data-received-from-alarm", handler: "handleRetrieveInfoResponse" },
                        { event: "alarm-transaction-complete", nextState: "transaction-complete-state" },
@@ -164,7 +164,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "transaction-complete-state",
-             target: { handler: "transactionComplete" },
+             action: { handler: "transactionComplete" },
              sources: [{ event: "socket-closed", nextState: "idle-state"},
                        { event: "go-idle", nextState: "idle-state" },
                        { event: "arm-alarm", nextState: "arm-alarm-state" },
@@ -173,7 +173,7 @@ function AlarmTexecom(_config) {
           },
           {
              name: "error-state",
-             target: { handler: "errorHasOccurred" },
+             action: { handler: "errorHasOccurred" },
              sources: [{ event: "go-idle", nextState: "idle-state" }]
           }
       ]

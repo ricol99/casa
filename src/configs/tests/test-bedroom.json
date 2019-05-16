@@ -713,16 +713,16 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 3,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -732,32 +732,32 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 15 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 15 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 50, "duration": 2 }},
                                     { "property": "power", "value": true }
                                  ]
@@ -765,7 +765,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -791,16 +791,16 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 3,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -810,32 +810,32 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 15 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 15 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 50, "duration": 2 }},
                                     { "property": "power", "value": true }
                                  ]
@@ -843,7 +843,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -870,12 +870,12 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               }
                            ]
                         },
@@ -887,12 +887,12 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               }
                            ]
                         },
@@ -902,37 +902,37 @@
                            "states": [
                               {
                                  "name": "no-users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "no-users-present-evening",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-evening",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "no-users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "no-users-present-dull-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -943,12 +943,12 @@
                            "states": [
                               {
                                  "name": "not-active",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "active",
                                  "priority": 5,
-                                 "targets": [{ "property": "brightness", "value": 100 },
+                                 "actions": [{ "property": "brightness", "value": 100 },
                                              { "property": "power", "value": true }
                                  ]
                               }

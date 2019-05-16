@@ -223,15 +223,15 @@ StateProperty.prototype.alignProperties = function(_properties) {
    }
 };
 
-StateProperty.prototype.alignTargets = function(_targets, _priority) {
+StateProperty.prototype.alignActions = function(_actions, _priority) {
 
-   if (_targets && (this.ignoreControl || this.takeControl(_priority))) {
+   if (_actions && (this.ignoreControl || this.takeControl(_priority))) {
       var props = [];
       var events = [];
 
-      for (var a = 0; a < _targets.length; ++a) {
-         var arr = (_targets[a].hasOwnProperty("property")) ? props : events;
-         arr.push(_targets[a]);
+      for (var a = 0; a < _actions.length; ++a) {
+         var arr = (_actions[a].hasOwnProperty("property")) ? props : events;
+         arr.push(_actions[a]);
       }
 
       if (props.length > 0) {
@@ -251,7 +251,7 @@ StateProperty.prototype.becomeController = function() {
 
    // Re-apply current state
    if (this.currentState) {
-      this.currentState.alignTargets();
+      this.currentState.alignActions();
    }
 };
 
@@ -286,10 +286,10 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    return sourceListener;
 };
 
-StateProperty.prototype.launchTargetFunction = function(_targetHandler, _priority) {
+StateProperty.prototype.launchActionFunction = function(_actionHandler, _priority) {
 
    if (this.ignoreControl || this.takeControl(_priority)) {
-       return this.owner[_targetHandler](this.currentState);
+       return this.owner[_actionHandler](this.currentState);
    }
 
    return false;
@@ -302,8 +302,8 @@ function State(_config, _owner) {
    this._id = this.uName;
    this.sourceMap = {};
    this.activeGuardedSources = [];
-   this.activeGuardedTargets = [];
-   this.targetTimeouts = [];
+   this.activeGuardedActions = [];
+   this.actionTimeouts = [];
 
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 
@@ -322,23 +322,23 @@ function State(_config, _owner) {
       }
    }
 
-   if (_config.hasOwnProperty("target")) {
-      _config.targets = [ _config.target ];
+   if (_config.hasOwnProperty("action")) {
+      _config.actions = [ _config.action ];
    }
 
-   if (_config.hasOwnProperty("targets")) {
-      this.targets = _config.targets;
+   if (_config.hasOwnProperty("actions")) {
+      this.actions = _config.actions;
 
-      for (var l = 0; l < this.targets.length; ++l) {
+      for (var l = 0; l < this.actions.length; ++l) {
 
-         if (this.targets[l].hasOwnProperty('guard')) {
-            this.targets[l].guards = [ this.targets[l].guard ];
+         if (this.actions[l].hasOwnProperty('guard')) {
+            this.actions[l].guards = [ this.actions[l].guard ];
          }
       }
    }
 
-   if (_config.hasOwnProperty("targetHandler")) {
-      this.targetHandler = _config.targetHandler;
+   if (_config.hasOwnProperty("actionHandler")) {
+      this.actionHandler = _config.actionHandler;
    }
 
    if (_config.hasOwnProperty("schedule")) {
@@ -407,25 +407,25 @@ function State(_config, _owner) {
       }
    }
 
-   if (this.targets) {
+   if (this.actions) {
 
-      for (var l = 0; l < this.targets.length; l++) {
+      for (var l = 0; l < this.actions.length; l++) {
 
-         if (this.targets[l].hasOwnProperty("guards")) {
+         if (this.actions[l].hasOwnProperty("guards")) {
 
-            for (var m = 0; m < this.targets[l].guards.length; ++m) {
+            for (var m = 0; m < this.actions[l].guards.length; ++m) {
 
-               if (this.targets[l].guards[m].hasOwnProperty("property")) {
-                  util.ensureExists(this.targets[l].guards[m], "value", true);
-                  util.ensureExists(this.targets[l].guards[m], "active", true);
+               if (this.actions[l].guards[m].hasOwnProperty("property")) {
+                  util.ensureExists(this.actions[l].guards[m], "value", true);
+                  util.ensureExists(this.actions[l].guards[m], "active", true);
 
-                  if (this.targets[l].guards[m].active) {
-                     this.targets[l].guards[m].uName = this.owner.owner.uName;
-                     this.targets[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.targets[l].guards[m]);
+                  if (this.actions[l].guards[m].active) {
+                     this.actions[l].guards[m].uName = this.owner.owner.uName;
+                     this.actions[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.actions[l].guards[m]);
                   }
                }
                else {
-                  this.targets[l].guards[m].active = false;
+                  this.actions[l].guards[m].active = false;
                }
             }
          }
@@ -468,7 +468,7 @@ State.prototype.initialise = function() {
 
    if (!immediateState) {
 
-      if (!this.alignTargets() && this.owner.takeControlOnTransition) {
+      if (!this.alignActions() && this.owner.takeControlOnTransition) {
          this.owner.takeControl(this.priority);
       }
    }
@@ -501,7 +501,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
          }
       }
    }
-   else if (this.processActiveTargetGuards(_name, _value)) {
+   else if (this.processActiveActionGuards(_name, _value)) {
       return null;
    }
 
@@ -538,28 +538,28 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
    return ret;
 };
 
-State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
-   var targetsMet = [];
-   var newTargetsFound = 0;
+State.prototype.processActiveActionGuards = function(_propName, _propValue) {
+   var actionsMet = [];
+   var newActionsFound = 0;
 
-   for (var a = 0; a < this.activeGuardedTargets.length; ++a) {
+   for (var a = 0; a < this.activeGuardedActions.length; ++a) {
 
-      for (var i = 0; i < this.activeGuardedTargets[a].guards.length; ++i) {
+      for (var i = 0; i < this.activeGuardedActions[a].guards.length; ++i) {
 
-         if (this.activeGuardedTargets[a].guards[i].active && (this.activeGuardedTargets[a].guards[i].property === _propName)) {
+         if (this.activeGuardedActions[a].guards[i].active && (this.activeGuardedActions[a].guards[i].property === _propName)) {
 
-            if ((_propValue === this.activeGuardedTargets[a].guards[i].value) && this.checkGuard(this.activeGuardedTargets[a])) {
-               console.log(this.uName + ": checkActiveTargetGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
-               newTargetsFound++;
-               targetsMet.push(this.activeGuardedTargets[a]);
+            if ((_propValue === this.activeGuardedActions[a].guards[i].value) && this.checkGuard(this.activeGuardedActions[a])) {
+               console.log(this.uName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
+               newActionsFound++;
+               actionsMet.push(this.activeGuardedActions[a]);
             }
          }
       }
    }
 
-   // Process met targets
-   if (newTargetsFound > 0) {
-      this.owner.alignTargets(targetsMet, this.priority);
+   // Process met actions
+   if (newActionsFound > 0) {
+      this.owner.alignActions(actionsMet, this.priority);
       return true;
    }
    else {
@@ -586,61 +586,61 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
    return null;
 };
 
-State.prototype.filterTargets = function(_targets) {
+State.prototype.filterActions = function(_actions) {
 
-   if (!_targets) {
+   if (!_actions) {
       return null;
    }
 
-   var newTargets = [];
+   var newActions = [];
 
-   for (var i = 0; i < _targets.length; ++i) {
+   for (var i = 0; i < _actions.length; ++i) {
 
-      if (_targets[i].hasOwnProperty("delay")) {
+      if (_actions[i].hasOwnProperty("delay")) {
 
-         this.targetTimeouts.push({ target: _targets[i], timeout: setTimeout( (_index) => {
+         this.actionTimeouts.push({ action: _actions[i], timeout: setTimeout( (_index) => {
 
-            if (this.targetTimeouts[_index].target.hasOwnProperty("handler")) {
-               this.launchTargetHandlers([ this.targetTimeouts[_index].target]);
+            if (this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
+               this.launchActionHandlers([ this.actionTimeouts[_index].action]);
             }
-            this.owner.alignTargets([this.targetTimeouts[_index].target], this.priority);
-            this.targetTimeouts[_index] = null;
+            this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
+            this.actionTimeouts[_index] = null;
 
-         }, _targets[i].delay*1000, this.targetTimeouts.length)});
+         }, _actions[i].delay*1000, this.actionTimeouts.length)});
       }
-      else if (this.checkGuard(_targets[i], this.activeGuardedTargets)) {
-         newTargets.push(_targets[i]);
+      else if (this.checkGuard(_actions[i], this.activeGuardedActions)) {
+         newActions.push(_actions[i]);
       }
    }
 
-   return newTargets;
+   return newActions;
 }
 
-State.prototype.launchTargetHandlers = function(_targets) {
-   var propertyTargets = [];
+State.prototype.launchActionHandlers = function(_actions) {
+   var propertyActions = [];
 
-   if (!_targets) {
-      return _targets;
+   if (!_actions) {
+      return _actions;
    }
 
-   for (var i = 0; i < _targets.length; ++i) {
+   for (var i = 0; i < _actions.length; ++i) {
 
-      if (_targets[i].hasOwnProperty("handler")) {
-         this.owner.launchTargetFunction(_targets[i].handler, this.priority);
+      if (_actions[i].hasOwnProperty("handler")) {
+         this.owner.launchActionFunction(_actions[i].handler, this.priority);
       }
       else {
-         propertyTargets.push(_targets[i]);
+         propertyActions.push(_actions[i]);
       }
    }
 
-   return propertyTargets;
+   return propertyActions;
 };
 
-State.prototype.alignTargets = function() {
-   var filteredTargets = this.launchTargetHandlers(this.filterTargets(this.targets));
-   this.owner.alignTargets(filteredTargets, this.priority);
+State.prototype.alignActions = function() {
+   var filteredActions = this.launchActionHandlers(this.filterActions(this.actions));
+   this.owner.alignActions(filteredActions, this.priority);
 
-   return (filteredTargets && (filteredTargets.length > 0));
+   return (filteredActions && (filteredActions.length > 0));
 };
 
 State.prototype.checkSourceProperties = function() {
@@ -674,16 +674,16 @@ State.prototype.checkSourceProperties = function() {
 
 State.prototype.exiting = function(_event, _value) {
    this.activeGuardedSources = [];
-   this.activeGuardedTargets = [];
+   this.activeGuardedActions = [];
 
-   for (var i = 0; i < this.targetTimeouts.length; ++i) {
+   for (var i = 0; i < this.actionTimeouts.length; ++i) {
 
-      if (this.targetTimeouts[i]) {
-         clearTimeout(this.targetTimeouts[i].timeout);
+      if (this.actionTimeouts[i]) {
+         clearTimeout(this.actionTimeouts[i].timeout);
       }
    }
 
-   this.targetTimeouts = [];
+   this.actionTimeouts = [];
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {

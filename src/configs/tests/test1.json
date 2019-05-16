@@ -219,7 +219,7 @@
                "name": "MODE",
                "type": "stateproperty",
                "initialValue": "auto",
-               "takeControlWithoutTargets": true,
+               "takeControlWithoutActions": true,
                "states": [
                   {
                      "name": "auto",
@@ -265,7 +265,7 @@
                            "nextState": "test-immediate-next-state"
                         }
                      ],
-                     "target": {
+                     "action": {
                         "property": "test-state-property",
                         "ramp": {
                            "ramps": [
@@ -312,7 +312,7 @@
                            "nextState": "idle"
                         }
                      ],
-                     "target": {
+                     "action": {
                         "property": "test-state-property",
                         "ramp": {
                            "endValue": 0,

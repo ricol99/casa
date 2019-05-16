@@ -70,7 +70,7 @@
          "uName": "thing:test-state-timers",
          "props": [
             {
-               "name": "test-prop-target",
+               "name": "test-prop-action",
                "initialValue": false
             },
             {
@@ -88,7 +88,7 @@
                      "sources": [ { "property": "test-periodic-2", "value": "on", "nextState": "on-others" },
                                   { "property": "test-periodic-2", "value": "on-others", "nextState": "on-others" } ],
                      "timeout": { "from": [ "on-off" ], "duration": 20, "nextState": "off" },
-                     "targets": [{ "property": "test-prop-target", "value": true }]
+                     "actions": [{ "property": "test-prop-action", "value": true }]
                   },
                   {
                      "name": "on-others",
@@ -112,7 +112,7 @@
                      "sources": [ { "property": "test-periodic-1", "value": "on", "nextState": "on-others" },
                                   { "property": "test-periodic-1", "value": "on-others", "nextState": "on-others" } ],
                      "timeout": { "from": [ "on-off" ], "duration": 20, "nextState": "off" },
-                     "targets": { "property": "test-prop-target", "value": false }
+                     "actions": { "property": "test-prop-action", "value": false }
                   },
                   {
                      "name": "on-others",

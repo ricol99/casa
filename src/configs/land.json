@@ -224,12 +224,12 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
-                                 "targets": [{ "property": "playing", "value": false }]
+                                 "actions": [{ "property": "playing", "value": false }]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "volume", "ramp": { "startValue": 2, "endValue": 30, "step": 2, "duration": 1800 }},
                                     { "property": "playing", "value": true }
                                  ]
@@ -237,7 +237,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [{ "property": "volume", "value": 30 }, { "property": "playing", "value": true }]
+                                 "actions": [{ "property": "volume", "value": 30 }, { "property": "playing", "value": true }]
                               }
                            ]
                         }
@@ -306,7 +306,7 @@
                      "states": [
                         {
                            "name": "fire-alarm",
-                           "targets": [
+                           "actions": [
                               { "property": "brightness", "ramp": { "loop": true,
                                                                     "ramps": [{ "startValue": 2, "endValue": 100, "step": 20, "duration": 2 },
                                                                               { "startValue": 100, "endValue": 99, "step": -1, "duration": 4 },
@@ -347,12 +347,12 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -362,7 +362,7 @@
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -372,7 +372,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -382,7 +382,7 @@
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -392,7 +392,7 @@
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 2, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
@@ -402,7 +402,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
                                     { "property": "saturation", "value": 70 },
@@ -426,12 +426,12 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -441,7 +441,7 @@
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -451,7 +451,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -461,14 +461,14 @@
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "power", "value": false }
                                  ]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 0, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
@@ -478,7 +478,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
                                     { "property": "saturation", "value": 70 },
@@ -494,17 +494,17 @@
                            "states": [
                               {
                                  "name": "DEFAULT",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 2,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -515,12 +515,12 @@
                            "states": [
                               {
                                  "name": "not-active",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "active",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 100 },
+                                 "actions": [{ "property": "brightness", "value": 100 },
                                              { "property": "hue", "value": 60 },
                                              { "property": "saturation", "value": 70 },
                                              { "property": "power", "value": true }
@@ -609,7 +609,7 @@
                      "states": [
                         {  
                            "name": "fire-alarm",
-                           "targets": [
+                           "actions": [
                               { "property": "brightness", "ramp": { "loop": true,
                                                                     "ramps": [{ "startValue": 2, "endValue": 100, "step": 20, "duration": 2 }, 
                                                                               { "startValue": 100, "endValue": 99, "step": -1, "duration": 4 },
@@ -648,12 +648,12 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -663,7 +663,7 @@
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -673,7 +673,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -683,14 +683,14 @@
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "power", "value": false }
                                  ]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 2, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
@@ -700,7 +700,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
                                     { "property": "saturation", "value": 70 },
@@ -724,12 +724,12 @@
                            "states": [
                               {
                                  "name": "not-present",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 60 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -739,7 +739,7 @@
                               {
                                  "name": "reading-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 40 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -749,7 +749,7 @@
                               {
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 15 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
@@ -759,14 +759,14 @@
                               {
                                  "name": "asleep-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "power", "value": false }
                                  ]
                               },
                               {
                                  "name": "waking-up-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "ramp": { "startValue": 2, "endValue": 100, "step": 2, "duration": 1800 }},
                                     { "property": "hue", "ramp": { "startValue": 0, "endValue": 60, "step": 1, "duration": 1800 }},
                                     { "property": "saturation", "ramp": { "startValue": 100, "endValue": 70, "step": -1, "duration": 1800}},
@@ -776,7 +776,7 @@
                               {
                                  "name": "awake-in-bed",
                                  "priority": 4,
-                                 "targets": [
+                                 "actions": [
                                     { "property": "brightness", "value": 100 },
                                     { "property": "hue", "value": 60 },
                                     { "property": "saturation", "value": 70 },
@@ -801,17 +801,17 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "awake-in-bed",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               }
                            ]
                         },
@@ -823,17 +823,17 @@
                               {
                                  "name": "DEFAULT",
                                  "priority": 4,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "awake-in-bed",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "not-present",
                                  "priority": 0,
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               }
                            ]
                         },
@@ -844,17 +844,17 @@
                            "states": [
                               {
                                  "name": "DEFAULT",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 2,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -865,12 +865,12 @@
                            "states": [
                               {
                                  "name": "not-active",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "active",
                                  "priority": 3,
-                                 "targets": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                               }
                            ]
                         }

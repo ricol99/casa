@@ -143,37 +143,37 @@
                            "states": [
                               {
                                  "name": "no-users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "no-users-present-evening",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-evening",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "no-users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-night",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "no-users-present-dull-day",
-                                 "targets": [{ "property": "power", "value": false }]
+                                 "actions": [{ "property": "power", "value": false }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 4,
-                                 "targets": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                               }
                            ]
                         },

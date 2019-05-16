@@ -312,7 +312,7 @@ Source.prototype.coldStart = function() {
    SourceBase.prototype.coldStart.call(this);
 }
 
-// Called by stateproperty to take control based on setting a target property
+// Called by stateproperty to take control based on setting a action property
 Source.prototype.takeControl = function(_newController, _priority) {
    console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
@@ -364,7 +364,7 @@ Source.prototype.updateControllerPriority = function(_controller, _newPriority) 
       this.addSecondaryController(_controller, _newPriority);
    }
    // else do nothing as stateproperty will not take control with this method
-   // control is only taken (via takeControl()) when targets are specified in a state
+   // control is only taken (via takeControl()) when actions are specified in a state
 };
 
 // Internal
