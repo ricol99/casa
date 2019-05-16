@@ -223,22 +223,27 @@ StateProperty.prototype.alignProperties = function(_properties) {
    }
 };
 
-StateProperty.prototype.alignTargetPropertiesAndEvents = function(_targets, _events, _priority) {
+StateProperty.prototype.alignTargets = function(_targets, _priority) {
 
-   if (((_targets && _targets.length > 0) || (_events && _events.length > 0)) && (this.ignoreControl || this.takeControl(_priority))) {
+   if (_targets && (this.ignoreControl || this.takeControl(_priority))) {
+      var props = [];
+      var events = [];
 
-      if (_targets) {
-         this.owner.alignProperties(_targets);
+      for (var a = 0; a < _targets.length; ++a) {
+         var arr = (_targets[a].hasOwnProperty("property")) ? props : events;
+         arr.push(_targets[a]);
       }
 
-      if (_events) {
+      if (props.length > 0) {
+         this.owner.alignProperties(props);
+      }
 
-         for (var i = 0; i < _events.length; ++i) {
-            this.raiseEvent(_events[i].name);
-         }
+      for (var e = 0; e < events.length; ++e) {
+         this.raiseEvent(events[e].event, (events[e].hasOwnProperty("value")) ? { value: events[e].value } : undefined );
       }
    }
 };
+
 
 StateProperty.prototype.becomeController = function() {
    // I am now the controller
@@ -246,7 +251,7 @@ StateProperty.prototype.becomeController = function() {
 
    // Re-apply current state
    if (this.currentState) {
-      this.currentState.alignTargetsAndEvents();
+      this.currentState.alignTargets();
    }
 };
 
@@ -328,21 +333,6 @@ function State(_config, _owner) {
 
          if (this.targets[l].hasOwnProperty('guard')) {
             this.targets[l].guards = [ this.targets[l].guard ];
-         }
-      }
-   }
-
-   if (_config.hasOwnProperty("event")) {
-      _config.events = [ _config.event ];
-   }
-
-   if (_config.hasOwnProperty("events")) {
-      this.events = _config.events;
-
-      for (var e = 0; e < this.events.length; ++e) {
-
-         if (this.events[e].hasOwnProperty('guard')) {
-            this.events[e].guards = [ this.events[e].guard ];
          }
       }
    }
@@ -478,7 +468,7 @@ State.prototype.initialise = function() {
 
    if (!immediateState) {
 
-      if (!this.alignTargetsAndEvents() && this.owner.takeControlOnTransition) {
+      if (!this.alignTargets() && this.owner.takeControlOnTransition) {
          this.owner.takeControl(this.priority);
       }
    }
@@ -549,8 +539,7 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 };
 
 State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
-   var targetPropertiesMet = [];
-   var targetEventsMet = [];
+   var targetsMet = [];
    var newTargetsFound = 0;
 
    for (var a = 0; a < this.activeGuardedTargets.length; ++a) {
@@ -562,13 +551,7 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
             if ((_propValue === this.activeGuardedTargets[a].guards[i].value) && this.checkGuard(this.activeGuardedTargets[a])) {
                console.log(this.uName + ": checkActiveTargetGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
                newTargetsFound++;
-
-               if (this.activeGuardedTargets[a].hasOwnProperty("property")) {
-                  targetPropertiesMet.push(this.activeGuardedTargets[a]);
-               }
-               else {
-                  targetEventsMet.push(this.activeGuardedTargets[a]);
-               }
+               targetsMet.push(this.activeGuardedTargets[a]);
             }
          }
       }
@@ -576,7 +559,7 @@ State.prototype.processActiveTargetGuards = function(_propName, _propValue) {
 
    // Process met targets
    if (newTargetsFound > 0) {
-      this.owner.alignTargetPropertiesAndEvents(targetPropertiesMet, targetEventsMet, this.priority);
+      this.owner.alignTargets(targetsMet, this.priority);
       return true;
    }
    else {
@@ -603,39 +586,34 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
    return null;
 };
 
-State.prototype.filterTargetsAndEvents = function(_targetsOrEvents) {
+State.prototype.filterTargets = function(_targets) {
 
-   if (!_targetsOrEvents) {
+   if (!_targets) {
       return null;
    }
 
-   var newTargetsOrEvents = [];
+   var newTargets = [];
 
-   for (var i = 0; i < _targetsOrEvents.length; ++i) {
+   for (var i = 0; i < _targets.length; ++i) {
 
-      if (_targetsOrEvents[i].hasOwnProperty("delay")) {
+      if (_targets[i].hasOwnProperty("delay")) {
 
-         this.targetTimeouts.push({ targetOrEvent: _targetsOrEvents[i], timeout: setTimeout( (_index) => {
+         this.targetTimeouts.push({ target: _targets[i], timeout: setTimeout( (_index) => {
 
-            if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("handler")) {
-               this.launchTargetHandlers([ this.targetTimeouts[_index].targetOrEvent]);
+            if (this.targetTimeouts[_index].target.hasOwnProperty("handler")) {
+               this.launchTargetHandlers([ this.targetTimeouts[_index].target]);
             }
-            else if (this.targetTimeouts[_index].targetOrEvent.hasOwnProperty("property")) {
-               this.owner.alignTargetPropertiesAndEvents([this.targetTimeouts[_index].targetOrEvent], null, this.priority);
-            }
-            else {
-               this.owner.alignTargetPropertiesAndEvents(null, [this.targetTimeouts[_index].targetOrEvent], this.priority);
-            }
+            this.owner.alignTargets([this.targetTimeouts[_index].target], this.priority);
             this.targetTimeouts[_index] = null;
 
-         }, _targetsOrEvents[i].delay*1000, this.targetTimeouts.length)});
+         }, _targets[i].delay*1000, this.targetTimeouts.length)});
       }
-      else if (this.checkGuard(_targetsOrEvents[i], this.activeGuardedTargets)) {
-         newTargetsOrEvents.push(_targetsOrEvents[i]);
+      else if (this.checkGuard(_targets[i], this.activeGuardedTargets)) {
+         newTargets.push(_targets[i]);
       }
    }
 
-   return newTargetsOrEvents;
+   return newTargets;
 }
 
 State.prototype.launchTargetHandlers = function(_targets) {
@@ -658,14 +636,11 @@ State.prototype.launchTargetHandlers = function(_targets) {
    return propertyTargets;
 };
 
-State.prototype.alignTargetsAndEvents = function() {
-   var filteredTargets = this.filterTargetsAndEvents(this.targets);
-   var newTargets = this.launchTargetHandlers(filteredTargets);
-   var newEvents = this.filterTargetsAndEvents(this.events);
+State.prototype.alignTargets = function() {
+   var filteredTargets = this.launchTargetHandlers(this.filterTargets(this.targets));
+   this.owner.alignTargets(filteredTargets, this.priority);
 
-   this.owner.alignTargetPropertiesAndEvents(newTargets, newEvents, this.priority);
-
-   return ((newTargets && (newTargets.length > 0)) || (newEvents && (newEvents.length > 0)));
+   return (filteredTargets && (filteredTargets.length > 0));
 };
 
 State.prototype.checkSourceProperties = function() {

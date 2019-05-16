@@ -120,7 +120,7 @@ Tester.prototype.buildTestCases = function(_testRun, _testCases) {
 
    if (_testRun) {
 
-      if (!_testRun.hasOwnProperty("testCases")) {
+      if ((!_testRun.hasOwnProperty("testCases")) || (_testRun.testCases.length === 0)) {
          _testRun.testCases = [];
 
          for (var k = 0; k < _testCases.length; ++k) {
@@ -210,7 +210,7 @@ Tester.prototype.initiateTestEvent = function(_cold) {
 
 Tester.prototype.initiateNextTestEvent = function() {
 
-   console.log("initiateNextTestEvent(): called - tc="+this.currentTestCase+" te="+this.currentTestEvent);
+   console.log("initiateNextTestEvent(): called - tc="+(this.currentTestCase + 1)+" te="+this.currentTestEvent);
 
    if (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1) {
       ++this.currentTestEvent;
@@ -219,12 +219,12 @@ Tester.prototype.initiateNextTestEvent = function() {
 };
 
 Tester.prototype.runTestEvent = function() {
-   console.log("runTestEvent(): called - tc="+this.currentTestCase+" te="+this.currentTestEvent);
+   console.log("runTestEvent(): called - tc="+(this.currentTestCase  + 1)+" te="+this.currentTestEvent);
    var tc = this.currentTestCase;
    var target = this;
 
    if (this.currentTestEvent === 0) {
-      console.info(this.uName + ": ========= TEST CASE " + (this.currentTestCase + 1) + " =========");
+      console.info(this.uName + ": ========= TEST CASE "+(this.currentTestCase + 1)+" =========");
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {

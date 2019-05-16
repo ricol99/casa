@@ -28,7 +28,8 @@
                "expectedSequence": [
                   { "source": "building:test", "property": "users-state", "value": "occupied-awake" }
                ]
-            }
+            },
+            "testCases": []
          },
          "testCases": [
             {
@@ -138,7 +139,8 @@
             {
                "name": "3) Normal - both going to bed slightly different times - initiation by bed switches",
                "driveSequence": [
-                  { "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
@@ -197,7 +199,8 @@
             {
                "name": "4) Normal - both going to bed slightly different times - initiation by bed switches",
                "driveSequence": [
-                  { "wait": 5, "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
@@ -262,7 +265,8 @@
             {  
                "name": "5) Normal - both going to bed slightly different times - initiation by bed switches",
                "driveSequence": [
-                  { "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
@@ -321,7 +325,8 @@
             {
                "name": "6) Normal - 2nd user in one bedroom forgets to touch switch",
                "driveSequence": [
-                  { "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "property": "test-3-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
@@ -395,7 +400,8 @@
             { 
                "name": "7) Normal - one person (2 person bedroom) goes to bed - other user arrives home",
                "driveSequence": [
-                  { "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 2.5, "property": "test-2-present", "value": true },
@@ -464,7 +470,8 @@
             { 
                "name": "8) Normal - two people (2 person bedroom) go to bed - other user arrives home and goes to bed in another bedroom",
                "driveSequence": [
-                  { "property": "test-1-present", "value": true },
+                  { "property": "evening-possible", "value": true },
+                  { "wait": 0.5, "property": "test-1-present", "value": true },
                   { "wait": 0.5, "property": "test-2-present", "value": true },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
