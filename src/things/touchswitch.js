@@ -16,6 +16,11 @@ function TouchSwitch(_config) {
    this.invokeManualMode =  _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode : !this.stateless;
    this.displayName = _config.displayName;
 
+   if (_config.hasOwnProperty("holdEventName")) {
+      this.holdEventName = _config.holdEventName;
+      this.holdTimerDuration = (_config.hasOwnProperty("holdTimerDuration")) ? _config.holdTimerDuration : 3;
+   }
+
    this.gpioService =  this.gang.findService("gpioservice");
 
    if (!this.gpioService) {
@@ -46,9 +51,23 @@ util.inherits(TouchSwitch, Thing);
 TouchSwitch.prototype.gpioPinStatusChanged = function(_pin, _value) {
 
    if (_value) {
+
+      if (this.holdEventName) {
+
+         this.holdTimer = setTimeout( () => {
+            this.holdTimer = null;
+            this.raiseEvent(this.longEventName);
+         }, this.holdTimerDuration * 1000);
+      }
+      else {
+         this.raiseEvent(this.eventName);
+      }
+   }
+   else if (this.holdEventName && this.holdTimer) {
+      clearTimeout(this.holdTimer);
       this.raiseEvent(this.eventName);
    }
-}
+};
 
 TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
