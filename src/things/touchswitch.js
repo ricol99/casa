@@ -19,6 +19,7 @@ function TouchSwitch(_config) {
    if (_config.hasOwnProperty("holdEventName")) {
       this.holdEventName = _config.holdEventName;
       this.holdTimerDuration = (_config.hasOwnProperty("holdTimerDuration")) ? _config.holdTimerDuration : 3;
+      this.holding = false;
    }
 
    this.gpioService =  this.gang.findService("gpioservice");
@@ -56,16 +57,26 @@ TouchSwitch.prototype.gpioPinStatusChanged = function(_pin, _value) {
 
          this.holdTimer = setTimeout( () => {
             this.holdTimer = null;
-            this.raiseEvent(this.longEventName);
+            this.raiseEvent(this.holdEventName);
+            this.raiseEvent(this.holdEventName+"-start");
+            this.holding = true;
          }, this.holdTimerDuration * 1000);
       }
       else {
          this.raiseEvent(this.eventName);
       }
    }
-   else if (this.holdEventName && this.holdTimer) {
-      clearTimeout(this.holdTimer);
-      this.raiseEvent(this.eventName);
+   else if (this.holdEventName) {
+
+      if (this.holdTimer) {
+         clearTimeout(this.holdTimer);
+         this.holdTimer = null;
+         this.raiseEvent(this.eventName);
+      }
+      else if (this.holding) {
+         this.holding = false;
+         this.raiseEvent(this.holdEventName+"-end");
+      }
    }
 };
 

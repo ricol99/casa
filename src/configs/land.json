@@ -957,6 +957,44 @@
          ]
       },
       {
+         "uName": "room:master-ensuite",
+         "displayName": "Master Bedroom Ensuite",
+         "buildingName": "building:dumgoyne",
+         "movementTimeout": 120,
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 18,
+               "triggerLow": true
+            },
+            {
+               "name": "low-light",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "building:dumgoyne",
+                  "property": "low-light"
+               }
+            },
+            {
+               "name": "night-time",
+               "initialValue": false,
+               "writable": false,
+               "source": {
+                  "uName": "building:dumgoyne",
+                  "property": "night-time"
+               }
+            }
+         ],
+         "things": [
+            {
+            }
+         ]
+      },
+      {
          "uName": "thing:pushover-messenger",
          "displayName": "Pushover Messenger",
          "props": [
