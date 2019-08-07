@@ -182,6 +182,7 @@
          ],
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 1800,
+         "overrideTimeout": 3600,
          "events": [
             { "name": "pre-wake-up-event", "rules": [ "00 6 * * 1-5", "00 10 * * 0,6" ]},
             { "name": "wake-up-event", "rules": [ "30 6 * * 1-5", "30 10 * * 0,6" ]}
