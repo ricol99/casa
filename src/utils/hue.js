@@ -1,5 +1,7 @@
-var userId = "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w",
-    linkId = "001788fffe6d3a92",
+//var userId = "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w",
+var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj",
+    linkId = "001788fffe62eec3",
+    //linkId = "001788fffe6d3a92",
     linkAddress,
     Hue = require("node-hue-api");
 
@@ -10,16 +12,39 @@ var displayUserResult = function(_result) {
 var displayError = function(_err) {
     console.log("Unable to create user. Error="+ _err);
 };
- 
-Hue.nupnpSearch(function(_err, _bridges) {
 
-   if (_err || _bridges.length == 0) {
-      console.error("Unable to find bridge, error=" + _err ? _err : "None Found!");
+Hue.nupnpSearch(function(_err, _result) {
+
+   //if (_err || _bridges.length == 0) {
+      //console.error("Unable to find bridge, error=" + _err ? _err : "None Found!");
+      //process.exit(1);
+   //}
+
+   try {
+      Hue.upnpSearch(10000).then(bridgesFound).done();
+   }
+   catch(_error) {
+      console.error(this.uName + ": No bridges found!");
       process.exit(1);
    }
+});
+
+function fixIds(_bridges) {
 
    for (var i = 0; i < _bridges.length; ++i) {
 
+      if (_bridges[i].id.substr(6,4) !== "fffe") {
+         _bridges[i].id = _bridges[i].id.substr(0,6) + "fffe" + _bridges[i].id.substr(6);
+      }
+   }
+}
+
+function bridgesFound(_bridges) {
+   console.log(_bridges);
+   fixIds(_bridges);
+
+   for (var i = 0; i < _bridges.length; ++i) {
+      console.log(_bridges[i].id);
       if (_bridges[i].id == linkId) {
          linkAddress = _bridges[i].ipaddress;
          break;
@@ -70,5 +95,5 @@ Hue.nupnpSearch(function(_err, _bridges) {
          });
       }
    }
-});
+}
  
