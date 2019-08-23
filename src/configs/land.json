@@ -991,6 +991,51 @@
             }
          ],
          "things": [
+            {
+               "uName": "huelightgroup:master-ensuite-downlighters",
+               "displayName": "Master Bedroom Ensuite - Downlighters",
+               "lightGroupId": 9,
+               "propogateToParent": false,
+               "props": [
+                  {
+                     "name": "room-state",
+                     "type": "stateproperty",
+                     "initialValue": "no-users-present-day",
+                     "states": [
+                        {
+                           "name": "DEFAULT",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-evening",
+                           "priority": 2,
+                           "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "users-present-dull-day",
+                           "priority": 2,
+                           "actions": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "user-override-state",
+                     "type": "stateproperty",
+                     "initialValue": "not-active",
+                     "states": [
+                        {
+                           "name": "not-active",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "active",
+                           "priority": 3,
+                           "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  }
+               ]
+            }
          ]
       },
       {
