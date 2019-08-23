@@ -968,7 +968,7 @@
                "initialValue": false,
                "writable": false,
                "type": "gpioproperty",
-               "gpioPin": 18,
+               "gpioPin": 27,
                "triggerLow": true
             },
             {
