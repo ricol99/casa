@@ -1,7 +1,7 @@
-//var userId = "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w",
-var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj",
-    linkId = "001788fffe62eec3",
-    //linkId = "001788fffe6d3a92",
+var userId = "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w",
+//var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj",
+    linkId = "001788fffe6d3a92",
+    //linkId = "001788fffe62eec3",
     linkAddress,
     Hue = require("node-hue-api");
 
@@ -64,7 +64,7 @@ function bridgesFound(_bridges) {
          for (var i = 0; i < _result.lights.length; ++i) {
             console.log(_result.lights[i].id + "\t" + _result.lights[i].name);
          }
-         //console.log("Lights: " + JSON.stringify(_result, null, 2));
+         console.log("Lights: " + JSON.stringify(_result, null, 2));
       });
    }
    else {
