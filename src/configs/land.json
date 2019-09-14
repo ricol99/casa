@@ -961,7 +961,7 @@
          "uName": "room:master-ensuite",
          "displayName": "Master Bedroom Ensuite",
          "buildingName": "building:dumgoyne",
-         "movementTimeout": 120,
+         "movementTimeout": 900,
          "props": [
             {
                "name": "movement",

@@ -114,7 +114,7 @@ function Bedroom(_config) {
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
 
       this.ensurePropertyExists(this.users[i].sName+"-in-bed", 'property',
-                                { "initialValue": false, "source": { "property": this.users[i].sName+"-user-state", "transform": "$value !== \"not-present\"" }},  _config);
+                                { "initialValue": false, "source": { "property": this.users[i].sName+"-user-state", "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\")" }},  _config);
 
       this.ensurePropertyExists(this.users[i].sName+"-in-building", 'property',
                                 { "initialValue": false, "source": { "uName": this.buildingName, "property": this.users[i].sName+"-user-state",
