@@ -988,22 +988,6 @@
                   "uName": "building:dumgoyne",
                   "property": "night-time"
                }
-            },
-            {
-               "name": "shower-possible",
-               "initialValue": true,
-               "writable": false,
-               "type": "scheduleproperty",
-               "events": [
-                  {
-                     "rule": "0 11 * * *",
-                     "value": false
-                  },
-                  {
-                     "rule": "0 17 * * *",
-                     "value": true
-                  }
-               ]
             }
          ],
          "things": [
@@ -1058,6 +1042,22 @@
                "deviceId": 29,
                "propogateToParent": false,
                "props": [
+                  {
+                     "name": "shower-possible",
+                     "initialValue": true,
+                     "writable": false,
+                     "type": "scheduleproperty",
+                     "events": [
+                        {
+                           "rule": "0 11 * * *",
+                           "value": false
+                        },
+                        {
+                           "rule": "0 17 * * *",
+                           "value": true
+                        }
+                     ]
+                  },
                   {  
                      "name": "room-state",
                      "type": "stateproperty",
