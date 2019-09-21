@@ -23,23 +23,37 @@ function b(_bridges) {
 
 HueService.prototype.coldStart = function() {
 
-   //Hue.nupnpSearch( (_err, _result) => {
+  Hue.nupnpSearch( (_err, _result) => {
 
-      //if (_err) {
-         //console.error(this.uName + ": Unable to find bridge, Error="+_err);
-         //process.exit(0);
-      //}
+     if (!_err && _result.length > 0) {
+        var bridge = this.findBridge(_result, this.linkId);
 
-      //this.bridgesFound(_result);
-      try {
-         Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
+         if (bridge) {
+            this.hueBridgeFound(bridge);
+         }
+         else {
+            try {
+               Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
+            }
+            catch(_error) {
+               console.error(this.uName + ": No bridges found!");
+               process.exit(0);
+            }
+         }
       }
-      catch(_error) {
-         console.error(this.uName + ": No bridges found!");
-         process.exit(1);
+   });
+};
+
+HueService.prototype.findBridge = function (_bridges, _id) {
+
+   for (var i = 0; i < _bridges.length; ++i) {
+
+      if (_bridges[i].id === _id) {
+         return _bridges[i];
       }
-      //}
-   //});
+   }
+
+   return null;
 };
 
 HueService.prototype.fixIds = function(_bridges) {
@@ -55,14 +69,19 @@ HueService.prototype.fixIds = function(_bridges) {
 HueService.prototype.bridgesFound = function(_bridges) {
    this.fixIds(_bridges);
    console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
+   var bridge = this.findBridge(_bridges, this.linkId);
 
-   for (var i = 0; i < _bridges.length; ++i) {
-
-      if (_bridges[i].id == this.linkId) {
-         this.linkAddress = _bridges[i].ipaddress;
-         break;
-      }
+   if (bridge) {
+      this.hueBridgeFound(bridge);
    }
+   else {
+      console.error(this.uName + ": No bridges found!");
+      process.exit(0);
+   }
+};
+
+HueService.prototype.hueBridgeFound = function(_bridge) {
+   this.linkAddress = _bridge.ipaddress;
 
    if (!this.linkAddress) {
       console.error(this.uName + ": Unable to find bridge, My link Id=" + this.linkId + " not Found!");
