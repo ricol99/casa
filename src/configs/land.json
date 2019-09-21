@@ -988,6 +988,22 @@
                   "uName": "building:dumgoyne",
                   "property": "night-time"
                }
+            },
+            {
+               "name": "shower-possible",
+               "initialValue": true,
+               "writable": false,
+               "type": "scheduleproperty",
+               "events": [
+                  {
+                     "rule": "0 11 * * *",
+                     "value": false
+                  },
+                  {
+                     "rule": "0 17 * * *",
+                     "value": true
+                  }
+               ]
             }
          ],
          "things": [
@@ -1031,6 +1047,56 @@
                            "name": "active",
                            "priority": 3,
                            "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  }
+               ]
+            },
+            {  
+               "uName": "huelight:master-ensuite-extractor-fan",
+               "displayName": "Master Bedroom Ensuite - Extractor Fan",
+               "deviceId": 29,
+               "propogateToParent": false,
+               "props": [
+                  {  
+                     "name": "room-state",
+                     "type": "stateproperty",
+                     "initialValue": "no-users-present-day",
+                     "states": [
+                        {  
+                           "name": "DEFAULT",
+                           "actions": [{ "property": "power", "value": false }]
+                        }, 
+                        {  
+                           "name": "users-present-evening",
+                           "priority": 2,
+                           "actions": [{ "guard": { "active": true, "property": "shower-possible" }, "property": "power", "value": true }]
+                        }, 
+                        {  
+                           "name": "users-present-day",
+                           "priority": 2,
+                           "actions": [{ "guard": { "active": true, "property": "shower-possible" }, "property": "power", "value": true }]
+                        },
+                        {  
+                           "name": "users-present-dull-day",
+                           "priority": 2,
+                           "actions": [{ "guard": { "active": true, "property": "shower-possible" }, "property": "power", "value": true }]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "user-override-state",
+                     "type": "stateproperty",
+                     "initialValue": "not-active",
+                     "states": [
+                        {
+                           "name": "not-active",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "active",
+                           "priority": 3,
+                           "actions": [{ "property": "power", "value": true }]
                         }
                      ]
                   }

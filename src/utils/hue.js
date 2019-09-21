@@ -1,31 +1,32 @@
-var userId = "0hpXbPLf7y5aPenmJrE8-UXYEoqdCMvK5osyAt6w",
-//var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj",
-    linkId = "001788fffe6d3a92",
-    //linkId = "001788fffe62eec3",
-    linkAddress,
-    Hue = require("node-hue-api");
+// Upstairs
+var userId = "mCeDzqVmSty2ff3-mxi6LnGKe12HmCznuQ-k2uia";
+var linkId = "001788fffe6d3a92";
 
-var displayUserResult = function(_result) {
-    console.log("Created user: " + JSON.stringify(_result));
-};
- 
-var displayError = function(_err) {
-    console.log("Unable to create user. Error="+ _err);
-};
+// Downstairs
+//var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj";
+//var linkId = "001788fffe62eec3";
+
+
+var linkAddress, Hue = require("node-hue-api");
 
 Hue.nupnpSearch(function(_err, _result) {
 
-   //if (_err || _bridges.length == 0) {
-      //console.error("Unable to find bridge, error=" + _err ? _err : "None Found!");
-      //process.exit(1);
-   //}
+   if (!_err && _result.length > 0) {
+      var bridge = findBridge(_result, linkId);
 
-   try {
-      Hue.upnpSearch(10000).then(bridgesFound).done();
-   }
-   catch(_error) {
-      console.error(this.uName + ": No bridges found!");
-      process.exit(1);
+      if (bridge) {
+         doIt(bridge);
+      }
+      else {
+
+         try {
+            Hue.upnpSearch(10000).then(bridgesFound).done();
+         }
+         catch(_error) {
+            console.error(this.uName + ": No bridges found!");
+            process.exit(1);
+         }
+      }
    }
 });
 
@@ -39,26 +40,45 @@ function fixIds(_bridges) {
    }
 }
 
-function bridgesFound(_bridges) {
-   console.log(_bridges);
-   fixIds(_bridges);
+function findBridge(_bridges, _id) {
 
    for (var i = 0; i < _bridges.length; ++i) {
       console.log(_bridges[i].id);
-      if (_bridges[i].id == linkId) {
-         linkAddress = _bridges[i].ipaddress;
-         break;
+
+      if (_bridges[i].id === _id) {
+         console.log("FOUND!");
+         return _bridges[i];
       }
    }
+
+   return null;
+}
+
+function bridgesFound(_bridges) {
+   fixIds(_bridges);
+   var bridge = findBridge(_bridges, linkId);
+
+   if (bridge) {
+      doIt(bridge);
+   }
+   else {
+      console.error(": No bridges found!");
+      process.exit(1);
+   }
+}
+
+function doIt(_bridge) {
+   linkAddress = _bridge.ipaddress;
 
    if (!linkAddress) {
       console.error("Unable to find bridge, error=" + "Id " + linkId + " not Found!");
       process.exit(1);
    }
+   console.log("IP Address="+linkAddress);
 
    var hue = new Hue.HueApi(linkAddress, userId);
 
-   if (process.argv.length == 2 ) {
+   if (process.argv.length === 2 ) {
 
       hue.lights(function(_err, _result) {
          for (var i = 0; i < _result.lights.length; ++i) {
