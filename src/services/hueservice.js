@@ -37,7 +37,7 @@ HueService.prototype.coldStart = function() {
             }
             catch(_error) {
                console.error(this.uName + ": No bridges found!");
-               process.exit(0);
+               process.exit(1);
             }
          }
       }
@@ -47,7 +47,7 @@ HueService.prototype.coldStart = function() {
          }
          catch(_error) {
             console.error(this.uName + ": No bridges found!");
-            process.exit(0);
+            process.exit(1);
          }
       }
    });
@@ -85,7 +85,7 @@ HueService.prototype.bridgesFound = function(_bridges) {
    }
    else {
       console.error(this.uName + ": No bridges found!");
-      process.exit(0);
+      process.exit(1);
    }
 };
 
