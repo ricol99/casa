@@ -15,7 +15,7 @@
             { "uName": "room:test-room", "property": "room-state" },
             { "uName": "room:test-room", "property": "user-override-state" },
             { "uName": "thing:test-main-lights", "property": "power" },
-            { "uName": "building:test", "property": "evening-possible" }
+            { "uName": "room:test-room", "property": "evening-possible" }
          ],
          "testSteps": [
          ],
@@ -62,19 +62,19 @@
                "name": "3) Normal - check state model for room-state",
                "driveSequence": [
                   { "testCase": "2) Normal - initiation by movement and timeout" },
-                  { "wait": 1, "target": "building:test", "property": "evening-possible", "value": true },
+                  { "wait": 1, "property": "evening-possible", "value": true },
                   { "wait": 1, "property": "low-light", "value": true },
                   { "wait": 0.5, "property": "movement", "value": true },
                   { "wait": 2.0, "property": "movement", "value": false },
-                  { "wait": 1.0, "target": "building:test","property": "night-time", "value": true },
+                  { "wait": 1.0, "property": "night-time", "value": true },
                   { "wait": 0.5, "property": "movement", "value": true },
                   { "wait": 2.0, "property": "movement", "value": false },
-                  { "wait": 1.0, "target": "building:test","property": "night-time", "value": false },
+                  { "wait": 1.0, "property": "night-time", "value": false },
                   { "wait": 1, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
                   { "testCase": "2) Normal - initiation by movement and timeout" },
-                  { "source": "building:test", "property": "evening-possible", "value": true },
+                  { "source": "room:test-room", "property": "evening-possible", "value": true },
                   { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
                   {
                      "simultaneous": [
@@ -86,7 +86,7 @@
                      "simultaneous": [
                         { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
                         { "source": "thing:test-main-lights", "property": "power", "value": false },
-                        { "source": "building:test", "property": "evening-possible", "value": false },
+                        { "source": "room:test-room", "property": "evening-possible", "value": false },
                         { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" }
                      ]
                   },
@@ -105,21 +105,21 @@
          ],
          "props": [],
          "things": [
-            {
-               "uName": "building:test",
-               "displayName": "Test Building",
-               "users": [],
-               "bedrooms": [],
-               "rooms": [
-                  { "uName": "room:test-room" }
-               ]
-            },
+            //{
+               //"uName": "building:test",
+               //"displayName": "Test Building",
+               //"users": [],
+               //"bedrooms": [],
+               //"rooms": [
+                  //{ "uName": "room:test-room" }
+               //]
+            //},
             {
                "uName": "room:test-room",
                "displayName": "Test Room",
                "movementTimeout": 3,
                "dullDayMovementTimeout": 3,
-               "buildingName": "building:test",
+               //"buildingName": "building:test",
                "events": [],
                "props": [
                   {
@@ -128,6 +128,10 @@
                   },
                   {
                      "name": "low-light",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "night-time",
                      "initialValue": false
                   }
                ],
