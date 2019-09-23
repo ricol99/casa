@@ -28,6 +28,15 @@ Hue.nupnpSearch(function(_err, _result) {
          }
       }
    }
+   else {
+      try {
+         Hue.upnpSearch(10000).then(bridgesFound).done();
+      }
+      catch(_error) {
+         console.error(this.uName + ": No bridges found!");
+         process.exit(1);
+      }
+   }
 });
 
 function fixIds(_bridges) {
@@ -62,7 +71,7 @@ function bridgesFound(_bridges) {
       doIt(bridge);
    }
    else {
-      console.error(": No bridges found!");
+      console.error("AAAA No bridges found!");
       process.exit(1);
    }
 }

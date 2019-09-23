@@ -41,6 +41,15 @@ HueService.prototype.coldStart = function() {
             }
          }
       }
+      else {
+         try {
+            Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
+         }
+         catch(_error) {
+            console.error(this.uName + ": No bridges found!");
+            process.exit(0);
+         }
+      }
    });
 };
 
