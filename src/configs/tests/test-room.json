@@ -66,11 +66,12 @@
                   { "wait": 1, "property": "low-light", "value": true },
                   { "wait": 0.5, "property": "movement", "value": true },
                   { "wait": 2.0, "property": "movement", "value": false },
-                  { "wait": 1.0, "property": "night-time", "value": true },
+                  { "wait": 3.0, "property": "night-time", "value": true },
+                  { "wait": 0.5, "property": "evening-possible", "value": false },
                   { "wait": 0.5, "property": "movement", "value": true },
-                  { "wait": 2.0, "property": "movement", "value": false },
-                  { "wait": 1.0, "property": "night-time", "value": false },
-                  { "wait": 1, "property": "low-light", "value": false }
+                  { "wait": 0.5, "property": "movement", "value": false },
+                  { "wait": 0.5, "property": "night-time", "value": false },
+                  { "wait": 5, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
                   { "testCase": "2) Normal - initiation by movement and timeout" },
@@ -85,19 +86,29 @@
                   {
                      "simultaneous": [
                         { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
-                        { "source": "thing:test-main-lights", "property": "power", "value": false },
-                        { "source": "room:test-room", "property": "evening-possible", "value": false },
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" }
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
+                        { "source": "room:test-room", "property": "evening-possible", "value": false }
                      ]
                   },
                   {
                      "simultaneous": [
                         { "source": "room:test-room", "property": "room-state", "value": "users-present-night" },
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
+                        { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
                      ]
-                  }
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
                ],
                "cleanupSequence": [
                ]
@@ -105,21 +116,11 @@
          ],
          "props": [],
          "things": [
-            //{
-               //"uName": "building:test",
-               //"displayName": "Test Building",
-               //"users": [],
-               //"bedrooms": [],
-               //"rooms": [
-                  //{ "uName": "room:test-room" }
-               //]
-            //},
             {
                "uName": "room:test-room",
                "displayName": "Test Room",
                "movementTimeout": 3,
                "dullDayMovementTimeout": 3,
-               //"buildingName": "building:test",
                "events": [],
                "props": [
                   {
