@@ -11,11 +11,13 @@
       {
          "uName": "tester:stateproperty",
          "displayName": "Test property:stateproperty",
+         "props": [],
+         "targetUnderTest": "testthing:test-thing",
          "sources": [
-            { "uName": "testthing:test-thing", "property": "test-state-1" },
-            { "uName": "testthing:test-thing", "property": "test-action-guard-prop" },
-            { "uName": "testthing:test-thing", "property": "test-prop-3" },
-            { "uName": "testthing:test-thing", "event": "test-action-function-event" }
+            { "property": "test-state-1" },
+            { "property": "test-action-guard-prop" },
+            { "property": "test-prop-3" },
+            { "event": "test-action-function-event" }
          ],
          "testCases": [
             {
@@ -25,9 +27,9 @@
                   { "wait": 6, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {
@@ -38,10 +40,10 @@
                   { "wait": 3, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-timer-inherited-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-timer-inherited-state" },
+                  { "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {
@@ -52,10 +54,10 @@
                   { "wait": 6, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-timer-non-inherited-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-timed-out-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-timer-non-inherited-state" },
+                  { "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {
@@ -74,30 +76,30 @@
                   { "wait": 1, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-prop-3", "value": true },
+                  { "property": "test-state-1", "value": "test-guarded-source-state" },
                   { "simultaneous": [
-                     { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-action-state" },
-                     { "source": "testthing:test-thing", "property": "test-prop-3", "value": false }
+                     { "property": "test-state-1", "value": "test-guarded-action-state" },
+                     { "property": "test-prop-3", "value": false }
                   ]},
                   { "simultaneous": [
-                     { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
-                     { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": true }
+                     { "property": "test-prop-3", "value": true },
+                     { "property": "test-action-guard-prop", "value": true }
                   ]},
                   { "simultaneous": [
-                     { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
-                     { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": false }
+                     { "property": "test-prop-3", "value": false },
+                     { "property": "test-action-guard-prop", "value": false }
                   ]},
                   { "simultaneous": [
-                     { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
-                     { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": true }
+                     { "property": "test-prop-3", "value": true },
+                     { "property": "test-action-guard-prop", "value": true }
                   ]},
                   { "simultaneous": [
-                     { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
-                     { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": false }
+                     { "property": "test-prop-3", "value": false },
+                     { "property": "test-action-guard-prop", "value": false }
                   ]},
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {
@@ -115,14 +117,14 @@
                   { "wait": 1, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-guarded-action-state" },
-                  { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": true },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": true },
-                  { "source": "testthing:test-thing", "property": "test-action-guard-prop", "value": false },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
+                  { "property": "test-state-1", "value": "test-guarded-action-state" },
+                  { "property": "test-action-guard-prop", "value": true },
+                  { "property": "test-prop-3", "value": true },
+                  { "property": "test-action-guard-prop", "value": false },
+                  { "property": "test-prop-3", "value": false },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {  
@@ -136,9 +138,9 @@
                   { "wait": 1, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             },
             {  
@@ -150,105 +152,104 @@
                   { "wait": 1, "event": "reset-back-to-idle" }
                ],
                "expectedSequence": [
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-started" },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": true, "fuzz": 1 },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-action-function-state" },
-                  { "source": "testthing:test-thing", "event": "test-action-function-event", "value": true },
-                  { "source": "testthing:test-thing", "property": "test-prop-3", "value": false },
-                  { "source": "testthing:test-thing", "property": "test-state-1", "value": "test-idle-state" }
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-prop-3", "value": true, "fuzz": 1 },
+                  { "property": "test-state-1", "value": "test-action-function-state" },
+                  { "event": "test-action-function-event", "value": true },
+                  { "property": "test-prop-3", "value": false },
+                  { "property": "test-state-1", "value": "test-idle-state" }
                ]
             }
          ],
-         "props": [],
          "things": [
-            {
-               "uName": "testthing:test-thing",
-               "displayName": "Test thing",
-               "events": [],
-               "props": [
-                  {
-                     "name": "test-prop-1",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "test-prop-2",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "test-prop-3",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "test-source-guard-prop",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "test-action-guard-prop",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "test-state-1",
-                     "type": "stateproperty",
-                     "initialValue": "test-idle-state",
-                     "states": [
-                        {
-                           "name": "test-idle-state",
-                           "sources": [{ "event": "start-test", "nextState": "test-started" }]
-                        },
-                        {
-                           "name": "test-started",
-                           "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
-                           "sources": [{ "event": "jump-to-timer-inherited-state", "nextState": "test-timer-inherited-state" },
-                                       { "event": "jump-to-timer-non-inherited-state", "nextState": "test-timer-non-inherited-state" },
-                                       { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" },
-                                       { "event": "jump-to-guarded-action-state", "nextState": "test-guarded-action-state" },
-                                       { "event": "jump-to-non-active-guarded-source-state", "nextState": "test-non-active-guarded-source-state" },
-                                       { "event": "jump-to-action-function-state", "nextState": "test-action-function-state" }]
-                        },
-                        {
-                           "name": "test-timer-inherited-state",
-                           "timeout": { "from": ["test-started"], "duration": 6, "nextState": "test-timed-out-state" },
-                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
-                        },
-                        {
-                           "name": "test-timer-non-inherited-state",
-                           "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
-                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
-                        },
-                        {
-                           "name": "test-timed-out-state",
-                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
-                        },
-                        {
-                           "name": "test-guarded-source-state",
-                           "sources": [{ "guard": { "active": true, "property": "test-source-guard-prop" },
-                                         "event": "go-through-source-guard", "nextState": "test-guarded-action-state" },
-                                       { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
-                        },
-                        {
-                           "name": "test-non-active-guarded-source-state",
-                           "sources": [{ "guard": { "active": false, "property": "test-source-guard-prop" },
-                                         "event": "go-through-source-guard", "nextState": "test-guarded-action-state" },
-                                       { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
-                        },
-                        {
-                           "name": "test-guarded-action-state",
-                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" },
-                                       { "event": "back-to-test-guarded-source-state", "nextState": "test-guarded-source-state" }],
-                           "actions": [{ "guard": { "active": true, "property": "test-action-guard-prop", "value": true }, "property": "test-prop-3", "value": true },
-                                       { "guard": { "active": true, "property": "test-action-guard-prop", "value": false }, "property": "test-prop-3", "value": false }]
-                        },
-                        {
-                           "name": "test-action-function-state",
-                           "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }],
-                           "action": { "handler": "testActionFunction" }
-                        }
-                     ]
-                  }
-               ],
-               "things": []
-            }
          ]
+      },
+      {
+         "uName": "testthing:test-thing",
+         "displayName": "Test thing",
+         "events": [],
+         "props": [
+            {
+               "name": "test-prop-1",
+               "initialValue": false
+            },
+            {
+               "name": "test-prop-2",
+               "initialValue": false
+            },
+            {
+               "name": "test-prop-3",
+               "initialValue": false
+            },
+            {
+               "name": "test-source-guard-prop",
+               "initialValue": false
+            },
+            {
+               "name": "test-action-guard-prop",
+               "initialValue": false
+            },
+            {
+               "name": "test-state-1",
+               "type": "stateproperty",
+               "initialValue": "test-idle-state",
+               "states": [
+                  {
+                     "name": "test-idle-state",
+                     "sources": [{ "event": "start-test", "nextState": "test-started" }]
+                  },
+                  {
+                     "name": "test-started",
+                     "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
+                     "sources": [{ "event": "jump-to-timer-inherited-state", "nextState": "test-timer-inherited-state" },
+                                 { "event": "jump-to-timer-non-inherited-state", "nextState": "test-timer-non-inherited-state" },
+                                 { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" },
+                                 { "event": "jump-to-guarded-action-state", "nextState": "test-guarded-action-state" },
+                                 { "event": "jump-to-non-active-guarded-source-state", "nextState": "test-non-active-guarded-source-state" },
+                                 { "event": "jump-to-action-function-state", "nextState": "test-action-function-state" }]
+                  },
+                  {
+                     "name": "test-timer-inherited-state",
+                     "timeout": { "from": ["test-started"], "duration": 6, "nextState": "test-timed-out-state" },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-timer-non-inherited-state",
+                     "timeout": { "duration": 5, "nextState": "test-timed-out-state" },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-timed-out-state",
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-guarded-source-state",
+                     "sources": [{ "guard": { "active": true, "property": "test-source-guard-prop" },
+                                   "event": "go-through-source-guard", "nextState": "test-guarded-action-state" },
+                                 { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-non-active-guarded-source-state",
+                     "sources": [{ "guard": { "active": false, "property": "test-source-guard-prop" },
+                                   "event": "go-through-source-guard", "nextState": "test-guarded-action-state" },
+                                 { "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-guarded-action-state",
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" },
+                                 { "event": "back-to-test-guarded-source-state", "nextState": "test-guarded-source-state" }],
+                     "actions": [{ "guard": { "active": true, "property": "test-action-guard-prop", "value": true }, "property": "test-prop-3", "value": true },
+                                 { "guard": { "active": true, "property": "test-action-guard-prop", "value": false }, "property": "test-prop-3", "value": false }]
+                  },
+                  {
+                     "name": "test-action-function-state",
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }],
+                     "action": { "handler": "testActionFunction" }
+                  }
+               ]
+            }
+         ],
+         "things": []
       }
    ]
 }

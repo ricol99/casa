@@ -4,6 +4,7 @@ var Thing = require('../thing');
 // Please provide inputs
 // users - users that will use the building
 // bedrooms - bedrooms the users will sleep in
+// daylight - daylight true (dark property is created as the inverse of daylight)
 
 // Please define properties for automated functionality
 // low-light - true when light levels are low enough to switch on lights
@@ -219,7 +220,7 @@ function Building(_config) {
          },
          {
             "name": "confirmed-alarm",
-            "sources": [{ "property": "confirmed-armed", "value": false, "nextState": "not-armed" },
+            "sources": [{ "property": "confirmed-alarm", "value": false, "nextState": "not-armed" },
                         { "property": "fire-alarm", "value": true, "nextState": "fire-alarm" }]
          }
       ]

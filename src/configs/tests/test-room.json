@@ -11,11 +11,12 @@
       {
          "uName": "tester:room",
          "displayName": "Test thing:room",
+         "targetUnderTest": "room:test-room",
          "sources": [
-            { "uName": "room:test-room", "property": "room-state" },
-            { "uName": "room:test-room", "property": "user-override-state" },
+            { "property": "room-state" },
+            { "property": "user-override-state" },
             { "uName": "thing:test-main-lights", "property": "power" },
-            { "uName": "room:test-room", "property": "evening-possible" }
+            { "property": "evening-possible" }
          ],
          "testSteps": [
          ],
@@ -27,8 +28,8 @@
                   { "wait": 1, "event": "room-switch-event" }
                ],
                "expectedSequence": [
-                  { "source": "room:test-room", "property": "user-override-state", "value": "active" },
-                  { "source": "room:test-room", "property": "user-override-state", "value": "not-active" }
+                  { "property": "user-override-state", "value": "active" },
+                  { "property": "user-override-state", "value": "not-active" }
                ]
             },
             {
@@ -40,20 +41,20 @@
                   { "wait": 1.5, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                  { "property": "room-state", "value": "no-users-present-dull-day" },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
+                        { "property": "room-state", "value": "users-present-dull-day" },
                         { "source": "thing:test-main-lights", "property": "power", "value": true }
                      ]
                   },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "property": "room-state", "value": "no-users-present-dull-day" },
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
+                  { "property": "room-state", "value": "no-users-present-day" }
                ],
                "cleanupSequence": [
                ]
@@ -75,122 +76,121 @@
                ],
                "expectedSequence": [
                   { "testCase": "2) Normal - initiation by movement and timeout" },
-                  { "source": "room:test-room", "property": "evening-possible", "value": true },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
+                  { "property": "evening-possible", "value": true },
+                  { "property": "room-state", "value": "no-users-present-evening" },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "users-present-evening" },
+                        { "property": "room-state", "value": "users-present-evening" },
                         { "source": "thing:test-main-lights", "property": "power", "value": true }
                      ]
                   },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-evening" },
+                        { "property": "room-state", "value": "no-users-present-evening" },
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-night" },
-                        { "source": "room:test-room", "property": "evening-possible", "value": false }
+                        { "property": "room-state", "value": "no-users-present-night" },
+                        { "property": "evening-possible", "value": false }
                      ]
                   },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "users-present-night" },
-                        { "source": "room:test-room", "property": "room-state", "value": "users-present-dull-day" },
+                        { "property": "room-state", "value": "users-present-night" },
+                        { "property": "room-state", "value": "users-present-dull-day" },
                         { "source": "thing:test-main-lights", "property": "power", "value": true }
                      ]
                   },
                   {
                      "simultaneous": [
-                        { "source": "room:test-room", "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "property": "room-state", "value": "no-users-present-dull-day" },
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
-                  { "source": "room:test-room", "property": "room-state", "value": "no-users-present-day" }
+                  { "property": "room-state", "value": "no-users-present-day" }
                ],
                "cleanupSequence": [
                ]
             }
          ],
          "props": [],
+         "things": []
+      },
+      {
+         "uName": "room:test-room",
+         "displayName": "Test Room",
+         "movementTimeout": 3,
+         "dullDayMovementTimeout": 3,
+         "events": [],
+         "props": [
+            {
+               "name": "movement",
+               "initialValue": false
+            },
+            {
+               "name": "low-light",
+               "initialValue": false
+            },
+            {
+               "name": "night-time",
+               "initialValue": false
+            }
+         ],
          "things": [
             {
-               "uName": "room:test-room",
-               "displayName": "Test Room",
-               "movementTimeout": 3,
-               "dullDayMovementTimeout": 3,
-               "events": [],
+               "uName": "thing:test-main-lights",
+               "displayName": "Test Main Lights",
+               "propogateToParent": false,
                "props": [
                   {
-                     "name": "movement",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "low-light",
-                     "initialValue": false
-                  },
-                  {
-                     "name": "night-time",
-                     "initialValue": false
-                  }
-               ],
-               "things": [
-                  {
-                     "uName": "thing:test-main-lights",
-                     "displayName": "Test Main Lights",
-                     "propogateToParent": false,
-                     "props": [
+                     "name": "room-state",
+                     "type": "stateproperty",
+                     "states": [
                         {
-                           "name": "room-state",
-                           "type": "stateproperty",
-                           "states": [
-                              {
-                                 "name": "no-users-present-day",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-day",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "no-users-present-evening",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-evening",
-                                 "priority": 4,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
-                              },
-                              {
-                                 "name": "no-users-present-night",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-night",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "no-users-present-dull-day",
-                                 "actions": [{ "property": "power", "value": false }]
-                              },
-                              {
-                                 "name": "users-present-dull-day",
-                                 "priority": 4,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
-                              }
-                           ]
+                           "name": "no-users-present-day",
+                           "actions": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "power",
-                           "initialValue": false
+                           "name": "users-present-day",
+                           "actions": [{ "property": "power", "value": false }]
                         },
                         {
-                           "name": "brightness",
-                           "initialValue": 0
+                           "name": "no-users-present-evening",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-evening",
+                           "priority": 4,
+                           "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                        },
+                        {
+                           "name": "no-users-present-night",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-night",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-dull-day",
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-dull-day",
+                           "priority": 4,
+                           "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
                         }
                      ]
+                  },
+                  {
+                     "name": "power",
+                     "initialValue": false
+                  },
+                  {
+                     "name": "brightness",
+                     "initialValue": 0
                   }
                ]
             }

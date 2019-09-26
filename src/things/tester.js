@@ -7,6 +7,7 @@ function Tester(_config) {
    this.thingType = "testsequence";
    this.config = _config;
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
+   this.targetUnderTest = _config.hasOwnProperty("targetUnderTest") ? _config.targetUnderTest : this.uName;
 
    this.currentTestCase = 0;
    this.currentTestEvent = 0;
@@ -24,6 +25,11 @@ function Tester(_config) {
       this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
+
+         if (!_config.sources[index].hasOwnProperty("uName")) {
+            _config.sources[index].uName = this.targetUnderTest;
+         }
+
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
@@ -53,6 +59,23 @@ Tester.prototype.findTestCaseStep = function(_name, _type) {
       }
    }
    return null;
+};
+
+Tester.prototype.addTargetUnderTest = function(_testCase) {
+
+   for (var i = 0; i < _testCase.driveSequence.length; ++i) {
+
+      if (!_testCase.driveSequence[i].hasOwnProperty("target")) {
+         _testCase.driveSequence[i].target = this.targetUnderTest;
+      }
+   }
+
+   for (var j = 0; j < _testCase.expectedSequence.length; ++j) {
+
+      if (!_testCase.expectedSequence[j].hasOwnProperty("source")) {
+         _testCase.expectedSequence[j].source = this.targetUnderTest;
+      }
+   }
 };
 
 Tester.prototype.replaceInnerTestCases = function(_testCaseStep) {
@@ -113,6 +136,7 @@ Tester.prototype.buildTestCase = function(_testCase) {
          this.testCases[this.testCases.length - 1].expectedSequence.push(_testCase.expectedSequence[i]);
       }
    }
+   this.addTargetUnderTest(this.testCases[this.testCases.length - 1]);
 };
 
 Tester.prototype.buildTestCases = function(_testRun, _testCases) {

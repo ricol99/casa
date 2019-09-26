@@ -337,10 +337,14 @@ Gang.prototype.extractThings = function(_config, _parent) {
 
          if (_config[index].things) {
 
-            if (_parent == undefined) {
+            if (!_parent) {
                this.topLevelThings.push(thingObj);
             }
             this.extractThings(_config[index].things, thingObj);
+
+            if (!_parent) {
+               thingObj.inheritChildProps();
+            }
          }
       }
    }

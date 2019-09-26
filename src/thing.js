@@ -34,9 +34,13 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
-         this.emitPropertyChange(_propName, _propValue, data);
-      }
+      // Moving to a model where you must declare the property in the thing, if you want it to emit
+      // Will out a check into sourcelistener to make sure the property there when listening is established
+      // Don't check result, never emit if property is not there
+      //if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
+         //this.emitPropertyChange(_propName, _propValue, data);
+      //}
+      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
       if (this.propogateToChildren) {
 
@@ -56,11 +60,13 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       data.propertyOldValue = this.value;
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
+      var needToUpdateChildren = this.propogateToChildren;
 
       if (this.parent && this.propogateToParent) {
-         this.parent.childPropertyChanged(_propName, _propValue, this, data);
+         needToUpdateChildren = !this.parent.childPropertyChanged(_propName, _propValue, this, data);
       }
-      else if (this.propogateToChildren) {
+
+      if (needToUpdateChildren) {
          data.alignWithParent = true;
 
          for (var thing in this.things) {
@@ -73,89 +79,52 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
 };
 
-Thing.prototype.hasProperty = function(_property) {
-   var result = Source.prototype.hasProperty.call(this, _property);
-
-   if (!result && this.propogateToChildren) {
-
-      for (var thing in this.things) {
-
-         if (this.things.hasOwnProperty(thing)) {
-            result = this.things[thing].hasProperty(_property);
-
-            if (result) {
-               break;
-            }
-         }
-      }
-   }
-
-   return result;
-};
-
-Thing.prototype.getProperty = function(_property) {
-   var value;
-
-   if (Source.prototype.hasProperty.call(this, _property)) {
-      value = Source.prototype.getProperty.call(this, _property); 
-   }
-   else if (this.propogateToChildren) {
-
-      for (var thing in this.things) {
-
-         if (this.things.hasOwnProperty(thing)) {
-            var exists = this.things[thing].hasProperty(_property);
-
-            if (exists) {
-               value = this.things[thing].getProperty(_property);
-               break;
-            }
-         }
-      }
-   }
-
-   return value;
-};
-
-
-Thing.prototype.setProperty = function(_propName, _propValue, _data) {
-
-   var ret = Source.prototype.setProperty.call(this, _propName, _propValue, _data);
+Thing.prototype.inheritChildProps = function() {
+   var childProps = {};
 
    for (var thing in this.things) {
 
       if (this.things.hasOwnProperty(thing)) {
-
-         if (this.things[thing].setProperty(_propName, _propValue, _data)) {
-            ret = true;
-         }
+         this.things[thing].getAllProperties(childProps);
       }
    }
 
-   return ret;
+   for (var prop in childProps) {
+
+      if (childProps.hasOwnProperty(prop)) {
+         console.log(this.uName + ": AAAAA prop=", prop);
+         console.log(this.uName + ": BBBBB prop=", childProps[prop]);
+         this.ensurePropertyExists(prop, "property", { initialValue: childProps[prop] }, this.config);
+      }
+   }
 };
 
 Thing.prototype.getAllProperties = function(_allProps) {
 
-   Source.prototype.getAllProperties.call(this, _allProps);
+   if (!this.parent || this.propogateToParent) {
+      Source.prototype.getAllProperties.call(this, _allProps);
 
-   for (var thing in this.things) {
+      for (var thing in this.things) {
 
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].getAllProperties(_allProps);
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].getAllProperties(_allProps);
+         }
       }
    }
 };
 
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
+   var ret = this.propogateToChildren;
 
    if (this.parent) {
-      this.parent.childPropertyChanged(_propName, _propValue, this, _data);
+      ret = ret && this.parent.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
       _data.alignWithParent = true;
       this.updateProperty(_propName, _propValue, _data);
    }
+
+   return ret;
 };
 
 Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {

@@ -83,7 +83,6 @@ SourceListener.prototype.establishListeners = function() {
    this.source = this.gang.findSource(this.sourceName);
    this.valid = (this.source != undefined) || (this.source != null);;
 
-
    if (this.valid) {
 
       if (this.listeningToPropertyChange) {

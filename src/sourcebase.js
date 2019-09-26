@@ -42,11 +42,12 @@ SourceBase.prototype.isPropertyValid = function(_property) {
 };
 
 SourceBase.prototype.getProperty = function(_property) {
-   return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
-};
 
-SourceBase.prototype.hasProperty = function(_property) {
-   return this.props.hasOwnProperty(_property);
+   if (!this.props.hasOwnProperty(_property)) {
+      console.error(this.uName + ": Asked for property " + _property + " that I don't have.");
+   }
+
+   return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
 };
 
 SourceBase.prototype.getAllProperties = function(_allProps) {
