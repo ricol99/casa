@@ -406,7 +406,7 @@
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 2.5, "property": "test-2-present", "value": true },
-                  { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
+                  { "wait": 2.0, "target": "bedroom:test-1", "event": "test-2-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "pre-wake-up-event" },
                   { "wait": 2.5, "target": "bedroom:test-1", "event": "wake-up-event" },
@@ -436,6 +436,7 @@
                         { "property": "test-2-user-state", "value": "present" },
                         { "property": "all-users-in-bed", "value": false },
                         { "property": "users-state", "value": "occupied-may-be-waking-up" },
+                        { "property": "users-state", "value": "user-arrived-during-bedtime" },
                         { "property": "night-time", "value": false }
                      ]
                   },
@@ -478,8 +479,8 @@
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-1-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "test-2-switch-event" },
-                  { "wait": 0.5, "property": "test-3-present", "value": true },
-                  { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
+                  { "wait": 2.5, "property": "test-3-present", "value": true },
+                  { "wait": 7.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-2", "event": "test-3-switch-event" },
                   { "wait": 0.5, "target": "bedroom:test-1", "event": "pre-wake-up-event" },
                   { "wait": 2.5, "target": "bedroom:test-1", "event": "wake-up-event" },
@@ -519,6 +520,7 @@
                         { "property": "test-3-user-state", "value": "present" },
                         { "property": "all-users-in-bed", "value": false },
                         { "property": "users-state", "value": "occupied-may-be-waking-up" },
+                        { "property": "users-state", "value": "user-arrived-during-bedtime" },
                         { "property": "night-time", "value": false }
                      ]
                   },

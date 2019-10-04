@@ -205,6 +205,9 @@ StateProperty.prototype.setState = function(_nextStateName) {
 
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
+   else {
+      console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
+   }
 };
 
 StateProperty.prototype.takeControl = function(_priority) {

@@ -41,6 +41,10 @@ SourceBase.prototype.isPropertyValid = function(_property) {
    }
 };
 
+SourceBase.prototype.hasProperty = function(_property) {
+   return this.props.hasOwnProperty(_property);
+};
+
 SourceBase.prototype.getProperty = function(_property) {
 
    if (!this.props.hasOwnProperty(_property)) {

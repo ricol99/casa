@@ -86,6 +86,10 @@ SourceListener.prototype.establishListeners = function() {
    if (this.valid) {
 
       if (this.listeningToPropertyChange) {
+
+         if (!this.source.hasProperty(this.eventName)) {
+            console.error(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
+         }
          this.source.on('property-changed', this.propertyChangedHandler);
       }
       else {
