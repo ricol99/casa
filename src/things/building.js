@@ -84,9 +84,13 @@ function Building(_config) {
       if (_config.hasOwnProperty('bedrooms')) {
 
          for (var j = 0; j < _config.bedrooms.length; ++j) {
-            this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-            this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-            this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
+            var listen = _config.bedrooms[j].hasOwnProperty("users") ? _config.bedrooms[j].users.includes(this.users[i].uName) : true;
+
+            if (listen) {
+               this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
+            }
          }
       }
 

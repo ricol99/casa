@@ -568,7 +568,16 @@
          "uName": "building:test",
          "displayName": "Test Building",
          "users": [ { "uName": "user:test-1" }, { "uName": "user:test-2" }, { "uName": "user:test-3" } ],
-         "bedrooms": [ { "uName": "bedroom:test-1" }, { "uName": "bedroom:test-2" } ],
+         "bedrooms": [
+            {
+               "uName": "bedroom:test-1",
+               "users": [ "user:test-1",  "user:test-2" ]
+            },
+            { 
+               "uName": "bedroom:test-2",
+               "users": [ "user:test-3" ]
+            }
+         ],
          "rooms": [ { "uName": "room:test-1" }, { "uName": "room:test-2" } ],
          "allUsersLeftTimeout": 2,
          "propogateToParent": false,
