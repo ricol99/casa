@@ -195,8 +195,9 @@ HueService.prototype.getLightGroups = function(_callback) {
 
 HueService.prototype.defaultCallbackHandler = function(_error, _result) {
 
-   if (_error){
+   if (_error) {
       console.error(this.uName + ": Unable to complete request, error=" + _error);
+   }
    else {
       console.log(this.uName + ": Request completed, result=" + _result);
    }
