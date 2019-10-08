@@ -1014,7 +1014,7 @@
                         {
                            "name": "users-present-dull-day",
                            "priority": 2,
-                           "actions": [{ "property": "brightness", "value": 40 }, { "property": "power", "value": true }]
+                           "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
                         }
                      ]
                   },
@@ -1110,7 +1110,6 @@
                "serialNumber": "1234567890",
                "stateless": true,
                "eventName": "room-switch-event",
-               "propogateToParent": false,
                "invokeManualMode": false,
                "props": [
                   {

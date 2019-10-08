@@ -4,6 +4,7 @@ var Thing = require('../thing');
 function HueLightGroup(_config) {
    Thing.call(this, _config);
    this.thingType = "hue-light-group";
+   this.displayName = _config.displayName;
 
    if (_config.hasOwnProperty('lightGroupId')) {
       this.lightGroupId = _config.lightGroupId;
@@ -24,6 +25,19 @@ function HueLightGroup(_config) {
       process.exit();
    }
 
+   if (_config.hasOwnProperty("hueSupported")) {
+
+      if (_config.hueSupported) {
+         this.hueSupported = true;
+         this.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
+      }
+
+      if (_config.saturationSupported) {
+         this.saturationSupported = true;
+         this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
+      }
+   }
+
    this.ensurePropertyExists('scene', 'property', { initialValue: false }, _config);
 }
 
@@ -33,11 +47,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
 
    if (!_data.coldStart) {
 
-      if ((_propName == "scene") && (_propValue != "CLEARED")) {
-         this.hueService.setScene(_propValue);
-         this.alignPropertyValue(_propName, "CLEARED");
-      }
-      else if (_propName == "power") {
+      if (_propName == "power") {
 
          if (_propValue) {
             this.hueService.setLightGroupState(this.lightGroupId, { power: true });
@@ -46,6 +56,10 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
          else {
             this.hueService.setLightGroupState(this.lightGroupId, { power: false });
          }
+      }
+      else if ((_propName == "scene") && (_propValue != "CLEARED")) {
+         this.hueService.setScene(_propValue);
+         this.alignPropertyValue(_propName, "CLEARED");
       }
       else if (this.getProperty("power")) {
          this.syncDeviceProperty(_propName, _propValue);
@@ -59,8 +73,15 @@ HueLightGroup.prototype.syncDeviceProperties = function() {
 
 HueLightGroup.prototype.syncDeviceProperty = function(_propName, _propValue) {
 
-   if (_propName == 'brightness') {
-      this.hueService.setLightGroupState(this.lightGroupId, { power: true, brightness: this.getProperty("brightness") });
+   var temp = { power: true };
+   temp[_propName] = _propValue;
+
+   switch (_propName) {
+      case  "brightness":
+      case  "hue":
+      case  "saturation":
+         this.hueService.setLightGroupState(this.lightGroupId, temp);
+         break;
    }
 };
 
@@ -77,7 +98,7 @@ HueLightGroup.prototype.coldStart = function() {
             for (var i = 0; i < _result.length; ++i) {
                var check = (this.groupType) ? (_result[i].type === this.groupType) : true;
 
-               if (check && (_result[i].name == this.hueGroupName)) {
+               if (check && (_result[i].name === this.hueGroupName)) {
                   this.lightGroupId = _result[i].id;
                   break;
                }
@@ -86,10 +107,12 @@ HueLightGroup.prototype.coldStart = function() {
             if (!this.hasOwnProperty('lightGroupId')) {
                console.error(this.uName + ": Unable to find room on Hue Bridge!");
             }
-
             Thing.prototype.coldStart.call(this);
          }
       });
+   }
+   else {
+      Thing.prototype.coldStart.call(this);
    }
 };
 
