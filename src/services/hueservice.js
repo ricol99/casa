@@ -193,14 +193,24 @@ HueService.prototype.getLightGroups = function(_callback) {
    this.addToQueue("getLightGroups", null, {}, _callback);
 };
 
-HueService.prototype.addToQueue = function(_request, _deviceId, _config, _callback) {
+HueService.prototype.defaultCallbackHandler = function(_error, _result) {
 
+   if (_error){
+      console.error(this.uName + ": Unable to complete request, error=" + _error);
+   else {
+      console.log(this.uName + ": Request completed, result=" + _result);
+   }
+};
+
+HueService.prototype.addToQueue = function(_request, _deviceId, _config, _callback) {
+   var  cb = (_callback) ? _callback : HueService.prototype.defaultCallbackHandler.bind(this);
+      
    if (!this.ready) {
-      _callback("Not ready yet!");
+      cb("Not ready yet!");
       return;
    }
 
-   this.queue.push(new Request(this, _request, _deviceId, _config, _callback));
+   this.queue.push(new Request(this, _request, _deviceId, _config, cb));
    this.makeNextRequest();
 };
 
@@ -238,13 +248,13 @@ function Request(_owner, _request, _deviceId, _config, _callback) {
                this.config.on = _config[param];
                break;
             case "brightness":
-               this.config.bri = _config[param] * 255 / 100;
+               this.config.bri = Math.floor(_config[param] * 255 / 100);
                break;
             case "hue":
-               this.config.hue = _config[param] * 65535 / 360;
+               this.config.hue = Math.floor(_config[param] * 65535 / 360);
                break;
             case "saturation":
-               this.config.sat = _config[param] * 255 / 100;
+               this.config.sat = Math.floor(_config[param] * 255 / 100);
                break;
          }
       }

@@ -34,36 +34,17 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
    if (!_data.coldStart) {
 
       if ((_propName == "scene") && (_propValue != "CLEARED")) {
-
-         this.hueService.setScene(_propValue, (_error, _content) => {
-
-            if (_error) {
-               console.log(this.uName + ': Error activating scene: ', _error);
-            }
-         });
-
+         this.hueService.setScene(_propValue);
          this.alignPropertyValue(_propName, "CLEARED");
       }
       else if (_propName == "power") {
 
          if (_propValue) {
-            this.hueService.setLightGroupState(this.lightGroupId, { power: true }, (_error, _content) => {
-
-               if (_error) {
-                  console.log(this.uName + ': Error turning room off ' + _error.message);
-               }
-               else {
-                  this.syncDeviceProperties();
-               }
-            });
+            this.hueService.setLightGroupState(this.lightGroupId, { power: true });
+            this.syncDeviceProperties();
          }
          else {
-            this.hueService.setLightGroupState(this.lightGroupId, { power: false }, (_error, _content) => {
-
-               if (_error) {
-                  console.log(this.uName + ': Error turning room off ' + _error.message);
-               }
-            });
+            this.hueService.setLightGroupState(this.lightGroupId, { power: false });
          }
       }
       else if (this.getProperty("power")) {
@@ -73,24 +54,13 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
 };
 
 HueLightGroup.prototype.syncDeviceProperties = function() {
-
-   this.hueService.setLightGroupState(this.lightGroupId, { power: true, brightness: this.getProperty("brightness") }, (_error, _content) => {
-
-      if (_error) {
-         console.error(this.uName + ': Error turning room off ' + _error.message);
-      }
-   });
+   this.hueService.setLightGroupState(this.lightGroupId, { power: true, brightness: this.getProperty("brightness"), hue: this.getProperty("hue"), saturation: this.getProperty("saturation") });
 };
 
 HueLightGroup.prototype.syncDeviceProperty = function(_propName, _propValue) {
 
    if (_propName == 'brightness') {
-      this.hueService.setLightGroupState(this.lightGroupId, { power: true, brightness: this.getProperty("brightness") }, (_error, _content) => {
-
-         if (_error) {
-            console.error(this.uName + ': Error turning room off ' + _error.message);
-         }
-      });
+      this.hueService.setLightGroupState(this.lightGroupId, { power: true, brightness: this.getProperty("brightness") });
    }
 };
 

@@ -1101,6 +1101,32 @@
                      ]
                   }
                ]
+            },
+            {
+               "uName": "hkswitchaccessory:ensuite-main-switch",
+               "displayName": "Ensuite Main Switch",
+               "manufacturer": "Casa Home Automation",
+               "model": "V0.1",
+               "serialNumber": "1234567890",
+               "stateless": true,
+               "eventName": "room-switch-event",
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "props": [
+                  {
+                     "name": "user-override-state",
+                     "initialValue": "not-active"
+                  },
+                  {
+                     "name": "ACTIVE",
+                     "initialValue": false,
+                     "source": {
+                        "uName": "hkswitchaccessory:ensuite-main-switch",
+                        "property": "user-override-state",
+                        "transform": "$value == \"active\""
+                     }
+                  }
+               ]
             }
          ]
       },

@@ -8,6 +8,8 @@ function SourceBase() {
    this.bowing = false;
    this.gang = Gang.mainInstance();
    this.props = {};
+
+   this.setMaxListeners(50);
 }
 
 util.inherits(SourceBase, AsyncEmitter);
