@@ -215,6 +215,14 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
         console.log(this.uName + ": Unhandled Message");
      }
   });
+
+  _socket.on('error', (_error) => {
+     console.error(this.uName + ": Socket error! Error = ", _error);
+  });
+
+  _socket.on('disconnect', (_error) => {
+     console.log(this.uName + ": Socket disconnected.");
+  });
 };
 
 
