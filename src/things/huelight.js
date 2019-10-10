@@ -81,15 +81,15 @@ HueLight.prototype.syncDeviceProperties = function() {
    var config = { power: true };
 
    if (this.brightnessSupported) {
-      config[brightness] =  this.getProperty("brightness");
+      config["brightness"] =  this.getProperty("brightness");
    }
 
    if (this.hueSupported) {
-      config[hue] =  this.getProperty("hue");
+      config["hue"] =  this.getProperty("hue");
    }
 
    if (this.saturationSupported)  {
-       config[saturation] =  this.getProperty("saturation");
+       config["saturation"] =  this.getProperty("saturation");
    }
 
    this.hueService.setLightState(this.deviceId, config);
