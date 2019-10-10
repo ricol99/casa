@@ -249,13 +249,13 @@ function Request(_owner, _request, _deviceId, _config, _callback) {
                this.config.on = _config[param];
                break;
             case "brightness":
-               this.config.bri = Math.floor(_config[param] * 255 / 100);
+               this.config.bri = Math.floor(parseFloat(_config[param] * 255 / 100));
                break;
             case "hue":
-               this.config.hue = Math.floor(_config[param] * 65535 / 360);
+               this.config.hue = Math.floor(parseFloat(_config[param] * 65535 / 360));
                break;
             case "saturation":
-               this.config.sat = Math.floor(_config[param] * 255 / 100);
+               this.config.sat = Math.floor(parseFloat(_config[param] * 255 / 100));
                break;
          }
       }

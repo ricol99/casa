@@ -9,14 +9,17 @@ function HueLight(_config) {
 
    this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
-   this.brightnessSupported = true;
-   this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
-
    this.hueService =  this.gang.findService("hueservice");
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");
       process.exit();
+   }
+
+   this.brightnessSupported = _config.hasOwnProperty("brightnessSupported") ? _config.brightnessSupported : true;
+
+   if (this.brightnessSupported)  {
+      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
    }
 
    if (_config.hasOwnProperty("hueSupported")) {
@@ -75,7 +78,21 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
 };
 
 HueLight.prototype.syncDeviceProperties = function() {
-   this.hueService.setLightState(this.deviceId, { power: true, brightness: this.getProperty("brightness"), hue: this.getProperty("hue"), saturation: this.getProperty("saturation") });
+   var config = { power: true };
+
+   if (this.brightnessSupported) {
+      config[brightness] =  this.getProperty("brightness");
+   }
+
+   if (this.hueSupported) {
+      config[hue] =  this.getProperty("hue");
+   }
+
+   if (this.saturationSupported)  {
+       config[saturation] =  this.getProperty("saturation");
+   }
+
+   this.hueService.setLightState(this.deviceId, config);
 };
 
 HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
@@ -84,7 +101,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
              saturation: "setLightSaturation" };
 
    if (f[_propName]) {
-      this.hueService[f[_propName]].call(this.hueService, this.deviceId);
+      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue);
    }
 };
 
