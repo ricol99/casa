@@ -126,8 +126,7 @@ function Building(_config) {
                                            timeout: { duration: 1, nextState: "occupied-going-to-bed" } },
                                          { name: "occupied-waking-up", sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
                                                                                  { property: "all-users-away", value: true, nextState: "empty" }],
-                                           action: { property: "evening-possible", value: false },
-                                           timeout: { duration: this.bedtimeTimeout, nextState: "occupied-awake" } }]}, _config);
+                                           action: { property: "evening-possible", value: false } }]}, _config);
 
    // Movement property
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };
