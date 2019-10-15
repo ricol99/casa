@@ -59,10 +59,6 @@
          ]
       }
    ],
-   "services": [
-   ],
-   "things": [ 
-      {
-      }
-   ]
+   "things": [],
+   "services": []
 }
