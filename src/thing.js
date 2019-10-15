@@ -92,8 +92,6 @@ Thing.prototype.inheritChildProps = function() {
    for (var prop in childProps) {
 
       if (childProps.hasOwnProperty(prop)) {
-         console.log(this.uName + ": AAAAA prop=", prop);
-         console.log(this.uName + ": BBBBB prop=", childProps[prop]);
          this.ensurePropertyExists(prop, "property", { initialValue: childProps[prop] }, this.config);
       }
    }

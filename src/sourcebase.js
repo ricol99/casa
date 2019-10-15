@@ -79,7 +79,7 @@ SourceBase.prototype.dropSourceListeners = function(_propName, _sourceData) {
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': Emitting Property Change (Child) ' + _propName + ' is ' + _propValue);
+   console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.sourceName = this.uName;

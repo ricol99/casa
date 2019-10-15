@@ -12,6 +12,8 @@ for (var i=0; i < LOG.length-1; i++ ) {
       things[LOG[i].uName] = LOG[i];
       things[LOG[i].uName].props = {};
       things[LOG[i].uName].props[LOG[i].prop] = LOG[i].value;
+      delete things[LOG[i].uName].prop;
+      delete things[LOG[i].uName].value;
    }
 }
 
