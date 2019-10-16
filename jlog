@@ -1,5 +1,12 @@
 #!/bin/sh
-filename=`echo $1 | sed 's/\.[a-zA-Z0-9][a-zA-Z0-9]*$//'`.json
-echo "[" > $filename
-grep INFO $1 | grep "Property Changed: " | awk '{print "{ \"timestamp\": \""substr($1,3,12)"\", \"uName\": \""substr($3,1,length($3)-1)"\", \"prop\": \""substr($6,1,length($6)-1)"\", \"value\": \""$7"\" },"}' >> $filename
-echo "{}]" >> $filename
+if [ $# -ne 2 ];
+then
+   fileIn='/dev/stdin'
+   fileOut='/dev/stdout'
+else
+   fileIn=$1
+   fileOut=`echo $1 | sed 's/\.[a-zA-Z0-9][a-zA-Z0-9]*$//'`.json
+fi
+echo "[" > $fileOut
+grep INFO $fileIn | grep "Property Changed: " | awk '{print "{ \"timestamp\": \""substr($1,3,12)"\", \"uName\": \""substr($3,1,length($3)-1)"\", \"prop\": \""substr($6,1,length($6)-1)"\", \"value\": \""$7"\" },"}' >> $fileOut
+echo "{}]" >> $fileOut

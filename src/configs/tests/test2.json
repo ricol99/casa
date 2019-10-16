@@ -38,6 +38,34 @@
             }
          ]
       },
+      {  
+         "uName": "thing:test-peer-bow",
+         "displayName": "Test Peer Bow",
+         "props": [
+            {
+               "name": "test-peer-bow-1",
+               "initialValue": "peer-1",
+               "writable": true,
+               "type": "stateproperty",
+               "states": [
+                  {
+                     "name": "peer-1",
+                     "timeout": {   
+                        "duration": 5,
+                        "nextState": "peer-2"
+                     }
+                  },
+                  {
+                     "name": "peer-2",
+                     "timeout": {
+                        "duration": 5,
+                        "nextState": "peer-1"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
       {
          "uName": "thing:test-environment",
          "displayName": "Test Timed Environment",
