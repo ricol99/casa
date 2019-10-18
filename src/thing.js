@@ -4,7 +4,7 @@ var Source = require('./source');
 function Thing(_config) {
    Source.call(this, _config);
 
-   this.setMaxListeners(75);
+   //this.setMaxListeners(75);
 
    this.displayName = _config.displayName;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;

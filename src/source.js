@@ -7,7 +7,7 @@ function Source(_config) {
    this.uName = _config.uName;
    this.sName = this.uName.split(":")[1];
 
-   this.setMaxListeners(50);
+   //this.setMaxListeners(50);
 
    this.casa = this.gang.casa;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
