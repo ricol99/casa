@@ -163,7 +163,7 @@ Casa.prototype.addSource = function(_source) {
    this.sources[_source.uName] = _source;
 
    _source.on('property-changed', (_data) => {
-      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change', _data);
+      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change');
       this.emit('source-property-changed', _data);
    });
 

@@ -152,7 +152,9 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
-      sendData.alignWithParent = undefined;	// This should never be emitted - only for composite management
+
+      delete sendData.alignWithParent;	// This should never be emitted - only for composite management
+      delete sendData.sourcePeerCasa;
 
       this.asyncEmit('property-changed', sendData);
       return true;
