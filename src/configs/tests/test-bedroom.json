@@ -62,11 +62,7 @@
                   {
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "asleep-in-bed" },
-                        { "source": "thing:test-1-lamp", "property": "power", "value": false }
-                     ]
-                  },
-                  {
-                     "simultaneous": [
+                        { "source": "thing:test-1-lamp", "property": "power", "value": false },
                         { "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
                         { "source": "thing:test-2-lamp", "property": "brightness", "value": 15 }
                      ]
