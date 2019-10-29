@@ -4,6 +4,7 @@ var StateProperty = require('../stateproperty');
 
 function CombineStateProperty(_config, _owner) {
    StateProperty.call(this, _config, _owner);
+   this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";
 
    this.sources = (_config.hasOwnProperty("sources")) ? _config.sources : [];
 }
@@ -36,7 +37,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
       sourceFound = sourceFound || (this.sources[i].uName === sourceName);
 
       if (i < this.sources.length - 1) {
-         newState = newState + "_";
+         newState = newState + this.separator;
       }
    }
 

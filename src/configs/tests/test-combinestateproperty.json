@@ -16,13 +16,21 @@
          "sources": [
             { "property": "test-state-1" },
             { "property": "test-state-2" },
-            { "property": "test-combined-state" }
+            { "property": "test-combined-state" },
+            { "event": "made-it-test-state-1-idle" },
+            { "event": "made-it-default-state" }
          ],
          "testRun": {
             "preAmble": {
                "expectedSequence": [
-                  { "property": "test-combined-state", "value": "undefined_test-state-2-idle" },
-                  { "property": "test-combined-state", "value": "test-state-1-idle_test-state-2-idle" }
+                  { "simultaneous": [
+                     { "property": "test-combined-state", "value": "undefined:test-state-2-idle" },
+                     { "event": "made-it-default-state", "value": true }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-combined-state", "value": "test-state-1-idle:test-state-2-idle" },
+                     { "event": "made-it-test-state-1-idle", "value": true }
+                  ]}
                ]
             },
             "testCases": [1]
@@ -37,27 +45,33 @@
                "expectedSequence": [
                   { "simultaneous": [
                      { "property": "test-state-1", "value": "test-state-1-started" },
-                     { "property": "test-combined-state", "value": "test-state-1-started_test-state-2-idle" }
+                     { "property": "test-combined-state", "value": "test-state-1-started:test-state-2-idle" },
+                     { "event": "made-it-default-state", "value": true }
                   ]},
                   { "simultaneous": [
                      { "property": "test-state-2", "value": "test-state-2-started" },
-                     { "property": "test-combined-state", "value": "test-state-1-started_test-state-2-started" }
+                     { "property": "test-combined-state", "value": "test-state-1-started:test-state-2-started" },
+                     { "event": "made-it-default-state", "value": true }
                   ]},
                   { "simultaneous": [
                      { "property": "test-state-1", "value": "test-state-1-timed-out" },
-                     { "property": "test-combined-state", "value": "test-state-1-timed-out_test-state-2-started" }
+                     { "property": "test-combined-state", "value": "test-state-1-timed-out:test-state-2-started" },
+                     { "event": "made-it-default-state", "value": true }
                   ]},
                   { "simultaneous": [
                      { "property": "test-state-1", "value": "test-state-1-idle" },
-                     { "property": "test-combined-state", "value": "test-state-1-idle_test-state-2-started" }
+                     { "property": "test-combined-state", "value": "test-state-1-idle:test-state-2-started" },
+                     { "event": "made-it-test-state-1-idle", "value": true }
                   ]},
                   { "simultaneous": [
                      { "property": "test-state-2", "value": "test-state-2-timed-out" },
-                     { "property": "test-combined-state", "value": "test-state-1-idle_test-state-2-timed-out" }
+                     { "property": "test-combined-state", "value": "test-state-1-idle:test-state-2-timed-out" },
+                     { "event": "made-it-test-state-1-idle", "value": true }
                   ]},
                   { "simultaneous": [
                      { "property": "test-state-2", "value": "test-state-2-idle" },
-                     { "property": "test-combined-state", "value": "test-state-1-idle_test-state-2-idle" }
+                     { "property": "test-combined-state", "value": "test-state-1-idle:test-state-2-idle" },
+                     { "event": "made-it-test-state-1-idle", "value": true }
                   ]}
                ]
             }
@@ -123,6 +137,7 @@
             {  
                "name": "test-combined-state",
                "type": "combinestateproperty",
+               "separator": ":",
                "sources": [
                   {
                      "property": "test-state-1"
@@ -134,6 +149,15 @@
                "states": [
                   {  
                      "name": "test-state-1-idle-state-test-state-2-idle"
+                  },
+                  {
+                     "name": "test-state-1-idle",
+                     "regEx": "test-state-1-idle:",
+                     "action": { "event": "made-it-test-state-1-idle", "value": true }
+                  },
+                  {
+                     "name": "DEFAULT",
+                     "action": { "event": "made-it-default-state", "value": true }
                   }
                ]
             }
