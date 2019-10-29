@@ -1,0 +1,271 @@
+{
+   "casa": {
+      "uName": "casa:test-combinestateproperty",
+      "displayName": "Casa Collin Test State Property",
+      "gang": "gang:collin-test",
+      "listeningPort": 8085
+   },
+   "services": [],
+   "scenes": [],
+   "things": [
+      {
+         "uName": "tester:combinestateproperty",
+         "displayName": "Test property:combinestateproperty",
+         "props": [],
+         "targetUnderTest": "testthing:test-thing",
+         "sources": [
+            { "property": "test-state-1" },
+            { "property": "test-state-2" },
+            { "property": "test-combined-state" }
+         ],
+         "testRun": {
+            "preAmble": {
+               "expectedSequence": [
+                  { "property": "test-combined-state", "value": "undefined-test-state-2-idle" },
+                  { "property": "test-combined-state", "value": "test-state-1-idle-test-state-2-idle" }
+               ]
+            },
+            "testCases": [1]
+         },
+         "testCases": [
+            {
+               "name": "1) Normal - Test basic transition on event and timeout based transition ",
+               "driveSequence": [
+                  { "event": "start-test-1" },
+                  { "wait": 1, "event": "start-test-2" }
+               ],
+               "expectedSequence": [
+                  { "simultaneous": [
+                     { "property": "test-state-1", "value": "test-state-1-started" },
+                     { "property": "test-combined-state", "value": "test-state-1-started-test-state-2-idle" }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-state-2", "value": "test-state-2-started" },
+                     { "property": "test-combined-state", "value": "test-state-1-started-test-state-2-started" }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-state-1", "value": "test-state-1-timed-out" },
+                     { "property": "test-combined-state", "value": "test-state-1-timed-out-test-state-2-started" }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-state-1", "value": "test-state-1-idle" },
+                     { "property": "test-combined-state", "value": "test-state-1-idle-test-state-2-started" }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-state-2", "value": "test-state-2-timed-out" },
+                     { "property": "test-combined-state", "value": "test-state-1-idle-test-state-2-timed-out" }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-state-2", "value": "test-state-2-idle" },
+                     { "property": "test-combined-state", "value": "test-state-1-idle-test-state-2-idle" }
+                  ]}
+               ]
+            },
+            {
+               "name": "2) Normal - Test basic transition on event and timeout based transition with intermediate inherited timer ",
+               "driveSequence": [
+                  { "event": "start-test-1" },
+                  { "wait": 1, "event": "start-test-2" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-timer-inherited-state" },
+                  { "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "3) Normal - Test basic transition on event and timeout based transition with intermediate non-inherited timer ",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 3, "event": "jump-to-timer-non-inherited-state" },
+                  { "wait": 6, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-timer-non-inherited-state" },
+                  { "property": "test-state-1", "value": "test-timed-out-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "4) Normal - Test basic transition with guard on source",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 0.5, "property": "test-prop-3", "value": true },
+                  { "wait": 1, "event": "jump-to-guarded-source-state" },
+                  { "wait": 1, "event": "go-through-source-guard" },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": true },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": true },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": false },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": true },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": false },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-prop-3", "value": true },
+                  { "property": "test-state-1", "value": "test-guarded-source-state" },
+                  { "simultaneous": [
+                     { "property": "test-state-1", "value": "test-guarded-action-state" },
+                     { "property": "test-prop-3", "value": false }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-prop-3", "value": true },
+                     { "property": "test-action-guard-prop", "value": true }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-prop-3", "value": false },
+                     { "property": "test-action-guard-prop", "value": false }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-prop-3", "value": true },
+                     { "property": "test-action-guard-prop", "value": true }
+                  ]},
+                  { "simultaneous": [
+                     { "property": "test-prop-3", "value": false },
+                     { "property": "test-action-guard-prop", "value": false }
+                  ]},
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {
+               "name": "5) Normal - Test basic transition with active guard on action",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-non-active-guarded-source-state" },
+                  { "wait": 1, "event": "go-through-source-guard" },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": true },
+                  { "wait": 1, "event": "go-through-source-guard" },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": false },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": false },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": true },
+                  { "wait": 1, "property": "test-action-guard-prop", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
+                  { "property": "test-state-1", "value": "test-guarded-action-state" },
+                  { "property": "test-action-guard-prop", "value": true },
+                  { "property": "test-prop-3", "value": true },
+                  { "property": "test-action-guard-prop", "value": false },
+                  { "property": "test-prop-3", "value": false },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {  
+               "name": "6) Normal - Test basic transition with non-active guard on source",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-non-active-guarded-source-state" },
+                  { "wait": 1, "event": "go-through-source-guard" },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": true },
+                  { "wait": 1, "property": "test-source-guard-prop", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "test-non-active-guarded-source-state" },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {  
+               "name": "7) Normal - Test action function",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-action-function-state" },
+                  { "wait": 1, "property": "test-prop-3", "value": false },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-prop-3", "value": true, "fuzz": 1 },
+                  { "property": "test-state-1", "value": "test-action-function-state" },
+                  { "event": "test-action-function-event", "value": true },
+                  { "property": "test-prop-3", "value": false },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            }
+         ],
+         "things": [
+         ]
+      },
+      {
+         "uName": "testthing:test-thing",
+         "displayName": "Test thing",
+         "events": [],
+         "props": [
+            {
+               "name": "test-state-1",
+               "type": "stateproperty",
+               "initialValue": "test-state-1-idle",
+               "states": [
+                  {
+                     "name": "test-state-1-idle",
+                     "sources": [{ "event": "start-test-1", "nextState": "test-state-1-started" }]
+                  },
+                  {
+                     "name": "test-state-1-started",
+                     "timeout": { "duration": 2, "nextState": "test-state-1-timed-out" },
+                     "sources": [{ "event": "jump-to-test-state-1-main", "nextState": "test-state-1-main" }]
+                  },
+                  {
+                     "name": "test-state-1-timed-out",
+                     "timeout": { "duration": 2, "nextState": "test-state-1-idle" },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-state-1-idle" }]
+                  },
+                  {
+                     "name": "test-state-1-main",
+                     "timeout": { "duration": 2, "nextState": "test-state-1-idle" }
+                  }
+               ]
+            },
+            {
+               "name": "test-state-2",
+               "type": "stateproperty",
+               "initialValue": "test-state-2-idle",
+               "states": [
+                  {
+                     "name": "test-state-2-idle",
+                     "sources": [{ "event": "start-test-2", "nextState": "test-state-2-started" }]
+                  },
+                  {
+                     "name": "test-state-2-started",
+                     "timeout": { "duration": 4, "nextState": "test-state-2-timed-out" },
+                     "sources": [{ "event": "jump-to-test-state-2-main", "nextState": "test-state-2-main" }]
+                  },
+                  {
+                     "name": "test-state-2-timed-out",
+                     "timeout": { "duration": 4, "nextState": "test-state-2-idle" },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-state-2-idle" }]
+                  },
+                  {
+                     "name": "test-state-2-main",
+                     "timeout": { "duration": 4, "nextState": "test-state-2-idle" }
+                  }
+               ]
+            },
+            {  
+               "name": "test-combined-state",
+               "type": "combinestateproperty",
+               "sources": [
+                  {
+                     "property": "test-state-1"
+                  },
+                  {
+                     "property": "test-state-2"
+                  }
+               ],
+               "states": [
+                  {  
+                     "name": "test-state-1-idle-state-test-state-2-idle"
+                  }
+               ]
+            }
+         ],
+         "things": []
+      }
+   ]
+}
