@@ -297,6 +297,10 @@ SourceListener.prototype.getSource = function() {
    return this.source;
 };
 
+SourceListener.prototype.getSourceName = function() {
+   return this.sourceName;
+};
+
 SourceListener.prototype.isValid = function() {
    return this.maskingInvalid ? true : this.valid;
 };

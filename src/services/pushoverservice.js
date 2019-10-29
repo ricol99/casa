@@ -27,12 +27,17 @@ PushoverService.prototype.sendMessage = function(_user, _messagePriority, _messa
       priority: _messagePriority,
    };
 
-   this.pushService.send(msg, function(_err, _result ) {
+   try {
+      this.pushService.send(msg, function(_err, _result ) {
 
-      if (_err) {
-         console.info('pushoverservice: Error logging into Pushover: ' + _err);
-      }
-   });
+         if (_err) {
+            console.error('pushoverservice: Error logging into Pushover: ' + _err);
+         }
+      });
+   }
+   catch (_err) {
+      console.error('pushoverservice: Error logging into Pushover: ' + _err);
+   }
 };
 
 module.exports = exports = PushoverService;

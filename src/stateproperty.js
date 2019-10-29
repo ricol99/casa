@@ -54,7 +54,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                this.resetStateTimer(this.currentState);
             }
             else {
-               this.set(this.transformNextState(source.nextState), { sourceName: this.owner });
+               this.set(this.transformNextState(source.nextState), { sourceName: this.owner.uName });
             }
          }
          else if (source.hasOwnProperty('handler')) {
@@ -124,7 +124,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
 StateProperty.prototype.timeoutInternal = function(_timeoutState) {
    this.stateTimer = null;
-   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner });
+   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.uName });
 };
 
 StateProperty.prototype.transformNextState = function(_nextState) {
@@ -196,7 +196,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
          console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
          setTimeout( (_nextStateName) => {
-            this.set(_nextStateName, { sourceName: this.owner });
+            this.set(_nextStateName, { sourceName: this.owner.uName });
          }, 1, this.transformNextState(immediateNextState));
       }
       else {
@@ -705,11 +705,11 @@ State.prototype.scheduledEventTriggered = function(_event) {
    if (_event.config.hasOwnProperty("nextState")) {
 
       if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
-         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner });
+         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.uName });
       }
    }
    else {
-      this.owner.set(this.name, { sourceName: this.owner.owner });
+      this.owner.set(this.name, { sourceName: this.owner.owner.uName });
    }
 }
 
