@@ -8,14 +8,24 @@ function StateProperty(_config, _owner) {
 
    this.gang = Gang.mainInstance();
    this.states = {};
+   this.regExStates = [];
    this.controllingOwner = false;
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
    this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
+   this.allSourcesRequiredForValidity = false;
+
+   var regExIndex = 0;
 
    for (var i = 0; i < _config.states.length; ++i) {
-      this.states[_config.states[i].name] = new State(_config.states[i], this);
+
+      if (_config.states[i].hasOwnProperty("regEx")) {
+         this.regExStates.push(new State(_config.states[i], this));
+      }
+      else {
+         this.states[_config.states[i].name] = new State(_config.states[i], this);
+      }
    }
 }
 
@@ -169,6 +179,20 @@ StateProperty.prototype.transformNextState = function(_nextState) {
    return nextState;
 }
 
+StateProperty.prototype.matchRegExState = function(_stateName) {
+   var state = this.states["DEFAULT"];
+
+   for (let i = 0; i < this.regExStates.length; ++i) {
+
+      if (this.regExStates[i].regEx.test(_stateName)) {
+         state = this.regExStates[i];
+         break;
+      }
+   }
+
+   return state;
+};
+
 StateProperty.prototype.setState = function(_nextStateName) {
    console.log(this.uName+": setState state="+_nextStateName);
    this.previousState = this.value;
@@ -181,17 +205,27 @@ StateProperty.prototype.setState = function(_nextStateName) {
       clearTimerResult.timeLeft = 1;
    }
 
+   var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.matchRegExState(_nextStateName);
+
    if (!this.cold) {
 
       if (this.states[this.value]) {
          this.states[this.value].exiting();
       }
-      else if (this.states["DEFAULT"] && this.states[_nextStateName]) {
-         this.states["DEFAULT"].exiting();
+      else {
+         var currentRegExState = this.matchRegExState(this.value);
+
+         if (currentRegExState && nextState && (currentRegExState != nextState)) {
+            currentRegExState.exiting();
+         }
+
+         //if (this.states["DEFAULT"] && this.states[_nextStateName]) {
+            //this.states["DEFAULT"].exiting();
+         //}
       }
    }
 
-   var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.states["DEFAULT"];
+   //var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.states["DEFAULT"];
 
    if (nextState) {
       var immediateNextState = nextState.initialise();
@@ -266,11 +300,11 @@ StateProperty.prototype.ceasedToBeController = function(_newController) {
    this.controllingOwner = false;
 };
 
-StateProperty.prototype.sourceIsValid = function(_data) {
-};
+//StateProperty.prototype.sourceIsValid = function(_data) {
+//};
 
-StateProperty.prototype.sourceIsInvalid = function(_data) {
-};
+//StateProperty.prototype.sourceIsInvalid = function(_data) {
+//};
 
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListenerName;
@@ -311,6 +345,10 @@ function State(_config, _owner) {
    this.activeGuardedSources = [];
    this.activeGuardedActions = [];
    this.actionTimeouts = [];
+
+   if (_config.hasOwnProperty("regEx")) {
+      this.regEx = new RegExp(_config.regEx);
+   }
 
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 

@@ -17,8 +17,14 @@
             { "property": "test-state-1" },
             { "property": "test-action-guard-prop" },
             { "property": "test-prop-3" },
-            { "event": "test-action-function-event" }
+            { "event": "test-action-function-event" },
+            { "event": "have-made-it-to-regex-matched-state-1" },
+            { "event": "have-made-it-to-regex-matched-state-2" },
+            { "event": "have-made-it-to-default-state" }
          ],
+         "testRun": {
+            "testCases": []
+         },
          "testCases": [
             {
                "name": "1) Normal - Test basic transition on event and timeout based transition ",
@@ -159,6 +165,48 @@
                   { "property": "test-prop-3", "value": false },
                   { "property": "test-state-1", "value": "test-idle-state" }
                ]
+            },
+            {  
+               "name": "8) Normal - Test RegEx state matching",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-regex-matched-state-1" },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "matchthistatethroughregex" },
+                  { "event": "have-made-it-to-regex-matched-state-1", "value": true },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {  
+               "name": "9) Normal - Test RegEx state matching",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-regex-matched-state-2" },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "sjdhjshd09098448574674873873" },
+                  { "event": "have-made-it-to-regex-matched-state-2", "value": true },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
+            },
+            {  
+               "name": "10) Normal - Test RegEx state matching",
+               "driveSequence": [
+                  { "event": "start-test" },
+                  { "wait": 1, "event": "jump-to-regex-matched-state-3" },
+                  { "wait": 1, "event": "reset-back-to-idle" }
+               ],
+               "expectedSequence": [
+                  { "property": "test-state-1", "value": "test-started" },
+                  { "property": "test-state-1", "value": "matchthista%tethroughregex097634GHGNj" },
+                  { "event": "have-made-it-to-default-state", "value": true },
+                  { "property": "test-state-1", "value": "test-idle-state" }
+               ]
             }
          ],
          "things": [
@@ -206,7 +254,10 @@
                                  { "event": "jump-to-guarded-source-state", "nextState": "test-guarded-source-state" },
                                  { "event": "jump-to-guarded-action-state", "nextState": "test-guarded-action-state" },
                                  { "event": "jump-to-non-active-guarded-source-state", "nextState": "test-non-active-guarded-source-state" },
-                                 { "event": "jump-to-action-function-state", "nextState": "test-action-function-state" }]
+                                 { "event": "jump-to-action-function-state", "nextState": "test-action-function-state" },
+                                 { "event": "jump-to-regex-matched-state-1", "nextState": "matchthistatethroughregex" },
+                                 { "event": "jump-to-regex-matched-state-2", "nextState": "sjdhjshd09098448574674873873" },
+                                 { "event": "jump-to-regex-matched-state-3", "nextState": "matchthista%tethroughregex097634GHGNj" }]
                   },
                   {
                      "name": "test-timer-inherited-state",
@@ -245,6 +296,23 @@
                      "name": "test-action-function-state",
                      "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }],
                      "action": { "handler": "testActionFunction" }
+                  },
+                  {
+                     "name": "test-regex-matched-state-1",
+                     "regEx": "^[A-Za-z]+$",
+                     "action": { "event": "have-made-it-to-regex-matched-state-1", "value": true },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "test-regex-matched-state-2",
+                     "regEx": "^[A-Z-a-z0-9]+$",
+                     "action": { "event": "have-made-it-to-regex-matched-state-2", "value": true },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
+                  },
+                  {
+                     "name": "DEFAULT",
+                     "action": { "event": "have-made-it-to-default-state", "value": true },
+                     "sources": [{ "event": "reset-back-to-idle", "nextState": "test-idle-state" }]
                   }
                ]
             }

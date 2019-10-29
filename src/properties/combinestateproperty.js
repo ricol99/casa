@@ -36,7 +36,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
       sourceFound = sourceFound || (this.sources[i].uName === sourceName);
 
       if (i < this.sources.length - 1) {
-         newState = newState + "-";
+         newState = newState + "_";
       }
    }
 
@@ -47,14 +47,6 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
 
    console.log(this.uName + ": Attempting to move to state " + newState);
    this.set(newState, { sourceName: this.owner.uName });
-};
-
-CombineStateProperty.prototype.sourceIsValid = function(_data) {
-   Property.prototype.sourceIsValid.call(this, _data);
-};
-
-CombineStateProperty.prototype.sourceIsInvalid = function(_data) {
-   Property.prototype.sourceIsInvalid.call(this, _data);
 };
 
 module.exports = exports = CombineStateProperty;
