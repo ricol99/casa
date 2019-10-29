@@ -22,7 +22,6 @@ function Tester(_config) {
    }
 
    if (_config.hasOwnProperty('sources')) {
-      this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
 
@@ -34,8 +33,6 @@ function Tester(_config) {
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
       }
-
-      this.constructing = false;
    }
 
    this.buildTestCases(_config.testRun, _config.testCases);

@@ -22,7 +22,11 @@ function StateProperty(_config, _owner) {
 util.inherits(StateProperty, Property);
 
 StateProperty.prototype.coldStart = function(_data) {
-   this.setState(this.value);
+
+   if (this.initialValueSet) {
+      this.setState(this.value);
+   }
+
    Property.prototype.coldStart.call(this, _data);
 };
    

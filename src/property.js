@@ -9,6 +9,7 @@ function Property(_config, _owner) {
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
+   this.initialValueSet = _config.hasOwnProperty("initialValue");
    this.value = _config.initialValue;
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
@@ -34,7 +35,6 @@ function Property(_config, _owner) {
 
    if (_config.hasOwnProperty('sources')) {
       this.valid = false;
-      this.constructing = true;
 
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
@@ -42,9 +42,7 @@ function Property(_config, _owner) {
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
-      };
-
-      this.constructing = false;
+      }
    }
    else {
       this.valid = true;
@@ -268,8 +266,11 @@ Property.prototype.newEventReceivedFromTarget = function(_targetListener, _data)
 // Override this if you listen to a source that is not "Source".
 // If you listen to a "Source" you will be fired by that Source cold starting
 Property.prototype.coldStart = function(_data) {
-   console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
-   this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
+
+   if (this.initialValueSet) {
+      console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
+      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
+   }
    this.cold = false;
 };
 

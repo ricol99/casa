@@ -1,5 +1,6 @@
 var util = require('util');
-var StateProperty = require('./stateproperty');
+var Property = require('../property');
+var StateProperty = require('../stateproperty');
 
 function CombineStateProperty(_config, _owner) {
    StateProperty.call(this, _config, _owner);
@@ -23,14 +24,15 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    let sourceFound = false;
 
    for (let i = 0; i < this.sources.length; ++i) {
-      let sl = this.sourceListeners[this.sources[i].uName + ":" + _data.name];
+      let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.uName;
+      let sl = this.sourceListeners[sn + ":" + this.sources[i].property];
 
       if (!sl) {
          console.info(this.uName + ": Event rejected as it came from source " + sourceName + " which is outside of sources specified");
          return;
       }
 
-      newState = newState + sl.getPropertyValue().toString();
+      newState = newState + "" + sl.getPropertyValue();
       sourceFound = sourceFound || (this.sources[i].uName === sourceName);
 
       if (i < this.sources.length - 1) {
@@ -45,6 +47,14 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
 
    console.log(this.uName + ": Attempting to move to state " + newState);
    this.set(newState, { sourceName: this.owner.uName });
+};
+
+CombineStateProperty.prototype.sourceIsValid = function(_data) {
+   Property.prototype.sourceIsValid.call(this, _data);
+};
+
+CombineStateProperty.prototype.sourceIsInvalid = function(_data) {
+   Property.prototype.sourceIsInvalid.call(this, _data);
 };
 
 module.exports = exports = CombineStateProperty;
