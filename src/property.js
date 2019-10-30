@@ -38,7 +38,11 @@ function Property(_config, _owner) {
 
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
-         _config.sources[index].uName = (_config.sources[index].hasOwnProperty("uName")) ? _config.sources[index].uName : this.owner.uName;
+
+         if (!_config.sources[index].hasOwnProperty("uName") || _config.sources[index].uName == undefined) {
+            _config.sources[index].uName = this.owner.uName;
+         }
+
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
@@ -269,9 +273,9 @@ Property.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
       console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
+      this.cold = false;
       this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
-   this.cold = false;
 };
 
 // ====================

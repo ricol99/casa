@@ -204,6 +204,10 @@ SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
    }
 };
 
+SourceListener.prototype.isCold = function() {
+   return !(this.hasOwnProperty("sourcePropertyValue"));
+};
+
 //
 // Internal method - Called by the last step in the pipeline
 //

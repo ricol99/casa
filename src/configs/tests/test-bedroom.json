@@ -224,7 +224,7 @@
                   { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 1, "event": "test-1-switch-event" },
                   { "wait": 0.2, "property": "evening-possible", "value": false },
-                  { "wait": 0.2, "event": "test-1-switch-event" },
+                  { "wait": 2.2, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 0.5, "event": "pre-wake-up-event" },
@@ -250,6 +250,7 @@
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
+                  { "property": "room-state", "value": "no-users-present-night" },
                   {
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "asleep-in-bed" },
@@ -274,7 +275,6 @@
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "waking-up-in-bed" },
                         { "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                        { "property": "room-state", "value": "no-users-present-night" },
                         { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },
                         { "source": "thing:test-1-lamp", "property": "power", "value": true },
                         { "source": "thing:test-2-lamp", "property": "brightness", "value": 0 },
@@ -320,7 +320,7 @@
                   { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 0.8, "event": "test-1-switch-event" },
                   { "wait": 0.2, "property": "evening-possible", "value": false },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
+                  { "wait": 2.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 1, "property": "low-light", "value": false },
@@ -346,6 +346,7 @@
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]  
                   },
+                  { "property": "room-state", "value": "no-users-present-night" },
                   {  
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "asleep-in-bed" },
@@ -366,7 +367,6 @@
                         { "source": "thing:test-2-lamp", "property": "power", "value": false }
                      ]  
                   },
-                  { "property": "room-state", "value": "no-users-present-night" },
                   {  
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "waking-up-in-bed" },
@@ -415,7 +415,7 @@
                   { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 0.8, "event": "test-1-switch-event" },
                   { "wait": 0.2, "property": "evening-possible", "value": false },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
+                  { "wait": 2.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 0.5, "event": "pre-wake-up-event" },
@@ -441,6 +441,7 @@
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
+                  { "property": "room-state", "value": "no-users-present-night" },
                   {
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "asleep-in-bed" },
@@ -461,7 +462,6 @@
                         { "source": "thing:test-2-lamp", "property": "power", "value": false }
                      ]
                   },
-                  { "property": "room-state", "value": "no-users-present-night" },
                   {
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "waking-up-in-bed" },
@@ -511,7 +511,7 @@
                   { "wait": 0.5, "property": "movement", "value": false },
                   { "wait": 0.8, "event": "test-1-switch-event" },
                   { "wait": 0.2, "property": "evening-possible", "value": false },
-                  { "wait": 0.5, "event": "test-1-switch-event" },
+                  { "wait": 2.5, "event": "test-1-switch-event" },
                   { "wait": 0.5, "event": "room-switch-event" },
                   { "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 0.5, "event": "pre-wake-up-event" },
@@ -537,6 +537,7 @@
                         { "source": "thing:test-main-lights", "property": "power", "value": false }
                      ]
                   },
+                  { "property": "room-state", "value": "no-users-present-night" },
                   {
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "asleep-in-bed" },
@@ -561,7 +562,6 @@
                      "simultaneous": [
                         { "property": "test-1-user-state", "value": "waking-up-in-bed" },
                         { "property": "test-2-user-state", "value": "waking-up-in-bed" },
-                        { "property": "room-state", "value": "no-users-present-night" },
                         { "source": "thing:test-1-lamp", "property": "power", "value": true },
                         { "source": "thing:test-2-lamp", "property": "power", "value": true },
                         { "source": "thing:test-1-lamp", "property": "brightness", "value": 0 },

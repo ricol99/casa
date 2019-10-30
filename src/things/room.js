@@ -8,7 +8,17 @@ var Thing = require('../thing');
 // room-switch-event - room entrance switch
  
 
-// Resulting room-state (s)
+// Resulting day-state
+// day - normal daytime
+// dull-day - daytime but with low light
+// evening  - low light and late enough to be evening
+// night - night time
+
+// Resulting users-present-state
+// no-users-present - no users detected in room for at least timeout period
+// users-present - users detected within timeout period
+
+// Resulting room-state
 // no-users-present - no movement detected
 // users-present - movement detected
 // no-users-present-evening - no movement detected in low-light before bed-time (background lights)
@@ -36,84 +46,29 @@ function Room(_config) {
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
    this.dullDayMovementTimeout = (_config.hasOwnProperty('dullDayMovementTimeout')) ? _config.dullDayMovementTimeout : 1800;
-
-   this.roomStateConfig = (_config.hasOwnProperty('roomStateConfig')) ? _config.roomStateConfig : {};
-   this.roomStateConfig.name = "room-state";
-   this.roomStateConfig.type = "stateproperty";
    this.buildingName = _config.buildingName;
+
 
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
 
-   if (!this.roomStateConfig.hasOwnProperty("initialValue")) {
-      this.roomStateConfig.initialValue = "no-users-present-day";
-   }
+   this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", type: "stateproperty", initialValue: "day", 
+                                                             states: [{ name: "day", sources: [{ property: "low-light", value: true, nextState: "dull-day" },
+                                                                                               { property: "night-time", "value": true, nextState: "night" }]},
+                                                                      { name: "dull-day", sources: [{ property: "low-light", "value": false, nextState: "day" },
+                                                                                                    { property: "night-time", "value": true, nextState: "night" },
+                                                                                                    { property: "evening-possible", "value": true, nextState: "evening" }]},
+                                                                      { name: "evening", sources: [{ property: "night-time", "value": true, nextState: "night" },
+                                                                                                   { property: "low-light", "value": false, nextState: "day" }]},
+                                                                      { name: "night", sources: [{ property: "night-time", "value": false, nextState: "day" }]} ]}, _config);
 
-   if (!this.roomStateConfig.hasOwnProperty("states")) {
-      this.roomStateConfig.states = [];
-   }
+   this.ensurePropertyExists('users-present-state', 'stateproperty', { name: "users-present-state", type: "stateproperty", initialValue: "no-users-present", 
+                                                                       states: [{ name: "no-users-present", source: { property: "movement", "value": true, nextState: "users-present" } },
+                                                                                { name: "users-present", timeout: { duration: this.movementTimeout, nextState: "no-users-present" },
+                                                                                                         source: { property: "movement", "value": true, nextState: "users-present" }} ]}, _config);
 
-   if (!nameExists(this.roomStateConfig.states, "no-users-present-day")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-day",
-                                         "sources": [{ "property": "movement", "value": true, "nextState": "users-present-day" },
-                                                     { "property": "low-light", "value": true, "nextState": "no-users-present-dull-day" },
-                                                     { "property": "night-time", "value": true, "nextState": "no-users-present-night" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "users-present-day")) {
-      this.roomStateConfig.states.push({ "name": "users-present-day",
-                                         "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-day" },
-                                         "sources": [{ "property": "low-light", "value": true, "nextState": "users-present-dull-day" },
-                                                     { "property": "night-time", "value": true, "nextState": "users-present-night" },
-                                                     { "property": "movement", "value": true, "nextState": "users-present-day" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "no-users-present-dull-day")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-dull-day",
-                                         "sources": [{ "property": "movement", "value": true, "nextState": "users-present-dull-day" },
-                                                     { "property": "low-light", "value": false, "nextState": "no-users-present-day" },
-                                                     { "property": "night-time", "value": true, "nextState": "no-users-present-night" },
-                                                     { "property": "evening-possible", "value": true, "nextState": "no-users-present-evening" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "users-present-dull-day")) {
-      this.roomStateConfig.states.push({ "name": "users-present-dull-day",
-                                         "timeout": { "duration": this.dullDayMovementTimeout, "nextState": "no-users-present-dull-day" },
-                                         "sources": [ { "property": "evening-possible", "value": true, "nextState": "users-present-evening" },
-                                                      { "property": "low-light", "value": false, "nextState": "users-present-day" },
-                                                      { "property": "night-time", "value": true, "nextState": "users-present-night" },
-                                                      { "property": "movement", "value": true, "nextState": "users-present-dull-day" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "no-users-present-evening")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-evening",
-                                         "sources": [{ "property": "movement", "value": true, "nextState": "users-present-evening" },
-                                                     { "property": "night-time", "value": true, "nextState": "no-users-present-night" },
-                                                     { "property": "low-light", "value": false, "nextState": "no-users-present-day" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "users-present-evening")) {
-      this.roomStateConfig.states.push({ "name": "users-present-evening",
-                                         "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-evening" },
-                                         "sources": [ { "property": "low-light", "value": false, "nextState": "users-present-day" },
-                                                      { "property": "night-time", "value": true, "nextState": "users-present-night" },
-                                                      { "property": "movement", "value": true, "nextState": "users-present-evening" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "no-users-present-night")) {
-      this.roomStateConfig.states.push({ "name": "no-users-present-night",
-                                         "sources": [{ "property": "movement", "value": true, "nextState": "users-present-night" },
-                                                     { "property": "night-time", "value": false, "nextState": "no-users-present-day" }]});
-   }
-
-   if (!nameExists(this.roomStateConfig.states, "users-present-night")) {
-      this.roomStateConfig.states.push({ "name": "users-present-night",
-                                         "timeout": { "duration": this.movementTimeout, "nextState": "no-users-present-night" },
-                                         "sources": [ { "property": "night-time", "value": false, "nextState": "users-present-day" },
-                                                      { "property": "movement", "value": true, "nextState": "users-present-night" }]});
-   }
-
-   this.ensurePropertyExists('room-state', 'stateproperty', this.roomStateConfig, _config);
+   this.ensurePropertyExists('room-state', 'combinestateproperty', { name: "room-state", type: "combinestateproperty", separator: "-", initialValue: "no-users-present-day",
+                                                                     sources: [{ property: "users-present-state" }, { property: "day-state" }] }, _config);
 
    var userOverrideConfig = (_config.hasOwnProperty("userOverrideConfig")) ? _config.userOverrideConfig
                                                                            : { initialValue: 'not-active',

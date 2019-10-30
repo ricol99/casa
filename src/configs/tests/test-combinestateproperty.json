@@ -24,11 +24,6 @@
             "preAmble": {
                "expectedSequence": [
                   { "simultaneous": [
-                     { "property": "test-combined-state", "value": "undefined:test-state-2-idle" },
-                     { "event": "made-it-default-state", "value": true }
-                  ]},
-                  { "simultaneous": [
-                     { "property": "test-combined-state", "value": "test-state-1-idle:test-state-2-idle" },
                      { "event": "made-it-test-state-1-idle", "value": true }
                   ]}
                ]
@@ -147,9 +142,6 @@
                   }
                ],
                "states": [
-                  {  
-                     "name": "test-state-1-idle-state-test-state-2-idle"
-                  },
                   {
                      "name": "test-state-1-idle",
                      "regEx": "test-state-1-idle:",

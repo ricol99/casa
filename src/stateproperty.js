@@ -18,13 +18,16 @@ function StateProperty(_config, _owner) {
 
    var regExIndex = 0;
 
-   for (var i = 0; i < _config.states.length; ++i) {
+   if (_config.hasOwnProperty("states")) {
 
-      if (_config.states[i].hasOwnProperty("regEx")) {
-         this.regExStates.push(new State(_config.states[i], this));
-      }
-      else {
-         this.states[_config.states[i].name] = new State(_config.states[i], this);
+      for (var i = 0; i < _config.states.length; ++i) {
+
+         if (_config.states[i].hasOwnProperty("regEx")) {
+            this.regExStates.push(new State(_config.states[i], this));
+         }
+         else {
+            this.states[_config.states[i].name] = new State(_config.states[i], this);
+         }
       }
    }
 }
@@ -319,7 +322,10 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
-      _config.uName = _config.uName;
+
+      if (!_config.hasOwnProperty("uName") || _config.uName == undefined) {
+         _config.uName = this.owner.uName;
+      }
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
    }

@@ -280,6 +280,7 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
 
    if (this.testCases[this.currentTestCase].expectedSequence[_index].hasOwnProperty('property')) {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].property;
+      //console.info(this.uName + ": AAAAAA " + this.testCases[this.currentTestCase].expectedSequence[_index].source + " " + name + " " + this.testCases[this.currentTestCase].expectedSequence[_index].value);
    }
    else {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
@@ -305,6 +306,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          if (result) {
 
             if (i !== this.expectedPosition) {
+               //console.info(this.uName + ": AAAAAA not in expected position!");
                let temp = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition];
                this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition] = this.testCases[this.currentTestCase].expectedSequence[i];
                this.testCases[this.currentTestCase].expectedSequence[i] = temp;
@@ -318,10 +320,12 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
+         //console.info(this.uName + ": AAAAAA result found!");
          console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
       }
       else {
+         //console.info(this.uName + ": AAAAAA not result found!");
          console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
          process.exit(5);

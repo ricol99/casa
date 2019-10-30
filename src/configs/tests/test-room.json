@@ -18,6 +18,9 @@
             { "uName": "thing:test-main-lights", "property": "power" },
             { "property": "evening-possible" }
          ],
+         "testRun": {
+            "testCases": []
+         },
          "testSteps": [
          ],
          "testCases": [
@@ -62,7 +65,12 @@
             {
                "name": "3) Normal - check state model for room-state",
                "driveSequence": [
-                  { "testCase": "2) Normal - initiation by movement and timeout" },
+                  //{ "testCase": "2) Normal - initiation by movement and timeout" },
+                  { "property": "low-light", "value": true },
+                  { "wait": 0.5, "property": "movement", "value": true },
+                  { "wait": 2.0, "property": "movement", "value": false },
+                  { "wait": 1.5, "property": "low-light", "value": false },
+
                   { "wait": 1, "property": "evening-possible", "value": true },
                   { "wait": 1, "property": "low-light", "value": true },
                   { "wait": 0.5, "property": "movement", "value": true },
@@ -75,7 +83,22 @@
                   { "wait": 5, "property": "low-light", "value": false }
                ],
                "expectedSequence": [
-                  { "testCase": "2) Normal - initiation by movement and timeout" },
+                  //{ "testCase": "2) Normal - initiation by movement and timeout" },
+                  { "property": "room-state", "value": "no-users-present-dull-day" },
+                  {
+                     "simultaneous": [
+                        { "property": "room-state", "value": "users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": true }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "property": "room-state", "value": "no-users-present-dull-day" },
+                        { "source": "thing:test-main-lights", "property": "power", "value": false }
+                     ]
+                  },
+                  { "property": "room-state", "value": "no-users-present-day" },
+
                   { "property": "evening-possible", "value": true },
                   { "property": "room-state", "value": "no-users-present-evening" },
                   {
@@ -122,7 +145,6 @@
          "uName": "room:test-room",
          "displayName": "Test Room",
          "movementTimeout": 3,
-         "dullDayMovementTimeout": 3,
          "events": [],
          "props": [
             {
