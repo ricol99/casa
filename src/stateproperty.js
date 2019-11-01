@@ -14,7 +14,7 @@ function StateProperty(_config, _owner) {
    this.currentPriority = this.priority;
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
    this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
-   this.allSourcesRequiredForValidity = false;
+   this.allSourcesRequiredForValidity = (_config.hasOwnProperty("allSourcesRequiredForValidity")) ? _config.allSourcesRequiredForValidity : false;
 
    var regExIndex = 0;
 

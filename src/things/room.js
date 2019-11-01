@@ -45,8 +45,7 @@ function Room(_config) {
    this.thingType = "room";
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
-   this.dullDayMovementTimeout = (_config.hasOwnProperty('dullDayMovementTimeout')) ? _config.dullDayMovementTimeout : 1800;
-   this.buildingName = _config.buildingName;
+   this.buildingName = _config.building;
 
 
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);

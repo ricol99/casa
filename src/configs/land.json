@@ -176,7 +176,7 @@
       {
          "uName": "bedroom:dylan",
          "displayName": "Dylan's Bedroom",
-         "buildingName": "building:dumgoyne",
+         "building": "building:dumgoyne",
          "users": [
             { "uName": "user:dylan" }
          ],
@@ -538,7 +538,7 @@
       {
          "uName": "bedroom:master",
          "displayName": "Master Bedroom",
-         "buildingName": "building:dumgoyne",
+         "building": "building:dumgoyne",
          "users": [
             { "uName": "user:richard"},
             { "uName": "user:natalie"}
@@ -960,7 +960,7 @@
       {
          "uName": "room:master-ensuite",
          "displayName": "Master Bedroom Ensuite",
-         "buildingName": "building:dumgoyne",
+         "building": "building:dumgoyne",
          "movementTimeout": 900,
          "props": [
             {

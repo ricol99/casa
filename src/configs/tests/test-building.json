@@ -612,7 +612,7 @@
       {
          "uName": "bedroom:test-1",
          "displayName": "Test Bedroom 1",
-         "buildingName": "building:test",
+         "building": "building:test",
          "users": [ { "uName": "user:test-1" }, { "uName": "user:test-2" } ],
          "readingInBedTimeout": 4,
          "awakeInBedTimeout": 1,
@@ -635,7 +635,7 @@
       {
          "uName": "bedroom:test-2",
          "displayName": "Test Bedroom 2",
-         "buildingName": "building:test",
+         "building": "building:test",
          "users": [ { "uName": "user:test-3" } ],
          "readingInBedTimeout": 4,
          "awakeInBedTimeout": 1,
@@ -658,7 +658,7 @@
       {
          "uName": "room:test-1",
          "displayName": "Test Room 1",
-         "buildingName": "building:test",
+         "building": "building:test",
          "movementTimeout": 2,
          "propogateToParent": false,
          "events": [],
@@ -682,7 +682,7 @@
       {
          "uName": "room:test-2",
          "displayName": "Test Room 2",
-         "buildingName": "building:test",
+         "building": "building:test",
          "movementTimeout": 2,
          "propogateToParent": false,
          "events": [],
