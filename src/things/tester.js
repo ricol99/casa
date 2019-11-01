@@ -321,24 +321,24 @@ Tester.prototype.receivedEventFromSource = function(_data) {
 
       if (result) {
          //console.info(this.uName + ": AAAAAA result found!");
-         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
-                      " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED");
+         console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                      " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");
       }
       else {
          //console.info(this.uName + ": AAAAAA not result found!");
-         console.info(this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
-                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED");
+         console.info("\x1b[31m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m");
          process.exit(5);
       }
 
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
 
          if ((this.timeout) || (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
-            console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete");
+            console.info("\x1b[31m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m");
             process.exit(5);
          }
 
-         console.info(this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED");
+         console.info("\x1b[32m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m");
 
          if (++this.currentTestCase < this.testCases.length) {
             this.currentTestEvent = 0;
@@ -346,7 +346,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
             this.initiateTestEvent();
          }
          else {
-            console.info(this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED");
+            console.info("\x1b[32m"+this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
             process.exit(0);
          }
       }
