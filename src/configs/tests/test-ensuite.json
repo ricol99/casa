@@ -33,10 +33,11 @@
             { "property": "user-sensitivity-state" }
          ],
          "testRun": {
+            "testCases": []
          },
          "testCases": [
             {
-               "name": "1) Normal - both going to bed slightly different times - initiation by bed switches",
+               "name": "1) Normal - both go to bed and use ensuite before touching bed switches - ensuite goes sensitive when both in bed",
                "driveSequence": [
                   { "target": "building:test-building", "property": "test-1-present", "value": true },
                   { "target": "building:test-building", "wait": 0.2, "property": "test-2-present", "value": true },
@@ -49,14 +50,14 @@
                   { "wait": 0.1, "property": "movement", "value": true },
                   { "wait": 0.2, "property": "movement", "value": false },
                   { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-1-switch-event" },
-                  { "target": "building:test-building", "wait": 0.2, "property": "evening-possible", "value": false },
+                  //{ "target": "building:test-building", "wait": 0.2, "property": "evening-possible", "value": false },
                   { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-2-switch-event" },
                   { "target": "bedroom:test-bedroom", "wait": 2.5, "event": "test-1-switch-event" },
                   { "target": "bedroom:test-bedroom", "wait": 0.5, "event": "test-2-switch-event" },
                   { "wait": 2.0, "property": "low-light", "value": false },
                   { "target": "bedroom:test-bedroom", "wait": 0.1, "property": "low-light", "value": false },
                   { "target": "bedroom:test-bedroom", "wait": 1.0, "event": "wake-up-event" },
-                  { "target": "building:test-building", "property": "test-1-present", "value": false },
+                  { "target": "building:test-building", "wait": 0.1, "property": "test-1-present", "value": false },
                   { "target": "building:test-building", "wait": 0.5, "property": "test-2-present", "value": false }
                ],
                "expectedSequence": [
@@ -112,6 +113,144 @@
                      "simultaneous": [
                         { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
                         { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "2) Normal - one goes to bed, one does not. One going to bed uses ensuite before touching bed switches - ensuite goes sensitive when asleep",
+               "driveSequence": [
+                  { "target": "building:test-building", "property": "test-1-present", "value": true },
+                  { "target": "building:test-building", "wait": 0.2, "property": "test-2-present", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "evening-possible", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "low-light", "value": true },
+                  { "wait": 0.2, "property": "evening-possible", "value": true },
+                  { "wait": 0.2, "property": "low-light", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "movement", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.1, "property": "movement", "value": false },
+                  { "wait": 0.1, "property": "movement", "value": true },
+                  { "wait": 0.2, "property": "movement", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-1-switch-event" },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-1-switch-event" },
+                  { "target": "bedroom:test-bedroom", "wait": 3.0, "event": "test-2-switch-event" },
+                  { "target": "bedroom:test-bedroom", "wait": 0.5, "event": "test-2-switch-event" },
+                  { "wait": 2.0, "property": "low-light", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 0.1, "property": "low-light", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 1.0, "event": "wake-up-event" },
+                  { "target": "building:test-building", "wait": 0.1, "property": "test-1-present", "value": false },
+                  { "target": "building:test-building", "wait": 0.5, "property": "test-2-present", "value": false }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
+                  { "property": "room-state", "value": "no-users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  {
+                     "simultaneous": [
+                        { "property": "room-state", "value": "users-present-evening" },
+                        { "property": "power", "value": true },
+                        { "property": "brightness", "value": 20 },
+                        { "property": "user-sensitivity-state", "value": "users-present-normal" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                        { "property": "user-sensitivity-state", "value": "users-present-sensitive" },
+                        { "property": "brightness", "value": 5 }
+                     ]
+                  },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "reading-in-bed-others-asleep" },
+                  { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "asleep-in-bed" },
+                  {
+                     "simultaneous": [
+                        { "property": "user-sensitivity-state", "value": "no-users-present-sensitive" },
+                        { "property": "room-state", "value": "no-users-present-evening" },
+                        { "property": "power", "value": false }
+                     ]
+                  },
+                  { "property": "room-state", "value": "no-users-present-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "awake-in-bed" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "property": "user-sensitivity-state", "value": "no-users-present-normal" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" },
+                        { "source": "bedroom:test-bedroom", "property": "test-2-user-state", "value": "not-present" }
+                     ]
+                  }
+               ]
+            },
+            {
+               "name": "3) Normal - one goes to bed and uses ensuite before touching bed switches - ensuite goes sensitive when in bed",
+               "driveSequence": [
+                  { "target": "building:test-building", "property": "test-1-present", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "evening-possible", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "low-light", "value": true },
+                  { "wait": 0.2, "property": "evening-possible", "value": true },
+                  { "wait": 0.2, "property": "low-light", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "property": "movement", "value": true },
+                  { "target": "bedroom:test-bedroom", "wait": 0.1, "property": "movement", "value": false },
+                  { "wait": 0.1, "property": "movement", "value": true },
+                  { "wait": 0.2, "property": "movement", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-1-switch-event" },
+                  { "target": "bedroom:test-bedroom", "wait": 0.2, "event": "test-1-switch-event" },
+                  { "wait": 5.0, "property": "low-light", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 0.1, "property": "low-light", "value": false },
+                  { "target": "bedroom:test-bedroom", "wait": 1.0, "event": "wake-up-event" },
+                  { "target": "building:test-building", "wait": 0.5, "property": "test-1-present", "value": false }
+               ],
+               "expectedSequence": [
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-evening" },
+                  { "property": "room-state", "value": "no-users-present-evening" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-evening" },
+                  {
+                     "simultaneous": [
+                        { "property": "room-state", "value": "users-present-evening" },
+                        { "property": "power", "value": true },
+                        { "property": "brightness", "value": 20 },
+                        { "property": "user-sensitivity-state", "value": "users-present-normal" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "room-state", "value": "users-present-night" },
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "initial-reading-in-bed" },
+                        { "property": "user-sensitivity-state", "value": "users-present-sensitive" },
+                        { "property": "brightness", "value": 5 }
+                     ]
+                  },
+                  { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "asleep-in-bed" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-night" },
+                  {
+                     "simultaneous": [
+                        { "property": "user-sensitivity-state", "value": "no-users-present-sensitive" },
+                        { "property": "room-state", "value": "no-users-present-evening" },
+                        { "property": "power", "value": false }
+                     ]
+                  },
+                  { "property": "room-state", "value": "no-users-present-day" },
+                  { "source": "bedroom:test-bedroom", "property": "room-state", "value": "no-users-present-day" },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "awake-in-bed" },
+                        { "property": "user-sensitivity-state", "value": "no-users-present-normal" }
+                     ]
+                  },
+                  {
+                     "simultaneous": [
+                        { "source": "bedroom:test-bedroom", "property": "test-1-user-state", "value": "not-present" }
                      ]
                   }
                ]

@@ -958,7 +958,7 @@
          ]
       },
       {
-         "uName": "room:master-ensuite",
+         "uName": "ensuite:master-ensuite",
          "displayName": "Master Bedroom Ensuite",
          "building": "building:dumgoyne",
          "movementTimeout": 900,
@@ -1029,8 +1029,34 @@
                         },
                         {
                            "name": "active",
-                           "priority": 3,
+                           "priority": 12,
                            "actions": [{ "property": "brightness", "value": 100 }, { "property": "power", "value": true }]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "user-sensitivity-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present-normal",
+                           "priority": -1,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-normal",
+                           "priority": -1,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-sensitive",
+                           "priority": 10,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-sensitive",
+                           "priority": 10,
+                           "actions": [{ "property": "brightness", "value": 5 }, { "property": "power", "value": true }]
                         }
                      ]
                   }
@@ -1095,8 +1121,34 @@
                         },
                         {
                            "name": "active",
-                           "priority": 3,
+                           "priority": 12,
                            "actions": [{ "property": "power", "value": true }]
+                        }
+                     ]
+                  },
+                  {
+                     "name": "user-sensitivity-state",
+                     "type": "stateproperty",
+                     "states": [
+                        {
+                           "name": "no-users-present-normal",
+                           "priority": -1,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-normal",
+                           "priority": -1,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "no-users-present-sensitive",
+                           "priority": 10,
+                           "actions": [{ "property": "power", "value": false }]
+                        },
+                        {
+                           "name": "users-present-sensitive",
+                           "priority": 10,
+                           "actions": [{ "property": "power", "value": false }]
                         }
                      ]
                   }
