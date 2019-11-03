@@ -958,9 +958,10 @@
          ]
       },
       {
-         "uName": "ensuite:master-ensuite",
+         "uName": "ensuite:master",
          "displayName": "Master Bedroom Ensuite",
          "building": "building:dumgoyne",
+         "bedroom": "bedroom:master",
          "movementTimeout": 900,
          "props": [
             {
