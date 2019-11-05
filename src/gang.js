@@ -749,5 +749,21 @@ Gang.prototype.changePeerCasaName = function(_peerCasa, _newName) {
    this.peerCasas[_newName] = _peerCasa;
 };
 
+Gang.prototype.filterGlobalObjects = function(_filter) {
+   var hits = [];
+
+   for (var obj in this.allObjects) {
+
+      if (this.allObjects[obj].uName.startsWith(_filter)) {
+         hits.push(this.allObjects[obj].uName);
+      }
+   }
+   return hits;
+};
+
+Gang.prototype.findObject = function(_uName) {
+   return this.allObjects[_uName];
+};
+
 module.exports = exports = Gang;
 
