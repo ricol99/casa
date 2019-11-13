@@ -39,12 +39,7 @@ else {
 require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 
 Gang = require('./gang');
-var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version);
-
-if (options.console) {
-   var CasaConsole = require('./casaconsole');
-   var casaConsole = new CasaConsole();
-}
+var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version, options.console);
 
 function checkPath(_path) {
    return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;

@@ -4,7 +4,7 @@ var Db = require('./db');
 
 var _mainInstance = null;
 
-function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPath, _configPath, _version) {
+function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPath, _configPath, _version, _console) {
    this.casaName = "casa:" + _casaName;
    this.version = _version;
    this._id = true;	// TDB!!!
@@ -50,7 +50,13 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
          this.config.certPath = _certPath;
          this.config.configPath = _configPath;
          this.uName = this.config.gang;
+
          this.loadSystemServices();
+
+         if (_console) {
+            var GangConsoleObj = this.cleverRequire("gangconsole:"+this.uName.split(":")[1], "consoles");
+            this.gangConsole = new GangConsoleObj(this.uName);
+         }
 
          this.gangDb = new Db(this.uName, _configPath);
 
@@ -244,7 +250,14 @@ Gang.prototype.cleverRequire = function(_name, _path, _type) {
 
    if (!this.constructors[str]) {
       console.log('loading more code: ./' + str);
-      this.constructors[str] = require('./' + path + str);
+
+      try {
+         this.constructors[str] = require('./' + path + str);
+      }
+      catch (_err) {
+         process.stderr.write(util.inspect(_err));
+         return null;
+      }
    }
    return this.constructors[str];
 }
@@ -765,5 +778,8 @@ Gang.prototype.findObject = function(_uName) {
    return this.allObjects[_uName];
 };
 
+Gang.prototype.getConsole = function() {
+   return this.gangConsole;
+};
 module.exports = exports = Gang;
 

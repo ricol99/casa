@@ -105,6 +105,18 @@ SourceListener.prototype.establishListeners = function() {
    return this.valid;
 }
 
+SourceListener.prototype.stopListening = function() {
+
+   if (this.listeningToPropertyChange) {
+      this.source.removeListener('property-changed', this.propertyChangedHandler);
+   }
+   else {
+      this.source.removeListener('event-raised', this.eventRaisedHandler);
+   }
+
+   this.source.removeListener('invalid', this.invalidHandler);
+};
+
 SourceListener.prototype.propertyChangedCb = function(_data) {
 
    if (this.wasMaskingInvalid && _data.coldStart) {
