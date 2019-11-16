@@ -331,7 +331,7 @@
                      "type": "orproperty",
                      "initialValue": false,
                      "sources": [{ "uName": "huelight:dylan-bedside-lamp", "property": "power" },
-                                 { "uName": "huelight:dylan-main-light", "property": "power" }]
+                                 { "uName": "huelightgroup:dylan-main-lights", "property": "power" }]
                   }
                ],
                "things": [
@@ -415,9 +415,9 @@
                      ]
                   },
                   {
-                     "uName": "huelight:dylan-main-light",
-                     "displayName": "Dylan Bedroom Main Light",
-                     "deviceId": 6,
+                     "uName": "huelightgroup:dylan-main-lights",
+                     "displayName": "Dylan Bedroom Main Lights",
+                     "lightGroupId": 12,
                      "propogateToParent": false,
                      "props": [
                         {
