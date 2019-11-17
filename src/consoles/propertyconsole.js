@@ -15,13 +15,11 @@ PropertyConsole.prototype.myObj = function() {
 };
 
 PropertyConsole.prototype.cat = function() {
-   process.stdout.write(this.myObj().getValue()+"\n");
+   return this.myObj().getValue();
 };
 
 PropertyConsole.prototype.getValue = function() {
-   var val = this.myObj().getValue();
-   process.stdout.write(val+"\n");
-   return val;
+   return this.myObj().getValue();
 };
 
 PropertyConsole.prototype.watch = function() {

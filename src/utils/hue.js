@@ -20,7 +20,7 @@ Hue.nupnpSearch(function(_err, _result) {
       else {
 
          try {
-            Hue.upnpSearch(10000).then(bridgesFound).done();
+            Hue.upnpSearch(15000).then(bridgesFound).done();
          }
          catch(_error) {
             console.error(this.uName + ": No bridges found!");

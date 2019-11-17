@@ -9,7 +9,7 @@ function Console(_config, _owner) {
    this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.uName : this.uName
 
    this.gang = Gang.mainInstance();
-   this.gangConsole = this.gang.getConsole();
+   this.consoleService =  this.gang.findService("consoleservice");
 }
 
 Console.prototype.coldStart = function() {
@@ -68,11 +68,11 @@ Console.prototype.filterMembers = function(_filterArray, _exclusions) {
    for (var method in mainProto) {
 
       if (!proto.hasOwnProperty(method) && !excObj.hasOwnProperty(method)) {
-         members.push(this.fullScopeName+":"+method);
+         members.push(this.fullScopeName+"."+method);
       }
    }
 
-   this.filterArray(members, this.fullScopeName+":"+_filterArray[0]);
+   this.filterArray(members, this.fullScopeName+"."+_filterArray[0]);
    return members;
 };
 
@@ -91,7 +91,6 @@ Console.prototype.findOrCreateConsoleObject = function(_uName, _realObj) {
          realObj = this.findGlobalObject(_uName);
 
          if (!realObj) {
-            process.stdout.write("-> Object not found! " + _uName + "\n");
             return null;
          }
       }
@@ -125,6 +124,7 @@ Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
    var prevResultCount =  (_prevResult) ? _prevResult.hits.length : 0;
    var result =  (_prevResult) ? _prevResult : { hits: [], consoleObj: null };
    var matchString = (_filterArray.length === 1) ? _filterArray[0] : _filterArray[0]+":"+_filterArray[1];
+   var perfectMatch = null;
 
    if (_object) {
 
@@ -132,6 +132,10 @@ Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
 
           if (obj.startsWith(matchString)) {
              result.hits.push(this.fullScopeName+":"+obj);
+
+             if (obj === _filterArray[0]) {
+                perfectMatch = obj;
+             }
           }
        }
    }
@@ -142,6 +146,15 @@ Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
    if ((result.hits.length === 1) && (prevResultCount === 0)) {
       var splitRes = result.hits[0].split(":");
       result.consoleObj = this.findOrCreateConsoleObject(splitRes[splitRes.length-2]+":"+splitRes[splitRes.length-1]);
+
+      if (result.consoleObj && _filterArray.length > 2) {
+         _filterArray.splice(0, 2);
+         result = result.consoleObj.filterScope(_filterArray);
+      }
+   }
+   else if (perfectMatch) {
+      var splitRes = result.hits[0].split(":");
+      result.consoleObj = this.findOrCreateConsoleObject(this.uName+":"+perfectMatch);
 
       if (result.consoleObj && _filterArray.length > 2) {
          _filterArray.splice(0, 2);

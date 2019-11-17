@@ -54,8 +54,8 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
          this.loadSystemServices();
 
          if (_console) {
-            var GangConsoleObj = this.cleverRequire("gangconsole:"+this.uName.split(":")[1], "consoles");
-            this.gangConsole = new GangConsoleObj(this.uName);
+            var LocalConsole = require('./localconsole');
+            this.localConsole = new LocalConsole();
          }
 
          this.gangDb = new Db(this.uName, _configPath);
@@ -219,7 +219,7 @@ Gang.prototype.init = function() {
 
 Gang.prototype.loadSystemServices = function(_dbCallback) {
    this.extractServices([ { uName: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { uName: "rampservice" }, { uName: "dbservice" } ], true);
+                          { uName: "rampservice" }, { uName: "dbservice" }, { uName: "consoleservice" } ], true);
 };
 
 Gang.prototype.connectToPeers = function(_dbCallback) {
@@ -778,8 +778,5 @@ Gang.prototype.findObject = function(_uName) {
    return this.allObjects[_uName];
 };
 
-Gang.prototype.getConsole = function() {
-   return this.gangConsole;
-};
 module.exports = exports = Gang;
 
