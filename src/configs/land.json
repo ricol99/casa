@@ -154,6 +154,15 @@
                "gpioPin": 26,
                "triggerLow": true,
                "local": true
+            },
+            {
+               "name": "land-gp21",
+               "initialValue": false,
+               "writable": false,
+               "type": "gpioproperty",
+               "gpioPin": 21,
+               "triggerLow": true,
+               "local": true
             }
          ]
       },
@@ -433,7 +442,7 @@
                                  "name": "initial-reading-in-bed",
                                  "priority": 4,
                                  "actions": [
-                                    { "property": "brightness", "value": 60 },
+                                    { "property": "brightness", "value": 25 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -443,7 +452,7 @@
                                  "name": "reading-in-bed",
                                  "priority": 4,
                                  "actions": [
-                                    { "property": "brightness", "value": 40 },
+                                    { "property": "brightness", "value": 25 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -453,7 +462,7 @@
                                  "name": "reading-in-bed-others-asleep",
                                  "priority": 4,
                                  "actions": [
-                                    { "property": "brightness", "value": 40 },
+                                    { "property": "brightness", "value": 25 },
                                     { "property": "hue", "value": 44 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -500,12 +509,12 @@
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
@@ -958,10 +967,9 @@
          ]
       },
       {
-         "uName": "ensuite:master",
+         "uName": "room:master-ensuite",
          "displayName": "Master Bedroom Ensuite",
          "building": "building:dumgoyne",
-         "bedroom": "bedroom:master",
          "movementTimeout": 900,
          "props": [
             {
@@ -988,6 +996,15 @@
                "source": {
                   "uName": "building:dumgoyne",
                   "property": "night-time"
+               }
+            },
+            {
+               "name": "users-sensitive",
+               "initialValue": "normal",
+               "writable": false,
+               "source": {
+                  "uName": "bedroom:master",
+                  "property": "users-sensitive"
                }
             }
          ],
@@ -1154,6 +1171,18 @@
                      ]
                   }
                ]
+            },
+            {
+               "uName": "touchswitch:ensuite-bedroom-switch",
+               "displayName": "Ensuite Bedroom Touch Switch",
+               "propogateToChild": false,
+               "propogateToParent": false,
+               "invokeManualMode": false,
+               "gpioTouchPin": 21,
+               "stateless": true,
+               "eventName": "room-switch-event",
+               "triggerLow": true,
+               "local": true
             },
             {
                "uName": "hkswitchaccessory:ensuite-main-switch",

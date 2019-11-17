@@ -5,9 +5,9 @@ var Thing = require('../thing');
 // movement - true when there is movement detected
 // low-light - true when light levels are low enough to switch on lights
 // night-time - true when head to bed and no longer want any background lights
+// users-sensitive -  true when users are sensitive to  light or noise (may be  in adjacent rooms)
 // room-switch-event - room entrance switch
  
-
 // Resulting day-state
 // day - normal daytime
 // dull-day - daytime but with low light
@@ -39,6 +39,13 @@ var Thing = require('../thing');
 // zone-alarm - zone has been triggered
 // confirmed-alarm - mulitple zones have been triggered
 // fire-alarm - fire detector has been triggered
+
+// Resulting users-sensitivity-state
+// no-users-present-normal - no users present and no users are worried about lighting or noise
+// users-present-normal - users present but no users are worried about lighting or noise
+// no-users-present-sensitive - no users present but users are worried about lighting or noise
+// users-present-sensitive - users present and users are worried about lighting or noise
+
 
 function Room(_config) {
    Thing.call(this, _config);
@@ -76,6 +83,11 @@ function Room(_config) {
                                                                                           timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]};
 
    this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
+
+   this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", separator: "-",
+                                                                                 sources: [{ property: "users-present-state" },
+                                                                                           { property: "users-sensitive",
+                                                                                             transformMap: { false: "normal", true: "sensitive" }}] }, _config);
 }
 
 util.inherits(Room, Thing);
