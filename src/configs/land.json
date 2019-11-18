@@ -427,6 +427,8 @@
                      "uName": "huelightgroup:dylan-main-lights",
                      "displayName": "Dylan Bedroom Main Lights",
                      "lightGroupId": 13,
+                     "hueSupported": true,
+                     "saturationSupported": true,
                      "propogateToParent": false,
                      "props": [
                         {
