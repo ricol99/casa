@@ -54,7 +54,6 @@ function Room(_config) {
    this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
    this.buildingName = _config.building;
 
-
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
 
@@ -84,10 +83,11 @@ function Room(_config) {
 
    this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
 
-   this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", separator: "-",
-                                                                                 sources: [{ property: "users-present-state" },
-                                                                                           { property: "users-sensitive",
-                                                                                             transformMap: { false: "normal", true: "sensitive" }}] }, _config);
+   if (this.hasProperty("users-sensitive")) {
+      this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", separator: "-",
+                                                                                    sources: [{ property: "users-present-state" },
+                                                                                              { property: "users-sensitive", transformMap: { false: "normal", true: "sensitive" }}] }, _config);
+   }
 }
 
 util.inherits(Room, Thing);

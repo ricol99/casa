@@ -22,7 +22,7 @@
       {
          "uName": "tester:ensuite",
          "displayName": "Test thing:ensuite attached to bedroom with two users",
-         "targetUnderTest": "ensuite:test-ensuite",
+         "targetUnderTest": "room:test-ensuite",
          "sources": [
             { "uName": "bedroom:test-bedroom", "property": "test-1-user-state" },
             { "uName": "bedroom:test-bedroom", "property": "test-2-user-state" },
@@ -330,9 +330,8 @@
          ]
       },
       {
-         "uName": "ensuite:test-ensuite",
+         "uName": "room:test-ensuite",
          "displayName": "Test Ensuite",
-         "bedroom": "bedroom:test-bedroom",
          "movementTimeout": 5,
          "events": [], 
          "props": [
@@ -347,6 +346,11 @@
             {
                "name": "low-light",
                "initialValue": false
+            },
+            {
+               "name": "users-sensitive",
+               "initialValue": false,
+               "source": { "uName": "bedroom:test-bedroom", "property": "users-sensitive" }
             }
          ],
          "things": [

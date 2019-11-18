@@ -1000,7 +1000,7 @@
             },
             {
                "name": "users-sensitive",
-               "initialValue": "normal",
+               "initialValue": false,
                "writable": false,
                "source": {
                   "uName": "bedroom:master",
