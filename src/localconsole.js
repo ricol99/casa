@@ -36,7 +36,7 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
       process.exit(0);
    }
 
-   process.stdout.write(this.consoleService.executeLine(_line));
+   process.stdout.write(this.consoleService.executeLine(_line)+"\n");
    this.rl.prompt();
 };
 

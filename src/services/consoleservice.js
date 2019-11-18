@@ -30,7 +30,7 @@ util.inherits(ConsoleService, WebService);
 
 ConsoleService.prototype.coldStart = function() {
 
-   this.addRoute('/console/completeLine/:scope', ConsoleService.prototype.completeLineRequest.bind(this));
+   this.addRoute('/console/completeLine/:line', ConsoleService.prototype.completeLineRequest.bind(this));
    this.addRoute('/console/executeLine/:line', ConsoleService.prototype.executeLineRequest.bind(this));
 
    WebService.prototype.coldStart.call(this);
@@ -91,41 +91,45 @@ ConsoleService.prototype.executeLine = function(_line) {
    var result = this.gangConsole.filterScope(dotSplit[0].split(":"), 0);
 
    if (_line.indexOf(".") !== -1 && result.consoleObj) {
-       var i = 0;
-       dotSplit.splice(0, 1);
-       var outputOfEvaluation = result.consoleObj;
+      var i = 0;
+      dotSplit.splice(0, 1);
+      var outputOfEvaluation = result.consoleObj;
 
-       try {
-          outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
+      try {
+         outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
 
-          while (typeof outputOfEvaluation === 'object' && dotSplit.length > 1) {
-             dotSplit.splice(0, 1);
-             outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
-          }
+         while (typeof outputOfEvaluation === 'object' && dotSplit.length > 1) {
+            dotSplit.splice(0, 1);
+            outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
+         }
 
-          if (outputOfEvaluation) {
-
-             if (typeof outputOfEvaluation === 'object' || outputOfEvaluation instanceof Array) {
-                return util.inspect(outputOfEvaluation);
-             }
-             else {
-                return outputOfEvaluation.toString();
-             }
-          }
-          else {
-             return outputOfEvaluation;
-          }
+         return this.writeOutput(outputOfEvaluation);
       }
       catch (_err) {
          return "Unable to process command!";
       }
    }
    else if (result.consoleObj) {
-      return util.inspect(result.consoleObj.cat());
+      return this.writeOutput(result.consoleObj.cat());
    }
    else {
       return "Object not found!";
    }
 };
 
+ConsoleService.prototype.writeOutput = function(_outputOfEvaluation) {
+
+   if (_outputOfEvaluation === undefined) {
+
+      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
+         return util.inspect(_outputOfEvaluation);
+      }
+      else {
+         return _outputOfEvaluation.toString();
+      }
+   }
+   else {
+      return _outputOfEvaluation;
+   }
+};
 module.exports = exports = ConsoleService;
