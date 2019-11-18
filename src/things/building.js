@@ -130,11 +130,13 @@ function Building(_config) {
 
    // Movement property
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };
+   var anyUsersSensitiveConfig = { "name": "any-users-sensitive", "type": "orproperty", "initialValue": false, "sources": [] };
 
    if (_config.hasOwnProperty('bedrooms')) {
          
       for (var j = 0; j < _config.bedrooms.length; ++j) {
          movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement" });
+         anyUsersSensitiveConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "users-sensitive" });
       }
    }
 
@@ -146,6 +148,7 @@ function Building(_config) {
    }
 
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
+   this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
    // night-time property
    this.ensurePropertyExists("night-time", 'scheduleproperty', { intialValue: false, events: [ { rule: "05 03 * * *", value: true }, { rule: "05 13 * * *", value: false} ],
