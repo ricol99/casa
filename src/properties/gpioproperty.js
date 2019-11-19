@@ -39,6 +39,7 @@ GPIOProperty.prototype.propertyAboutToChange = function(_propValue, _data) {
 
 GPIOProperty.prototype.coldStart = function() {
    this.gpio = this.gpioService.createPin(this, this.gpioPin, this.direction, this.triggerLow);
+   Property.prototype.coldStart.call(this);
 }
 
 module.exports = exports = GPIOProperty;

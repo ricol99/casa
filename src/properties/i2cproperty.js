@@ -49,6 +49,8 @@ I2CProperty.prototype.set = function(_propValue, _data) {
 I2CProperty.prototype.coldStart = function() {
    this.wire = new ADCPi(this.address1, this.address2, 18);
    this.startScanning();
+
+   Property.prototype.coldStart.call(this);
 }
 
 // ====================
