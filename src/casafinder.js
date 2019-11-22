@@ -43,11 +43,23 @@ CasaFinder.prototype.coldStart =  function() {
          }
       });
 
-      this.browser.start();
-
    } catch (_err) {
       process.stderr.write('Error: ' + _err.message + '\n');
    }
 }
+
+CasaFinder.prototype.startSearching =  function() {
+
+   try {
+      this.browser.start();
+   } catch (_err) {
+      process.stderr.write('Error: ' + _err.message + '\n');
+   }
+};
+
+CasaFinder.prototype.stopSearching =  function() {
+   this.browser.stop();
+};
+
 
 module.exports = exports = CasaFinder;

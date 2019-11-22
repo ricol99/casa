@@ -29,10 +29,13 @@ function checkPath(_path) {
 var CasaFinder = require('../casafinder');
 var casaFinder = new CasaFinder({ gang: gang, casa: casa });
 casaFinder.coldStart();
+casaFinder.startSearching();
+
 var RemoteConsole = require('../remoteconsole');
 var remoteConsole;
 
 var callFinderListener = function(_params) {
+   casaFinder.stopSearching();
    casaFinder.removeListener("casa-found", callFinderListener);
    _params.secureMode = secureMode;
    _params.certPath = certPath;
