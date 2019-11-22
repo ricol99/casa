@@ -260,7 +260,7 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
    }
 
    console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-   this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/', this.socketOptions);
+   this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/peercasa', this.socketOptions);
    this.establishListeners();
 };
 

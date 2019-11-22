@@ -83,7 +83,14 @@ Casa.prototype.createServer = function() {
       res.json(allProps);
    });
 
-   io.on('connection', (_socket) => {
+   //io.of('/consolesocketio')
+     //.on('connection', (_socket) => {
+     //process.exit(1);
+   //});
+
+   io.of('/peercasa')
+     .on('connection', (_socket) => {
+
       console.log('a casa has joined');
       var peerCasa = this.gang.createPeerCasa({uName: "casa:anonymous:"+Date.now()}, true);
       peerCasa.serveClient(_socket);
@@ -230,6 +237,10 @@ Casa.prototype.getProperty = function(_property) {
 
 Casa.prototype.addRouteToMainServer = function(_route, _callback) {
    return app.get(_route, _callback);
+};
+
+Casa.prototype.addIoRouteToMainServer = function(_route, _callback) {
+   return io.of(_route).on('connection', _callback);
 };
 
 module.exports = exports = Casa;

@@ -3,16 +3,29 @@ var util = require('util');
 
 function Console(_config, _owner) {
    this.config = _config;
-   this.uName = _config.uName;
+   this.uName = _config.uName.split(":")[0] + "console:" + _config.uName.split(":")[1];
+   this.myObjuName = _config.uName;
    this.consoleObjects = {};
    this.owner = _owner;
-   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.uName : this.uName
+   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.myObjuName : this.myObjuName
 
    this.gang = Gang.mainInstance();
    this.consoleService =  this.gang.findService("consoleservice");
 }
 
 Console.prototype.coldStart = function() {
+};
+
+Console.prototype.getCurrentSession = function() {
+   return this.consoleService.getCurrentSession();
+};
+
+Console.prototype.getSessionVar = function() {
+   return this.consoleService.getCurrentSession().getSessionVar(_name, this.uName);
+};
+
+Console.prototype.addSessionVar = function() {
+   return this.consoleService.getCurrentSession().addSessionVar(_name, _variable, this.uName);
 };
 
 Console.prototype.filterGlobalObjects = function(_filter) {
@@ -154,7 +167,7 @@ Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
    }
    else if (perfectMatch) {
       var splitRes = result.hits[0].split(":");
-      result.consoleObj = this.findOrCreateConsoleObject(this.uName+":"+perfectMatch);
+      result.consoleObj = this.findOrCreateConsoleObject(this.myObjuName+":"+perfectMatch);
 
       if (result.consoleObj && _filterArray.length > 2) {
          _filterArray.splice(0, 2);
@@ -166,10 +179,13 @@ Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
 };
 
 Console.prototype.myObj = function() {
-   return this.gang.findObject(this.uName);
+   return this.gang.findObject(this.myObjuName);
 };
 
 Console.prototype.cat = function() {
+};
+
+Console.prototype.sessionClosed = function(_consoleObjVars, _sessionId) {
 };
 
 module.exports = exports = Console;

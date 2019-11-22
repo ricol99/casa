@@ -8,6 +8,7 @@ function WebService(_config) {
    Service.call(this, _config);
    this.hangingOffMainServer = true;
    this.secure = _config.hasOwnProperty("secure") ? _config.secure : this.gang.inSecureMode();
+   this.socketIoSupported = _config.hasOwnProperty("socketIoSupported") ? _config.socketIoSupported : false;
 
    if (_config.hasOwnProperty("mediaRoute")) {
       this.mediaRoute = _config.mediaRoute;
@@ -56,6 +57,16 @@ function WebService(_config) {
             rejectUnauthorized: true
          };
       }
+
+      if (this.socketIoSuported)  {
+
+         if (this.secure) {
+            this.io = require('socket.io')(this.http, { allowUpgrades: true });
+         }
+         else {
+            this.io = require('socket.io')(this.http, { allowUpgrades: true, transports: ['websocket'] });
+         }
+      }
    }
 }
 
@@ -77,10 +88,10 @@ WebService.prototype.coldStart = function() {
       var http;
 
       if (this.secure) {
-         http = require('https').Server(this.serverOptions, app);
+         this.http = require('https').Server(this.serverOptions, app);
       }
       else {
-         http = require('http').Server(app);
+         this.http = require('http').Server(app);
       }
 
       if (this.mediaPath) {
@@ -91,7 +102,7 @@ WebService.prototype.coldStart = function() {
          });
       }
 
-      http.listen(this.port, () => {
+      this.http.listen(this.port, () => {
          console.log(this.uName + ': listening on *: ' + this.port);
       });
    }
@@ -99,6 +110,15 @@ WebService.prototype.coldStart = function() {
 
 WebService.prototype.addRoute = function(_route, _callback) {
    return (this.hangingOffMainServer) ? this.gang.casa.addRouteToMainServer(_route, _callback) : app.get(_route, _callback);
+};
+
+WebService.prototype.addIoRoute = function(_route, _callback) {
+
+   if (!this.socketIoSupported) {
+      return false;
+   }
+
+   return (this.hangingOffMainServer) ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback);
 };
 
 WebService.setGang = function(_gang) {

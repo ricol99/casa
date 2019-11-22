@@ -4,9 +4,12 @@ var Gang = require('./gang');
 
 function LocalConsole() {
    this.gang = Gang.mainInstance();
+   this.uName = "localconsole:"+Date.now();
 
    this.consoleService =  this.gang.findService("consoleservice");
    this.gangConsole = this.consoleService.getGangConsole();
+
+   this.consoleSession = this.consoleService.getSession(this.uName, this);
 
    this.autoCompleteHandler = LocalConsole.prototype.autoCompleteCb.bind(this);
    this.lineReaderHandler = LocalConsole.prototype.lineReaderCb.bind(this);
@@ -27,7 +30,7 @@ function LocalConsole() {
 }
 
 LocalConsole.prototype.autoCompleteCb = function(_line) {
-   return this.consoleService.completeLine(_line);
+   return this.consoleSession.completeLine(_line);
 };
 
 LocalConsole.prototype.lineReaderCb = function(_line) {
@@ -36,8 +39,12 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
       process.exit(0);
    }
 
-   process.stdout.write(this.consoleService.executeLine(_line)+"\n");
+   process.stdout.write(this.consoleSession.executeLine(_line)+"\n");
    this.rl.prompt();
+};
+
+LocalConsole.prototype.writeOutput = function(_line) {
+   process.stdout.write("\n" + _line + "\ncasa > ");
 };
 
 module.exports = exports = LocalConsole;

@@ -3,7 +3,6 @@ var Console = require('../console');
 
 function PropertyConsole(_config, _owner) {
    Console.call(this, _config, _owner);
-   this.uName = _config.uName;
    this.name = _config.uName.split(":")[2];
 }
 

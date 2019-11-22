@@ -1,6 +1,8 @@
 var crypto = require('crypto');
 var readline = require('readline');
+var io = require('socket.io-client');
 var request = require('request');
+var util = require('./util');
 
 function RemoteConsole(_params) {
    this.secureMode = _params.secureMode;
@@ -23,7 +25,7 @@ function RemoteConsole(_params) {
    }
    else {
       this.http = "http";
-      this.socketOptions = { json: true };
+      this.socketOptions = { transports: ['websocket'], json: true };
    }
 
    this.autoCompleteHandler = RemoteConsole.prototype.autoCompleteCb.bind(this);
@@ -36,7 +38,8 @@ function RemoteConsole(_params) {
      prompt: this.name+' > '
    });
 
-   this.rl.prompt();
+   this.establishSocket();
+
    this.rl.on('line', this.lineReaderHandler);
 
    this.rl.on('close', () => {
@@ -44,8 +47,39 @@ function RemoteConsole(_params) {
    });
 }
 
-RemoteConsole.prototype.autoCompleteCb = function(_line, _callback) {
+RemoteConsole.prototype.establishSocket = function() {
+   this.socket = io(this.http + '://' + this.host + ':' + this.port + '/consolesocketio', this.socketOptions);
 
+   this.socket.on('connect', (_data) => {
+       this.rl.prompt();
+   });
+
+   this.socket.on('connect_error', (_data) => {
+      process.stdout.write(util.inspect(_data) +"\n");
+      process.exit(1);
+   });
+
+   this.socket.on('output', (_data) => {
+      process.stdout.write("\n" + _data.line + "\n" + this.name + " > ");
+   });
+
+   this.socket.on('execute-output', (_data) => {
+      process.stdout.write(_data.line + "\n");
+      this.rl.prompt();
+   });
+
+   this.socket.on('disconnect', (_data) => {
+      process.stdout.write("\nCasa disconnected. Exiting..\n");
+      process.exit(1);
+   });
+
+   this.socket.on('error', (_data) => {
+      process.stdout.write("\nCasa disconnected. Exiting..\n");
+      process.exit(1);
+   });
+};
+
+RemoteConsole.prototype.autoCompleteCb = function(_line, _callback) {
    request(this.http + "://" + this.host + ":" + this.port + "/console/completeLine/" + _line, this.socketOptions, (_err, _res, _body) => {
 
       if (_err || _body.hasOwnProperty("error")) {
@@ -62,17 +96,7 @@ RemoteConsole.prototype.lineReaderCb = function(_line) {
       process.exit(0);
    }
 
-   request(this.http + "://" + this.host + ":" + this.port + "/console/executeLine/" + _line, this.socketOptions, (_err, _res, _body) => {
-
-      if (_err || _body.hasOwnProperty("error")) {
-         process.stdout.write(_err ? _err : _body.error);
-      }
-      else {
-         process.stdout.write(_body + "\n");
-      }
-
-      this.rl.prompt();
-   });
+   this.socket.emit('executeLine', { line: _line });
 };
 
 module.exports = exports = RemoteConsole;

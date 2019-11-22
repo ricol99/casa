@@ -4,7 +4,7 @@ var util = require('util');
 function GangConsole(_config, _owner) {
    Console.call(this, _config, _owner);
    this.fullScopeName = "";
-   this.consoleObjects[this.uName] = this;
+   this.consoleObjects[this.myObjuName] = this;
 }
 
 util.inherits(GangConsole, Console);
