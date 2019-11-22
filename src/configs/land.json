@@ -972,7 +972,12 @@
          "uName": "room:master-ensuite",
          "displayName": "Master Bedroom Ensuite",
          "building": "building:dumgoyne",
-         "movementTimeout": 900,
+         "movementTimeouts": {
+            "day": 900,
+            "dull-day": 900,
+            "evening": 600,
+            "night": 300
+         },
          "props": [
             {
                "name": "movement",

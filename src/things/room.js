@@ -1,13 +1,19 @@
 var util = require('util');
 var Thing = require('../thing');
 
+// Config
+// movementTimeout - how many seconds a movement should affect the room
+// or movementTimeouts - object of timeouts for day-state { day, dull-day, evening, night }
+//
+// overrideTimeout - how many seconds the override should be in affect for
+
 // Please define properties for automated functionality
 // movement - true when there is movement detected
 // low-light - true when light levels are low enough to switch on lights
 // night-time - true when head to bed and no longer want any background lights
-// users-sensitive -  true when users are sensitive to  light or noise (may be  in adjacent rooms)
+// users-sensitive -  true when users are sensitive to light or noise (may be  in adjacent rooms)
 // room-switch-event - room entrance switch
- 
+
 // Resulting day-state
 // day - normal daytime
 // dull-day - daytime but with low light
@@ -51,25 +57,38 @@ function Room(_config) {
    Thing.call(this, _config);
    this.thingType = "room";
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
-   this.movementTimeout = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
+
+   if (_config.hasOwnProperty('movementTimeouts')) {
+      this.movementTimeouts = _config.movementTimeouts;
+   }
+   else {
+      var value = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
+      this.movementTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
+   }
+
    this.buildingName = _config.building;
 
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
+   this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
 
-   this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", type: "stateproperty", initialValue: "day", 
+   this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", ignoreControl: true, type: "stateproperty", initialValue: "day", 
                                                              states: [{ name: "day", sources: [{ property: "low-light", value: true, nextState: "dull-day" },
-                                                                                               { property: "night-time", "value": true, nextState: "night" }]},
+                                                                                               { property: "night-time", "value": true, nextState: "night" }],
+                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["day"] }},
                                                                       { name: "dull-day", sources: [{ property: "low-light", "value": false, nextState: "day" },
                                                                                                     { property: "night-time", "value": true, nextState: "night" },
-                                                                                                    { property: "evening-possible", "value": true, nextState: "evening" }]},
+                                                                                                    { property: "evening-possible", "value": true, nextState: "evening" }],
+                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["dull-day"] }},
                                                                       { name: "evening", sources: [{ property: "night-time", "value": true, nextState: "night" },
-                                                                                                   { property: "low-light", "value": false, nextState: "day" }]},
-                                                                      { name: "night", sources: [{ property: "night-time", "value": false, nextState: "day" }]} ]}, _config);
+                                                                                                   { property: "low-light", "value": false, nextState: "day" }],
+                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["evening"] }},
+                                                                      { name: "night", sources: [{ property: "night-time", "value": false, nextState: "day" }],
+                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["night"] }}] }, _config);
 
    this.ensurePropertyExists('users-present-state', 'stateproperty', { name: "users-present-state", type: "stateproperty", initialValue: "no-users-present", 
                                                                        states: [{ name: "no-users-present", source: { property: "movement", "value": true, nextState: "users-present" } },
-                                                                                { name: "users-present", timeout: { duration: this.movementTimeout, nextState: "no-users-present" },
+                                                                                { name: "users-present", timeout: { property: "movement-timeout", nextState: "no-users-present" },
                                                                                                          source: { property: "movement", "value": true, nextState: "users-present" }} ]}, _config);
 
    this.ensurePropertyExists('room-state', 'combinestateproperty', { name: "room-state", type: "combinestateproperty", separator: "-", initialValue: "no-users-present-day",

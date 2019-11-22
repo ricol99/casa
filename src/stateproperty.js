@@ -118,6 +118,22 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          else if (_state.timeout.hasOwnProperty('duration')) {
             this.timeoutDuration = (_timeoutDuration < _state.timeout.duration * 1000) ? _timeoutDuration : _state.timeout.duration * 1000;
          }
+         else if (_state.timeout.hasOwnProperty('property')) {
+            var value = this.owner.getProperty(_state.timeout.property);
+
+            if (typeof value !== 'number') {
+
+                if (typeof value === 'string') {
+                  value = parseInt(value);
+                }
+                else {
+                   console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                   return;
+                }
+            }
+
+            this.timeoutDuration = (_timeoutDuration < value * 1000) ? _timeoutDuration : value * 1000;
+         }
          else {
             this.timeoutDuration = _timeoutDuration;
          }
@@ -128,6 +144,23 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
       }
       else if (_state.timeout.hasOwnProperty('duration')) {
          this.timeoutDuration = _state.timeout.duration * 1000;
+         this.timeoutNextState = _state.timeout.nextState;
+      }
+      else if (_state.timeout.hasOwnProperty('property')) {
+         var value = this.owner.getProperty(_state.timeout.property);
+            
+         if (typeof value !== 'number') {
+                
+             if (typeof value === 'string') {
+               value = parseInt(value);
+             }
+             else {
+                console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                return;
+             }
+         }
+
+         this.timeoutDuration = value * 1000;
          this.timeoutNextState = _state.timeout.nextState;
       }
       else {
@@ -302,12 +335,6 @@ StateProperty.prototype.becomeController = function() {
 StateProperty.prototype.ceasedToBeController = function(_newController) {
    this.controllingOwner = false;
 };
-
-//StateProperty.prototype.sourceIsValid = function(_data) {
-//};
-
-//StateProperty.prototype.sourceIsInvalid = function(_data) {
-//};
 
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListenerName;
