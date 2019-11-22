@@ -149,16 +149,12 @@ SourceBaseConsole.prototype.unwatch = function(_name) {
 };
 
 SourceBaseConsole.prototype.sessionClosed = function(_consoleObjVars, _sessionId) {
-   var watchList = consoleObjVars.watchList;
+   var watchList = _consoleObjVars.watchList;
 
    if (watchList) {
 
       for (var name in watchList) {
-
-         if (watchList.hasOwnProperty(name)) {
-            watchList[_name].stopListening();
-            delete watchList[_name];
-         }
+         this.unwatch(name);
       }
    }
 };
