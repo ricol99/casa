@@ -3,7 +3,10 @@ var Console = require('../console');
 
 function PropertyConsole(_config, _owner) {
    Console.call(this, _config, _owner);
+   this.uName = _config.uName.split(":")[0] + "console:" + _config.uName.split(":")[1] + ":" + _config.uName.split(":")[2];
    this.name = _config.uName.split(":")[2];
+   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.name : this.myObjuName
+
 }
 
 util.inherits(PropertyConsole, Console);
@@ -30,7 +33,7 @@ PropertyConsole.prototype.unwatch = function() {
 };
 
 PropertyConsole.prototype.watching = function() {
-   return this.owner.watchList.hasOwnProperty(this.name);
+   return this.owner.getWatchList().hasOwnProperty(this.name);
 };
 
 module.exports = exports = PropertyConsole;

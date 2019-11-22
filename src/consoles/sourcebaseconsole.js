@@ -38,8 +38,14 @@ SourceBaseConsole.prototype.filterScope = function(_filterArray) {
    return result;
 };
 
-SourceBaseConsole.prototype.filterMembers = function(_filterArray) {
-   return Console.prototype.filterMembers.call(this, _filterArray, ["sourceIsValid", "sourceIsInvalid", "receivedEventFromSource"]);
+SourceBaseConsole.prototype.filterMembers = function(_filterArray, _exclusions) {
+
+   if (_exclusions) {
+      return Console.prototype.filterMembers.call(this, _filterArray, ["sourceIsValid", "sourceIsInvalid", "receivedEventFromSource"].concat(_exclusions));
+   }
+   else {
+      return Console.prototype.filterMembers.call(this, _filterArray, ["sourceIsValid", "sourceIsInvalid", "receivedEventFromSource"]);
+   }
 };
 
 SourceBaseConsole.prototype.cat = function() {
@@ -66,15 +72,31 @@ SourceBaseConsole.prototype.props = function() {
 SourceBaseConsole.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {
-      this.sourceListeners[_name] = new SourceListener({ uName: this.myObjuName, property: _name }, this);
-      this.sourceListeners[_name].establishListeners();
+      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ uName: this.myObjuName, property: _name }, this) };
+      this.sourceListeners[_name].sourceListener.establishListeners();
+   }
+   else {
+      this.sourceListeners[_name].refCount = this.sourceListeners[_name].refCount + 1;
    }
 
-   return this.sourceListeners[_name];
+   return this.sourceListeners[_name].sourceListener;
+};
+
+SourceBaseConsole.prototype.removeListener = function(_name) {
+
+   if (this.sourceListeners.hasOwnProperty(_name)) {
+      this.sourceListeners[_name].refCount = this.sourceListeners[_name].refCount - 1;
+
+      if (this.sourceListeners[_name].refCount === 0) {
+         this.sourceListeners[_name].sourceListener.stopListening();
+         delete this.sourceListeners[_name].sourceListener;
+         delete this.sourceListeners[_name];
+      }
+   }
 };
 
 SourceBaseConsole.prototype.getWatchList = function() {
-   var watchList = this.consoleService.getSessionVar(watchList, this);
+   var watchList = this.consoleService.getSessionVar("watchList", this);
 
    if (!watchList) {
       watchList = {};
@@ -120,7 +142,7 @@ SourceBaseConsole.prototype.unwatch = function(_name) {
       return "Not currently watching \""+_name+"\"";
    }
    else {
-      watchList[_name].stopListening();
+      this.removeListener(_name);
       delete watchList[_name];
       return "Finished watching \""+_name+"\"";
    }

@@ -7,7 +7,7 @@ function ConsoleService(_config) {
    WebService.call(this, _config);
 
    var GangConsoleObj = this.gang.cleverRequire("gangconsole:"+this.gang.uName.split(":")[1], "consoles");
-   this.gangConsole = new GangConsoleObj({ uName: this.gang.uName}, this);
+   this.gangConsole = new GangConsoleObj({ uName: this.gang.uName});
    this.sessions = {};
 }
 

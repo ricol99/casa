@@ -13,8 +13,8 @@ ThingConsole.prototype.filterScope = function(_filterArray) {
    return Console.prototype.filterScope.call(this, _filterArray, this.myObj().things, result);
 };
 
-ThingConsole.prototype.filterMembers = function(_filterArray) {
-   return SourceBaseConsole.prototype.filterMembers.call(this, _filterArray, []);
+ThingConsole.prototype.filterMembers = function(_filterArray, _exclusions) {
+   return SourceBaseConsole.prototype.filterMembers.call(this, _filterArray, _exclusions);
 };
 
 ThingConsole.prototype.cat = function() {
