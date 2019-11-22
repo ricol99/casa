@@ -39,7 +39,9 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
       process.exit(0);
    }
 
-   process.stdout.write(this.consoleSession.executeLine(_line)+"\n");
+   if (_line !== "") {
+      process.stdout.write(this.consoleSession.executeLine(_line)+"\n");
+   }
    this.rl.prompt();
 };
 

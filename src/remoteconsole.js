@@ -96,7 +96,12 @@ RemoteConsole.prototype.lineReaderCb = function(_line) {
       process.exit(0);
    }
 
-   this.socket.emit('executeLine', { line: _line });
+   if (_line !== "") {
+      this.socket.emit('executeLine', { line: _line });
+   }
+   else {
+      this.rl.prompt();
+   }
 };
 
 module.exports = exports = RemoteConsole;
