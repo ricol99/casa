@@ -17,7 +17,7 @@ ConsoleService.prototype.coldStart = function() {
 
    this.addRoute('/console/completeLine/:line', ConsoleService.prototype.completeLineRequest.bind(this));
    this.addRoute('/console/executeLine/:line', ConsoleService.prototype.executeLineRequest.bind(this));
-   this.addIoRoute('/consolesocketio', ConsoleService.prototype.socketIoConnection.bind(this));
+   this.addIoRoute('/console/io', ConsoleService.prototype.socketIoConnection.bind(this));
 
    WebService.prototype.coldStart.call(this);
 };

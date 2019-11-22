@@ -48,7 +48,7 @@ function RemoteConsole(_params) {
 }
 
 RemoteConsole.prototype.establishSocket = function() {
-   this.socket = io(this.http + '://' + this.host + ':' + this.port + '/consolesocketio', this.socketOptions);
+   this.socket = io(this.http + '://' + this.host + ':' + this.port + '/console/io', this.socketOptions);
 
    this.socket.on('connect', (_data) => {
        this.rl.prompt();
