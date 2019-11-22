@@ -60,11 +60,11 @@ RemoteConsole.prototype.establishSocket = function() {
    });
 
    this.socket.on('output', (_data) => {
-      process.stdout.write("\n" + _data.line + "\n" + this.name + " > ");
+      process.stdout.write("\n" + this.processOutput(_data.result) + "\n" + this.name + " > ");
    });
 
    this.socket.on('execute-output', (_data) => {
-      process.stdout.write(_data.line + "\n");
+      process.stdout.write(this.processOutput(_data.result) + "\n");
       this.rl.prompt();
    });
 
@@ -101,6 +101,22 @@ RemoteConsole.prototype.lineReaderCb = function(_line) {
    }
    else {
       this.rl.prompt();
+   }
+};
+
+RemoteConsole.prototype.processOutput = function(_outputOfEvaluation) {
+
+   if (_outputOfEvaluation === undefined) {
+
+      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
+         return util.inspect(_outputOfEvaluation);
+      }
+      else {
+         return _outputOfEvaluation.toString();
+      }
+   }
+   else {
+      return _outputOfEvaluation;
    }
 };
 

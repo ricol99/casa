@@ -173,11 +173,11 @@ ConsoleSession.prototype.serveClient = function(_socket) {
    this.socket = _socket;
 
    this.socket.on('completeLine', (_data) => {
-      this.socket.emit('complete-output', { line: this.completeLine(_data.line) });
+      this.socket.emit('complete-output', { result: this.completeLine(_data.line) });
    });
 
    this.socket.on('executeLine', (_data) => {
-      this.socket.emit('execute-output', { line: this.executeLine(_data.line) });
+      this.socket.emit('execute-output', { result: this.executeLine(_data.line) });
    });
 
    this.socket.on('disconnect', (_data) => {
@@ -258,9 +258,8 @@ ConsoleSession.prototype.executeLine = function(_line) {
             outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
          }
 
-         var output = this.processOutput(outputOfEvaluation);
          this.owner.setCurrentSession(null);
-         return output;
+         return outputOfEvaluation;
       }
       catch (_err) {
          this.owner.setCurrentSession(null);
@@ -270,28 +269,12 @@ ConsoleSession.prototype.executeLine = function(_line) {
    }
    else if (result.consoleObj) {
       this.owner.setCurrentSession(this);
-      var output = this.processOutput(result.consoleObj.cat());
+      var output = result.consoleObj.cat();
       this.owner.setCurrentSession(null);
       return output;
    }
    else {
       return "Object not found!";
-   }
-};
-
-ConsoleSession.prototype.processOutput = function(_outputOfEvaluation) {
-
-   if (_outputOfEvaluation === undefined) {
-
-      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
-         return util.inspect(_outputOfEvaluation);
-      }
-      else {
-         return _outputOfEvaluation.toString();
-      }
-   }
-   else {
-      return _outputOfEvaluation;
    }
 };
 
@@ -301,7 +284,7 @@ ConsoleSession.prototype.writeOutput = function(_output) {
       this.console.writeOutput(_output);
    }
    else if (this.socket) {
-      this.socket.emit('output', { line: _output });
+      this.socket.emit('output', { result: _output });
    }
 };
 

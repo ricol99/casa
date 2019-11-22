@@ -40,13 +40,30 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 
    if (_line !== "") {
-      process.stdout.write(this.consoleSession.executeLine(_line)+"\n");
+      var result = this.consoleSession.executeLine(_line);
+      process.stdout.write(this.processOutput(result)+"\n");
    }
    this.rl.prompt();
 };
 
+LocalConsole.prototype.processOutput = function(_outputOfEvaluation) {
+
+   if (_outputOfEvaluation === undefined) {
+
+      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
+         return util.inspect(_outputOfEvaluation);
+      }
+      else {
+         return _outputOfEvaluation.toString();
+      }
+   }
+   else {
+      return _outputOfEvaluation;
+   }
+};
+
 LocalConsole.prototype.writeOutput = function(_line) {
-   process.stdout.write("\n" + _line + "\ncasa > ");
+   process.stdout.write("\n" + this.processOutput(_line) + "\ncasa > ");
 };
 
 module.exports = exports = LocalConsole;
