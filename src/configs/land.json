@@ -501,8 +501,8 @@
                                  "priority": 4,
                                  "actions": [
                                     { "property": "brightness", "value": 100 },
-                                    { "property": "hue", "value": 60 },
-                                    { "property": "saturation", "value": 70 },
+                                    { "property": "hue", "value": 0 },
+                                    { "property": "saturation", "value": 0 },
                                     { "property": "power", "value": true }
                                  ]
                               }
@@ -520,12 +520,22 @@
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [
+                                    { "property": "brightness", "value": 80 },
+                                    { "property": "hue", "value": 44 },
+                                    { "property": "saturation", "value": 69 },
+                                    { "property": "power", "value": true }
+                                 ]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 60 }, { "property": "power", "value": true }]
+                                 "actions": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 0 },
+                                    { "property": "saturation", "value": 0 },
+                                    { "property": "power", "value": true }
+                                 ]
                               }
                            ]
                         },
@@ -541,10 +551,11 @@
                               {
                                  "name": "active",
                                  "priority": 3,
-                                 "actions": [{ "property": "brightness", "value": 100 },
-                                             { "property": "hue", "value": 60 },
-                                             { "property": "saturation", "value": 70 },
-                                             { "property": "power", "value": true }
+                                 "actions": [
+                                    { "property": "brightness", "value": 100 },
+                                    { "property": "hue", "value": 0 },
+                                    { "property": "saturation", "value": 0 },
+                                    { "property": "power", "value": true }
                                  ]
                               }
                            ]
