@@ -24,6 +24,10 @@ PropertyConsole.prototype.getValue = function() {
    return this.myObj().getValue();
 };
 
+PropertyConsole.prototype.set = function(_value) {
+   return this.owner.setProperty(this.name, _value);
+};
+
 PropertyConsole.prototype.watch = function() {
    return this.owner.watch(this.name);
 };
@@ -34,6 +38,10 @@ PropertyConsole.prototype.unwatch = function() {
 
 PropertyConsole.prototype.watching = function() {
    return this.owner.getWatchList().hasOwnProperty(this.name);
+};
+
+PropertyConsole.prototype.listeners = function() {
+   return this.owner.listeners(this.name);
 };
 
 module.exports = exports = PropertyConsole;

@@ -39,12 +39,13 @@ SourceBaseConsole.prototype.filterScope = function(_filterArray) {
 };
 
 SourceBaseConsole.prototype.filterMembers = function(_filterArray, _exclusions) {
+   var myExclusions = [ "sourceIsValid", "sourceIsInvalid", "receivedEventFromSource", "removeListener", "getWatchList", "findOrCreateSourceListener" ]
 
    if (_exclusions) {
-      return Console.prototype.filterMembers.call(this, _filterArray, ["sourceIsValid", "sourceIsInvalid", "receivedEventFromSource"].concat(_exclusions));
+      return Console.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
    }
    else {
-      return Console.prototype.filterMembers.call(this, _filterArray, ["sourceIsValid", "sourceIsInvalid", "receivedEventFromSource"]);
+      return Console.prototype.filterMembers.call(this, _filterArray, myExclusions);
    }
 };
 
@@ -146,6 +147,20 @@ SourceBaseConsole.prototype.unwatch = function(_name) {
       delete watchList[_name];
       return "Finished watching \""+_name+"\"";
    }
+};
+
+SourceBaseConsole.prototype.listeners = function(_property) {
+   var listeners = this.gang.casa.findListeners(this.myObjuName);
+   var listenerUnames = [];
+
+   for (var i=0; i < listeners.length; ++i) {
+
+      if ((listeners[i].owner.type !== "console") && ((_property == undefined) || (_property === listeners[i].eventName))) {
+         listenerUnames.push(listeners[i].owner.uName);
+      }
+   }
+
+   return listenerUnames;
 };
 
 SourceBaseConsole.prototype.sessionClosed = function(_consoleObjVars, _sessionId) {

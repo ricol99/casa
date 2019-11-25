@@ -3,6 +3,7 @@ var util = require('util');
 
 function Console(_config, _owner) {
    this.config = _config;
+   this.type = "console";
    this.uName = _config.uName.split(":")[0] + "console:" + _config.uName.split(":")[1];
    this.myObjuName = _config.uName;
    this.consoleObjects = {};

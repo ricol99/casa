@@ -245,19 +245,38 @@ ConsoleSession.prototype.executeLine = function(_line) {
    var result = this.owner.gangConsole.filterScope(dotSplit[0].split(":"), 0);
 
    if (_line.indexOf(".") !== -1 && result.consoleObj) {
-      var i = 0;
-      dotSplit.splice(0, 1);
-      var outputOfEvaluation = result.consoleObj;
+      var str = _line.split(".").slice(1).join(".");
+      var methodName = str.split("(")[0];
+      var methodExists = result.consoleObj.filterMembers(methodName);
+      
+      if (!methodExists || methodExists.length == 0) {
+         return "Method not found!";
+      }
+
+      var methodArguments = _line.split("(").slice(1).join("(").trim();
+
+      for (var i = methodArguments.length-1; i >= 0; --i) {
+
+         if (methodArguments.charAt(i) == ')') {
+            break;
+         }
+      }
+
+      var arguments = [];
+
+      if (i !== 0) {
+         methodArguments = methodArguments.substring(0, i);
+         arguments = JSON.parse("["+methodArguments+"]");
+      }
+
+      if (!arguments) {
+         return "Unable to parse arguments!";
+      }
+
       this.owner.setCurrentSession(this);
 
       try {
-         outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
-
-         while (typeof outputOfEvaluation === 'object' && dotSplit.length > 1) {
-            dotSplit.splice(0, 1);
-            outputOfEvaluation = eval("outputOfEvaluation."+dotSplit[0]);
-         }
-
+         var outputOfEvaluation = result.consoleObj[methodName].apply(result.consoleObj, arguments);
          this.owner.setCurrentSession(null);
          return outputOfEvaluation;
       }
@@ -265,7 +284,6 @@ ConsoleSession.prototype.executeLine = function(_line) {
          this.owner.setCurrentSession(null);
          return _err;
       }
-
    }
    else if (result.consoleObj) {
       this.owner.setCurrentSession(this);

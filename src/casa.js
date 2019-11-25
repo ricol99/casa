@@ -213,6 +213,21 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
    this.sourceListeners[_sourceListener.uName] = _sourceListener;
 };
 
+Casa.prototype.findListeners = function(_uName) {
+   var listeners = [];
+
+   for (var listener in this.sourceListeners) {
+
+      if (this.sourceListeners.hasOwnProperty(listener)) {
+
+         if (this.sourceListeners[listener].sourceName === _uName) {
+            listeners.push(this.sourceListeners[listener]);
+         }
+      }
+   }
+   return listeners;
+};
+
 Casa.prototype.addWorker = function(_worker) {
    console.log(this.uName + ': Worker '  + _worker.uName + ' added to casa ');
    this.workers[_worker.uName] = _worker;
