@@ -118,6 +118,11 @@ function doIt(_bridge) {
             console.log("Group creation result: " + JSON.stringify(_result, null, 2));
          });
          break;
+      case "deleteGroup":
+         hue.deleteGroup(process.argv[3], (err, result) => {
+            console.log("Group deletion result: " + JSON.stringify(_result, null, 2));
+         });
+         break;
       default:
          hue.getLightStatus(process.argv[2], function(_err, _result) {
             console.log("Light Status: " + JSON.stringify(_result));

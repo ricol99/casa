@@ -12,5 +12,9 @@ SourceConsole.prototype.setProperty = function(_property, _value) {
    return this.myObj().setProperty(_property, _value, {});
 };
 
+SourceConsole.prototype.config = function() {
+   return this.myObj().config;
+};
+
 module.exports = exports = SourceConsole;
  

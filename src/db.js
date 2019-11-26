@@ -128,7 +128,7 @@ Db.prototype.remove = function(_uName, _callback) {
 };
 
 Db.prototype.update = function(_config, _callback) {
-   return db.update({ _id: _config.uName }, _config, {}. _callback);
+   return db.update({ _id: _config.uName }, _config, {}, _callback);
 };
 
 

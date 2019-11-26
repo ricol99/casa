@@ -232,7 +232,7 @@ ConsoleSession.prototype.completeLine = function(_line) {
 
    var result = this.owner.gangConsole.filterScope(dotSplit[0].split(":"), 0);
 
-   if (_line.indexOf(".") !== -1  && result.consoleObj) {
+   if (_line.indexOf(".") !== -1 && result.consoleObj) {
        dotSplit.splice(0, 1);
        result.hits = result.consoleObj.filterMembers(dotSplit);
    }
@@ -254,7 +254,7 @@ ConsoleSession.prototype.executeCommand = function(_command) {
       this.owner.setCurrentSession(this);
 
       try {
-         outputOfEvaluation = result.consoleObj[_command.method].apply(result.consoleObj, _command.arguments);
+         outputOfEvaluation =  Object.getPrototypeOf(result.consoleObj)[_command.method].apply(result.consoleObj, _command.arguments);
          this.owner.setCurrentSession(null);
       }
       catch (_err) {
