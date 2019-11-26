@@ -16,7 +16,7 @@ util.inherits(ConsoleService, WebService);
 ConsoleService.prototype.coldStart = function() {
 
    this.addRoute('/console/completeLine/:line', ConsoleService.prototype.completeLineRequest.bind(this));
-   this.addRoute('/console/executeLine/:line', ConsoleService.prototype.executeLineRequest.bind(this));
+   this.addRoute('/console/executeCommand/:command', ConsoleService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/console/io', ConsoleService.prototype.socketIoConnection.bind(this));
 
    WebService.prototype.coldStart.call(this);
@@ -33,7 +33,7 @@ ConsoleService.prototype.completeLineRequest = function(_request, _response) {
       this.sendFail(_request, _response);
    }
    else {
-      var id = "oneshotconsole:"+Date.now();
+      var id = "oneshotconsolesession:"+Date.now();
       this.sessions[id] = new ConsoleSession(id, null, this);
       var output = this.sessions[id].completeLine(_request.params.line);
       _response.send(output);
@@ -42,16 +42,16 @@ ConsoleService.prototype.completeLineRequest = function(_request, _response) {
    }
 };
 
-ConsoleService.prototype.executeLineRequest = function(_request, _response) {
-   console.log(this.uName+": executeLineRequest() request=", _request.params);
+ConsoleService.prototype.executeCommandRequest = function(_request, _response) {
+   console.log(this.uName+": executeCommandRequest() request=", _request.params);
 
-   if (!_request.params.hasOwnProperty("line")) {
+   if (!_request.params.hasOwnProperty("command")) {
       this.sendFail(_request, _response);
    }
    else {
-      var id = "oneshotconsole:"+Date.now();
+      var id = "oneshotconsolesession:"+Date.now();
       this.sessions[id] = new ConsoleSession(id, null, this);
-      var output = this.sessions[id].executeLine(_request.params.line);
+      var output = this.sessions[id].executeCommand(_request.params.command);
       _response.send(output);
       this.sessions[id].sessionClosed();
       delete this.sessions[id];
@@ -176,8 +176,8 @@ ConsoleSession.prototype.serveClient = function(_socket) {
       this.socket.emit('complete-output', { result: this.completeLine(_data.line) });
    });
 
-   this.socket.on('executeLine', (_data) => {
-      this.socket.emit('execute-output', { result: this.executeLine(_data.line) });
+   this.socket.on('executeCommand', (_data) => {
+      this.socket.emit('execute-output', { result: this.executeCommand(_data.command) });
    });
 
    this.socket.on('disconnect', (_data) => {
@@ -240,60 +240,35 @@ ConsoleSession.prototype.completeLine = function(_line) {
    return [ result.hits, _line];
 };
 
-ConsoleSession.prototype.executeLine = function(_line) {
-   var dotSplit = _line.split(".");
-   var result = this.owner.gangConsole.filterScope(dotSplit[0].split(":"), 0);
+ConsoleSession.prototype.executeCommand = function(_command) {
+   var result = this.owner.gangConsole.filterScope(_command.scope);
+   var outputOfEvaluation =   "Object not found!";
 
-   if (_line.indexOf(".") !== -1 && result.consoleObj) {
-      var str = _line.split(".").slice(1).join(".");
-      var methodName = str.split("(")[0];
-      var methodExists = result.consoleObj.filterMembers(methodName);
-      
-      if (!methodExists || methodExists.length == 0) {
+   if (_command.hasOwnProperty("method") && result.consoleObj) {
+      var matchingMethods = result.consoleObj.filterMembers(_command.method);
+
+      if (!matchingMethods || matchingMethods.length == 0) {
          return "Method not found!";
-      }
-
-      var methodArguments = _line.split("(").slice(1).join("(").trim();
-
-      for (var i = methodArguments.length-1; i >= 0; --i) {
-
-         if (methodArguments.charAt(i) == ')') {
-            break;
-         }
-      }
-
-      var arguments = [];
-
-      if (i !== 0) {
-         methodArguments = methodArguments.substring(0, i);
-         arguments = JSON.parse("["+methodArguments+"]");
-      }
-
-      if (!arguments) {
-         return "Unable to parse arguments!";
       }
 
       this.owner.setCurrentSession(this);
 
       try {
-         var outputOfEvaluation = result.consoleObj[methodName].apply(result.consoleObj, arguments);
+         outputOfEvaluation = result.consoleObj[_command.method].apply(result.consoleObj, _command.arguments);
          this.owner.setCurrentSession(null);
-         return outputOfEvaluation;
       }
       catch (_err) {
          this.owner.setCurrentSession(null);
-         return _err;
+         outputOfEvaulation  = _err;
       }
    }
    else if (result.consoleObj) {
       this.owner.setCurrentSession(this);
-      var output = result.consoleObj.cat();
+      outputOfEvaluation = result.consoleObj.cat();
       this.owner.setCurrentSession(null);
-      return output;
    }
-   else {
-      return "Object not found!";
-   }
+
+   return outputOfEvaluation;
 };
 
 ConsoleSession.prototype.writeOutput = function(_output) {

@@ -40,15 +40,47 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 
    if (_line !== "") {
-      var result = this.consoleSession.executeLine(_line);
+      var command = {};
+      var dotSplit = _line.split(".");
+      command.scope = dotSplit[0].split(":");
+
+      if (_line.indexOf(".") !== -1) {
+         var str = _line.split(".").slice(1).join(".");
+         command.method  = str.split("(")[0];
+         var methodArguments = str.split("(").slice(1).join("(").trim();
+         var i;
+
+         for (i = methodArguments.length-1; i >= 0; --i) {
+
+            if (methodArguments.charAt(i) == ')') {
+               break;
+            }
+         }
+         if (i !== 0) {
+            methodArguments = methodArguments.substring(0, i);
+            command.arguments = JSON.parse("["+methodArguments+"]");
+         }
+         else {
+            command.arguments = [];
+         }
+
+         if (!command.arguments) {
+            process.stdout.write("Unable to parse arguments!\n");
+            this.rl.prompt();
+            return;
+         }
+      }
+
+      var result = this.consoleSession.executeCommand(command);
       process.stdout.write(this.processOutput(result)+"\n");
    }
+
    this.rl.prompt();
 };
 
 LocalConsole.prototype.processOutput = function(_outputOfEvaluation) {
 
-   if (_outputOfEvaluation === undefined) {
+   if (_outputOfEvaluation !== undefined) {
 
       if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
          return util.inspect(_outputOfEvaluation);
