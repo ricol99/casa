@@ -17,7 +17,7 @@ function Console(_config) {
      completer: this.autoCompleteHandler
    });
 
-   this.setPrompt(this.currentScope + ' > ');
+   this.setPrompt(this.currentScope);
 
    this.prompt();
    this.rl.on('line', this.lineReaderHandler);
