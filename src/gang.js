@@ -50,13 +50,9 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
          this.config.certPath = _certPath;
          this.config.configPath = _configPath;
          this.uName = this.config.gang;
+         this.allObjects[this.uName] = this;
 
          this.loadSystemServices();
-
-         if (_console) {
-            var LocalConsole = require('./localconsole');
-            this.localConsole = new LocalConsole();
-         }
 
          this.gangDb = new Db(this.uName, _configPath);
 
@@ -81,14 +77,14 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
                               process.exit(1);
                            }
                            else {
-                              this.init();
+                              this.init(_console);
                            }
                         });
                      }
                   });
                }
                else {
-                  this.init();
+                  this.init(_console);
                }
             });
          });
@@ -174,13 +170,18 @@ Gang.prototype.attemptToFetchGangDbFromPeer = function(_callback) {
 
 };
 
-Gang.prototype.init = function() {
+Gang.prototype.init = function(_console) {
    
    // Merge Configs
    this.mergeConfigs();
 
    // Extract Casa
    this.extractCasa();
+
+   if (_console) {
+      var LocalConsole = require('./localconsole');
+      this.localConsole = new LocalConsole();
+   }
 
    // Extract Services
    this.extractServices(this.config.services);
@@ -219,7 +220,7 @@ Gang.prototype.init = function() {
 
 Gang.prototype.loadSystemServices = function(_dbCallback) {
    this.extractServices([ { uName: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { uName: "rampservice" }, { uName: "dbservice" }, { uName: "consoleservice" } ], true);
+                          { uName: "rampservice" }, { uName: "dbservice" }, { uName: "consoleapiservice" } ], true);
 };
 
 Gang.prototype.connectToPeers = function(_dbCallback) {
@@ -691,6 +692,10 @@ Gang.prototype.getDbs = function() {
    return [ this.uName, this.casa.uName ];
 };
 
+Gang.prototype.getDb = function() {
+   return this.gangDb;
+};
+
 Gang.mainInstance = function() {
    return _mainInstance;
 };
@@ -771,6 +776,7 @@ Gang.prototype.filterGlobalObjects = function(_filter) {
          hits.push(this.allObjects[obj].uName);
       }
    }
+
    return hits;
 };
 

@@ -1,192 +1,176 @@
-var Gang = require('./gang');
+var readline = require('readline');
 var util = require('util');
+var Gang = require('./gang');
 
-function Console(_config, _owner) {
-   this.config = _config;
-   this.type = "console";
-   this.uName = _config.uName.split(":")[0] + "console:" + _config.uName.split(":")[1];
-   this.myObjuName = _config.uName;
-   this.consoleObjects = {};
-   this.owner = _owner;
-   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.myObjuName : this.myObjuName
+function Console(_config) {
+   this.uName = "console:"+Date.now();
+   this.name = _config.name;
+   this.gangName = _config.gangName;
+   this.currentScope = "::" + this.name;
 
-   this.gang = Gang.mainInstance();
-   this.consoleService =  this.gang.findService("consoleservice");
+   this.autoCompleteHandler = Console.prototype.autoCompleteCb.bind(this);
+   this.lineReaderHandler = Console.prototype.lineReaderCb.bind(this);
+
+   this.rl = readline.createInterface({
+     input: process.stdin,
+     output: process.stdout,
+     completer: this.autoCompleteHandler,
+     prompt: this.currentScope + ' > '
+   });
+
+   this.prompt();
+   this.rl.on('line', this.lineReaderHandler);
+
+   this.rl.on('close', () => {
+     process.exit(0);
+   });
 }
 
-Console.prototype.coldStart = function() {
+Console.prototype.autoCompleteCb = function(_line, _callback) {
+   var line = _line.trim();
+
+   this.autoComplete({ scope: this.currentScope, line: line }, (_err, _result) => {
+
+      if  (!_err && _result && _result.length > 0) {
+
+         if (line[0] !== ':') {
+
+            for (var i = 0; i < _result[0].length; ++i) {
+               _result[0][i] = _result[0][i].replace(this.currentScope+":", "");
+               _result[0][i] = _result[0][i].replace(this.currentScope+".", "");
+            }
+         }
+      }
+      _callback(_err, _result);
+  });
 };
 
-Console.prototype.getCurrentSession = function() {
-   return this.consoleService.getCurrentSession();
-};
+Console.prototype.lineReaderCb = function(_line) {
 
-Console.prototype.getSessionVar = function() {
-   return this.consoleService.getCurrentSession().getSessionVar(_name, this.uName);
-};
+   if (_line === 'exit' || _line ==='quit') {
+      process.exit(0);
+   }
 
-Console.prototype.addSessionVar = function() {
-   return this.consoleService.getCurrentSession().addSessionVar(_name, _variable, this.uName);
-};
+   var line = _line.trim();
 
-Console.prototype.filterGlobalObjects = function(_filter) {
-   return this.gang.filterGlobalObjects(_filter);
-};
+   if (_line !== "") {
 
-Console.prototype.findGlobalObject = function(_uName) {
-   return this.gang.findObject(_uName);
-};
+      if (line.startsWith(":")) {
 
-Console.prototype.filterArray = function(_array, _filter) {
-
-   for (var i = 0; i < _array.length;) {
-
-      if (_array[i].startsWith(_filter)) {
-         ++i;
+         if (!line.startsWith("::")) {
+            line = "::" + this.name + ":" + line;
+         }
+      }
+      else if ((line.indexOf(".") === -1) && (line.indexOf(":") === -1)) {
+         line = this.currentScope + "." + line;
       }
       else {
-         _array.splice(i, 1);
+         line = this.currentScope + ":" + line;
       }
-   }
-};
 
-Console.prototype.getClassHierarchy = function(_obj) {
-   var list = [];
-   var proto = Object.getPrototypeOf(_obj);
+      if (line[line.length-1] === ':') {
+         var newLine = line.slice(0, line.length-1);
 
-   while (proto) {
-       list.push(proto.constructor.name.toLowerCase());
-       proto = Object.getPrototypeOf(proto);
-   }
-   return list;
-};
+         this.scopeExists(newLine, (_err, _result) => {
+        
 
-Console.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var mainProto = Object.getPrototypeOf(this);
-   var proto = mainProto;
+            if (!_err && _result) {
 
-   while (proto.constructor.name !== 'Console') {
-       proto = Object.getPrototypeOf(proto);
-   }
-
-   var members = [];
-   var excObj = {};
-
-   if (_exclusions) {
-
-      for (var i = 0; i < _exclusions.length; ++i) {
-         excObj[_exclusions[i]] = true;
+               if (line.startsWith(this.name)) {
+                  this.currentScope = "::" + newLine;
+               }
+               else {
+                  this.currentScope = newLine;
+               }
+               this.setPrompt(this.currentScope);
+            }
+            else {
+               process.stdout.write("Object not found!\n");
+            }
+            this.prompt();
+         });
+         return;
       }
-   }
 
-   for (var method in mainProto) {
+      var command = {};
+      var dotSplit = line.split(".");
+      command.scope = dotSplit[0];
 
-      if (!proto.hasOwnProperty(method) && !excObj.hasOwnProperty(method)) {
-         members.push(this.fullScopeName+"."+method);
-      }
-   }
+      if (line.indexOf(".") !== -1) {
+         var str = line.split(".").slice(1).join(".");
+         command.method  = str.split("(")[0];
+         var methodArguments = str.split("(").slice(1).join("(").trim();
+         var i;
 
-   this.filterArray(members, this.fullScopeName+"."+_filterArray[0]);
-   return members;
-};
+         for (i = methodArguments.length-1; i >= 0; --i) {
 
-Console.prototype.findOrCreateConsoleObject = function(_uName, _realObj) {
-   var segments = _uName.split(":");
-   var obj = null;
-   var realObj = _realObj;
-
-   if (segments.length < 2) {
-      return null;
-   }
-
-   if (!this.consoleObjects.hasOwnProperty(_uName)) {
-
-      if (!realObj) {
-         realObj = this.findGlobalObject(_uName);
-
-         if (!realObj) {
-            return null;
+            if (methodArguments.charAt(i) == ')') {
+               break;
+            }
          }
-      }
-      let classList = this.getClassHierarchy(realObj);
+         if (i !== 0) {
+            methodArguments = methodArguments.substring(0, i);
+            command.arguments = JSON.parse("["+methodArguments+"]");
+         }
+         else {
+            command.arguments = [];
+         }
 
-      for (var i = 0; i < classList.length; ++i) {
-         var ConsoleObj = this.gang.cleverRequire(segments[0]+"console:"+segments[1], "consoles", classList[i]+"console");
-
-         if (ConsoleObj) {
-            break;
+         if (!command.arguments) {
+            process.stdout.write("Unable to parse arguments!\n");
+            this.prompt();
+            return;
          }
       }
 
-      if (!ConsoleObj) {
-         return null;
-      }
-
-      obj = new ConsoleObj({ uName: _uName }, this);
-      this.consoleObjects[_uName] = obj;
+      this.executeCommand(command, (_err, _result) => {
+         process.stdout.write(this.processOutput(_err ? _err : _result)+"\n");
+         this.prompt();
+      });
    }
    else {
-      obj = this.consoleObjects[_uName];
+      this.prompt();
    }
+};
 
-   return obj;
-}
+// Override thesee three functions
+Console.prototype.autoComplete = function(_line, _callback) {
+};
 
-// _object - object to search, global search performed if not supplied
-// _prevResult  - result object to merge with new results - optional
-Console.prototype.filterScope = function(_filterArray, _object, _prevResult)  {
-   var prevResultCount =  (_prevResult) ? _prevResult.hits.length : 0;
-   var result =  (_prevResult) ? _prevResult : { hits: [], consoleObj: null };
-   var matchString = (_filterArray.length === 1) ? _filterArray[0] : _filterArray[0]+":"+_filterArray[1];
-   var perfectMatch = null;
+Console.prototype.executeCommand = function(_command, _callback) {
+};
 
-   if (_object) {
+Console.prototype.scopeExists = function(_scope, _callback) {
+   _callback(null, true);
+};
 
-       for (var obj in _object) {
+Console.prototype.processOutput = function(_outputOfEvaluation) {
 
-          if (obj.startsWith(matchString)) {
-             result.hits.push(this.fullScopeName+":"+obj);
+   if (_outputOfEvaluation !== undefined) {
 
-             if (obj === _filterArray[0]) {
-                perfectMatch = obj;
-             }
-          }
-       }
+      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
+         return util.inspect(_outputOfEvaluation);
+      }
+      else {
+         return _outputOfEvaluation.toString();
+      }
    }
    else {
-      result.hits = this.filterGlobalObjects(matchString);
+      return _outputOfEvaluation;
    }
-
-   if ((result.hits.length === 1) && (prevResultCount === 0)) {
-      var splitRes = result.hits[0].split(":");
-      result.consoleObj = this.findOrCreateConsoleObject(splitRes[splitRes.length-2]+":"+splitRes[splitRes.length-1]);
-
-      if (result.consoleObj && _filterArray.length > 2) {
-         _filterArray.splice(0, 2);
-         result = result.consoleObj.filterScope(_filterArray);
-      }
-   }
-   else if (perfectMatch) {
-      var splitRes = result.hits[0].split(":");
-      result.consoleObj = this.findOrCreateConsoleObject(this.myObjuName+":"+perfectMatch);
-
-      if (result.consoleObj && _filterArray.length > 2) {
-         _filterArray.splice(0, 2);
-         result = result.consoleObj.filterScope(_filterArray);
-      }
-   }
-
-   return result;
 };
 
-Console.prototype.myObj = function() {
-   return this.gang.findObject(this.myObjuName);
+Console.prototype.writeOutput = function(_line) {
+   process.stdout.write("\n" + this.processOutput(_line) + "\ncasa > ");
 };
 
-Console.prototype.cat = function() {
+Console.prototype.prompt = function() {
+   this.rl.prompt();
 };
 
-Console.prototype.sessionClosed = function(_consoleObjVars, _sessionId) {
+Console.prototype.setPrompt = function(_prompt) {
+   this.rl.setPrompt(_prompt + " > ");
 };
 
 module.exports = exports = Console;
+ 

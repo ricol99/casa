@@ -1,55 +1,30 @@
 var util = require('util');
-var Console = require('../console');
+var ConsoleApi = require('../consoleapi');
 var SourceListener = require('../sourcelistener');
 
-function SourceBaseConsole(_config, _owner) {
-   Console.call(this, _config, _owner);
+function SourceBaseConsoleApi(_config, _owner) {
+   ConsoleApi.call(this, _config, _owner);
    this.sourceListeners = {};
 }
 
-util.inherits(SourceBaseConsole, Console);
+util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
-SourceBaseConsole.prototype.filterScope = function(_filterArray) {
-   var result = { hits: [], consoleObj: null };
-   var perfectMatch = null;
-
-   if (_filterArray.length === 1) {
-
-      for (var prop in this.myObj().props) {
-
-         if (prop.startsWith(_filterArray[0])) {
-            result.hits.push(this.fullScopeName+":"+prop);
-
-            if (prop === _filterArray[0]) {
-               perfectMatch = prop;
-            }
-         }
-      }
-
-      if (result.hits.length === 1) {
-         var splitRes = result.hits[0].split(":");
-         result.consoleObj = this.findOrCreateConsoleObject(this.myObjuName+":"+splitRes[splitRes.length-1], this.myObj().props[splitRes[splitRes.length-1]]);
-      }
-      else if (perfectMatch) {
-         result.consoleObj = this.findOrCreateConsoleObject(this.myObjuName+":"+perfectMatch, this.myObj().props[perfectMatch]);
-      }
-   }
-
-   return result;
+SourceBaseConsoleApi.prototype.filterScope = function(_scope) {
+   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props);
 };
 
-SourceBaseConsole.prototype.filterMembers = function(_filterArray, _exclusions) {
+SourceBaseConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
    var myExclusions = [ "sourceIsValid", "sourceIsInvalid", "receivedEventFromSource", "removeListener", "getWatchList", "findOrCreateSourceListener" ]
 
    if (_exclusions) {
-      return Console.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
+      return ConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
    }
    else {
-      return Console.prototype.filterMembers.call(this, _filterArray, myExclusions);
+      return ConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions);
    }
 };
 
-SourceBaseConsole.prototype.cat = function() {
+SourceBaseConsoleApi.prototype.cat = function() {
    var output = [];
 
    for (var prop in this.myObj().props) {
@@ -62,15 +37,15 @@ SourceBaseConsole.prototype.cat = function() {
    return output;
 };
 
-SourceBaseConsole.prototype.prop = function(_name) {
+SourceBaseConsoleApi.prototype.prop = function(_name) {
    return this.myObj().props[_name].getValue();
 };
 
-SourceBaseConsole.prototype.props = function() {
+SourceBaseConsoleApi.prototype.props = function() {
    return this.myObj().props;
 };
 
-SourceBaseConsole.prototype.findOrCreateSourceListener = function(_name) {
+SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {
       this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ uName: this.myObjuName, property: _name }, this) };
@@ -83,7 +58,7 @@ SourceBaseConsole.prototype.findOrCreateSourceListener = function(_name) {
    return this.sourceListeners[_name].sourceListener;
 };
 
-SourceBaseConsole.prototype.removeListener = function(_name) {
+SourceBaseConsoleApi.prototype.removeListener = function(_name) {
 
    if (this.sourceListeners.hasOwnProperty(_name)) {
       this.sourceListeners[_name].refCount = this.sourceListeners[_name].refCount - 1;
@@ -96,18 +71,18 @@ SourceBaseConsole.prototype.removeListener = function(_name) {
    }
 };
 
-SourceBaseConsole.prototype.getWatchList = function() {
-   var watchList = this.consoleService.getSessionVar("watchList", this);
+SourceBaseConsoleApi.prototype.getWatchList = function() {
+   var watchList = this.consoleApiService.getSessionVar("watchList", this);
 
    if (!watchList) {
       watchList = {};
-      this.consoleService.addSessionVar("watchList", watchList, this);
+      this.consoleApiService.addSessionVar("watchList", watchList, this);
    }
 
    return watchList;
 };
 
-SourceBaseConsole.prototype.watching = function() {
+SourceBaseConsoleApi.prototype.watching = function() {
    var output = [];
    var watchList = this.getWatchList();
 
@@ -121,7 +96,7 @@ SourceBaseConsole.prototype.watching = function() {
    return output;
 };
 
-SourceBaseConsole.prototype.watch = function(_name) {
+SourceBaseConsoleApi.prototype.watch = function(_name) {
    var watchList = this.getWatchList();
 
    if (watchList.hasOwnProperty(_name)) {
@@ -136,7 +111,7 @@ SourceBaseConsole.prototype.watch = function(_name) {
    }
 };
 
-SourceBaseConsole.prototype.unwatch = function(_name) {
+SourceBaseConsoleApi.prototype.unwatch = function(_name) {
    var watchList = this.getWatchList();
 
    if (!watchList.hasOwnProperty(_name)) {
@@ -149,13 +124,13 @@ SourceBaseConsole.prototype.unwatch = function(_name) {
    }
 };
 
-SourceBaseConsole.prototype.listeners = function(_property) {
+SourceBaseConsoleApi.prototype.listeners = function(_property) {
    var listeners = this.gang.casa.findListeners(this.myObjuName);
    var listenerUnames = [];
 
    for (var i=0; i < listeners.length; ++i) {
 
-      if ((listeners[i].owner.type !== "console") && ((_property == undefined) || (_property === listeners[i].eventName))) {
+      if ((listeners[i].owner.type !== "consoleapi") && ((_property == undefined) || (_property === listeners[i].eventName))) {
          listenerUnames.push(listeners[i].owner.uName);
       }
    }
@@ -163,8 +138,8 @@ SourceBaseConsole.prototype.listeners = function(_property) {
    return listenerUnames;
 };
 
-SourceBaseConsole.prototype.sessionClosed = function(_consoleObjVars, _sessionId) {
-   var watchList = _consoleObjVars.watchList;
+SourceBaseConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _sessionId) {
+   var watchList = _consoleApiObjVars.watchList;
 
    if (watchList) {
 
@@ -174,14 +149,14 @@ SourceBaseConsole.prototype.sessionClosed = function(_consoleObjVars, _sessionId
    }
 };
 
-SourceBaseConsole.prototype.sourceIsValid = function(_sourceEventName, _sourceName, _eventName) {
+SourceBaseConsoleApi.prototype.sourceIsValid = function(_sourceEventName, _sourceName, _eventName) {
 };
 
-SourceBaseConsole.prototype.sourceIsInvalid = function(_data) {
+SourceBaseConsoleApi.prototype.sourceIsInvalid = function(_data) {
 };
 
-SourceBaseConsole.prototype.receivedEventFromSource = function(_data) {
-   var allSessionVars = this.consoleService.getAllSessionsForConsoleObject(this);
+SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
+   var allSessionVars = this.consoleApiService.getAllSessionsForConsoleApiObject(this);
 
    for (var session in allSessionVars) {
 
@@ -190,12 +165,12 @@ SourceBaseConsole.prototype.receivedEventFromSource = function(_data) {
           if (allSessionVars[session].hasOwnProperty("watchList")) {
 
              if (allSessionVars[session].watchList.hasOwnProperty(_data.name)) {
-                this.consoleService.writeOutput(session, "Watched property " + this.myObjuName +":"+_data.name+" changed to "+_data.value);
+                this.consoleApiService.writeOutput(session, "Watched property " + this.myObjuName +":"+_data.name+" changed to "+_data.value);
              }
           }
        }
    }
 };
 
-module.exports = exports = SourceBaseConsole;
+module.exports = exports = SourceBaseConsoleApi;
  

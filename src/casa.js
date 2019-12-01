@@ -24,9 +24,10 @@ function Casa(_config) {
 
    this.id = _config.id;
 
-   this.sources = [];
+   this.sources = {};
    this.sourceListeners = {};
-   this.workers = [];
+   this.workers = {};
+
    this.uber = false;
    this.valid = true;
 
@@ -82,11 +83,6 @@ Casa.prototype.createServer = function() {
 
       res.json(allProps);
    });
-
-   //io.of('/consolesocketio')
-     //.on('connection', (_socket) => {
-     //process.exit(1);
-   //});
 
    io.of('/peercasa')
      .on('connection', (_socket) => {

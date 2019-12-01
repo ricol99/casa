@@ -2,6 +2,7 @@ var crypto = require('crypto');
 var readline = require('readline');
 var io = require('socket.io-client');
 var util = require('./util');
+var Console = require('./console');
 
 function RemoteConsole(_params) {
    this.secureMode = _params.secureMode;
@@ -27,27 +28,15 @@ function RemoteConsole(_params) {
       this.socketOptions = { transports: ['websocket'], json: true };
    }
 
-   this.autoCompleteHandler = RemoteConsole.prototype.autoCompleteCb.bind(this);
-   this.lineReaderHandler = RemoteConsole.prototype.lineReaderCb.bind(this);
-
-   this.rl = readline.createInterface({
-     input: process.stdin,
-     output: process.stdout,
-     completer: this.autoCompleteHandler,
-     prompt: this.name+' > '
-   });
+   Console.call(this, { name: this.name });
 
    this.establishSocket();
-
-   this.rl.on('line', this.lineReaderHandler);
-
-   this.rl.on('close', () => {
-     process.exit(0);
-   });
 }
 
+util.inherits(RemoteConsole, Console);
+
 RemoteConsole.prototype.establishSocket = function() {
-   this.socket = io(this.http + '://' + this.host + ':' + this.port + '/console/io', this.socketOptions);
+   this.socket = io(this.http + '://' + this.host + ':' + this.port + '/consoleapi/io', this.socketOptions);
 
    this.socket.on('connect', (_data) => {
        this.rl.prompt();
@@ -62,6 +51,13 @@ RemoteConsole.prototype.establishSocket = function() {
       process.stdout.write("\n" + this.processOutput(_data.result) + "\n" + this.name + " > ");
    });
 
+   this.socket.on('scope-exists-output', (_data) => {
+
+      if (this.scopeExistsCallback) {
+         this.scopeExistsCallback(null, _data.result);
+      }
+   });
+
    this.socket.on('complete-output', (_data) => {
 
       if (this.completeCallback) {
@@ -70,8 +66,9 @@ RemoteConsole.prototype.establishSocket = function() {
    });
 
    this.socket.on('execute-output', (_data) => {
-      process.stdout.write(this.processOutput(_data.result) + "\n");
-      this.rl.prompt();
+      if (this.executeCallback) {
+         this.executeCallback(null, _data.result);
+      }
    });
 
    this.socket.on('disconnect', (_data) => {
@@ -85,72 +82,21 @@ RemoteConsole.prototype.establishSocket = function() {
    });
 };
 
-RemoteConsole.prototype.autoCompleteCb = function(_line, _callback) {
+RemoteConsole.prototype.scopeExists = function(_scope, _callback) {
+   this.scopeExistsCallback = _callback;
+   this.socket.emit('scopeExists', { scope: _scope });
+};
+
+RemoteConsole.prototype.autoComplete = function(_line, _callback) {
    this.completeCallback = _callback;
    this.completeLine = _line;
 
-   this.socket.emit('completeLine', { line: _line });
+   this.socket.emit('completeLine', _line);
 };
 
-RemoteConsole.prototype.lineReaderCb = function(_line) {
-
-   if (_line === 'exit' || _line ==='quit') {
-      process.exit(0);
-   }
-
-   if (_line !== "") {
-      var command = {};
-      var dotSplit = _line.split(".");
-      command.scope = dotSplit[0].split(":");
-
-      if (_line.indexOf(".") !== -1) {
-         var str = _line.split(".").slice(1).join(".");
-         command.method  = str.split("(")[0];
-         var methodArguments = str.split("(").slice(1).join("(").trim();
-         var i;
-
-         for (i = methodArguments.length-1; i >= 0; --i) {
-
-            if (methodArguments.charAt(i) == ')') {
-               break;
-            }
-         }
-         if (i !== 0) {
-            methodArguments = methodArguments.substring(0, i);
-            command.arguments = JSON.parse("["+methodArguments+"]");
-         }
-         else {
-            command.arguments = [];
-         }
-
-         if (!command.arguments) {
-            process.stdout.write("Unable to parse arguments!\n");
-            this.rl.prompt();
-            return;
-         }
-      }
-
-      this.socket.emit('executeCommand', { command: command });
-   }
-   else {
-      this.rl.prompt();
-   }
-};
-
-RemoteConsole.prototype.processOutput = function(_outputOfEvaluation) {
-
-   if (_outputOfEvaluation !== undefined) {
-
-      if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
-         return util.inspect(_outputOfEvaluation);
-      }
-      else {
-         return _outputOfEvaluation.toString();
-      }
-   }
-   else {
-      return _outputOfEvaluation;
-   }
+RemoteConsole.prototype.executeCommand = function(_command, _callback) {
+   this.executeCallback = _callback;
+   this.socket.emit('executeCommand', _command);
 };
 
 module.exports = exports = RemoteConsole;
