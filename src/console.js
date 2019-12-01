@@ -36,8 +36,20 @@ Console.prototype.autoCompleteCb = function(_line, _callback) {
          if (line[0] !== ':') {
 
             for (var i = 0; i < _result[0].length; ++i) {
-               _result[0][i] = _result[0][i].replace(this.currentScope+":", "");
-               _result[0][i] = _result[0][i].replace(this.currentScope+".", "");
+
+               if (this.currentScope === "::") {
+                  _result[0][i] = _result[0][i].replace("::", "");
+               }
+               else {
+                  _result[0][i] = _result[0][i].replace(this.currentScope+":", "");
+                  _result[0][i] = _result[0][i].replace(this.currentScope+".", "");
+               }
+            }
+         }
+         else if (line[1] !== ':') {
+
+            for (var i = 0; i < _result[0].length; ++i) {
+               _result[0][i] = _result[0][i].replace("::" + this.name, "");
             }
          }
       }
@@ -53,23 +65,26 @@ Console.prototype.lineReaderCb = function(_line) {
 
    var line = _line.trim();
 
-   if (_line !== "") {
+   if (line !== "") {
 
       if (line.startsWith(":")) {
 
          if (!line.startsWith("::")) {
-            line = "::" + this.name + ":" + line;
+            line = "::" + this.name + line;
          }
       }
       else if ((line.indexOf(".") === -1) && (line.indexOf(":") === -1)) {
          line = this.currentScope + "." + line;
+      }
+      else if (this.currentScope === "::") {
+         line = this.currentScope + line;
       }
       else {
          line = this.currentScope + ":" + line;
       }
 
       if (line[line.length-1] === ':') {
-         var newLine = line.slice(0, line.length-1);
+         var newLine = (line === "::") ? line : line.slice(0, line.length-1);
 
          this.scopeExists(newLine, (_err, _result) => {
         

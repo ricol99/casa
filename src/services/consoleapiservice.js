@@ -284,30 +284,53 @@ ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _requ
 };
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
-   _callback(null, this.owner.gangConsoleApi.filterScope(_params.scope).consoleApiObj != null);
+   if (_params.scope.length === 1) {
+      _callback(null, _params.scope === ":");
+   }
+   else if (_params.scope.length === 2) {
+      _callback(null, _params.scope === "::");
+   }
+   else {
+      _callback(null, this.owner.gangConsoleApi.filterScope(_params.scope).consoleApiObj != null);
+   }
 };
 
 ConsoleApiSession.prototype.completeLine = function(_params, _callback) {
-   var dotSplit = _params.line.split(".");
+   var result = { hits: [] };
 
    if (_params.hasOwnProperty('scope') && _params.line[0] !== ':') {
-      var scope = _params.scope + ":" + dotSplit[0];
-      var result = this.owner.gangConsoleApi.filterScope(scope);
+      var dotSplit = _params.line.split(".");
+      var scope;
+
+      if (_params.scope === "::") {
+         scope = _params.scope + dotSplit[0];
+      }
+      else {
+         scope = _params.scope + ":" + dotSplit[0];
+      }
+
+      result = this.owner.gangConsoleApi.filterScope(scope);
 
       if (_params.line.indexOf(".") !== -1 && result.consoleApiObj) {
          result.hits = result.consoleApiObj.filterMembers(dotSplit[1]);
       }
 
-      var result2 = this.owner.gangConsoleApi.filterScope(_params.scope);
+      var result2 = { hits: [] };
 
-      if (result2.consoleApiObj) {
-         result2.hits = result2.consoleApiObj.filterMembers(_params.line);
+      if (_params.scope !== "::") {
+         var result2 = this.owner.gangConsoleApi.filterScope(_params.scope);
+
+         if (result2.consoleApiObj) {
+            result2.hits = result2.consoleApiObj.filterMembers(_params.line);
+         }
       }
 
       result.hits = result.hits.concat(result2.hits);
    }
-   else {
-      var result = this.owner.gangConsoleApi.filterScope(dotSplit[0]);
+   else if (_params.line[0] === ':') {
+      var line = (_params.line[1] === ':') ? _params.line : "::" + this.owner.gang.casa.uName + _params.line;
+      var dotSplit = line.split(".");
+      result = this.owner.gangConsoleApi.filterScope(dotSplit[0]);
 
       if (_params.line.indexOf(".") !== -1 && result.consoleApiObj) {
          result.hits = result.consoleApiObj.filterMembers(dotSplit[1]);
