@@ -14,9 +14,10 @@ function Console(_config) {
    this.rl = readline.createInterface({
      input: process.stdin,
      output: process.stdout,
-     completer: this.autoCompleteHandler,
-     prompt: this.currentScope + ' > '
+     completer: this.autoCompleteHandler
    });
+
+   this.setPrompt(this.currentScope + ' > ');
 
    this.prompt();
    this.rl.on('line', this.lineReaderHandler);
@@ -184,7 +185,8 @@ Console.prototype.prompt = function() {
 };
 
 Console.prototype.setPrompt = function(_prompt) {
-   this.rl.setPrompt(_prompt + " > ");
+   var colour = _prompt.startsWith("::"+this.name) ? "\x1b[32m" : "\x1b[31m";
+   this.rl.setPrompt(colour + _prompt + " > \x1b[0m");
 };
 
 module.exports = exports = Console;

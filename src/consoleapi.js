@@ -158,7 +158,7 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult)  {
    if ((result.hits.length === 1) && (prevResultCount === 0)) {
       var splitRes = result.hits[0].split(":");
 
-      if (filterArray.length === 1) {
+      if ((filterArray.length === 1) && _collection) {
          result.consoleApiObj = this.findOrCreateConsoleApiObject(this.myObjuName+":"+splitRes[splitRes.length-1], _collection[splitRes[splitRes.length-1]]);
       }
       else {
