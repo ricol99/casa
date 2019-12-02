@@ -219,8 +219,8 @@ Gang.prototype.init = function(_console) {
 }
 
 Gang.prototype.loadSystemServices = function(_dbCallback) {
-   this.extractServices([ { uName: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { uName: "rampservice" }, { uName: "dbservice" }, { uName: "consoleapiservice" } ], true);
+   this.extractServices([ { uName: "service:schedule",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                          { uName: "service:ramp" }, { uName: "service:db" }, { uName: "service:consoleapi" } ], true);
 };
 
 Gang.prototype.connectToPeers = function(_dbCallback) {
@@ -286,7 +286,7 @@ Gang.prototype.extractServices = function(_config, _noColdStart) {
 
       for (var index = 0; index < _config.length; ++index) {
          console.log('Loading service '+ _config[index].uName);
-         var Service = require('./services/'+_config[index].uName);
+         var Service = require('./services/'+_config[index].uName.split(":")[1]+"service");
          this.services[_config[index].uName] = new Service(_config[index]);
       }
 
@@ -701,7 +701,7 @@ Gang.mainInstance = function() {
 };
 
 Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
-   var dbService = this.findService("dbservice");
+   var dbService = this.findService("service:db");
 
    dbService.updateGangDbFromPeer(_parentCasa.address.hostname, _parentCasa.address.port, (_err, _res) => {
 

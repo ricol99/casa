@@ -6,7 +6,7 @@ function Alarm(_config) {
    Thing.call(this, _config);
    this.thingType = "alarm";
 
-   this.scheduleService =  this.gang.findService("scheduleservice");
+   this.scheduleService =  this.gang.findService("service:schedule");
 
    if (!this.scheduleService) {
       console.error(this.uName + ": ***** Schedule service not found! *************");

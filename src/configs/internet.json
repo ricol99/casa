@@ -7,7 +7,7 @@
    },
    "services": [
       {
-         "uName": "pushoverservice",
+         "uName": "service:pushover",
          "displayName": "Pushover Messaging Service",
          "secureConfig": true
       }

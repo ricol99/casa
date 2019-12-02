@@ -121,8 +121,4 @@ WebService.prototype.addIoRoute = function(_route, _callback) {
    return (this.hangingOffMainServer) ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback);
 };
 
-WebService.setGang = function(_gang) {
-   Service.setGang(_gang);
-};
-
 module.exports = exports = WebService;

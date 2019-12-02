@@ -12,7 +12,7 @@ function GPIOProperty(_config, _owner) {
    this.ready = false;
    this.direction = (_config.hasOwnProperty("direction")) ? _config.direction : ((this.writable) ? 'out' : 'in');
 
-   this.gpioService =  this.owner.gang.findService("gpioservice");
+   this.gpioService =  this.owner.gang.findService("service:gpio");
 
    if (!this.gpioService) {
       console.error(this.uName + ": ***** GpioService service not found! *************");

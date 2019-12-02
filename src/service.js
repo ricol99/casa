@@ -1,21 +1,17 @@
-var Gang = require('./gang');
-
-var _gangInstance = null;
+var util = require('./util');
+var SourceBase = require('./sourcebase');
 
 function Service(_config) {
+   SourceBase.call(this);
    this.config = _config;
    this.uName = _config.uName;
    this.displayName = _config.displayName;
-
-   this.gang = (_gangInstance) ? _gangInstance : Gang.mainInstance();
    this.casa = this.gang.casa;
 }
 
+util.inherits(Service, SourceBase);
+
 Service.prototype.coldStart = function() {
 };
-
-Service.setGang = function(_gang) {
-   _gangInstance = _gang;
-}
 
 module.exports = exports = Service;

@@ -45,7 +45,7 @@ SonosPlayer.prototype.coldStart = function() {
       this.sonos = this.devices[0].sonos;
    }
    else {
-      this.sonosService = this.gang.findService("sonosservice");
+      this.sonosService = this.gang.findService("service:sonos");
 
       if (!this.sonosService) {
          console.error(this.uName + ": ***** Sonos service not found! *************");

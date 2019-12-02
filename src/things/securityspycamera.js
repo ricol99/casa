@@ -12,7 +12,7 @@ function SecuritySpyCamera(_config) {
    this.ensurePropertyExists('motion-capture', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('actions', 'property', { initialValue: false }, _config);
 
-   this.securitySpyService =  this.gang.findService("securityspyservice");
+   this.securitySpyService =  this.gang.findService("service:securityspy");
 
    if (!this.securitySpyService) {
       console.error(this.uName + ": ***** Security Spy service not found! *************");

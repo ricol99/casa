@@ -11,7 +11,7 @@ function ConsoleApi(_config, _owner) {
    this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.myObjuName : this.myObjuName
 
    this.gang = Gang.mainInstance();
-   this.consoleApiService =  this.gang.findService("consoleapiservice");
+   this.consoleApiService =  this.gang.findService("service:consoleapi");
    this.db = this.gang.getDb();
 }
 

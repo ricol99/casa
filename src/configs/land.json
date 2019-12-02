@@ -7,7 +7,7 @@
    },
    "services": [
       {
-         "uName": "homekitservice",
+         "uName": "service:homekit",
          "displayName": "Homekit Service Upstairs",
          "pincode": "111-11-111",
          "username": "CC:22:3D:E4:CF:EE",
@@ -16,15 +16,15 @@
          "serialNumber": "1234567890"
       },
       {
-         "uName": "gpioservice",
+         "uName": "service:gpio",
          "displayName": "GPIO Service"
       },
       {
-         "uName": "sonosservice",
+         "uName": "service:sonos",
          "displayName": "Sonos Discovery Service"
       },
       {
-         "uName": "webservice",
+         "uName": "service:web",
          "displayName": "Web Server Service",
          "port": 80,
          "mediaPath": "/web/media",
@@ -34,19 +34,19 @@
          "caCert": ""
       },
       {
-         "uName": "hueservice",
+         "uName": "service:hue",
          "displayName": "Hue Link Services",
          "secureConfig": true
       },
       {
-         "uName": "securityspyservice",
+         "uName": "service:securityspy",
          "hostname": "collin.viewcam.me",
          "port": 8001,
          "secure": true,
          "secureConfig": true
       },
       {
-         "uName": "pushoverservice",
+         "uName": "service:pushover",
          "displayName": "Pushover Messaging Service",
          "secureConfig": true
       }

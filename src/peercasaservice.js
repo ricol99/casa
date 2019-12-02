@@ -24,7 +24,7 @@ function PeerCasaService(_config) {
    this.inFetchDbMode = _config.fetchDbMode;
    this.casasBeingEstablished = {};
 
-   this.dbService =  this.gang.findService("dbservice");
+   this.dbService =  this.gang.findService("service:db");
 
    if (!process.env.INTERNETCASA) {
       try {

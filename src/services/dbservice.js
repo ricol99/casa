@@ -244,8 +244,4 @@ DbService.prototype.getAndWritePeerDb = function(_dbName, _address, _port, _outp
    });
 };
 
-DbService.setGang = function(_gang) {
-   WebService.setGang(_gang);
-}
-
 module.exports = exports = DbService;

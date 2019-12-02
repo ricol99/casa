@@ -6,7 +6,7 @@ function LocalConsole() {
    this.gang = Gang.mainInstance();
    this.uName = "localconsole:"+Date.now();
 
-   this.consoleApiService =  this.gang.findService("consoleapiservice");
+   this.consoleApiService =  this.gang.findService("service:consoleapi");
    this.gangApi = this.consoleApiService.getGangConsoleApi();
 
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);

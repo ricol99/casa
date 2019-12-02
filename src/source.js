@@ -54,7 +54,7 @@ function Source(_config) {
 util.inherits(Source, SourceBase);
 
 Source.prototype.getScheduleService = function() {
-  var scheduleService =  this.gang.findService("scheduleservice");
+  var scheduleService =  this.gang.findService("service:schedule");
 
   if (!scheduleService) {
      console.error(this.uName + ": ***** Schedule service not found! *************");
@@ -83,7 +83,7 @@ Source.prototype.scheduledEventTriggered = function(_event) {
 };
 
 Source.prototype.getRampService = function() {
-  var rampService =  this.gang.findService("rampservice");
+  var rampService =  this.gang.findService("service:ramp");
 
   if (!rampService) {
      console.error(this.uName + ": ***** Ramp service not found! *************");

@@ -15,7 +15,7 @@ function HueLightGroup(_config) {
 
    this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
-   this.hueService =  this.gang.findService("hueservice");
+   this.hueService =  this.gang.findService("service:hue");
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");

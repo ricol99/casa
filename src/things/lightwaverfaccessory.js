@@ -34,7 +34,7 @@ function LightwaveRfAccessory(_config) {
 
    this.displayName = _config.displayName;
 
-   this.lightwaveRfService =  this.gang.findService("lightwaverfservice");
+   this.lightwaveRfService =  this.gang.findService("service:lightwaverf");
 
    if (!this.lightwaveRfService) {
       console.error(this.uName + ": ***** LightwaveRf service not found! *************");

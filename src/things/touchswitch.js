@@ -22,7 +22,7 @@ function TouchSwitch(_config) {
       this.holding = false;
    }
 
-   this.gpioService =  this.gang.findService("gpioservice");
+   this.gpioService =  this.gang.findService("service:gpio");
 
    if (!this.gpioService) {
       console.error(this.uName + ": ***** GpioService service not found! *************");

@@ -513,7 +513,7 @@ function State(_config, _owner) {
    if (this.schedules) {
 
       if (!this.scheduleService) {
-         this.scheduleService =  this.owner.gang.findService("scheduleservice");
+         this.scheduleService =  this.owner.gang.findService("service:schedule");
       }
 
       if (!this.scheduleService) {
