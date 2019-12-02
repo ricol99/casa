@@ -1,15 +1,15 @@
 var util = require('./util');
-var SourceBase = require('./sourcebase');
+var Source = require('./source');
 
 function Service(_config) {
-   SourceBase.call(this);
-   this.config = _config;
-   this.uName = _config.uName;
+   Source.call(this, _config);
+   //this.config = _config;
+   //this.uName = _config.uName;
    this.displayName = _config.displayName;
-   this.casa = this.gang.casa;
+   //this.casa = this.gang.casa;
 }
 
-util.inherits(Service, SourceBase);
+util.inherits(Service, Source);
 
 Service.prototype.coldStart = function() {
 };

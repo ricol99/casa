@@ -20,6 +20,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    this.parentCasa = null;
    this.remoteCasas = [];
    this.services = {};
+   this.systemServices = {};
 
    this.casaArea = null;
    this.parentCasaArea = null;
@@ -178,13 +179,15 @@ Gang.prototype.init = function(_console) {
    // Extract Casa
    this.extractCasa();
 
+   // Extract Services
+   this.extractServices(this.config.services);
+
+   this.addSystemServicesToCasa();
+
    if (_console) {
       var LocalConsole = require('./localconsole');
       this.localConsole = new LocalConsole();
    }
-
-   // Extract Services
-   this.extractServices(this.config.services);
 
    // Extract Users
    this.extractUsers();
@@ -219,8 +222,19 @@ Gang.prototype.init = function(_console) {
 }
 
 Gang.prototype.loadSystemServices = function(_dbCallback) {
-   this.extractServices([ { uName: "service:schedule",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { uName: "service:ramp" }, { uName: "service:db" }, { uName: "service:consoleapi" } ], true);
+   var casaShortName = this.casaName.split(":")[1];
+   this.extractServices([ { uName: "scheduleservice:"+casaShortName,  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                          { uName: "rampservice:"+casaShortName }, { uName: "dbservice:"+casaShortName }, { uName: "consoleapiservice:"+casaShortName } ], true, this.systemServices);
+};
+
+Gang.prototype.addSystemServicesToCasa = function() {
+
+   for (service in this.systemServices) {
+
+      if (this.systemServices.hasOwnProperty(service)) {
+         this.casa.addService(this.systemServices[service]);
+      }
+   }
 };
 
 Gang.prototype.connectToPeers = function(_dbCallback) {
@@ -279,15 +293,22 @@ Gang.prototype.extractUsers = function() {
    }
 };
 
-Gang.prototype.extractServices = function(_config, _noColdStart) {
+Gang.prototype.extractServices = function(_config, _noColdStart, _serviceOwner) {
 
    if (_config) {
       console.log('Extracting services...');
 
       for (var index = 0; index < _config.length; ++index) {
          console.log('Loading service '+ _config[index].uName);
-         var Service = require('./services/'+_config[index].uName.split(":")[1]+"service");
+         var Service = this.cleverRequire(_config[index].uName, 'services', _config.type);
          this.services[_config[index].uName] = new Service(_config[index]);
+
+         if (_serviceOwner) {
+            _serviceOwner[_config[index].uName] = this.services[_config[index].uName];
+         }
+         else {
+            this.casa.addService(this.services[_config[index].uName]);
+         }
       }
 
       if (!_noColdStart) {
@@ -701,7 +722,7 @@ Gang.mainInstance = function() {
 };
 
 Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
-   var dbService = this.findService("service:db");
+   var dbService = this.casa.findService("dbservice");
 
    dbService.updateGangDbFromPeer(_parentCasa.address.hostname, _parentCasa.address.port, (_err, _res) => {
 

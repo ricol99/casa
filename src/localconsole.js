@@ -4,14 +4,15 @@ var Console = require('./console');
 
 function LocalConsole() {
    this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
    this.uName = "localconsole:"+Date.now();
 
-   this.consoleApiService =  this.gang.findService("service:consoleapi");
+   this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.gangApi = this.consoleApiService.getGangConsoleApi();
 
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
 
-   Console.call(this, { name: this.gang.casa.uName });
+   Console.call(this, { name: this.casa.uName });
 }
 
 util.inherits(LocalConsole, Console);

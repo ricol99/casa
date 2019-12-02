@@ -5,7 +5,7 @@ function Scheduler(_config) {
    Thing.call(this, _config);
    this.thingType = "scheduler";
 
-   this.scheduleService =  this.gang.findService("service:schedule");
+   this.scheduleService =  this.casa.findService("scheduleservice");
 
    if (!this.scheduleService) {
       console.error(this.uName + ": ***** Schedule service not found! *************");

@@ -16,7 +16,7 @@ function PushoverStep(_config, _pipeline) {
 
    PipelineStep.call(this, _config, _pipeline);
 
-   this.pushService = this.gang.findService("pushoverservice");
+   this.pushService = this.gang.casa.findService("pushoverservice");
 
    if (!this.pushService) {
       console.error(this.uName + ": ***** Pushover service not found! *************");

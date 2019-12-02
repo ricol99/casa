@@ -26,6 +26,7 @@ function Casa(_config) {
 
    this.sources = {};
    this.sourceListeners = {};
+   this.services = {};
    this.workers = {};
 
    this.uber = false;
@@ -222,6 +223,21 @@ Casa.prototype.findListeners = function(_uName) {
       }
    }
    return listeners;
+};
+
+Casa.prototype.addService = function(_service) {
+   console.log(this.uName + ': Service '  + _service.uName + ' added to casa ');
+
+   if (this.services[_service.uName.split(":")[0]]) {
+      console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.uName);
+      process.exit(1);
+   }
+
+   this.services[_service.uName.split(":")[0]]  = _service;
+};
+
+Casa.prototype.findService = function(_serviceType) {
+   return this.services[_serviceType];
 };
 
 Casa.prototype.addWorker = function(_worker) {

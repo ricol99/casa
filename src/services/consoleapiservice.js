@@ -5,15 +5,14 @@ var request = require('request');
 function ConsoleApiService(_config) {
    _config.socketIoSupported = true;
    WebService.call(this, _config);
-
-   var GangConsoleApiObj = this.gang.cleverRequire("gangconsoleapi:"+this.gang.uName.split(":")[1], "consoleapis");
-   this.gangConsoleApi = new GangConsoleApiObj({ uName: this.gang.uName});
    this.sessions = {};
 }
 
 util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
+   var GangConsoleApiObj = this.gang.cleverRequire("gangconsoleapi:"+this.gang.uName.split(":")[1], "consoleapis");
+   this.gangConsoleApi = new GangConsoleApiObj({ uName: this.gang.uName});
 
    this.addRoute('/consoleapi/scopeExists/:scope', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/completeLine/:scope/:line', ConsoleApiService.prototype.completeLineRequest.bind(this));

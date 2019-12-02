@@ -7,8 +7,8 @@
    },
    "services": [
       {
-         "uName": "service:homekit",
-         "displayName": "Homekit Service Upstairs",
+         "uName": "homekitservice:land",
+         "displayName": "Homekit Service - Upstairs",
          "pincode": "111-11-111",
          "username": "CC:22:3D:E4:CF:EE",
          "manufacturer": "Casa Collin Ltd",
@@ -16,16 +16,16 @@
          "serialNumber": "1234567890"
       },
       {
-         "uName": "service:gpio",
+         "uName": "gpioservice:land",
          "displayName": "GPIO Service"
       },
       {
-         "uName": "service:sonos",
-         "displayName": "Sonos Discovery Service"
+         "uName": "serviceservice:land",
+         "displayName": "Sonos Discovery Service - Upstairs"
       },
       {
-         "uName": "service:web",
-         "displayName": "Web Server Service",
+         "uName": "webservice:land",
+         "displayName": "Web Server Service - Upstairs",
          "port": 80,
          "mediaPath": "/web/media",
          "secure": false,
@@ -34,20 +34,20 @@
          "caCert": ""
       },
       {
-         "uName": "service:hue",
-         "displayName": "Hue Link Services",
+         "uName": "hueservice:land",
+         "displayName": "Hue Link Services - Upstairs",
          "secureConfig": true
       },
       {
-         "uName": "service:securityspy",
+         "uName": "securityspyservice:land",
          "hostname": "collin.viewcam.me",
          "port": 8001,
          "secure": true,
          "secureConfig": true
       },
       {
-         "uName": "service:pushover",
-         "displayName": "Pushover Messaging Service",
+         "uName": "pushoverservice:land",
+         "displayName": "Pushover Messaging Service - Upstairs",
          "secureConfig": true
       }
    ],

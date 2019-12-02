@@ -25,7 +25,7 @@ function HomekitAccessory(_config) {
    this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.uName);
    this.hkAccessory = new Accessory(this.displayName, this.hkUUID);
 
-   this.homekitService = this.gang.findService("service:homekit");
+   this.homekitService = this.casa.findService("homekitservice");
 
    if (this.homekitService) {
       console.log(this.uName+": Homekit service found, so using bridge configuration");

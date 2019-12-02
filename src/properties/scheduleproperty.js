@@ -7,7 +7,7 @@ function ScheduleProperty(_config, _owner) {
    Property.call(this, _config, _owner);
 
    this.gang = Gang.mainInstance();
-   this.scheduleService = this.gang.findService("service:schedule");
+   this.scheduleService = this.gang.casa.findService("scheduleservice");
 
    if (!this.scheduleService) {
       console.error(this.uName + ": ***** Schedule service not found! *************");

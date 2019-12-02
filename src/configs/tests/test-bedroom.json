@@ -7,7 +7,7 @@
    },
    "services": [
       {
-         "uName": "service:web",
+         "uName": "webservice:test-bedroom",
          "port": 11003,
          "mediaPath": "/Users/richardcollin/personal/media",
          "secure": false,
