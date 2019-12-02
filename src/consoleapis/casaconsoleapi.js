@@ -28,5 +28,9 @@ CasaConsoleApi.prototype.config = function() {
    return this.myObj().config;
 };
 
+CasaConsoleApi.prototype.restart = function() {
+   process.exit(3);
+};
+
 module.exports = exports = CasaConsoleApi;
  
