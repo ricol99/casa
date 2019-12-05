@@ -1,5 +1,5 @@
 var util = require('util');
-var Thing = require('./thing');
+var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
 function CasaArea(_config) {
@@ -10,10 +10,10 @@ function CasaArea(_config) {
    this.casaCount = 0;
    this.uName = _config.uName;
 
-   Thing.call(this, _config);
+   SourceBase.call(this, _config);
 }
 
-util.inherits(CasaArea, Thing);
+util.inherits(CasaArea, SourceBase);
 
 CasaArea.prototype.addCasa = function(_casa) {
    this.casas[_casa.uName] = _casa;

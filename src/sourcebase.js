@@ -4,7 +4,6 @@ var Gang = require('./gang');
 
 function SourceBase() {
    AsyncEmitter.call(this);
-   this.valid = true;
    this.bowing = false;
    this.gang = Gang.mainInstance();
    this.props = {};
@@ -14,13 +13,32 @@ function SourceBase() {
 
 util.inherits(SourceBase, AsyncEmitter);
 
-SourceBase.prototype.isActive = function() {
-   return this.props['ACTIVE'].value;
+SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
+
+   if (_event === "property-changed") {
+      this.propertySubscribedTo(_subscription.prop, _subscription, this.props.hasOwnProperty(_subscription.prop));
+   }
+   else {
+      this.eventSubscribedTo(_event, _subscription);
+   }
+};
+
+// Override this to learn of new subscriptions to properties
+// _property - property name
+// _subscription - usually an object - provided by subscriber
+// _exists - whether the property is currently defined in this source
+SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+};
+
+// Override this to learn of new subscriptions to events
+// _event - event name
+// _subscription - usually an object - provided by subscriber
+SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
 };
 
 SourceBase.prototype.bowToOtherSource = function() {
    this.bowing = true;
-   this.changeName('*'+this.uName, false);
+   this.changeName('*'+this.uName);
 };
 
 SourceBase.prototype.coldStart = function() {
@@ -66,13 +84,29 @@ SourceBase.prototype.getAllProperties = function(_allProps) {
    }
 };
 
-SourceBase.prototype.dropSourceListeners = function(_propName, _sourceData) {
+SourceBase.prototype.goInvalid = function(_propName, _data) {
+   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
+
+   var sendData = (_data) ? util.copy(_data) : {};
+   sendData.sourceName = this.uName;
+   sendData.oldState = this.props[_propName].value;
+   sendData.name = _propName;
+   console.log(this.uName + ": Emitting invalid!");
+
+   this.emit('invalid', sendData);
+}
+
+SourceBase.prototype.invalidate = function(_propName, _sourceData) {
    console.log(this.uName + ": Raising invalid on all props to drop source listeners");
+
+   if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {
+      this.clearAlignmentQueue();
+   }
 
    for(var prop in this.props) {
 
       if (this.props.hasOwnProperty(prop)) {
-         this.emit('invalid', { sourceName: this.uName, name: prop });
+         this.goInvalid(prop);
       }
    }
 }
@@ -139,12 +173,7 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
    this.asyncEmit('event-raised', sendData);
 }
 
-SourceBase.prototype.changeName = function(_newName, _updateCasa) {
-
-   if ((_updateCasa === undefined) || _updateCasa) {
-      this.casa.renameSource(this, _newName);
-   }
-
+SourceBase.prototype.changeName = function(_newName) {
    this.uName = _newName;
 
    for (var prop in this.props) {
@@ -162,7 +191,7 @@ SourceBase.prototype.deferToPeer = function(_newSource) {
       this.bowing = true;
       this.local = true;
       console.log(this.uName+": Bowing to new source");
-      this.dropSourceListeners();
+      this.invalidate();
       this.bowToOtherSource();
       return true;
    }
@@ -184,6 +213,91 @@ SourceBase.prototype.becomeMainSource = function(_oldMainSource) {
 
    return false;
 };
+
+SourceBase.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
+   this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
+};
+
+// Please override these two methods to actually set property values
+SourceBase.prototype.setProperty = function(_propName, _propValue, _data) {
+   return false;
+};
+
+SourceBase.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
+   return false;
+};
+
+SourceBase.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
+   this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
+};
+
+SourceBase.prototype.alignProperties = function(_properties) {
+
+   if (_properties && (_properties.length > 0)) {
+      console.log(this.uName + ": alignProperties() ", _properties.length);
+      this.addPropertiesForAlignment(_properties);
+      this.alignNextProperty();
+   }
+};
+
+// Internal
+SourceBase.prototype.addPropertiesForAlignment = function(_properties) {
+
+   if (!this.propertyAlignmentQueue) {
+      this.propertyAlignmentQueue = [];
+   }
+
+   for (var i = 0; i < _properties.length; ++i) {
+
+      if (_properties[i].hasOwnProperty("ramp")) {
+         var ramp = util.copy(_properties[i].ramp);
+
+         if (_properties[i].ramp.hasOwnProperty("ramps")) {
+            ramp.ramps = util.copy(_properties[i].ramp.ramps, true);
+         }
+
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
+      }
+      else {
+         console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
+      }
+   }
+};
+
+// Internal
+SourceBase.prototype.alignNextProperty = function() {
+
+   if (!this.alignmentTimeout && (this.propertyAlignmentQueue.length > 0)) {
+
+      this.alignmentTimeout = setTimeout( () => {
+         this.alignmentTimeout = null;
+
+         if (this.propertyAlignmentQueue.length > 0) {
+            var prop = this.propertyAlignmentQueue.shift();
+
+            if (prop.hasOwnProperty("ramp")) {
+               console.log(this.uName + ": Setting property " + prop.property + " to ramp");
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName });
+            }
+            else {
+               console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
+               this.setProperty(prop.property, prop.value, { sourceName: this.uName });
+            }
+            this.alignNextProperty();
+         }
+         else {
+            console.error(this.uName + ": Something has gone wrong as no alignments are in the queue!");
+         }
+      }, 1);
+   }
+};
+
+SourceBase.prototype.clearAlignmentQueue = function() {
+   clearTimeout(this.alignmentTimeout);
+   this.alignmentTimeout = null;
+   this.propertyAlignmentQueue = [];
+}
 
 
 module.exports = exports = SourceBase;

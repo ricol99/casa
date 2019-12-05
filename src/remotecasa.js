@@ -1,5 +1,5 @@
 var util = require('util');
-var Source = require('./source');
+var SourceBase = require('./sourcebase');
 var S = require('string');
 var io = require('socket.io-client');
 var Gang = require('./gang');
@@ -9,13 +9,14 @@ function RemoteCasa(_config, _peerCasa) {
    this.casa = this.gang.casa;
    this.peerCasa = _peerCasa;
 
-   Source.call(this, _config);
+   SourceBase.call(this, _config);
 
    this.loginAs = 'remote';
    this.sources = [];
    this.workers = [];
 
    this.listenersSetUp = false;
+   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
    // Listen to Casa for my remote instance to connect
    this.peerCasa.on('casa-active', (_data) => {
@@ -39,7 +40,7 @@ function RemoteCasa(_config, _peerCasa) {
    });
 }
 
-util.inherits(RemoteCasa, Source);
+util.inherits(RemoteCasa, SourceBase);
 
 RemoteCasa.prototype.establishListeners = function(_force) {
 

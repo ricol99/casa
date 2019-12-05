@@ -114,6 +114,8 @@ HueService.prototype.hueBridgeFound = function(_bridge) {
          if (this.callbacks[light.id]) {
             extractLightCapability(this, light.id, light, this.callbacks[light.id]);
          }
+       
+         this.raiseEvent('light-capability', extractLightCapability(this, light.id, light));
       }
 
       this.callbacks = {};
@@ -150,7 +152,14 @@ function extractLightCapability(_this, _deviceId, _light, _callback) {
    }
 
    var colourSupported = (light.type == "Extended color light");
-   _callback(null, { id: _deviceId, brightness: true, hue: colourSupported, saturation: colourSupported });
+   var capability = { id: _deviceId, brightness: true, hue: colourSupported, saturation: colourSupported };
+
+   if  (_callback) {
+      _callback(null, capability);
+   }
+   else {
+      return capability;
+   }
 }
 
 HueService.prototype.setLightState = function(_deviceId, _config, _callback) {

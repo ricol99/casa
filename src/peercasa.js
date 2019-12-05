@@ -1,5 +1,5 @@
 var util = require('./util');
-var Source = require('./source');
+var SourceBase = require('./sourcebase');
 var S = require('string');
 var io = require('socket.io-client');
 var Gang = require('./gang');
@@ -20,7 +20,7 @@ function PeerCasa(_config) {
    this.remoteCasas = [];
    this.deathTime = 500;
 
-   Source.call(this, _config);
+   SourceBase.call(this, _config);
 
    this.sources = [];
    this.workers = [];
@@ -29,7 +29,6 @@ function PeerCasa(_config) {
    this.casaListeners = [];
 
    this.connected = false;
-   this.valid = true;
    this.socket = null;
    this.intervalId = null;
    this.unAckedMessages = [];
@@ -50,13 +49,15 @@ function PeerCasa(_config) {
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
    this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
 
+   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
+
    this.gang.addPeerCasa(this);
 }
 
-util.inherits(PeerCasa, Source);
+util.inherits(PeerCasa, SourceBase);
 
 PeerCasa.prototype.coldStart = function() {
-   Source.prototype.coldStart.call(this);
+   SourceBase.prototype.coldStart.call(this);
 
    for (var prop in this.sources) {
 
@@ -200,12 +201,12 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    clearTimeout(this.loginTimer);
    this.loginTimer = null;
 
-   this.casa.refreshConfigWithSourcesStatus();
+   var simpleConfig = this.casa.refreshSimpleConfig();
 
    // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
 
-   this.ackMessage('login', { messageId: _config.messageId, gangHash: this.gang.gangDb.getHash(), casaName: this.casa.uName, casaConfig: this.casa.config });
+   this.ackMessage('login', { messageId: _config.messageId, gangHash: this.gang.gangDb.getHash(), casaName: this.casa.uName, casaConfig: simpleConfig });
    this.establishHeartbeat();
 
    var casaList = this.casaArea.buildCasaForwardingList();
@@ -213,8 +214,8 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    // Send info regarding all relevant casas
    for (var i = 0; i < casaListLen; ++i) {
-      casaList[i].refreshConfigWithSourcesStatus();
-      this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
+      var simpleConfig2 = casaList[i].refreshSimpleConfig();
+      this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: simpleConfig2 });
    }
 
    this.resendUnAckedMessages();
@@ -306,12 +307,12 @@ PeerCasa.prototype.deleteSocket = function() {
 PeerCasa.prototype.socketConnectCb = function() {
    console.log(this.uName + ': Connected to my peer. Logging in...');
 
-   this.casa.refreshConfigWithSourcesStatus();
+   var simpleConfig = this.casa.refreshSimpleConfig();
 
    var messageData = {
       casaName: this.casa.uName,
       casaType: this.loginAs,
-      casaConfig: this.casa.config,
+      casaConfig: simpleConfig,
       casaVersion: this.gang.version
    };
 
@@ -649,7 +650,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
    }
 }
 
-PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
+PeerCasa.prototype.refreshSimpleConfig = function() {
    delete this.config.sourcesStatus;
    this.config.sourcesStatus = [];
    var len = this.config.sources.length;
@@ -665,8 +666,9 @@ PeerCasa.prototype.refreshConfigWithSourcesStatus = function() {
          }
       }
 
-      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: this.sources[this.config.sources[i]].isActive() });
+      this.config.sourcesStatus.push({ properties: util.copy(allProps) });
    }
+   return this.config;
 }
 
 PeerCasa.prototype.createSources = function(_data, _peerCasa) {

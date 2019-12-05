@@ -4,18 +4,36 @@ var Service = require('../service');
 
 function GpioService(_config, _owner) {
    Service.call(this, _config, _owner);
-
    this.gpios = {};
-   process.setMaxListeners(50);
 }
 
 util.inherits(GpioService, Service);
 
+GpioService.prototype.propertySubscribedTo = function(_subscription, _exists) {
+
+   if (!_exists && _subscription.prop.startsWith("gpio-pin-") {
+      this.ensurePropertyExists(_subscription.property, 'property', { initialValue: false, }, this.config);
+      this.createPin(this, _subscription.property.split("-").[2], _subscription.direction, _subscription.triggerLow); 
+   }
+};
+
 GpioService.prototype.createPin = function(_owner, _pin, _direction, _triggerLow) {
    var gpio = new GpioPin(_owner, _pin, _direction, _triggerLow);
-   this.gpios[_owner] = { gpio: gpio, owner: _owner };
+   this.gpios[_pin] = { gpio: gpio, owner: _owner };
    gpio.start();
    return gpio;
+};
+
+GpioService.prototype.gpioPinStatusChanged = function(_pin, _value) {
+   this.alignPropertyValue("gpio-pin-"+_pin, _value);
+};
+
+GpioService.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
+   var pin = _propName.split("-")[2];
+   
+   if (this.gpios.hasOwnProperty(pin)) {
+      thie.gpios[pin].set(_propValue);
+   }
 };
 
 function GpioPin(_owner, _pin, _direction, _triggerLow) {

@@ -301,13 +301,15 @@ Gang.prototype.extractServices = function(_config, _noColdStart, _serviceOwner) 
       for (var index = 0; index < _config.length; ++index) {
          console.log('Loading service '+ _config[index].uName);
          var Service = this.cleverRequire(_config[index].uName, 'services', _config.type);
-         this.services[_config[index].uName] = new Service(_config[index]);
+         var serviceObj = new Service(_config[index]);
+         this.services[serviceObj.uName] = serviceObj;
 
          if (_serviceOwner) {
-            _serviceOwner[_config[index].uName] = this.services[_config[index].uName];
+            _serviceOwner[serviceObj.uName] = serviceObj;
          }
          else {
-            this.casa.addService(this.services[_config[index].uName]);
+            this.casa.addService(serviceObj);
+            this.allObjects[serviceObj.uName] = serviceObj;
          }
       }
 
@@ -374,6 +376,9 @@ Gang.prototype.extractThings = function(_config, _parent) {
 
             if (!_parent) {
                this.topLevelThings.push(thingObj);
+            }
+            else {
+               thingObj.local = true;
             }
             this.extractThings(_config[index].things, thingObj);
 

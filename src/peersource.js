@@ -98,34 +98,8 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
    this.asyncEmit('event-raised', util.copy(_data));
 };
 
-PeerSource.prototype.alignProperties = function(_properties) {
-   console.log(this.uName + ": alignProperties() ", _properties);
-
-   if (_properties && (_properties.length > 0)) {
-
-      for (var i = 0; i < _properties.length; ++i) {
-
-         if (_properties[i].hasOwnProperty('ramp')) {
-            this.setPropertyWithRamp(_properties[i].property, _properties[i].ramp, { sourceName: this.uName });
-         }
-         else {
-            this.setProperty(_properties[i].property, _properties[i].value, { sourceName: this.uName });
-         }
-      }
-   }
-};
-
 PeerSource.prototype.invalidate = function() {
-
-   this.valid = false;
-
-   for(var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop)) {
-         this.emit('invalid', { sourceName: this.uName, name: prop });
-      }
-   }
-
+   SourceBase.prototype.invalidate.call(this);
    delete this.gang.allObjects[this.uName];
    this.casa.findNewMainSource(this);
 };

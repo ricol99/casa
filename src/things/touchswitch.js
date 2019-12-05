@@ -21,8 +21,9 @@ function TouchSwitch(_config) {
       this.holdTimerDuration = (_config.hasOwnProperty("holdTimerDuration")) ? _config.holdTimerDuration : 3;
       this.holding = false;
    }
+   this.service = (_config.hasOwnProperty("service")) ? _config.service :  "gpioservice";
 
-   this.gpioService =  this.casa.findService("gpioservice");
+   this.gpioService =  this.casa.findService(this.service);
 
    if (!this.gpioService) {
       console.error(this.uName + ": ***** GpioService service not found! *************");

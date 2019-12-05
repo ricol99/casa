@@ -5,6 +5,7 @@ function HueLightGroup(_config) {
    Thing.call(this, _config);
    this.thingType = "hue-light-group";
    this.displayName = _config.displayName;
+   this.service = (_config.hasOwnProperty("service")) ? _config.service : "hueservice";
 
    if (_config.hasOwnProperty('lightGroupId')) {
       this.lightGroupId = _config.lightGroupId;
@@ -15,7 +16,7 @@ function HueLightGroup(_config) {
 
    this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
-   this.hueService =  this.casa.findService("hueservice");
+   this.hueService =  this.casa.findService(this.service);
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");

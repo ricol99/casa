@@ -34,12 +34,15 @@ function SourceListener(_config, _owner) {
    this.maskInvalidValue = _config.maskInvalidValue;
 
    this.listeningToPropertyChange = _config.hasOwnProperty("property");
+   this.subscription = (_config.hasOwnProperty("subscription")) ? _config.subscription : {};
 
    if (this.listeningToPropertyChange) {
       this.eventName = _config.property;
+      this.subscription.prop = this.eventName;
    }
    else {
       this.eventName = _config.event;
+      this.subscription.event = this.eventName;
    }
 
    this.matchingValueDefined = _config.hasOwnProperty('value');
@@ -86,11 +89,9 @@ SourceListener.prototype.establishListeners = function() {
    if (this.valid) {
 
       if (this.listeningToPropertyChange) {
+         this.source.on('property-changed', this.eventName, this.propertyChangedHandler);
 
-         if (this.source.hasProperty(this.eventName)) {
-            this.source.on('property-changed', this.propertyChangedHandler);
-         }
-         else {
+         if (!this.source.hasProperty(this.eventName)) {
             console.error(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
             this.valid = false;
          }

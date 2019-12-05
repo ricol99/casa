@@ -25,6 +25,15 @@ CasaConsoleApi.prototype.cat = function() {
    return output;
 };
 
+CasaConsoleApi.prototype.sources = function() {
+   var sources = [];
+
+   for (var source in this.myObj().sources) {
+      sources.push(this.myObj().sources[source].uName);
+   }
+   return sources;
+};
+
 CasaConsoleApi.prototype.config = function() {
    return this.myObj().config;
 };

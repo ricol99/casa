@@ -6,10 +6,11 @@ function HueLight(_config) {
    this.thingType = "hue-light";
    this.displayName = _config.displayName;
    this.deviceId = _config.deviceId;
+   this.service = (_config.hasOwnProperty("service")) ? _config.service : "hueservice";
 
    this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
-   this.hueService =  this.casa.findService("hueservice");
+   this.hueService =  this.casa.findService(this.service);
 
    if (!this.hueService) {
       console.error(this.uName + ": ***** Hue service not found! *************");

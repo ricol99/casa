@@ -39,8 +39,6 @@ function Source(_config) {
       this.events = util.copy(_config.events, true);
    }
 
-   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
-
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { "initialValue": 'auto', "takeControlOnTransition": true,
                                "states": [ { name: "auto", priority: -100 },
@@ -52,6 +50,11 @@ function Source(_config) {
 }
 
 util.inherits(Source, SourceBase);
+
+Source.prototype.changeName = function(_newName) {
+   SourceBase.prototype.changeName.call(this, _newName);
+   this.casa.renameSource(this, _newName);
+};
 
 Source.prototype.getScheduleService = function() {
   var scheduleService =  this.casa.findService("scheduleservice");
@@ -160,92 +163,6 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    else {
       return false;
    }
-}
-
-Source.prototype.alignPropertyRamp = function(_propName, _rampConfig) {
-   this.alignProperties([ { property: _propName, ramp: _rampConfig } ]);
-};
-
-Source.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
-   this.alignProperties([ { property: _propName, value: _nextPropValue } ]);
-};
-
-Source.prototype.alignProperties = function(_properties) {
-
-   if (_properties && (_properties.length > 0)) {
-      console.log(this.uName + ": alignProperties() ", _properties.length);
-      this.addPropertiesForAlignment(_properties);
-      this.alignNextProperty();
-   }
-};
-
-// Internal
-Source.prototype.addPropertiesForAlignment = function(_properties) {
-
-   if (!this.propertyAlignmentQueue) {
-      this.propertyAlignmentQueue = [];
-   }
-
-   for (var i = 0; i < _properties.length; ++i) {
-
-      if (_properties[i].hasOwnProperty("ramp")) {
-         var ramp = util.copy(_properties[i].ramp);
-
-         if (_properties[i].ramp.hasOwnProperty("ramps")) {
-            ramp.ramps = util.copy(_properties[i].ramp.ramps, true);
-         }
-
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
-      }
-      else {
-         console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
-      }
-   }
-};
-
-// Internal
-Source.prototype.alignNextProperty = function() {
-
-   if (!this.alignmentTimeout && (this.propertyAlignmentQueue.length > 0)) {
-
-      this.alignmentTimeout = setTimeout( () => {
-         this.alignmentTimeout = null;
-
-         if (this.propertyAlignmentQueue.length > 0) {
-            var prop = this.propertyAlignmentQueue.shift();
-
-            if (prop.hasOwnProperty("ramp")) {
-               console.log(this.uName + ": Setting property " + prop.property + " to ramp");
-               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName });
-            }
-            else {
-               console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-               this.setProperty(prop.property, prop.value, { sourceName: this.uName });
-            }
-            this.alignNextProperty();
-         }
-         else {
-            console.error(this.uName + ": Something has gone wrong as no alignments are in the queue!");
-         }
-      }, 1);
-   }
-};
-
-Source.prototype.goInvalid = function(_propName, _sourceData) {
-   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
-
-   if (this.alignmentTimeout) {
-      clearTimeout(this.alignmentTimeout);
-   }
-
-   var sendData = _sourceData;
-   sendData.sourceName = this.uName;
-   sendData.oldState = this.props[_propName].value;
-   sendData.name = _propName;
-   console.log(this.uName + ": Emitting invalid!");
-
-   this.emit('invalid', sendData);
 }
 
 Source.prototype.updateEvent = function(_modifiedEvent) {

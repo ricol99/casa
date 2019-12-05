@@ -21,11 +21,12 @@ function HomekitAccessory(_config) {
    this.model = (_config.model == undefined) ? "v1.0" : _config.model;
    this.serialNumber = (_config.serialNumber == undefined) ? "XXXXXXX" : _config.serialNumber;
    this.invokeManualMode = (_config.hasOwnProperty("invokeManualMode")) ? _config.invokeManualMode : true;
+   this.service = (_config.hasOwnProperty("service")) ? _config.service : "homekitservice";
 
    this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.uName);
    this.hkAccessory = new Accessory(this.displayName, this.hkUUID);
 
-   this.homekitService = this.casa.findService("homekitservice");
+   this.homekitService = this.casa.findService(this.service);
 
    if (this.homekitService) {
       console.log(this.uName+": Homekit service found, so using bridge configuration");

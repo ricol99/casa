@@ -30,9 +30,7 @@ function Casa(_config) {
    this.workers = {};
 
    this.uber = false;
-   this.valid = true;
 
-   this.buildSimpleConfig(_config);
    this.createServer();
 }
 
@@ -98,37 +96,6 @@ Casa.prototype.createServer = function() {
    });
 };
 
-Casa.prototype.buildSimpleConfig = function(_config) {
-   this.config = {};
-   this.config.uName = _config.uName;
-   this.config.displayName = _config.displayName;
-
-   if (_config.gang) {
-      this.config.gang = _config.gang;
-   }
-
-   this.config.sources = [];
-   this.config.sourcesPriority = [];
-   this.config.sourcesStatus = [];
-
-   if (_config.hasOwnProperty('things')) {
-      var len = _config.things.length;
-
-      for (var j = 0; j < len; ++j) {
-         this.config.sources.push(_config.things[j].uName);
-         this.config.sourcesPriority.push((_config.things[j].hasOwnProperty('priority')) ? _config.things[j].priority : 0);
-         this.config.sourcesStatus.push({ properties: {}, status: false });
-      }
-
-      var len = _config.users.length;
-      for (var k = j; k < len + j; ++k) {
-         this.config.sources.push(_config.users[k-j].uName);
-         this.config.sourcesStatus.push({ properties: {}, status: false });
-         this.config.sourcesPriority.push((_config.users[k-j].hasOwnProperty('priority')) ? _config.users[k-j].priority : 0);
-      }
-   }
-}
-
 Casa.prototype.refreshSourceListeners = function() {
    for (var prop in this.sourceListeners) {
 
@@ -136,23 +103,36 @@ Casa.prototype.refreshSourceListeners = function() {
          this.sourceListeners[prop].refreshSource();
       }
    }
-}
+};
 
-Casa.prototype.refreshConfigWithSourcesStatus = function() {
-   delete this.config.sourcesStatus;
-   this.config.sourcesStatus = [];
-   var len = this.config.sources.length;
+Casa.prototype.refreshSimpleConfig = function() {
+   this.simpleConfig = {};
+   this.simpleConfig.uName = this.uName;
+   this.simpleConfig.displayName = this.displayName;
+   this.simpleConfig.gang = this.gang.uName;
+   this.simpleConfig.sources = [];
+   this.simpleConfig.sourcesPriority = [];
+   this.simpleConfig.sourcesStatus = [];
 
-   for (var i = 0; i < len; ++i) {
-      var allProps = {}; 
-      var source = this.gang.findSource(this.config.sources[i]);
+   for (sourceName in this.sources) {
 
-      if (source) {
-         source.getAllProperties(allProps);
+      if (this.sources.hasOwnProperty(sourceName)) {
+         var source = this.sources[sourceName];
+         console.error(this.uName+":AAAAAA Source Name="+source.uName);
+
+         if (!source.local) {
+            var allProps = {};
+            source.getAllProperties(allProps);
+
+            this.simpleConfig.sources.push(source.uName);
+            this.simpleConfig.sourcesPriority.push((source.hasOwnProperty('priority')) ? source.priority : 0);
+            this.simpleConfig.sourcesStatus.push({ properties: util.copy(allProps) });
+         }
       }
-      this.config.sourcesStatus.push({ properties: util.copy(allProps), status: source.isActive() });
    }
-}
+
+   return this.simpleConfig;
+};
 
 Casa.prototype.getSource = function(_sourceName) {
    return this.sources[_sourceName];
@@ -160,7 +140,7 @@ Casa.prototype.getSource = function(_sourceName) {
 
 Casa.prototype.isActive = function() {
    return true;
-}
+};
 
 Casa.prototype.addSource = function(_source) {
    console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
@@ -237,7 +217,13 @@ Casa.prototype.addService = function(_service) {
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return this.services[_serviceType];
+   return (_serviceType.indexOf(":") !== -1) ? this.gang.findObject(_serviceType) : this.services[_serviceType];
+};
+
+Casa.prototype.findServiceName = function(_serviceType) {
+   var service = this.findService(_serviceType);
+
+   return (service) ? service.uName : null;
 };
 
 Casa.prototype.addWorker = function(_worker) {

@@ -6,6 +6,7 @@ function LightwaveRfAccessory(_config) {
 
    Thing.call(this, _config);
    this.thingType = "lightwave-accessory";
+   this.service = (_config.hasOwnProperty("service")) ? _config.service : "lightwaverfservice";
 
    if (_config.moods != undefined) {
       this.moods = {};
@@ -34,7 +35,7 @@ function LightwaveRfAccessory(_config) {
 
    this.displayName = _config.displayName;
 
-   this.lightwaveRfService =  this.casa.findService("lightwaverfservice");
+   this.lightwaveRfService =  this.casa.findService(this.service);
 
    if (!this.lightwaveRfService) {
       console.error(this.uName + ": ***** LightwaveRf service not found! *************");

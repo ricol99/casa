@@ -34,6 +34,8 @@ function SonosPlayer(_config) {
       this.alarmVolumes['fire-alarm'] = _config.hasOwnProperty("fireAlarmVolume") ? _config.fireAlarmVolume : 60;
       this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false }, _config);
    }
+
+   this.service = (_config.hasOwnProperty("service")) ? _config.service : "sonosservice";
 }
 
 util.inherits(SonosPlayer, Thing);
@@ -45,7 +47,7 @@ SonosPlayer.prototype.coldStart = function() {
       this.sonos = this.devices[0].sonos;
    }
    else {
-      this.sonosService = this.casa.findService("sonosservice");
+      this.sonosService = this.casa.findService(this.service);
 
       if (!this.sonosService) {
          console.error(this.uName + ": ***** Sonos service not found! *************");
