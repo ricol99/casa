@@ -42,6 +42,7 @@ function GpioPin(_owner, _pin, _direction, _triggerLow) {
    this.direction = _direction;
    this.triggerLow = (_triggerLow == undefined) ? true :_triggerLow;
    this.writable = (this.direction === 'out') || (this.direction === 'inout');
+   this.value = false;
 
    this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
 
@@ -80,7 +81,8 @@ GpioPin.prototype.start = function() {
 
 GpioPin.prototype.set = function(_value) {
 
-   if (this.writable) {
+   if (this.value !== _value && this.writable) {
+      this.value = _value;
       this.gpio.write(this.triggerLow ? (_value ? 0 : 1) : (_value ? 1 : 0));
    }
 }
