@@ -54,7 +54,7 @@ RemoteConsole.prototype.establishSocket = function() {
    this.socket.on('scope-exists-output', (_data) => {
 
       if (this.scopeExistsCallback) {
-         this.scopeExistsCallback(null, _data.result);
+         this.scopeExistsCallback(null, _data);
       }
    });
 
@@ -82,21 +82,21 @@ RemoteConsole.prototype.establishSocket = function() {
    });
 };
 
-RemoteConsole.prototype.scopeExists = function(_scope, _callback) {
+RemoteConsole.prototype.scopeExists = function(_line, _callback) {
    this.scopeExistsCallback = _callback;
-   this.socket.emit('scopeExists', { scope: _scope });
+   this.socket.emit('scopeExists', { scope: this.currentScope, line: _line });
 };
 
 RemoteConsole.prototype.autoComplete = function(_line, _callback) {
    this.completeCallback = _callback;
    this.completeLine = _line;
 
-   this.socket.emit('completeLine', _line);
+   this.socket.emit('completeLine', { scope: this.currentScope, line: _line });
 };
 
-RemoteConsole.prototype.executeCommand = function(_command, _callback) {
+RemoteConsole.prototype.executeCommand = function(_line, _callback) {
    this.executeCallback = _callback;
-   this.socket.emit('executeCommand', _command);
+   this.socket.emit('executeCommand', { scope: this.currentScope, line: _line });
 };
 
 module.exports = exports = RemoteConsole;

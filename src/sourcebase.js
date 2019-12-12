@@ -96,7 +96,7 @@ SourceBase.prototype.goInvalid = function(_propName, _data) {
    this.emit('invalid', sendData);
 }
 
-SourceBase.prototype.invalidate = function(_propName, _sourceData) {
+SourceBase.prototype.invalidate = function() {
    console.log(this.uName + ": Raising invalid on all props to drop source listeners");
 
    if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {

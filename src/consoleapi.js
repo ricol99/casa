@@ -67,6 +67,10 @@ ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previo
    var proto = mainProto;
    var fullScopeName = (_fullScopeName) ? _fullScopeName : this.fullScopeName;
 
+   //if (fullScopeName === ":") {
+      //fullScopeName = "::";
+   //}
+
    while (proto.constructor.name !== 'ConsoleApi') {
        proto = Object.getPrototypeOf(proto);
    }
@@ -147,7 +151,7 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult)  {
        for (var obj in _collection) {
 
           if (obj.startsWith(matchString)) {
-             result.hits.push(this.fullScopeName+":"+obj);
+             result.hits.push((this.fullScopeName === "") ? obj : this.fullScopeName+":"+obj);
           }
        }
    }

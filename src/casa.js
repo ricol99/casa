@@ -156,6 +156,7 @@ Casa.prototype.addSource = function(_source) {
       this.emit('source-event-raised', _data);
    });
 
+   this.emit('source-added', { sourceName: _source.uName });
    console.log(this.uName + ': ' + _source.uName + ' associated!');
 };
 
@@ -174,6 +175,7 @@ Casa.prototype.renameSource = function(_source, _newName) {
 
 Casa.prototype.removeSource = function(_source) {
    console.log(this.uName + ': Deleting source '  + _source.uName);
+   this.emit('source-removed', { sourceName: _source.uName });
 
    this.gang.removeThing(_source);
    delete this.sources[_source.uName];

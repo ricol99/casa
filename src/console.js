@@ -28,34 +28,7 @@ function Console(_config) {
 }
 
 Console.prototype.autoCompleteCb = function(_line, _callback) {
-   var line = _line.trim();
-
-   this.autoComplete({ scope: this.currentScope, line: line }, (_err, _result) => {
-
-      if  (!_err && _result && _result.length > 0) {
-
-         if (line[0] !== ':') {
-
-            for (var i = 0; i < _result[0].length; ++i) {
-
-               if (this.currentScope === "::") {
-                  _result[0][i] = _result[0][i].replace("::", "");
-               }
-               else {
-                  _result[0][i] = _result[0][i].replace(this.currentScope+":", "");
-                  _result[0][i] = _result[0][i].replace(this.currentScope+".", "");
-               }
-            }
-         }
-         else if (line[1] !== ':') {
-
-            for (var i = 0; i < _result[0].length; ++i) {
-               _result[0][i] = _result[0][i].replace("::" + this.name, "");
-            }
-         }
-      }
-      _callback(_err, _result);
-  });
+   this.autoComplete(_line.trim(), _callback);
 };
 
 Console.prototype.lineReaderCb = function(_line) {
@@ -68,81 +41,23 @@ Console.prototype.lineReaderCb = function(_line) {
 
    if (line !== "") {
 
-      if (line.startsWith(":")) {
-
-         if (!line.startsWith("::")) {
-            line = "::" + this.name + line;
-         }
-      }
-      else if ((line.indexOf(".") === -1) && (line.indexOf(":") === -1)) {
-         line = this.currentScope + "." + line;
-      }
-      else if (this.currentScope === "::") {
-         line = this.currentScope + line;
-      }
-      else {
-         line = this.currentScope + ":" + line;
-      }
-
       if (line[line.length-1] === ':') {
-         var newLine = (line === "::") ? line : line.slice(0, line.length-1);
+         this.scopeExists(line, (_err, _result) => {
 
-         this.scopeExists(newLine, (_err, _result) => {
-        
-
-            if (!_err && _result) {
-
-               if (line.startsWith(this.name)) {
-                  this.currentScope = "::" + newLine;
-               }
-               else {
-                  this.currentScope = newLine;
-               }
-               this.setPrompt(this.currentScope);
-            }
-            else {
-               process.stdout.write("Object not found!\n");
+            if (!_err && _result.exists) {
+               this.currentScope = _result.newScope;
+               this.setPrompt(_result.newScope);
             }
             this.prompt();
          });
-         return;
       }
+      else {
 
-      var command = {};
-      var dotSplit = line.split(".");
-      command.scope = dotSplit[0];
-
-      if (line.indexOf(".") !== -1) {
-         var str = line.split(".").slice(1).join(".");
-         command.method  = str.split("(")[0];
-         var methodArguments = str.split("(").slice(1).join("(").trim();
-         var i;
-
-         for (i = methodArguments.length-1; i >= 0; --i) {
-
-            if (methodArguments.charAt(i) == ')') {
-               break;
-            }
-         }
-         if (i !== 0) {
-            methodArguments = methodArguments.substring(0, i);
-            command.arguments = JSON.parse("["+methodArguments+"]");
-         }
-         else {
-            command.arguments = [];
-         }
-
-         if (!command.arguments) {
-            process.stdout.write("Unable to parse arguments!\n");
+         this.executeCommand(line, (_err, _result) => {
+            process.stdout.write(this.processOutput(_err ? _err : _result)+"\n");
             this.prompt();
-            return;
-         }
+         });
       }
-
-      this.executeCommand(command, (_err, _result) => {
-         process.stdout.write(this.processOutput(_err ? _err : _result)+"\n");
-         this.prompt();
-      });
    }
    else {
       this.prompt();
@@ -153,10 +68,10 @@ Console.prototype.lineReaderCb = function(_line) {
 Console.prototype.autoComplete = function(_line, _callback) {
 };
 
-Console.prototype.executeCommand = function(_command, _callback) {
+Console.prototype.executeCommand = function(_line, _callback) {
 };
 
-Console.prototype.scopeExists = function(_scope, _callback) {
+Console.prototype.scopeExists = function(_line, _callback) {
    _callback(null, true);
 };
 

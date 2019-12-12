@@ -44,10 +44,14 @@ function PeerCasa(_config) {
    // Callbacks for listening to main casa
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
    this.sourceEventRaisedCasaHandler = PeerCasa.prototype.sourceEventRaisedCasaCb.bind(this);
+   this.sourceAddedCasaHandler = PeerCasa.prototype.sourceAddedCasaCb.bind(this);
+   this.sourceRemovedCasaHandler = PeerCasa.prototype.sourceRemovedCasaCb.bind(this);
 
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
    this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
+   this.casa.on('source-added', this.sourceAddedCasaHandler);
+   this.casa.on('source-removed', this.sourceRemovedCasaHandler);
 
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
 
@@ -93,12 +97,47 @@ PeerCasa.prototype.sourceEventRaisedCasaCb = function(_data) {
    }
 };
 
+PeerCasa.prototype.sourceAddedCasaCb = function(_data) {
+
+   if (this.connected && (_data.sourcePeerCasa != this.uName)) {
+
+      if (!_data.local) {
+         console.log(this.uName + ': publishing source ' + _data.sourceName + ' added to peer casa');
+         var source = this.casa.getSource(_data.sourceName);
+         var allProps = {};
+         source.getAllProperties(allProps);
+         _data.sourcePriority = (source.hasOwnProperty('priority')) ? source.priority : 0;
+         _data.sourceProperties = util.copy(allProps);
+         this.sendMessage('source-added', _data);
+      }
+      else {
+         console.log(this.uName + ': not publishing source ' + _data.sourceName + ' added to peer casa - Not Global');
+      }
+   }
+};
+
+PeerCasa.prototype.sourceRemovedCasaCb = function(_data) {
+
+   if (this.connected && (_data.sourcePeerCasa != this.uName)) {
+
+      if (!_data.local) {
+         console.log(this.uName + ': publishing source ' + _data.sourceName + ' removed from peer casa');
+         this.sendMessage('source-removed', _data);
+      }
+      else {
+         console.log(this.uName + ': not publishing source ' + _data.sourceName + ' removed from peer casa - Not Global');
+      }
+   }
+};
+
 PeerCasa.prototype.removeCasaListeners = function() {
    console.log(this.uName + ': removing casa listeners');
 
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
       this.casa.removeListener('source-event-raised', this.sourceEventRaisedCasaHandler);
+      this.casa.removeListener('source-added', this.sourceAddedCasaHandler);
+      this.casa.removeListener('source-removed', this.sourceRemovedCasaHandler);
    }
 }
 
@@ -290,6 +329,10 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.removeListener('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
+      this.socket.removeListener('source-added', this.socketSourceAddedHandler);
+      this.socket.removeListener('source-addedAACCKK', this.socketSourceAddedAckHandler);
+      this.socket.removeListener('source-removed', this.socketSourceRemovedHandler);
+      this.socket.removeListener('source-removedAACCKK', this.socketSourceRemovedAckHandler);
       this.socket.removeListener('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.removeListener('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
       this.socket.removeListener('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
@@ -512,6 +555,42 @@ PeerCasa.prototype.socketSourceEventRaisedAckCb = function(_data) {
    this.messageHasBeenAcked(_data);
 };
 
+PeerCasa.prototype.socketSourceAddedCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: source-added, source: ' + _data.sourceName);
+
+   var PeerSource = require('./peersource');
+   console.log(this.uName + ': Creating peer source named ' + _data.sourceName + ' priority =' + _data.sourcePriority);
+   var source = new PeerSource(_data.sourceName, _data.sourcePriority, _data.sourceProperties, this);
+
+   // Refresh all inactive sources and workers
+   this.gang.casa.refreshSourceListeners();
+
+   this.emit('broadcast-message', { message: 'source-added', data:_data, sourceCasa: this.uName });
+   this.ackMessage('source-added', _data);
+};
+
+PeerCasa.prototype.socketSourceAddedAckCb = function(_data) {
+   console.log(this.uName + ': Source-added Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourceRemovedCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: source-removed, source: ' + _data.sourceName);
+
+   if (this.sources.hasOwnProperty(_data.sourceName)) {
+      this.sources[_data.sourceName].invalidate();
+      delete this.sources[_data.sourceName];
+   }
+
+   this.emit('broadcast-message', { message: 'source-removed', data:_data, sourceCasa: this.uName });
+   this.ackMessage('source-removed', _data);
+};
+
+PeerCasa.prototype.socketSourceRemovedAckCb = function(_data) {
+   console.log(this.uName + ': Source-removed Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
 PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
    var source = this.gang.findSource(_data.sourceName);
@@ -720,6 +799,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
       this.socketSourceEventRaisedAckHandler = PeerCasa.prototype.socketSourceEventRaisedAckCb.bind(this);
+      this.socketSourceAddedHandler = PeerCasa.prototype.socketSourceAddedCb.bind(this);
+      this.socketSourceAddedAckHandler = PeerCasa.prototype.socketSourceAddedAckCb.bind(this);
+      this.socketSourceRemovedHandler = PeerCasa.prototype.socketSourceRemovedCb.bind(this);
+      this.socketSourceRemovedAckHandler = PeerCasa.prototype.socketSourceRemovedAckCb.bind(this);
       this.socketSetSourcePropertyReqHandler = PeerCasa.prototype.socketSetSourcePropertyReqCb.bind(this);
       this.socketSetSourcePropertyReqAckHandler = PeerCasa.prototype.socketSetSourcePropertyReqAckCb.bind(this);
       this.socketSetSourcePropertyRespHandler = PeerCasa.prototype.socketSetSourcePropertyRespCb.bind(this);
@@ -737,6 +820,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.on('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
+      this.socket.on('source-added', this.socketSourceAddedHandler);
+      this.socket.on('source-addedAACCKK', this.socketSourceAddedAckHandler);
+      this.socket.on('source-removed', this.socketSourceRemovedHandler);
+      this.socket.on('source-removedAACCKK', this.socketSourceRemovedAckHandler);
       this.socket.on('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.on('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
       this.socket.on('set-source-property-resp', this.socketSetSourcePropertyRespHandler);

@@ -11,10 +11,10 @@ function ConsoleApiService(_config) {
 util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
-   var GangConsoleApiObj = this.gang.cleverRequire("gangconsoleapi:"+this.gang.uName.split(":")[1], "consoleapis");
-   this.gangConsoleApi = new GangConsoleApiObj({ uName: this.gang.uName});
+   var GlobalConsoleApiObj = require("../consoleapis/globalconsoleapi");
+   this.globalConsoleApi = new GlobalConsoleApiObj({ uName: "global:global" });
 
-   this.addRoute('/consoleapi/scopeExists/:scope', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
+   this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/completeLine/:scope/:line', ConsoleApiService.prototype.completeLineRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:scope/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
@@ -22,14 +22,14 @@ ConsoleApiService.prototype.coldStart = function() {
    WebService.prototype.coldStart.call(this);
 };
 
-ConsoleApiService.prototype.getGangConsoleApi = function() {
-   return this.gangConsoleApi;
+ConsoleApiService.prototype.getGlobalConsoleApi = function() {
+   return this.globalConsoleApi;
 };
 
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
    console.log(this.uName+": scopeExistsRequest() request=", _request.params);
    
-   if (!_request.params.hasOwnProperty("scope")) {
+   if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
       this.sendFail(_request, _response);
    }
    else { 
@@ -55,7 +55,7 @@ ConsoleApiService.prototype.completeLineRequest = function(_request, _response) 
 ConsoleApiService.prototype.executeCommandRequest = function(_request, _response) {
    console.log(this.uName+": executeCommandRequest() request=", _request.params);
 
-   if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("method")) {
+   if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
       this.sendFail(_request, _response);
    }
    else {
@@ -185,7 +185,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('scope-exists-output', { result: _result });
+         this.socket.emit('scope-exists-output', _result);
       });
    });
 
@@ -283,105 +283,157 @@ ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _requ
 };
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
-   if (_params.scope.length === 1) {
-      _callback(null, _params.scope === ":");
+   var scope;
+   var newScope;
+   var line = _params.line;
+
+   if ((line !== ":") && (line !== "::")) {
+      line = _params.line.substr(-1);
    }
-   else if (_params.scope.length === 2) {
-      _callback(null, _params.scope === "::");
+
+   if ((line.length >= 1) && (line[0] === ':')) {
+      scope = (line === "::") ? line.replace("::", this.owner.gang.uName) : (line === ":") ? this.owner.gang.uName + ":" + this.owner.gang.casa.uName : line.replace(":", this.owner.gang.uName);
+      newScope = (line === ":") ? "::" + this.owner.gang.casa.uName : line;
    }
    else {
-      _callback(null, this.owner.gangConsoleApi.filterScope(_params.scope).consoleApiObj != null);
+      scope = (_params.scope === "::") ? this.owner.gang.uName : this.owner.gang.uName + _params.scope.substr(1) + ":" + line;
+      newScope = _params.scope + ":" + line;
    }
+
+   _callback(null, { exists: this.owner.globalConsoleApi.filterScope(scope).consoleApiObj != null, newScope: newScope });
+};
+
+ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _matches) {
+   var scope = (_currentScope === "::") ? this.owner.gang.uName : this.owner.gang.uName + _currentScope.substr(1);
+
+   for (var i = 0; i < _matches.length; ++i) {
+
+      if (_line[0] === ':') {
+         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.owner.gang.uName.length+1) : ":"+_matches[i].replace(this.owner.gang.uName+":"+this.owner.gang.casa.uName, "").substr(1);
+      }
+      else  {
+         _matches[i] = _matches[i].replace(scope, "").substr(1);
+      }
+   }
+};
+
+ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
+   var line;
+   var scope;
+   var matchingMethods = [];
+   var matchingScopes = [];
+   var method = null;
+   var arguments = [];
+   var result;
+
+   if (_line[0] === ':') {
+      line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + _line.substr(1) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + _line;
+      result = this.owner.globalConsoleApi.filterScope(line.split("(")[0]);
+
+      if (result.hits.length === 0) {
+         line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + "." + _line.substr(2) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + "." + _line.substr(1);
+         result = this.owner.globalConsoleApi.filterScope(line.split(".")[0]);
+      }
+   }
+   else  {
+      var s = (_currentScope.startsWith("::")) ? this.owner.gang.uName + _currentScope.substr(1) : _currentScope;
+      line = s + ":" + _line;
+      result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
+
+      if (result.hits.length === 0) {
+
+         if (_currentScope === "::") {
+            line = this.owner.gang.uName + "." + _line;
+         }
+         else if (_currentScope.startsWith("::")) {
+            line = this.owner.gang.uName + _currentScope.substr(1) + "." + _line;
+         }
+         result = this.owner.globalConsoleApi.filterScope(line.split(".")[0]);
+      }
+   }
+
+   if (result.hits.length === 0) {
+      return { scope: null, matchingMethods: [], method: null, arguments: [] };
+   }
+
+   matchingScopes = result.hits;
+   scope = result.hits[0];
+   this.processMatches(_currentScope, _line, matchingScopes);
+   
+   if (result.consoleApiObj && (line.split("(")[0].split(".").length > 1)) {
+      var m = line.split("(")[0].split(".")[1];
+      matchingMethods = result.consoleApiObj.filterMembers(m);
+
+      if (matchingMethods.length === 0) {
+         return (line.indexOf("(") === -1) ? { scope: scope, matchingMethods: [] } : { scope: scope, matchingMethods: [], method: null, consoleApiObj: result.consoleApiObj };
+      }
+
+      if ((scope + "." + m) === matchingMethods[0]) {
+         method = m;
+      }
+
+      this.processMatches(_currentScope, _line, matchingMethods);
+   }
+
+   if (method && (line.split("(").length > 1)) {
+      var methodArguments = line.split("(").slice(1).join("(").trim();
+      var i;
+
+      for (i = methodArguments.length-1; i >= 0; --i) {
+
+         if (methodArguments.charAt(i) == ')') {
+            break;
+         }
+      }
+      if (i !== 0) {
+         methodArguments = methodArguments.substring(0, i);
+         arguments = JSON.parse("["+methodArguments+"]");
+      }
+   }
+
+   return { scope: scope, matchingScopes: matchingScopes, matchingMethods: matchingMethods, method: method, arguments: arguments, consoleApiObj: result.consoleApiObj };
 };
 
 ConsoleApiSession.prototype.completeLine = function(_params, _callback) {
-   var result = { hits: [] };
+   var result = this.splitLine(_params.scope, _params.line);
 
-   if (_params.hasOwnProperty('scope') && _params.line[0] !== ':') {
-      var dotSplit = _params.line.split(".");
-      var scope;
+   var results = (result.matchingMethods.length === 0) ? result.matchingScopes : result.matchingMethods;
 
-      if (_params.scope === "::") {
-         scope = _params.scope + dotSplit[0];
-      }
-      else {
-         scope = _params.scope + ":" + dotSplit[0];
-      }
-
-      result = this.owner.gangConsoleApi.filterScope(scope);
-
-      if (_params.line.indexOf(".") !== -1 && result.consoleApiObj) {
-         result.hits = result.consoleApiObj.filterMembers(dotSplit[1]);
-      }
-
-      var result2 = { hits: [] };
-
-      if (_params.scope !== "::") {
-         var result2 = this.owner.gangConsoleApi.filterScope(_params.scope);
-
-         if (result2.consoleApiObj) {
-            result2.hits = result2.consoleApiObj.filterMembers(_params.line);
-         }
-      }
-
-      result.hits = result.hits.concat(result2.hits);
+   if (_callback) {
+      _callback(null, [ results, _params.line]);
    }
-   else if (_params.line[0] === ':') {
-      var line = (_params.line[1] === ':') ? _params.line : "::" + this.owner.gang.casa.uName + _params.line;
-      var dotSplit = line.split(".");
-      result = this.owner.gangConsoleApi.filterScope(dotSplit[0]);
-
-      if (_params.line.indexOf(".") !== -1 && result.consoleApiObj) {
-         result.hits = result.consoleApiObj.filterMembers(dotSplit[1]);
-      }
+   else {
+     return [ results, _params.line ];
    }
-
-   _callback(null, [ result.hits, _params.line]);
 };
 
+
 ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
-   var result = this.owner.gangConsoleApi.filterScope(_params.scope);
+   var result = this.splitLine(_params.scope, _params.line);
    var outputOfEvaluation =   "Object not found!";
 
-   if (_params.hasOwnProperty("method") && result.consoleApiObj) {
-      var matchingMethods = result.consoleApiObj.filterMembers(_params.method);
+   if (result.scope && result.consoleApiObj) {
 
-      if (!matchingMethods || matchingMethods.length == 0) {
-
-         if (!_params.hasOwnProperty("arguments") || (_params.arguments.length === 0)) {
-             var newResult = this.owner.gangConsoleApi.filterScope( _params.scope + ":" + _params.method);
-
-             if (newResult.consoleApiObj) {
-                this.owner.setCurrentSession(this);
-                outputOfEvaluation = newResult.consoleApiObj.cat();
-                this.owner.setCurrentSession(null);
-                _callback(null, outputOfEvaluation);
-             }
-             else {
-                _callback("Method not found!");
-             }
+      if (result.method) {
+         this.owner.setCurrentSession(this);
+      
+         try {
+            outputOfEvaluation =  Object.getPrototypeOf(result.consoleApiObj)[result.method].apply(result.consoleApiObj, result.arguments);
+            this.owner.setCurrentSession(null);
          }
-         else {
-             _callback("Method not found!");
+         catch (_err) {
+            this.owner.setCurrentSession(null);
+            outputOfEvaulation  = _err;
          }
-         return;
       }
-
-      this.owner.setCurrentSession(this);
-
-      try {
-         outputOfEvaluation =  Object.getPrototypeOf(result.consoleApiObj)[_params.method].apply(result.consoleApiObj, _params.arguments);
+      else if (result.matchingScopes.length > 0) {
+         this.owner.setCurrentSession(this);
+         outputOfEvaluation = result.consoleApiObj.cat();
          this.owner.setCurrentSession(null);
       }
-      catch (_err) {
-         this.owner.setCurrentSession(null);
-         outputOfEvaulation  = _err;
+      else {
+         _callback("Method not found!");
       }
-   }
-   else if (result.consoleApiObj) {
-      this.owner.setCurrentSession(this);
-      outputOfEvaluation = result.consoleApiObj.cat();
-      this.owner.setCurrentSession(null);
    }
 
    _callback(null, outputOfEvaluation);

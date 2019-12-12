@@ -3,9 +3,6 @@ var util = require('util');
 
 function GangConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
-   this.fullScopeName = ":";
-   this.myObjuName = ":";
-   this.consoleApiObjects[this.myObjuName] = this;
 }
 
 util.inherits(GangConsoleApi, ConsoleApi);
@@ -13,8 +10,8 @@ util.inherits(GangConsoleApi, ConsoleApi);
 GangConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult)  {
    var collection = {};
    collection[this.gang.casa.uName] = this.gang.casa;
-   var result = ConsoleApi.prototype.filterScope.call(this, _scope.replace("::", ""), collection);
-   return ConsoleApi.prototype.filterScope.call(this, _scope.replace("::", ""), this.gang.peerCasas, result);
+   var result = ConsoleApi.prototype.filterScope.call(this, _scope, collection);
+   return ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.peerCasas, result);
 };
 
 GangConsoleApi.prototype.cat = function() {
@@ -23,6 +20,17 @@ GangConsoleApi.prototype.cat = function() {
 
 GangConsoleApi.prototype.config = function() {
    return this.gang.config;
+};
+
+GangConsoleApi.prototype.createUser = function(_uName) {
+
+   if (!this.gang.findObject(_uName)) {
+      var userObj = this.gang.createUser({uName: _uName});
+      return true;
+   }
+   else {
+      return false;
+   }
 };
 
 module.exports = exports = GangConsoleApi;

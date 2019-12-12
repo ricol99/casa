@@ -278,18 +278,22 @@ Gang.prototype.cleverRequire = function(_name, _path, _type) {
 }
 
 // Extract Users
+Gang.prototype.createUser = function(_user) {
+   var User = this.cleverRequire(_user.uName);
+   _user.owner = this;
+   var userObj = new User(_user);
+   this.users[userObj.uName] = userObj;
+   this.allObjects[userObj.uName] = userObj;
+   console.log('New user: ' + userObj.uName);
+};
+
 Gang.prototype.extractUsers = function() {
 
    if (this.config.users) {
 
-      this.config.users.forEach( (user) => { 
-         var User = this.cleverRequire(user.uName);
-         user.owner = this;
-         var userObj = new User(user);
-         this.users[userObj.uName] = userObj;
-         this.allObjects[userObj.uName] = userObj;
-         console.log('New user: ' + userObj.uName);
-      });
+      for (var i = 0; i < this.config.users.length; ++i) { 
+         this.createUser(this.config.users[i]);
+      };
    }
 };
 
@@ -352,6 +356,11 @@ Gang.prototype.extractScenes = function(_config, _parent) {
 // Extract Things
 Gang.prototype.createThing = function(_config, _parent) {
    var Thing = this.cleverRequire(_config.uName, 'things', _config.type);
+
+   if (!Thing) {
+      return null;
+   }
+
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
    this.things[thingObj.uName] = thingObj;
