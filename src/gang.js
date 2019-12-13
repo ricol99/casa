@@ -270,7 +270,7 @@ Gang.prototype.cleverRequire = function(_name, _path, _type) {
          this.constructors[str] = require('./' + path + str);
       }
       catch (_err) {
-         //process.stderr.write(util.inspect(_err));
+         process.stderr.write(util.inspect(_err));
          return null;
       }
    }

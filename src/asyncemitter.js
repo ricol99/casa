@@ -30,17 +30,13 @@ AsyncEmitter.prototype.setAsyncEmitTimer = function() {
    }
 };
 
-AsyncEmitter.prototype.on = function(_event, _subscriptionOrCallback, _callback) {
-   var callback = _callback;
+AsyncEmitter.prototype.on = function(_event, _callback, _subscription) {
 
-   if (_subscriptionOrCallback instanceof Function) {
-       callback = _subscriptionOrCallback;
-   }
-   else  {
-      this.subscriptionRegistered(_event, _subscriptionOrCallback);
+   if (_subscription) {
+      this.subscriptionRegistered(_event, _subscription);
    }
 
-   return events.EventEmitter.prototype.on.call(this, _event,  callback);
+   return events.EventEmitter.prototype.on.call(this, _event,  _callback);
 };
 
 // Override this to learn of new subscriptions

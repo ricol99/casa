@@ -9,11 +9,12 @@ function GpioService(_config, _owner) {
 
 util.inherits(GpioService, Service);
 
-GpioService.prototype.propertySubscribedTo = function(_subscription, _exists) {
+GpioService.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   console.error(this.uName+": AAAAAA propertySubscribedTo() :" + util.inspect(_subscription));
 
-   if (!_exists && _subscription.prop.startsWith("gpio-pin-") {
-      this.ensurePropertyExists(_subscription.property, 'property', { initialValue: false, }, this.config);
-      this.createPin(this, _subscription.property.split("-").[2], _subscription.direction, _subscription.triggerLow); 
+   if (!_exists && _subscription.prop.startsWith("gpio-pin-")) {
+      this.ensurePropertyExists(_subscription.prop, 'property', { initialValue: false, }, this.config);
+      this.createPin(this, _subscription.prop.split("-")[2], _subscription.direction, _subscription.triggerLow); 
    }
 };
 
@@ -32,7 +33,7 @@ GpioService.prototype.propertyAboutToChange = function(_propName, _propValue, _d
    var pin = _propName.split("-")[2];
    
    if (this.gpios.hasOwnProperty(pin)) {
-      thie.gpios[pin].set(_propValue);
+      this.gpios[pin].gpio.set(_propValue);
    }
 };
 
@@ -71,7 +72,7 @@ GpioPin.prototype.start = function() {
                if (newValue != this.value) {
                   console.log(this.owner.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
                   this.value = newValue;
-                  this.owner.gpioPinStatusChanged(this.pin, this.value == 1);
+                  this.owner.gpioPinStatusChanged(this.gpioPin, this.value == 1);
                }
             }
          });

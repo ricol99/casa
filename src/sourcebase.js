@@ -14,6 +14,7 @@ function SourceBase() {
 util.inherits(SourceBase, AsyncEmitter);
 
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
+   console.error(this.uName+": AAAAAA subscriptionRegistered() :" + util.inspect(_subscription));
 
    if (_event === "property-changed") {
       this.propertySubscribedTo(_subscription.prop, _subscription, this.props.hasOwnProperty(_subscription.prop));
