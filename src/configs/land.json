@@ -20,7 +20,7 @@
          "displayName": "GPIO Service"
       },
       {
-         "uName": "serviceservice:land",
+         "uName": "sonosservice:land",
          "displayName": "Sonos Discovery Service - Upstairs"
       },
       {
