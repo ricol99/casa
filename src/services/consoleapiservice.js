@@ -288,7 +288,7 @@ ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
    var line = _params.line;
 
    if ((line !== ":") && (line !== "::")) {
-      line = _params.line.substr(-1);
+      line = _params.line.substr(0, _params.line.length - 1);
    }
 
    if ((line.length >= 1) && (line[0] === ':')) {
@@ -296,8 +296,8 @@ ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
       newScope = (line === ":") ? "::" + this.owner.gang.casa.uName : line;
    }
    else {
-      scope = (_params.scope === "::") ? this.owner.gang.uName : this.owner.gang.uName + _params.scope.substr(1) + ":" + line;
-      newScope = _params.scope + ":" + line;
+      scope = (_params.scope === "::") ? this.owner.gang.uName + ":" + line : this.owner.gang.uName + _params.scope.substr(1) + ":" + line;
+      newScope = (_params.scope === "::") ? "::" + line : _params.scope + ":" + line;
    }
 
    _callback(null, { exists: this.owner.globalConsoleApi.filterScope(scope).consoleApiObj != null, newScope: newScope });
@@ -337,7 +337,8 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
    }
    else  {
       var s = (_currentScope.startsWith("::")) ? this.owner.gang.uName + _currentScope.substr(1) : _currentScope;
-      line = s + ":" + _line;
+      line =  s + _line;
+      //line = (_line.length === 0) ? s : s + ":" + _line;
       result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
       if (result.hits.length === 0) {
@@ -353,7 +354,7 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
    }
 
    if (result.hits.length === 0) {
-      return { scope: null, matchingMethods: [], method: null, arguments: [] };
+      return { scope: null, matchingScopes: [], matchingMethods: [], method: null, arguments: [] };
    }
 
    matchingScopes = result.hits;
@@ -365,7 +366,8 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       matchingMethods = result.consoleApiObj.filterMembers(m);
 
       if (matchingMethods.length === 0) {
-         return (line.indexOf("(") === -1) ? { scope: scope, matchingMethods: [] } : { scope: scope, matchingMethods: [], method: null, consoleApiObj: result.consoleApiObj };
+         return (line.indexOf("(") === -1) ? { scope: scope, matchingScopes: matchingScopes, matchingMethods: [] }
+                                           : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], method: null, consoleApiObj: result.consoleApiObj };
       }
 
       if ((scope + "." + m) === matchingMethods[0]) {

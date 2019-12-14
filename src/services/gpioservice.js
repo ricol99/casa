@@ -10,7 +10,6 @@ function GpioService(_config, _owner) {
 util.inherits(GpioService, Service);
 
 GpioService.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-   console.error(this.uName+": AAAAAA propertySubscribedTo() :" + util.inspect(_subscription));
 
    if (!_exists && _subscription.prop.startsWith("gpio-pin-")) {
       this.ensurePropertyExists(_subscription.prop, 'property', { initialValue: false, }, this.config);

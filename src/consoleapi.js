@@ -67,10 +67,6 @@ ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previo
    var proto = mainProto;
    var fullScopeName = (_fullScopeName) ? _fullScopeName : this.fullScopeName;
 
-   //if (fullScopeName === ":") {
-      //fullScopeName = "::";
-   //}
-
    while (proto.constructor.name !== 'ConsoleApi') {
        proto = Object.getPrototypeOf(proto);
    }
