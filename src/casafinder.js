@@ -28,7 +28,6 @@ CasaFinder.prototype.coldStart =  function() {
             this.casas[_service.name] = { name: _service.name, host: _service.host, port: _service.port };
 
             if (!this.targetCasa || (this.targetCasa === _service.name)) {
-               process.stdout.write("Casa \""+_service.name+"\" at \""+_service.host+"\" on port "+_service.port+"\n");
                this.emit("casa-found", this.casas[_service.name]);
             }
          }
@@ -38,7 +37,6 @@ CasaFinder.prototype.coldStart =  function() {
          delete this.casas[_service.name];
 
          if (!this.targetCasa || (this.targetCasa === _service.name)) {
-             process.stdout.write("Casa \""+_service.name+"\" has gone down!\n");
             this.emit("casa-down", { name: _service.name });
          }
       });

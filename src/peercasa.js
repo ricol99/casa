@@ -10,6 +10,8 @@ function PeerCasa(_config) {
 
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
+   this.consoleApiService =  this.gang.casa.findService("consoleapiservice");
+
    this.config = _config;
    this.secureMode = this.casa.secureMode;
    this.certPath = this.casa.certPath;
@@ -173,6 +175,12 @@ PeerCasa.prototype.invalidateSources = function() {
    this.gang.casa.refreshSourceListeners();
 }
 
+PeerCasa.prototype.sendConsoleCommand = function(_scope, _line) {
+   var scope = _scope.replace(this.gang.casa.uName, this.uName);
+   var line = _scope.replace(this.gang.casa.uName, this.uName);
+  XXXXXXX
+};
+
 PeerCasa.prototype.getHostname = function() {
    return this.address.hostname;
 };
@@ -333,6 +341,8 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('source-addedAACCKK', this.socketSourceAddedAckHandler);
       this.socket.removeListener('source-removed', this.socketSourceRemovedHandler);
       this.socket.removeListener('source-removedAACCKK', this.socketSourceRemovedAckHandler);
+      this.socket.removeListener('console-command', this.socketConsoleCommandHandler);
+      this.socket.removeListener('console-commandAACCKK', this.socketConsoleCommandAckHandler);
       this.socket.removeListener('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.removeListener('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
       this.socket.removeListener('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
@@ -591,6 +601,22 @@ PeerCasa.prototype.socketSourceRemovedAckCb = function(_data) {
    this.messageHasBeenAcked(_data);
 };
 
+PeerCasa.prototype.socketConsoleCommandCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: console-command, source: ' + _data.sourceName);
+
+   if (_data.hasOwnProperty("scope") && _data.hasOwnProperty("line")) {
+      this.consoleApiService.executeCommand({ scope: _data.scope, line: _data.line });
+   }
+
+   this.emit('broadcast-message', { message: 'console-command', data:_data, sourceCasa: this.uName });
+   this.ackMessage('console-command', _data);
+};
+
+PeerCasa.prototype.socketConsoleCommandAckCb = function(_data) {
+   console.log(this.uName + ': Console-command Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
 PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
    var source = this.gang.findSource(_data.sourceName);
@@ -803,6 +829,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketSourceAddedAckHandler = PeerCasa.prototype.socketSourceAddedAckCb.bind(this);
       this.socketSourceRemovedHandler = PeerCasa.prototype.socketSourceRemovedCb.bind(this);
       this.socketSourceRemovedAckHandler = PeerCasa.prototype.socketSourceRemovedAckCb.bind(this);
+      this.socketConsoleCommandHandler = PeerCasa.prototype.socketConsoleCommandCb.bind(this);
+      this.socketConsoleCommandAckHandler = PeerCasa.prototype.socketConsoleCommandAckCb.bind(this);
       this.socketSetSourcePropertyReqHandler = PeerCasa.prototype.socketSetSourcePropertyReqCb.bind(this);
       this.socketSetSourcePropertyReqAckHandler = PeerCasa.prototype.socketSetSourcePropertyReqAckCb.bind(this);
       this.socketSetSourcePropertyRespHandler = PeerCasa.prototype.socketSetSourcePropertyRespCb.bind(this);
@@ -824,6 +852,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('source-addedAACCKK', this.socketSourceAddedAckHandler);
       this.socket.on('source-removed', this.socketSourceRemovedHandler);
       this.socket.on('source-removedAACCKK', this.socketSourceRemovedAckHandler);
+      this.socket.on('console-command', this.socketConsoleCommandHandler);
+      this.socket.on('console-commandAACCKK', this.socketConsoleCommandAckHandler);
       this.socket.on('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.on('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
       this.socket.on('set-source-property-resp', this.socketSetSourcePropertyRespHandler);

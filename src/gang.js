@@ -187,6 +187,7 @@ Gang.prototype.init = function(_console) {
    if (_console) {
       var LocalConsole = require('./localconsole');
       this.localConsole = new LocalConsole();
+      this.localConsole.coldStart();
    }
 
    // Extract Users

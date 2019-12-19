@@ -33,5 +33,9 @@ GangConsoleApi.prototype.createUser = function(_uName) {
    }
 };
 
+GangConsoleApi.prototype.restart = function() {
+   process.exit(3);
+};
+
 module.exports = exports = GangConsoleApi;
  

@@ -15,6 +15,7 @@ ConsoleApiService.prototype.coldStart = function() {
    this.globalConsoleApi = new GlobalConsoleApiObj({ uName: "global:global" });
 
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
+   this.addRoute('/consoleapi/parseLine/:scope/:line', ConsoleApiService.prototype.parseLineRequest.bind(this));
    this.addRoute('/consoleapi/completeLine/:scope/:line', ConsoleApiService.prototype.completeLineRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:scope/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
@@ -36,6 +37,19 @@ ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
       var id = "oneshotconsoleapiesession:"+Date.now();
       this.sessions[id] = new ConsoleApiSession(id, null, this);
       this.sessions[id].performOneShotHttpRequest('scopeExists', _request, _response);
+   }
+};
+
+ConsoleApiService.prototype.parseLineRequest = function(_request, _response) {
+   console.log(this.uName+": parseLineRequest() request=", _request.params);
+
+   if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
+      this.sendFail(_request, _response);
+   }
+   else {
+      var id = "oneshotconsoleapiesession:"+Date.now();
+      this.sessions[id] = new ConsoleApiSession(id, null, this);
+      this.sessions[id].performOneShotHttpRequest('parseLine', _request, _response);
    }
 };
 
@@ -189,6 +203,16 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
       });
    });
 
+   this.socket.on('parseLine', (_data) => {
+      this.parseLine(_data, (_err, _result) => {
+
+         if (_err) {
+            _result = _err;
+         }
+         this.socket.emit('parse-output', { result: _result });
+      });
+   });
+
    this.socket.on('completeLine', (_data) => {
       this.completeLine(_data, (_err, _result) => {
 
@@ -258,6 +282,7 @@ ConsoleApiSession.prototype.setSessionVar = function(_name, _value, _consoleApiO
 
 ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _request, _response) {
    var fTable = { scoopeExists: ConsoleApiSession.prototype.scopeExists,
+                  parseLine: ConsoleApiSession.prototype.parseLine,
                   completeLine: ConsoleApiSession.prototype.completeLine,
                   executeLine: ConsoleApiSession.prototype.executeLine };
 
@@ -338,7 +363,6 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
    else  {
       var s = (_currentScope.startsWith("::")) ? this.owner.gang.uName + _currentScope.substr(1) : _currentScope;
       line =  s + _line;
-      //line = (_line.length === 0) ? s : s + ":" + _line;
       result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
       if (result.hits.length === 0) {
@@ -394,6 +418,34 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
    }
 
    return { scope: scope, matchingScopes: matchingScopes, matchingMethods: matchingMethods, method: method, arguments: arguments, consoleApiObj: result.consoleApiObj };
+};
+
+ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
+   var result = this.splitLine(_params.scope, _params.line);
+
+   if (result.consoleApiObj) {
+      var hierarchy = util.getClassHierarchy(result.consoleApiObj);
+      result.consoleObjHierarchy = [];
+
+      for (var i = 0; i < hierarchy.length; ++i) {
+
+         if (hierarchy[i] === 'consoleapi') {
+            break;
+         }
+         else {
+            result.consoleObjHierarchy.push(hierarchy[i].replace("api", ""));
+         }
+      }
+     
+      delete result.consoleApiObj;
+   }
+
+   if (_callback) {
+      _callback(null, result);
+   }
+   else {
+     return result;
+   }
 };
 
 ConsoleApiSession.prototype.completeLine = function(_params, _callback) {

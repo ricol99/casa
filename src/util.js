@@ -1,5 +1,16 @@
 var Util = require('util');
 
+Util.getClassHierarchy = function(_obj) {
+   var list = [];
+   var proto = Object.getPrototypeOf(_obj);
+
+   while (proto) {
+       list.push(proto.constructor.name.toLowerCase());
+       proto = Object.getPrototypeOf(proto);
+   }
+   return list;
+};
+
 Util.copy = function(_source, _deep) {
 
    if (_source == undefined) {

@@ -51,17 +51,6 @@ ConsoleApi.prototype.filterArray = function(_array, _filter) {
    }
 };
 
-ConsoleApi.prototype.getClassHierarchy = function(_obj) {
-   var list = [];
-   var proto = Object.getPrototypeOf(_obj);
-
-   while (proto) {
-       list.push(proto.constructor.name.toLowerCase());
-       proto = Object.getPrototypeOf(proto);
-   }
-   return list;
-};
-
 ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previousMatches, _fullScopeName) {
    var mainProto = Object.getPrototypeOf(this);
    var proto = mainProto;
@@ -110,7 +99,7 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
             return null;
          }
       }
-      let classList = this.getClassHierarchy(realObj);
+      let classList = util.getClassHierarchy(realObj);
 
       for (var i = 0; i < classList.length; ++i) {
          var ConsoleApiObj = this.gang.cleverRequire(segments[0]+"consoleapi:"+segments[1], "consoleapis", classList[i]+"consoleapi");
