@@ -10,7 +10,7 @@ function HueServiceConsoleApi(_config, _owner) {
 util.inherits(HueServiceConsoleApi, ServiceConsoleApi);
 
 HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
-   var output = "";
+   var output = [];
 
    this.hue.lights(function(_err, _result) {
 
@@ -19,7 +19,7 @@ HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
       }
 
       for (var i = 0; i < _result.lights.length; ++i) {
-         output += _result.lights[i].id + "\t" + _result.lights[i].name+"\n";
+         output.push({ id: _result.lights[i].id, name: _result.lights[i].name });
       }
 
       _callback(null, output);
@@ -36,7 +36,7 @@ HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
       }
       
       for (var i = 0; i < _result.length; ++i) {
-         output += _result[i].id + "\t" + _result[i].name+"\n";
+         output.push({ id: _result[i].id, name: _result[i].name });
       }
       
       _callback(null, output);
@@ -53,7 +53,7 @@ HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
       }
       
       for (var i = 0; i < _result.length; ++i) {
-         output += _result[i].id + "\t" + _result[i].name+"\n";
+         output.push({ id: _result[i].id, name: _result[i].name });
       }
       
       _callback(null, output);
