@@ -25,7 +25,7 @@ PropertyConsoleApi.prototype.getValue = function(_params, _callback) {
 
 PropertyConsoleApi.prototype.set = function(_params, _callback) {
    this.checkParams(1, _params);
-   return _callback(null, this.owner.setProperty(this.name, _params[0]));
+   this.owner.setProperty([this.name, _params[0], _callback);
 };
 
 PropertyConsoleApi.prototype.watch = function(_params, _callback) {
