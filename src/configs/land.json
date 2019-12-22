@@ -920,8 +920,8 @@
                                  "priority": 2,
                                  "actions": [
                                     { "property": "brightness", "value": 30 },
-                                    { "property": "hue", "value": 50 },
-                                    { "property": "saturation", "value": 69 },
+                                    { "property": "hue", "value": 47 },
+                                    { "property": "saturation", "value": 100 },
                                     { "property": "power", "value": true }
                                  ]
                               },
