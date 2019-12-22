@@ -10,7 +10,7 @@ util.inherits(CasaConsoleApi, ConsoleApi);
 
 CasaConsoleApi.prototype.filterScope = function(_scope) {
    var result = ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources);
-   return ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.services, result);
+   return ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.casa.services, result);
 };
 
 CasaConsoleApi.prototype.cat = function() {

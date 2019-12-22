@@ -353,7 +353,7 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
 
    if (_line[0] === ':') {
       line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + _line.substr(1) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + _line;
-      result = this.owner.globalConsoleApi.filterScope(line.split("(")[0]);
+      result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
       if (result.hits.length === 0) {
          line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + "." + _line.substr(2) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + "." + _line.substr(1);
@@ -361,8 +361,13 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       }
    }
    else  {
-      var s = (_currentScope.startsWith("::")) ? this.owner.gang.uName + _currentScope.substr(1) : _currentScope;
-      line =  s + _line;
+      if (_currentScope === "::") {
+         line = this.owner.gang.uName + ":" + _line;
+      }
+      else if (_currentScope.startsWith("::")) {
+         line = this.owner.gang.uName + _currentScope.substr(1) + ":" + _line;
+      }
+
       result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
       if (result.hits.length === 0) {
