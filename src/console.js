@@ -130,13 +130,16 @@ Console.prototype.getCasaName = function(_line) {
    var casaName = null;
 
    if ((_line.length >= 1) && (_line[0] === ':')) {
-      casaName = (_line[1] ===':') ? _line.substr(2).replace(".", ":").split(":")[0] : _line.substr(1).replace(".", ":").split(":")[0];
+      var splitStrs = (_line[1] ===':') ? _line.substr(2).replace(".", ":").split(":") : _line.substr(1).replace(".", ":").split(":");
+      casaName = (splitStrs.length >= 2) ? splitStrs[0] + ":" + splitStrs[1] : "";
    }
    else if (this.currentScope === "::") {
-      casaName = _line.replace(".", ":").split(":")[0];
+      var splitStrs = _line.replace(".", ":").split(":");
+      casaName = (splitStrs.length >= 2) ? splitStrs[0] + ":" + splitStrs[1] : "";
    }
    else {
-      casaName = this.currentScope.substr(2).split(":")[0];
+      var splitStrs = this.currentScope.substr(2).split(":");
+      casaName = (splitStrs.length >= 2) ? splitStrs[0] + ":" + splitStrs[1] : "";
    }
 
    return casaName;

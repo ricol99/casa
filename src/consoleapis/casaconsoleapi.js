@@ -36,6 +36,16 @@ CasaConsoleApi.prototype.sources = function(_params, _callback) {
    _callback(null, sources);
 };
 
+CasaConsoleApi.prototype.services = function(_params, _callback) {
+   var services = [];
+
+   for (var service in this.myObj().services) {
+      services.push(this.myObj().services[service].uName);
+   }
+
+   _callback(null, services);
+};
+
 CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    this.checkParams(1, _params);
 

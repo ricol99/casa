@@ -19,7 +19,7 @@ HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
       }
 
       for (var i = 0; i < _result.lights.length; ++i) {
-         output.concat(_result.lights[i].id + "\t" + _result.lights[i].name+"\n");
+         output += _result.lights[i].id + "\t" + _result.lights[i].name+"\n";
       }
 
       _callback(null, output);
@@ -36,7 +36,7 @@ HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
       }
       
       for (var i = 0; i < _result.length; ++i) {
-         output.concat(_result[i].id + "\t" + _result[i].name+"\n");
+         output += _result[i].id + "\t" + _result[i].name+"\n";
       }
       
       _callback(null, output);
@@ -53,7 +53,7 @@ HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
       }
       
       for (var i = 0; i < _result.length; ++i) {
-         output.concat(_result[i].id + "\t" + _result[i].name+"\n");
+         output += _result[i].id + "\t" + _result[i].name+"\n";
       }
       
       _callback(null, output);
