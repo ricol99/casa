@@ -919,7 +919,7 @@
                                  "name": "users-present-evening",
                                  "priority": 2,
                                  "actions": [
-                                    { "property": "brightness", "value": 80 },
+                                    { "property": "brightness", "value": 30 },
                                     { "property": "hue", "value": 50 },
                                     { "property": "saturation", "value": 69 },
                                     { "property": "power", "value": true }
@@ -929,7 +929,7 @@
                                  "name": "users-present-dull-day",
                                  "priority": 2,
                                  "actions": [
-                                    { "property": "brightness", "value": 100 },
+                                    { "property": "brightness", "value": 70 },
                                     { "property": "hue", "value": 0 },
                                     { "property": "saturation", "value": 0 },
                                     { "property": "power", "value": true }
@@ -1022,12 +1022,12 @@
                               {
                                  "name": "users-present-evening",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 30 }, { "property": "power", "value": true }]
                               },
                               {
                                  "name": "users-present-dull-day",
                                  "priority": 2,
-                                 "actions": [{ "property": "brightness", "value": 20 }, { "property": "power", "value": true }]
+                                 "actions": [{ "property": "brightness", "value": 70 }, { "property": "power", "value": true }]
                               }
                            ]
                         },
