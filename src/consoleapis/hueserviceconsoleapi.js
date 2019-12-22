@@ -12,7 +12,7 @@ util.inherits(HueServiceConsoleApi, ServiceConsoleApi);
 HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
    var output = "";
 
-   hue.lights(function(_err, _result) {
+   this.hue.lights(function(_err, _result) {
 
       if (_err) {
          return _callback(_err);
@@ -29,7 +29,7 @@ HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
 HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
    var output = "";
    
-   hue.lightGroups(function(_err, _result) {
+   this.hue.lightGroups(function(_err, _result) {
       
       if (_err) {
          return _callback(_err);
@@ -46,7 +46,7 @@ HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
 HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
    var output = "";
    
-   hue.scenes(function(_err, _result) {
+   this.hue.scenes(function(_err, _result) {
       
       if (_err) {
          return _callback(_err);
@@ -65,14 +65,14 @@ HueServiceConsoleApi.prototype.createGroup = function(_params, _callback) {
    var name = _params[0];
    var lightIds = _params[1];
 
-   hue.createGroup(name, lightIds, _callback);
+   this.hue.createGroup(name, lightIds, _callback);
 };
 
 HueServiceConsoleApi.prototype.deleteGroup = function(_params, _callback) {
    this.checkParams(1, _params);
    var id = _params[0];
 
-   hue.deleteGroup(id, _callback);
+   this.hue.deleteGroup(id, _callback);
 };
 
 module.exports = exports = HueServiceConsoleApi;
