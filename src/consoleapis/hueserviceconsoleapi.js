@@ -27,7 +27,7 @@ HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
 };
 
 HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
-   var output = "";
+   var output = [];
    
    this.hue.lightGroups(function(_err, _result) {
       
@@ -44,7 +44,7 @@ HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
 };
 
 HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
-   var output = "";
+   var output = [];
    
    this.hue.scenes(function(_err, _result) {
       
