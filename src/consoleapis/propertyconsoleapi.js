@@ -19,28 +19,28 @@ PropertyConsoleApi.prototype.cat = function() {
    return this.myObj().getValue();
 };
 
-PropertyConsoleApi.prototype.getValue = function() {
-   return this.myObj().getValue();
+PropertyConsoleApi.prototype.getValue = function(_params, _callback) {
+   return _callback(null, this.myObj().getValue());
 };
 
-PropertyConsoleApi.prototype.set = function(_value) {
-   return this.owner.setProperty(this.name, _value);
+PropertyConsoleApi.prototype.set = function(_params, _callback) {
+   return _callback(null, this.owner.setProperty(this.name, _value));
 };
 
-PropertyConsoleApi.prototype.watch = function() {
-   return this.owner.watch(this.name);
+PropertyConsoleApi.prototype.watch = function(_params, _callback) {
+   this.owner.watch(_params, _callback);
 };
 
-PropertyConsoleApi.prototype.unwatch = function() {
-   return this.owner.unwatch(this.name);
+PropertyConsoleApi.prototype.unwatch = function(_params, _callback) {
+   this.owner.unwatch(_params, _callback);
 };
 
-PropertyConsoleApi.prototype.watching = function() {
-   return this.owner.getWatchList().hasOwnProperty(this.name);
+PropertyConsoleApi.prototype.watching = function(_params, _callback) {
+   _callback(null, this.owner.getWatchList().hasOwnProperty(this.name));
 };
 
-PropertyConsoleApi.prototype.listeners = function() {
-   return this.owner.listeners(this.name);
+PropertyConsoleApi.prototype.listeners = function(_params, _callback) {
+   this.owner.listeners(this.name, _callback);
 };
 
 module.exports = exports = PropertyConsoleApi;

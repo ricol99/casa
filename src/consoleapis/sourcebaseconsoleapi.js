@@ -14,7 +14,7 @@ SourceBaseConsoleApi.prototype.filterScope = function(_scope) {
 };
 
 SourceBaseConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var myExclusions = [ "sourceIsValid", "sourceIsInvalid", "receivedEventFromSource", "removeListener", "getWatchList", "findOrCreateSourceListener" ]
+   var myExclusions = [ "sessionClosed", "sourceIsValid", "sourceIsInvalid", "receivedEventFromSource", "removeListener", "getWatchList", "findOrCreateSourceListener" ]
 
    if (_exclusions) {
       return ConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
@@ -35,14 +35,6 @@ SourceBaseConsoleApi.prototype.cat = function() {
    }
 
    return output;
-};
-
-SourceBaseConsoleApi.prototype.prop = function(_name) {
-   return this.myObj().props[_name].getValue();
-};
-
-SourceBaseConsoleApi.prototype.props = function() {
-   return this.myObj().props;
 };
 
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
@@ -82,7 +74,7 @@ SourceBaseConsoleApi.prototype.getWatchList = function() {
    return watchList;
 };
 
-SourceBaseConsoleApi.prototype.watching = function() {
+SourceBaseConsoleApi.prototype.watching = function(_params, _callback) {
    var output = [];
    var watchList = this.getWatchList();
 
@@ -93,49 +85,55 @@ SourceBaseConsoleApi.prototype.watching = function() {
       }
    }
 
-   return output;
+   return _callback(null, output);
 };
 
-SourceBaseConsoleApi.prototype.watch = function(_name) {
+SourceBaseConsoleApi.prototype.watch = function(_params, _callback) {
+   this.checkParams(1, _params);
+
    var watchList = this.getWatchList();
 
-   if (watchList.hasOwnProperty(_name)) {
-      return "Already watching \""+_name+"\"";
+   if (watchList.hasOwnProperty(_params[0])) {
+      return _callback("Already watching \""+_params[0]+"\"");
    }
-   else if (this.myObj().props.hasOwnProperty(_name)) {
-      watchList[_name] = this.findOrCreateSourceListener(_name);
-      return "Watching \""+_name+"\"";
+   else if (this.myObj().props.hasOwnProperty(_params[0])) {
+      watchList[_params[0]] = this.findOrCreateSourceListener(_params[0]);
+      return _callback(null, "Watching \""+_params[0]+"\"");
    }
    else {
-      return "Property not found!";
+      return _callback(null, "Property not found!");
    }
 };
 
-SourceBaseConsoleApi.prototype.unwatch = function(_name) {
+SourceBaseConsoleApi.prototype.unwatch = function(_params, _callback) {
+   this.checkParams(1, _params);
+
    var watchList = this.getWatchList();
 
-   if (!watchList.hasOwnProperty(_name)) {
-      return "Not currently watching \""+_name+"\"";
+   if (!watchList.hasOwnProperty(_params[0])) {
+      return _callback("Not currently watching \""+_params[0]+"\"");
    }
    else {
-      this.removeListener(_name);
-      delete watchList[_name];
-      return "Finished watching \""+_name+"\"";
+      this.removeListener(_params[0]);
+      delete watchList[_params[0]];
+      return _callback(null, "Finished watching \""+_params[0]+"\"");
    }
 };
 
-SourceBaseConsoleApi.prototype.listeners = function(_property) {
+SourceBaseConsoleApi.prototype.listeners = function(_params, _callback) {
+   this.checkParams(1, _params);
+
    var listeners = this.gang.casa.findListeners(this.myObjuName);
    var listenerUnames = [];
 
    for (var i=0; i < listeners.length; ++i) {
 
-      if ((listeners[i].owner.type !== "consoleapi") && ((_property == undefined) || (_property === listeners[i].eventName))) {
+      if ((listeners[i].owner.type !== "consoleapi") && ((_params[0] == undefined) || (_params[0] === listeners[i].eventName))) {
          listenerUnames.push(listeners[i].owner.uName);
       }
    }
 
-   return listenerUnames;
+   return _callback(null, listenerUnames);
 };
 
 SourceBaseConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _sessionId) {

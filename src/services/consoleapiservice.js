@@ -464,7 +464,7 @@ ConsoleApiSession.prototype.completeLine = function(_params, _callback) {
 
 ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
    var result = this.splitLine(_params.scope, _params.line);
-   var outputOfEvaluation =   "Object not found!";
+   var outputOfEvaluation = "Object not found!";
 
    if (result.scope && result.consoleApiObj) {
 
@@ -472,25 +472,27 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
          this.owner.setCurrentSession(this);
       
          try {
-            outputOfEvaluation =  Object.getPrototypeOf(result.consoleApiObj)[result.method].apply(result.consoleApiObj, result.arguments);
+            Object.getPrototypeOf(result.consoleApiObj)[result.method].call(result.consoleApiObj, result.arguments, _callback);
             this.owner.setCurrentSession(null);
          }
          catch (_err) {
             this.owner.setCurrentSession(null);
-            outputOfEvaulation  = _err;
+            _callback(_err);
          }
       }
       else if (result.matchingScopes.length > 0) {
          this.owner.setCurrentSession(this);
          outputOfEvaluation = result.consoleApiObj.cat();
          this.owner.setCurrentSession(null);
+         _callback(null, outputOfEvaluation);
       }
       else {
          _callback("Method not found!");
       }
    }
-
-   _callback(null, outputOfEvaluation);
+   else {
+      _callback(outputOfEvaluation);
+   }
 };
 
 ConsoleApiSession.prototype.writeOutput = function(_output) {

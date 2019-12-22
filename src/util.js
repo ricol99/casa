@@ -1,5 +1,20 @@
 var Util = require('util');
 
+Util.getLocalIpAddress = function() {
+   var os = require( 'os' );
+   var networkInterfaces = os.networkInterfaces( );
+
+   for (var ni in networkInterfaces) {
+
+      for (var i = 0; i < networkInterfaces[ni].length; ++i) {
+
+         if (!networkInterfaces[ni][i].internal && networkInterfaces[ni][i].family === 'IPv4') {
+            return networkInterfaces[ni][i].address;
+         }
+      }
+   }
+};
+
 Util.getClassHierarchy = function(_obj) {
    var list = [];
    var proto = Object.getPrototypeOf(_obj);

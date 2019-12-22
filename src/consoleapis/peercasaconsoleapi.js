@@ -24,18 +24,14 @@ PeerCasaConsoleApi.prototype.cat = function() {
    return output;
 };
 
-PeerCasaConsoleApi.prototype.sources = function() {
+PeerCasaConsoleApi.prototype.sources = function(_params, _callback) {
    var sources = [];
 
    for (var source in this.myObj().sources) {
       sources.push(this.myObj().sources[source].uName);
    }
 
-   return sources;
-};
-
-PeerCasaConsoleApi.prototype.config = function() {
-   return this.myObj().config;
+   return _callback(null, sources);
 };
 
 module.exports = exports = PeerCasaConsoleApi;

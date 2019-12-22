@@ -46,20 +46,27 @@ DbService.prototype.coldStart = function() {
 DbService.prototype.dbRequested = function(_request, _response) {
    console.log(this.uName+": dbRequested() request=", _request.params);
 
-   if (!_request.params.hasOwnProperty("dbName") || ((_request.params.dbName !== this.gang.uName) && (_request.params.dbName !== this.gang.casa.uName))) {
+   if (!_request.params.hasOwnProperty("dbName")) {
       this.sendFail(_request, _response);
    }
    else {
-      var db = (_request.params.dbName === this.gang.uName) ? this.gang.gangDb : this.gang.casaDb;
+      this.gang.getDb(_request.params.dbName, { request: _request, response: _response }, (_err, _result, _data) => {
 
-      if (!db) {
-         this.sendFail(_request, _response);
-      }
-      else {
-         db.readAll((_err, _docs) => {
-            _response.send(_docs);
-         });
-      }
+         if (_err) {
+            this.sendFail(_data.request, _data.response);
+         }
+         else {
+            _result.readAll((_err, _docs) => {
+
+               if (_err) {
+                  this.sendFail(_data.request, _data.response);
+               }
+               else {
+                  _data.response.send(_docs);
+               }
+            });
+         }
+      });
    }
 };
 
@@ -76,7 +83,12 @@ DbService.prototype.dbHashRequested = function(_request, _response) {
          console.log('AAAAAAAAAAAAA OH DEAR!!!!!!!!');
       }
 
-      _response.send(hash);
+      if (!hash) {
+         this.sendFail(_request, _response);
+      }
+      else {
+         _response.send(hash);
+      }
    }
 };
 
@@ -146,7 +158,7 @@ DbService.prototype.thingsRequested = function(_request, _response) {
 };
 
 DbService.prototype.getDbHash = function(_dbName) {
-   var db = (_dbName === this.gang.uName) ? this.gang.gangDb : this.gang.casaDb;
+   var db = this.gang.getDb(_dbName);
    return db.getHash();
 };
 
@@ -199,6 +211,8 @@ DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) 
          this.gang.gangDb.on('connected', () => {
             this.gang.gangDb.append(_docs, _callback);
          });
+
+         this.gang.gangDb.connect();
       }
    });
 };
@@ -239,8 +253,13 @@ DbService.prototype.getAndWritePeerDb = function(_dbName, _address, _port, _outp
       var db = new Db(_dbName, _outputPath, true);
 
       db.on('connected', () => {
-         db.append(_docs, _callback);
+
+         db.append(_docs, (_err, _result) => {
+            _callback(_err, true);
+         });
       });
+
+      db.connect();
    });
 };
 

@@ -18,6 +18,13 @@ function ConsoleApi(_config, _owner) {
 ConsoleApi.prototype.coldStart = function() {
 };
 
+ConsoleApi.prototype.checkParams = function(_minLength, _params) {
+
+   if (_params.length < _minLength)  {
+      throw("Not enough parameters");
+   }
+};
+
 ConsoleApi.prototype.getCurrentSession = function() {
    return this.consoleApiService.getCurrentSession();
 };

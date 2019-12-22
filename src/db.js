@@ -3,6 +3,7 @@ var fs = require('fs');
 var events = require('events');
 var Datastore = require('nedb');
 var md5 = require('md5');
+var AsyncEmitter = require('./asyncemitter');
 
 function Db(_dbName, _dbPath, _newDb) {
 
@@ -12,27 +13,19 @@ function Db(_dbName, _dbPath, _newDb) {
    else {
       this.dbPath = _dbPath;
    }
+   this.newDb = _newDb;
 
-   this.dbName = this.dbPath + "/" + _dbName + ".db";
+   this.dbFullName = this.dbPath + "/" + _dbName + ".db";
+   this.dbName = _dbName;
    this.uName = "db:"+this.dbName;
-   events.EventEmitter.call(this);
-
-   if (_newDb) {
-
-      fs.unlink(this.dbName, (_err) => {
-         this.connect();
-      });
-   }
-   else {
-      this.connect();
-   }
+   AsyncEmitter.call(this);
 }
 
-util.inherits(Db, events.EventEmitter);
+util.inherits(Db, AsyncEmitter);
 
 Db.prototype.lastModified = function(_callback) {
 
-   fs.stat(this.dbName, (_err, _stats) => {
+   fs.stat(this.dbFullName, (_err, _stats) => {
 
       if (_err){
          return _callback(_err);
@@ -68,20 +61,40 @@ Db.prototype.getHash = function() {
 };
 
 Db.prototype.connect = function() {
-   this.db = new Datastore({ filename: this.dbName, autoload: true });
+
+   if (this.newDb) {
+
+      fs.unlink(this.dbFullName, (_err) => {
+         this.createDb();
+      });
+   }
+   else {
+
+      fs.access(this.dbFullName, fs.F_OK, (_err) => {
+
+         //if (_err) {
+            //this.asyncEmit('error', { error: _err, name: this.dbName });
+         //}
+         //else {
+            this.createDb();
+         //}
+      });
+   }
+};
+
+Db.prototype.createDb = function() {
+   this.db = new Datastore({ filename: this.dbFullName, autoload: true });
 
    this.updateHashInternal( (_err, _hash) => {
       var eventName = 'connected';
-      var data = null;
+      var data = { name: this.dbName, db: this };
 
       if (_err) {
          eventName = 'error';
-         data = _err;
+         data = { name: this.dbName, db: this, error: _err };
       }
 
-      setTimeout( () => {
-         this.emit(eventName, data);
-      }, 1);
+      this.asyncEmit(eventName, data);
    });
 };
 

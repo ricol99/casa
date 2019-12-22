@@ -31,66 +31,102 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    this.allObjects = [];
 
    this.areaId = 1;
+   this.dbs = {};
+   this.dbCallbacks = {};
 
    _mainInstance = this;
+ 
+   var globalConsole = (_console) ? _console === "global" : false;
+   var localConsole = (_console) ? _console === "local" : false;
 
-   this.casaDb = new Db(this.casaName, _configPath);
+   if (!globalConsole) {
+      this.casaDb = new Db(this.casaName, _configPath);
+      this.dbs[this.casaName] = this.casaDb;
 
-   this.casaDb.on('connected', () => {
+      this.casaDb.on('connected', (_data) => {
+         this.dbs[_data.name] = _data.db;
 
-      this.loadConfig(this.casaDb, "casa", (_err, _res) => {
+         this.loadConfig(this.casaDb, "casa", (_err, _res) => {
 
-         if (_err) {
-            console.error("Unable to load casa DB. Error=" + _err);
-            process.exit(1);
-         }
+            if (_err) {
+               console.error("Unable to load casa DB. Error=" + _err);
+               process.exit(1);
+            }
 
-         this.config.connectToPeers = _connectToPeers;
-         this.config.connectToParent = _connectToParent;
-         this.config.secureMode = _secureMode;
-         this.config.certPath = _certPath;
-         this.config.configPath = _configPath;
-         this.uName = this.config.gang;
-         this.allObjects[this.uName] = this;
+            this.config.connectToPeers = _connectToPeers;
+            this.config.connectToParent = _connectToParent;
+            this.config.secureMode = _secureMode;
+            this.config.certPath = _certPath;
+            this.config.configPath = _configPath;
+            this.uName = this.config.gang;
+            this.allObjects[this.uName] = this;
 
-         this.loadSystemServices();
+            this.loadSystemServices();
 
-         this.gangDb = new Db(this.uName, _configPath);
+            this.gangDb = new Db(this.uName, _configPath);
+            this.dbs[this.uName] = this.gangDb;
 
-         this.gangDb.on('connected', () => {
+            this.gangDb.on('connected', (_data) => {
+               this.dbs[_data.name] = _data.db;
 
-            this.loadConfig(this.gangDb, "gang", (_err, _config) => {
+               this.loadConfig(this.gangDb, "gang", (_err, _config) => {
 
-               if (_err) {
+                  if (_err) {
 
-                  this.attemptToFetchGangDbFromPeer( (_err, _res) => {
+                     this.attemptToFetchGangDbFromPeer( (_err, _res) => {
 
-                     if (_err) {
-                        console.error("Unable to fetch gang DB from peer. Exiting... Error=" + _err);
-                        process.exit(2);
-                     }
-                     else {
+                        if (_err) {
+                           console.error("Unable to fetch gang DB from peer. Exiting... Error=" + _err);
+                           process.exit(2);
+                        }
+                        else {
 
-                        this.loadConfig(this.gangDb, "gang", (_err, _config) => {
+                           this.loadConfig(this.gangDb, "gang", (_err, _config) => {
 
-                           if (_err) {
-                              console.error("Unable to load casa DB. Error=" + _err);
-                              process.exit(1);
-                           }
-                           else {
-                              this.init(_console);
-                           }
-                        });
-                     }
-                  });
-               }
-               else {
-                  this.init(_console);
-               }
+                              if (_err) {
+                                 console.error("Unable to load casa DB. Error=" + _err);
+                                 process.exit(1);
+                              }
+                              else {
+                                 this.init(localConsole);
+                              }
+                           });
+                        }
+                     });
+                  }
+                  else {
+                     this.init(_console);
+                  }
+               });
             });
+
+            this.gangDb.connect();
          });
       });
-   });
+
+      this.casaDb.connect();
+   }
+   else {
+      this.uName = "gang:"+_casaName;
+      this.casaName = "casa:console";
+
+      this.config = { uName: this.casaName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
+      this.extractCasa();
+      var casaShortName = this.casaName.split(":")[1];
+      this.extractServices([ { uName: "scheduleservice:"+casaShortName,  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                             { uName: "rampservice:"+casaShortName }, { uName: "dbservice:"+casaShortName } ], false, this.systemServices);
+
+      this.gangDb = new Db(this.uName, _configPath);
+
+      this.gangDb.on('connected', (_data) => {
+         this.dbs[_data.name] = _data.db;
+         var Console = require('./console');
+         this.console = new Console({ gangName: this.uName, casaName: null, secureMode: _secureMode, certPath: _certPath });
+         this.console.coldStart();
+      });
+
+      this.gangDb.connect();
+   }
 };
 
 Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
@@ -271,7 +307,7 @@ Gang.prototype.cleverRequire = function(_name, _path, _type) {
          this.constructors[str] = require('./' + path + str);
       }
       catch (_err) {
-         //process.stderr.write(util.inspect(_err));
+         process.stderr.write(util.inspect(_err));
          return null;
       }
    }
@@ -728,8 +764,50 @@ Gang.prototype.getDbs = function() {
    return [ this.uName, this.casa.uName ];
 };
 
-Gang.prototype.getDb = function() {
-   return this.gangDb;
+Gang.prototype.getDb = function(_dbName, _meta, _callback) {
+
+   var dbName = (_dbName) ? _dbName : this.uName;
+
+   if (this.dbs.hasOwnProperty(dbName)) {
+
+      if (_callback) {
+         return _callback(null, this.dbs[dbName], _meta);
+      }
+      else {
+         return this.dbs[dbName];
+      }
+   }
+   else if (_callback) {
+      var db = new Db(dbName, this.configPath());
+      this.dbCallbacks[_dbName] = { meta: _meta, callback: _callback, db: db};
+
+      db.on('connected', (_data) => {
+
+         if (this.dbCallbacks[_data.name]) {
+            this.dbs[_data.name] = this.dbCallbacks[_data.name].db;
+            var cb = this.dbCallbacks[_data.name].callback;
+            var meta = this.dbCallbacks[_data.name].meta;
+            delete this.dbCallbacks[_data.name];
+            cb(null, this.dbs[_data.name], meta);
+         }
+      });
+
+      db.on('error', (_data) => {
+
+         if (this.dbCallbacks[_data.name]) {
+            delete this.dbCallbacks[_data.name].db;
+            var cb = this.dbCallbacks[_data.name].callback;
+            var meta = this.dbCallbacks[_data.name].meta;
+            delete this.dbCallbacks[_data.name];
+            cb(_data.error, null, meta);
+         }
+      });
+
+      db.connect();
+   }
+   else {
+      return null;
+   }
 };
 
 Gang.mainInstance = function() {
@@ -759,6 +837,8 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
             });
 
          });
+
+         this.gangDb.connect();
       }
    });
 };

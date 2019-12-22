@@ -7,6 +7,7 @@ var optionDefinitions = [
   { name: 'secure', type: Boolean },
   { name: 'certs', type: String },
   { name: 'config', type: String },
+  { name: 'localconsole', type: Boolean },
   { name: 'console', type: Boolean },
   { name: 'logs', type: String },
   { name: 'nopeer', type: Boolean },
@@ -16,7 +17,7 @@ var optionDefinitions = [
 var options = commandLineArgs(optionDefinitions)
 
 if (options.casa == undefined) {
-   console.log("Usage: casa [--secure] [--certs] [--config] [--nopeer] [--noparent] <casa-name>");
+   console.log("Usage: casa [--secure] [--certs] [--config] [--nopeer] [--noparent] [--localconsole | --console] <casa-or-gang-name>");
    process.exit(1);
 }
 
@@ -29,7 +30,7 @@ var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-key
 var casaName = options.casa;
 
 var logs;
-if (options.console) {
+if (options.localconsole || options.console) {
    logs = { };
 }
 else {
@@ -38,8 +39,10 @@ else {
 
 require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 
+var consoleRequired = (options.console) ? "global" : (options.localconsole) ? "local" : false;
+
 Gang = require('./gang');
-var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version, options.console);
+var gang = new Gang(casaName, connectToPeers, connectToParent, secureMode, certPath, configPath, version, consoleRequired);
 
 function checkPath(_path) {
    return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;

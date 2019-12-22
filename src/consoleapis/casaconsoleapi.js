@@ -3,6 +3,7 @@ var ConsoleApi = require('../consoleapi');
 
 function CasaConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
+   this.dbService =  this.gang.casa.findService("dbservice");
 }
 
 util.inherits(CasaConsoleApi, ConsoleApi);
@@ -25,28 +26,65 @@ CasaConsoleApi.prototype.cat = function() {
    return output;
 };
 
-CasaConsoleApi.prototype.sources = function() {
+CasaConsoleApi.prototype.sources = function(_params, _callback) {
    var sources = [];
 
    for (var source in this.myObj().sources) {
       sources.push(this.myObj().sources[source].uName);
    }
-   return sources;
+
+   _callback(null, sources);
 };
 
-CasaConsoleApi.prototype.createThing = function(_uName) {
+CasaConsoleApi.prototype.createThing = function(_params, _callback) {
+   this.checkParams(1, _params);
 
-   if (!this.gang.findObject(_uName)) {
-      var thingObj = this.gang.createThing({uName: _uName});
-      return true;
+   if (!this.gang.findObject(_params[0])) {
+      var thingObj = this.gang.createThing({uName: _params[0]});
+      return _callback(null, true);
    }
    else {
-      return false;
+      return _callback(null, false);
    }
 };
 
-CasaConsoleApi.prototype.restart = function() {
+CasaConsoleApi.prototype.restart = function(_params, _callback) {
    process.exit(3);
 };
+
+CasaConsoleApi.prototype.fetchDb = function(_params, _callback) {
+   this.checkParams(2, _params);
+
+   var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.uName;
+   var localHash = this.dbService.getDbHash(dbName);
+
+   this.dbService.getPeerDbHash(dbName, localHash, _params[0], _params[1], (_err, _result) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+      else if (localHash.hash !== _result.hash) {
+         this.dbService.getAndWritePeerDb(dbName, _params[0], _params[1], this.gang.configPath(), _callback);
+      }
+      else {
+         _callback(null, true);
+      }
+   });
+};
+
+CasaConsoleApi.prototype.fetchDbs = function(_params, _callback) {
+   this.checkParams(2, _params);
+   this.fetchDb(_params, (_err, _result) => {
+
+      if (_err)  {
+         _callback(_err);
+      }
+      else {
+         _params.push(this.gang.uName);
+         this.fetchDb(_params, _callback);
+      }
+   });
+};
+
 module.exports = exports = CasaConsoleApi;
  

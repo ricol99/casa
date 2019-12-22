@@ -7,12 +7,9 @@ function SourceConsoleApi(_config, _owner) {
 
 util.inherits(SourceConsoleApi, SourceBaseConsoleApi);
 
-SourceConsoleApi.prototype.setProperty = function(_property, _value) {
-   return this.myObj().setProperty(_property, _value, {});
-};
-
-SourceConsoleApi.prototype.config = function() {
-   return this.myObj().config;
+SourceConsoleApi.prototype.setProperty = function(_params, _callback) {
+   this.checkParams(2, _params);
+   _callback(null, this.myObj().setProperty(_params[0], _params[1], {}));
 };
 
 module.exports = exports = SourceConsoleApi;

@@ -199,8 +199,8 @@
             "night": 300
          },
          "events": [
-            { "name": "pre-wake-up-event", "rules": [ "00 6 * * 1-5", "30 8 * * 6", "30 9 * * 0" ]},
-            { "name": "wake-up-event", "rules": [ "30 6 * * 1-5", "00 9 * * 6", "00 10 * * 0"  ]}
+            { "name": "pre-wake-up-event", "rules": [ "03 8 * * 1-5", "30 8 * * 6", "30 9 * * 0" ]},
+            { "name": "wake-up-event", "rules": [ "00 9 * * 1-5", "00 9 * * 6", "00 10 * * 0"  ]}
          ],
          "props": [
             {
@@ -583,8 +583,8 @@
          "readingInBedTimeout": 900,
          "awakeInBedTimeout": 3600,
          "events": [
-            { "name": "pre-wake-up-event", "rules": [ "30 5 * * 1-5", "30 7 * * 0,6" ]},
-            { "name": "wake-up-event", "rules": [ "00 6 * * 1-5", "00 8 * * 0,6" ]}
+            { "name": "pre-wake-up-event", "rules": [ "30 8 * * 1-5", "30 8 * * 0,6" ]},
+            { "name": "wake-up-event", "rules": [ "00 9 * * 1-5", "00 9 * * 0,6" ]}
          ],
          "props": [
             {

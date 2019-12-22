@@ -7,9 +7,5 @@ function PeerSourceConsoleApi(_config, _owner) {
 
 util.inherits(PeerSourceConsoleApi, SourceBaseConsoleApi);
 
-PeerSourceConsoleApi.prototype.config = function() {
-   return this.myObj().config;
-};
-
 module.exports = exports = PeerSourceConsoleApi;
  

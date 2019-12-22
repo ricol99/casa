@@ -39,6 +39,8 @@ function Console(_params) {
 util.inherits(Console, LocalConsole);
 
 Console.prototype.coldStart = function() {
+   this.gang = Gang.mainInstance();
+
    var CasaFinder = require('./casafinder');
    var casaFinder = new CasaFinder({ gang: this.gangName, casa: this.casaName });
 
@@ -58,14 +60,24 @@ Console.prototype.casaFound = function(_params) {
       remoteCasa.on("connected", (_data) => {
          this.connectedCasas = this.connectedCasas + 1;
 
-         if (!this.started) {
-            this.defaultCasa = this.remoteCasas[_data.name];
-            this.started = true;
-            this.start("::");
-         }
-         else {
-            this.updatePrompt();
-         }
+         this.gang.getDb(_data.name, _data, (_err, _result, _data) => {
+
+            if (_err) {
+               this.writeOutput("Casa "+_data.name+" has joined and console does not have a local db for it!");
+            }
+            else {
+               this.remoteCasas[_data.name].setDb(_result);
+            }
+
+            if (!this.started) {
+               this.defaultCasa = this.remoteCasas[_data.name];
+               this.started = true;
+               this.start("::");
+            }
+            else {
+               this.updatePrompt();
+            }
+         });
       });
 
       remoteCasa.on("connect_error", (_data) => {
@@ -271,6 +283,7 @@ function RemoteCasa(_config, _owner) {
    this.name = _config.name;
    this.host = _config.host;
    this.port = _config.port;
+   this.db = null;
    this.connected = false;
 }
 
@@ -338,6 +351,10 @@ RemoteCasa.prototype.start = function()  {
          this.emit('disconnected', _data);
       }
    });
+};
+
+RemoteCasa.prototype.setDb = function(_db) {
+   this.db = _db;
 };
 
 RemoteCasa.prototype.reconnect = function(_params) {

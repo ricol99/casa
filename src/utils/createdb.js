@@ -14,6 +14,8 @@ db.on('connected', () => {
    populateDbFromConfig();
 });
 
+db.connect();
+
 function populateDbFromConfig() {
 
    var configs = {};
