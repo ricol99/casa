@@ -96,5 +96,9 @@ CasaConsoleApi.prototype.fetchDbs = function(_params, _callback) {
    });
 };
 
+CasaConsoleApi.prototype.exportDb = function(_params, _callback) {
+   this.gang.casa.getDb().readAll(_callback);
+};
+
 module.exports = exports = CasaConsoleApi;
  

@@ -229,7 +229,8 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('execute-output', { result: util.inspect(_result) });
+         //this.socket.emit('execute-output', { result: util.inspect(_result) });
+         this.socket.emit('execute-output', { result: _result });
       });
    });
 
@@ -428,9 +429,11 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
 ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
    var result = this.splitLine(_params.scope, _params.line);
 
+
    if (result.consoleApiObj) {
       var hierarchy = util.getClassHierarchy(result.consoleApiObj);
       result.consoleObjHierarchy = [];
+      result.consoleObjuName = result.consoleApiObj.myObjuName;
 
       for (var i = 0; i < hierarchy.length; ++i) {
 

@@ -23,6 +23,7 @@ function Casa(_config) {
    events.EventEmitter.call(this);
 
    this.id = _config.id;
+   this.db = null;
 
    this.sources = {};
    this.sourceListeners = {};
@@ -103,6 +104,10 @@ Casa.prototype.refreshSourceListeners = function() {
          this.sourceListeners[prop].refreshSource();
       }
    }
+};
+
+Casa.prototype.getDb = function() {
+   return this.db;
 };
 
 Casa.prototype.refreshSimpleConfig = function() {

@@ -160,7 +160,7 @@ Console.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
             
             try {
                var ConsoleCmdObj = require("./consolecmds/" + _result.consoleObjHierarchy[i] +  "cmd");
-               cmdObj = new ConsoleCmdObj({ uName: _result.consoleObjHierarchy[i] +  "cmd" }, this);
+               cmdObj = new ConsoleCmdObj({ uName: _result.consoleObjuName }, this);
                break;
             }
             catch (_err) {
@@ -174,7 +174,8 @@ Console.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
                Object.getPrototypeOf(cmdObj)[_result.method].call(cmdObj, _line, _result, _callback);
             }
             catch (_err) {
-               this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
+               _callback(_err);
+               //this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
             }
          }
          else {

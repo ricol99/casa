@@ -529,6 +529,7 @@ Gang.prototype.extractCasa = function() {
    var casaObj = new Casa(this.config);
    this.allObjects[casaObj.uName] = casaObj;
    this.casa = casaObj;
+   this.casa.db = this.dbs[casaObj.uName];
    console.log('New casa: ' + casaObj.uName);
 }
 

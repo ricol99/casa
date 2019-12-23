@@ -72,6 +72,9 @@ GangConsoleApi.prototype.fetchDbs = function(_params, _callback) {
    });
 };
 
+GangConsoleApi.prototype.exportDb = function(_params, _callback) {
+   this.gang.getDb().readAll(_callback);
+};
 
 module.exports = exports = GangConsoleApi;
  

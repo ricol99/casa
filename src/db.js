@@ -144,5 +144,30 @@ Db.prototype.update = function(_config, _callback) {
    return db.update({ _id: _config.uName }, _config, {}, _callback);
 };
 
+Db.export = function(_content) {
+   var output  = {};
+
+   for  (var i = 0; i < _content.length; ++i) {
+      var collection = _content[i]._collection;
+
+      if (!output.hasOwnProperty(collection)) {
+         output[collection] = [];
+      }
+
+      delete _content[i]._collection;
+      delete _content[i]._id;
+      output[collection].push(_content[i]);
+   }
+
+   if (output.hasOwnProperty("casa")) {
+      output.casa = output.casa[0];
+   }
+
+   if (output.hasOwnProperty("gang")) {
+      output.gang = output.gang[0];
+   }
+
+   return output;
+};
 
 module.exports = exports = Db;
