@@ -7,3 +7,5 @@ node_modules/*
 .casa:*
 backup*
 persist/*
+configs
+configs/*
