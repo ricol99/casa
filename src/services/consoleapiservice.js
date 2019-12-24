@@ -17,7 +17,7 @@ ConsoleApiService.prototype.coldStart = function() {
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/parseLine/:scope/:line', ConsoleApiService.prototype.parseLineRequest.bind(this));
    this.addRoute('/consoleapi/completeLine/:scope/:line', ConsoleApiService.prototype.completeLineRequest.bind(this));
-   this.addRoute('/consoleapi/executeCommand/:scope/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
+   this.addRoute('/consoleapi/executeCommand/:obj/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
 
    WebService.prototype.coldStart.call(this);
@@ -69,7 +69,7 @@ ConsoleApiService.prototype.completeLineRequest = function(_request, _response) 
 ConsoleApiService.prototype.executeCommandRequest = function(_request, _response) {
    console.log(this.uName+": executeCommandRequest() request=", _request.params);
 
-   if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
+   if (!_request.params.hasOwnProperty("obj") || !_request.params.hasOwnProperty("method")) {
       this.sendFail(_request, _response);
    }
    else {
@@ -471,7 +471,18 @@ ConsoleApiSession.prototype.completeLine = function(_params, _callback) {
 
 
 ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
-   var result = this.splitLine(_params.scope, _params.line);
+   var result = null;
+
+   if (_params.hasOwnProperty("scope") || _params.hasOwnProperty("line")) {
+      result = this.splitLine(_params.scope, _params.line);
+   }
+   else if (_params.hasOwnProperty("obj")) {
+      result = this.owner.globalConsoleApi.filterScope(_params.obj);
+      result.scope = _params.obj;
+      result.method = _params.method;
+      result.arguments = _params.arguments;
+   }
+
    var outputOfEvaluation = "Object not found!";
 
    if (result.scope && result.consoleApiObj) {

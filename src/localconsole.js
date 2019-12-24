@@ -62,7 +62,7 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
       }
       else {
 
-         this.executeCommand(line, (_err, _result) => {
+         this.assessScopeAndExecuteCommand(line, (_err, _result) => {
             process.stdout.write(this.processOutput(_err ? _err : _result)+"\n");
             this.prompt();
          });
@@ -73,7 +73,56 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 };
 
-// Override thesee three functions
+LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
+
+   this.parseLine(_line, (_err, _result) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      if (_result.consoleObjHierarchy) {
+         var cmdObj = null;
+
+         for (var i = 0; i < _result.consoleObjHierarchy.length; ++i) {
+
+            try {
+               var ConsoleCmdObj = require("./consolecmds/" + _result.consoleObjHierarchy[i] +  "cmd");
+               cmdObj = new ConsoleCmdObj({ uName: _result.consoleObjuName }, this);
+               break;
+            }
+            catch (_err) {
+               continue;
+            }
+         }
+
+         if (cmdObj && _result.method) {
+
+            var cmdMethod = Object.getPrototypeOf(cmdObj)[_result.method];
+
+            if (cmdMethod) {
+               try {
+                  Object.getPrototypeOf(cmdObj)[_result.method].call(cmdObj, _result.scope, _result.arguments, _callback);
+               }
+               catch (_err) {
+                  _callback(_err);
+               }
+            }
+            else {
+               this.executeParsedCommand(_result.scope, _result.method, _result.arguments, _callback);
+            }
+         }
+         else {
+            this.executeCommand(_line, _callback);
+         }
+      }
+      else {
+         _callback("Object not found!");
+      }
+   });
+};
+
+// Override thesee five functions
 LocalConsole.prototype.scopeExists = function(_line, _callback) {
    this.consoleApiSession.scopeExists({ scope: this.currentScope, line: _line }, _callback);
 };
@@ -82,8 +131,20 @@ LocalConsole.prototype.autoComplete = function(_line, _callback) {
    this.consoleApiSession.completeLine({ scope: this.currentScope, line: _line }, _callback);
 };
 
+LocalConsole.prototype.parseLine = function(_line, _callback) {
+   this.consoleApiSession.parseLine({ scope: this.currentScope, line: _line }, _callback);
+};
+
 LocalConsole.prototype.executeCommand = function(_line, _callback) {
    this.consoleApiSession.executeCommand({ scope: this.currentScope, line: _line }, _callback);
+};
+
+LocalConsole.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
+   this.consoleApiSession.executeCommand({ obj: _obj, method: _method, arguments: _arguments }, _callback);
+};
+
+LocalConsole.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, _arguments, _callback) {
+   this.consoleApiSession.executeCommand({ obj: _obj, method: _method, arguments: _arguments }, _callback);
 };
 
 LocalConsole.prototype.getPromptColour = function(_prompt) {

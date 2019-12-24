@@ -7,29 +7,23 @@ function CasaConsoleCmd(_config, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
-CasaConsoleCmd.prototype.fetchDbs = function(_line, _parseResult, _callback) {
-   var line = _line.split("(")[0];
-
+CasaConsoleCmd.prototype.fetchDbs = function(_obj, _arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   line = line + "(\"" + myAddress + "\", " + port +")";
-   this.console.identifyCasaAndSendCommand(line, "executeCommand", _callback);
+   this.console.executeParsedCommand(_obj, "fetchDbs", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.fetchDb = function(_line, _parseResult, _callback) {
-   var line = _line.split("(")[0];
-
+CasaConsoleCmd.prototype.fetchDb = function(_obj, _arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   line = line + "(\"" + myAddress + "\", " + port +")";
-   this.console.identifyCasaAndSendCommand(line, "executeCommand", _callback);
+   this.console.executeParsedCommand(_obj, "fetchDb", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.exportDb = function(_line, _parseResult, _callback) {
+CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
 
-   this.console.identifyCasaAndSendCommand(_line, "executeCommand", (_err, _result) => {
+   this.console.executeParsedCommand(_obj, "exportDb", null, (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
@@ -37,7 +31,7 @@ CasaConsoleCmd.prototype.exportDb = function(_line, _parseResult, _callback) {
      
       Db = require('../db');
       var output = Db.export(_result);
-      var fileName = this.gang.configPath() + "/exports/" + this.myObjuName + ".json";
+      var fileName = this.gang.configPath() + "/configs/" + this.myObjuName + ".json";
       var fs = require('fs');
       var content = JSON.stringify(output, null, 3);
 

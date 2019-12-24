@@ -145,49 +145,6 @@ Console.prototype.getCasaName = function(_line) {
    return casaName;
 };
 
-Console.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
-
-   this.parseLine(_line, (_err, _result) => {
-
-      if (_err) {
-         return _callback(_err);
-      }
-
-      if (_result.consoleObjHierarchy) {
-         var cmdObj = null;
-
-         for (var i = 0; i < _result.consoleObjHierarchy.length; ++i) {
-            
-            try {
-               var ConsoleCmdObj = require("./consolecmds/" + _result.consoleObjHierarchy[i] +  "cmd");
-               cmdObj = new ConsoleCmdObj({ uName: _result.consoleObjuName }, this);
-               break;
-            }
-            catch (_err) {
-               continue;
-            }
-         }
-
-         if (cmdObj && _result.method) {
-
-            try {
-               Object.getPrototypeOf(cmdObj)[_result.method].call(cmdObj, _line, _result, _callback);
-            }
-            catch (_err) {
-               _callback(_err);
-               //this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
-            }
-         }
-         else {
-            this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
-         }
-      }
-      else {
-         _callback("Object not found!");
-      }
-   });
-};
-
 Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
    var casaName = this.getCasaName(_line);
 
@@ -270,7 +227,15 @@ Console.prototype.autoComplete = function(_line, _callback) {
 };
 
 Console.prototype.executeCommand = function(_line, _callback) {
-   this.assessScopeAndExecuteCommand(_line, _callback);
+   this.identifyCasaAndSendCommand(_line, "executeParsedCommand", _callback);
+};
+
+Console.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
+   this.identifyCasaAndSendCommand([_obj, _method, _arguments], "executeParsedCommand", _callback);
+};
+
+Console.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, _arguments, _callback) {
+   this.sendCommandToAllCasas([_obj, _method, _arguments], "executeParsedCommand", _callback);
 };
 
 Console.prototype.setPrompt = function(_prompt) {
@@ -411,6 +376,18 @@ RemoteCasa.prototype.executeCommand = function(_line, _callback) {
    if (this.connected) {
       this.executeCallback = _callback;
       this.socket.emit('executeCommand', { scope: this.owner.currentScope, line: _line });
+      return true;
+   }
+   else {
+      return false;
+   }
+};
+
+RemoteCasa.prototype.executeParsedCommand = function(_command, _callback) {
+
+   if (this.connected) {
+      this.executeCallback = _callback;
+      this.socket.emit('executeCommand', { obj: _command[0], method: _command[1], arguments: _command[2] });
       return true;
    }
    else {
