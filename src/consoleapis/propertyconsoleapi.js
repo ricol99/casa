@@ -41,7 +41,7 @@ PropertyConsoleApi.prototype.watching = function(_params, _callback) {
 };
 
 PropertyConsoleApi.prototype.listeners = function(_params, _callback) {
-   this.owner.listeners(this.name, _callback);
+   this.owner.listeners([this.name], _callback);
 };
 
 module.exports = exports = PropertyConsoleApi;

@@ -137,22 +137,34 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult)  {
    var prevResultCount =  (_prevResult) ? _prevResult.hits.length : 0;
    var result =  (_prevResult) ? _prevResult : { hits: [], consoleApiObj: null };
    var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
+   var perfectMatch = -1;
 
    if (_collection) {
 
        for (var obj in _collection) {
 
           if (obj.startsWith(matchString)) {
+
+             if (obj === matchString) {
+                perfectMatch = result.hits.length;
+             }
              result.hits.push((this.fullScopeName === "") ? obj : this.fullScopeName+":"+obj);
           }
        }
    }
    else {
       result.hits = result.hits.concat(this.filterGlobalObjects(matchString))
+
+      for (var i = 0; i < result.hits.length; ++i) {
+
+         if (result.hits[i] === matchString) {
+            perfectMatch = i;
+         }
+      }
    }
 
-   if ((result.hits.length === 1) && (prevResultCount === 0)) {
-      var splitRes = result.hits[0].split(":");
+   if ((perfectMatch !== -1) || ((result.hits.length === 1) && (prevResultCount === 0))) {
+      var splitRes = result.hits[(perfectMatch === -1) ? 0 : perfectMatch].split(":");
 
       if ((filterArray.length === 1) && _collection) {
          result.consoleApiObj = this.findOrCreateConsoleApiObject(this.myObjuName+":"+splitRes[splitRes.length-1], _collection[splitRes[splitRes.length-1]]);
