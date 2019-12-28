@@ -429,7 +429,6 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
 ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
    var result = this.splitLine(_params.scope, _params.line);
 
-
    if (result.consoleApiObj) {
       var hierarchy = util.getClassHierarchy(result.consoleApiObj);
       result.consoleObjHierarchy = [];

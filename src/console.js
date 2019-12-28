@@ -227,7 +227,7 @@ Console.prototype.autoComplete = function(_line, _callback) {
 };
 
 Console.prototype.executeCommand = function(_line, _callback) {
-   this.identifyCasaAndSendCommand(_line, "executeParsedCommand", _callback);
+   this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
 };
 
 Console.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {

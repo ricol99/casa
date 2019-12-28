@@ -81,7 +81,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
          return _callback(_err);
       }
 
-      if (_result.consoleObjHierarchy) {
+      if (_result.hasOwnProperty("consoleObjHierarchy")) {
          var cmdObj = null;
 
          for (var i = 0; i < _result.consoleObjHierarchy.length; ++i) {
