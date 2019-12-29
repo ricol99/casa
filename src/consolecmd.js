@@ -12,5 +12,12 @@ function ConsoleCmd(_config, _console) {
 ConsoleCmd.prototype.coldStart = function() {
 };
 
+ConsoleCmd.prototype.checkArguments = function(_minLength, _argumens) {
+
+   if (_argumens.length < _minLength)  {
+      throw("Not enough argumens");
+   }
+};
+
 
 module.exports = exports = ConsoleCmd;

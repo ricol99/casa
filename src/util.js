@@ -1,5 +1,18 @@
 var Util = require('util');
 
+Util.memberCount = function(_obj) {
+   var count = 0;
+
+   for (var param in _obj) {
+
+      if (_obj.hasOwnProperty(param)) {
+         ++count;
+      }
+   }
+
+   return count;
+}
+
 Util.getLocalIpAddress = function() {
    var os = require( 'os' );
    var networkInterfaces = os.networkInterfaces( );

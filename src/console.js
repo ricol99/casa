@@ -238,6 +238,19 @@ Console.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, _argu
    this.sendCommandToAllCasas([_obj, _method, _arguments], "executeParsedCommand", _callback);
 };
 
+Console.prototype.getConnectedCasas = function() {
+   var connectedCasas = [];
+
+   for (var casa in this.remoteCasas) {
+
+     if (this.remoteCasas.hasOwnProperty(casa) && this.remoteCasas[casa].connected) {
+        connectedCasas.push(casa);
+     }
+   }
+
+   return connectedCasas;
+};
+
 Console.prototype.setPrompt = function(_prompt) {
    LocalConsole.prototype.setPrompt.call(this, _prompt + " [" + this.connectedCasas + "]");
 };

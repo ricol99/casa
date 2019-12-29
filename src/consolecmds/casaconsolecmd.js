@@ -8,6 +8,8 @@ function CasaConsoleCmd(_config, _console) {
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
 CasaConsoleCmd.prototype.fetchDbs = function(_obj, _arguments, _callback) {
+   this.checkArguments(0, _arguments);
+
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
@@ -15,6 +17,8 @@ CasaConsoleCmd.prototype.fetchDbs = function(_obj, _arguments, _callback) {
 };
 
 CasaConsoleCmd.prototype.fetchDb = function(_obj, _arguments, _callback) {
+   this.checkArguments(0, _arguments);
+
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
@@ -22,6 +26,7 @@ CasaConsoleCmd.prototype.fetchDb = function(_obj, _arguments, _callback) {
 };
 
 CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
+   this.checkArguments(0, _arguments);
 
    this.console.executeParsedCommand(_obj, "exportDb", null, (_err, _result) => {
 
@@ -41,5 +46,63 @@ CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
    });
 };
 
+CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
+   this.checkArguments(0, _arguments);
+
+   var cjson = require('cjson');
+   var configFilename = this.gang.configPath() + "/configs/" + this.myObjuName + ".json";
+   var inputConfig = cjson.load(configFilename);
+
+   if (inputConfig.casa.uName !== this.myObjuName) {
+      return _callback("Config file corrupt.");
+   }
+
+   var Db = require('../db');
+   var db = new Db(this.myObjuName, undefined, true);
+  
+   db.on('connected', () => {
+      var configs = {};
+      configs.casa = { "uName": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
+      configs.users = [];
+      configs.services = [];
+      configs.scenes = [];
+      configs.things = [];
+
+      for (var section in configs) {
+
+         if (configs.hasOwnProperty(section) && inputConfig.hasOwnProperty(section)) {
+
+            if (configs[section] instanceof Array || (util.memberCount(configs[section]) === 0)) {
+
+               if (inputConfig.hasOwnProperty(section)) {
+                  configs[section] = inputConfig[section];
+                  db.appendToCollection(section, configs[section]);
+               }
+            }
+            else {
+               for (var param in configs[section]) {
+
+                  if (inputConfig.hasOwnProperty(section) && inputConfig[section].hasOwnProperty(param)) {
+                     configs[section][param] = inputConfig[section][param];
+                  }
+               }
+               db.appendToCollection(section, configs[section]);
+            }
+         }
+      }
+
+      db.close();
+      var myAddress = util.getLocalIpAddress();
+      var port = this.gang.mainListeningPort();
+
+      this.console.executeParsedCommand(_obj, "fetchDb", [ myAddress, port], _callback);
+   });
+
+   db.on('error', (_data) => {
+      _callback("Unable to open database!");
+   });
+
+   db.connect();
+};
+
 module.exports = exports = CasaConsoleCmd;
- 

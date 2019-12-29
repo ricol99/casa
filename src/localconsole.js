@@ -101,6 +101,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
             var cmdMethod = Object.getPrototypeOf(cmdObj)[_result.method];
 
             if (cmdMethod) {
+
                try {
                   Object.getPrototypeOf(cmdObj)[_result.method].call(cmdObj, _result.scope, _result.arguments, _callback);
                }
@@ -113,7 +114,19 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
             }
          }
          else {
-            this.executeCommand(_line, _callback);
+            this.executeCommand(_line, (_err, _newResult) => {
+
+               if (_err) {
+                  return _callback(_err);
+               }
+
+               if (!_result.method) {
+                  this.currentScope = _result.newScope;
+                  this.setPrompt(_result.newScope);
+               }
+
+               _callback(_err, _newResult);
+            });
          }
       }
       else {
