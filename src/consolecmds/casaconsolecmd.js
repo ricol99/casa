@@ -7,22 +7,22 @@ function CasaConsoleCmd(_config, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
-CasaConsoleCmd.prototype.fetchDbs = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.updateDbs = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "fetchDbs", [ myAddress, port], _callback);
+   this.console.executeParsedCommand(_obj, "updateDbs", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.fetchDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.updateDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "fetchDb", [ myAddress, port], _callback);
+   this.console.executeParsedCommand(_obj, "updateDb", [ myAddress, port], _callback);
 };
 
 CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
@@ -95,7 +95,7 @@ CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
       var myAddress = util.getLocalIpAddress();
       var port = this.gang.mainListeningPort();
 
-      this.console.executeParsedCommand(_obj, "fetchDb", [ myAddress, port], _callback);
+      this.console.executeParsedCommand(_obj, "updateDb", [ myAddress, port], _callback);
    });
 
    db.on('error', (_data) => {

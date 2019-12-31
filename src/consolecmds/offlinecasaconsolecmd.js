@@ -1,31 +1,15 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 
-function GangConsoleCmd(_config, _console) {
+function OfflineCasaConsoleCmd(_config, _console) {
    ConsoleCmd.call(this, _config, _console);
 }
 
-util.inherits(GangConsoleCmd, ConsoleCmd);
+util.inherits(OfflineCasaConsoleCmd, ConsoleCmd);
 
-GangConsoleCmd.prototype.restart = function(_obj, _arguments, _callback)  {
-   this.console.executeParsedCommandOnAllCasas(_obj, "restart", _arguments, _callback);
-};
+OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
 
-GangConsoleCmd.prototype.updateDbs = function(_obj, _arguments, _callback) {
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
-   this.console.executeParsedCommandOnAllCasas(_obj, "updateDbs", [ myAddress, port ], _callback);
-};
-
-GangConsoleCmd.prototype.updateDb = function(_obj, _arguments, _callback) {
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
-   this.console.executeParsedCommandOnAllCasas(_obj, "updateDb", [ myAddress, port ], _callback);
-};
-
-GangConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
-
-   this.console.executeParsedCommand(_obj, "exportDb", null, (_err, _result) => {
+   this.gang.getDb().readAll((_err, _result) => {
 
       if (_err) {
          return _callback(_err);
@@ -43,7 +27,7 @@ GangConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
    });
 };
 
-GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
+OfflineCasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
    
    var cjson = require('cjson');
@@ -91,8 +75,7 @@ GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
       db.close();
       var myAddress = util.getLocalIpAddress();
       var port = this.gang.mainListeningPort();
-      
-      this.console.executeParsedCommandOnAllCasas(_obj, "updateDb", [ myAddress, port], _callback);
+      _callback(null, true);
    });
    
    db.on('error', (_data) => {
@@ -102,5 +85,5 @@ GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    db.connect();
 }; 
 
-module.exports = exports = GangConsoleCmd;
+module.exports = exports = OfflineCasaConsoleCmd;
  

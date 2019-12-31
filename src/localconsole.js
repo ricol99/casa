@@ -180,6 +180,11 @@ LocalConsole.prototype.processOutput = function(_outputOfEvaluation) {
    }
 };
 
+LocalConsole.prototype.setPromptMidLine = function(_prompt) {
+   this.setPrompt(_prompt);
+   this.rl.prompt(true);
+};
+
 LocalConsole.prototype.writeOutput = function(_line) {
    process.stdout.write("\n" + this.processOutput(_line) + "\n");
    this.prompt();
@@ -193,6 +198,7 @@ LocalConsole.prototype.setPrompt = function(_prompt) {
    var colour = this.getPromptColour(_prompt);
    this.rl.setPrompt(colour + _prompt + " > \x1b[0m");
 };
+
 
 module.exports = exports = LocalConsole;
  

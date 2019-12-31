@@ -38,7 +38,7 @@ GangConsoleApi.prototype.restart = function(_params, _callback) {
    process.exit(3);
 };
 
-GangConsoleApi.prototype.fetchDb = function(_params, _callback) {
+GangConsoleApi.prototype.updateDb = function(_params, _callback) {
    this.checkParams(2, _params);
 
    var dbName = (_params.length > 2) ? _params[2] : this.gang.uName;
@@ -58,16 +58,16 @@ GangConsoleApi.prototype.fetchDb = function(_params, _callback) {
    });
 };
 
-GangConsoleApi.prototype.fetchDbs = function(_params, _callback) {
+GangConsoleApi.prototype.updateDbs = function(_params, _callback) {
    this.checkParams(2, _params);
-   this.fetchDb(_params, (_err, _result) => {
+   this.updateDb(_params, (_err, _result) => {
 
       if (_err)  {
          _callback(_err);
       }
       else {
          _params.push(this.gang.casa.uName);
-         this.fetchDb(_params, _callback);
+         this.updateDb(_params, _callback);
       }
    });
 };
@@ -77,7 +77,7 @@ GangConsoleApi.prototype.exportDb = function(_params, _callback) {
 };
 
 GangConsoleApi.prototype.importDb = function(_params, _callback) {
-   this.fetchDb(_params, _callback);
+   this.updateDb(_params, _callback);
 };
 
 module.exports = exports = GangConsoleApi;

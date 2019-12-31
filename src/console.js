@@ -11,7 +11,7 @@ function Console(_params) {
    this.gangName = _params.gangName;
    this.casaName = _params.casaName;
    this.remoteCasas = {};
-   this.started = false;
+   this.offline = true;
    this.connectedCasas = 0;
    this.defaultCasa = null;
 
@@ -49,6 +49,10 @@ Console.prototype.coldStart = function() {
 
    casaFinder.coldStart();
    casaFinder.startSearching();
+
+   this.offlineCasa = new OfflineCasa({ name: "casa:offlinecase" }, this);
+
+   this.start("::");
 };
 
 Console.prototype.casaFound = function(_params) {
@@ -69,13 +73,13 @@ Console.prototype.casaFound = function(_params) {
                this.remoteCasas[_data.name].setDb(_result);
             }
 
-            if (!this.started) {
+            if (this.offline) {
                this.defaultCasa = this.remoteCasas[_data.name];
-               this.started = true;
-               this.start("::");
+               this.offline = false;
+               this.updatePromptMidLine();
             }
             else {
-               this.updatePrompt();
+               this.updatePromptMidLine();
             }
          });
       });
@@ -85,13 +89,16 @@ Console.prototype.casaFound = function(_params) {
 
       remoteCasa.on("disconnected", (_data) => {
          this.connectedCasas = this.connectedCasas - 1;
+
+         if (this.connectedCasas === 0) {
+            this.offline = true;
+            this.currentScope = "::";
+         }
+
          this.updatePrompt();
          this.writeOutput("Casa "+_data.name+" disconnected");
 
-         if (this.connectedCasas === 0) {
-            process.exit(1);
-         }
-         else if (this.defaultCasa && this.defaultCasa === this.remoteCasas[_data.name]) {
+         if ((this.connectedCasas >  0) && (this.defaultCasa && this.defaultCasa === this.remoteCasas[_data.name])) {
             this.defaultCasa = null;
 
             for (var casa in this.remoteCasas) {
@@ -146,6 +153,11 @@ Console.prototype.getCasaName = function(_line) {
 };
 
 Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
+
+   if (this.offline) {
+      return this.sendCommandToCasa(this.offlineCasa, _line, _func, _callback);
+   }
+
    var casaName = this.getCasaName(_line);
 
    if (this.remoteCasas.hasOwnProperty(casaName)) {
@@ -167,6 +179,10 @@ Console.prototype.sendCommandToCasa = function(_casa, _line, _func, _callback) {
 };
 
 Console.prototype.sendCommandToAllCasas = function(_line, _func, _callback) {
+
+   if (this.offline) {
+      return this.sendCommandToCasa(this.offlineCasa, _linw, _func, _callback);
+   }
 
    if (this.allCasaCommandOngoing)  {
       return false;
@@ -257,6 +273,10 @@ Console.prototype.setPrompt = function(_prompt) {
 
 Console.prototype.updatePrompt = function() {
    LocalConsole.prototype.setPrompt.call(this, this.currentScope + " [" + this.connectedCasas + "]");
+};
+
+Console.prototype.updatePromptMidLine = function() {
+   LocalConsole.prototype.setPromptMidLine.call(this, this.currentScope);
 };
 
 function RemoteCasa(_config, _owner) {
@@ -406,6 +426,95 @@ RemoteCasa.prototype.executeParsedCommand = function(_command, _callback) {
    else {
       return false;
    }
+};
+
+function OfflineCasa(_config, _owner) {
+   this.owner = _owner;
+   this.name = _config.name;
+   this.db = this.owner.gang.getDb(this.owner.gang.name);
+
+   var ConsoleCmdObj = require("./consolecmds/offlinecasaconsolecmd");
+   this.cmdObj = new ConsoleCmdObj({ uName: "casa:offlinecasa" }, this);
+   this.methods = Object.getPrototypeOf(this.cmdObj);
+}
+
+OfflineCasa.prototype.scopeExists = function(_line, _callback) {
+   var gScope = _line.startsWith("::");
+
+   if (_callback) {
+      _callback(null, gScope ? (_line.replace("::", "").indexOf(':') === -1) : (_line.indexOf(':') === -1));
+   }
+   else {
+      return gScope ? (_line.replace("::", "").indexOf(':') === -1) : (_line.indexOf(':') === -1);
+   }
+};
+
+OfflineCasa.prototype.parseLine = function(_line, _callback) {
+
+   if (!this.scopeExists(_line)) {
+
+      if (_callback) {
+         return _callback("Object does not exist!");
+      }
+      else {
+         return null;
+      }
+   }
+
+   var line = _line.replace("::", "");
+   var method = _line.split("(")[0];
+   var consoleObjHierarchy = [ "offlinecasaconsole" ];
+   var scope = "::";
+   var arguments = [];
+
+   if (line.split("(").length > 1) {
+      var methodArguments = line.split("(").slice(1).join("(").trim();
+      var i;
+
+      for (i = methodArguments.length-1; i >= 0; --i) {
+
+         if (methodArguments.charAt(i) == ')') {
+            break;
+         }
+      }
+
+      if (i !== 0) {
+         methodArguments = methodArguments.substring(0, i);
+         arguments = JSON.parse("["+methodArguments+"]");
+      }
+   }
+
+   if (_callback) {
+      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments });
+   }
+   else {
+      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments };
+   }
+};
+
+OfflineCasa.prototype.autoComplete = function(_line, _callback) {
+   return _callback(null, [ this.findMatchingMethod(_line.replace("::", "")), _line ]);
+};
+
+OfflineCasa.prototype.executeCommand = function(_line, _callback) {
+   _callback("Casa is offline!");
+};
+
+OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {
+   _callback("Casa is offline!");
+};
+
+OfflineCasa.prototype.findMatchingMethod = function(_matchString) {
+   var matchingMethods = [];
+
+   for (var method in this.methods) {
+
+      if (this.methods.hasOwnProperty(method) && method.startsWith(_matchString)) {
+         matchingMethods.push(method);
+      }
+   }
+
+   return matchingMethods;
 };
 
 module.exports = exports = Console;
