@@ -326,9 +326,15 @@ StateProperty.prototype.becomeController = function() {
    // I am now the controller
    this.controllingOwner = true;
 
-   // Re-apply current state
+   // Re-apply current state. but try to avoid race conditions
    if (this.currentState) {
-      this.currentState.alignActions();
+
+      setTimeout((_state) => {
+
+         if (this.currentState === _state) {
+            this.currentState.alignActions();
+         }
+      }, 500, this.currentState);
    }
 };
 
