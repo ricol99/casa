@@ -23,7 +23,7 @@ function Bedroom(_config) {
                                    states: [{ name: "not-active",
                                               source: { guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
                                             { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
-                                              timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]};
+                                              timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
    Room.call(this, _config);
 
    if (_config.hasOwnProperty('user')) {

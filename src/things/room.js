@@ -66,25 +66,38 @@ function Room(_config) {
       this.movementTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
    }
 
+   if (_config.hasOwnProperty('overrideTimeouts')) {
+      this.overrideTimeouts = _config.overrideTimeouts;
+   }
+   else {
+      var value = (_config.hasOwnProperty('overrideTimeout')) ? _config.overrideTimeout : 600;
+      this.overrideTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
+   }
+
    this.buildingName = _config.building;
 
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
+   this.ensurePropertyExists('override-timeout', 'property', { initialValue: this.overrideTimeouts.day }, _config);
 
    this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", ignoreControl: true, type: "stateproperty", initialValue: "day", 
                                                              states: [{ name: "day", sources: [{ property: "low-light", value: true, nextState: "dull-day" },
                                                                                                { property: "night-time", "value": true, nextState: "night" }],
-                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["day"] }},
+                                                                                     actions: [{ property: "movement-timeout", value: this.movementTimeouts["day"] },
+                                                                                               { property: "override-timeout", value: this.overrideTimeouts["day"] }]},
                                                                       { name: "dull-day", sources: [{ property: "low-light", "value": false, nextState: "day" },
                                                                                                     { property: "night-time", "value": true, nextState: "night" },
                                                                                                     { property: "evening-possible", "value": true, nextState: "evening" }],
-                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["dull-day"] }},
+                                                                                     actions: [{ property: "movement-timeout", value: this.movementTimeouts["dull-day"] },
+                                                                                               { property: "override-timeout", value: this.overrideTimeouts["dull-day"] }]},
                                                                       { name: "evening", sources: [{ property: "night-time", "value": true, nextState: "night" },
                                                                                                    { property: "low-light", "value": false, nextState: "day" }],
-                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["evening"] }},
+                                                                                     actions: [{ property: "movement-timeout", value: this.movementTimeouts["evening"] },
+                                                                                               { property: "override-timeout", value: this.overrideTimeouts["evening"] }]},
                                                                       { name: "night", sources: [{ property: "night-time", "value": false, nextState: "day" }],
-                                                                                     action: { property: "movement-timeout", value: this.movementTimeouts["night"] }}] }, _config);
+                                                                                     actions: [{ property: "movement-timeout", value: this.movementTimeouts["night"] },
+                                                                                               { property: "override-timeout", value: this.overrideTimeouts["night"] }] }] }, _config);
 
    this.ensurePropertyExists('users-present-state', 'stateproperty', { name: "users-present-state", type: "stateproperty", initialValue: "no-users-present", 
                                                                        states: [{ name: "no-users-present", source: { property: "movement", "value": true, nextState: "users-present" } },
@@ -98,7 +111,7 @@ function Room(_config) {
                                                                            : { initialValue: 'not-active',
                                                                                states: [{ name: "not-active", source: { event: "room-switch-event", nextState: "active" }},
                                                                                         { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
-                                                                                          timeout: { "duration": this.overrideTimeout, "nextState": "not-active" }} ]};
+                                                                                          timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
 
    this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
 
