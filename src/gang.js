@@ -125,6 +125,25 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
          this.console.coldStart();
       });
 
+      this.gangDb.on('connect-error', (_data) => {
+         this.gangDb = new Db(this.uName, _configPath, true);
+
+         this.gangDb.on('connected', (_data) => {
+            this.dbs[_data.name] = _data.db;
+            this.gangDb.appendToCollection("gang", { uName: this.uName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 });
+            var Console = require('./console');
+            this.console = new Console({ gangName: this.uName, casaName: null, secureMode: _secureMode, certPath: _certPath });
+            this.console.coldStart();
+         });
+
+         this.gangDb.on('connect-error', (_data) => {
+            process.stderr.write("Unable to create gang database\n");
+            process.exit(1);
+         });
+
+         this.gangDb.connect();
+      });
+
       this.gangDb.connect();
    }
 };
@@ -793,7 +812,7 @@ Gang.prototype.getDb = function(_dbName, _meta, _callback) {
          }
       });
 
-      db.on('error', (_data) => {
+      db.on('connect-error', (_data) => {
 
          if (this.dbCallbacks[_data.name]) {
             delete this.dbCallbacks[_data.name].db;

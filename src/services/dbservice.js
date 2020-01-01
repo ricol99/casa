@@ -212,6 +212,10 @@ DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) 
             this.gang.gangDb.append(_docs, _callback);
          });
 
+         this.gang.gangDb.on('connect-error', (_data) => {
+            return _callback(_data.error);
+         });
+
          this.gang.gangDb.connect();
       }
    });

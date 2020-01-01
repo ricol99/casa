@@ -72,12 +72,12 @@ Db.prototype.connect = function() {
 
       fs.access(this.dbFullName, fs.F_OK, (_err) => {
 
-         //if (_err) {
-            //this.asyncEmit('error', { error: _err, name: this.dbName });
-         //}
-         //else {
+         if (_err) {
+            this.asyncEmit('connect-error', { error: _err, name: this.dbName });
+         }
+         else {
             this.createDb();
-         //}
+         }
       });
    }
 };

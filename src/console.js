@@ -136,7 +136,10 @@ Console.prototype.getPromptColour = function(_prompt) {
 Console.prototype.getCasaName = function(_line) {
    var casaName = null;
 
-   if ((_line.length >= 1) && (_line[0] === ':')) {
+   if ((_line.length === 1) && (_line === ":")) {
+      casaName = (this.currentScope === "::") ? "" : this.currentScope.replace("::", "").split(":")[0] + ":" + this.currentScope.replace("::", "").split(":")[1];
+   }
+   else if ((_line.length >= 1) && (_line[0] === ':')) {
       var splitStrs = (_line[1] ===':') ? _line.substr(2).replace(".", ":").split(":") : _line.substr(1).replace(".", ":").split(":");
       casaName = (splitStrs.length >= 2) ? splitStrs[0] + ":" + splitStrs[1] : "";
    }
@@ -431,7 +434,7 @@ RemoteCasa.prototype.executeParsedCommand = function(_command, _callback) {
 function OfflineCasa(_config, _owner) {
    this.owner = _owner;
    this.name = _config.name;
-   this.db = this.owner.gang.getDb(this.owner.gang.name);
+   this.db = this.owner.gang.getDb();
 
    var ConsoleCmdObj = require("./consolecmds/offlinecasaconsolecmd");
    this.cmdObj = new ConsoleCmdObj({ uName: "casa:offlinecasa" }, this);
@@ -466,6 +469,7 @@ OfflineCasa.prototype.parseLine = function(_line, _callback) {
    var consoleObjHierarchy = [ "offlinecasaconsole" ];
    var scope = "::";
    var arguments = [];
+   var consoleObjuName = "offlinecasaconsolecmd:offline";
 
    if (line.split("(").length > 1) {
       var methodArguments = line.split("(").slice(1).join("(").trim();
@@ -485,10 +489,10 @@ OfflineCasa.prototype.parseLine = function(_line, _callback) {
    }
 
    if (_callback) {
-      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments });
+      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName });
    }
    else {
-      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments };
+      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName };
    }
 };
 
