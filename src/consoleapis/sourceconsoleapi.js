@@ -8,7 +8,7 @@ function SourceConsoleApi(_config, _owner) {
 util.inherits(SourceConsoleApi, SourceBaseConsoleApi);
 
 SourceConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var myExclusions = [ "persistEvents" ];
+   var myExclusions = [ "persistUpdatedSource" ];
 
    if (_exclusions) {
       return SourceBaseConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
@@ -18,7 +18,7 @@ SourceConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
    }
 };
 
-SourceConsoleApi.prototype.persistEvents = function(_events, _callback) {
+SourceConsoleApi.prototype.persistUpdatedSource = function(_replaceMember, _newMember, _callback) {
    this.db = this.gang.getDb(this.gang.casa.uName);
 
    this.db.find(this.myObjuName, (_err, _result) => {
@@ -28,16 +28,16 @@ SourceConsoleApi.prototype.persistEvents = function(_events, _callback) {
 
          this.db.find(this.myObjuName, (_err2, _result2) => {
 
-            if (_err2) {
+            if (_err2 || (_result2 === null)) {
                return _callback(_err2);
             }
 
-            _result2.events = _events;
+            _result2[_replaceMember] = _newMember;
             this.db.update(_result2, _callback);
          });
       }
       else {
-         _result.events = _events;
+         _result[_replaceMember] = _newMember;
          this.db.update(_result, _callback);
       }
    });
@@ -58,10 +58,12 @@ SourceConsoleApi.prototype.addScheduledEvent = function(_params, _callback) {
    var rules = (_params[1] instanceof Array) ? _params[1] : [ _params[1] ];
    var persist = (_params.length > 2) ? _params[2] : false;
 
-   this.myObj().addEvent({ name: _params[0], rules: rules });
+   if (!this.myObj().addEvent({ name: _params[0], rules: rules })) {
+      return _callback("Event with that name alreadfy exists!");
+   }
 
    if (persist) {
-      this.persistEvents(this.myObj().events, _callback);
+      this.persistUpdatedSource("events", this.myObj().events, _callback);
    }
    else {
       _callback(null, true);
@@ -75,7 +77,7 @@ SourceConsoleApi.prototype.removeScheduledEvent = function(_params, _callback) {
    var result = this.myObj().deleteEvent(_params[0]);
 
    if (result && persist) {
-      this.persistEvents(this.myObj().events, _callback);
+      this.persistUpdatedSource("events", this.myObj().events, _callback);
    }
    else {
       _callback(null, result);
@@ -90,7 +92,7 @@ SourceConsoleApi.prototype.updateScheduledEvent = function(_params, _callback) {
    var result = this.myObj().updateEvent({ name: _params[0], rules: rules });
    
    if (result && persist) {
-      this.persistEvents(this.myObj().events, _callback);
+      this.persistUpdatedSource("events", this.myObj().events, _callback);
    }
    else {
       _callback(null, result);

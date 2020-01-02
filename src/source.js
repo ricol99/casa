@@ -35,9 +35,7 @@ function Source(_config) {
       }
    }
 
-   if (_config.events) {
-      this.events = util.copy(_config.events, true);
-   }
+   this.events = (_config.hasOwnProperty("events")) ? util.copy(_config.events, true) : [];
 
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { "initialValue": 'auto', "takeControlOnTransition": true,
@@ -180,8 +178,7 @@ Source.prototype.updateEvent = function(_modifiedEvent) {
    }
 
    if (this.deleteEvent(_modifiedEvent.name)) {
-      this.addEvent(this.events[eventIndex]);
-      return true;
+      return this.addEvent(this.events[eventIndex]);
    }
    else {
       return false;
@@ -189,8 +186,14 @@ Source.prototype.updateEvent = function(_modifiedEvent) {
 };
 
 Source.prototype.addEvent = function(_event) {
+
+   if (this.getEventIndex(_event.name) !== -1) {
+      return false;
+   }
+
    this.events.push(_event);
    this.scheduleService.addEvent(this, _event);
+   return true;
 };
 
 Source.prototype.getEventIndex = function(_eventName) {
@@ -222,7 +225,7 @@ Source.prototype.deleteEvent = function(_eventName) {
 
 Source.prototype.coldStart = function() {
 
-   if (this.events) {
+   if (this.events.length > 0) {
       this.scheduleService = this.getScheduleService();
       this.scheduleService.registerEvents(this, this.events);
    }

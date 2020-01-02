@@ -13,5 +13,92 @@ ThingConsoleApi.prototype.filterScope = function(_scope) {
    return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().things, result);
 };
 
+ThingConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
+   var myExclusions = [ "findMyThingInConfig" ];
+
+   if (_exclusions) {
+      return SourceConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
+   }
+   else {
+      return SourceConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions);
+   }
+};
+
+ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
+
+   if (_thingConfig.uName === this.myObjuName) {
+      return _thingConfig;
+   }
+
+   if (_thingConfig.hasOwnProperty("things") && (_thingConfig.things.length > 0)) {
+
+      for (var i = 0; i < _thingConfig.things.length; ++i) {
+         var result = this.findMyThinginConfig(_thingConfig.things[i]);
+
+         if (result) {
+            return result;
+         }
+      }
+   }
+
+   return null;
+};
+
+ThingConsoleApi.prototype.createThing = function(_params, _callback) {
+   this.checkParams(1, _params);
+   var config = _params[0];
+   var persist = (_params.length > 1) ? _params[1] : false;
+
+   if (this.gang.findObject(config.uName)) {
+      return _callback("Thing already exists!");
+   }
+
+   var topThing = this.myObj().getTopThing();
+
+   if (persist) {
+      this.db = this.gang.getDb(this.gang.casa.uName);
+
+      this.db.find(topThing.uName, (_err, _topThingConfig) => {
+
+         if (_err || (_topThingConfig === null)) {
+            return _callback("Unable to persist new Thing!");
+         }
+
+         var myThingInConfig = this.findMyThingInConfig(_topThingConfig);
+
+         if (!myThingInConfig) {
+            return _callback("Unable to persist new Thing!");
+         }
+
+         if (myThingInConfig.hasOwnProperty("things")) {
+            myThingInConfig.things.push(config);
+         }
+         else {
+            myThingInConfig.things = [ config ];
+         }
+
+         this.db.update(_topThingConfig, (_err2, _result2) => {
+
+            if (_err2) {
+               return _callback("Unable to perist the change");
+            }
+
+            var thingObj = this.gang.createThing(config, this.myObj());
+            topThing.inheritChildProps();
+            this.gang.casa.refreshSourceListeners();
+            thingObj.coldStart();
+            return _callback(null, true);
+         });
+      });
+   }
+   else {
+      var thingObj = this.gang.createThing(config);
+      topThing.inheritChildProps();
+      this.gang.casa.refreshSourceListeners();
+      thingObj.coldStart();
+      _callback(null, true);
+   }
+};
+
 module.exports = exports = ThingConsoleApi;
  

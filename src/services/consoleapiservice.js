@@ -400,8 +400,8 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       matchingMethods = result.consoleApiObj.filterMembers(m);
 
       if (matchingMethods.length === 0) {
-         return (line.indexOf("(") === -1) ? { scope: scope, matchingScopes: matchingScopes, matchingMethods: [] }
-                                           : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], method: null, consoleApiObj: result.consoleApiObj };
+         return (line.indexOf("(") === -1) ? { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0 }
+                                           : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0, method: null, consoleApiObj: result.consoleApiObj };
       }
 
       if ((scope + "." + m) === matchingMethods[0]) {
@@ -423,7 +423,13 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       }
       if (i !== 0) {
          methodArguments = methodArguments.substring(0, i);
-         arguments = JSON.parse("["+methodArguments+"]");
+
+         try {
+            arguments = JSON.parse("["+methodArguments+"]");
+         }
+         catch (_err) {
+            return { error: "Unable to parse arguments: " + _err };
+         }
       }
    }
 
@@ -432,6 +438,10 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
 
 ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
    var result = this.splitLine(_params.scope, _params.line);
+
+   if (result.error) {
+      return _callback(result.error);
+   }
 
    if (result.consoleApiObj) {
       var processedScopeAndLine = this.processScopeAndLine(_params.scope, _params.line);
@@ -465,6 +475,10 @@ ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
 ConsoleApiSession.prototype.completeLine = function(_params, _callback) {
    var result = this.splitLine(_params.scope, _params.line);
 
+   if (result.error) {
+      return _callback(result.error);
+   }
+
    var results = (result.matchingMethods.length === 0) ? result.matchingScopes : result.matchingMethods;
 
    if (_callback) {
@@ -481,6 +495,10 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
 
    if (_params.hasOwnProperty("scope") || _params.hasOwnProperty("line")) {
       result = this.splitLine(_params.scope, _params.line);
+
+      if (result.error) {
+         return _callback(result.error);
+      }
    }
    else if (_params.hasOwnProperty("obj")) {
       result = this.owner.globalConsoleApi.filterScope(_params.obj);
@@ -505,10 +523,17 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
             _callback(_err);
          }
       }
-      else if (result.matchingScopes.length > 0) {
+      else if ((result.matchingScopes.length > 0) && !result.methodNotFound) {
          this.owner.setCurrentSession(this);
-         outputOfEvaluation = result.consoleApiObj.cat([], _callback);
-         this.owner.setCurrentSession(null);
+
+         try {
+            result.consoleApiObj.cat([], _callback);
+            this.owner.setCurrentSession(null);
+         }
+         catch (_err) {
+            this.owner.setCurrentSession(null);
+            _callback(_err);
+         }
       }
       else {
          _callback("Method not found!");

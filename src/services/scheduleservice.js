@@ -286,7 +286,7 @@ Schedule.prototype.resetJob = function(_rule) {
    }
    else {
       console.error(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
-      process.exit(1);
+      throw(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
    }
 }
 

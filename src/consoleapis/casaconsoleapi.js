@@ -48,13 +48,42 @@ CasaConsoleApi.prototype.services = function(_params, _callback) {
 
 CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    this.checkParams(1, _params);
+   var newThingConfig = _params[0];
+   var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (!this.gang.findObject(_params[0])) {
-      var thingObj = this.gang.createThing({uName: _params[0]});
-      return _callback(null, true);
+   if (this.gang.findObject(newThingConfig.uName)) {
+      return _callback("Thing already exists!");
+   }
+
+   if (persist) {
+      this.db = this.gang.getDb(this.gang.casa.uName);
+
+      this.db.find(newThingConfig.uName, (_err, _result) => {
+
+         if (_err || (_result === null)) {
+            var thingObj = this.gang.createThing(util.copy(newThingConfig, true));
+
+            this.db.appendToCollection("things", newThingConfig, (_err2, _result2) => {
+
+               if (_err2) {
+                  return _callback("Not able to perist the change");
+               }
+
+               this.gang.casa.refreshSourceListeners();
+               thingObj.coldStart();
+               return _callback(null, true);
+            });
+         }
+         else {
+            return _callback("Thing already exists!");
+         }
+      });
    }
    else {
-      return _callback(null, false);
+      var thingObj = this.gang.createThing(newThingConfig);
+      this.gang.casa.refreshSourceListeners();
+      thingObj.coldStart();
+      _callback(null, true);
    }
 };
 

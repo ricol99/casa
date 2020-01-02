@@ -153,4 +153,8 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    }
 };
 
+Thing.prototype.getTopThing = function() {
+   return (this.parent) ? this.parent.getTopThing() : this;
+};
+
 module.exports = exports = Thing;
