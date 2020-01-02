@@ -133,7 +133,7 @@ Db.prototype.appendToCollection = function(_collectionName, _config, _callback) 
 };
 
 Db.prototype.find = function(_uName, _callback) {
-   return this.db.findOne({ _id: uName }, _callback);
+   return this.db.findOne({ _id: _uName }, _callback);
 };
 
 Db.prototype.remove = function(_uName, _callback) {
@@ -141,7 +141,7 @@ Db.prototype.remove = function(_uName, _callback) {
 };
 
 Db.prototype.update = function(_config, _callback) {
-   return db.update({ _id: _config.uName }, _config, {}, _callback);
+   return this.db.update({ _id: _config.uName }, _config, {}, _callback);
 };
 
 Db.export = function(_content) {

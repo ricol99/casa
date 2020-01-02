@@ -197,7 +197,8 @@ Source.prototype.getEventIndex = function(_eventName) {
    var eventIndex = -1;
 
    for (var i = 0; i < this.events.length; ++i) {
-      if (this.events[i].name = _eventName) {
+
+      if (this.events[i].name === _eventName) {
          eventIndex = i;
          break;
       }
@@ -214,7 +215,7 @@ Source.prototype.deleteEvent = function(_eventName) {
       return false;
    }
 
-   this.events.splice(eventNumber, 1);
+   this.events.splice(eventIndex, 1);
    this.scheduleService.removeEvent(this, _eventName);
    return true;
 };

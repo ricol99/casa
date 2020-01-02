@@ -799,16 +799,25 @@ Gang.prototype.getDb = function(_dbName, _meta, _callback) {
    }
    else if (_callback) {
       var db = new Db(dbName, this.configPath());
-      this.dbCallbacks[_dbName] = { meta: _meta, callback: _callback, db: db};
+
+      if (this.dbCallbacks.hasOwnProperty(dbName)) {
+         this.dbCallbacks[dbName].push({ meta: _meta, callback: _callback, db: db});
+      }
+      else {
+         this.dbCallbacks[dbName] = [{ meta: _meta, callback: _callback, db: db}];
+      }
 
       db.on('connected', (_data) => {
 
          if (this.dbCallbacks[_data.name]) {
-            this.dbs[_data.name] = this.dbCallbacks[_data.name].db;
-            var cb = this.dbCallbacks[_data.name].callback;
-            var meta = this.dbCallbacks[_data.name].meta;
+            this.dbs[_data.name] = this.dbCallbacks[_data.name][0].db;
+
+            for (var i = 0; i < this.dbCallbacks[_data.name].length; ++i) {
+               var cb = this.dbCallbacks[_data.name][i].callback;
+               var meta = this.dbCallbacks[_data.name][i].meta;
+               cb(null, this.dbs[_data.name], meta);
+            }
             delete this.dbCallbacks[_data.name];
-            cb(null, this.dbs[_data.name], meta);
          }
       });
 
@@ -816,10 +825,13 @@ Gang.prototype.getDb = function(_dbName, _meta, _callback) {
 
          if (this.dbCallbacks[_data.name]) {
             delete this.dbCallbacks[_data.name].db;
-            var cb = this.dbCallbacks[_data.name].callback;
-            var meta = this.dbCallbacks[_data.name].meta;
+
+            for (var i = 0; i < this.dbCallbacks[_data.name].length; ++i) {
+               var cb = this.dbCallbacks[_data.name][i].callback;
+               var meta = this.dbCallbacks[_data.name][i].meta;
+               cb(_data.error, null, meta);
+            }
             delete this.dbCallbacks[_data.name];
-            cb(_data.error, null, meta);
          }
       });
 

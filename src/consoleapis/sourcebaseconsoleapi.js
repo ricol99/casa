@@ -24,7 +24,7 @@ SourceBaseConsoleApi.prototype.filterMembers = function(_filterArray, _exclusion
    }
 };
 
-SourceBaseConsoleApi.prototype.cat = function() {
+SourceBaseConsoleApi.prototype.cat = function(_params, _callback) {
    var output = [];
 
    for (var prop in this.myObj().props) {
@@ -34,7 +34,7 @@ SourceBaseConsoleApi.prototype.cat = function() {
       }
    }
 
-   return output;
+   _callback(null, output);
 };
 
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {

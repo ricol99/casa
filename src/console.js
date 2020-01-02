@@ -445,10 +445,10 @@ OfflineCasa.prototype.scopeExists = function(_line, _callback) {
    var gScope = _line.startsWith("::");
 
    if (_callback) {
-      _callback(null, gScope ? (_line.replace("::", "").indexOf(':') === -1) : (_line.indexOf(':') === -1));
+      _callback(null, gScope ? (_line.replace("::", "").split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1));
    }
    else {
-      return gScope ? (_line.replace("::", "").indexOf(':') === -1) : (_line.indexOf(':') === -1);
+      return gScope ? (_line.replace("::", "").split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1);
    }
 };
 

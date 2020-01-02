@@ -70,6 +70,7 @@ ScheduleService.prototype.coldStart = function() {
 
 function Schedule(_owner, _config, _service) {
    this.uName = _service.uName + ":" + _owner.uName;
+   this.owner = _owner;
    this.service = _service;
    this.events = [];
 
@@ -77,11 +78,11 @@ function Schedule(_owner, _config, _service) {
    this.scheduleAllEvents();
 };
 
-Schedule.prototype.createEventsFromConfig = function(_owner, _eventsConfig) {
+Schedule.prototype.createEventsFromConfig = function(_eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
 
    for (var index = 0; index < eventsConfigLen; ++index) {
-      this.createEventFromConfig(_owner, _eventsConfig[index]);
+      this.createEventFromConfig(_eventsConfig[index]);
    }
 };
 
@@ -115,14 +116,14 @@ Schedule.prototype.createRuleFromConfig = function(_event, _ruleConfig) {
    return rule;
 };
 
-Schedule.prototype.createEventFromConfig = function(_owner, _eventConfig) {
+Schedule.prototype.createEventFromConfig = function(_eventConfig) {
    var rules = [];
 
    if (_eventConfig.hasOwnProperty('rule')) {
       _eventConfig.rules = [ _eventConfig.rule ];
    }
 
-   var event = { name: _eventConfig.name, owner: _owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true, config: _eventConfig };
+   var event = { name: _eventConfig.name, owner: this.owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true, config: _eventConfig };
 
    for (var i = 0; i < _eventConfig.rules.length; ++i) {
       event.rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
@@ -326,7 +327,7 @@ Schedule.prototype.getInitialValue = function() {
 };
 
 Schedule.prototype.addEvent = function(_event) {
-   this.createEventFromConfig(_owner, _event);
+   this.createEventFromConfig(_event);
    this.scheduleEvent(this.events[this.events.length - 1]);
 };
 

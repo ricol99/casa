@@ -15,8 +15,8 @@ PropertyConsoleApi.prototype.myObj = function() {
    return (myObj) ? myObj.props[this.name] : null;
 };
 
-PropertyConsoleApi.prototype.cat = function() {
-   return this.myObj().getValue();
+PropertyConsoleApi.prototype.cat = function(_params, _callback) {
+   _callback(null, this.myObj().getValue());
 };
 
 PropertyConsoleApi.prototype.getValue = function(_params, _callback) {

@@ -13,7 +13,7 @@ CasaConsoleApi.prototype.filterScope = function(_scope) {
    return ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.casa.services, result);
 };
 
-CasaConsoleApi.prototype.cat = function() {
+CasaConsoleApi.prototype.cat = function(_params, _callback) {
    var output = [];
 
    for (var source in this.myObj().sources) {
@@ -23,7 +23,7 @@ CasaConsoleApi.prototype.cat = function() {
       }
    }
 
-   return output;
+   _callback(null, output);
 };
 
 CasaConsoleApi.prototype.sources = function(_params, _callback) {

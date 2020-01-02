@@ -15,8 +15,8 @@ GangConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult
    return ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.peerCasas, result);
 };
 
-GangConsoleApi.prototype.cat = function() {
-   return false;
+GangConsoleApi.prototype.cat = function(_params, _callback) {
+   _callback(null, {});
 };
 
 GangConsoleApi.prototype.createUser = function(_params, _callback) {

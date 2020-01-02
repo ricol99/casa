@@ -11,7 +11,7 @@ PeerCasaConsoleApi.prototype.filterScope = function(_scope) {
    return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources);
 };
 
-PeerCasaConsoleApi.prototype.cat = function() {
+PeerCasaConsoleApi.prototype.cat = function(_params, _callback) {
    var output = [];
 
    for (var source in this.myObj().sources) {
@@ -21,7 +21,7 @@ PeerCasaConsoleApi.prototype.cat = function() {
       }
    }
 
-   return output;
+   _callback(null, output);
 };
 
 PeerCasaConsoleApi.prototype.sources = function(_params, _callback) {

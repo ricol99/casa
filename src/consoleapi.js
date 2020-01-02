@@ -84,6 +84,9 @@ ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previo
       }
    }
 
+   members.push(fullScopeName+"."+"ls");
+   members.push(fullScopeName+"."+"cat");
+
    this.filterArray(members, fullScopeName+"."+_filterArray);
    return members;
 };
@@ -186,7 +189,19 @@ ConsoleApi.prototype.myObj = function() {
    return this.gang.findObject(this.myObjuName);
 };
 
-ConsoleApi.prototype.cat = function() {
+ConsoleApi.prototype.ls = function(_params, _callback) {
+   this.checkParams(0, _params);
+   var result = this.filterScope("").hits;
+
+   for (var i = 0; i < result.length; ++i) {
+      result[i] = result[i].replace(this.fullScopeName+":", "");
+   }
+
+   _callback(null, result);
+};
+
+ConsoleApi.prototype.cat = function(_params, _callback) {
+   _callback(null, {});
 };
 
 ConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _sessionId) {

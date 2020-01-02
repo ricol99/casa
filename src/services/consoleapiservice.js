@@ -507,9 +507,8 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
       }
       else if (result.matchingScopes.length > 0) {
          this.owner.setCurrentSession(this);
-         outputOfEvaluation = result.consoleApiObj.cat();
+         outputOfEvaluation = result.consoleApiObj.cat([], _callback);
          this.owner.setCurrentSession(null);
-         _callback(null, outputOfEvaluation);
       }
       else {
          _callback("Method not found!");

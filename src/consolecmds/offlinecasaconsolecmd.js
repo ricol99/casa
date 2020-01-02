@@ -8,30 +8,40 @@ function OfflineCasaConsoleCmd(_config, _console) {
 util.inherits(OfflineCasaConsoleCmd, ConsoleCmd);
 
 OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.uName;
 
-   this.gang.getDb().readAll((_err, _result) => {
+   this.gang.getDb(name, null, (_err, _db) =>  {
 
       if (_err) {
          return _callback(_err);
       }
 
-      Db = require('../db');
-      var output = Db.export(_result);
-      var fileName = this.gang.configPath() + "/configs/" + this.gang.uName + ".json";
-      var fs = require('fs');
-      var content = JSON.stringify(output, null, 3);
+      _db.readAll((_err2, _result) => {
 
-      fs.writeFile(fileName, content, (_err) => {
-         _callback(_err, true);
+         if (_err2) {
+            return _callback(_err2);
+         }
+
+         Db = require('../db');
+         var output = Db.export(_result);
+         var fileName = this.gang.configPath() + "/configs/" + name + ".json";
+         var fs = require('fs');
+         var content = JSON.stringify(output, null, 3);
+
+         fs.writeFile(fileName, content, (_err) => {
+            _callback(_err, true);
+         });
       });
    });
 };
 
 OfflineCasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
-   
+   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.uName;
+
    var cjson = require('cjson');
-   var configFilename = this.gang.configPath() + "/configs/" + this.gang.uName + ".json";
+   var configFilename = this.gang.configPath() + "/configs/" + name + ".json";
    var inputConfig = cjson.load(configFilename); 
    
    if (inputConfig.gang.uName !== this.gang.uName) {
