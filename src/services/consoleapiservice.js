@@ -404,8 +404,12 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
                                            : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0, method: null, consoleApiObj: result.consoleApiObj };
       }
 
-      if ((scope + "." + m) === matchingMethods[0]) {
-         method = m;
+      for (var z = 0; z < matchingMethods.length; ++z){
+
+         if ((scope + "." + m) === matchingMethods[z]) {
+            method = m;
+            break;
+         }
       }
 
       this.processMatches(_currentScope, _line, matchingMethods);

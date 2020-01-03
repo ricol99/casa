@@ -185,6 +185,14 @@ LocalConsole.prototype.setPromptMidLine = function(_prompt) {
    this.rl.prompt(true);
 };
 
+LocalConsole.prototype.write = function(_line) {
+   process.stdout.write(_line + "\n");
+};
+
+LocalConsole.prototype.question = function(_question, _callback) {
+   this.rl.question(_question, _callback);
+};
+
 LocalConsole.prototype.writeOutput = function(_line) {
    process.stdout.write("\n" + this.processOutput(_line) + "\n");
    this.prompt();

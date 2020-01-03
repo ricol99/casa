@@ -5,6 +5,7 @@ var Hue = require("node-hue-api");
 function HueService(_config) {
    Service.call(this, _config);
 
+   this.bridgesAvailable = [];
    this.linkId = _config.linkId;
    this.userId = _config.userId;
    this.username = _config.username;
@@ -23,34 +24,83 @@ function b(_bridges) {
 
 HueService.prototype.coldStart = function() {
 
-  Hue.nupnpSearch( (_err, _result) => {
+   if (this.linkId && this.userId) {
 
-     if (!_err && _result.length > 0) {
-        var bridge = this.findBridge(_result, this.linkId);
+      this.findBridges((_err, _bridges) => {
+
+         if (_err || (_bridges.length === 0)) {
+            console.error(this.uName + ": Unable to find any bridges!");
+            process.exit(1);
+         }
+
+         console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
+         var bridge = this.findBridge(_bridges, this.linkId);
 
          if (bridge) {
             this.hueBridgeFound(bridge);
          }
          else {
-            try {
-               Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
-            }
-            catch(_error) {
-               console.error(this.uName + ": No bridges found!");
-               process.exit(1);
-            }
+            console.error(this.uName + ": Bridge not found!");
+            process.exit(1);
+         }
+      });
+   }
+};
+
+HueService.prototype.findBridges = function(_callback) {
+
+   Hue.nupnpSearch( (_err, _bridgesFoundSearch1) => {
+      var bridgesAvailable = [];
+
+      if (!_err) {
+         bridgesAvailable = _bridgesFoundSearch1;
+
+         try {
+            Hue.upnpSearch(10000).then((_bridgesFoundSearch2) => {
+               this.fixIds(_bridgesFoundSearch2);
+               var availableLen = bridgesAvailable.length;
+               var matchFound;
+
+               for (var i = 0; i <_bridgesFoundSearch2.length; ++i) {
+                  matchFound = false;
+
+                  for (var j = 0; j < availableLen; ++j) {
+
+                     if (bridgesAvailable[j].id === _bridgesFoundSearch2[i].id) {
+                        matchFound = true;
+                        break;
+                     }
+                  }
+
+                  if (!matchFound) {
+                     bridgesAvailable.push(_bridgesFoundSearch2[i]);
+                  }
+               }
+
+               _callback(null, bridgesAvailable);
+            }).done();
+         }
+         catch(_error) {
+            _callback(null, bridgesAvailable);
          }
       }
       else {
-         try {
-            Hue.upnpSearch(10000).then(HueService.prototype.bridgesFound.bind(this)).done();
-         }
-         catch(_error) {
-            console.error(this.uName + ": No bridges found!");
-            process.exit(1);
-         }
+         _callback(null, []);
       }
    });
+};
+
+HueService.prototype.createUserOnBridge = function(_linkIpAddress, _callback) {
+   var hue = new Hue.HueApi();
+
+   hue.registerUser(_linkIpAddress, "Casa Home Automation")
+    .then((_result) => {
+       return _callback(null, _result);
+    })
+    .fail((_error) => {
+       return _callback(_error);
+    })
+    .done();
 };
 
 HueService.prototype.findBridge = function (_bridges, _id) {
@@ -72,20 +122,6 @@ HueService.prototype.fixIds = function(_bridges) {
       if (_bridges[i].id.substr(6,4) !== "fffe") {
          _bridges[i].id = _bridges[i].id.substr(0,6) + "fffe" + _bridges[i].id.substr(6);
       }
-   }
-};
-
-HueService.prototype.bridgesFound = function(_bridges) {
-   this.fixIds(_bridges);
-   console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
-   var bridge = this.findBridge(_bridges, this.linkId);
-
-   if (bridge) {
-      this.hueBridgeFound(bridge);
-   }
-   else {
-      console.error(this.uName + ": No bridges found!");
-      process.exit(1);
    }
 };
 

@@ -9,6 +9,107 @@ function HueServiceConsoleApi(_config, _owner) {
 
 util.inherits(HueServiceConsoleApi, ServiceConsoleApi);
 
+HueServiceConsoleApi.prototype.findBridges = function(_params, _callback) {
+   this.checkParams(0, _params);
+   this.myObj().findBridges(_callback);
+};
+
+HueServiceConsoleApi.prototype.findBridge = function(_params, _callback) {
+   this.checkParams(0, _params);
+
+   var linkId = (_params.length > 0) ? _params[0] : this.myObj().linkId;
+
+   this.findBridges([], (_err, _bridges) => {
+
+      if (_err || (_bridges.length === 0)) {
+         return  _callback("Unable to find bridge with id " + linkId);
+      }
+
+      for (var i = 0; i < _bridges.length; ++i) {
+
+         if (_bridges[i].id === linkId) {
+            return _callback(null, _bridges[i]);
+         }
+      }
+
+      _callback("Unable to find bridge with id " + linkId);
+   });
+};
+
+HueServiceConsoleApi.prototype.setLinkId = function(_params, _callback) {
+   this.checkParams(1, _params);
+   var linkId = _params[0];
+   var persist = (_params.length > 1) ? _params[1] : false;
+
+   if (persist) {
+      this.db = this.gang.getDb(this.gang.casa.uName);
+
+      this.db.find(this.myObjuName, (_err, _hueServiceConfig) => {
+
+         if (_err || (_hueServiceConfig === null)) {
+            return _callback("Unable to persist link id!");
+         }
+
+         _hueServiceConfig.linkId = linkId;
+
+         this.db.update(_hueServiceConfig, (_err2, _result) => {
+
+            if (_err2) {
+               return _callback("Unable to perist the link id");
+            }
+
+            this.myObj().linkId = linkId;
+            return _callback(null, true);
+         });
+      });
+   }
+   else {
+      this.myObj().linkId = linkId;
+      _callback(null, true);
+   }
+
+};
+
+HueServiceConsoleApi.prototype.createUserOnBridge = function(_params, _callback) {
+   this.checkParams(1, _params);
+   var linkIpAddress = _params[0];
+   var persist = (_params.length > 1) ? _params[1] : false;
+
+   this.myObj().createUserOnBridge(linkIpAddress, (_err, _userId) => {
+
+      if (_err) {
+         return _callback("Unable to create user id on bridge!");
+      }
+
+      if (persist) {
+         this.db = this.gang.getDb(this.gang.casa.uName);
+
+         this.db.find(this.myObjuName, (_err, _hueServiceConfig) => {
+
+            if (_err || (_hueServiceConfig === null)) {
+               return _callback("Unable to persist user id!");
+            }
+
+            _hueServiceConfig.userId = _userId;
+
+            this.db.update(_hueServiceConfig, (_err2, _result) => {
+
+               if (_err2) {
+                  return _callback("Unable to perist the link id");
+               }
+
+               this.myObj().userId = _userId;
+               return _callback(null, true);
+            });
+         });
+      }
+      else {
+         this.myObj().userId = _userId;
+         _callback(null, _userId);
+      }
+   });
+};
+
 HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
    var output = [];
 
