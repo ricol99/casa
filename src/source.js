@@ -18,20 +18,7 @@ function Source(_config) {
       var propLen = _config.props.length;
 
       for (var i = 0; i < propLen; ++i) {
-         var Prop;
-
-         if (!_config.props[i].hasOwnProperty('type')) {
-            _config.props[i].type = 'property';
-         }
-
-         if ((_config.props[i].type == "property") || (_config.props[i].type == "stateproperty")) {
-            Prop = require('./'+_config.props[i].type);
-         }
-         else {
-            Prop = require('./properties/'+_config.props[i].type);
-         }
-
-         this.props[_config.props[i].name] = new Prop(_config.props[i], this);
+         this.ensurePropertyExists(_config.props[i].name, (_config.props[i].hasOwnProperty("type")) ? _config.props[i].type : 'property', _config.props[i]); 
       }
    }
 
@@ -48,6 +35,16 @@ function Source(_config) {
 }
 
 util.inherits(Source, SourceBase);
+
+Source.prototype.createProperty = function(_config) {
+
+   if (this.props.hasOwnProperty(_config.name)) {
+      return false;
+   }
+
+   this.ensurePropertyExists(_config.name, (_config.hasOwnProperty("type")) ? _config.type : 'property', _config); 
+   return true;
+};
 
 Source.prototype.changeName = function(_newName) {
    SourceBase.prototype.changeName.call(this, _newName);
