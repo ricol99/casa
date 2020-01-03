@@ -56,7 +56,7 @@ HueService.prototype.findBridges = function(_callback) {
          bridgesAvailable = _bridgesFoundSearch1;
 
          try {
-            Hue.upnpSearch(10000).then((_bridgesFoundSearch2) => {
+            Hue.upnpSearch(15000).then((_bridgesFoundSearch2) => {
                this.fixIds(_bridgesFoundSearch2);
                var availableLen = bridgesAvailable.length;
                var matchFound;
