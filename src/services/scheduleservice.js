@@ -74,7 +74,7 @@ function Schedule(_owner, _config, _service) {
    this.service = _service;
    this.events = [];
 
-   this.createEventsFromConfig(_owner, _config);
+   this.createEventsFromConfig(_config);
    this.scheduleAllEvents();
 };
 

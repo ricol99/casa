@@ -353,24 +353,37 @@ Gang.prototype.extractUsers = function() {
    }
 };
 
+// Extract Services
+Gang.prototype.createService = function(_config, _serviceOwner) {
+   console.log('Loading service '+ _config.uName);
+   var Service = this.cleverRequire(_config.uName, 'services', _config.type);
+
+   if (!Service) {
+      return null;
+   }
+
+   var serviceObj = new Service(_config);
+   this.services[serviceObj.uName] = serviceObj;
+   console.log('New service: ' + _config.uName);
+
+   if (_serviceOwner) {
+      _serviceOwner[serviceObj.uName] = serviceObj;
+   }
+   else {
+      this.casa.addService(serviceObj);
+      this.allObjects[serviceObj.uName] = serviceObj;
+   }
+
+   return serviceObj;
+};
+
 Gang.prototype.extractServices = function(_config, _noColdStart, _serviceOwner) {
 
    if (_config) {
       console.log('Extracting services...');
 
       for (var index = 0; index < _config.length; ++index) {
-         console.log('Loading service '+ _config[index].uName);
-         var Service = this.cleverRequire(_config[index].uName, 'services', _config.type);
-         var serviceObj = new Service(_config[index]);
-         this.services[serviceObj.uName] = serviceObj;
-
-         if (_serviceOwner) {
-            _serviceOwner[serviceObj.uName] = serviceObj;
-         }
-         else {
-            this.casa.addService(serviceObj);
-            this.allObjects[serviceObj.uName] = serviceObj;
-         }
+         this.createService(_config[index], _serviceOwner);
       }
 
       if (!_noColdStart) {

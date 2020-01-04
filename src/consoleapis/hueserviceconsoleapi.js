@@ -99,12 +99,14 @@ HueServiceConsoleApi.prototype.createUserOnBridge = function(_params, _callback)
                }
 
                this.myObj().userId = _userId;
+               this.myObj().coldStart();
                return _callback(null, true);
             });
          });
       }
       else {
          this.myObj().userId = _userId;
+         this.myObj().coldStart();
          _callback(null, _userId);
       }
    });
