@@ -51,7 +51,7 @@ SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, 
       else {
          switch (_action) {
          case "replace":
-            _result2[_member] = _newMember;
+            _result[_member] = _newMember;
             break;
          case "add":
             if (result.hasOwnProperty(_member)) {

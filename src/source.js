@@ -161,21 +161,21 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 }
 
 Source.prototype.updateEvent = function(_modifiedEvent) {
-   var eventIndex = this.getEventIndex(_eventName);
+   var eventIndex = this.getEventIndex(_modifiedEvent.name);
 
    if (eventIndex === -1) {
       return false;
    }
 
-   for (var prop in _modifiedEvent) {
+   //for (var prop in _modifiedEvent) {
 
-      if (_modifiedEvent.hasOwnProperty(prop)) {
-         this.events[eventIndex][prop] = _modifiedEvent[prop];
-      }
-   }
+      //if (_modifiedEvent.hasOwnProperty(prop)) {
+         //this.events[eventIndex][prop] = _modifiedEvent[prop];
+      //}
+   //}
 
    if (this.deleteEvent(_modifiedEvent.name)) {
-      return this.addEvent(this.events[eventIndex]);
+      return this.addEvent(_modifiedEvent);
    }
    else {
       return false;
