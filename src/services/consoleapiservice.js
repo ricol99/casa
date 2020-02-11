@@ -330,11 +330,14 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
    var result = this.processScopeAndLine(_params.scope, _params.line);
-   _callback(null, { exists: this.owner.globalConsoleApi.filterScope(result.longScope).consoleApiObj != null, newScope: result.shortScope });
+   var scopeResult = {};
+   this.owner.globalConsoleApi.filterScope(result.longScope, null, scopeResult, true);
+   _callback(null, { exists: scopeResult.consoleApiObj != null, newScope: result.shortScope });
 };
 
 ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _matches) {
    var scope = (_currentScope === "::") ? this.owner.gang.uName : this.owner.gang.uName + _currentScope.substr(1);
+   process.stdout.write("AAAAAA GGGGG "+util.inspect(_matches)+"\n");
 
    for (var i = 0; i < _matches.length; ++i) {
 
@@ -345,6 +348,49 @@ ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _mat
          _matches[i] = _matches[i].replace(scope, "").substr(1);
       }
    }
+};
+
+ConsoleApiSession.prototype.deDupResults = function(_results) {
+   var dupObj = {};
+
+   for (var i = 0; i <= _results.length; ++i) {
+
+      if (dupObj.hasOwnProperty(_results[i])) {
+         _results.splice(i, 1);
+         --i;
+      }
+      else {
+         dupObj[_results[i]] = true;
+      }
+   }
+};
+
+ConsoleApiSession.prototype.extractScope = function(_currentScope, _line, _perfectMatchRequired) {
+   var line;
+   var scope;
+   var matchingMethods = [];
+   var matchingScopes = [];
+   var method = null;
+   var arguments = [];
+   var result = {};
+
+   if (_line[0] === ':') {
+      line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + _line.substr(1) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + _line;
+      this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0], undefined, result, _perfectMatchRequired);
+   }
+   else  {
+      line = (_currentScope === "::") ? this.owner.gang.uName + ":" + _line : this.owner.gang.uName + _currentScope.substr(1) + ":" + _line;
+      this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0], undefined, result, _perfectMatchRequired);
+   }
+
+   if (result.hits.length === 0) {
+      return { scope: null, matchingScopes: [], matchingMethods: [], method: null, methodMatch: result.remainingStr, arguments: [] };
+   }
+
+   matchingScopes = result.hits;
+   this.processMatches(_currentScope, _line, matchingScopes);
+
+   return { matchingScopes: matchingScopes, consoleApiObj: result.consoleApiObj, remainingStr: result.remainingStr };
 };
 
 ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
@@ -360,48 +406,37 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + _line.substr(1) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + _line;
       result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
-      if (result.hits.length === 0) {
-         line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + "." + _line.substr(2) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + "." + _line.substr(1);
-         result = this.owner.globalConsoleApi.filterScope(line.split(".")[0]);
-      }
+      line = ((_line.length > 1) && (_line[1] === ":")) ? this.owner.gang.uName + "." + _line.substr(2) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + "." + _line.substr(1);
+      this.owner.globalConsoleApi.filterScope(line.split(".")[0], undefined, result);
    }
    else  {
-      if (_currentScope === "::") {
-         line = this.owner.gang.uName + ":" + _line;
-      }
-      else if (_currentScope.startsWith("::")) {
-         line = this.owner.gang.uName + _currentScope.substr(1) + ":" + _line;
-      }
-
+      line = (_currentScope === "::") ? this.owner.gang.uName + ":" + _line : this.owner.gang.uName + _currentScope.substr(1) + ":" + _line;
       result = this.owner.globalConsoleApi.filterScope(line.split("(")[0].split(".")[0]);
 
-      if (result.hits.length === 0) {
-
-         if (_currentScope === "::") {
-            line = this.owner.gang.uName + "." + _line;
-         }
-         else if (_currentScope.startsWith("::")) {
-            line = this.owner.gang.uName + _currentScope.substr(1) + "." + _line;
-         }
-         result = this.owner.globalConsoleApi.filterScope(line.split(".")[0]);
-      }
+      line = (_currentScope === "::") ? this.owner.gang.uName + "." + _line : this.owner.gang.uName + _currentScope.substr(1) + "." + _line;
+      this.owner.globalConsoleApi.filterScope(line.split(".")[0], undefined, result);
    }
 
+   this.deDupResults(result.hits);
+
    if (result.hits.length === 0) {
-      return { scope: null, matchingScopes: [], matchingMethods: [], method: null, arguments: [] };
+      return { scope: null, matchingScopes: [], matchingMethods: [], method: null, methodMatch: result.remainingStr, arguments: [] };
    }
 
    matchingScopes = result.hits;
    scope = result.hits[0];
    this.processMatches(_currentScope, _line, matchingScopes);
+
+   var m = null;
    
    if (result.consoleApiObj && (line.split("(")[0].split(".").length > 1)) {
-      var m = line.split("(")[0].split(".")[1];
+      m = line.split("(")[0].split(".")[1];
       matchingMethods = result.consoleApiObj.filterMembers(m);
 
       if (matchingMethods.length === 0) {
-         return (line.indexOf("(") === -1) ? { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0 }
-                                           : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0, method: null, consoleApiObj: result.consoleApiObj };
+         return (line.indexOf("(") === -1) ? { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0, methodMatch: m }
+                                           : { scope: scope, matchingScopes: matchingScopes, matchingMethods: [], methodNotFound: m.length > 0, method: null, methodMatch: m,
+                                               consoleApiObj: result.consoleApiObj };
       }
 
       for (var z = 0; z < matchingMethods.length; ++z){
@@ -437,17 +472,18 @@ ConsoleApiSession.prototype.splitLine = function(_currentScope, _line) {
       }
    }
 
-   return { scope: scope, matchingScopes: matchingScopes, matchingMethods: matchingMethods, method: method, arguments: arguments, consoleApiObj: result.consoleApiObj };
+   return { scope: scope, matchingScopes: matchingScopes, matchingMethods: matchingMethods, method: method, methodMatch: m, arguments: arguments, consoleApiObj: result.consoleApiObj };
 };
 
 ConsoleApiSession.prototype.parseLine = function(_params, _callback) {
-   var result = this.splitLine(_params.scope, _params.line);
+   var result = this.extractScope(_params.scope, _params.line);
 
    if (result.error) {
       return _callback(result.error);
    }
 
    if (result.consoleApiObj) {
+      process.stdout.write("AAAA GGGG\n");
       var processedScopeAndLine = this.processScopeAndLine(_params.scope, _params.line);
       result.newScope = processedScopeAndLine.shortScope;
 
@@ -527,7 +563,7 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
             _callback(_err);
          }
       }
-      else if ((result.matchingScopes.length > 0) && !result.methodNotFound) {
+      else if ((result.matchingScopes && (result.matchingScopes.length > 0)) && !result.methodNotFound) {
          this.owner.setCurrentSession(this);
 
          try {

@@ -37,7 +37,33 @@ LocalConsole.prototype.start = function(_startScope) {
 };
 
 LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
-   this.autoComplete(_line.trim(), _callback);
+
+  this.parseLine(_line, (_err, _result) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var matches = [];
+
+      if (_result.hasOwnProperty("consoleObjHierarchy")) {
+         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
+
+         if (cmdObj) {
+            var methodMatch = _result.remainingStr ? _result.remainingStr : "";
+            cmdObj.filterMembers(methodMatch, matches);
+         }
+      }
+
+      matches = matches.concat(((_result.matchingScopes.length === 0) && _result.scope) ? [ _result.scope ] : _result.matchingScopes);
+
+      if (_callback) {
+         _callback(null, [ matches, _line]);
+      }
+      else {
+         return [ matches, _line ];
+      }
+   });
 };
 
 LocalConsole.prototype.lineReaderCb = function(_line) {
@@ -73,6 +99,24 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 };
 
+LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName) {
+   var cmdObj = null;
+
+   for (var i = 0; i < _consoleObjHierarchy.length; ++i) {
+
+      try {
+         var ConsoleCmdObj = require("./consolecmds/" + _consoleObjHierarchy[i] +  "cmd");
+         cmdObj = new ConsoleCmdObj({ uName: _consoleObjuName }, this);
+         break;
+      }
+      catch (_err) {
+         continue;
+      }
+   }
+
+   return cmdObj;
+};
+
 LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
 
    this.parseLine(_line, (_err, _result) => {
@@ -82,28 +126,17 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
       }
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         var cmdObj = null;
+         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
 
-         for (var i = 0; i < _result.consoleObjHierarchy.length; ++i) {
+         if (cmdObj) {
+            var methodName = _result.method ? _result.method : "cat";
 
-            try {
-               var ConsoleCmdObj = require("./consolecmds/" + _result.consoleObjHierarchy[i] +  "cmd");
-               cmdObj = new ConsoleCmdObj({ uName: _result.consoleObjuName }, this);
-               break;
-            }
-            catch (_err) {
-               continue;
-            }
-         }
-
-         if (cmdObj && _result.method) {
-
-            var cmdMethod = Object.getPrototypeOf(cmdObj)[_result.method];
+            var cmdMethod = Object.getPrototypeOf(cmdObj)[methodName];
 
             if (cmdMethod) {
 
                try {
-                  Object.getPrototypeOf(cmdObj)[_result.method].call(cmdObj, _result.scope, _result.arguments, _callback);
+                  Object.getPrototypeOf(cmdObj)[methodName].call(cmdObj, _result.scope, _result.arguments, _callback);
                }
                catch (_err) {
                   _callback(_err);
@@ -113,21 +146,21 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
                this.executeParsedCommand(_result.scope, _result.method, _result.arguments, _callback);
             }
          }
-         else {
-            this.executeCommand(_line, (_err, _newResult) => {
+         //else {
+            //this.executeCommand(_line, (_err, _newResult) => {
 
-               if (_err) {
-                  return _callback(_err);
-               }
+               //if (_err) {
+                  //return _callback(_err);
+               //}
 
-               if (!_result.method) {
-                  this.currentScope = _result.newScope;
-                  this.setPrompt(_result.newScope);
-               }
+               //if (!_result.method) {
+                  //this.currentScope = _result.newScope;
+                  //this.setPrompt(_result.newScope);
+               //}
 
-               _callback(_err, _newResult);
-            });
-         }
+               //_callback(_err, _newResult);
+            //});
+         //}
       }
       else {
          _callback("Object not found!");
@@ -164,6 +197,11 @@ LocalConsole.prototype.getPromptColour = function(_prompt) {
    return (_prompt.startsWith("::"+this.casa.uName)) ? "\x1b[32m" : "\x1b[31m";
 };
 
+LocalConsole.prototype.getCasa = function(_name) {
+   return this.gang.casa;
+};
+
+//
 LocalConsole.prototype.processOutput = function(_outputOfEvaluation) {
 
    if (_outputOfEvaluation !== undefined) {

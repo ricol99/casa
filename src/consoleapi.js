@@ -135,54 +135,64 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
 
 // _collection object to search, global search performed if not supplied
 // _prevResult  - result object to merge with new results - optional
-ConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult)  {
+ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfectMatchRequired)  {
    var filterArray = _scope.split(":");
-   var prevResultCount =  (_prevResult) ? _prevResult.hits.length : 0;
-   var result =  (_prevResult) ? _prevResult : { hits: [], consoleApiObj: null };
+   var prevResultCount =  _result.hasOwnProperty("hits") ? _result.hits.length : 0;
    var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
    var perfectMatch = -1;
+   var hits = [];
 
-   if (_collection) {
-
-       for (var obj in _collection) {
-
-          if (obj.startsWith(matchString)) {
-
-             if (obj === matchString) {
-                perfectMatch = result.hits.length;
-             }
-             result.hits.push((this.fullScopeName === "") ? obj : this.fullScopeName+":"+obj);
-          }
-       }
+   if (!_result.hasOwnProperty("hits")) {
+      _result.hits = [];
    }
-   else {
-      result.hits = result.hits.concat(this.filterGlobalObjects(matchString))
 
-      for (var i = 0; i < result.hits.length; ++i) {
+   var matches = _collection ? util.filter(_collection, (_obj) => { return _obj.startsWith(matchString); }) : this.filterGlobalObjects(matchString);
 
-         if (result.hits[i] === matchString) {
-            perfectMatch = i;
+   util.iterate(matches, 0, (_obj) => {
+
+      if (_obj === matchString) {
+         perfectMatch = hits.length;
+         hits.push((this.fullScopeName === "") ? _obj : this.fullScopeName+":"+_obj);
+      }
+      else if (!_perfectMatchRequired) {
+         hits.push((this.fullScopeName === "") ? _obj : this.fullScopeName+":"+_obj);
+      }
+   });
+
+   if (perfectMatch !== -1) {
+      var consoleApiObj = this.findOrCreateConsoleApiObject(((filterArray.length === 1) ? this.myObjuName+":" : "") + matchString, _collection ? _collection[matchString] : undefined);
+
+      if (consoleApiObj) {
+         filterArray.splice(0, (filterArray.length >= 2) ? 2 : 1);
+
+         if (filterArray.length > 0) {
+            consoleApiObj.filterScope((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"), undefined, _result, _perfectMatchRequired);
+
+            if (!_result.consoleApiObj && !_perfectMatchRequired) {
+               _result.consoleApiObj = consoleApiObj;
+               _result.scope = this.fullScopeName;
+            }
+         }
+         else {
+            _result.consoleApiObj = consoleApiObj;
+            _result.scope = this.fullScopeName;
+            _result.remainingStr = "";
+            _result.hits.push(...hits);
          }
       }
    }
+   else {
+      if (!_perfectMatchRequired) {
+         _result.hits.push(...hits);
+         var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
 
-   if ((perfectMatch !== -1) || ((result.hits.length === 1) && (prevResultCount === 0))) {
-      var splitRes = result.hits[(perfectMatch === -1) ? 0 : perfectMatch].split(":");
-
-      if ((filterArray.length === 1) && _collection) {
-         result.consoleApiObj = this.findOrCreateConsoleApiObject(this.myObjuName+":"+splitRes[splitRes.length-1], _collection[splitRes[splitRes.length-1]]);
-      }
-      else {
-         result.consoleApiObj = this.findOrCreateConsoleApiObject(splitRes[splitRes.length-2]+":"+splitRes[splitRes.length-1]);
-      }
-
-      if (result.consoleApiObj && filterArray.length > 2) {
-         filterArray.splice(0, 2);
-         result = result.consoleApiObj.filterScope(filterArray.join(":"));
+         if (!_result.hasOwnProperty("remainingStr") || (_result.remainingStr.length > remainingStr.length)) {
+            _result.scope = this.fullScopeName;
+            _result.consoleApiObj = this;
+            _result.remainingStr = remainingStr;
+         }
       }
    }
-
-   return result;
 };
 
 ConsoleApi.prototype.myObj = function() {

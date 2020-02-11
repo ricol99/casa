@@ -263,4 +263,12 @@ Casa.prototype.addIoRouteToMainServer = function(_route, _callback) {
    return io.of(_route).on('connection', _callback);
 };
 
+Casa.prototype.getListeningPort = function() {
+   return this.listeningPort;
+};
+
+Casa.prototype.getHost = function() {
+   return util.getLocalIpAddress();
+};
+
 module.exports = exports = Casa;

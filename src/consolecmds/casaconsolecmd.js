@@ -7,22 +7,40 @@ function CasaConsoleCmd(_config, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
-CasaConsoleCmd.prototype.updateDbs = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.pushDbs = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "updateDbs", [ myAddress, port], _callback);
+   this.console.executeParsedCommand(_obj, "pushDbs", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.updateDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.pushDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "updateDb", [ myAddress, port], _callback);
+   this.console.executeParsedCommand(_obj, "pushDb", [ myAddress, port], _callback);
+};
+
+CasaConsoleCmd.prototype.pullDb = function(_obj, _arguments, _callback) {
+   /// TDB To be comnpleted!
+   this.checkArguments(0, _arguments);
+   this.console.executeParsedCommand(_obj, "pullDb", null, (_err, _result) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+      else if (localHash.hash !== _result.hash) {
+         this.dbService.getAndWritePeerDb(dbName, _params[0], _params[1], this.gang.configPath(), _callback);
+      }
+      else {
+         _callback(null, true);
+      }
+
+   });
 };
 
 CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
@@ -95,7 +113,7 @@ CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
       var myAddress = util.getLocalIpAddress();
       var port = this.gang.mainListeningPort();
 
-      this.console.executeParsedCommand(_obj, "updateDb", [ myAddress, port], _callback);
+      this.console.executeParsedCommand(_obj, "pushDb", [ myAddress, port], _callback);
    });
 
    db.on('error', (_data) => {

@@ -8,9 +8,9 @@ function ThingConsoleApi(_config, _owner) {
 
 util.inherits(ThingConsoleApi, SourceConsoleApi);
 
-ThingConsoleApi.prototype.filterScope = function(_scope) {
-   var result = SourceConsoleApi.prototype.filterScope.call(this, _scope);
-   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().things, result);
+ThingConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
+   SourceConsoleApi.prototype.filterScope.call(this, _scope, _collection, _prevResult, _perfectMatchRequired);
+   ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().things, _prevResult, _perfectMatchRequired);
 };
 
 ThingConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {

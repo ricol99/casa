@@ -8,8 +8,8 @@ function CasaConsoleApi(_config, _owner) {
 
 util.inherits(CasaConsoleApi, ConsoleApi);
 
-CasaConsoleApi.prototype.filterScope = function(_scope) {
-   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources);
+CasaConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
+   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources, _prevResult, _perfectMatchRequired);
 };
 
 CasaConsoleApi.prototype.cat = function(_params, _callback) {
@@ -131,7 +131,7 @@ CasaConsoleApi.prototype.restart = function(_params, _callback) {
    process.exit(3);
 };
 
-CasaConsoleApi.prototype.updateDb = function(_params, _callback) {
+CasaConsoleApi.prototype.pushDb = function(_params, _callback) {
    this.checkParams(2, _params);
 
    var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.uName;
@@ -151,16 +151,16 @@ CasaConsoleApi.prototype.updateDb = function(_params, _callback) {
    });
 };
 
-CasaConsoleApi.prototype.updateDbs = function(_params, _callback) {
+CasaConsoleApi.prototype.pushDbs = function(_params, _callback) {
    this.checkParams(2, _params);
-   this.updateDb(_params, (_err, _result) => {
+   this.pushDb(_params, (_err, _result) => {
 
       if (_err)  {
          _callback(_err);
       }
       else {
          _params.push(this.gang.uName);
-         this.updateDb(_params, _callback);
+         this.pushDb(_params, _callback);
       }
    });
 };
@@ -170,7 +170,7 @@ CasaConsoleApi.prototype.exportDb = function(_params, _callback) {
 };
 
 CasaConsoleApi.prototype.importDb = function(_params, _callback) {
-   this.updateDb(_params, _callback);
+   this.pushDb(_params, _callback);
 };
 
 module.exports = exports = CasaConsoleApi;

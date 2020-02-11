@@ -35,13 +35,6 @@ LightwaveRfService.prototype.coldStart = function() {
    //Bind to the receive port
    this.receiveSocket.bind(9761);
 
-   // Register with Link
-   this.registerWithLink( (_error, _content) => {
-
-      if (_error) {
-         console.error(this.uName + ": Unable to register with link, error = "+ _error);
-      }
-   });
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
@@ -102,7 +95,7 @@ LightwaveRfService.prototype.turnRoomOff = function(_roomId, _callback) {
 }
 
 LightwaveRfService.prototype.registerWithLink = function(_callback) {
-   //this.addToQueue("!R1Fa", _callback);
+   this.addToQueue("!R1Fa", _callback);
 }
 
 LightwaveRfService.prototype.addToQueue = function(_message, _callback) {

@@ -9,10 +9,10 @@ function GlobalConsoleApi(_config, _owner) {
 
 util.inherits(GlobalConsoleApi, ConsoleApi);
 
-GlobalConsoleApi.prototype.filterScope = function(_scope) {
+GlobalConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
    var collection = {};
    collection[this.gang.uName] = this.gang;
-   return ConsoleApi.prototype.filterScope.call(this, _scope, collection);
+   ConsoleApi.prototype.filterScope.call(this, _scope, collection, _prevResult, _perfectMatchRequired);
 };
 
 module.exports = exports = GlobalConsoleApi;

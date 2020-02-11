@@ -9,8 +9,8 @@ function SourceBaseConsoleApi(_config, _owner) {
 
 util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
-SourceBaseConsoleApi.prototype.filterScope = function(_scope) {
-   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props);
+SourceBaseConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
+   ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props, _prevResult, _perfectMatchRequired);
 };
 
 SourceBaseConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {

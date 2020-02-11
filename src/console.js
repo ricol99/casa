@@ -64,24 +64,12 @@ Console.prototype.casaFound = function(_params) {
       remoteCasa.on("connected", (_data) => {
          this.connectedCasas = this.connectedCasas + 1;
 
-         this.gang.getDb(_data.name, _data, (_err, _result, _data) => {
+         if (this.offline) {
+            this.defaultCasa = this.remoteCasas[_data.name];
+            this.offline = false;
+         }
 
-            if (_err) {
-               this.writeOutput("Casa "+_data.name+" has joined and console does not have a local db for it!");
-            }
-            else {
-               this.remoteCasas[_data.name].setDb(_result);
-            }
-
-            if (this.offline) {
-               this.defaultCasa = this.remoteCasas[_data.name];
-               this.offline = false;
-               this.updatePromptMidLine();
-            }
-            else {
-               this.updatePromptMidLine();
-            }
-         });
+         this.updatePromptMidLine();
       });
 
       remoteCasa.on("connect_error", (_data) => {
@@ -282,10 +270,15 @@ Console.prototype.updatePromptMidLine = function() {
    LocalConsole.prototype.setPromptMidLine.call(this, this.currentScope);
 };
 
+Console.prototype.getCasa = function(_name) {
+   returnr this.remoteCasas[_name];
+};
+
 function RemoteCasa(_config, _owner) {
    AsyncEmitter.call(this);
    this.owner = _owner;
    this.name = _config.name;
+   this.uName = this.name;
    this.host = _config.host;
    this.port = _config.port;
    this.db = null;
@@ -300,6 +293,39 @@ RemoteCasa.prototype.start = function()  {
    this.socket.on('connect', (_data) => {
       this.connected = true;
       this.emit('connected', { name: this.name });
+
+      this.owner.gang.getDb(this.name, undefined, (_err, _db, _data) => {
+
+         if (_err) {
+            this.owner.writeOutput("Casa "+this.name+" has joined and console does not have a local db for it!");
+         }
+         else {
+            this.db = _db;
+            this.db.lastModified((_err, _result) => {
+
+               if (!_err) {
+                  this.dbLastModified = _result;
+                  this.socket.emit('get-casa-info');
+               }
+            });
+         }
+      });
+   });
+
+   this.socket.on('casa-info', (_data) => {
+
+      if (_data.hasOwnProperty("dbInfo")) {
+
+         if (_data.dbInfo.hash !== this.db.getHash()) {
+
+            if (_data.dbInfo.lastModified > this.dbLastModified) {
+            }
+            else {
+            }
+         }
+      }
+      else {
+      }
    });
 
    this.socket.on('connect_error', (_data) => {
@@ -358,10 +384,6 @@ RemoteCasa.prototype.start = function()  {
    });
 };
 
-RemoteCasa.prototype.setDb = function(_db) {
-   this.db = _db;
-};
-
 RemoteCasa.prototype.reconnect = function(_params) {
 
    if (!this.connected) {
@@ -369,6 +391,14 @@ RemoteCasa.prototype.reconnect = function(_params) {
       this.port = _params.port;
       this.start();
    }
+};
+
+RemoteCasa.prototype.getListeningPort = function() {
+   return this.port;
+};
+
+RemoteCasa.prototype.getHost = function() {
+   return this.host;
 };
 
 RemoteCasa.prototype.scopeExists = function(_line, _callback) {
