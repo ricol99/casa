@@ -13,10 +13,10 @@ function ConsoleCmd(_config, _console) {
 ConsoleCmd.prototype.coldStart = function() {
 };
 
-ConsoleCmd.prototype.checkArguments = function(_minLength, _argumens) {
+ConsoleCmd.prototype.checkArguments = function(_minLength, _arguments) {
 
-   if (_argumens.length < _minLength)  {
-      throw("Not enough argumens");
+   if ((!_arguments && (_minLength > 0)) || (_arguments && (_arguments.length < _minLength)))  {
+      throw("Not enough arguments");
    }
 };
 

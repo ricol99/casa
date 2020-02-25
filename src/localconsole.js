@@ -38,24 +38,23 @@ LocalConsole.prototype.start = function(_startScope) {
 
 LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
 
-  this.parseLine(_line, (_err, _result) => {
+   this.extractScope(_line, (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
       }
 
-      var matches = [];
+      //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
+      var matches = _result.matchingScopes;
+
+      var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.uName + ":");
+      var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
+      var method = (methodResult.method) ? methodResult.method : "";
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
-
-         if (cmdObj) {
-            var methodMatch = _result.remainingStr ? _result.remainingStr : "";
-            cmdObj.filterMembers(methodMatch, matches);
-         }
+         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName);
+         matches = methodMatches.concat(_result.matchingScopes);
       }
-
-      matches = matches.concat(((_result.matchingScopes.length === 0) && _result.scope) ? [ _result.scope ] : _result.matchingScopes);
 
       if (_callback) {
          _callback(null, [ matches, _line]);
@@ -117,50 +116,112 @@ LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consol
    return cmdObj;
 };
 
+LocalConsole.prototype.processMatches = function(_line, _matches) {
+   var scope = (this.currentScope === "::") ? this.gang.uName : this.gang.uName + this.currentScope.substr(1);
+
+   for (var i = 0; i < _matches.length; ++i) {
+
+      if (_line[0] === ':') {
+         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.gang.uName.length+1) : ":"+_matches[i].replace(this.gang.uName+":"+this.getCasaName(), "").substr(1);
+      }
+      else  {
+         _matches[i] = _matches[i].replace(scope, "").substr(1);
+      }
+   }
+};
+
+LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjuName, _perfectMatchRequired) {
+   var matches = [];
+
+   if (_consoleObjHierarchy) {
+      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName);
+
+      if (cmdObj) {
+         matches = cmdObj.filterMembers(_method, undefined, _scope);
+         this.processMatches(_originalLine, matches);
+      }
+   }
+
+   return matches;
+};
+
+LocalConsole.prototype.extractMethodAndArguments = function(_originalLine, _line) {
+   var line = (_line.length > 0) ? ((_line[0] === ".") ? _line.substr(1) : _line) : _line;
+   var spacePos = (line.indexOf(' ') === -1) ? 10000 : line.indexOf(' ');
+   var bracketPos = (line.indexOf('(') === -1) ? 10000 : line.indexOf('(');
+   var separator = '(';
+   var methodArguments;
+   var methodSeparator = (spacePos < bracketPos) ? ' ' : '(';
+   var splitLine = line.split(methodSeparator);
+   var method = (splitLine[0].length > 0) ? splitLine[0] : null;
+
+   if (splitLine.length > 1) {
+      var argFormat = (methodSeparator === '(') ? 'js' : (splitLine[1].trim()[0] === '(') ? 'js' : 'space';
+      var arguments;
+
+      if (argFormat === 'space') {
+         arguments = "\"" + splitLine.slice(1).join(" ").match(/[\w-]+|"(?:\\"|[^"])+"/g).join("\",\"") + "\")";
+         arguments = arguments.replace(/""/g,"\"");
+      }
+      else {
+         arguments = line.split("(").slice(1).join("(").trim();
+      }
+
+      var lastIndex = arguments.lastIndexOf(")");
+
+      if (lastIndex !== -1) {
+         arguments = arguments.substring(0, lastIndex);
+
+         try {
+            methodArguments = JSON.parse("["+arguments+"]");
+         }
+         catch (_err) {
+            return { error: "Unable to parse arguments: " + _err };
+         }
+      }
+      else {
+         return { error: "Unable to parse arguments: No closing parenthesis" };
+      }
+   }
+
+   return { method: method, arguments: methodArguments };
+};
+
 LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
 
-   this.parseLine(_line, (_err, _result) => {
+   this.extractScope(_line, (_err, _result) => {
+      var err = _err ? _err : "Object not found";
 
-      if (_err) {
+      if (_err || !_result.scope) {
          return _callback(_err);
       }
 
-      if (_result.hasOwnProperty("consoleObjHierarchy")) {
+      var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
+
+      if (methodResult.method && _result.hasOwnProperty("consoleObjHierarchy")) {
          var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
 
          if (cmdObj) {
-            var methodName = _result.method ? _result.method : "cat";
+            var methodName = methodResult.method ? methodResult.method : "cat";
 
             var cmdMethod = Object.getPrototypeOf(cmdObj)[methodName];
 
             if (cmdMethod) {
 
                try {
-                  Object.getPrototypeOf(cmdObj)[methodName].call(cmdObj, _result.scope, _result.arguments, _callback);
+                  Object.getPrototypeOf(cmdObj)[methodName].call(cmdObj, _result.scope, methodResult.arguments, _callback);
                }
                catch (_err) {
                   _callback(_err);
                }
             }
             else {
-               this.executeParsedCommand(_result.scope, _result.method, _result.arguments, _callback);
+               _callback("Command not found!");
             }
          }
-         //else {
-            //this.executeCommand(_line, (_err, _newResult) => {
-
-               //if (_err) {
-                  //return _callback(_err);
-               //}
-
-               //if (!_result.method) {
-                  //this.currentScope = _result.newScope;
-                  //this.setPrompt(_result.newScope);
-               //}
-
-               //_callback(_err, _newResult);
-            //});
-         //}
+         else {
+            _callback("Object not found!");
+         }
       }
       else {
          _callback("Object not found!");
@@ -173,16 +234,8 @@ LocalConsole.prototype.scopeExists = function(_line, _callback) {
    this.consoleApiSession.scopeExists({ scope: this.currentScope, line: _line }, _callback);
 };
 
-LocalConsole.prototype.autoComplete = function(_line, _callback) {
-   this.consoleApiSession.completeLine({ scope: this.currentScope, line: _line }, _callback);
-};
-
-LocalConsole.prototype.parseLine = function(_line, _callback) {
-   this.consoleApiSession.parseLine({ scope: this.currentScope, line: _line }, _callback);
-};
-
-LocalConsole.prototype.executeCommand = function(_line, _callback) {
-   this.consoleApiSession.executeCommand({ scope: this.currentScope, line: _line }, _callback);
+LocalConsole.prototype.extractScope = function(_line, _callback) {
+   this.consoleApiSession.extractScope({ scope: this.currentScope, line: _line }, _callback);
 };
 
 LocalConsole.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
@@ -196,6 +249,11 @@ LocalConsole.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, 
 LocalConsole.prototype.getPromptColour = function(_prompt) {
    return (_prompt.startsWith("::"+this.casa.uName)) ? "\x1b[32m" : "\x1b[31m";
 };
+
+LocalConsole.prototype.getCasaName = function(_line) {
+   this.gang.casa.uName;
+};
+
 
 LocalConsole.prototype.getCasa = function(_name) {
    return this.gang.casa;
@@ -244,7 +302,6 @@ LocalConsole.prototype.setPrompt = function(_prompt) {
    var colour = this.getPromptColour(_prompt);
    this.rl.setPrompt(colour + _prompt + " > \x1b[0m");
 };
-
 
 module.exports = exports = LocalConsole;
  

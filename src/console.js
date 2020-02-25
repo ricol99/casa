@@ -225,16 +225,12 @@ Console.prototype.scopeExists = function(_line, _callback) {
    this.identifyCasaAndSendCommand(_line, "scopeExists", _callback);
 };
 
-Console.prototype.parseLine = function(_line, _callback) {
-   this.identifyCasaAndSendCommand(_line, "parseLine", _callback);
+Console.prototype.extractScope = function(_line, _callback) {
+   this.identifyCasaAndSendCommand(_line, "extractScope", _callback);
 };
 
 Console.prototype.autoComplete = function(_line, _callback) {
    this.identifyCasaAndSendCommand(_line, "autoComplete", _callback);
-};
-
-Console.prototype.executeCommand = function(_line, _callback) {
-   this.identifyCasaAndSendCommand(_line, "executeCommand", _callback);
 };
 
 Console.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
@@ -345,17 +341,10 @@ RemoteCasa.prototype.start = function()  {
       }
    });
 
-   this.socket.on('parse-output', (_data) => {
+   this.socket.on('extract-scope-output', (_data) => {
 
-      if (this.parseCallback) {
-         this.parseCallback(null, _data.result);
-      }
-   });
-
-   this.socket.on('complete-output', (_data) => {
-
-      if (this.completeCallback) {
-         this.completeCallback(null, _data.result);
+      if (this.extractScopeCallback) {
+         this.extractScopeCallback(null, _data.result);
       }
    });
 
@@ -413,35 +402,11 @@ RemoteCasa.prototype.scopeExists = function(_line, _callback) {
    }
 };
 
-RemoteCasa.prototype.parseLine = function(_line, _callback) {
+RemoteCasa.prototype.extractScope = function(_line, _callback) {
 
    if (this.connected) {
-      this.parseCallback = _callback;
-      this.socket.emit('parseLine', { scope: this.owner.currentScope, line: _line });
-      return true;
-   }
-   else {
-      return false;
-   }
-};
-
-RemoteCasa.prototype.autoComplete = function(_line, _callback) {
-
-   if (this.connected) {
-      this.completeCallback = _callback;
-      this.socket.emit('completeLine', { scope: this.owner.currentScope, line: _line });
-      return true;
-   }
-   else {
-      return false;
-   }
-};
-
-RemoteCasa.prototype.executeCommand = function(_line, _callback) {
-
-   if (this.connected) {
-      this.executeCallback = _callback;
-      this.socket.emit('executeCommand', { scope: this.owner.currentScope, line: _line });
+      this.extractScopeCallback = _callback;
+      this.socket.emit('extractScope', { scope: this.owner.currentScope, line: _line });
       return true;
    }
    else {
@@ -482,7 +447,7 @@ OfflineCasa.prototype.scopeExists = function(_line, _callback) {
    }
 };
 
-OfflineCasa.prototype.parseLine = function(_line, _callback) {
+OfflineCasa.prototype.extractScope = function(_line, _callback) {
 
    if (!this.scopeExists(_line)) {
 
@@ -524,14 +489,6 @@ OfflineCasa.prototype.parseLine = function(_line, _callback) {
    else {
       return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName };
    }
-};
-
-OfflineCasa.prototype.autoComplete = function(_line, _callback) {
-   return _callback(null, [ this.findMatchingMethod(_line.replace("::", "")), _line ]);
-};
-
-OfflineCasa.prototype.executeCommand = function(_line, _callback) {
-   _callback("Casa is offline!");
 };
 
 OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {

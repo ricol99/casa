@@ -170,27 +170,25 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfe
 
             if (!_result.consoleApiObj && !_perfectMatchRequired) {
                _result.consoleApiObj = consoleApiObj;
-               _result.scope = this.fullScopeName;
             }
          }
          else {
             _result.consoleApiObj = consoleApiObj;
-            _result.scope = this.fullScopeName;
+            _result.scope = hits[perfectMatch];
+            hits.splice(perfectMatch, 1);
             _result.remainingStr = "";
             _result.hits.push(...hits);
          }
       }
    }
-   else {
-      if (!_perfectMatchRequired) {
-         _result.hits.push(...hits);
-         var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
+   else if (!_perfectMatchRequired) {
+      _result.hits.push(...hits);
+      var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
 
-         if (!_result.hasOwnProperty("remainingStr") || (_result.remainingStr.length > remainingStr.length)) {
-            _result.scope = this.fullScopeName;
-            _result.consoleApiObj = this;
-            _result.remainingStr = remainingStr;
-         }
+      if (!_result.hasOwnProperty("remainingStr") || (_result.remainingStr.length > remainingStr.length)) {
+         _result.scope = this.fullScopeName;
+         _result.consoleApiObj = this;
+         _result.remainingStr = remainingStr;
       }
    }
 };
@@ -201,13 +199,14 @@ ConsoleApi.prototype.myObj = function() {
 
 ConsoleApi.prototype.ls = function(_params, _callback) {
    this.checkParams(0, _params);
-   var result = this.filterScope("").hits;
+   var result = {};
+   this.filterScope("", undefined, result);
 
-   for (var i = 0; i < result.length; ++i) {
-      result[i] = result[i].replace(this.fullScopeName+":", "");
+   for (var i = 0; i < result.hits.length; ++i) {
+      result.hits[i] = result.hits[i].replace(this.fullScopeName+":", "");
    }
 
-   _callback(null, result);
+   _callback(null, result.hits);
 };
 
 ConsoleApi.prototype.cat = function(_params, _callback) {
