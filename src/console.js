@@ -143,24 +143,25 @@ Console.prototype.getCasaName = function(_line) {
    return casaName;
 };
 
-Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
+Console.prototype.identifyCasaAndSendCommand = function(_lineOrCommand, _func, _callback) {
 
    if (this.offline) {
-      return this.sendCommandToCasa(this.offlineCasa, _line, _func, _callback);
+      return this.sendCommandToCasa(this.offlineCasa, _lineOrCommand, _func, _callback);
    }
 
-   var casaName = this.getCasaName(_line);
+   var scope = (_lineOrCommand instanceof Array) ? _lineOrCommand[0] : _lineOrCommand;
+   var casaName = this.getCasaName(scope);
 
    if (this.remoteCasas.hasOwnProperty(casaName)) {
 
-      if (!this.sendCommandToCasa(this.remoteCasas[casaName], _line, _func, _callback)) {
+      if (!this.sendCommandToCasa(this.remoteCasas[casaName], _lineOrCommand, _func, _callback)) {
 
-         if (!(this.defaultCasa && this.sendCommandToCasa(this.defaultCasa, _line, _func, _callback))) {
+         if (!(this.defaultCasa && this.sendCommandToCasa(this.defaultCasa, _lineOrCommand, _func, _callback))) {
             _callback("Object not found!");
          }
       }
    }
-   else if (!(this.defaultCasa && this.sendCommandToCasa(this.defaultCasa, _line, _func, _callback))) {
+   else if (!(this.defaultCasa && this.sendCommandToCasa(this.defaultCasa, _lineOrCommand, _func, _callback))) {
       _callback("Object not found!");
    }
 };
