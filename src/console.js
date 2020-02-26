@@ -267,7 +267,7 @@ Console.prototype.updatePromptMidLine = function() {
 };
 
 Console.prototype.getCasa = function(_name) {
-   returnr this.remoteCasas[_name];
+   return this.remoteCasas[_name];
 };
 
 function RemoteCasa(_config, _owner) {
@@ -491,7 +491,7 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    }
 };
 
-OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {
+OfflineCasa.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
    _callback("Casa is offline!");
 };
 
@@ -506,6 +506,10 @@ OfflineCasa.prototype.findMatchingMethod = function(_matchString) {
    }
 
    return matchingMethods;
+};
+
+OfflineCasa.prototype.getCasa = function(_name) {
+   return this;
 };
 
 module.exports = exports = Console;
