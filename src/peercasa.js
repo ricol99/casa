@@ -175,12 +175,6 @@ PeerCasa.prototype.invalidateSources = function() {
    this.gang.casa.refreshSourceListeners();
 }
 
-PeerCasa.prototype.sendConsoleCommand = function(_scope, _line) {
-   var scope = _scope.replace(this.gang.casa.uName, this.uName);
-   var line = _scope.replace(this.gang.casa.uName, this.uName);
-  XXXXXXX
-};
-
 PeerCasa.prototype.getHostname = function() {
    return this.address.hostname;
 };

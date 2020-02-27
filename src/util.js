@@ -70,7 +70,10 @@ Util.iterate = function(_collection, _startIndex, _func) {
    if (_collection instanceof Array) {
 
       for (var i = startIndex; i < _collection.length; ++i) {
-         _func(_collection[i]);
+
+         if (_func(_collection[i])) {
+            break;
+         }
       }
    }
    else if (typeof _collection === 'object') {
@@ -79,7 +82,10 @@ Util.iterate = function(_collection, _startIndex, _func) {
       for (var element in _collection) {
 
          if (_collection.hasOwnProperty(element) && (index >= startIndex)) {
-            _func(element);
+
+            if (_func(element)) {
+               break;
+            }
          }
          ++index;
       }
