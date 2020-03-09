@@ -38,7 +38,7 @@ GPIOProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _d
 GPIOProperty.prototype.propertyAboutToChange = function(_propValue, _data) {
 
    if ((this.direction == 'out' || this.direction == 'inout') && (this.value != _propValue)) {
-      var source = this.owner.gang.casa.findSource(this.serviceName);
+      var source = this.owner.gang.findGlobalSource(this.serviceName);
 
       if (source) {
          source.setProperty("gpio-pin-"+this.gpioPin, _propValue, {});

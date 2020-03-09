@@ -55,10 +55,14 @@ function SourceListener(_config, _owner) {
       this.sourceEventName = this.sourceName + ":" + this.eventName;
    }
 
-   this.uName = "sourcelistener:" + _owner.uName + ":" + this.sourceEventName;
+   if (!this.owner.fullName) {
+      console.error('Owner '+this.owner.uName + ' is not a named object!');
+      process.exit(1);
+   }
+
+   this.uName = "sourcelistener:" + this.owner.fullName + ":" + this.sourceEventName;
 
    this._id = this.uName;   // *** TBD
-
 
    if (_config.steps) {
       this.pipeline = new Pipeline(_config.steps, this);
@@ -83,7 +87,8 @@ SourceListener.prototype.establishListeners = function() {
    this.invalidHandler = SourceListener.prototype.invalidCb.bind(this);
 
    // refresh source
-   this.source = this.gang.findSource(this.sourceName);
+   console.log("AAAA sourceName="+this.sourceName);
+   this.source = this.gang.findNamedObject(this.sourceName);
    this.valid = (this.source != undefined) || (this.source != null);;
 
    if (this.valid) {

@@ -1,17 +1,22 @@
 var util = require('./util');
-var AsyncEmitter = require('./asyncemitter');
+var NamedObject = require('./namedobject');
 var Gang = require('./gang');
 
-function SourceBase() {
-   AsyncEmitter.call(this);
-   this.bowing = false;
+function SourceBase(_uName, _owner) {
+   NamedObject.call(this, _uName, _owner);
    this.gang = Gang.mainInstance();
+   this.bowing = false;
    this.props = {};
 
    this.setMaxListeners(0);
 }
 
-util.inherits(SourceBase, AsyncEmitter);
+util.inherits(SourceBase, NamedObject);
+
+SourceBase.prototype.findNamedObject = function(_scope, _collections) {
+   var collections = _collections ? _collections : [];
+   return NamedObject.prototype.findNamedObject.call(this, _scope, collections.push(this.props));
+};
 
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);

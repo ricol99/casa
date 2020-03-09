@@ -355,10 +355,6 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
-
-      if (!_config.hasOwnProperty("uName") || _config.uName == undefined) {
-         _config.uName = this.owner.uName;
-      }
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
    }
@@ -456,9 +452,7 @@ function State(_config, _owner) {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (!this.sources[i].hasOwnProperty("uName")) {
-            this.sources[i].uName = this.owner.owner.uName;
-         }
+         this.sources[i].uName = this.sources[i].hasOwnProperty("uName") ? this.owner.gang.parseFullName(this.sources[i].uName) : this.owner.owner.fullName;
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;
@@ -479,7 +473,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.sources[i].guards[k], "active", true);
 
                   if (this.sources[i].guards[k].active) {
-                     this.sources[i].guards[k].uName = this.owner.owner.uName;
+                     this.sources[i].guards[k].uName = this.owner.owner.fullName;
                      this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
                   }
                }
@@ -504,7 +498,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.actions[l].guards[m], "active", true);
 
                   if (this.actions[l].guards[m].active) {
-                     this.actions[l].guards[m].uName = this.owner.owner.uName;
+                     this.actions[l].guards[m].uName = this.owner.owner.fullName;
                      this.actions[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.actions[l].guards[m]);
                   }
                }
@@ -536,7 +530,7 @@ function State(_config, _owner) {
                util.ensureExists(this.schedules[n].guards[p], "active", true);
 
                if (this.schedules[n].guards[p].active) {
-                  this.schedules[n].guards[p].uName = this.owner.owner.uName;
+                  this.schedules[n].guards[p].uName = this.owner.owner.fullName;
                   this.schedules[n].guards[p].sourceListener = this.owner.fetchOrCreateSourceListener(this.schedules[n].guards[p]);
                }
             }

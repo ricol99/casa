@@ -53,7 +53,7 @@ function Building(_config) {
                                "source": { "property": "daylight", "transform": "!$value" }}, _config);
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findSource(_config.users[u].uName));
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
    }
 
    for (var i = 0; i < this.users.length; ++i) {
@@ -96,7 +96,7 @@ function Building(_config) {
 
       this.ensurePropertyExists(this.users[i].sName+"-present", 'property', { name: this.users[i].sName+"-present", initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].sName+"-user-state" }}, {});
+      this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.fullName, "property": this.users[i].sName+"-user-state" }}, {});
 
       allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"not-present\"" });
       allUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });

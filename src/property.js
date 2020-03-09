@@ -1,11 +1,14 @@
 var util = require('./util');
 var SourceListener = require('./sourcelistener');
 var Pipeline = require('./pipeline');
+var NamedObject = require('./namedobject');
 
 function Property(_config, _owner) {
    this.name = _config.name;
    this.type = _config.type;
-   this.uName = _owner.uName+":"+this.type+":"+this.name;
+   //this.uName = _owner.uName+":"+this.type+":"+this.name;
+
+   NamedObject.call(this, _config.name, _owner);
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
@@ -40,7 +43,10 @@ function Property(_config, _owner) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
 
          if (!_config.sources[index].hasOwnProperty("uName") || _config.sources[index].uName == undefined) {
-            _config.sources[index].uName = this.owner.uName;
+            _config.sources[index].uName = this.owner.fullName;
+         }
+         else {
+            _config.sources[index].uName = this.owner.gang.parseFullName(_config.sources[index].uName);
          }
 
          var sourceListener = new SourceListener(_config.sources[index], this);
@@ -53,7 +59,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('target')) {
-      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.uName;
+      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.fullName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
 
@@ -64,6 +70,8 @@ function Property(_config, _owner) {
       this.target = this.targetListener.source;
    }
 }
+
+util.inherits(Property, NamedObject);
 
 //
 // Returns current property value - not updated until all step pipeline has been processed

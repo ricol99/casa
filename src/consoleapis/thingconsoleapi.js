@@ -49,7 +49,7 @@ ThingConsoleApi.prototype.createThing = function(_params, _callback) {
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findObject(config.uName)) {
+   if (this.gang.findGlobalSource(config.uName)) {
       return _callback("Thing already exists!");
    }
 

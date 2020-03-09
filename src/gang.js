@@ -1,6 +1,7 @@
 var util = require('./util');
 var S = require('string');
 var Db = require('./db');
+var NamedObject = require('./namedobject');
 
 var _mainInstance = null;
 
@@ -59,6 +60,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
             this.config.certPath = _certPath;
             this.config.configPath = _configPath;
             this.uName = this.config.gang;
+            NamedObject.call(this, this.uName);
             this.allObjects[this.uName] = this;
 
             this.loadSystemServices();
@@ -108,6 +110,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    }
    else {
       this.uName = "gang:"+_casaName;
+      NamedObject.call(this, this.uName);
       this.casaName = "casa:console";
 
       this.config = { uName: this.casaName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
@@ -146,6 +149,29 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
       this.gangDb.connect();
    }
+};
+
+util.inherits(Gang, NamedObject);
+
+Gang.prototype.parseFullName = function(_fullName) {
+   var newName = (_fullName.startsWith("::")) ? _fullName.replace(":", this.uName) : (_fullName.startsWith(":")) ? this.uName + ":" + this.casa.uName + _fullName : _fullName;
+   return newName.trim();
+};
+
+Gang.prototype.findNamedObject = function(_scope, _collections) {
+
+   var scope = _scope.startsWith("::") ? _scope.substr(2) : _scope.startsWith(this.uName + ":") ? _scope.substr(this.uName.length+1) : (_scope === this.uName) ? "" : _scope;
+
+   if (scope.trim().length === 0) {
+      return this;
+   }
+
+   if (scope.startsWith(":")) {
+      scope = this.casa.uName + scope;
+   }
+    
+   console.log("AAAAA scope="+scope);
+   return NamedObject.prototype.findNamedObject.call(this, scope, [ this.allObjects ]);
 };
 
 Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
@@ -289,6 +315,7 @@ Gang.prototype.addSystemServicesToCasa = function() {
 
       if (this.systemServices.hasOwnProperty(service)) {
          this.casa.addService(this.systemServices[service]);
+         this.systemServices[service].setOwner(this.casa);
       }
    }
 };
@@ -309,6 +336,16 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
          }
       }
    }
+};
+
+Gang.prototype.addObjectToGlobalScope = function(_obj) {
+
+   if (_obj.hasOwnProperty("local") && !_obj.local)  {
+      this.allObjects[_obj.uName] = _obj;
+      return true;
+   }
+
+   return false;
 };
 
 Gang.prototype.cleverRequire = function(_name, _path, _type) {
@@ -339,7 +376,7 @@ Gang.prototype.createUser = function(_user) {
    _user.owner = this;
    var userObj = new User(_user);
    this.users[userObj.uName] = userObj;
-   this.allObjects[userObj.uName] = userObj;
+   this.addObjectToGlobalScope(userObj);
    console.log('New user: ' + userObj.uName);
 };
 
@@ -371,7 +408,7 @@ Gang.prototype.createService = function(_config, _serviceOwner) {
    }
    else {
       this.casa.addService(serviceObj);
-      this.allObjects[serviceObj.uName] = serviceObj;
+      this.addObjectToGlobalScope(serviceObj);
    }
 
    return serviceObj;
@@ -416,7 +453,7 @@ Gang.prototype.extractScenes = function(_config, _parent) {
          var Scene = this.cleverRequire(_config[index].uName, 'scenes');
          var sceneObj = new Scene(_config[index]);
          this.scenes[sceneObj.uName] = sceneObj;
-         this.allObjects[sceneObj.uName] = sceneObj;
+         this.addObjectToGlobalScope(sceneObj);
          console.log('New scene: ' + _config[index].uName);
       }
    }
@@ -433,14 +470,17 @@ Gang.prototype.createThing = function(_config, _parent) {
    var thingObj = new Thing(_config);
    thingObj.setParent(_parent);
    this.things[thingObj.uName] = thingObj;
-   this.allObjects[thingObj.uName] = thingObj;
+   this.addObjectToGlobalScope(thingObj);
    console.log('New thing: ' + _config.uName);
    return thingObj;
 };
 
 Gang.prototype.removeThing = function(_thing) {
    delete this.things[_thing.uName];
-   delete this.allObjects[_thing.uName];
+
+   if (!_thing.local) {
+      delete this.allObjects[_thing.uName];
+   }
 };
 
 Gang.prototype.extractThings = function(_config, _parent) {
@@ -750,16 +790,12 @@ Gang.prototype.findRemoteCasa = function (_casaName) {
    return this.remoteCasas[_casaName];
 };
 
-Gang.prototype.findSource = function (_sourceName) {
+Gang.prototype.findGlobalSource = function (_sourceName) {
    return this.allObjects[_sourceName];
 };
 
 Gang.prototype.findService = function(_serviceName) {
    return this.services[_serviceName];
-};
-
-Gang.prototype.resolveObject = function (objName) {
-    return this.allObjects[objName];
 };
 
 Gang.prototype.setUberCasa = function(_uberCasa) {
@@ -939,10 +975,6 @@ Gang.prototype.filterGlobalObjects = function(_filter) {
    }
 
    return hits;
-};
-
-Gang.prototype.findObject = function(_uName) {
-   return this.allObjects[_uName];
 };
 
 module.exports = exports = Gang;

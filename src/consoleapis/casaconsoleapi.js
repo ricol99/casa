@@ -50,7 +50,7 @@ CasaConsoleApi.prototype.createService = function(_params, _callback) {
    var newServiceConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findObject(newServiceConfig.uName)) {
+   if (this.gang.findService(newServiceConfig.uName)) {
       return _callback("Service already exists!");
    }
 
@@ -91,7 +91,7 @@ CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    var newThingConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findObject(newThingConfig.uName)) {
+   if (this.gang.findGlobalSource(newThingConfig.uName)) {
       return _callback("Thing already exists!");
    }
 

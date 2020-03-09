@@ -10,7 +10,7 @@ function CasaArea(_config) {
    this.casaCount = 0;
    this.uName = _config.uName;
 
-   SourceBase.call(this, _config);
+   SourceBase.call(this, this.uName, this.gang.casa);
 }
 
 util.inherits(CasaArea, SourceBase);

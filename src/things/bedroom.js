@@ -36,7 +36,7 @@ function Bedroom(_config) {
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findSource(_config.users[u].uName));
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
    }
 
    this.usersPresentAndAwakeConfig = { initialValue: false, sources: [] };

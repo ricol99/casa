@@ -101,7 +101,7 @@ DbService.prototype.scenesRequested = function(_request, _response) {
 
    if (_request.params.hasOwnProperty("scenes")) {
       var allProps = {};
-      var source = this.gang.allObjects[_request.params.source];
+      var source = this.gang.findNamedObject(_request.params.source);
 
       if (source) {
          source.getAllProperties(allProps);
@@ -127,7 +127,7 @@ DbService.prototype.thingRequested = function(_request, _response) {
 
    if (_request.params.hasOwnProperty("thingName")) {
       var allProps = {};
-      var thing = this.gang.allObjects[_request.params.thingName];
+      var thing = this.gang.findNamedObject(_request.params.thingName);
 
       if (thing) {
          thing.getAllProperties(allProps);

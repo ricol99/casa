@@ -42,7 +42,7 @@ ConsoleApi.prototype.filterGlobalObjects = function(_filter) {
 };
 
 ConsoleApi.prototype.findGlobalObject = function(_uName) {
-   return this.gang.findObject(_uName);
+   return this.gang.findGlobalObject(_uName);
 };
 
 ConsoleApi.prototype.filterArray = function(_array, _filter) {
@@ -194,7 +194,7 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfe
 };
 
 ConsoleApi.prototype.myObj = function() {
-   return this.gang.findObject(this.myObjuName);
+   return this.gang.findGlobalObject(this.myObjuName);
 };
 
 ConsoleApi.prototype.ls = function(_params, _callback) {

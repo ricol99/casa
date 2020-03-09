@@ -6,7 +6,6 @@ var Gang = require('./gang');
 
 function PeerCasa(_config) {
    this.name = _config.uName;
-   this.uName = (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name;
 
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
@@ -22,7 +21,7 @@ function PeerCasa(_config) {
    this.remoteCasas = [];
    this.deathTime = 500;
 
-   SourceBase.call(this, _config);
+   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name, this.gang);
 
    this.sources = [];
    this.workers = [];
@@ -613,7 +612,7 @@ PeerCasa.prototype.socketConsoleCommandAckCb = function(_data) {
 
 PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
-   var source = this.gang.findSource(_data.sourceName);
+   var source = this.gang.findGlobalSource(_data.sourceName);
 
    if (source) {
       _data.acker = this.casa.uName;

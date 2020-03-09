@@ -1,14 +1,13 @@
 var util = require('./util');
-var events = require('events');
 var express;
 var app;
 var http;
 var io;
 
 var Gang = require('./gang');
+var NamedObject = require('./namedobject');
 
 function Casa(_config) {
-   this.uName = _config.uName;
    this.gang = Gang.mainInstance();
    this._id = true;     // TDB!!!
    this.portStart = 50000;
@@ -20,7 +19,7 @@ function Casa(_config) {
 
    this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
-   events.EventEmitter.call(this);
+   NamedObject.call(this, _config.uName, this.gang);
 
    this.id = _config.id;
    this.db = null;
@@ -35,7 +34,13 @@ function Casa(_config) {
    this.createServer();
 }
 
-util.inherits(Casa, events.EventEmitter);
+util.inherits(Casa, NamedObject);
+
+Casa.prototype.findNamedObject = function(_scope, _collections) {
+   var collections = _collections ? _collections : [];
+   collections.push(this.sources);
+   return NamedObject.prototype.findNamedObject.call(this, _scope, collections);
+};
 
 Casa.prototype.createServer = function() {
    express = require('express');
@@ -75,7 +80,7 @@ Casa.prototype.createServer = function() {
 
    app.get('/source/:source', (req, res) => {
       var allProps = {};
-      var source = this.gang.allObjects[req.params.source];
+      var source = this.gang.findGlobalSource(req.params.source);
 
       if (source) {
          source.getAllProperties(allProps);
@@ -224,7 +229,7 @@ Casa.prototype.addService = function(_service) {
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return (_serviceType.indexOf(":") !== -1) ? this.gang.findObject(_serviceType) : this.services[_serviceType];
+   return (_serviceType.indexOf(":") !== -1) ? this.gang.findGlobalObject(_serviceType) : this.services[_serviceType];
 };
 
 Casa.prototype.findServiceName = function(_serviceType) {

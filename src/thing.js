@@ -12,17 +12,25 @@ function Thing(_config) {
 
 util.inherits(Thing, Source);
 
+Thing.prototype.findNamedObject = function(_scope, _collections) {
+   var collections = _collections ? _collections : [];
+   collections.push(this.things);
+   return Source.prototype.findNamedObject.call(this, _scope, collections);
+};
+
 Thing.prototype.setParent = function(_thing) {
 
    if (_thing) {
       this.parent = _thing;
       this.parent.addThing(this);
       this.local = true;
+      this.setOwner(_thing);
    }
 };
 
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
+   _thing.setOwner(this);
 };
 
 // Actually update the property value and let all interested parties know

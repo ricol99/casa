@@ -42,21 +42,21 @@ Util.getClassHierarchy = function(_obj) {
 Util.filter = function(_collection, _func) {
    var dest = [];
 
-   if (_collection instanceof Array) {
-
-      for (var i = 0; i < _collection.length; ++i) {
-
-         if (_func(_collection[i])) {
-            dest.push(_collection[i]);
-         }
-      }
-   }
-   else if (typeof _collection === 'object') {
+   if (typeof _collection === 'object') {
 
       for (var element in _collection) {
 
          if (_collection.hasOwnProperty(element) && _func(element)) {
             dest.push(element);
+         }
+      }
+   }
+   else if (_collection instanceof Array) {
+
+      for (var i = 0; i < _collection.length; ++i) {
+
+         if (_func(_collection[i])) {
+            dest.push(_collection[i]);
          }
       }
    }
@@ -66,8 +66,23 @@ Util.filter = function(_collection, _func) {
 
 Util.iterate = function(_collection, _startIndex, _func) {
    var startIndex = (_startIndex == undefined) ? 0 : _startIndex;
+   console.log("AAAAA startIndex="+startIndex);
 
-   if (_collection instanceof Array) {
+   if (typeof _collection === 'object') {
+      var index = 0;
+
+      for (var element in _collection) {
+
+         if (_collection.hasOwnProperty(element) && (index >= startIndex)) {
+
+            if (_func(_collection[element])) {
+               break;
+            }
+         }
+         ++index;
+      }
+   }
+   else if (_collection instanceof Array) {
 
       for (var i = startIndex; i < _collection.length; ++i) {
 
@@ -76,36 +91,22 @@ Util.iterate = function(_collection, _startIndex, _func) {
          }
       }
    }
-   else if (typeof _collection === 'object') {
-      var index = 0;
-
-      for (var element in _collection) {
-
-         if (_collection.hasOwnProperty(element) && (index >= startIndex)) {
-
-            if (_func(element)) {
-               break;
-            }
-         }
-         ++index;
-      }
-   }
 };
 
 
 Util.assign = function(_dest, _source) {
 
-   if (_source instanceof Array) {
+   if (typeof _source === 'object') {
+
+      for (var prop in _source) {
+         _dest[prop] = _source[prop];
+      }
+   }
+   else if (_source instanceof Array) {
       _dest.length = 0;
 
       for (var i = 0; i < _source.length; ++i) {
          _dest.push(this.copy(_source[i]), false);       // Not sure this is correct, we need it for copy config
-      }
-   }
-   else if (typeof _source === 'object') {
-
-      for (var prop in _source) {
-         _dest[prop] = _source[prop];
       }
    }
    else {

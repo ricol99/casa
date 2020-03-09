@@ -9,7 +9,7 @@ function RemoteCasa(_config, _peerCasa) {
    this.casa = this.gang.casa;
    this.peerCasa = _peerCasa;
 
-   SourceBase.call(this, _config);
+   SourceBase.call(this, _config.uName, this.gang);
 
    this.loginAs = 'remote';
    this.sources = [];

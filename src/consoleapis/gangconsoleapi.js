@@ -25,7 +25,7 @@ GangConsoleApi.prototype.createUser = function(_params, _callback) {
        return _callback("Name not passed as a parameter");
    }
 
-   if (!this.gang.findObject(_params[0])) {
+   if (!this.gang.findNamedObject(_params[0])) {
       var userObj = this.gang.createUser({uName: _params[0]});
       return _callback(null, true);
    }

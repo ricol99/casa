@@ -2,9 +2,7 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 
 function PeerSource(_uName, _priority, _props, _peerCasa) {
-   SourceBase.call(this);
-   this.uName = _uName;
-   this.sName = this.uName.split(":")[1];
+   SourceBase.call(this, _uName, _peerCasa);
 
    this.priority = _priority;
    this.casa = _peerCasa;
@@ -12,7 +10,7 @@ function PeerSource(_uName, _priority, _props, _peerCasa) {
    this.config = { local: true };
    this.local = true;
 
-   var existingSource = this.gang.findSource(_uName);
+   var existingSource = this.gang.findGlobalSource(_uName);
 
    if (existingSource) {
 

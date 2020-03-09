@@ -7,7 +7,7 @@ function Tester(_config) {
    this.thingType = "testsequence";
    this.config = _config;
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
-   this.targetUnderTest = _config.hasOwnProperty("targetUnderTest") ? _config.targetUnderTest : this.uName;
+   this.targetUnderTest = _config.hasOwnProperty("targetUnderTest") ? this.gang.parseFullName(_config.targetUnderTest) : this.fullName;
 
    this.currentTestCase = 0;
    this.currentTestEvent = 0;
@@ -249,7 +249,7 @@ Tester.prototype.runTestEvent = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
-      target = this.gang.findSource(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
+      target = this.gang.findNamedObject(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {

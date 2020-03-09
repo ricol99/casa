@@ -1,11 +1,12 @@
 var util = require('./util');
 var SourceBase = require('./sourcebase');
+var Gang = require('./gang');
 
 function Source(_config) {
-   SourceBase.call(this);
+   var gang = Gang.mainInstance();
+   console.log("AAAAA Source uName="+_config.uName);
+   SourceBase.call(this, _config.uName, gang.casa);
    this.config = _config;
-   this.uName = _config.uName;
-   this.sName = this.uName.split(":")[1];
 
    this.casa = this.gang.casa;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
