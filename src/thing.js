@@ -1,13 +1,23 @@
 var util = require('./util');
 var Source = require('./source');
 
-function Thing(_config) {
-   Source.call(this, _config);
+function Thing(_config, _parent) {
+
+   if (_parent) {
+      _config.local = true;
+   }
+
+   Source.call(this, _config, _parent);
 
    this.displayName = _config.displayName;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
    this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
    this.things = {};
+
+   if (_parent) {
+      this.parent = _parent;
+      this.parent.addThing(this);
+   }
 }
 
 util.inherits(Thing, Source);
@@ -18,25 +28,14 @@ Thing.prototype.findNamedObject = function(_scope, _collections) {
    return Source.prototype.findNamedObject.call(this, _scope, collections);
 };
 
-Thing.prototype.setParent = function(_thing) {
-
-   if (_thing) {
-      this.parent = _thing;
-      this.parent.addThing(this);
-      this.local = true;
-      this.setOwner(_thing);
-   }
-};
-
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
-   _thing.setOwner(this);
 };
 
 // Actually update the property value and let all interested parties know
 // Also used to navigate down the composite thing tree to update a property shared by all
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
-   var data = (_data) ? _data : { sourceName: this.uName };
+   var data = (_data) ? _data : { sourceName: this.fullName };
 
    if (data.alignWithParent) {
 
@@ -144,7 +143,7 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
 Thing.prototype.raiseEvent = function(_eventName, _data) {
 
-   var data = (_data) ? _data : { sourceName: this.uName };
+   var data = (_data) ? _data : { sourceName: this.fullName };
 
    if (data.alignWithParent) {
       Source.prototype.raiseEvent.call(this, _eventName, data);

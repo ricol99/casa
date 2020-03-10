@@ -8,12 +8,12 @@ function TopProperty(_config, _owner) {
    this.sources = [];
 
    if (_config.hasOwnProperty('source')) {
-      this.sources.push(this.sourceListeners[_config.source.uName]);
+      this.sources.push(this.sourceListeners[_config.source.fullName]);
    }
    else if (_config.hasOwnProperty('sources')) {
 
       for (var i = 0; i < _config.sources.length; ++i) {
-         this.sources.push(this.sourceListeners[_config.sources[i].uName];
+         this.sources.push(this.sourceListeners[_config.sources[i].fullName];
       }
    }
 }
@@ -49,7 +49,7 @@ TopProperty.prototype.amIValid = function() {
       var newValue = this.calculateOutputValue();
 
       if (newValue !== this.value) {
-         this.updatePropertyInternal(newValue, { sourceName: this.owner.uName });
+         this.updatePropertyInternal(newValue, { sourceName: this.owner.fullName });
       }
    }
 

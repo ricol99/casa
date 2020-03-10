@@ -76,8 +76,8 @@ function Room(_config) {
 
    this.buildingName = _config.building;
 
-   this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
-   this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
+   this.ensurePropertyExists('alarm-state', 'property', { source: { fullName: this.buildingName, property: "alarm-state"}}, _config);
+   this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { fullName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
    this.ensurePropertyExists('override-timeout', 'property', { initialValue: this.overrideTimeouts.day }, _config);
 

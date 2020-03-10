@@ -31,10 +31,10 @@ util.inherits(ScheduleProperty, Property);
 ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {
-      this.updatePropertyInternal(_event.value, { sourceName: this.owner.uName });
+      this.updatePropertyInternal(_event.value, { sourceName: this.owner.fullName });
    }
    else {
-      this.setWithRamp(_event.ramp, { sourceName: this.owner.uName });
+      this.setWithRamp(_event.ramp, { sourceName: this.owner.fullName });
    }
 }
 

@@ -19,30 +19,30 @@ util.inherits(ScheduleService, Service);
 
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
    var sched = new Schedule(_owner, _config, this);
-   this.schedules[_owner.uName] = sched;
+   this.schedules[_owner.fullName] = sched;
 };
 
 ScheduleService.prototype.getInitialValue = function(_owner) {
-   return this.schedules[_owner.uName].getInitialValue();
+   return this.schedules[_owner.fullName].getInitialValue();
 };
 
 ScheduleService.prototype.addEvent = function(_owner, _event) {
 
-   if (!this.schedules.hasOwnProperty(_owner.uName)) {
+   if (!this.schedules.hasOwnProperty(_owner.fullName)) {
       this.registerEvents(_owner, [ _event ]);
    }
    else {
-      this.schedules[_owner.uName].addEvent(_event);
+      this.schedules[_owner.fullName].addEvent(_event);
    }
 };
 
 ScheduleService.prototype.removeEvent = function(_owner, _eventName) {
 
-   if (!this.schedules.hasOwnProperty(_owner.uName)) {
+   if (!this.schedules.hasOwnProperty(_owner.fullName)) {
       return false;
    }
 
-   return this.schedules[_owner.uName].removeEvent(_eventName);
+   return this.schedules[_owner.fullName].removeEvent(_eventName);
 };
 
 ScheduleService.prototype.getSunTimes = function() {
@@ -69,7 +69,7 @@ ScheduleService.prototype.coldStart = function() {
 };
 
 function Schedule(_owner, _config, _service) {
-   this.uName = _service.uName + ":" + _owner.uName;
+   this.uName = _service.uName + ":" + _owner.fullName;
    this.owner = _owner;
    this.service = _service;
    this.events = [];
@@ -285,8 +285,8 @@ Schedule.prototype.resetJob = function(_rule) {
       _rule.job.mySchedule = this;
    }
    else {
-      console.error(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
-      throw(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
+      console.error(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
+      throw(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
    }
 }
 

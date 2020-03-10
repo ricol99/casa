@@ -15,7 +15,8 @@ util.inherits(SourceBase, NamedObject);
 
 SourceBase.prototype.findNamedObject = function(_scope, _collections) {
    var collections = _collections ? _collections : [];
-   return NamedObject.prototype.findNamedObject.call(this, _scope, collections.push(this.props));
+   collections.push(this.props);
+   return NamedObject.prototype.findNamedObject.call(this, _scope, collections);
 };
 
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
@@ -94,7 +95,7 @@ SourceBase.prototype.goInvalid = function(_propName, _data) {
    console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
    var sendData = (_data) ? util.copy(_data) : {};
-   sendData.sourceName = this.uName;
+   sendData.sourceName =  this.fullName;
    sendData.oldState = this.props[_propName].value;
    sendData.name = _propName;
    console.log(this.uName + ": Emitting invalid!");
@@ -122,7 +123,7 @@ SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data)
    console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? util.copy(_data) : {};
-   sendData.sourceName = this.uName;
+   sendData.sourceName = this.fullName;
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
@@ -168,7 +169,7 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
 
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.local = this.local;
-   sendData.sourceName = this.uName;
+   sendData.sourceName = this.fullName;
    sendData.name = _eventName;
 
    if (!sendData.hasOwnProperty("value")) {
@@ -284,11 +285,11 @@ SourceBase.prototype.alignNextProperty = function() {
 
             if (prop.hasOwnProperty("ramp")) {
                console.log(this.uName + ": Setting property " + prop.property + " to ramp");
-               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName });
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.fullName });
             }
             else {
                console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-               this.setProperty(prop.property, prop.value, { sourceName: this.uName });
+               this.setProperty(prop.property, prop.value, { sourceName: this.fullName });
             }
             this.alignNextProperty();
          }

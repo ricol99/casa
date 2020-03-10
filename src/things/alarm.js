@@ -27,10 +27,10 @@ Alarm.prototype.scheduledEventTriggered = function(_event) {
    if (this.getProperty('ACTIVE') {
 
       if (_event.hasOwnProperty("value")) {
-         this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+         this.raiseEvent(_event.name, { sourceName: this.fullName, value: _event.value });
       }
       else {
-         this.raiseEvent(_event.name, { sourceName: this.uName });
+         this.raiseEvent(_event.name, { sourceName: this.fullName });
       }
    }
 }

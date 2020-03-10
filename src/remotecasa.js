@@ -27,7 +27,7 @@ function RemoteCasa(_config, _peerCasa) {
          // listen for source changes from peer casas
          this.establishListeners(true);
 
-         this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+         this.alignPropertyValue('ACTIVE', true, { sourceName: this.fullName });
       }
    });
 
@@ -35,7 +35,7 @@ function RemoteCasa(_config, _peerCasa) {
 
       if (this.isActive()) {
          console.log(this.uName + ': Lost connection to my peer. Going inactive.');
-         this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+         this.alignPropertyValue('ACTIVE', false, { sourceName: this.fullName });
       }
    });
 }

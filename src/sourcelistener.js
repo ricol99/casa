@@ -8,9 +8,9 @@ function SourceListener(_config, _owner) {
    this.casa = this.gang.casa;
    this.owner = _owner;
 
-   this.sourceName = _config.uName;
+   this.sourceName = _config.fullName;
 
-   if (_config.uName == undefined) {
+   if (_config.fullName == undefined) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
    }
 
@@ -56,13 +56,13 @@ function SourceListener(_config, _owner) {
    }
 
    if (!this.owner.fullName) {
-      console.error('Owner '+this.owner.uName + ' is not a named object!');
+      console.error('Owner '+this.owner.fullName + ' is not a named object!');
       process.exit(1);
    }
 
    this.uName = "sourcelistener:" + this.owner.fullName + ":" + this.sourceEventName;
 
-   this._id = this.uName;   // *** TBD
+   this._id = this.fullName;   // *** TBD
 
    if (_config.steps) {
       this.pipeline = new Pipeline(_config.steps, this);
@@ -97,7 +97,7 @@ SourceListener.prototype.establishListeners = function() {
          this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
 
          if (!this.source.hasProperty(this.eventName)) {
-            console.error(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
+            console.error(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.fullName + ". Fix config!");
             this.valid = false;
          }
       }

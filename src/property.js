@@ -42,11 +42,8 @@ function Property(_config, _owner) {
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
 
-         if (!_config.sources[index].hasOwnProperty("uName") || _config.sources[index].uName == undefined) {
-            _config.sources[index].uName = this.owner.fullName;
-         }
-         else {
-            _config.sources[index].uName = this.owner.gang.parseFullName(_config.sources[index].uName);
+         if (!_config.sources[index].hasOwnProperty("fullName") || _config.sources[index].fullName == undefined) {
+            _config.sources[index].fullName = this.owner.fullName;
          }
 
          var sourceListener = new SourceListener(_config.sources[index], this);
@@ -59,11 +56,11 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('target')) {
-      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.fullName;
+      _config.target.fullName = (_config.target.hasOwnProperty("fullName")) ? _config.target.fullName : this.owner.fullName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
 
-      this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
+      this.targetListener = new SourceListener({ fullName: _config.target, property: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
                                                  transformMap:_config.targetTransformMap}, this);
 
@@ -88,7 +85,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.cancelCurrentRamp();
 
    if (_data == undefined) {
-      _data = { sourceName: this.owner.uName };
+      _data = { sourceName: this.owner.fullName };
    }
 
    this.checkData(_newPropValue, _data);
@@ -282,7 +279,7 @@ Property.prototype.coldStart = function(_data) {
    if (this.initialValueSet) {
       console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
       this.cold = false;
-      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
+      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.fullName, coldStart: true });
    }
 };
 
@@ -343,7 +340,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
 
 Property.prototype.checkData = function(_value, _data) {
 
-   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.uName;
+   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.fullName;
    if (!_data.hasOwnProperty('name')) _data.name = this.name;
    if (!_data.hasOwnProperty('value')) _data.value = _value;
 }

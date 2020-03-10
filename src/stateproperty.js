@@ -1,4 +1,5 @@
 var util = require('util');
+var NamedObject = require('./namedobject');
 var Property = require('./property');
 var SourceListener = require('./sourcelistener');
 var Gang = require('./gang');
@@ -71,7 +72,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                this.resetStateTimer(this.currentState);
             }
             else {
-               this.set(this.transformNextState(source.nextState), { sourceName: this.owner.uName });
+               this.set(this.transformNextState(source.nextState), { sourceName: this.owner.fullName });
             }
          }
          else if (source.hasOwnProperty('handler')) {
@@ -174,7 +175,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
 StateProperty.prototype.timeoutInternal = function(_timeoutState) {
    this.stateTimer = null;
-   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.uName });
+   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.fullName });
 };
 
 StateProperty.prototype.transformNextState = function(_nextState) {
@@ -270,7 +271,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
          console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
          setTimeout( (_nextStateName) => {
-            this.set(_nextStateName, { sourceName: this.owner.uName });
+            this.set(_nextStateName, { sourceName: this.owner.fullName });
          }, 1, this.transformNextState(immediateNextState));
       }
       else {
@@ -346,10 +347,10 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListenerName;
 
    if (_config.hasOwnProperty("value")) {
-      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
+      sourceListenerName = _config.fullName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
    }
    else {
-      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
+      sourceListenerName = _config.fullName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
    }
 
    var sourceListener = this.sourceListeners[sourceListenerName];
@@ -373,9 +374,10 @@ StateProperty.prototype.launchActionFunction = function(_actionHandler, _priorit
 
 function State(_config, _owner) {
    this.name = _config.name;
-   this.owner = _owner;
-   this.uName = _owner.uName + ":state:" + this.name;
-   this._id = this.uName;
+   NamedObject.call(this, "state:" + this.name, _owner);
+
+   //this.uName = _owner.uName + ":state:" + this.name;
+   this._id = this.fullName;
    this.sourceMap = {};
    this.activeGuardedSources = [];
    this.activeGuardedActions = [];
@@ -452,7 +454,9 @@ function State(_config, _owner) {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         this.sources[i].uName = this.sources[i].hasOwnProperty("uName") ? this.owner.gang.parseFullName(this.sources[i].uName) : this.owner.owner.fullName;
+         if (!this.sources[i].hasOwnProperty("fullName")) {
+            this.sources[i].fullName = this.owner.owner.fullName;
+         }
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;
@@ -473,7 +477,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.sources[i].guards[k], "active", true);
 
                   if (this.sources[i].guards[k].active) {
-                     this.sources[i].guards[k].uName = this.owner.owner.fullName;
+                     this.sources[i].guards[k].fullName = this.owner.owner.fullName;
                      this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
                   }
                }
@@ -498,7 +502,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.actions[l].guards[m], "active", true);
 
                   if (this.actions[l].guards[m].active) {
-                     this.actions[l].guards[m].uName = this.owner.owner.fullName;
+                     this.actions[l].guards[m].fullName = this.owner.owner.fullName;
                      this.actions[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.actions[l].guards[m]);
                   }
                }
@@ -530,7 +534,7 @@ function State(_config, _owner) {
                util.ensureExists(this.schedules[n].guards[p], "active", true);
 
                if (this.schedules[n].guards[p].active) {
-                  this.schedules[n].guards[p].uName = this.owner.owner.fullName;
+                  this.schedules[n].guards[p].fullName = this.owner.owner.fullName;
                   this.schedules[n].guards[p].sourceListener = this.owner.fetchOrCreateSourceListener(this.schedules[n].guards[p]);
                }
             }
@@ -540,6 +544,8 @@ function State(_config, _owner) {
       this.scheduleService.registerEvents(this, this.schedules);
    }
 }
+
+util.inherits(State, NamedObject);
 
 State.prototype.initialise = function() {
    var immediateState = this.checkSourceProperties();
@@ -729,7 +735,7 @@ State.prototype.checkSourceProperties = function() {
       for (var i = 0; i < this.sources.length; i++) {
 
          if (this.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
-            var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
+            var sourceName = this.sources[i].hasOwnProperty("fullName") ? this.sources[i].fullName : this.owner.owner.fullName;
             var sourceEventName = sourceName + ":" + this.sources[i].property + ":" + this.sources[i].value.toString();
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;
@@ -739,7 +745,7 @@ State.prototype.checkSourceProperties = function() {
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
                   immediateNextState = this.sources[i].nextState;
-                  console.log(this.uName+": Immediate state transition match! source="+this.sources[i].uName+" property="+this.sources[i].property+" value="+this.sources[i].value);
+                  console.log(this.uName+": Immediate state transition match! source="+this.sources[i].fullName+" property="+this.sources[i].property+" value="+this.sources[i].value);
                   break;
                }
             }
@@ -770,21 +776,21 @@ State.prototype.scheduledEventTriggered = function(_event) {
    if (_event.hasOwnProperty("name")) {
 
       if (_event.hasOwnProperty("value")) {
-         this.owner.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.fullName, value: _event.value });
       }
       else {
-         this.owner.raiseEvent(_event.name, { sourceName: this.uName });
+         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.fullName });
       }
    }
 
    if (_event.config.hasOwnProperty("nextState")) {
 
       if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
-         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.uName });
+         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.fullName });
       }
    }
    else {
-      this.owner.set(this.name, { sourceName: this.owner.owner.uName });
+      this.owner.set(this.name, { sourceName: this.owner.owner.fullName });
    }
 }
 

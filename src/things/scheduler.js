@@ -18,7 +18,7 @@ function Scheduler(_config) {
 util.inherits(Scheduler, Thing);
 
 Scheduler.prototype.scheduledEventTriggered = function(_event) {
-   this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+   this.raiseEvent(_event.name, { sourceName: this.fullName, value: _event.value });
 }
 
 module.exports = exports = Scheduler;

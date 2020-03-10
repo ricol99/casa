@@ -153,11 +153,6 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
 util.inherits(Gang, NamedObject);
 
-Gang.prototype.parseFullName = function(_fullName) {
-   var newName = (_fullName.startsWith("::")) ? _fullName.replace(":", this.uName) : (_fullName.startsWith(":")) ? this.uName + ":" + this.casa.uName + _fullName : _fullName;
-   return newName.trim();
-};
-
 Gang.prototype.findNamedObject = function(_scope, _collections) {
 
    var scope = _scope.startsWith("::") ? _scope.substr(2) : _scope.startsWith(this.uName + ":") ? _scope.substr(this.uName.length+1) : (_scope === this.uName) ? "" : _scope;
@@ -340,7 +335,7 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
 
 Gang.prototype.addObjectToGlobalScope = function(_obj) {
 
-   if (_obj.hasOwnProperty("local") && !_obj.local)  {
+   if (!_obj.owner) {
       this.allObjects[_obj.uName] = _obj;
       return true;
    }
@@ -467,10 +462,12 @@ Gang.prototype.createThing = function(_config, _parent) {
       return null;
    }
 
-   var thingObj = new Thing(_config);
-   thingObj.setParent(_parent);
+   var thingObj = new Thing(_config, _parent);
    this.things[thingObj.uName] = thingObj;
-   this.addObjectToGlobalScope(thingObj);
+
+   if (!_parent) {
+      this.addObjectToGlobalScope(thingObj);
+   }
    console.log('New thing: ' + _config.uName);
    return thingObj;
 };
@@ -478,7 +475,7 @@ Gang.prototype.createThing = function(_config, _parent) {
 Gang.prototype.removeThing = function(_thing) {
    delete this.things[_thing.uName];
 
-   if (!_thing.local) {
+   if (!_thing.owner) {
       delete this.allObjects[_thing.uName];
    }
 };
@@ -491,13 +488,6 @@ Gang.prototype.extractThings = function(_config, _parent) {
          var thingObj = this.createThing(_config[index], _parent);
 
          if (_config[index].things) {
-
-            if (!_parent) {
-               this.topLevelThings.push(thingObj);
-            }
-            else {
-               thingObj.local = true;
-            }
             this.extractThings(_config[index].things, thingObj);
 
             if (!_parent) {

@@ -2,7 +2,7 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 
 function PeerSource(_uName, _priority, _props, _peerCasa) {
-   SourceBase.call(this, _uName, _peerCasa);
+   SourceBase.call(this, _uName, null);
 
    this.priority = _priority;
    this.casa = _peerCasa;
@@ -48,7 +48,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
-      sendData.sourceName = this.uName;
+      sendData.sourceName = "::"+this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;

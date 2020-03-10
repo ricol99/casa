@@ -2,14 +2,14 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function Source(_config) {
+function Source(_config, _owner) {
    var gang = Gang.mainInstance();
    console.log("AAAAA Source uName="+_config.uName);
-   SourceBase.call(this, _config.uName, gang.casa);
+   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
+   SourceBase.call(this, _config.uName, _owner);
    this.config = _config;
 
    this.casa = this.gang.casa;
-   this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
@@ -73,10 +73,10 @@ Source.prototype.scheduledEventTriggered = function(_event) {
    if (_event.hasOwnProperty("name")) {
 
       if (_event.hasOwnProperty("value")) {
-         this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
+         this.raiseEvent(_event.name, { sourceName: this.fullName, value: _event.value });
       }
       else {
-         this.raiseEvent(_event.name, { sourceName: this.uName });
+         this.raiseEvent(_event.name, { sourceName: this.fullName });
       }
    }
 };
@@ -133,7 +133,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
-      sendData.sourceName = this.uName;
+      sendData.sourceName =  this.fullName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;

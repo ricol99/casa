@@ -39,6 +39,16 @@ Util.getClassHierarchy = function(_obj) {
    return list;
 };
 
+Util.add = function(_collection, _obj, _name) {
+
+   if (typeof _collection === 'object') {
+      _collection[_name] = _obj;
+   }
+   else if (_collection instanceof Array) {
+      _collection.push(_obj);
+   }
+};
+
 Util.filter = function(_collection, _func) {
    var dest = [];
 

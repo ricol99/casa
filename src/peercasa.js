@@ -21,7 +21,7 @@ function PeerCasa(_config) {
    this.remoteCasas = [];
    this.deathTime = 500;
 
-   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name, this.gang);
+   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name);
 
    this.sources = [];
    this.workers = [];
@@ -170,7 +170,7 @@ PeerCasa.prototype.invalidateSources = function() {
 
    delete this.remoteCasas;
    this.remoteCasas = [];
-   this.goInvalid('ACTIVE', { sourceName: this.uName });
+   this.goInvalid('ACTIVE', { sourceName: this.fullName });
    this.gang.casa.refreshSourceListeners();
 }
 
@@ -259,7 +259,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    }
 
    this.resendUnAckedMessages();
-   this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+   this.alignPropertyValue('ACTIVE', true, { sourceName: this.fullName });
 };
 
 PeerCasa.prototype.connectToPeerCasa = function(_config) {
@@ -428,7 +428,7 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
       this.sendMessage('casa-active', { sourceName: casaList[i].uName, casaConfig: casaList[i].config });
    }  
 
-   this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+   this.alignPropertyValue('ACTIVE', true, { sourceName: this.fullName });
 };
 
 PeerCasa.prototype.socketLoginFailureCb = function(_data) {
@@ -528,10 +528,11 @@ PeerCasa.prototype.socketSourcePropertyChangedCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: property-changed, source: ' + _data.sourceName);
    this.emit('source-property-changed', _data);
    this.emit('broadcast-message', { message: 'source-property-changed', data:_data, sourceCasa: this.uName });
+   var sourceName = _data.sourceName.replace("::","");
 
-   if (this.sources[_data.sourceName]) {
+   if (this.sources[sourceName]) {
       _data.sourcePeerCasa = this.uName;
-      this.sources[_data.sourceName].sourceHasChangedProperty(_data);
+      this.sources[sourceName].sourceHasChangedProperty(_data);
    }
    this.ackMessage('source-property-changed', _data);
 };
@@ -545,10 +546,12 @@ PeerCasa.prototype.socketSourceEventRaisedCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: event-raised, source: ' + _data.sourceName);
    this.emit('source-event-raised', _data);
    this.emit('broadcast-message', { message: 'source-event-raised', data:_data, sourceCasa: this.uName });
+   var sourceName = _data.sourceName.replace("::","");
 
-   if (this.sources[_data.sourceName]) {
+
+   if (this.sources[sourceName]) {
       _data.sourcePeerCasa = this.uName;
-      this.sources[_data.sourceName].sourceHasRaisedEvent(_data);
+      this.sources[sourceName].sourceHasRaisedEvent(_data);
    }
    this.ackMessage('source-event-raised', _data);
 };
@@ -704,7 +707,7 @@ PeerCasa.prototype.deleteMeIfNeeded = function() {
 
       if (!this.waitingToConnect) {
          this.waitingToConnect = true;
-         this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
+         this.alignPropertyValue('ACTIVE', false, { sourceName: this.fullName });
 
          if (this.manualDisconnect) {
             // Recreate socket to attempt reconnection

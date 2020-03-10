@@ -42,7 +42,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    let sourceFound = false;
 
    for (let i = 0; i < this.sources.length; ++i) {
-      let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.uName;
+      let sn = (this.sources[i].hasOwnProperty("fullName")) ? this.sources[i].fullName : this.fullName;
       let sl = this.sourceListeners[sn + ":" + this.sources[i].property];
 
       if (!sl) {
@@ -56,7 +56,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
       }
 
       newState = newState + "" + sl.getPropertyValue();
-      sourceFound = sourceFound || (this.sources[i].uName === sourceName);
+      sourceFound = sourceFound || (this.sources[i].fullName === sourceName);
 
       if (i < this.sources.length - 1) {
          newState = newState + this.separator;
@@ -69,7 +69,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    }
 
    console.log(this.uName + ": Attempting to move to state " + newState);
-   this.set(newState, { sourceName: this.owner.uName });
+   this.set(newState, { sourceName: this.owner.fullName });
 };
 
 module.exports = exports = CombineStateProperty;

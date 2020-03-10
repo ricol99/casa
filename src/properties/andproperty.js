@@ -43,7 +43,7 @@ AndProperty.prototype.amIValid = function() {
       var newValue = this.calculateOutputValue();
  
       if (newValue !== this.value) {
-         this.updatePropertyInternal(newValue, { sourceName: this.owner.uName });
+         this.updatePropertyInternal(newValue, { sourceName: this.owner.fullName });
       }
    }
 

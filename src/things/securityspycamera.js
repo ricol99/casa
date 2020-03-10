@@ -21,7 +21,7 @@ function SecuritySpyCamera(_config) {
    }
 
    if (_config.hasOwnProperty("triggerSource")) {
-      _config.triggerSource.uName = (_config.triggerSource.hasOwnProperty("uName")) ? _config.triggerSource.uName : this.uName;
+      _config.triggerSource.fullName = (_config.triggerSource.hasOwnProperty("fullName")) ? _config.triggerSource.fullName : this.fullName;
       this.triggerSource = new SourceListener(_config.triggerSource, this);
    }
 

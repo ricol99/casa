@@ -7,7 +7,7 @@ function NamedObject(_uName, _owner) {
    this.owner = _owner ? _owner : null;
    this.uName = _uName;
    this.sName = this.uName.split(":")[1];
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : this.uName;
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : "::" + this.uName;
 
    this.setMaxListeners(0);
 }
@@ -16,6 +16,36 @@ util.inherits(NamedObject, AsyncEmitter);
 
 NamedObject.prototype.setOwner = function(_owner) {
    this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : this.uName;
+};
+
+NamedObject.prototype.addNamedObject = function(_newObj, _collection) {
+   var ret = false;
+   var scopeLeft = _newObj.fullName.replace(this.fullName);
+
+   if (scopeLeft[0] === ':') {
+      scopeLeft = scopeLeft.substr(1);
+   }
+
+   if (scopeLeft === _newObj.uName) {
+      util.add(_collection, _newObj, _newObj.uName);
+      return true;
+   }
+      
+   var filterArray = scopeLeft.split(":");
+
+   if (filterArray.length === 0) {
+      console.error(this.uName + ": addNamedObject() Cannot add object as it already exists!");
+      return false;
+   }
+
+   var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
+   var obj = null;
+
+   util.iterate(_collection, 0, (_obj) => {
+      if (_obj.uName === matchString) { obj = _obj; return true; }
+   });
+
+   return obj ? obj.addNamedObject(_newObj) : false;
 };
 
 NamedObject.prototype.findNamedObject = function(_scope, _collections) {

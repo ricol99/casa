@@ -7,7 +7,7 @@ function LatchProperty(_config, _owner) {
 
    if (_config.controller) {
       _config.ignoreTargetUpdates = false;
-      _config.target = _config.controller.uName;
+      _config.target = _config.controller.fullName;
       _config.targetProperty = _config.controller.property;
       _config.transform = _config.controller.transform;
       _config.transformMap = _config.controller.transformMap;

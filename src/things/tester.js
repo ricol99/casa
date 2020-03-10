@@ -7,7 +7,7 @@ function Tester(_config) {
    this.thingType = "testsequence";
    this.config = _config;
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
-   this.targetUnderTest = _config.hasOwnProperty("targetUnderTest") ? this.gang.parseFullName(_config.targetUnderTest) : this.fullName;
+   this.targetUnderTest = _config.hasOwnProperty("targetUnderTest") ? _config.targetUnderTest : this.fullName;
 
    this.currentTestCase = 0;
    this.currentTestEvent = 0;
@@ -25,8 +25,8 @@ function Tester(_config) {
 
       for (var index = 0; index < _config.sources.length; ++index) {
 
-         if (!_config.sources[index].hasOwnProperty("uName")) {
-            _config.sources[index].uName = this.targetUnderTest;
+         if (!_config.sources[index].hasOwnProperty("fullName")) {
+            _config.sources[index].fullName = this.targetUnderTest;
          }
 
          var sourceListener = new SourceListener(_config.sources[index], this);
@@ -250,6 +250,10 @@ Tester.prototype.runTestEvent = function() {
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
       target = this.gang.findNamedObject(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
+      if (!target) {
+         console.log("AAAAAAA BROKEN! Target="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
+         process.exit(1);
+      }
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
@@ -285,6 +289,8 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
    else {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
    }
+
+   console.log(this.uName+": AAAA data.sourceName="+_data.sourceName+" test source="+this.testCases[this.currentTestCase].expectedSequence[_index].source);
 
    return ((_data.sourceName === this.testCases[this.currentTestCase].expectedSequence[_index].source) &&
        (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));

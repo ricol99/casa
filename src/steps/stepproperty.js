@@ -88,7 +88,7 @@ StepProperty.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.cancelCurrentRamp();
 
    if (_data == undefined) {
-      _data = { sourceName: this.owner.uName };
+      _data = { sourceName: this.owner.fullName };
    }
 
    this.checkData(_newPropValue, _data);

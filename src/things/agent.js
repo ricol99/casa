@@ -126,7 +126,7 @@ Agent.prototype.setAgentStates = function(_propertyValue) {
          var sourceListener = this.sourceListeners[this.sourceMap[_propertyValue][i].name];
 
          if (sourceListener.isValid()) {
-            sourceListener.getSource().setProperty(this.sourceMap[_propertyValue][i].property, this.sourceMap[_propertyValue][i].value, { sourceName: this.uName });
+            sourceListener.getSource().setProperty(this.sourceMap[_propertyValue][i].property, this.sourceMap[_propertyValue][i].value, { sourceName: this.fullName });
          }
       }
    }
