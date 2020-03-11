@@ -4,10 +4,9 @@ var User = require('./user');
 function UserGroup(_config) {
    this.users = [];
 
-   // TBD - Need to resolve user objects from config object
-   _config.users.forEach( (userName) => {
-      this.users.push(_config.owner.findUser(userName));
-   });
+   for (var u = 0; u < _config.users.length; ++u) {
+      this.users.push(this.gang.findNamedObject(_config.users[u].fullName));
+   }
 
    User.call(this, _config);
 

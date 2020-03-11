@@ -925,14 +925,14 @@ Gang.prototype.removePeerCasa = function(_peerCasa) {
   }
 };
 
-Gang.prototype.findNewPeerSource = function(_sourceName, _peerCasa) {
+Gang.prototype.findNewPeerSource = function(_peerSourceName, _peerCasa) {
    var topPriority = -1;
    var highestPrioritySource = null;
 
    for (var peerCasaName in this.peerCasas) {
 
       if (this.peerCasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.uName)) {
-         let newSource = this.peerCasas[peerCasaName].getSource(_sourceName);
+         let newSource = this.peerCasas[peerCasaName].getSource(_peerSourceName);
 
          if (newSource) {
 

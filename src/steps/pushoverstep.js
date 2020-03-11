@@ -7,7 +7,7 @@ function PushoverStep(_config, _pipeline) {
    this.messagePriority = (_config.priority) ? _config.priority : 0;
 
    this.gang = Gang.mainInstance();
-   this.userGroup = this.gang.findSource(_config.userGroup);
+   this.userGroup = this.gang.findNamedObject(_config.userGroup);
 
    if (!this.userGroup) {
       console.error(this.uName + ": ***** UserGroup not found! *************");
