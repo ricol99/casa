@@ -45,19 +45,19 @@ StateProperty.prototype.coldStart = function(_data) {
 };
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
-   console.log(this.uName + ": state about to change to " + _propertyValue);
+   console.log(this.fullName + ": state about to change to " + _propertyValue);
    this.setState(_propertyValue);
 };
 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   console.log(this.uName + ": Event received when in state " + this.value);
+   console.log(this.fullName + ": Event received when in state " + this.value);
 
    var name = _data.name
    var value = _data.value;
    var source = null;
 
    if (!this.sourceListeners[_sourceListener.sourceEventName]) {
-      console.log(this.uName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
+      console.log(this.fullName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
       return;
    }
 
@@ -199,7 +199,7 @@ StateProperty.prototype.transformNextState = function(_nextState) {
             }
             else {
                nextState = immediateNextState;
-               console.log(this.uName+": Immediate State transition, nextState="+nextState);
+               console.log(this.fullName+": Immediate State transition, nextState="+nextState);
             }
          }
          else {
@@ -231,14 +231,14 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
 };
 
 StateProperty.prototype.setState = function(_nextStateName) {
-   console.log(this.uName+": setState state="+_nextStateName);
+   console.log(this.fullName+": setState state="+_nextStateName);
    this.previousState = this.value;
 
    var clearTimerResult = this.clearStateTimer();
 
    if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
       // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
-      console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
+      console.log(this.fullName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
       clearTimerResult.timeLeft = 1;
    }
 
@@ -268,7 +268,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
       var immediateNextState = nextState.initialise();
 
       if (immediateNextState) {
-         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
+         console.log(this.fullName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
          setTimeout( (_nextStateName) => {
             this.set(_nextStateName, { sourceName: this.owner.fullName });
@@ -565,7 +565,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    var source = this.checkActiveSourceGuards(_name, _value);
 
    if (source) {
-      console.log(this.uName+": processSourceEvent() active guard is now met");
+      console.log(this.fullName+": processSourceEvent() active guard is now met");
       return source;
    }
 
@@ -633,7 +633,7 @@ State.prototype.processActiveActionGuards = function(_propName, _propValue) {
          if (this.activeGuardedActions[a].guards[i].active && (this.activeGuardedActions[a].guards[i].property === _propName)) {
 
             if ((_propValue === this.activeGuardedActions[a].guards[i].value) && this.checkGuard(this.activeGuardedActions[a])) {
-               console.log(this.uName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
+               console.log(this.fullName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
                newActionsFound++;
                actionsMet.push(this.activeGuardedActions[a]);
             }
@@ -660,7 +660,7 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
          if (this.activeGuardedSources[a].guards[i].active && (this.activeGuardedSources[a].guards[i].property === _propName)) {
 
             if ((_propValue === this.activeGuardedSources[a].guards[i].value) && this.checkGuard(this.activeGuardedSources[a])) {
-               console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
+               console.log(this.fullName + ": checkActiveSourceGuards() Found active guard!");
                return this.activeGuardedSources[a];
             }
          }
@@ -745,7 +745,7 @@ State.prototype.checkSourceProperties = function() {
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
                   immediateNextState = this.sources[i].nextState;
-                  console.log(this.uName+": Immediate state transition match! source="+this.sources[i].fullName+" property="+this.sources[i].property+" value="+this.sources[i].value);
+                  console.log(this.fullName+": Immediate state transition match! source="+this.sources[i].fullName+" property="+this.sources[i].property+" value="+this.sources[i].value);
                   break;
                }
             }
@@ -771,7 +771,7 @@ State.prototype.exiting = function(_event, _value) {
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
-   console.log(this.uName + ": scheduledEventTriggered() event name=" + _event.name);
+   console.log(this.fullName + ": scheduledEventTriggered() event name=" + _event.name);
 
    if (_event.hasOwnProperty("name")) {
 
