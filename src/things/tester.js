@@ -2,8 +2,8 @@ var util = require('util');
 var Thing = require('../thing');
 var SourceListener = require('../sourcelistener');
 
-function Tester(_config) {
-   Thing.call(this, _config);
+function Tester(_config, _parent) {
+   Thing.call(this, _config, _parent);
    this.thingType = "testsequence";
    this.config = _config;
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;

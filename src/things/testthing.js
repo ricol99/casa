@@ -1,9 +1,9 @@
 var util = require('../util');
 var Thing = require('../thing');
 
-function TestThing(_config) {
+function TestThing(_config, _parent) {
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
    this.thingType = "test";
 }
 

@@ -11,9 +11,9 @@ var uuid = HAP.uuid;
 
 storage.initSync();
 
-function HomekitAccessory(_config) {
+function HomekitAccessory(_config, _parent) {
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
    this.thingType = "homekit-accessory";
 
    this.displayName = _config.displayName;

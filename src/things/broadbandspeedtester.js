@@ -2,8 +2,8 @@ var util = require('util');
 var Thing = require('../thing');
 var speedTest = require('speedtest-net');
 
-function BroadbandSpeedTester(_config) {
-   Thing.call(this, _config);
+function BroadbandSpeedTester(_config, _parent) {
+   Thing.call(this, _config, _parent);
 
    this.maxTime = (_config.hasOwnProperty('maxTime')) ? _config.maxTime : 10000;
 

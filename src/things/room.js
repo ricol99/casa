@@ -53,8 +53,8 @@ var Thing = require('../thing');
 // users-present-sensitive - users present and users are worried about lighting or noise
 
 
-function Room(_config) {
-   Thing.call(this, _config);
+function Room(_config, _parent) {
+   Thing.call(this, _config, _parent);
    this.thingType = "room";
    this.overrideTimeout = (_config.hasOwnProperty("overrideTimeout")) ? _config.overrideTimeout : 900;
 

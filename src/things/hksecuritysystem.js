@@ -5,9 +5,9 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
-function HomekitSecuritySystem(_config) {
+function HomekitSecuritySystem(_config, _parent) {
    _config.invokeManualMode = false;
-   HomekitAccessory.call(this, _config);
+   HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-security-system-accessory";
 
    this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED }, _config);

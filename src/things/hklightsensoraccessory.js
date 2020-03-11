@@ -5,9 +5,9 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
-function HomekitLightSensorAccessory(_config) {
+function HomekitLightSensorAccessory(_config, _parent) {
 
-   HomekitAccessory.call(this, _config);
+   HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-light-accessory";
 
    this.ensurePropertyExists('light-level', 'property', { initialValue: 1 }, _config);

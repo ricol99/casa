@@ -31,9 +31,9 @@ var STATE_ALARM_TRIGGERED = 4;
 var REQUEST_STATE_IDLE = 999;
 var REQUEST_STATE = 100;
 
-function AlarmTexecom(_config) {
+function AlarmTexecom(_config, _parent) {
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
 
    this.pollingInterval = _config.pollingInterval * 1000 * 60;   // mins into ms
    this.maxPollMisses = (_config.maxPollMisses == undefined) ? 3 : _config.maxPollMisses;

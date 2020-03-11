@@ -1,8 +1,8 @@
 var util = require('util');
 var Thing = require('../thing');
 
-function HueLightGroup(_config) {
-   Thing.call(this, _config);
+function HueLightGroup(_config, _parent) {
+   Thing.call(this, _config, _parent);
    this.thingType = "hue-light-group";
    this.displayName = _config.displayName;
    this.service = (_config.hasOwnProperty("service")) ? _config.service : "hueservice";

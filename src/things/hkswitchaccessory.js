@@ -5,8 +5,8 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
-function HomekitSwitchAccessory(_config) {
-   HomekitAccessory.call(this, _config);
+function HomekitSwitchAccessory(_config, _parent) {
+   HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-switch-accessory";
 
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;

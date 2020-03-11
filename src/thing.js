@@ -45,6 +45,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       //if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
          //this.emitPropertyChange(_propName, _propValue, data);
       //}
+
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
       if (this.propogateToChildren) {

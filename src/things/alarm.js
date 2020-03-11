@@ -1,9 +1,9 @@
 var util = require('../util');
 var Thing = require('../thing');
 
-function Alarm(_config) {
+function Alarm(_config, _parent) {
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
    this.thingType = "alarm";
 
    this.scheduleService =  this.gang.casa.findService("scheduleservice");

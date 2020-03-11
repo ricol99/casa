@@ -17,14 +17,14 @@ var Room = require('./room');
 // waking-in-bed - pre-alarm sequence started
 // awake-in-bed - wake up event has happened
 
-function Bedroom(_config) {
+function Bedroom(_config, _parent) {
    this.overrideTimeout = (_config.hasOwnProperty("overrideProperty")) ? _config.overrideProperty : 600;
    _config.userOverrideConfig =  { initialValue: 'not-active',
                                    states: [{ name: "not-active",
                                               source: { guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
                                             { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
-   Room.call(this, _config);
+   Room.call(this, _config, _parent);
 
    if (_config.hasOwnProperty('user')) {
       _config.users = [ _config.user ];

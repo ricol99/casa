@@ -3,8 +3,8 @@ var util = require('util');
 var Thing = require('../thing');
 var SourceListener = require('../sourcelistener');
 
-function SecuritySpyCamera(_config) {
-   Thing.call(this, _config);
+function SecuritySpyCamera(_config, _parent) {
+   Thing.call(this, _config, _parent);
 
    this.id = _config.id;
 

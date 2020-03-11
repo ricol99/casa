@@ -31,9 +31,9 @@ var Thing = require('../thing');
 // fire-alarm - fire detector has been triggered
 
 
-function Building(_config) {
+function Building(_config, _parent) {
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
    this.thingType = "building";
 
    this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout')) ? _config.bedtimeTimeout : 3600 + 1800;

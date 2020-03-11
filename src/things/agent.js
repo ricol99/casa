@@ -85,8 +85,8 @@ var SourceListener = require('./sourcelistener');
 }
 *************************/
 
-function Agent(_config) {
-   Thing.call(this, _config);
+function Agent(_config, _parent) {
+   Thing.call(this, _config, _parent);
 
    this.sourceMap = {};
    this.sourceListeners = {};

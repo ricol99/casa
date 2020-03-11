@@ -2,8 +2,8 @@ var util = require('util');
 var Thing = require('../thing');
 var Sonos = require('sonos');
 
-function SonosPlayer(_config) {
-   Thing.call(this, _config);
+function SonosPlayer(_config, _parent) {
+   Thing.call(this, _config, _parent);
 
    this.zone = _config.zone;
    this.host = _config.host;

@@ -1,8 +1,8 @@
 var util = require('util');
 var Thing = require('../thing');
 
-function Scheduler(_config) {
-   Thing.call(this, _config);
+function Scheduler(_config, _parent) {
+   Thing.call(this, _config, _parent);
    this.thingType = "scheduler";
 
    this.scheduleService =  this.casa.findService("scheduleservice");

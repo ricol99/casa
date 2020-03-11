@@ -1,10 +1,10 @@
 var util = require('util');
 var Thing = require('../thing');
 
-function LightwaveRfAccessory(_config) {
+function LightwaveRfAccessory(_config, _parent) {
    this.roomId = _config.roomId;
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _parent);
    this.thingType = "lightwave-accessory";
    this.service = (_config.hasOwnProperty("service")) ? _config.service : "lightwaverfservice";
 

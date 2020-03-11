@@ -1,14 +1,14 @@
 var util = require('util');
 var HueLightGroup = require('./huelightgroup');
 
-function HueRoom(_config) {
+function HueRoom(_config, _parent) {
    this.groupType = "Room";
    
    if (_config.hasOwnProperty('hueRoomName')) {
       _config.hueGroupName = _config.hueRoomName;
    }
 
-   HueLightGroup.call(this, _config);
+   HueLightGroup.call(this, _config, _parent);
    this.thingType = "hue-room";
 }
 

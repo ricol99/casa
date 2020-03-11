@@ -5,9 +5,9 @@ var Accessory = require('hap-nodejs').Accessory;
 var Service = require('hap-nodejs').Service;
 var Characteristic = require('hap-nodejs').Characteristic;
 
-function HomekitSpeakerAccessory(_config) {
+function HomekitSpeakerAccessory(_config, _parent) {
 
-   HomekitAccessory.call(this, _config);
+   HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-speaker-accessory";
    this.volumeSupported = (_config.hasOwnProperty('volumeSupported')) ? _config.volumeSupported : true;
    this.ensurePropertyExists('muted', 'property', { initialValue: false }, _config);
