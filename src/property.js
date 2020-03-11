@@ -140,7 +140,7 @@ Property.prototype.cancelCurrentRamp = function() {
 };
 
 Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
+   console.log(this.fullName + ": New value from ramp, property=" + this.name + ", value=" + _value);
    this.setPropertyInternal(_value, this.rampData);
 };
 
@@ -201,7 +201,7 @@ Property.prototype.sourceIsValid = function(_data) {
 // when they override Property.prototype.sourceIsInvalid()
 //
 Property.prototype.goInvalid = function (_data) {
-   console.log(this.uName + ': INVALID');
+   console.log(this.fullName + ': INVALID');
    this.cancelCurrentRamp();
    this.owner.goInvalid(this.name, _data);
 }
@@ -216,7 +216,7 @@ Property.prototype.goValid = function (_data) {
 // Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
 Property.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.uName + ': Property.prototype.sourceIsInvalid');
+   console.log(this.fullName + ': Property.prototype.sourceIsInvalid');
 
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -277,7 +277,7 @@ Property.prototype.newEventReceivedFromTarget = function(_targetListener, _data)
 Property.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
-      console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
+      console.log(this.fullName + ": Cold starting, emiting initialValue="+this.value);
       this.cold = false;
       this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.fullName, coldStart: true });
    }
@@ -288,7 +288,7 @@ Property.prototype.coldStart = function(_data) {
 // ====================
 
 Property.prototype.setPropertyInternal = function(_newValue, _data) {
-   console.log(this.name+": setPropertyInternal value="+_newValue);
+   console.log(this.fullName": setPropertyInternal value="+_newValue);
 
    if (this.value !== _newValue || this.cold) {
 
