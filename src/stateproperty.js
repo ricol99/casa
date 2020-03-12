@@ -128,7 +128,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                   value = parseInt(value);
                 }
                 else {
-                   console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                   console.error(this.fullName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
                    return;
                 }
             }
@@ -156,7 +156,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                value = parseInt(value);
              }
              else {
-                console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                console.error(this.fullName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
                 return;
              }
          }
@@ -208,7 +208,7 @@ StateProperty.prototype.transformNextState = function(_nextState) {
       }
 
       if (immediateNextState) {
-         console.error(this.uName + ": State machine is broken as state model has gone through 10 immediate state transitions");
+         console.error(this.fullName + ": State machine is broken as state model has gone through 10 immediate state transitions");
          process.exit(3);
       }
    }
@@ -281,7 +281,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
    else {
-      console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
+      console.error(this.fullName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
    }
 };
 
@@ -521,7 +521,7 @@ function State(_config, _owner) {
       }
 
       if (!this.scheduleService) {
-         console.error(this.uName + ": ***** Schedule service not found! *************");
+         console.error(this.fullName + ": ***** Schedule service not found! *************");
          process.exit(3);
       }
 

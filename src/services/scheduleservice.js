@@ -19,6 +19,12 @@ util.inherits(ScheduleService, Service);
 
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
    var sched = new Schedule(_owner, _config, this);
+
+   if (this.schedules[_owner.fullName]) {
+      console.error(this.fullName + ": Conflict - an owner has registered more than one set of events! Not supported!");
+      process.exit(3);
+   }
+
    this.schedules[_owner.fullName] = sched;
 };
 
