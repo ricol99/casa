@@ -49,6 +49,7 @@ function AlarmTexecom(_config, _parent) {
 
    this.transactionTarget = REQUEST_STATE_IDLE;
 
+   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('current-state', 'property', { initialValue: STATE_DISARMED }, _config);
    this.ensurePropertyExists('target-state', 'property', { initialValue: STATE_DISARMED }, _config);
 
