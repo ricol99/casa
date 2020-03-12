@@ -1,14 +1,18 @@
 var util = require('util');
+var NamedObject = require('./namedobject');
 
 function ConsoleCmd(_config, _console) {
    this.config = _config;
    this.type = "consolecmd";
-   this.uName = _config.uName.split(":")[0] + "consolecmd:" + _config.uName.split(":")[1];
+   NamedObject.call(_config.uName.split(":")[0] + "consolecmd:" + _config.uName.split(":")[1]);
+
    this.myObjuName = _config.uName;
    this.console = _console;
    this.gang = Gang.mainInstance();
    this.casa = this.console.getCasa(this.myObjuName);
 }
+
+util.inherits(ConsoleCmd, NamedObject);
 
 ConsoleCmd.prototype.coldStart = function() {
 };

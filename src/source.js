@@ -64,6 +64,7 @@ Source.prototype.getScheduleService = function() {
 };
 
 Source.prototype.scheduledEventTriggered = function(_event) {
+   console.log(this.fullName + ": scheduledEventTriggered() event=" + _event.name);
 
    if (_event.hasOwnProperty("ramp")) {
       console.error(this.uName + ": Ramps are not supported for this type of scheduled event");

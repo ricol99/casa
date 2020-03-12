@@ -165,4 +165,15 @@ Thing.prototype.getTopThing = function() {
    return (this.parent) ? this.parent.getTopThing() : this;
 };
 
+Thing.prototype.ownerHasNewName = function() {
+   NamedObject.prototype.ownerHasNewName.call(this);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].ownerHasNewName();
+      }
+   }
+};
+
 module.exports = exports = Thing;

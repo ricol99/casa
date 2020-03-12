@@ -18,6 +18,10 @@ NamedObject.prototype.setOwner = function(_owner) {
    this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : this.uName;
 };
 
+NamedObject.prototype.ownerHasNewName = function() {
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : "::" + this.uName;
+};
+
 NamedObject.prototype.addNamedObject = function(_newObj, _collection) {
    var ret = false;
    var scopeLeft = _newObj.fullName.replace(this.fullName);

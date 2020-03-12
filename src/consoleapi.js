@@ -1,19 +1,22 @@
 var Gang = require('./gang');
 var util = require('util');
+var NamedObject = require('./namedobject');
 
 function ConsoleApi(_config, _owner) {
    this.config = _config;
    this.type = "consoleapi";
-   this.uName = _config.uName.split(":")[0] + "consoleapi:" + _config.uName.split(":")[1];
+   NamedObject.call(this, _config.uName.split(":")[0] + "consoleapi:" + _config.uName.split(":")[1], _owner);
+
    this.myObjuName = _config.uName;
    this.consoleApiObjects = {};
-   this.owner = _owner;
    this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.myObjuName : this.myObjuName
 
    this.gang = Gang.mainInstance();
    this.consoleApiService =  this.gang.casa.findService("consoleapiservice");
    this.db = this.gang.getDb();
 }
+
+util.inherits(ConsoleApi, NamedObject);
 
 ConsoleApi.prototype.coldStart = function() {
 };

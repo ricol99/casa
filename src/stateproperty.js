@@ -372,6 +372,17 @@ StateProperty.prototype.launchActionFunction = function(_actionHandler, _priorit
    return false;
 };
 
+StateProperty.prototype.ownerHasNewName = function() {
+   NamedObject.prototype.ownerHasNewName.call(this);
+
+   for (var state in this.states) {
+
+      if (this.states.hasOwnProperty(state)) {
+         this.states[state].ownerHasNewName();
+      }
+   }
+};
+
 function State(_config, _owner) {
    this.name = _config.name;
    NamedObject.call(this, "state:" + this.name, _owner);

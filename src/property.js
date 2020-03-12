@@ -8,7 +8,7 @@ function Property(_config, _owner) {
    this.type = _config.type;
    //this.uName = _owner.uName+":"+this.type+":"+this.name;
 
-   NamedObject.call(this, _config.name, _owner);
+   NamedObject.call(this, this.type+":"+_config.name, _owner);
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
@@ -344,9 +344,5 @@ Property.prototype.checkData = function(_value, _data) {
    if (!_data.hasOwnProperty('name')) _data.name = this.name;
    if (!_data.hasOwnProperty('value')) _data.value = _value;
 }
-
-Property.prototype.ownerHasNewName = function() {
-   this.uName = this.owner.uName+":"+this.type+":"+this.name;
-};
 
 module.exports = exports = Property;
