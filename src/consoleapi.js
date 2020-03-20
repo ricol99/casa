@@ -21,6 +21,10 @@ util.inherits(ConsoleApi, NamedObject);
 ConsoleApi.prototype.coldStart = function() {
 };
 
+ConsoleApi.prototype.getCasa = function() {
+   return this.gang.casa;
+};
+
 ConsoleApi.prototype.checkParams = function(_minLength, _params) {
 
    if (_params.length < _minLength)  {

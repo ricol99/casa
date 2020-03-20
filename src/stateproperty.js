@@ -346,6 +346,10 @@ StateProperty.prototype.ceasedToBeController = function(_newController) {
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListenerName;
 
+   if (!_config.hasOwnProperty("fullName") || _config.fullName == undefined) {
+      _config.fullName = this.owner.fullName;
+   }
+
    if (_config.hasOwnProperty("value")) {
       sourceListenerName = _config.fullName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
    }
@@ -387,7 +391,6 @@ function State(_config, _owner) {
    this.name = _config.name;
    NamedObject.call(this, "state:" + this.name, _owner);
 
-   //this.uName = _owner.uName + ":state:" + this.name;
    this._id = this.fullName;
    this.sourceMap = {};
    this.activeGuardedSources = [];
@@ -784,7 +787,7 @@ State.prototype.exiting = function(_event, _value) {
 State.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.fullName + ": scheduledEventTriggered() event name=" + _event.name);
 
-   if (_event.hasOwnProperty("name")) {
+   if (_event.hasOwnProperty("name") && (_event.name != undefined)) {
 
       if (_event.hasOwnProperty("value")) {
          this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.fullName, value: _event.value });

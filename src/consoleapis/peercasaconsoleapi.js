@@ -7,6 +7,10 @@ function PeerCasaConsoleApi(_config, _owner) {
 
 util.inherits(PeerCasaConsoleApi, ConsoleApi);
 
+PeerCasaConsoleApi.prototype.getCasa = function() {
+   return this.myObj();
+};
+
 PeerCasaConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
    ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources, _prevResult, _perfectMatchRequired);
 };
