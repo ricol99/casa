@@ -23,6 +23,7 @@
     "node-hue-api": "^2.4.2",
     "node-persist": "^2.0.7",
     "node-schedule": "~0.1.16",
+    "node-w1bus": "^0.1.2",
     "onoff": "^3.1.0",
     "ping": "^0.2.1",
     "pushover-notifications": "~0.2.2",
