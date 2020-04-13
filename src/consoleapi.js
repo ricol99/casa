@@ -8,8 +8,8 @@ function ConsoleApi(_config, _owner) {
    NamedObject.call(this, _config.uName.split(":")[0] + "consoleapi:" + _config.uName.split(":")[1], _owner);
 
    this.myObjuName = _config.uName;
+   this.myObjFullName = (_owner) ? _owner.fullName + ":" + _config.uName : "::" + _config.uName;
    this.consoleApiObjects = {};
-   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.myObjuName : this.myObjuName
 
    this.gang = Gang.mainInstance();
    this.consoleApiService =  this.gang.casa.findService("consoleapiservice");
@@ -65,10 +65,9 @@ ConsoleApi.prototype.filterArray = function(_array, _filter) {
    }
 };
 
-ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previousMatches, _fullScopeName) {
+ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previousMatches) {
    var mainProto = Object.getPrototypeOf(this);
    var proto = mainProto;
-   var fullScopeName = (_fullScopeName) ? _fullScopeName : this.fullScopeName;
 
    while (proto.constructor.name !== 'ConsoleApi') {
        proto = Object.getPrototypeOf(proto);
@@ -87,14 +86,14 @@ ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previo
    for (var method in mainProto) {
 
       if (!proto.hasOwnProperty(method) && !excObj.hasOwnProperty(method)) {
-         members.push(fullScopeName+"."+method);
+         members.push(this.myObjFullName+"."+method);
       }
    }
 
-   members.push(fullScopeName+"."+"ls");
-   members.push(fullScopeName+"."+"cat");
+   members.push(this.myObjFullName+"."+"ls");
+   members.push(this.myObjFullName+"."+"cat");
 
-   this.filterArray(members, fullScopeName+"."+_filterArray);
+   this.filterArray(members, this.myObjFullName+"."+_filterArray);
    return members;
 };
 
@@ -142,7 +141,7 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
 
 // _collection object to search, global search performed if not supplied
 // _prevResult  - result object to merge with new results - optional
-ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfectMatchRequired)  {
+/*ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfectMatchRequired)  {
    var filterArray = _scope.split(":");
    var prevResultCount =  _result.hasOwnProperty("hits") ? _result.hits.length : 0;
    var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
@@ -159,10 +158,10 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfe
 
       if (_obj === matchString) {
          perfectMatch = hits.length;
-         hits.push((this.fullScopeName === "") ? _obj : this.fullScopeName+":"+_obj);
+         hits.push(this.myObjFullName+":"+_obj);
       }
       else if (!_perfectMatchRequired) {
-         hits.push((this.fullScopeName === "") ? _obj : this.fullScopeName+":"+_obj);
+         hits.push(this.myObjFullName+":"+_obj);
       }
    });
 
@@ -193,15 +192,15 @@ ConsoleApi.prototype.filterScope = function(_scope, _collection, _result, _perfe
       var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
 
       if (!_result.hasOwnProperty("remainingStr") || (_result.remainingStr.length > remainingStr.length)) {
-         _result.scope = this.fullScopeName;
+         _result.scope = this.myObjFullName;
          _result.consoleApiObj = this;
          _result.remainingStr = remainingStr;
       }
    }
-};
+};*/
 
 ConsoleApi.prototype.myObj = function() {
-   return this.gang.findGlobalObject(this.myObjuName);
+   return this.gang.findNamedObject(this.myObjFullName);
 };
 
 ConsoleApi.prototype.ls = function(_params, _callback) {
@@ -210,7 +209,7 @@ ConsoleApi.prototype.ls = function(_params, _callback) {
    this.filterScope("", undefined, result);
 
    for (var i = 0; i < result.hits.length; ++i) {
-      result.hits[i] = result.hits[i].replace(this.fullScopeName+":", "");
+      result.hits[i] = result.hits[i].replace(this.myObjFullName+":", "");
    }
 
    _callback(null, result.hits);

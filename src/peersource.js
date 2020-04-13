@@ -1,8 +1,9 @@
 var util = require('./util');
 var SourceBase = require('./sourcebase');
+var Gang = require('./gang');
 
 function PeerSource(_uName, _priority, _props, _peerCasa) {
-   SourceBase.call(this, _uName, null);
+   SourceBase.call(this, _uName, Gang.mainInstance());
 
    this.priority = _priority;
    this.casa = _peerCasa;

@@ -6,6 +6,7 @@ function ConsoleApiService(_config) {
    _config.socketIoSupported = true;
    WebService.call(this, _config);
    this.sessions = {};
+   this.consoleApiObjects = {};
 }
 
 util.inherits(ConsoleApiService, WebService);
@@ -169,6 +170,35 @@ ConsoleApiService.prototype.socketIoConnection = function(_socket) {
    this.sessions[_socket.id].serveClient(_socket);
 };
 
+ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
+   var obj = null;
+
+   if (!this.consoleApiObjects.hasOwnProperty(_namedObject.fullName)) {
+
+      let classList = util.getClassHierarchy(_namedObject);
+
+      for (var i = 0; i < classList.length; ++i) {
+         var ConsoleApiObj = this.gang.cleverRequire(_namedObject.tName+"consoleapi:"+_namedObject.sName, "consoleapis", classList[i]+"consoleapi");
+
+         if (ConsoleApiObj) {
+            break;
+         }
+      }
+
+      if (!ConsoleApiObj) {
+         return null;
+      }
+
+      obj = new ConsoleApiObj({ uName: _namedObject.uName }, this);
+      this.consoleApiObjects[_namedObject.fullName] = obj;
+   }
+   else {
+      obj = this.consoleApiObjects[_namedObject.fullName];
+   }
+
+   return obj;
+};
+
 function ConsoleApiSession(_id, _console, _owner) {
    this.uName = _id;
    this.console = _console;
@@ -300,14 +330,13 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
       shortScope = (_scope === "::") ? "::" + line : _scope + ":" + line;
    }
 
-   return { line: line, longScope: longScope, shortScope: shortScope };
+   return shortScope;
 };
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
-   var result = this.processScopeAndLine(_params.scope, _params.line);
-   var scopeResult = {};
-   this.owner.globalConsoleApi.filterScope(result.longScope, null, scopeResult, true);
-   _callback(null, { exists: ((scopeResult.consoleApiObj != null) && scopeResult.scope), newScope: result.shortScope });
+   var scope = this.processScopeAndLine(_params.scope, _params.line);
+   var obj = this.owner.gang.findNamedObject(scope);
+   _callback(null, { exists: obj != null, newScope: scope });
 };
 
 ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _matches) {
@@ -324,8 +353,8 @@ ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _mat
    }
 };
 
-ConsoleApiSession.prototype.extractScopeFromLine = function(_currentScope, _line, _perfectMatchRequired) {
-   var shortenedLine = _line, trimmedString = "", line, scope, serverMethods = [], matchingScopes = [], method = null, arguments = [], result = {};
+ConsoleApiSession.prototype.extractScopeFromLine = function(_currentScope, _line) {
+   var shortenedLine = _line, trimmedString = "", method = null, arguments = [], result = {};
    var sepIndex = _line.search(/[. \(]/);
 
    if (sepIndex !== -1) {
@@ -333,72 +362,20 @@ ConsoleApiSession.prototype.extractScopeFromLine = function(_currentScope, _line
       trimmedString = _line.substr(sepIndex);
    }
 
-   if (shortenedLine[0] === ':') {
-      line = ((shortenedLine.length > 1) && (shortenedLine[1] === ":")) ? this.owner.gang.uName + shortenedLine.substr(1) : this.owner.gang.uName + ":" + this.owner.gang.casa.uName + shortenedLine;
-   }
-   else  {
-      line = (_currentScope === "::") ? this.owner.gang.uName + ":" + shortenedLine : this.owner.gang.uName + _currentScope.substr(1) + ":" + shortenedLine;
-   }
+   var line = (shortenedLine[0] === ':') ? shortenedLine : (_currentScope === "::") ? "::"+ shortenedLine : _currentScope + ":" + shortenedLine;
+   var result = this.owner.gang.filterName(line);
 
-   this.owner.globalConsoleApi.filterScope(line, undefined, result, _perfectMatchRequired);
-
-   if ((result.hits.length === 0) && !result.consoleApiObj) {
-      return { scope: null, matchingScopes: [], serverMethods: [], method: null,
-               consoleApiObj: result.consoleApiObj, remainingStr: result.remainingStr+trimmedString, arguments: [] };
+   if ((result.hits.length === 0) && !result.namedObject) {
+      return { scope: null, matchingScopes: [], method: null,
+               consoleApiObj: null, remainingStr: result.remainingStr+trimmedString, arguments: [] };
    }
 
-   matchingScopes = result.hits;
+   var matchingScopes = result.hits;
    this.processMatches(_currentScope, shortenedLine, matchingScopes);
 
    var scope = result.scope;
-   var output = { scope: scope, matchingScopes: matchingScopes, consoleApiObj: result.consoleApiObj, remainingStr: result.remainingStr+trimmedString };
-
-   //if (result.consoleApiObj && result.remainingStr && (result.remainingStr.length > 0)) {
-      //util.assign(output, this.extractMethodAndArguments(_currentScope, result.remainingStr, result.consoleApiObj));
-   //}
-
-   return output;
-};
-
-ConsoleApiSession.prototype.extractMethodAndArguments = function(_currentScope, _line, _consoleApiObj) {
-   var line = (_line[0] === '.') ? _line.substr(1) : _line;
-   var spacePos = (line.indexOf(' ') === -1) ? 10000 : line.indexOf(' ');
-   var bracketPos = (line.indexOf('(') === -1) ? 10000 : line.indexOf('(');
-   var separator = '(';
-   var methodArguments;
-   var methodSeparator = (spacePos < bracketPos) ? ' ' : '(';
-   var splitLine = line.split(methodSeparator);
-   var method = splitLine[0].trim();
-
-   var serverMethods = _consoleApiObj.filterMembers("");
-   this.processMatches(_currentScope, line, serverMethods);
-
-   if (splitLine.length > 1) {
-      var argFormat = (methodSeparator === '(') ? 'js' : (splitLine[1].trim()[0] === '(') ? 'js' : 'space';
-
-      if (argFormat === 'space') {
-         methodArguments = "\"" + splitLine.slice(1).join(" ").match(/\w+|"(?:\\"|[^"])+"/g).join("\",\"") + "\")";
-         methodArguments = methodArguments.replace(/""/g,"\"");
-      }
-      else {
-         methodArguments = line.split("(").slice(1).join("(").trim();
-      }
-
-      var lastIndex = methodArguments.lastIndexOf(")");
-
-      if (lastIndex !== -1) {
-         methodArguments = methodArguments.substring(0, lastIndex);
-
-         try {
-            arguments = JSON.parse("["+methodArguments+"]");
-         }
-         catch (_err) {
-            return { error: "Unable to parse arguments: " + _err };
-         }
-      }
-   }
-
-   return { serverMethods: serverMethods, method: method, arguments: methodArguments };
+   var consoleApiObj = result.namedObject ? this.owner.findOrCreateConsoleApiObject(result.namedObject) : null;
+   return { scope: scope, matchingScopes: matchingScopes, consoleApiObj: consoleApiObj, remainingStr: result.remainingStr+trimmedString };
 };
 
 ConsoleApiSession.prototype.getClassHierarchy = function(_consoleApiObj) {
@@ -419,7 +396,7 @@ ConsoleApiSession.prototype.getClassHierarchy = function(_consoleApiObj) {
 };
 
 ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
-   var result = this.extractScopeFromLine(_params.scope, _params.line, false);
+   var result = this.extractScopeFromLine(_params.scope, _params.line);
 
    if (result.error) {
       return _callback(result.error);

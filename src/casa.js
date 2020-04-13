@@ -36,12 +36,6 @@ function Casa(_config) {
 
 util.inherits(Casa, NamedObject);
 
-Casa.prototype.findNamedObject = function(_scope, _collections) {
-   var collections = _collections ? _collections : [];
-   collections.push(this.sources);
-   return NamedObject.prototype.findNamedObject.call(this, _scope, collections);
-};
-
 Casa.prototype.createServer = function() {
    express = require('express');
    app = express();

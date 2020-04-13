@@ -1,32 +1,30 @@
 var util = require('./util');
 var Source = require('./source');
+var Gang = require('./gang');
 
-function Thing(_config, _parent) {
+function Thing(_config, _owner) {
+   var gang = Gang.mainInstance();
 
-   if (_parent) {
+   if (_owner && (_owner !== gang)) {
       _config.local = true;
    }
+   else {
+      this.topLevelThing = true;
+   }
 
-   Source.call(this, _config, _parent);
+   Source.call(this, _config, _owner);
 
    this.displayName = _config.displayName;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
    this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
    this.things = {};
 
-   if (_parent) {
-      this.parent = _parent;
-      this.parent.addThing(this);
+   if (!this.topLevelThing) {
+      this.owner.addThing(this);
    }
 }
 
 util.inherits(Thing, Source);
-
-Thing.prototype.findNamedObject = function(_scope, _collections) {
-   var collections = _collections ? _collections : [];
-   collections.push(this.things);
-   return Source.prototype.findNamedObject.call(this, _scope, collections);
-};
 
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
@@ -68,8 +66,8 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
       var needToUpdateChildren = this.propogateToChildren;
 
-      if (this.parent && this.propogateToParent) {
-         needToUpdateChildren = !this.parent.childPropertyChanged(_propName, _propValue, this, data);
+      if (!this.topLevelThing && this.propogateToParent) {
+         needToUpdateChildren = !this.owner.childPropertyChanged(_propName, _propValue, this, data);
       }
 
       if (needToUpdateChildren) {
@@ -105,7 +103,7 @@ Thing.prototype.inheritChildProps = function() {
 
 Thing.prototype.getAllProperties = function(_allProps) {
 
-   if (!this.parent || this.propogateToParent) {
+   if (this.topLevelThing || this.propogateToParent) {
       Source.prototype.getAllProperties.call(this, _allProps);
 
       for (var thing in this.things) {
@@ -120,8 +118,8 @@ Thing.prototype.getAllProperties = function(_allProps) {
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
    var ret = this.propogateToChildren;
 
-   if (this.parent) {
-      ret = ret && this.parent.childPropertyChanged(_propName, _propValue, this, _data);
+   if (!this.topLevelThing) {
+      ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
       _data.alignWithParent = true;
@@ -133,8 +131,8 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
 
 Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
-   if (this.parent) {
-      this.parent.childRaisedEvent(_eventName, this, _data);
+   if (!this.topLevelThing) {
+      this.owner.childRaisedEvent(_eventName, this, _data);
    }
    else {
       _data.alignWithParent = true;
@@ -161,8 +159,12 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    }
 };
 
+Thing.prototype.isTopLevelThing = function() {
+   return this.topLevelThing;
+};
+
 Thing.prototype.getTopThing = function() {
-   return (this.parent) ? this.parent.getTopThing() : this;
+   return this.topLevelThing ? this : this.owner.getTopThing();
 };
 
 Thing.prototype.ownerHasNewName = function() {

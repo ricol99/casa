@@ -153,22 +153,6 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
 util.inherits(Gang, NamedObject);
 
-Gang.prototype.findNamedObject = function(_scope, _collections) {
-
-   var scope = _scope.startsWith("::") ? _scope.substr(2) : _scope.startsWith(this.uName + ":") ? _scope.substr(this.uName.length+1) : (_scope === this.uName) ? "" : _scope;
-
-   if (scope.trim().length === 0) {
-      return this;
-   }
-
-   if (scope.startsWith(":")) {
-      scope = this.casa.uName + scope;
-   }
-    
-   console.log("AAAAA scope="+scope);
-   return NamedObject.prototype.findNamedObject.call(this, scope, [ this.allObjects ]);
-};
-
 Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
 
    if (_objects) {
@@ -368,8 +352,8 @@ Gang.prototype.cleverRequire = function(_name, _path, _type) {
 // Extract Users
 Gang.prototype.createUser = function(_user) {
    var User = this.cleverRequire(_user.uName);
-   _user.owner = this;
-   var userObj = new User(_user);
+   //_user.owner = this;
+   var userObj = new User(_user, this);
    this.users[userObj.uName] = userObj;
    this.addObjectToGlobalScope(userObj);
    console.log('New user: ' + userObj.uName);
@@ -394,7 +378,7 @@ Gang.prototype.createService = function(_config, _serviceOwner) {
       return null;
    }
 
-   var serviceObj = new Service(_config);
+   var serviceObj = new Service(_config, this);
    this.services[serviceObj.uName] = serviceObj;
    console.log('New service: ' + _config.uName);
 
@@ -446,7 +430,7 @@ Gang.prototype.extractScenes = function(_config, _parent) {
 
       for (var index = 0; index < _config.length; ++index) {
          var Scene = this.cleverRequire(_config[index].uName, 'scenes');
-         var sceneObj = new Scene(_config[index]);
+         var sceneObj = new Scene(_config[index], this);
          this.scenes[sceneObj.uName] = sceneObj;
          this.addObjectToGlobalScope(sceneObj);
          console.log('New scene: ' + _config[index].uName);
@@ -455,20 +439,21 @@ Gang.prototype.extractScenes = function(_config, _parent) {
 }
 
 // Extract Things
-Gang.prototype.createThing = function(_config, _parent) {
+Gang.prototype.createThing = function(_config, _owner) {
    var Thing = this.cleverRequire(_config.uName, 'things', _config.type);
 
    if (!Thing) {
+      console.error(this.uName + ": Thing "+_config.uName+" does not exist");
       return null;
    }
 
-   var thingObj = new Thing(_config, _parent);
+   var thingObj = new Thing(_config, _owner);
    this.things[thingObj.uName] = thingObj;
 
-   if (!_parent) {
+   if (thingObj.isTopLevelThing()) {
       this.addObjectToGlobalScope(thingObj);
    }
-   console.log('New thing: ' + _config.uName);
+   console.log('New thing: ' + _config.fullName);
    return thingObj;
 };
 
@@ -480,17 +465,18 @@ Gang.prototype.removeThing = function(_thing) {
    }
 };
 
-Gang.prototype.extractThings = function(_config, _parent) {
+Gang.prototype.extractThings = function(_config, _owner) {
+   var owner = _owner ? _owner : this;
 
    if (_config) {
 
       for (var index = 0; index < _config.length; ++index) {
-         var thingObj = this.createThing(_config[index], _parent);
+         var thingObj = this.createThing(_config[index], owner);
 
          if (_config[index].things) {
             this.extractThings(_config[index].things, thingObj);
 
-            if (!_parent) {
+            if (thingObj.isTopLevelThing()) {
                thingObj.inheritChildProps();
             }
          }
@@ -588,7 +574,7 @@ Gang.prototype.mergeConfigs = function() {
 
 Gang.prototype.extractCasa = function() {
    var Casa = this.cleverRequire(this.config.uName);
-   var casaObj = new Casa(this.config);
+   var casaObj = new Casa(this.config, this);
    this.allObjects[casaObj.uName] = casaObj;
    this.casa = casaObj;
    this.casa.db = this.dbs[casaObj.uName];

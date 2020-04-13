@@ -4,7 +4,7 @@ var S = require('string');
 var io = require('socket.io-client');
 var Gang = require('./gang');
 
-function PeerCasa(_config) {
+function PeerCasa(_config, _owner) {
    this.name = _config.uName;
 
    this.gang = Gang.mainInstance();
@@ -21,7 +21,7 @@ function PeerCasa(_config) {
    this.remoteCasas = [];
    this.deathTime = 500;
 
-   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name);
+   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name, _owner);
 
    this.sources = [];
    this.workers = [];

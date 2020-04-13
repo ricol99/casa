@@ -1,9 +1,7 @@
 var util = require('./util');
 var SourceBase = require('./sourcebase');
-var Gang = require('./gang');
 
 function Source(_config, _owner) {
-   var gang = Gang.mainInstance();
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    SourceBase.call(this, _config.uName, _owner);
    this.config = _config;

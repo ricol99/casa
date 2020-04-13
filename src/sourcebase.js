@@ -13,12 +13,6 @@ function SourceBase(_uName, _owner) {
 
 util.inherits(SourceBase, NamedObject);
 
-SourceBase.prototype.findNamedObject = function(_scope, _collections) {
-   var collections = _collections ? _collections : [];
-   collections.push(this.props);
-   return NamedObject.prototype.findNamedObject.call(this, _scope, collections);
-};
-
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
 
