@@ -1,5 +1,5 @@
 var util = require('./util');
-var Source = require('./source');
+var Thing = require('./thing');
 
 function Service(_config) {
 
@@ -7,10 +7,19 @@ function Service(_config) {
       _config.local = true;
    }
 
-   Source.call(this, _config);
-   this.displayName = _config.displayName;
+   Thing.call(this, _config);
 }
 
-util.inherits(Service, Source);
+util.inherits(Service, Thing);
+
+Service.prototype.createThing = function(_config) {
+   var type = _config.uName.split(":")[0];
+
+   var ServiceOwnedThing = require("./services/things/"+type);
+   var thing = new ServiceOwnedThing(_config, this);
+   this.gang.casa.refreshSourceListeners();
+
+   return thing;
+};
 
 module.exports = exports = Service;

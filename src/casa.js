@@ -192,6 +192,7 @@ Casa.prototype.removeSource = function(_source) {
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
+   console.log(this.uName + ": AAAA ****** New source listener added " + _sourceListener.uName);
 
    if (this.sourceListeners[_sourceListener.uName]) {
       console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);

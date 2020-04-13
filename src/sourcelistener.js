@@ -40,9 +40,14 @@ function SourceListener(_config, _owner) {
       this.eventName = _config.property;
       this.subscription.prop = this.eventName;
    }
-   else {
+   else if (_config.hasOwnProperty("event")) {
       this.eventName = _config.event;
       this.subscription.event = this.eventName;
+   }
+   else {
+      this.eventName = "mirror";
+      this.subscription.mirror = true;
+      this.capturingAllEvents = true;
    }
 
    this.matchingValueDefined = _config.hasOwnProperty('value');
@@ -80,14 +85,17 @@ SourceListener.prototype.establishListeners = function() {
    if (this.listeningToPropertyChange) {
       this.propertyChangedHandler = SourceListener.prototype.propertyChangedCb.bind(this);
    }
-   else {
+   else if (this.capturingAllEvents) {
+      this.propertyChangedHandler = SourceListener.prototype.propertyChangedCb.bind(this);
+      this.eventRaisedHandler = SourceListener.prototype.eventRaisedCb.bind(this);
+   }
+   else  {
       this.eventRaisedHandler = SourceListener.prototype.eventRaisedCb.bind(this);
    }
 
    this.invalidHandler = SourceListener.prototype.invalidCb.bind(this);
 
    // refresh source
-   console.log("AAAA sourceName="+this.sourceName);
    this.source = this.gang.findNamedObject(this.sourceName);
    this.valid = (this.source != undefined) || (this.source != null);;
 
@@ -100,6 +108,10 @@ SourceListener.prototype.establishListeners = function() {
             console.error(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.fullName + ". Fix config!");
             this.valid = false;
          }
+      }
+      else if (this.capturingAllEvents) {
+         this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
+         this.source.on('event-raised', this.eventRaisedHandler);
       }
       else {
          this.source.on('event-raised', this.eventRaisedHandler);
@@ -142,6 +154,7 @@ SourceListener.prototype.invalidCb = function(_data) {
 };
 
 SourceListener.prototype.refreshSource = function() {
+   console.log(this.uName + ': refreshSource() current validity =' + this.valid);
    var ret = true;
 
    if (!this.valid)  {
@@ -329,7 +342,12 @@ SourceListener.prototype.isValid = function() {
 
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
-   if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
+   if (this.capturingAllEvents) {
+       var newData = util.copy(_data);
+       newData.propertyChange = true;
+       this.owner.receivedEventFromSource(newData);
+   }
+   else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
       this.sourceRawValue = _data.value;
@@ -350,7 +368,10 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
 SourceListener.prototype.internalSourceEventRaised = function(_data) {
 
-   if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
+   if (this.capturingAllEvents) {
+       this.owner.receivedEventFromSource(util.copy(_data));
+   }
+   else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
 

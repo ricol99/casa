@@ -4,7 +4,6 @@ var Gang = require('./gang');
 
 function Source(_config, _owner) {
    var gang = Gang.mainInstance();
-   console.log("AAAAA Source uName="+_config.uName);
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    SourceBase.call(this, _config.uName, _owner);
    this.config = _config;
@@ -14,7 +13,13 @@ function Source(_config, _owner) {
    this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
    this.controller = null;
-   
+
+   if (_config.hasOwnProperty("mirrorSource")) {
+      this.mirroring = true;
+      var SourceListener = require('./sourcelistener');
+      this.mirrorSourceListener = new SourceListener({ fullName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
+   }
+
    if (_config.props) {
       var propLen = _config.props.length;
 
@@ -118,6 +123,13 @@ Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
 
 // Override this for last output hook - e.g. sync and external property with the final property value
 Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
+
+   if (this.capturingAllEvents && this.mirrorSourceListener.isValid() && this.mirrorSourceListener.getSource().hasProperty(_propName)) {
+
+      if (this.mirrorSourceListener.getSource().getProperty(_propName) != _propValue) {
+         this.mirrorSourceListener.getSource().alignPropertyValue(_propName, _propValue);
+      }
+   }
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
@@ -370,6 +382,36 @@ Source.prototype.getAutoMode = function() {
 
 Source.prototype.setAutoMode = function() {
    this.alignPropertyValue("MODE", "auto");
+};
+
+//
+// Called by SourceListener as a defined source has become valid again (available) - Not applicable for mirroring
+//
+Source.prototype.sourceIsValid = function(_data) {
+};
+
+//
+// Called by SourceListener as a defined source has become invalid (unavailable) - Not applicable for mirroring
+//
+Source.prototype.sourceIsInvalid = function(_data) {
+};
+
+//
+// Called by SourceListener as a defined source has changed it property value
+// Only used when source is mirroring another source
+//
+Source.prototype.receivedEventFromSource = function(_data) {
+
+   if (this.mirroring) {
+
+      if (_data.propertyChange) {
+         this.ensurePropertyExists(_data.name, "property", {}, this.config);
+         this.alignPropertyValue(_data.name, _data.value);
+      }
+      else {
+         this.raiseEvent(_data.name, _data);
+      }
+   }
 };
 
 module.exports = exports = Source;
