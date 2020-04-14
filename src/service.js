@@ -1,7 +1,7 @@
 var util = require('./util');
 var Thing = require('./thing');
 
-function Service(_config) {
+function Service(_config, _owner) {
 
    if (!_config.hasOwnProperty("local")) {
       _config.local = true;
@@ -11,7 +11,7 @@ function Service(_config) {
       _config.propogateToChildren = false;
    }
 
-   Thing.call(this, _config);
+   Thing.call(this, _config, _owner);
 }
 
 util.inherits(Service, Thing);
