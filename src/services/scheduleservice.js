@@ -4,8 +4,8 @@ var SunCalc = require('suncalc');
 var Parser = require('cron-parser');
 var Service = require('../service');
 
-function ScheduleService(_config) {
-   Service.call(this, _config);
+function ScheduleService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    // Defaults to London
    this.latitude = (_config.hasOwnProperty("latitude")) ? _config.latitude : 51.5;

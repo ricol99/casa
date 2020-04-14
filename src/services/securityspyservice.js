@@ -1,8 +1,8 @@
 var util = require('util');
 var Service = require('../service');
 
-function SecuritySpyService(_config) {
-   Service.call(this, _config);
+function SecuritySpyService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    this.hostname = _config.hostname;
    this.port = _config.port;

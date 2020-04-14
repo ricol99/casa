@@ -4,8 +4,8 @@ var SunCalc = require('suncalc');
 var Parser = require('cron-parser');
 var Service = require('../service');
 
-function RampService(_config) {
-   Service.call(this, _config);
+function RampService(_config, _owner) {
+   Service.call(this, _config, _owner);
 }
 
 util.inherits(RampService, Service);

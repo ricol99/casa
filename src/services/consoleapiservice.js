@@ -2,9 +2,9 @@ var util = require('util');
 var WebService = require('./webservice');
 var request = require('request');
 
-function ConsoleApiService(_config) {
+function ConsoleApiService(_config, _owner) {
    _config.socketIoSupported = true;
-   WebService.call(this, _config);
+   WebService.call(this, _config, _owner);
    this.sessions = {};
    this.consoleApiObjects = {};
 }

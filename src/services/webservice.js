@@ -4,8 +4,8 @@ var events = require('events');
 var express = require('express');
 var app = express();
 
-function WebService(_config) {
-   Service.call(this, _config);
+function WebService(_config, _owner) {
+   Service.call(this, _config, _owner);
    this.hangingOffMainServer = true;
    this.secure = _config.hasOwnProperty("secure") ? _config.secure : this.gang.inSecureMode();
    this.socketIoSupported = _config.hasOwnProperty("socketIoSupported") ? _config.socketIoSupported : false;

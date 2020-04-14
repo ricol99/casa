@@ -11,8 +11,8 @@ var uuid = HAP.uuid;
 
 storage.initSync();
 
-function HomekitService(_config) {
-   Service.call(this, _config);
+function HomekitService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    this.port = this.casa.allocatePort(this.uName);
 

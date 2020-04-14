@@ -20,8 +20,8 @@ process.on('SIGINT', () => {
   })
 });
 
-function SonosService(_config) {
-   Service.call(this, _config);
+function SonosService(_config, _owner) {
+   Service.call(this, _config, _owner);
    this.devices = {};
    this.players = {};
    this.callbacks = {};

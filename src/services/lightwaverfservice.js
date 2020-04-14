@@ -2,8 +2,8 @@ var util = require('util');
 var Service = require('../service');
 var Dgram = require('dgram');
 
-function LightwaveRfService(_config) {
-   Service.call(this, _config);
+function LightwaveRfService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    this.linkAddress = _config.linkAddress;
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;

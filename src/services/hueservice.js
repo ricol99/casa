@@ -2,8 +2,8 @@ var util = require('util');
 var Service = require('../service');
 var Hue = require("node-hue-api");
 
-function HueService(_config) {
-   Service.call(this, _config);
+function HueService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    this.bridgesAvailable = [];
    this.linkId = _config.linkId;

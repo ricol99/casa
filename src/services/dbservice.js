@@ -2,8 +2,8 @@ var util = require('util');
 var WebService = require('./webservice');
 var request = require('request');
 
-function DbService(_config) {
-   WebService.call(this, _config);
+function DbService(_config, _owner) {
+   WebService.call(this, _config, _owner);
 
    if (this.gang.inSecureMode()) {
       var fs = require('fs');

@@ -3,8 +3,8 @@ var Service = require('../service');
 var audio = require('osx-audio');
 var AudioAnalyser = require('audio-analyser');
 
-function SoundService(_config) {
-   Service.call(this, _config);
+function SoundService(_config, _owner) {
+   Service.call(this, _config, _owner);
 }
 
 util.inherits(SoundService, Service);

@@ -2,8 +2,8 @@ var util = require('util');
 var Service = require('../service');
 var push = require( 'pushover-notifications' );
 
-function PushoverService(_config) {
-   Service.call(this, _config);
+function PushoverService(_config, _owner) {
+   Service.call(this, _config, _owner);
 
    this.userId = _config.userId;
    this.token = _config.token;
