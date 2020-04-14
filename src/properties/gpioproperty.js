@@ -9,7 +9,7 @@ function GPIOProperty(_config, _owner) {
    this.direction = (_config.hasOwnProperty("direction")) ? _config.direction : ((this.writable) ? 'out' : 'in');
    this.serviceName = (_config.hasOwnProperty("service")) ? _config.service : _owner.gang.casa.findServiceName("gpioservice");
 
-   _config.source = { fullName: this.serviceName, property: "gpio-pin-"+this.gpioPin,
+   _config.source = { fullName: "::"+this.serviceName, property: "gpio-pin-"+this.gpioPin,
                       subscription: { direction: this.direction, triggerLow: this.triggerLow }};
 
    Property.call(this, _config, _owner);
