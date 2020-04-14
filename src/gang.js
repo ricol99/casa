@@ -453,7 +453,7 @@ Gang.prototype.createThing = function(_config, _owner) {
    if (thingObj.isTopLevelThing()) {
       this.addObjectToGlobalScope(thingObj);
    }
-   console.log('New thing: ' + _config.fullName);
+   console.log('New thing: ' + thingObj.fullName);
    return thingObj;
 };
 
