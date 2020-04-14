@@ -172,6 +172,7 @@ SourceListener.prototype.refreshSource = function() {
          }
       }
    }
+
    return ret;
 }
 

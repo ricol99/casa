@@ -94,15 +94,7 @@ NamedObject.prototype.findNamedObject = function(_name)  {
    });
 
    if (obj) {
-      filterArray.splice(0, (filterArray.length >= 2) ? 2 : 1);
-
-      if (filterArray.length > 0) {
-         var a = (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
-         return obj.findNamedObject((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"));
-      }
-      else {
-         return obj;
-      }
+      return obj.findNamedObject(newName);
    }
    else {
       console.error(this.fullName + ": Named object " + newName + " not found!");
