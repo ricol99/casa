@@ -6,7 +6,15 @@ function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
 
    if (_owner && (_owner !== gang)) {
-      _config.local = true;
+
+      if (_config.hasOwnProperty("local") && !_config.local && _owner.local) {
+         console.error(this.fullName + ": Config broken as non-local thing owned by local thing!");
+         process.exit(2);
+      }
+
+      if (!_config.hasOwnProperty("local")) {
+         _config.local = true;
+      }
    }
    else {
       this.topLevelThing = true;

@@ -44,14 +44,6 @@ ConsoleApi.prototype.addSessionVar = function() {
    return this.consoleApiService.getCurrentSession().addSessionVar(_name, _variable, this.uName);
 };
 
-ConsoleApi.prototype.filterGlobalObjects = function(_filter) {
-   return this.gang.filterGlobalObjects(_filter);
-};
-
-ConsoleApi.prototype.findGlobalObject = function(_uName) {
-   return this.gang.findGlobalObject(_uName);
-};
-
 ConsoleApi.prototype.filterArray = function(_array, _filter) {
 
    for (var i = 0; i < _array.length;) {

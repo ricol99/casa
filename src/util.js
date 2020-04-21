@@ -76,7 +76,6 @@ Util.filter = function(_collection, _func) {
 
 Util.iterate = function(_collection, _startIndex, _func) {
    var startIndex = (_startIndex == undefined) ? 0 : _startIndex;
-   console.log("AAAAA startIndex="+startIndex);
 
    if (typeof _collection === 'object') {
       var index = 0;

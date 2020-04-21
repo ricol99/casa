@@ -91,7 +91,7 @@ CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    var newThingConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findGlobalSource(newThingConfig.uName)) {
+   if (this.gang.findNamedObject("::"+newThingConfig.uName)) {
       return _callback("Thing already exists!");
    }
 

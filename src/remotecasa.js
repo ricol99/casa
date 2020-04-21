@@ -99,7 +99,6 @@ RemoteCasa.prototype.invalidateSources = function() {
       if(this.sources.hasOwnProperty(prop)){
          console.log(this.uName + ': Invaliding source ' + this.sources[prop].uName);
          this.sources[prop].invalidate();
-         delete this.gang.allObjects[this.sources[prop].uName];
          delete this.sources[prop];
       }
    }

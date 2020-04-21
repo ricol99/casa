@@ -2,8 +2,12 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_uName, _priority, _props, _peerCasa) {
-   SourceBase.call(this, _uName, Gang.mainInstance());
+function PeerSource(_fullName, _priority, _props, _peerCasa) {
+   var gang = Gang.mainInstance();
+   var existingSource = gang.findNamedObject(_fullName);
+   var name = existingSource ? _peerCasa.sName+"-"+_fullName.replace(gang.findOwner(_fullName).fullName+":", "") : _fullName;
+
+   SourceBase.call(this, name, gang);
 
    this.priority = _priority;
    this.casa = _peerCasa;
@@ -11,19 +15,14 @@ function PeerSource(_uName, _priority, _props, _peerCasa) {
    this.config = { local: true };
    this.local = true;
 
-   var existingSource = this.gang.findGlobalSource(_uName);
-
    if (existingSource) {
 
       if (existingSource.deferToPeer(this)) {
-         this.gang.allObjects[this.uName] = this;
+         this.setUName(this.uName.replace(_peerCasa.sName+"-", ""));
       }
       else {
          this.bowToOtherSource();
       }
-   }
-   else {
-      this.gang.allObjects[this.uName] = this;
    }
 
    for (var prop in _props) {
@@ -31,7 +30,7 @@ function PeerSource(_uName, _priority, _props, _peerCasa) {
       this.props[prop].set(_props[prop], {});
    }
 
-   this.casa.addSource(this);
+   this.casa.addSource(this, _fullName);
 }
 
 util.inherits(PeerSource, SourceBase);
@@ -45,11 +44,11 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
          return true;
       }
 
-      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
+      console.log(this.fullName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
-      sendData.sourceName = "::"+this.uName;
+      sendData.sourceName = "::"+this.fullName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
@@ -58,7 +57,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       // Call the final hooks
       this.props[_propName].propertyAboutToChange(_propValue, sendData);
 
-      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
+      console.info(this.fullName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
@@ -71,17 +70,17 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 }
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
-   console.log(this.uName + ': Attempting to set source property');
+   console.log(this.fullName + ': Attempting to set source property');
    return this.casa.setSourceProperty(this, _propName, _propValue, _data);
 };
 
 PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
-   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
+   console.log(this.fullName + ': Attempting to set Property ' + _propName + ' to ramp');
    return this.casa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
 };
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
-   console.log(this.uName + ': received changed-property event from peer.');
+   console.log(this.fullName + ': received changed-property event from peer.');
 
    let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
@@ -92,15 +91,21 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
 };
 
 PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
-   console.log(this.uName + ': received event-raised event from peer.');
-   console.info('Event Raised: ' + this.uName + ':' + _data.name);
+   console.log(this.fullName + ': received event-raised event from peer.');
+   console.info('Event Raised: ' + this.fullName + ':' + _data.name);
    this.asyncEmit('event-raised', util.copy(_data));
 };
 
 PeerSource.prototype.invalidate = function() {
    SourceBase.prototype.invalidate.call(this);
-   delete this.gang.allObjects[this.uName];
-   this.casa.findNewMainSource(this);
+   var fullName = this.fullName;
+   this.setOwner(null);
+   this.casa.findNewMainSource(this, fullName);
+};
+
+PeerSource.prototype.changeName = function(_newName) {
+   SourceBase.prototype.changeName.call(this, _newName);
+   this.casa.renameSource(this, _newName);
 };
 
 module.exports = exports = PeerSource;

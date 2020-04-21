@@ -68,7 +68,7 @@ Casa.prototype.createServer = function() {
    });
 
    app.get('/configfile/:filename', (req, res) => {
-      console.log(this.uName + ": Serving file " + req.params.filename);
+      console.log(this.fullName + ": Serving file " + req.params.filename);
       res.sendFile(this.configPath + '/' + req.params.filename);
    });
 
@@ -97,10 +97,11 @@ Casa.prototype.createServer = function() {
 };
 
 Casa.prototype.refreshSourceListeners = function() {
-   for (var prop in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(prop)) {
-         this.sourceListeners[prop].refreshSource();
+   for (var sourceListenerName in this.sourceListeners) {
+
+      if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+         this.sourceListeners[sourceListenerName].refreshSource();
       }
    }
 };
@@ -110,32 +111,32 @@ Casa.prototype.getDb = function() {
 };
 
 Casa.prototype.refreshSimpleConfig = function() {
-   this.simpleConfig = {};
-   this.simpleConfig.uName = this.uName;
-   this.simpleConfig.displayName = this.displayName;
-   this.simpleConfig.gang = this.gang.uName;
-   this.simpleConfig.sources = [];
-   this.simpleConfig.sourcesPriority = [];
-   this.simpleConfig.sourcesStatus = [];
+   var simpleConfig = {};
+   simpleConfig = {};
+   simpleConfig.uName = this.uName;
+   simpleConfig.displayName = this.displayName;
+   simpleConfig.gang = this.gang.uName;
+   simpleConfig.sources = [];
+   simpleConfig.sourcesPriority = [];
+   simpleConfig.sourcesStatus = [];
 
    for (sourceName in this.sources) {
 
       if (this.sources.hasOwnProperty(sourceName)) {
          var source = this.sources[sourceName];
-         console.error(this.uName+":AAAAAA Source Name="+source.uName);
 
          if (!source.local) {
             var allProps = {};
             source.getAllProperties(allProps);
 
-            this.simpleConfig.sources.push(source.uName);
-            this.simpleConfig.sourcesPriority.push((source.hasOwnProperty('priority')) ? source.priority : 0);
-            this.simpleConfig.sourcesStatus.push({ properties: util.copy(allProps) });
+            simpleConfig.sources.push(source.fullName);
+            simpleConfig.sourcesPriority.push((source.hasOwnProperty('priority')) ? source.priority : 0);
+            simpleConfig.sourcesStatus.push({ properties: util.copy(allProps) });
          }
       }
    }
 
-   return this.simpleConfig;
+   return simpleConfig;
 };
 
 Casa.prototype.getSource = function(_sourceName) {
@@ -147,64 +148,58 @@ Casa.prototype.isActive = function() {
 };
 
 Casa.prototype.addSource = function(_source) {
-   console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
-   this.sources[_source.uName] = _source;
+   console.log(this.fullName + ': Source '  + _source.fullName + ' added to casa ');
+   this.sources[_source.fullName] = _source;
 
    _source.on('property-changed', (_data) => {
-      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change');
+      console.log(this.fullName + ': ' + _data.sourceName + ' has had a property change');
       this.emit('source-property-changed', _data);
    });
 
    _source.on('event-raised', (_data) => {
-      console.log(this.uName + ': ' + _data.sourceName + ' has raised an event');
+      console.log(this.fullName + ': ' + _data.sourceName + ' has raised an event');
       this.emit('source-event-raised', _data);
    });
 
-   this.emit('source-added', { sourceName: _source.uName });
-   console.log(this.uName + ': ' + _source.uName + ' associated!');
+   this.emit('source-added', { sourceName: _source.fullName });
+   console.log(this.fullName + ': ' + _source.fullName + ' associated!');
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
-   console.log(this.uName + ': Renaming source '  + _source.uName + ' to ' + _newName);
-   delete this.sources[_source.uName];
-   this.sources[_newName] = _source;
-
-   // ** TBD Don't like this! HACK!
-   if (this.gang.allObjects[_source.uName]) {
-      delete this.gang.allObjects[_source.uName];
-   }
-   this.gang.allObjects[_newName] = _source;
-   console.log(this.uName + ": Source: "+_source.uName+" is now referred to in casa as "+ _newName);
+   console.log(this.fullName + ': Renaming source '  + _source.uName + ' to ' + _newName);
+   delete this.sources[_source.fullName];
+   _source.setUName(_newName);
+   this.sources[_source.fullName] = _source;
 };
 
 Casa.prototype.removeSource = function(_source) {
-   console.log(this.uName + ': Deleting source '  + _source.uName);
-   this.emit('source-removed', { sourceName: _source.uName });
+   console.log(this.fullName + ': Deleting source '  + _source.fullName);
+   this.emit('source-removed', { sourceName: _source.fullName });
 
    this.gang.removeThing(_source);
-   delete this.sources[_source.uName];
+   delete this.sources[_source.fullName];
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
-   console.log(this.uName + ": AAAA ****** New source listener added " + _sourceListener.uName);
+   console.log(this.fullName + ": AAAA ****** New source listener added " + _sourceListener.fullName);
 
-   if (this.sourceListeners[_sourceListener.uName]) {
-      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
+   if (this.sourceListeners[_sourceListener.fullName]) {
+      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.fullName);
       process.exit(1);
    }
 
-   console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
-   this.sourceListeners[_sourceListener.uName] = _sourceListener;
+   console.log(this.fullName + ': Source listener ' + _sourceListener.fullName + ' added to casa');
+   this.sourceListeners[_sourceListener.fullName] = _sourceListener;
 };
 
-Casa.prototype.findListeners = function(_uName) {
+Casa.prototype.findListeners = function(_fullName) {
    var listeners = [];
 
    for (var listener in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(listener)) {
 
-         if (this.sourceListeners[listener].sourceName === _uName) {
+         if (this.sourceListeners[listener].sourceName === _fullName) {
             listeners.push(this.sourceListeners[listener]);
          }
       }
@@ -213,7 +208,7 @@ Casa.prototype.findListeners = function(_uName) {
 };
 
 Casa.prototype.addService = function(_service) {
-   console.log(this.uName + ': Service '  + _service.uName + ' added to casa ');
+   console.log(this.fullName + ': Service '  + _service.uName + ' added to casa ');
 
    if (this.services[_service.uName.split(":")[0]]) {
       console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.uName);
@@ -234,7 +229,7 @@ Casa.prototype.findServiceName = function(_serviceType) {
 };
 
 Casa.prototype.addWorker = function(_worker) {
-   console.log(this.uName + ': Worker '  + _worker.uName + ' added to casa ');
+   console.log(this.fullName + ': Worker '  + _worker.uName + ' added to casa ');
    this.workers[_worker.uName] = _worker;
 };
 
