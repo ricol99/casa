@@ -34,6 +34,17 @@ function Thing(_config, _owner) {
 
 util.inherits(Thing, Source);
 
+Thing.prototype.invalidate = function(_thing) {
+   Source.prototype.invalidate.call(this, _thing);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].invalidate();
+      }
+   }
+};
+
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.uName] = _thing;
 };

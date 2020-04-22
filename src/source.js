@@ -33,7 +33,7 @@ function Source(_config, _owner) {
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    if (this.casa) {
-      console.log(this.fullName + ': Source casa: ' + this.casa.uName);
+      console.log(this.fullName + ': Source casa: ' + this.casa.fullName);
       this.casa.addSource(this);
    }
 }

@@ -38,9 +38,26 @@ SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _
 SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
 };
 
-SourceBase.prototype.bowToOtherSource = function() {
+SourceBase.prototype.bowToOtherSource = function(_currentlyActive) {
+   console.log(this.fullName+": Bowing to new source");
    this.bowing = true;
+   this.local = true;
+
+   if (_currentlyActive) {
+      this.invalidate();
+   }
+
+   this.casa.bowSource(this, _currentlyActive);
 };
+
+SourceBase.prototype.standUpFromBow = function() {
+   console.log(this.fullName+": Standing up to lower priority source");
+
+   this.bowing = false;
+   this.local = this.config.hasOwnProperty("local") ? this.config.local : false;
+   this.gang.findNamedObject(this.fullName).bowToOtherSource(true);
+   this.casa.standUpSourceFromBow(this);
+}
 
 SourceBase.prototype.coldStart = function() {
 
@@ -187,18 +204,7 @@ SourceBase.prototype.changeName = function(_newName) {
 
 // Called by peerSource to check for overriding
 SourceBase.prototype.deferToPeer = function(_newSource) {
-
-   if (_newSource.priority > this.priority) {
-      this.bowing = true;
-      this.local = true;
-      console.log(this.fullName+": Bowing to new source");
-      this.invalidate();
-      this.setUName(this.casa.sName+"-"+this.uName);
-      this.bowToOtherSource();
-      return true;
-   }
-
-   return false;
+   return (_newSource.priority > this.priority);
 };
 
 // Called by peerSource to check for overriding
@@ -206,11 +212,7 @@ SourceBase.prototype.becomeMainSource = function(_owner) {
 
    if (this.bowing) {
       console.log(this.fullName + ": Becoming main source again!");
-      this.bowing = false;
-      this.local = (this.config.hasOwnProperty('local')) ? this.config.local : false;
-      this.changeName(this.uName.replace(this.casa.sName+"-", ""));
-      this.setOwner(_owner);
-      return true;
+      return this.standUpFromBow();
    }
 
    return false;

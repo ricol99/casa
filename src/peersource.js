@@ -2,12 +2,14 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_fullName, _priority, _props, _peerCasa) {
+function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
    var gang = Gang.mainInstance();
-   var existingSource = gang.findNamedObject(_fullName);
-   var name = existingSource ? _peerCasa.sName+"-"+_fullName.replace(gang.findOwner(_fullName).fullName+":", "") : _fullName;
+   var bowingOwner = _peerCasa.getBowingSource(_fullName.replace(":"+_uName));
 
-   SourceBase.call(this, name, gang);
+   var existingSource = gang.findNamedObject(_fullName);
+   var owner = bowingOwner ? bowingOwner : existingSource ? _fullName : gang.findOwner(_fullName);
+
+   SourceBase.call(this, _uName, owner);
 
    this.priority = _priority;
    this.casa = _peerCasa;
@@ -15,13 +17,16 @@ function PeerSource(_fullName, _priority, _props, _peerCasa) {
    this.config = { local: true };
    this.local = true;
 
-   if (existingSource) {
+   if (bowingOwner) {
+      this.bowToOtherSource(false);
+   }
+   else if (existingSource) {
 
       if (existingSource.deferToPeer(this)) {
-         this.setUName(this.uName.replace(_peerCasa.sName+"-", ""));
+         this.standUpFromBow();
       }
       else {
-         this.bowToOtherSource();
+         this.bowToOtherSource(false);
       }
    }
 
@@ -30,7 +35,7 @@ function PeerSource(_fullName, _priority, _props, _peerCasa) {
       this.props[prop].set(_props[prop], {});
    }
 
-   this.casa.addSource(this, _fullName);
+   this.casa.addSource(this);
 }
 
 util.inherits(PeerSource, SourceBase);
@@ -98,14 +103,11 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
 
 PeerSource.prototype.invalidate = function() {
    SourceBase.prototype.invalidate.call(this);
-   var fullName = this.fullName;
-   this.setOwner(null);
-   this.casa.findNewMainSource(this, fullName);
-};
 
-PeerSource.prototype.changeName = function(_newName) {
-   SourceBase.prototype.changeName.call(this, _newName);
-   this.casa.renameSource(this, _newName);
+   if (!this.bowing) {
+      this.bowToOtherSource(false);
+      this.casa.findNewMainSource(this);
+   }
 };
 
 module.exports = exports = PeerSource;

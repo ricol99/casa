@@ -28,6 +28,7 @@ function Casa(_config) {
    this.sourceListeners = {};
    this.services = {};
    this.workers = {};
+   this.bowingSources = {};
 
    this.uber = false;
 
@@ -115,10 +116,8 @@ Casa.prototype.refreshSimpleConfig = function() {
    simpleConfig = {};
    simpleConfig.uName = this.uName;
    simpleConfig.displayName = this.displayName;
-   simpleConfig.gang = this.gang.uName;
+   simpleConfig.gang = this.gang.fullName;
    simpleConfig.sources = [];
-   simpleConfig.sourcesPriority = [];
-   simpleConfig.sourcesStatus = [];
 
    for (sourceName in this.sources) {
 
@@ -129,9 +128,7 @@ Casa.prototype.refreshSimpleConfig = function() {
             var allProps = {};
             source.getAllProperties(allProps);
 
-            simpleConfig.sources.push(source.fullName);
-            simpleConfig.sourcesPriority.push((source.hasOwnProperty('priority')) ? source.priority : 0);
-            simpleConfig.sourcesStatus.push({ properties: util.copy(allProps) });
+            simpleConfig.sources.push({ uName: source.uName, fullName: source.fullName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
          }
       }
    }
@@ -219,7 +216,7 @@ Casa.prototype.addService = function(_service) {
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return (_serviceType.indexOf(":") !== -1) ? this.gang.findGlobalObject(_serviceType) : this.services[_serviceType];
+   return (_serviceType.indexOf(":") !== -1) ? this.gang.findNamedObject("::"+_serviceType) : this.services[_serviceType];
 };
 
 Casa.prototype.findServiceName = function(_serviceType) {
@@ -229,8 +226,8 @@ Casa.prototype.findServiceName = function(_serviceType) {
 };
 
 Casa.prototype.addWorker = function(_worker) {
-   console.log(this.fullName + ': Worker '  + _worker.uName + ' added to casa ');
-   this.workers[_worker.uName] = _worker;
+   console.log(this.fullName + ': Worker '  + _worker.fullName + ' added to casa ');
+   this.workers[_worker.fullName] = _worker;
 };
 
 Casa.prototype.setUber = function(_uber) {
@@ -241,8 +238,8 @@ Casa.prototype.isUber = function() {
    return this.uber;
 };
 
-Casa.prototype.allocatePort = function(_uName) {
-   this.ports[_uName] = this.nextPortToAllocate;
+Casa.prototype.allocatePort = function(_fullName) {
+   this.ports[_fullName] = this.nextPortToAllocate;
    return this.nextPortToAllocate++;
 };
 
@@ -266,4 +263,27 @@ Casa.prototype.getHost = function() {
    return util.getLocalIpAddress();
 };
 
+Casa.prototype.bowSource = function(_source, _currentlyActive) {
+   console.log(this.fullName + ": bowSource() Making source " + _source.fullName + " passive"); 
+
+   if (_currentlyActive) {
+      _source.detach();
+   }
+   this.bowingSources[_source.fullName] = _source;
+};
+
+Casa.prototype.standUpSourceFromBow = function(_source) {
+   console.log(this.fullName + ": standUpSourceFromBow() Making source " + _source.fullName + " active");
+
+   if (!this.gang.addNamedObject(_source)) {
+      console.error(this.fullName + ": standUpSourceFromBow() Unable to find owner for source=" + _source.fullName);
+      return;
+   }
+
+   delete this.bowingSources[_source.fullName];
+};
+
+Casa.prototype.getBowingSource = function(_sourceFullName) {
+   return this.bowingSources[_sourceFullName];
+};
 module.exports = exports = Casa;
