@@ -34,8 +34,8 @@ var SourceListener = require('./sourcelistener');
 }
 *************************/
 
-function Scene(_config) {
-   Thing.call(this, _config);
+function Scene(_config, _owner) {
+   Thing.call(this, _config, _owner);
 
    this.sources = [];
    this.sourceListeners = {};
