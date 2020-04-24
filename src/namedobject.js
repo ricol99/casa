@@ -13,7 +13,6 @@ function NamedObject(_name, _owner) {
    else {
 
       if (_name[0] === ":") {
-         console.log("AAAAAAAA name="+_name);
          this.owner = _owner.findOwner(_name);
 
          if (this.owner) {
@@ -185,7 +184,6 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
    if (_includeChildren) {
 
       for (var obj in this.myNamedObjects) {
-         console.error(this.fullName+": AAAAAAA invalidate() obj="+obj);
 
          if (this.myNamedObjects.hasOwnProperty(obj)) {
             this.myNamedObjects[obj].invalidate(_includeChildren);
