@@ -38,16 +38,18 @@ SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _
 SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
 };
 
-SourceBase.prototype.bowToOtherSource = function(_currentlyActive) {
+SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
    console.log(this.fullName+": Bowing to new source");
    this.bowing = true;
    this.local = true;
 
    if (_currentlyActive) {
-      this.invalidate();
+      this.invalidate(true);
    }
 
-   this.casa.bowSource(this, _currentlyActive);
+   if (_topOfTree) {
+      this.casa.bowSource(this, _currentlyActive);
+   }
 };
 
 SourceBase.prototype.standUpFromBow = function() {
@@ -55,7 +57,7 @@ SourceBase.prototype.standUpFromBow = function() {
 
    this.bowing = false;
    this.local = this.config.hasOwnProperty("local") ? this.config.local : false;
-   this.gang.findNamedObject(this.fullName).bowToOtherSource(true);
+   this.gang.findNamedObject(this.fullName).bowToOtherSource(true, true);
    this.casa.standUpSourceFromBow(this);
 }
 
@@ -102,7 +104,7 @@ SourceBase.prototype.getAllProperties = function(_allProps) {
    }
 };
 
-SourceBase.prototype.goInvalid = function(_propName, _data) {
+SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
    console.log(this.fullName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
    var sendData = (_data) ? util.copy(_data) : {};
@@ -114,20 +116,15 @@ SourceBase.prototype.goInvalid = function(_propName, _data) {
    this.emit('invalid', sendData);
 }
 
-SourceBase.prototype.invalidate = function() {
+SourceBase.prototype.invalidate = function(_includeChildren) {
    console.log(this.fullName + ": Raising invalid on all props to drop source listeners");
 
    if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {
       this.clearAlignmentQueue();
    }
 
-   for(var prop in this.props) {
-
-      if (this.props.hasOwnProperty(prop)) {
-         this.goInvalid(prop);
-      }
-   }
-}
+   NamedObject.prototype.invalidate.call(this, _includeChildren);
+};
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data) {

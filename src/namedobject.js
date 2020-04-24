@@ -163,6 +163,37 @@ NamedObject.prototype.ownerHasNewName = function() {
    }
 };
 
+NamedObject.prototype.validate = function(_includeChildren) {
+   var str =  _includeChildren ? " and all children" : "";
+   console.log(this.fullName + ": Validating object" + str);
+
+   if (_includeChildren) {
+
+      for (var obj in this.myNamedObjects) {
+
+         if (this.myNamedObjects.hasOwnProperty(obj)) {
+            this.myNamedObjects[obj].validate(_includeChildren);
+         }
+      }
+   }
+};
+
+NamedObject.prototype.invalidate = function(_includeChildren) {
+   var str =  _includeChildren ? " and all children" : "";
+   console.log(this.fullName + ": Invalidating object" +str);
+
+   if (_includeChildren) {
+
+      for (var obj in this.myNamedObjects) {
+         console.error(this.fullName+": AAAAAAA invalidate() obj="+obj);
+
+         if (this.myNamedObjects.hasOwnProperty(obj)) {
+            this.myNamedObjects[obj].invalidate(_includeChildren);
+         }
+      }
+   }
+};
+
 NamedObject.prototype.addChildNamedObject = function(_namedObject) {
    this.myNamedObjects[_namedObject.uName] = _namedObject;
 };

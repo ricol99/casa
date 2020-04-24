@@ -146,14 +146,16 @@ PeerCasa.prototype.removeCasaListeners = function() {
    }
 }
 
-PeerCasa.prototype.invalidateSources = function() {
+PeerCasa.prototype.invalidate = function() {
+   var previousFullName = "ZZZZZZ";
 
-   for(var source in this.sources) {
+   for (var source in this.sources) {
 
-      if(this.sources.hasOwnProperty(source)){
-         console.log(this.fullName + ': Invaliding source ' + this.sources[source].fullName);
-         this.sources[source].invalidate();
+      if (this.sources.hasOwnProperty(source) && !source.startsWith(previousFullName)) {
+         this.sources[source].findNewMainSource();
+         this.sources[source].invalidate(true);
          delete this.sources[source];
+         previousFullName = source;
       }
    }
 
@@ -165,7 +167,7 @@ PeerCasa.prototype.invalidateSources = function() {
       if (this.remoteCasas.hasOwnProperty(source)){
          console.log(this.fullName + ': Invaliding remote casa ' + this.remoteCasas[source].fullName);
          var remoteCasa = this.remoteCasas[source];
-         this.remoteCasas[source].invalidateSources();
+         this.remoteCasas[source].invalidate();
          this.gang.removeRemoteCasa(this.remoteCasas[source]);
          delete this.remoteCasas[source];
          delete remoteCasa;
@@ -174,7 +176,7 @@ PeerCasa.prototype.invalidateSources = function() {
 
    delete this.remoteCasas;
    this.remoteCasas = [];
-   this.goInvalid('ACTIVE', { sourceName: this.fullName });
+   this.props['ACTIVE'].invalidate(false);
    this.gang.casa.refreshSourceListeners();
 }
 
@@ -456,7 +458,7 @@ PeerCasa.prototype.socketErrorCb = function(_error) {
       this.connected = false;
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.fullName }, sourceCasa: this.fullName });
       this.removeCasaListeners();
-      this.invalidateSources();
+      this.invalidate();
 
       if (this.socket) {
          this.socket.disconnect();
@@ -480,7 +482,7 @@ PeerCasa.prototype.socketDisconnectCb = function(_data) {
       this.connected = false;
       this.emit('broadcast-message', { message: 'casa-inactive', data: { sourceName: this.fullName }, sourceCasa: this.fullName });
       this.removeCasaListeners();
-      this.invalidateSources();
+      this.invalidate();
    }
 
    this.manualDisconnect = true;
@@ -516,7 +518,7 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
    var remoteCasa = this.gang.remoteCasas[_data.sourceName];
 
    if (remoteCasa && remoteCasa.loginAs == 'remote') {
-      remoteCasa.invalidateSources();
+      remoteCasa.invalidate();
       delete this.remoteCasas[remoteCasa.fullName];
       delete this.gang.remoteCasas[remoteCasa.fullName];
       delete remoteCasa;
@@ -581,7 +583,7 @@ PeerCasa.prototype.socketSourceRemovedCb = function(_data) {
    console.log(this.fullName + ': Event received from my peer. Event name: source-removed, source: ' + _data.sourceName);
 
    if (this.sources.hasOwnProperty(_data.sourceName)) {
-      this.sources[_data.sourceName].invalidate();
+      this.sources[_data.sourceName].invalidate(true);
       delete this.sources[_data.sourceName];
    }
 
@@ -1145,7 +1147,20 @@ PeerCasa.prototype.standUpSourceFromBow = function(_source) {
 };
 
 PeerCasa.prototype.getBowingSource = function(_sourceFullName) {
-   return this.bowingSources[_sourceFullName];
+   var bowingSource = null;
+
+   for (var source in this.bowingSources) {
+
+      if (this.bowingSources.hasOwnProperty(source) && source.startsWith(_sourceFullName)) {
+         bowingSource = this.bowingSources[source].findNamedObject(_sourceFullName);
+
+         if (bowingSource) {
+            break;
+         }    
+      }
+   }
+
+   return bowingSource;
 };
 
 module.exports = exports = PeerCasa;

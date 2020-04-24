@@ -18,7 +18,7 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
    this.local = true;
 
    if (bowingOwner) {
-      this.bowToOtherSource(false);
+      this.bowToOtherSource(false, false);
    }
    else if (existingSource) {
 
@@ -26,7 +26,7 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
          this.standUpFromBow();
       }
       else {
-         this.bowToOtherSource(false);
+         this.bowToOtherSource(false, true);
       }
    }
 
@@ -101,11 +101,10 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
    this.asyncEmit('event-raised', util.copy(_data));
 };
 
-PeerSource.prototype.invalidate = function() {
-   SourceBase.prototype.invalidate.call(this);
+PeerSource.prototype.findNewMainSource = function() {
 
    if (!this.bowing) {
-      this.bowToOtherSource(false);
+      this.bowToOtherSource(false, false);
       this.casa.findNewMainSource(this);
    }
 };

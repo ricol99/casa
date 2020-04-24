@@ -211,7 +211,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
             this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
          else {
-            this.goInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+            this.invalidate();
          }
       }
    }
@@ -221,7 +221,7 @@ SourceListener.prototype.goValid = function() {
    this.owner.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
-SourceListener.prototype.goInvalid = function(_data) {
+SourceListener.prototype.invalidate = function() {
    this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
@@ -266,7 +266,7 @@ SourceListener.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) 
 // Internal method - Called by the last step in the pipeline
 //
 SourceListener.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
-   this.goInvalid(_data);
+   this.invalidate();
 };
 
 //
@@ -290,7 +290,7 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
                this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
             }
             else {
-               this.goInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+               this.invalidate();
             }
          }
       }, this.maskInvalidTimeout*1000);

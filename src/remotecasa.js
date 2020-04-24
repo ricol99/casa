@@ -92,7 +92,7 @@ RemoteCasa.prototype.addSource = function(_source) {
    console.log(this.uName + ': ' + _source.uName + ' associated!');
 }
 
-RemoteCasa.prototype.invalidateSources = function() {
+RemoteCasa.prototype.invalidate = function() {
 
    for(var prop in this.sources) {
 

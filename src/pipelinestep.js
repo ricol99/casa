@@ -60,7 +60,7 @@ PipelineStep.prototype.sourceIsInvalid = function(_data) {
 
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
-      this.goInvalid(_data);
+      this.invalidate();
    }
 };
 
@@ -123,13 +123,13 @@ PipelineStep.prototype.goValid = function(_data) {
 //
 // Internal - Inform next step that I am not available
 //
-PipelineStep.prototype.goInvalid = function(_data) {
+PipelineStep.prototype.invalidate = function() {
 
    if (this.nextStep) {
-      this.nextStep.sourceIsInvalid(_data);
+      this.nextStep.sourceIsInvalid({});
    }
    else {
-      this.pipeline.owner.sourceIsInvalidFromPipeline(this.pipeline, _data);
+      this.pipeline.owner.sourceIsInvalidFromPipeline(this.pipeline, {});
    }
 };
 

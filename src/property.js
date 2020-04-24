@@ -200,10 +200,11 @@ Property.prototype.sourceIsValid = function(_data) {
 // Some properties wish to delay or stop this and become responsible for calling this function
 // when they override Property.prototype.sourceIsInvalid()
 //
-Property.prototype.goInvalid = function (_data) {
+Property.prototype.invalidate = function (_includeChildren) {
    console.log(this.fullName + ': INVALID');
+   this.owner.propertyGoneInvalid(this.name);
+   NamedObject.prototype.invalidate.call(this);
    this.cancelCurrentRamp();
-   this.owner.goInvalid(this.name, _data);
 }
 
 Property.prototype.goValid = function (_data) {
@@ -224,7 +225,7 @@ Property.prototype.sourceIsInvalid = function(_data) {
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
       this.target = null;
-      this.goInvalid(_data);
+      this.invalidate();
    }
 };
 

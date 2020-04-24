@@ -284,6 +284,20 @@ Casa.prototype.standUpSourceFromBow = function(_source) {
 };
 
 Casa.prototype.getBowingSource = function(_sourceFullName) {
-   return this.bowingSources[_sourceFullName];
+   var bowingSource = null;
+
+   for (var source in this.bowingSources) {
+
+      if (this.bowingSources.hasOwnProperty(source) && source.startsWith(_sourceFullName)) {
+         bowingSource = this.bowingSources[source].findNamedObject(_sourceFullName);
+    
+         if (bowingSource) {
+            break;
+         }
+      }
+   }
+
+   return bowingSource;
 };
+
 module.exports = exports = Casa;

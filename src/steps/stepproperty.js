@@ -74,11 +74,11 @@ StepProperty.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) 
          this.outputPipeline.sourceIsInvalid(_data);
       }
       else {
-         this.goInvalid(_data);
+         this.invalidate();
       }
    }
    else {
-      this.goInvalid(_data);
+      this.invalidate();
    }
 }
 
