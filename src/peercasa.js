@@ -43,6 +43,7 @@ function PeerCasa(_config, _owner) {
    this.manualDisconnect = false;
    this.waitingToConnect = false;
 
+   this.topSources = {};
    this.bowingSources = {};
 
    // Callbacks for listening to main casa
@@ -776,7 +777,12 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       var len = _data.casaConfig.sources.length;
       console.log(_peerCasa.fullName + ': New sources found = ' + len);
 
+      _data.casaConfig.sources.sort( (_a, _b) => {
+          return _a.fullName > _b.fullName;
+      });
+
       var PeerSource = require('./peersource');
+
       for (var i = 0; i < len; ++i) {
          console.log(_peerCasa.fullName + ': Creating peer source named ' + _data.casaConfig.sources[i].fullName + ' uName = ' + _data.casaConfig.sources[i].uName +
                                           ' priority =' + _data.casaConfig.sources[i].priority);
@@ -1047,6 +1053,33 @@ PeerCasa.prototype.addSource = function(_source) {
    console.log(this.fullName + ': Source '  + _source.fullName + ' added to peercasa ');
    this.sources[_source.fullName] = _source;
    console.log(this.fullName + ': ' + _source.fullName + ' associated!');
+
+  var added = false;
+
+   for (var source in this.topSources) {
+
+      if (this.topSources.hasOwnProperty(source)) {
+
+         if (_source.fullName.startsWith(source)) {
+            console.log(this.uName+": AAAAAAA not added source "+_source.fullName);
+            added = true;
+            break;
+         }
+         else if (source.startsWith(_source.fullName)) {
+            console.log(this.uName+": AAAAAAA added source "+_source.fullName);
+            console.log(this.uName+": AAAAAAA removed source "+source);
+            delete this.topSources[source];
+            this.topSources[_source.fullName] = _source;
+            added = true;
+            break;
+         }
+      }
+   }
+
+   if (!added) {
+      console.log(this.uName+": AAAAAAA added source "+_source.fullName);
+      this.topSources[_source.fullName] = _source;
+   }
 }
 
 PeerCasa.prototype.addWorker = function(_worker) {

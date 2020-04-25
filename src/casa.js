@@ -25,6 +25,7 @@ function Casa(_config) {
    this.db = null;
 
    this.sources = {};
+   this.topSources = {};
    this.sourceListeners = {};
    this.services = {};
    this.workers = {};
@@ -160,6 +161,34 @@ Casa.prototype.addSource = function(_source) {
 
    this.emit('source-added', { sourceName: _source.fullName });
    console.log(this.fullName + ': ' + _source.fullName + ' associated!');
+
+   var added = false;
+
+   for (var source in this.topSources) {
+
+      if (this.topSources.hasOwnProperty(source)) {
+
+         if (_source.fullName.startsWith(source)) {
+            console.log(this.uName+": AAAAAAA not added source "+_source.fullName);
+            added = true;
+            break;
+         }
+         else if (source.startsWith(_source.fullName)) {
+            console.log(this.uName+": AAAAAAA added source "+_source.fullName);
+            console.log(this.uName+": AAAAAAA removed source "+source);
+            delete this.topSources[source];
+            this.topSources[_source.fullName] = _source;
+            added = true;
+            break;
+         }
+      }
+   }
+
+   if (!added) {
+      console.log(this.uName+": AAAAAAA added source "+_source.fullName);
+      this.topSources[_source.fullName] = _source;
+   }
+
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
