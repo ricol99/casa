@@ -4,8 +4,14 @@ var Gang = require('../gang');
 
 function OneWireThermometer(_config, _parent) {
    this.gang = Gang.mainInstance();
-   this.service = (_config.hasOwnProperty("service")) ? _config.service : "onewireservice";
-   this.oneWireService =  this.gang.casa.findService(this.service);
+
+   if (_config.hasOwnProperty("service")) {
+      this.oneWireService = _config.service;
+   }
+   else {
+      this.oneWireService =  this.gang.casa.findService("onewireservice");
+   }
+
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 60000;
 
    if (!this.oneWireService) {
