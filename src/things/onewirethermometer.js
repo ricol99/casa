@@ -6,20 +6,22 @@ function OneWireThermometer(_config, _parent) {
    this.gang = Gang.mainInstance();
 
    if (_config.hasOwnProperty("service")) {
-      this.oneWireService = _config.service;
+      this.oneWireServiceName = _config.service;
    }
    else {
-      this.oneWireService =  this.gang.casa.findService("onewireservice");
+      var service =  this.gang.casa.findService("onewireservice");
+
+      if (!service) {
+         console.error(this.uName + ": ***** OneWire service not found! *************");
+         process.exit();
+      }
+
+      this.oneWireServiceName = service.fullName;
    }
 
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 60000;
 
-   if (!this.oneWireService) {
-      console.error(this.uName + ": ***** OneWire service not found! *************");
-      process.exit();
-   }
-
-   _config.mirrorSource = this.oneWireService.fullName+":onewireservicethermometer:"+_config.deviceId;
+   _config.mirrorSource = this.oneWireServiceName.fullName+":onewireservicethermometer:"+_config.deviceId;
    _config.mirrorSourceSubscription = { pollDuration: this.pollDuration };
 
    Thing.call(this, _config, _parent);
