@@ -110,7 +110,7 @@ PeerCasa.prototype.sourceAddedCasaCb = function(_data) {
          console.log(this.fullName + ': publishing source ' + _data.sourceName + ' added to peer casa');
          var source = this.casa.getSource(_data.sourceName);
          var allProps = {};
-         source.getAllProperties(allProps);
+         source.getAllProperties(allProps, true);
          _data.sourceUName = source.uName;
          _data.sourcePriority = (source.hasOwnProperty('priority')) ? source.priority : 0;
          _data.sourceProperties = util.copy(allProps);

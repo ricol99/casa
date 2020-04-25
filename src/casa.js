@@ -79,7 +79,7 @@ Casa.prototype.createServer = function() {
       var source = this.gang.findGlobalSource(req.params.source);
 
       if (source) {
-         source.getAllProperties(allProps);
+         source.getAllProperties(allProps, true);
       }
 
       res.json(allProps);
@@ -127,8 +127,7 @@ Casa.prototype.refreshSimpleConfig = function() {
 
          if (!source.local) {
             var allProps = {};
-            source.getAllProperties(allProps);
-
+            source.getAllProperties(allProps, true);
             simpleConfig.sources.push({ uName: source.uName, fullName: source.fullName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
          }
       }
@@ -169,13 +168,10 @@ Casa.prototype.addSource = function(_source) {
       if (this.topSources.hasOwnProperty(source)) {
 
          if (_source.fullName.startsWith(source)) {
-            console.log(this.uName+": AAAAAAA not added source "+_source.fullName);
             added = true;
             break;
          }
          else if (source.startsWith(_source.fullName)) {
-            console.log(this.uName+": AAAAAAA added source "+_source.fullName);
-            console.log(this.uName+": AAAAAAA removed source "+source);
             delete this.topSources[source];
             this.topSources[_source.fullName] = _source;
             added = true;
@@ -185,7 +181,6 @@ Casa.prototype.addSource = function(_source) {
    }
 
    if (!added) {
-      console.log(this.uName+": AAAAAAA added source "+_source.fullName);
       this.topSources[_source.fullName] = _source;
    }
 

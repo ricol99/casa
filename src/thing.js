@@ -5,7 +5,7 @@ var Gang = require('./gang');
 function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
 
-   if (_owner && (_owner !== gang)) {
+   if (_owner && (_owner !== gang) && (_owner !== gang.casa)) {
 
       if (_config.hasOwnProperty("local") && !_config.local && _owner.local) {
          console.error(this.fullName + ": Config broken as non-local thing owned by local thing!");
@@ -109,9 +109,9 @@ Thing.prototype.inheritChildProps = function() {
    }
 };
 
-Thing.prototype.getAllProperties = function(_allProps) {
+Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
-   if (this.topLevelThing || this.propogateToParent) {
+   if (_ignorePropogation || (this.topLevelThing || this.propogateToParent)) {
       Source.prototype.getAllProperties.call(this, _allProps);
 
       for (var thing in this.things) {
