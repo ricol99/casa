@@ -48,12 +48,14 @@ function PeerCasa(_config, _owner) {
 
    // Callbacks for listening to main casa
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
+   this.sourcePropertySubscribedToCasaHandler = PeerCasa.prototype.sourcePropertySubscribedToCasaCb.bind(this);
    this.sourceEventRaisedCasaHandler = PeerCasa.prototype.sourceEventRaisedCasaCb.bind(this);
    this.sourceAddedCasaHandler = PeerCasa.prototype.sourceAddedCasaCb.bind(this);
    this.sourceRemovedCasaHandler = PeerCasa.prototype.sourceRemovedCasaCb.bind(this);
 
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   this.casa.on('source-property-subscribed-to', this.sourcePropertySubscribedToCasaHandler);
    this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
    this.casa.on('source-added', this.sourceAddedCasaHandler);
    this.casa.on('source-removed', this.sourceRemovedCasaHandler);
@@ -85,6 +87,14 @@ PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
          console.log(this.fullName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          this.sendMessage('source-property-changed', _data);
       }
+   }
+};
+
+PeerCasa.prototype.sourcePropertySubscribedToCasaCb = function(_data) {
+
+   if (this.connected && (_data.sourcePeerCasa != this.fullName)) {
+      console.log(this.fullName + ': source ' + _data.sourceName + ' subscrined to by ' + _data.sourceName);
+      this.sendMessage('source-property-subscribed-to', _data);
    }
 };
 
@@ -141,6 +151,7 @@ PeerCasa.prototype.removeCasaListeners = function() {
 
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
+      this.casa.removeListener('source-property-subscribed-to', this.sourcePropertySubscribedToCasaHandler);
       this.casa.removeListener('source-event-raised', this.sourceEventRaisedCasaHandler);
       this.casa.removeListener('source-added', this.sourceAddedCasaHandler);
       this.casa.removeListener('source-removed', this.sourceRemovedCasaHandler);
@@ -332,6 +343,8 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('casa-active', this.socketCasaActiveHandler);
       this.socket.removeListener('casa-inactive', this.socketCasaInactiveHandler);
       this.socket.removeListener('casa-activeAACCKK', this.socketCasaActiveAckHandler);
+      this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
+      this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
       this.socket.removeListener('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
@@ -525,6 +538,24 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
       delete remoteCasa;
    }
    this.ackMessage('casa-inactive', _data);
+};
+
+PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
+   console.log(this.fullName + ': Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
+   this.emit('source-property-subscribed-to', _data);
+   this.emit('broadcast-message', { message: 'source-property-subscribed-to', data:_data, sourceCasa: this.fullName });
+
+   if (this.sources[_data.sourceName]) {
+      _data.sourcePeerCasa = this.fullName;
+      this.sources[_data.sourceName].SourceBase.prototype.propertySubscribedTo(_data.property, _data.subscription, _data.exists);
+   }
+
+   this.ackMessage('source-property-subscribed-to', _data);
+};
+
+PeerCasa.prototype.socketSourcePropertySubscribedToAckCb = function(_data) {
+   console.log(this.fullName + ': Property-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
 };
 
 PeerCasa.prototype.socketSourcePropertyChangedCb = function(_data) {

@@ -40,6 +40,10 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
 
 util.inherits(PeerSource, SourceBase);
 
+PeerSource.prototype.proeprtySubscribedTo = function(_property, _subscription, _exists) {
+   this.asyncEmit('property-changed', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
+};
+
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
 PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 
