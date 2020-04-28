@@ -115,7 +115,7 @@ PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
 PeerSource.prototype.findNewMainSource = function() {
 
    if (!this.bowing) {
-      this.bowToOtherSource(false, false);
+      this.bowToOtherSource(false, this.casa.topSources.hasOwnProperty(this.fullName));
       this.casa.findNewMainSource(this);
    }
 };
