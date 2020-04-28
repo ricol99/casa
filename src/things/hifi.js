@@ -25,7 +25,7 @@ Hifi.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
          var hotHue = this.getProperty("shelf-hot-hue");
 
          if ((_propValue >= coldTemp) && (_propValue <= hotTemp)) {
-            this.alignProperty("shelf-colour", (((_propValue - coldTemp) / (hotTemp - coldTemp)) * (hotHue - coldHue)) + coldHue;
+            this.alignPropertyValue("shelf-colour", Math.floor((((_propValue - coldTemp) / (hotTemp - coldTemp)) * (hotHue - coldHue)) + coldHue));
          }
       }
    }

@@ -25,6 +25,7 @@ function OneWireThermometer(_config, _parent) {
    _config.mirrorSourceSubscription = { pollDuration: this.pollDuration };
 
    Thing.call(this, _config, _parent);
+   this.ensurePropertyExists('temperature', 'property', { initialValue: 0 }, _config);
    this.thingType = "onewire-thermometer";
    this.deviceId = _config.deviceId;
 }
