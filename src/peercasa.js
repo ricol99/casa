@@ -48,14 +48,12 @@ function PeerCasa(_config, _owner) {
 
    // Callbacks for listening to main casa
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
-   this.sourcePropertySubscribedToCasaHandler = PeerCasa.prototype.sourcePropertySubscribedToCasaCb.bind(this);
    this.sourceEventRaisedCasaHandler = PeerCasa.prototype.sourceEventRaisedCasaCb.bind(this);
    this.sourceAddedCasaHandler = PeerCasa.prototype.sourceAddedCasaCb.bind(this);
    this.sourceRemovedCasaHandler = PeerCasa.prototype.sourceRemovedCasaCb.bind(this);
 
    // publish source changes in this node (casa object) to remote casas
    this.casa.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
-   this.casa.on('source-property-subscribed-to', this.sourcePropertySubscribedToCasaHandler);
    this.casa.on('source-event-raised', this.sourceEventRaisedCasaHandler);
    this.casa.on('source-added', this.sourceAddedCasaHandler);
    this.casa.on('source-removed', this.sourceRemovedCasaHandler);
@@ -87,14 +85,6 @@ PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
          console.log(this.fullName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          this.sendMessage('source-property-changed', _data);
       }
-   }
-};
-
-PeerCasa.prototype.sourcePropertySubscribedToCasaCb = function(_data) {
-
-   if (this.connected && (_data.sourcePeerCasa != this.fullName)) {
-      console.log(this.fullName + ': source ' + _data.sourceName + ' subscribed to by ' + _data.sourceName);
-      this.sendMessage('source-property-subscribed-to', _data);
    }
 };
 
@@ -1021,6 +1011,14 @@ RemoteCasaRequestor.prototype.completeRequest = function(_result) {
    clearTimeout(this.timeout);
    this.callback(_result);
 }
+
+PeerCasa.prototype.propertySubscribedTo = function(_source, _property, _subscription, _exists) {
+
+   if (this.connected) {
+      console.log(this.fullName + ': source ' + _source.fullName + ' subscribed to');
+      this.sendMessage('source-property-subscribed-to', { sourceName: _source.fullName, property: _property, subscription: _subscription, exists: _exists });
+   }
+};
 
 PeerCasa.prototype.setSourceActive = function(_source, _data, _callback) {
    this.setSourceProperty(_source, "ACTIVE", true, _data, _callback);
