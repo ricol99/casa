@@ -205,7 +205,7 @@ SourceBase.prototype.deferToPeer = function(_newSource) {
 };
 
 // Called by peerSource to check for overriding
-SourceBase.prototype.becomeMainSource = function(_owner) {
+SourceBase.prototype.becomeMainSource = function() {
 
    if (this.bowing) {
       console.log(this.fullName + ": Becoming main source again!");

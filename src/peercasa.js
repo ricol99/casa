@@ -1143,20 +1143,20 @@ PeerCasa.prototype.broadcastCb = function(_message) {
    }
 };
 
-PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
+PeerCasa.prototype.findNewMainSource = function(_oldPeerSourceName) {
    console.log(this.fullName + ": Finding new main source as current main source has gone invalid");
    var currentPriority = 0;
    var topPriority = 0;
 
    // Check to see if source exists before looking for peers
-   var source = this.gang.casa.getSource(_oldPeerSource.fullName);
+   var source = this.gang.casa.getSource(_oldPeerSourceName);
 
    if (source) {
       currentPriority = source.priority;
       topPriority = currentPriority;
    }
 
-   var peerSource = this.gang.findNewPeerSource(_oldPeerSource.fullName, this);
+   var peerSource = this.gang.findNewPeerSource(_oldPeerSourceName, this);
    var newMainSource = null;
 
    if (peerSource && source) {
@@ -1176,7 +1176,7 @@ PeerCasa.prototype.findNewMainSource = function(_oldPeerSource) {
    }
 
    if (newMainSource) {
-      newMainSource.becomeMainSource(_oldPeerSource);
+      newMainSource.becomeMainSource();
       this.gang.casa.refreshSourceListeners();
    }
 };
