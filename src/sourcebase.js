@@ -57,7 +57,11 @@ SourceBase.prototype.standUpFromBow = function() {
 
    this.bowing = false;
    this.local = this.config.hasOwnProperty("local") ? this.config.local : false;
-   this.gang.findNamedObject(this.fullName).bowToOtherSource(true, true);
+   var currentSource = this.gang.findNamedObject(this.fullName);
+
+   if (currentSource) {
+      currentSource.bowToOtherSource(true, true);
+   }
    this.casa.standUpSourceFromBow(this);
 }
 
