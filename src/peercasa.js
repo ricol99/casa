@@ -332,8 +332,6 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('casa-active', this.socketCasaActiveHandler);
       this.socket.removeListener('casa-inactive', this.socketCasaInactiveHandler);
       this.socket.removeListener('casa-activeAACCKK', this.socketCasaActiveAckHandler);
-      this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
-      this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
       this.socket.removeListener('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
@@ -532,13 +530,11 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
 };
 
 PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
-   console.log(this.fullName + ': AAAAAA Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
+   console.log(this.fullName + ': Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
    this.emit('broadcast-message', { message: 'source-property-subscribed-to', data:_data, sourceCasa: this.fullName });
 
-   if (this.sources[_data.sourceName]) {
-      _data.sourcePeerCasa = this.fullName;
-      console.log(this.fullName+": AAAAAA socketSourcePropertySubscribedToCb() _data=", _data);
-      this.sources[_data.sourceName].SourceBase.prototype.propertySubscribedTo(_data.property, _data.subscription, _data.exists);
+   if (this.casa.sources[_data.sourceName]) {
+      this.casa.sources[_data.sourceName].propertySubscribedTo(_data.property, _data.subscription, _data.exists);
    }
 
    this.ackMessage('source-property-subscribed-to', _data);
@@ -1095,13 +1091,10 @@ PeerCasa.prototype.addSource = function(_source) {
       if (this.topSources.hasOwnProperty(source)) {
 
          if (_source.fullName.startsWith(source)) {
-            console.log(this.uName+": AAAAAAA not added source "+_source.fullName);
             added = true;
             break;
          }
          else if (source.startsWith(_source.fullName)) {
-            console.log(this.uName+": AAAAAAA added source "+_source.fullName);
-            console.log(this.uName+": AAAAAAA removed source "+source);
             delete this.topSources[source];
             this.topSources[_source.fullName] = _source;
             added = true;
@@ -1111,7 +1104,6 @@ PeerCasa.prototype.addSource = function(_source) {
    }
 
    if (!added) {
-      console.log(this.uName+": AAAAAAA added source "+_source.fullName);
       this.topSources[_source.fullName] = _source;
    }
 }

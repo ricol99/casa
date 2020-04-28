@@ -67,7 +67,6 @@ SourceBase.prototype.coldStart = function() {
 
       if (this.props.hasOwnProperty(prop)) {
          this.props[prop].coldStart();
-         console.log(this.fullName + ": AAAAA coldStart() prop="+prop);
       }
    }
 };

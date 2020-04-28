@@ -403,7 +403,6 @@ Source.prototype.receivedEventFromSource = function(_data) {
    if (this.mirroring) {
 
       if (_data.propertyChange) {
-         console.log(this.fullName+": AAAAAAAA receivedEventFromSource() _data=", _data);
          this.ensurePropertyExists(_data.name, "property", {}, this.config);
          this.alignPropertyValue(_data.name, _data.value);
       }

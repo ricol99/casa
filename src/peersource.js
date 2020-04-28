@@ -30,8 +30,6 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
       }
    }
 
-   console.log(this.fullName + ": AAAAA props=", _props);
-
    for (var prop in _props) {
       this.ensurePropertyExists(prop, 'property', { name: prop });
       this.props[prop].set(_props[prop], {});
@@ -45,10 +43,10 @@ util.inherits(PeerSource, SourceBase);
 PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
 
    if (_subscription.hasOwnProperty("mirror")) {
-      console.log(this.fullName+": AAAAAA propertySubscribedTo() mirror, sub=",_subscription);
+      console.log(this.fullName+": propertySubscribedTo() mirror, sub=",_subscription);
    }
    else {
-      console.log(this.fullName+": AAAAAA propertySubscribedTo() prop="+_property+", sub=",_subscription);
+      console.log(this.fullName+": propertySubscribedTo() prop="+_property+", sub=",_subscription);
    }
    this.casa.propertySubscribedTo(this, _property, _subscription, _exists);
 };
