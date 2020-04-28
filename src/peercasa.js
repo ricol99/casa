@@ -336,6 +336,8 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
       this.socket.removeListener('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
+      this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
+      this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.removeListener('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
       this.socket.removeListener('source-added', this.socketSourceAddedHandler);
@@ -868,6 +870,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('casa-activeAACCKK', this.socketCasaActiveAckHandler);
       this.socket.on('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
+      this.socket.on('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
+      this.socket.on('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.on('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
       this.socket.on('source-added', this.socketSourceAddedHandler);
