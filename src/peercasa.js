@@ -141,7 +141,6 @@ PeerCasa.prototype.removeCasaListeners = function() {
 
    if (!this.persistent) {
       this.casa.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
-      this.casa.removeListener('source-property-subscribed-to', this.sourcePropertySubscribedToCasaHandler);
       this.casa.removeListener('source-event-raised', this.sourceEventRaisedCasaHandler);
       this.casa.removeListener('source-added', this.sourceAddedCasaHandler);
       this.casa.removeListener('source-removed', this.sourceRemovedCasaHandler);
@@ -532,7 +531,6 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
 
 PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
    console.log(this.fullName + ': AAAAAA Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
-   this.emit('source-property-subscribed-to', _data);
    this.emit('broadcast-message', { message: 'source-property-subscribed-to', data:_data, sourceCasa: this.fullName });
 
    if (this.sources[_data.sourceName]) {
