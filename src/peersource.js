@@ -43,8 +43,15 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
 util.inherits(PeerSource, SourceBase);
 
 PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-   console.log(this.fullName+": AAAAAA propertySubscribedTo() prop="+_property+", sub="+_subscription);
-   this.asyncEmit('property-subscribed-to', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
+
+   if (_subscription.hasOwnProperty("mirror")) {
+      console.log(this.fullName+": AAAAAA propertySubscribedTo() mirror, sub=",_subscription);
+      this.asyncEmit('source-property-subscribed-to', { sourceName: this.fullName, mirror: _subscription.mirror, subscription: _subscription, exists: _exists });
+   }
+   else {
+      console.log(this.fullName+": AAAAAA propertySubscribedTo() prop="+_property+", sub=",_subscription);
+      this.asyncEmit('source-property-subscribed-to', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
+   }
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES

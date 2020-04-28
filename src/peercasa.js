@@ -93,7 +93,7 @@ PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
 PeerCasa.prototype.sourcePropertySubscribedToCasaCb = function(_data) {
 
    if (this.connected && (_data.sourcePeerCasa != this.fullName)) {
-      console.log(this.fullName + ': source ' + _data.sourceName + ' subscrined to by ' + _data.sourceName);
+      console.log(this.fullName + ': source ' + _data.sourceName + ' subscribed to by ' + _data.sourceName);
       this.sendMessage('source-property-subscribed-to', _data);
    }
 };
@@ -541,7 +541,7 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
 };
 
 PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
-   console.log(this.fullName + ': Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
+   console.log(this.fullName + ': AAAAAA Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
    this.emit('source-property-subscribed-to', _data);
    this.emit('broadcast-message', { message: 'source-property-subscribed-to', data:_data, sourceCasa: this.fullName });
 
