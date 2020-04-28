@@ -30,6 +30,8 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
       }
    }
 
+   console.log(this.fullName + ": AAAAA props=", _props);
+
    for (var prop in _props) {
       this.ensurePropertyExists(prop, 'property', { name: prop });
       this.props[prop].set(_props[prop], {});
@@ -40,7 +42,8 @@ function PeerSource(_fullName, _uName, _priority, _props, _peerCasa) {
 
 util.inherits(PeerSource, SourceBase);
 
-PeerSource.prototype.proeprtySubscribedTo = function(_property, _subscription, _exists) {
+PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   console.log(this.fullName+": AAAAAA propertySubscribedTo() prop="+_property+", sub="+_subscription);
    this.asyncEmit('property-changed', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
 };
 

@@ -547,6 +547,7 @@ PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
 
    if (this.sources[_data.sourceName]) {
       _data.sourcePeerCasa = this.fullName;
+      console.log(this.fullName+": AAAAAA socketSourcePropertySubscribedToCb() _data=", _data);
       this.sources[_data.sourceName].SourceBase.prototype.propertySubscribedTo(_data.property, _data.subscription, _data.exists);
    }
 
@@ -809,7 +810,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       console.log(_peerCasa.fullName + ': New sources found = ' + len);
 
       _data.casaConfig.sources.sort( (_a, _b) => {
-          return _a.fullName > _b.fullName;
+          return (_a.fullName > _b.fullName) ? 1 : (_a.fullName < _b.fullName) ? -1 : 0;
       });
 
       var PeerSource = require('./peersource');
@@ -854,6 +855,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketCasaActiveAckHandler = PeerCasa.prototype.socketCasaActiveAckCb.bind(this);
       this.socketSourcePropertyChangedHandler = PeerCasa.prototype.socketSourcePropertyChangedCb.bind(this);
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
+      this.socketSourcePropertySubscribedToHandler = PeerCasa.prototype.socketSourcePropertySubscribedToCb.bind(this);
+      this.socketSourcePropertySubscribedToAckHandler = PeerCasa.prototype.socketSourcePropertySubscribedToAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
       this.socketSourceEventRaisedAckHandler = PeerCasa.prototype.socketSourceEventRaisedAckCb.bind(this);
       this.socketSourceAddedHandler = PeerCasa.prototype.socketSourceAddedCb.bind(this);
