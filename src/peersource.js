@@ -44,7 +44,7 @@ util.inherits(PeerSource, SourceBase);
 
 PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
    console.log(this.fullName+": AAAAAA propertySubscribedTo() prop="+_property+", sub="+_subscription);
-   this.asyncEmit('property-changed', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
+   this.asyncEmit('property-subscribed-to', { sourceName: this.fullName, property: _property, subscription: _subscription, exists: _exists });
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
