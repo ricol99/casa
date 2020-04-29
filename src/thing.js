@@ -126,7 +126,7 @@ Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
    var ret = this.propogateToChildren;
 
-   if (!this.topLevelThing) {
+   if (!this.topLevelThing && this.propogateToParent) {
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
