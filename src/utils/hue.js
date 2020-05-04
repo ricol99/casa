@@ -1,10 +1,10 @@
 // Upstairs
-//var userId = "mCeDzqVmSty2ff3-mxi6LnGKe12HmCznuQ-k2uia";
-//var linkId = "001788fffe6d3a92";
+var userId = "mCeDzqVmSty2ff3-mxi6LnGKe12HmCznuQ-k2uia";
+var linkId = "001788fffe6d3a92";
 
 // Downstairs
-var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj";
-var linkId = "001788fffe62eec3";
+//var userId = "kJixJg-98-G53FjSIp2D1QROfLBI8bVRZt-w4cPj";
+//var linkId = "001788fffe62eec3";
 
 
 var linkAddress, Hue = require("node-hue-api");
