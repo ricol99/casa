@@ -62,7 +62,7 @@ HomekitSecuritySystem.prototype.getTargetState = function() {
 };
 
 HomekitSecuritySystem.prototype.setTargetState = function(_state) {
-   console.log(this.uName + ": Changing target state to " + _state);
+   console.log(this.fullName + ": Changing target state to " + _state);
    this.setManualMode('target-state');
    this.alignPropertyValue("target-state", _state);
 };

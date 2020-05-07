@@ -9,7 +9,7 @@ function Alarm(_config, _parent) {
    this.scheduleService =  this.gang.casa.findService("scheduleservice");
 
    if (!this.scheduleService) {
-      console.error(this.uName + ": ***** Schedule service not found! *************");
+      console.error(this.fullName + ": ***** Schedule service not found! *************");
       process.exit();
    }
 

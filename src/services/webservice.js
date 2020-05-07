@@ -27,12 +27,12 @@ function WebService(_config, _owner) {
    }
 
    if (!this.hangingOffMainServer && (this.port === this.gang.mainListeningPort())) {
-      console.error(this.uName + ": Unable to create Webservice due to port clashed with main Server");
+      console.error(this.fullName + ": Unable to create Webservice due to port clashed with main Server");
       process.exit(2);
    }
 
    if (this.hangingOffMainServer && this.mediaPath && !this.mediaRoute) {
-      console.error(this.uName + ": Unable to create Webservice, using main server due to port clash and no mediaRoute has been defined mediaPath!");
+      console.error(this.fullName + ": Unable to create Webservice, using main server due to port clash and no mediaRoute has been defined mediaPath!");
       process.exit(2);
    }
 
@@ -79,7 +79,7 @@ WebService.prototype.coldStart = function() {
       if (this.mediaPath) {
 
          this.gang.casa.addRouteToMainServer(this.mediaRoute, (req, res) => {
-            console.log(this.uName + ": Serving file " + req.params[0]);
+            console.log(this.fullName + ": Serving file " + req.params[0]);
             res.sendFile(this.mediaPath + req.params[0]);
          });
       }
@@ -97,13 +97,13 @@ WebService.prototype.coldStart = function() {
       if (this.mediaPath) {
 
          app.get(this.mediaRoute, (req, res) => { 
-            console.log(this.uName + ": Serving file " + req.params[0]);
+            console.log(this.fullName + ": Serving file " + req.params[0]);
             res.sendFile(this.mediaPath + req.params[0]); 
          });
       }
 
       this.http.listen(this.port, () => {
-         console.log(this.uName + ': listening on *: ' + this.port);
+         console.log(this.fullName + ': listening on *: ' + this.port);
       });
    }
 };

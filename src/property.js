@@ -6,7 +6,6 @@ var NamedObject = require('./namedobject');
 function Property(_config, _owner) {
    this.name = _config.name;
    this.type = _config.type;
-   //this.uName = _owner.uName+":"+this.type+":"+this.name;
 
    NamedObject.call(this, this.type+":"+_config.name, _owner);
 

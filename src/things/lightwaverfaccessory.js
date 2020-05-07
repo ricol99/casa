@@ -38,7 +38,7 @@ function LightwaveRfAccessory(_config, _parent) {
    this.lightwaveRfService =  this.casa.findService(this.service);
 
    if (!this.lightwaveRfService) {
-      console.error(this.uName + ": ***** LightwaveRf service not found! *************");
+      console.error(this.fullName + ": ***** LightwaveRf service not found! *************");
       process.exit();
    }
 }
@@ -76,19 +76,19 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
    this.powerCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(this.uName + ': Error callling lightwave service for power change. Error=' + _error);
+         console.error(this.fullName + ': Error callling lightwave service for power change. Error=' + _error);
       }
    }.bind(this);
 
    this.brightnessCallbackHandler = function(_error, _content) {
 
       if (_error) {
-         console.error(this.uName + ': Error calling lightwave service for brightness change. Error=' + _error);
+         console.error(this.fullName + ': Error calling lightwave service for brightness change. Error=' + _error);
       }
    }.bind(this);
 
    if (this.deviceId != undefined) {
-      console.log(this.uName + ": Attempting to apply property change to LightwaveRf device Id=" + this.deviceId);
+      console.log(this.fullName + ": Attempting to apply property change to LightwaveRf device Id=" + this.deviceId);
 
       if (!_data.coldStart) {
 
@@ -123,17 +123,17 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
       if (_propName == "mood") {
 
          if (_propValue == "off") {
-            console.log(this.uName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
+            console.log(this.fullName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
                this.lightwaveRfService.turnRoomOff(this.roomId, this.powerCallbackHandler);
             }
          }
          else {
-            console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
+            console.log(this.fullName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
 
             if (this.moods[_propValue] == undefined) {
-               console.error(this.uName + ": Configuration Error! Trying to apply mood="+_propValue+" which is not in the configuration!");
+               console.error(this.fullName + ": Configuration Error! Trying to apply mood="+_propValue+" which is not in the configuration!");
             }
             else if (!_data.coldStart) {
                this.lightwaveRfService.setRoomMood(this.roomId, this.moods[_propValue].id, this.powerCallbackHandler);
@@ -141,7 +141,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          }
       }
       else if (_propName == "power" && !_propValue) {
-         console.log(this.uName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
+         console.log(this.fullName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
 
          if (!_data.coldStart) {
             this.lightwaveRfService.turnRoomOff(this.roomId, this.powerCallbackHandler);
@@ -153,7 +153,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          var moodName = moodForBrightness(this.moods, brightness);
 
          if (moodName == "off") {
-            console.log(this.uName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
+            console.log(this.fullName + ": Attempting to turn off LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
                this.lightwaveRfService.turnRoomOff(this.roomId, this.powerCallbackHandler);
@@ -161,7 +161,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             this.alignPropertyValue("mood", "off");
          }
          else {
-            console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
+            console.log(this.fullName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
                this.lightwaveRfService.setRoomMood(this.roomId, this.moods[moodName].id, this.powerCallbackHandler);

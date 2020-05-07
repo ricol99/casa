@@ -40,7 +40,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
    var localConsole = (_console) ? _console === "local" : false;
 
    if (!globalConsole) {
-      this.casaDb = new Db(this.casaName, _configPath);
+      this.casaDb = new Db(this.casaName, _configPath, false, null);
       this.dbs[this.casaName] = this.casaDb;
 
       this.casaDb.on('connected', (_data) => {
@@ -60,10 +60,11 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
             this.config.configPath = _configPath;
             this.uName = this.config.gang;
             NamedObject.call(this, this.uName);
+            this.casaDb.setOwner(this);
 
             this.loadSystemServices();
 
-            this.gangDb = new Db(this.uName, _configPath);
+            this.gangDb = new Db(this.uName, _configPath, false, this);
             this.dbs[this.uName] = this.gangDb;
 
             this.gangDb.on('connected', (_data) => {
@@ -117,7 +118,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
       this.extractServices([ { uName: "scheduleservice:"+casaShortName,  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
                              { uName: "rampservice:"+casaShortName }, { uName: "dbservice:"+casaShortName } ], false, this.systemServices);
 
-      this.gangDb = new Db(this.uName, _configPath);
+      this.gangDb = new Db(this.uName, _configPath, false, this);
 
       this.gangDb.on('connected', (_data) => {
          this.dbs[_data.name] = _data.db;
@@ -127,7 +128,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
       });
 
       this.gangDb.on('connect-error', (_data) => {
-         this.gangDb = new Db(this.uName, _configPath, true);
+         this.gangDb = new Db(this.uName, _configPath, true, this);
 
          this.gangDb.on('connected', (_data) => {
             this.dbs[_data.name] = _data.db;
@@ -244,7 +245,7 @@ Gang.prototype.init = function(_console) {
 
    if (_console) {
       var LocalConsole = require('./localconsole');
-      this.localConsole = new LocalConsole();
+      this.localConsole = new LocalConsole(this);
       this.localConsole.coldStart();
    }
 
@@ -428,7 +429,7 @@ Gang.prototype.createThing = function(_config, _owner) {
    var Thing = this.cleverRequire(_config.uName, 'things', _config.type);
 
    if (!Thing) {
-      console.error(this.uName + ": Thing "+_config.uName+" does not exist");
+      console.error(this.fullName + ": Thing "+_config.uName+" does not exist");
       return null;
    }
 
@@ -787,7 +788,7 @@ Gang.prototype.getDb = function(_dbName, _meta, _callback) {
       }
    }
    else if (_callback) {
-      var db = new Db(dbName, this.configPath());
+      var db = new Db(dbName, this.configPath(), false, this);
 
       if (this.dbCallbacks.hasOwnProperty(dbName)) {
          this.dbCallbacks[dbName].push({ meta: _meta, callback: _callback, db: db});
@@ -850,7 +851,7 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
          process.exit(2);
 
          this.gangDb.close();
-         this.gangDb = new Db(this.uName, this.configPath());
+         this.gangDb = new Db(this.uName, this.configPath(), false, this);
 
          this.gangDb.on('connected', () => {
 

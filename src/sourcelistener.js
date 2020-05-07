@@ -67,7 +67,6 @@ function SourceListener(_config, _owner) {
    }
 
    NamedObject.call(this, "sourcelistener:"+this.sourceEventName.substr(2), this.owner);
-   //this.uName = "sourcelistener:" + this.owner.fullName + ":" + this.sourceEventName;
 
    this._id = this.fullName;   // *** TBD
 

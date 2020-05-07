@@ -50,7 +50,7 @@ SonosPlayer.prototype.coldStart = function() {
       this.sonosService = this.casa.findService(this.service);
 
       if (!this.sonosService) {
-         console.error(this.uName + ": ***** Sonos service not found! *************");
+         console.error(this.fullName + ": ***** Sonos service not found! *************");
          process.exit(1);
       }
 
@@ -82,7 +82,7 @@ SonosPlayer.prototype.deviceNotAvailable = function(_device) {
 
 SonosPlayer.prototype.createDevice = function(_device) {
    this.alignPropertyValue('ACTIVE', true);
-   console.log(this.uName + ": Successfully attached to sonos device in zone " + this.zone + ", host=" + _device.host);
+   console.log(this.fullName + ": Successfully attached to sonos device in zone " + this.zone + ", host=" + _device.host);
    this.device = _device;
 
    this.notifications = {};
@@ -109,16 +109,16 @@ SonosPlayer.prototype.startSyncingStatus = function() {
 };
 
 SonosPlayer.prototype.processMuteEvent = function(_muted) {
-   console.log(this.uName + ": processMuteEvent() muted=",_muted);
+   console.log(this.fullName + ": processMuteEvent() muted=",_muted);
    this.alignPropertyValue('muted', _muted);
 };
 
 SonosPlayer.prototype.processAVTransportChange = function(_data) {
-   //console.log(this.uName + ": processAVTransportChange() data=",_data);
+   //console.log(this.fullName + ": processAVTransportChange() data=",_data);
 };
 
 SonosPlayer.prototype.processPlayState = function(_data) {
-   console.log(this.uName + ": processPlayState() data=",_data);
+   console.log(this.fullName + ": processPlayState() data=",_data);
 
    switch(_data) {
       case 'playing':
@@ -164,21 +164,21 @@ SonosPlayer.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 SonosPlayer.prototype.setVolume = function(_level) {
 
    this.sonos.setVolume(_level).catch(_error => {
-      console.log(this.uName + ": Unable to set Volume!");
+      console.log(this.fullName + ": Unable to set Volume!");
    });
 };
 
 SonosPlayer.prototype.setMuted = function(_muted) {
 
    this.sonos.setMuted(_muted).catch(_error => {
-      console.log(this.uName + ": Unable to set mute!");
+      console.log(this.fullName + ": Unable to set mute!");
    });
 };
 
 SonosPlayer.prototype.pause = function() {
 
    this.sonos.pause().catch(_error => {
-      console.log(this.uName + ": Unable to pause!");
+      console.log(this.fullName + ": Unable to pause!");
    });
 };
 
@@ -186,12 +186,12 @@ SonosPlayer.prototype.play = function(_url) {
 
    if (_url) {
       this.sonos.play(_url).catch(_error => {
-         console.error(this.uName + ": Unable to play "+_url+"!");
+         console.error(this.fullName + ": Unable to play "+_url+"!");
       });
    }
    else {
       this.sonos.play().catch(_error => {
-         console.error(this.uName + ": Unable to play!");
+         console.error(this.fullName + ": Unable to play!");
       });
    }
 };
@@ -199,7 +199,7 @@ SonosPlayer.prototype.play = function(_url) {
 SonosPlayer.prototype.playNext = function(_stopIfFail) {
 
    this.sonos.next().catch(_error => {
-      console.error(this.uName + ": Unable to play next track!");
+      console.error(this.fullName + ": Unable to play next track!");
 
       if (_stopIfFail) {
          this.stop();
@@ -210,7 +210,7 @@ SonosPlayer.prototype.playNext = function(_stopIfFail) {
 SonosPlayer.prototype.stop = function() {
 
    this.sonos.stop().catch(_error => {
-      console.log(this.uName + ": Unable to stop music from playing!");
+      console.log(this.fullName + ": Unable to stop music from playing!");
    });
 };
 
@@ -267,12 +267,12 @@ SonosPlayer.prototype.replayAfterTimeout = function(_url, _timeout) {
 
    this.repeatTimer = setTimeout( () => {
 
-      if (_this.inAlarmStatus) {
+      if (this.inAlarmStatus) {
 
          this.sonos.play(_url).then( () => {
             this.replayAfterTimeout(_url, _timeout);
          }).catch(_error => {
-            console.log(_this.uName + ": Unable to replay alarm sound");
+            console.log(this.fullName + ": Unable to replay alarm sound");
          });
 
       }

@@ -36,12 +36,12 @@ BroadbandSpeedTester.prototype.testSpeed = function() {
    });
 
    test.on('error', (_err) => {
-      console.error(this.uName + ": Error performing speed test. Error: " + _err);
+      console.error(this.fullName + ": Error performing speed test. Error: " + _err);
    });
 };
 
 BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event) {
-   console.log(this.uName+': Testing broadband speed');
+   console.log(this.fullName+': Testing broadband speed');
    this.testSpeed();
 }
 

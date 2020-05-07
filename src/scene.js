@@ -43,8 +43,8 @@ function Scene(_config, _owner) {
 
    for (var i = 0; i < _config.sources.length; i++) {
 
-      if (!(_config.sources[i].hasOwnProperty("uName"))) {
-         _config.sources[i].uName = this.uName;
+      if (!(_config.sources[i].hasOwnProperty("fullName"))) {
+         _config.sources[i].fullName = this.fullName;
       }
 
       this.sources.push(_config.sources[i]);

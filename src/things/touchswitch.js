@@ -26,7 +26,7 @@ function TouchSwitch(_config, _parent) {
    this.gpioService =  this.casa.findService(this.service);
 
    if (!this.gpioService) {
-      console.error(this.uName + ": ***** GpioService service not found! *************");
+      console.error(this.fullName + ": ***** GpioService service not found! *************");
       process.exit(1);
    }
 

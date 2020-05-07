@@ -17,7 +17,7 @@ util.inherits(DebounceProperty, Property);
 
 DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
-   console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
+   console.log(this.fullName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
 
    if (_data.coldStart) {    // Cold start only once
       this.sourceState = propValue;
@@ -50,7 +50,7 @@ DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener
 //};
 
 DebounceProperty.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
+   console.log(this.fullName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
    this.invalidData = util.copy(_data);
 
    if (this.valid) {
@@ -58,7 +58,7 @@ DebounceProperty.prototype.sourceIsInvalid = function(_data) {
 
       // If a timer is already running, ignore. ELSE create one
       if (this.timeoutObj == null) {
-         console.log(this.uName + ": Starting timer....");
+         console.log(this.fullName + ": Starting timer....");
          this.startTimer();
       }
    }
@@ -81,7 +81,7 @@ DebounceProperty.prototype.sourceIsValid = function(_data) {
 DebounceProperty.prototype.startTimer = function() {
 
    this.timeoutObj = setTimeout(function(_this) {
-      console.log(_this.uName + ": Timer expired!");
+      console.log(_this.fullName + ": Timer expired!");
       _this.timeoutObj = null;
 
       if (_this.lastData) {

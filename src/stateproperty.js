@@ -61,24 +61,30 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       return;
    }
 
-   if (this.currentState) {
-      source = this.currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
+   if (this.sourceListeners[_sourceListener.sourceEventName].stateOwned) {
 
-      if (source) {
+      if (this.currentState) {
+         source = this.currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
 
-         if (source.hasOwnProperty('nextState')) {
+         if (source) {
 
-            if (source.nextState === this.currentState.name) {
-               this.resetStateTimer(this.currentState);
+            if (source.hasOwnProperty('nextState')) {
+
+               if (source.nextState === this.currentState.name) {
+                  this.resetStateTimer(this.currentState);
+               }
+               else {
+                  this.set(this.transformNextState(source.nextState), { sourceName: this.owner.fullName });
+               }
             }
-            else {
-               this.set(this.transformNextState(source.nextState), { sourceName: this.owner.fullName });
+            else if (source.hasOwnProperty('handler')) {
+               this.owner[source.handler](this.currentState, _data);
             }
-         }
-         else if (source.hasOwnProperty('handler')) {
-            this.owner[source.handler](this.currentState, _data);
          }
       }
+   }
+   else {
+      Property.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
    }
 };
 
@@ -362,6 +368,7 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    if (!sourceListener) {
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
+      sourceListener.stateOwned = true;
    }
 
    return sourceListener;

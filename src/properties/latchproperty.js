@@ -29,7 +29,7 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    this.lastData = _data;
 
    if (propValue) {
-      console.log(this.uName + ': target ' + _data.sourceName + ' active!');
+      console.log(this.fullName + ': target ' + _data.sourceName + ' active!');
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
@@ -45,7 +45,7 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       }
    }
    else {
-      console.log(this.uName + ': target ' + _data.sourceName + ' inactive!');
+      console.log(this.fullName + ': target ' + _data.sourceName + ' inactive!');
       this.sourceActive = false;
 
       if (this.active) {

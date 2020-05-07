@@ -29,7 +29,7 @@ HueService.prototype.coldStart = function() {
       this.findBridges((_err, _bridges) => {
 
          if (_err || (_bridges.length === 0)) {
-            console.error(this.uName + ": Unable to find any bridges!");
+            console.error(this.fullName + ": Unable to find any bridges!");
             process.exit(1);
          }
 
@@ -40,7 +40,7 @@ HueService.prototype.coldStart = function() {
             this.hueBridgeFound(bridge);
          }
          else {
-            console.error(this.uName + ": Bridge not found!");
+            console.error(this.fullName + ": Bridge not found!");
             process.exit(1);
          }
       });
@@ -129,7 +129,7 @@ HueService.prototype.hueBridgeFound = function(_bridge) {
    this.linkAddress = _bridge.ipaddress;
 
    if (!this.linkAddress) {
-      console.error(this.uName + ": Unable to find bridge, My link Id=" + this.linkId + " not Found!");
+      console.error(this.fullName + ": Unable to find bridge, My link Id=" + this.linkId + " not Found!");
       process.exit(1);
    }
 
@@ -140,7 +140,7 @@ HueService.prototype.hueBridgeFound = function(_bridge) {
    this.hue.lights( (_err, _result) => {
 
       if (_err) {
-         console.error(this.uName + ": Unable to get lights status, error=" + _err);
+         console.error(this.fullName + ": Unable to get lights status, error=" + _err);
          process.exit(1);
       }
 
@@ -241,10 +241,10 @@ HueService.prototype.getLightGroups = function(_callback) {
 HueService.prototype.defaultCallbackHandler = function(_error, _result) {
 
    if (_error) {
-      console.error(this.uName + ": Unable to complete request, error=" + _error);
+      console.error(this.fullName + ": Unable to complete request, error=" + _error);
    }
    else {
-      console.log(this.uName + ": Request completed, result=" + _result);
+      console.log(this.fullName + ": Request completed, result=" + _result);
    }
 };
 
@@ -266,7 +266,7 @@ HueService.prototype.makeNextRequest = function() {
       this.requestPending = true;
 
       this.queue[0].send( (_owner, _error, _result) => {
-         console.log(this.uName + ': Request done! Error='+_error);
+         console.log(this.fullName + ': Request done! Error='+_error);
          this.queue[0].complete(_error, _result);
          delete this.queue.shift();
 

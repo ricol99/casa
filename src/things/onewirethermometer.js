@@ -12,7 +12,7 @@ function OneWireThermometer(_config, _parent) {
       var service =  this.gang.casa.findService("onewireservice");
 
       if (!service) {
-         console.error(this.uName + ": ***** OneWire service not found! *************");
+         console.error(this.fullName + ": ***** OneWire service not found! *************");
          process.exit();
       }
 

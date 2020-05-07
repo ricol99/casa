@@ -245,7 +245,7 @@ Tester.prototype.runTestEvent = function() {
    var target = this;
 
    if (this.currentTestEvent === 0) {
-      console.info(this.uName + ": ========= TEST CASE "+(this.currentTestCase + 1)+" =========");
+      console.info(this.fullName + ": ========= TEST CASE "+(this.currentTestCase + 1)+" =========");
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
@@ -257,12 +257,12 @@ Tester.prototype.runTestEvent = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
-      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SENDING EVENT event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
+      console.info(this.fullName+": TC"+(this.currentTestCase+1)+" SENDING EVENT event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("property")) {
-      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property + " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
+      console.info(this.fullName+": TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property + " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
       target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
    }
 
@@ -272,7 +272,7 @@ Tester.prototype.runTestEvent = function() {
 };
 
 Tester.prototype.sourceIsInvalid = function(_data) {
-   console.error(this.uName + ': TEST FAILED - Source invalid');
+   console.error(this.fullName + ': TEST FAILED - Source invalid');
    process.exit(5);
 };
 
@@ -284,13 +284,13 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
 
    if (this.testCases[this.currentTestCase].expectedSequence[_index].hasOwnProperty('property')) {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].property;
-      //console.info(this.uName + ": AAAAAA " + this.testCases[this.currentTestCase].expectedSequence[_index].source + " " + name + " " + this.testCases[this.currentTestCase].expectedSequence[_index].value);
+      //console.info(this.fullName + ": AAAAAA " + this.testCases[this.currentTestCase].expectedSequence[_index].source + " " + name + " " + this.testCases[this.currentTestCase].expectedSequence[_index].value);
    }
    else {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
    }
 
-   console.log(this.uName+": AAAA data.sourceName="+_data.sourceName+" test source="+this.testCases[this.currentTestCase].expectedSequence[_index].source);
+   console.log(this.fullName+": AAAA data.sourceName="+_data.sourceName+" test source="+this.testCases[this.currentTestCase].expectedSequence[_index].source);
 
    return ((_data.sourceName === this.testCases[this.currentTestCase].expectedSequence[_index].source) &&
        (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));
@@ -312,7 +312,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          if (result) {
 
             if (i !== this.expectedPosition) {
-               //console.info(this.uName + ": AAAAAA not in expected position!");
+               //console.info(this.fullName + ": AAAAAA not in expected position!");
                let temp = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition];
                this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition] = this.testCases[this.currentTestCase].expectedSequence[i];
                this.testCases[this.currentTestCase].expectedSequence[i] = temp;
@@ -326,13 +326,13 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         //console.info(this.uName + ": AAAAAA result found!");
-         console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+         //console.info(this.fullName + ": AAAAAA result found!");
+         console.info("\x1b[32m"+this.fullName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");
       }
       else {
-         //console.info(this.uName + ": AAAAAA not result found!");
-         console.info("\x1b[31m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+         //console.info(this.fullName + ": AAAAAA not result found!");
+         console.info("\x1b[31m"+this.fullName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m");
          process.exit(5);
       }
@@ -340,11 +340,11 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
 
          if ((this.timeout) || (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
-            console.info("\x1b[31m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m");
+            console.info("\x1b[31m"+this.fullName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m");
             process.exit(5);
          }
 
-         console.info("\x1b[32m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m");
+         console.info("\x1b[32m"+this.fullName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m");
 
          if (++this.currentTestCase < this.testCases.length) {
             this.currentTestEvent = 0;
@@ -352,7 +352,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
             this.initiateTestEvent();
          }
          else {
-            console.info("\x1b[32m"+this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
+            console.info("\x1b[32m"+this.fullName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
             process.exit(0);
          }
       }

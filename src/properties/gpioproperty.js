@@ -22,7 +22,7 @@ util.inherits(GPIOProperty, Property);
 GPIOProperty.prototype.gpioPinStatusChanged = function(_gpioPin, _newValue) {
 
    if (_newValue != this.value) {
-      console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _newValue);
+      console.log(this.fullName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _newValue);
       this.updatePropertyInternal(_newValue);
    }
 }
@@ -30,7 +30,7 @@ GPIOProperty.prototype.gpioPinStatusChanged = function(_gpioPin, _newValue) {
 GPIOProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    if (_data.name === "gpio-pin-"+this.gpioPin) {
-      console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _data.value);
+      console.log(this.fullName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _data.value);
       this.updatePropertyInternal(_data.value, _data);
    }
 };

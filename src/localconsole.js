@@ -1,9 +1,10 @@
 var util = require('util');
 var Gang = require('./gang');
 var readline = require('readline');
+var NamedObject = require('./namedobject');
 
-function LocalConsole() {
-   this.uName = "console:"+Date.now();
+function LocalConsole(_owner) {
+   NamedObject.call(this, "console:"+Date.now(), _owner);
 
    this.autoCompleteHandler = LocalConsole.prototype.autoCompleteCb.bind(this);
    this.lineReaderHandler = LocalConsole.prototype.lineReaderCb.bind(this);
@@ -15,11 +16,13 @@ function LocalConsole() {
    });
 }
 
+util.inherits(LocalConsole, NamedObject);
+
 LocalConsole.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
    this.consoleApiService =  this.casa.findService("consoleapiservice");
-   this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
+   this.consoleApiSession = this.consoleApiService.getSession(this.fullName, this);
 
    this.start("::" + this.casa.uName);
 };

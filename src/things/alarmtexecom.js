@@ -88,7 +88,7 @@ function AlarmTexecom(_config, _parent) {
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;
    this.pollsMissed = 0;
 
-   this.decoders = { 2: new ContactIdProtocol("contactid:"+this.uName), 3: new SIAProtocol("sia:"+this.uName) };
+   this.decoders = { 2: new ContactIdProtocol(this.fullName+":contactid:"+this.gang.casa.sName), 3: new SIAProtocol(this.fullName+":sia:"+this.gang.casa.sName) };
 
    this.eventHandlers = {};
    this.eventHandlers["401"] = AlarmTexecom.prototype.alarmArmNormalHandler;
@@ -184,7 +184,7 @@ function AlarmTexecom(_config, _parent) {
 util.inherits(AlarmTexecom, Thing);
 
 AlarmTexecom.prototype.newConnection = function(_socket) {
-   console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
+   console.log(this.fullName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
   _socket.on('data', (_data) => {
 
@@ -193,7 +193,7 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
      }
 
      if (_data.slice(-2) != '\r\n') {
-        console.log(this.uName + ": Ignoring line with missing terminator");
+        console.log(this.fullName + ": Ignoring line with missing terminator");
         return;
      }
 
@@ -209,20 +209,20 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
            this.handleMessage(_socket, message, newData);
         }
         else {
-           console.log(this.uName + ": Unhandled Message");
+           console.log(this.fullName + ": Unhandled Message");
         }
      }
      else {
-        console.log(this.uName + ": Unhandled Message");
+        console.log(this.fullName + ": Unhandled Message");
      }
   });
 
   _socket.on('error', (_error) => {
-     console.error(this.uName + ": Socket error! Error = ", _error);
+     console.error(this.fullName + ": Socket error! Error = ", _error);
   });
 
   _socket.on('disconnect', (_error) => {
-     console.log(this.uName + ": Socket disconnected.");
+     console.log(this.fullName + ": Socket disconnected.");
   });
 };
 
@@ -260,12 +260,12 @@ AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
    _socket.write(buf);
 
    if (this.pollsMissed > 0) {
-      console.log(this.uName + ": Polling recovered (within tolerance) with Texecom alarm!");
+      console.log(this.fullName + ": Polling recovered (within tolerance) with Texecom alarm!");
       this.pollsMissed = 0;
    }
 
    if (!this.getProperty('ACTIVE')) {
-      console.log(this.uName + ": Connection restored to Texecom alarm!");
+      console.log(this.fullName + ": Connection restored to Texecom alarm!");
       this.alignPropertyValue('ACTIVE', true);
    }
 
@@ -289,7 +289,7 @@ AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
       this.alignPropertyValue('engineer-mode', ((flags & FLAG_ENGINEER) != 0));
    }
 
-   console.log(this.uName + ": Poll received from alarm. Flags="+flags);
+   console.log(this.fullName + ": Poll received from alarm. Flags="+flags);
    this.restartWatchdog();
 };
 
@@ -305,11 +305,11 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
    }
    else if (_message.property != undefined) {
       this.alignPropertyValue(_message.property, _message.propertyValue); 
-      console.log(this.uName+": Message received, event="+_message.event+" - "+ _message.description, + ", value=" + _message.value);
+      console.log(this.fullName+": Message received, event="+_message.event+" - "+ _message.description, + ", value=" + _message.value);
       this.alignPropertyValue('alarm-error', "ARC event="+_message.event+", "+_message.property+"="+_message.propertyValue);
    }
    else {
-      console.log(this.uName+": message received that had no property: \""+_message.description+"\"");
+      console.log(this.fullName+": message received that had no property: \""+_message.description+"\"");
       this.alignPropertyValue('alarm-error', "ARC event not handled. Event="+_message.event+", qual="+_message.qualifier);
    }
 
@@ -331,7 +331,7 @@ AlarmTexecom.prototype.restartWatchdog = function() {
 
       if (this.pollsMissed > this.maxPollMisses) {
          // Lost connection with alarm
-         console.error(this.uName + ": Lost connection to Texecom Alarm!");
+         console.error(this.fullName + ": Lost connection to Texecom Alarm!");
          this.pollsMissed = 0;
          this.alignPropertyValue('ACTIVE', false);
       }
@@ -375,7 +375,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 AlarmTexecom.prototype.setAcknowledgementTimer = function() {
 
    this.acknowledgementTimer = setTimeout( () => {
-      console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
+      console.error(this.fullName + ": Alarm has not acknowledged order to arm, failing transaction");
       this.alignPropertyValue("target-state", this.getProperty("current-state"));
    }, 60000);
 };
@@ -392,19 +392,19 @@ AlarmTexecom.prototype.initiateNewTransaction = function(_transactionTarget) {
    this.clearAcknowledgementTimer();
 
    if (this.getProperty('alarm-connection-state') !== "idle-state") {
-      console.log(this.uName + ": Request for new transaction received while servicing another transaction, queue it up!");
+      console.log(this.fullName + ": Request for new transaction received while servicing another transaction, queue it up!");
       this.transactionTarget = _transactionTarget;
       return;
    }
 
    if (this.transactionTarget === _transactionTarget) {
-      console.log(this.uName+": States already in sync, job done!");
+      console.log(this.fullName+": States already in sync, job done!");
       return;
    }
 
    this.transactionTarget = _transactionTarget;
 
-   console.log(this.uName+": Attempting to move states from current state:"+this.getProperty('current-state') +
+   console.log(this.fullName+": Attempting to move states from current state:"+this.getProperty('current-state') +
                " to target state:"+this.transactionTarget);
 
    this.raiseEvent('connect-to-alarm');
@@ -416,14 +416,14 @@ AlarmTexecom.prototype.sendToAlarmAppendChecksum = function(_buffer) {
    for (var i = 0; i < _buffer.length-1; ++i) {
       sum += _buffer[i];
    }
-   console.log(this.uName + ": Sum of bytes = " + sum);
+   console.log(this.fullName + ": Sum of bytes = " + sum);
 
    _buffer[_buffer.length-1] = (sum & 0xff) ^ 0xff;
   this.sendToAlarm(_buffer);
 };
 
 AlarmTexecom.prototype.sendToAlarm = function(_buffer) {
-   console.log(this.uName + ": Buffer sent to alarm: ", _buffer);
+   console.log(this.fullName + ": Buffer sent to alarm: ", _buffer);
    this.socket.write(_buffer);
 };
 
@@ -510,30 +510,30 @@ AlarmTexecom.prototype.handleIdleState = function(_currentState) {
 };
 
 AlarmTexecom.prototype.connectToAlarm = function(_currentState) {
-   console.log(this.uName + ': Connecting to Texecom alarm');
-   console.log(this.uName + ': Connecting to ip='+this.alarmAddress+' port='+this.alarmPort);
+   console.log(this.fullName + ': Connecting to Texecom alarm');
+   console.log(this.fullName + ': Connecting to ip='+this.alarmAddress+' port='+this.alarmPort);
 
    if (!this.socket || this.socket.destroyed) {
       this.socket = net.createConnection({ port: this.alarmPort, host: this.alarmAddress });
 
       this.socket.on('connect', (_buffer) => {
-         console.log(this.uName + ': Connected to alarm');
+         console.log(this.fullName + ': Connected to alarm');
          this.raiseEvent('connected');
       });
 
       this.socket.on('error', (_error) => {
-         console.error(this.uName + ": Error connecting to Texecom alarm, error:"+_error);
+         console.error(this.fullName + ": Error connecting to Texecom alarm, error:"+_error);
          this.raiseEvent('error', { value: _error });
       });
 
       this.socket.on('data', (_buffer) => {
-         console.log(this.uName + ": Received data from Texecom alarm in state " + this.getProperty('alarm-connection-state') + " = ", _buffer);
+         console.log(this.fullName + ": Received data from Texecom alarm in state " + this.getProperty('alarm-connection-state') + " = ", _buffer);
          this.receiveBuffer = _buffer;
          this.raiseEvent('data-received-from-alarm');
       });
 
       this.socket.on('end', (_buffer) => {
-         console.log(this.uName + ": Socket to alarm closed.");
+         console.log(this.fullName + ": Socket to alarm closed.");
          this.raiseEvent('socket-closed');
       });
    }
@@ -552,7 +552,7 @@ AlarmTexecom.prototype.handleWakeUpResponse = function(_currentState, _data) {
       this.raiseEvent("log-in-to-panel");
    }
    else {
-      console.error(this.uName + ": Failed to wake up panel!");
+      console.error(this.fullName + ": Failed to wake up panel!");
       this.raiseEvent('error', { value: 'Failed to wake panel up!' });
    }
 };
@@ -584,11 +584,11 @@ AlarmTexecom.prototype.sendCommandToAlarm = function() {
 AlarmTexecom.prototype.handleLoginResponse = function(_currentState, _data) {
 
    if (!this.receiveBuffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
-      console.log(this.uName + ": Logged in to panel successfully");
+      console.log(this.fullName + ": Logged in to panel successfully");
       this.sendCommandToAlarm();
    }
    else {
-      console.error(this.uName + ": Unable to log into Texecom alarm user - Check UDL");
+      console.error(this.fullName + ": Unable to log into Texecom alarm user - Check UDL");
       this.raiseEvent('error', { value: 'Failed to log into panel - Check UDL!' });
    }
 };
@@ -611,12 +611,12 @@ AlarmTexecom.prototype.armAlarm = function(_currentState) {
 AlarmTexecom.prototype.handleArmResponse = function(_currentState, _data) {
 
    if (this.receiveBuffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
-      console.log(this.uName + ": Arm command acknowledged by Texecom alarm");
+      console.log(this.fullName + ": Arm command acknowledged by Texecom alarm");
       this.setAcknowledgementTimer();
       this.raiseEvent('alarm-transaction-complete');
    }
    else {
-      console.error(this.uName + ": Unable to arm alarm!");
+      console.error(this.fullName + ": Unable to arm alarm!");
       this.raiseEvent('error', { value: "Unable to arm alarm!" });
    }
 };
@@ -628,11 +628,11 @@ AlarmTexecom.prototype.disarmAlarm = function(_currentState) {
 AlarmTexecom.prototype.handleDisarmResponse = function(_currentState, _data) {
 
    if (this.receiveBuffer.equals(Buffer.from([0x03, 0x06, 0xf6], 'ascii'))) {
-      console.log(this.uName + ": Disarming command acknowledged by Texecom alarm");
+      console.log(this.fullName + ": Disarming command acknowledged by Texecom alarm");
       this.raiseEvent('alarm-transaction-complete');
    }
    else {
-      console.error(this.uName + ": Unable to Disarm alarm!");
+      console.error(this.fullName + ": Unable to Disarm alarm!");
       this.raiseEvent('error', { value: "Unable to Disarm alarm!" });
    }
 };
@@ -644,12 +644,12 @@ AlarmTexecom.prototype.retrieveInfoFromAlarm = function(_currentState) {
 AlarmTexecom.prototype.handleRetrieveInfoResponse = function(_currentState, _data) {
 
    if ((this.receiveBuffer.slice(0,7).equals(Buffer.from([0x47,0x57,0x0,0x17,0xb2,0x40,0xf], 'ascii'))) && (this.receiveBuffer.length >= 71)) {
-      console.log(this.uName + ":  Received status from alarm");
+      console.log(this.fullName + ":  Received status from alarm");
       this.processAlarmStatus(this.receiveBuffer);
       this.raiseEvent('alarm-transaction-complete');
    }
    else {
-      console.error(this.uName + ": Unable to retrieve info from alarm!");
+      console.error(this.fullName + ": Unable to retrieve info from alarm!");
       this.raiseEvent('error', { value: "Unable to retrieve info from alarm!" });
    }
 };

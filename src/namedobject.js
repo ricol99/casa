@@ -8,7 +8,8 @@ function NamedObject(_name, _owner) {
    if (_owner && (typeof _owner === "string")) {
       this.owner = null;
       this.fullName = _owner;
-      this.uName = _name;
+      this.oName = _name;
+      this.uName = this.oName;
    }
    else {
 
@@ -16,7 +17,8 @@ function NamedObject(_name, _owner) {
          this.owner = _owner.findOwner(_name);
 
          if (this.owner) {
-            this.uName = _name.replace(this.owner.fullName+":", ""); 
+            this.oName = _name.replace(this.owner.fullName+":", ""); 
+            this.uName = this.oName;
          }
          else {
             console.error("namedobject:"+_name+ ": Owner not found!");
@@ -25,15 +27,15 @@ function NamedObject(_name, _owner) {
       }
       else {
          this.owner = _owner;
-         this.uName = _name;
+         this.oName = _name;
+         this.uName = this.oName;
       }
 
-      this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : ":";
+      this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
    }
 
-   //this.owner = _owner ? _owner : null;
-   this.sName = this.uName.split(":")[1];
-   this.tName = this.uName.split(":")[0];
+   this.sName = this.oName.split(":")[1];
+   this.tName = this.oName.split(":")[0];
    this.myNamedObjects = {};
    
    if (this.owner) {
@@ -53,7 +55,7 @@ NamedObject.prototype.setOwner = function(_owner) {
 
    this.owner = _owner;
    var oldFullName = this.fullName;
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : this.uName;
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : this.oName;
    
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -129,16 +131,21 @@ NamedObject.prototype.detach = function(_fullName) {
 };
 
 NamedObject.prototype.setUName = function(_uName) {
-   console.log(this.fullName + ": About to change uName to "+_uName);
+   this.setOName(_uName);
+};
+
+NamedObject.prototype.setOName = function(_oName) {
+   console.log(this.fullName + ": About to change oName to "+_oName);
 
    if (this.owner) {
       this.owner.removeChildNamedObject(this);
    }
 
-   this.uName = _uName;
-   this.sName = this.uName.split(":")[1];
-   this.tName = this.uName.split(":")[0];
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : ":";
+   this.oName = _oName;
+   this.uName = this.oName;
+   this.sName = this.oName.split(":")[1];
+   this.tName = this.oName.split(":")[0];
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
 
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -153,7 +160,7 @@ NamedObject.prototype.setUName = function(_uName) {
 };
 
 NamedObject.prototype.ownerHasNewName = function() {
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.uName : ":";
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
 
    for (var child in this.myNamedObjects) {
 
@@ -194,15 +201,15 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
 };
 
 NamedObject.prototype.addChildNamedObject = function(_namedObject) {
-   this.myNamedObjects[_namedObject.uName] = _namedObject;
+   this.myNamedObjects[_namedObject.oName] = _namedObject;
 };
 
 NamedObject.prototype.removeChildNamedObject = function(_namedObject) {
-   delete this.myNamedObjects[_namedObject.uName];
+   delete this.myNamedObjects[_namedObject.oName];
 };
 
 NamedObject.prototype.stripMyName = function(_name) {
-   var myName = this.owner ? this.uName : ":";
+   var myName = this.owner ? this.oName : ":";
 
    if (_name.startsWith(myName)) {
       var newName = _name.replace(myName, "");
@@ -229,7 +236,7 @@ NamedObject.prototype.findNamedObject = function(_name)  {
    var obj = null;
 
    util.iterate(this.myNamedObjects, 0, (_obj) => {
-      if (_obj.uName === matchString) { obj = _obj; return true; }
+      if (_obj.oName === matchString) { obj = _obj; return true; }
    });
 
    if (obj) {

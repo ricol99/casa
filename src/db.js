@@ -3,9 +3,9 @@ var fs = require('fs');
 var events = require('events');
 var Datastore = require('nedb');
 var md5 = require('md5');
-var AsyncEmitter = require('./asyncemitter');
+var NamedObject = require('./namedobject');
 
-function Db(_dbName, _dbPath, _newDb) {
+function Db(_dbName, _dbPath, _newDb, _owner) {
 
    if (_dbPath == undefined) {
       this.dbPath = process.env['HOME']+'/.casa-keys/secure-config/';
@@ -17,11 +17,10 @@ function Db(_dbName, _dbPath, _newDb) {
 
    this.dbFullName = this.dbPath + "/" + _dbName + ".db";
    this.dbName = _dbName;
-   this.uName = "db:"+this.dbName;
-   AsyncEmitter.call(this);
+   NamedObject.call(this, "db:"+this.dbName, _owner);
 }
 
-util.inherits(Db, AsyncEmitter);
+util.inherits(Db, NamedObject);
 
 Db.prototype.lastModified = function(_callback) {
 

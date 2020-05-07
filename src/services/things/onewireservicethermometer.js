@@ -49,7 +49,7 @@ OneWireServiceThermometer.prototype.pollDevice = function() {
    }
 
    this.timer = setTimeout(() => {
-      console.log(this.uName+": Reading from one wire. Device="+this.sName);
+      console.log(this.fullName + ": Reading from one wire. Device="+this.sName);
       this.owner.oneWireBus.getValueFrom(this.sName, "temperature")
       .then((_measure) => {
          this.alignPropertyValue("temperature", _measure.result.value);
