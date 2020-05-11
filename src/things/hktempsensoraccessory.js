@@ -12,9 +12,6 @@ function HomekitTempSensorAccessory(_config, _parent) {
 
    this.ensurePropertyExists("temperatue", 'property', { initialValue: 0 }, _config);
 
-  .getService(Service.TemperatureSensor)
-    .setCharacteristic(Characteristic.CurrentTemperature, FAKE_SENSOR.currentTemperature);
-
    this.hkAccessory
       .addService(Service.TemperatureSensor, this.displayName) // services exposed to the user should have "names" like "TempSensor" for this case
       .getCharacteristic(Characteristic.CurrentTemperature)
