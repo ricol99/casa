@@ -8,6 +8,7 @@ function Hifi(_config, _parent) {
    this.ensurePropertyExists('power-amp-cold-temp', 'property', { initialValue: 20 }, _config);
    this.ensurePropertyExists('power-amp-hot-temp', 'property', { initialValue: 35 }, _config);
    this.ensurePropertyExists('shelf-hue', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-saturation', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('shelf-cold-hue', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('shelf-hot-hue', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('shelf-cold-saturation', 'property', { initialValue: 0 }, _config);
