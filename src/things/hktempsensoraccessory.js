@@ -10,20 +10,20 @@ function HomekitTempSensorAccessory(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-temperature-accessory";
 
-   this.ensurePropertyExists("temperatue", 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists("temperature", 'property', { initialValue: 0 }, _config);
 
    this.hkAccessory
       .addService(Service.TemperatureSensor, this.displayName) // services exposed to the user should have "names" like "TempSensor" for this case
       .getCharacteristic(Characteristic.CurrentTemperature)
       .on('get', (_callback) => {
-         _callback(null, this.getCurrentTemperatue());
+         _callback(null, this.getCurrentTemperature());
       });
 }
 
 util.inherits(HomekitTempSensorAccessory, HomekitAccessory);
 
-HomekitTempSensorAccessory.prototype.getCurrentTemperatue = function() {
-   return this.props["temperatue"].value;
+HomekitTempSensorAccessory.prototype.getCurrentTemperature = function() {
+   return this.props["temperature"].value;
 };
 
 HomekitTempSensorAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
