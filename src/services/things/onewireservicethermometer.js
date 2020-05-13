@@ -3,6 +3,7 @@ var Thing = require('../../thing');
 
 function OneWireServiceThermometer(_config, _owner) {
    Thing.call(this, _config, _owner);
+   console.log(this.fullName + ": New thermometer created");
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 10000000;
    this.started = false;
    this.ensurePropertyExists("temperature", 'property', { initialValue: 0, }, this.config);
