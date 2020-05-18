@@ -15,7 +15,7 @@ function Source(_config, _owner) {
    if (_config.hasOwnProperty("mirrorSource")) {
       this.mirroring = true;
       var SourceListener = require('./sourcelistener');
-      this.mirrorSourceListener = new SourceListener({ fullName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
+      this.mirrorSourceListener = new SourceListener({ uName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
    }
 
    if (_config.props) {
@@ -33,7 +33,7 @@ function Source(_config, _owner) {
                                "states": [ { name: "auto", priority: -100 },
                                            { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
    if (this.casa) {
-      console.log(this.fullName + ': Source casa: ' + this.casa.fullName);
+      console.log(this.uName + ': Source casa: ' + this.casa.uName);
       this.casa.addSource(this);
    }
 }
@@ -59,7 +59,7 @@ Source.prototype.getScheduleService = function() {
   var scheduleService =  this.casa.findService("scheduleservice");
 
   if (!scheduleService) {
-     console.error(this.fullName + ": ***** Schedule service not found! *************");
+     console.error(this.uName + ": ***** Schedule service not found! *************");
      process.exit(3);
    }
 
@@ -67,20 +67,20 @@ Source.prototype.getScheduleService = function() {
 };
 
 Source.prototype.scheduledEventTriggered = function(_event) {
-   console.log(this.fullName + ": scheduledEventTriggered() event=" + _event.name);
+   console.log(this.uName + ": scheduledEventTriggered() event=" + _event.name);
 
    if (_event.hasOwnProperty("ramp")) {
-      console.error(this.fullName + ": Ramps are not supported for this type of scheduled event");
+      console.error(this.uName + ": Ramps are not supported for this type of scheduled event");
       return;
    }
 
    if (_event.hasOwnProperty("name")) {
 
       if (_event.hasOwnProperty("value")) {
-         this.raiseEvent(_event.name, { sourceName: this.fullName, value: _event.value });
+         this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
       }
       else {
-         this.raiseEvent(_event.name, { sourceName: this.fullName });
+         this.raiseEvent(_event.name, { sourceName: this.uName });
       }
    }
 };
@@ -89,7 +89,7 @@ Source.prototype.getRampService = function() {
   var rampService =  this.casa.findService("rampservice");
 
   if (!rampService) {
-     console.error(this.fullName + ": ***** Ramp service not found! *************");
+     console.error(this.uName + ": ***** Ramp service not found! *************");
      process.exit(3);
    }
 
@@ -98,7 +98,7 @@ Source.prototype.getRampService = function() {
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
 
-   console.log(this.fullName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
       return this.props[_propName].set(_propValue, _data);
@@ -109,7 +109,7 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
 };
 
 Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
-   console.log(this.fullName + ': Attempting to set Property ' + _propName + ' to ramp');
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
 
    if (this.props.hasOwnProperty(_propName)) {
       return this.props[_propName].setWithRamp(_ramp, _data);
@@ -132,7 +132,7 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
-   console.log(this.fullName + ": updateProperty prop="+_propName+" value="+_propValue);
+   console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
 
@@ -140,11 +140,11 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
          return true;
       }
 
-      console.log(this.fullName + ': Setting Property ' + _propName + ' to ' + _propValue);
+      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
-      sendData.sourceName =  this.fullName;
+      sendData.sourceName =  this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
@@ -157,7 +157,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.props[_propName].propertyAboutToChange(_propValue, sendData);
       this.propertyAboutToChange(_propName, _propValue, sendData);
 
-      console.info(this.fullName + ': Property Changed: ' + _propName + ': ' + _propValue);
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
 
@@ -244,32 +244,32 @@ Source.prototype.coldStart = function() {
 
 // Called by stateproperty to take control based on setting a action property
 Source.prototype.takeControl = function(_newController, _priority) {
-   console.log(this.fullName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
+   console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
 
    if (this.controller === null) {
-      console.log(this.fullName + ": Controller "+_newController.name+" is taking control");
+      console.log(this.uName + ": Controller "+_newController.name+" is taking control");
       this.controller = _newController;
       this.controllerPriority = _priority;
    }
    else if (_newController != this.controller) {
 
       if (_priority >= this.controllerPriority) {
-         console.log(this.fullName + ": Controller "+_newController.name+" is taking control");
+         console.log(this.uName + ": Controller "+_newController.name+" is taking control");
          var oldController = this.controller;
          var oldControllerPriority = this.controllerPriority;
          this.controller = _newController;
          this.controllerPriority = _priority;
 
          if (oldController) {
-            console.log(this.fullName + ": Old controller "+oldController.name+" is losing control");
+            console.log(this.uName + ": Old controller "+oldController.name+" is losing control");
             this.addSecondaryController(oldController, oldControllerPriority);
             oldController.ceasedToBeController(this.controller);
          }
       }
       else {
-         console.log(this.fullName + ": Controller "+_newController.name+" failed to take control from " + this.controller.name);
-         console.log(this.fullName + ": Controller "+_newController.name+" failed priority=" + _priority + " vs " + this.controller.name + " priority=" + this.controllerPriority);
+         console.log(this.uName + ": Controller "+_newController.name+" failed to take control from " + this.controller.name);
+         console.log(this.uName + ": Controller "+_newController.name+" failed priority=" + _priority + " vs " + this.controller.name + " priority=" + this.controllerPriority);
          this.addSecondaryController(_newController, _priority);
          result = false;
       }
@@ -303,16 +303,16 @@ Source.prototype.reprioritiseCurrentController = function(_newPriority) {
 
    if (_newPriority != this.controllerPriority) {
       // Same controlling stateProperty but different priority - reassess if it still should be a controller
-      console.log(this.fullName + ": Existing controller "+this.controller.name+" is changing priority");
+      console.log(this.uName + ": Existing controller "+this.controller.name+" is changing priority");
 
       if (this.secondaryControllers && (this.secondaryControllers.length > 0)) {
 
          if (_newPriority >= this.secondaryControllers[0].priority) {
-            console.log(this.fullName + ": Existing controller "+this.controller.name+" has retained control with new priority");
+            console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
             this.controllerPriority = _newPriority;
          }
          else {
-            console.log(this.fullName + ": Controller "+this.controller.name+" is losing control");
+            console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
             var losingController = this.controller;
             this.controllerPriority = this.secondaryControllers[0].priority;
             this.controller = this.secondaryControllers[0].controller;
@@ -324,7 +324,7 @@ Source.prototype.reprioritiseCurrentController = function(_newPriority) {
          }
       }
       else {
-         console.log(this.fullName + ": Existing controller "+this.controller.name+" has retained control with new priority");
+         console.log(this.uName + ": Existing controller "+this.controller.name+" has retained control with new priority");
          this.controllerPriority = _newPriority;
       }
    }

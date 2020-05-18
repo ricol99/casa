@@ -45,19 +45,19 @@ StateProperty.prototype.coldStart = function(_data) {
 };
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
-   console.log(this.fullName + ": state about to change to " + _propertyValue);
+   console.log(this.uName + ": state about to change to " + _propertyValue);
    this.setState(_propertyValue);
 };
 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   console.log(this.fullName + ": Event received when in state " + this.value);
+   console.log(this.uName + ": Event received when in state " + this.value);
 
    var name = _data.name
    var value = _data.value;
    var source = null;
 
    if (!this.sourceListeners[_sourceListener.sourceEventName]) {
-      console.log(this.fullName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
+      console.log(this.uName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
       return;
    }
 
@@ -74,7 +74,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                   this.resetStateTimer(this.currentState);
                }
                else {
-                  this.set(this.transformNextState(source.nextState), { sourceName: this.owner.fullName });
+                  this.set(this.transformNextState(source.nextState), { sourceName: this.owner.uName });
                }
             }
             else if (source.hasOwnProperty('handler')) {
@@ -134,7 +134,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                   value = parseInt(value);
                 }
                 else {
-                   console.error(this.fullName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                   console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
                    return;
                 }
             }
@@ -162,7 +162,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                value = parseInt(value);
              }
              else {
-                console.error(this.fullName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
+                console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
                 return;
              }
          }
@@ -181,7 +181,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
 StateProperty.prototype.timeoutInternal = function(_timeoutState) {
    this.stateTimer = null;
-   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.fullName });
+   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.uName });
 };
 
 StateProperty.prototype.transformNextState = function(_nextState) {
@@ -205,7 +205,7 @@ StateProperty.prototype.transformNextState = function(_nextState) {
             }
             else {
                nextState = immediateNextState;
-               console.log(this.fullName+": Immediate State transition, nextState="+nextState);
+               console.log(this.uName+": Immediate State transition, nextState="+nextState);
             }
          }
          else {
@@ -214,7 +214,7 @@ StateProperty.prototype.transformNextState = function(_nextState) {
       }
 
       if (immediateNextState) {
-         console.error(this.fullName + ": State machine is broken as state model has gone through 10 immediate state transitions");
+         console.error(this.uName + ": State machine is broken as state model has gone through 10 immediate state transitions");
          process.exit(3);
       }
    }
@@ -237,14 +237,14 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
 };
 
 StateProperty.prototype.setState = function(_nextStateName) {
-   console.log(this.fullName+": setState state="+_nextStateName);
+   console.log(this.uName+": setState state="+_nextStateName);
    this.previousState = this.value;
 
    var clearTimerResult = this.clearStateTimer();
 
    if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
       // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
-      console.log(this.fullName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
+      console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
       clearTimerResult.timeLeft = 1;
    }
 
@@ -274,10 +274,10 @@ StateProperty.prototype.setState = function(_nextStateName) {
       var immediateNextState = nextState.initialise();
 
       if (immediateNextState) {
-         console.log(this.fullName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
+         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
          setTimeout( (_nextStateName) => {
-            this.set(_nextStateName, { sourceName: this.owner.fullName });
+            this.set(_nextStateName, { sourceName: this.owner.uName });
          }, 1, this.transformNextState(immediateNextState));
       }
       else {
@@ -287,7 +287,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
       this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
    else {
-      console.error(this.fullName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
+      console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
    }
 };
 
@@ -352,15 +352,15 @@ StateProperty.prototype.ceasedToBeController = function(_newController) {
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListenerName;
 
-   if (!_config.hasOwnProperty("fullName") || _config.fullName == undefined) {
-      _config.fullName = this.owner.fullName;
+   if (!_config.hasOwnProperty("uName") || _config.uName == undefined) {
+      _config.uName = this.owner.uName;
    }
 
    if (_config.hasOwnProperty("value")) {
-      sourceListenerName = _config.fullName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
+      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
    }
    else {
-      sourceListenerName = _config.fullName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
+      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
    }
 
    var sourceListener = this.sourceListeners[sourceListenerName];
@@ -397,7 +397,7 @@ StateProperty.prototype.ownerHasNewName = function() {
 function State(_config, _owner) {
    NamedObject.call(this, { name: _config.name, type: "state" }, _owner);
 
-   this._id = this.fullName;
+   this._id = this.uName;
    this.sourceMap = {};
    this.activeGuardedSources = [];
    this.activeGuardedActions = [];
@@ -474,8 +474,8 @@ function State(_config, _owner) {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (!this.sources[i].hasOwnProperty("fullName")) {
-            this.sources[i].fullName = this.owner.owner.fullName;
+         if (!this.sources[i].hasOwnProperty("uName")) {
+            this.sources[i].uName = this.owner.owner.uName;
          }
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
@@ -497,7 +497,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.sources[i].guards[k], "active", true);
 
                   if (this.sources[i].guards[k].active) {
-                     this.sources[i].guards[k].fullName = this.owner.owner.fullName;
+                     this.sources[i].guards[k].uName = this.owner.owner.uName;
                      this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
                   }
                }
@@ -522,7 +522,7 @@ function State(_config, _owner) {
                   util.ensureExists(this.actions[l].guards[m], "active", true);
 
                   if (this.actions[l].guards[m].active) {
-                     this.actions[l].guards[m].fullName = this.owner.owner.fullName;
+                     this.actions[l].guards[m].uName = this.owner.owner.uName;
                      this.actions[l].guards[m].sourceListener = this.owner.fetchOrCreateSourceListener(this.actions[l].guards[m]);
                   }
                }
@@ -541,7 +541,7 @@ function State(_config, _owner) {
       }
 
       if (!this.scheduleService) {
-         console.error(this.fullName + ": ***** Schedule service not found! *************");
+         console.error(this.uName + ": ***** Schedule service not found! *************");
          process.exit(3);
       }
 
@@ -554,7 +554,7 @@ function State(_config, _owner) {
                util.ensureExists(this.schedules[n].guards[p], "active", true);
 
                if (this.schedules[n].guards[p].active) {
-                  this.schedules[n].guards[p].fullName = this.owner.owner.fullName;
+                  this.schedules[n].guards[p].uName = this.owner.owner.uName;
                   this.schedules[n].guards[p].sourceListener = this.owner.fetchOrCreateSourceListener(this.schedules[n].guards[p]);
                }
             }
@@ -585,7 +585,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    var source = this.checkActiveSourceGuards(_name, _value);
 
    if (source) {
-      console.log(this.fullName+": processSourceEvent() active guard is now met");
+      console.log(this.uName+": processSourceEvent() active guard is now met");
       return source;
    }
 
@@ -653,7 +653,7 @@ State.prototype.processActiveActionGuards = function(_propName, _propValue) {
          if (this.activeGuardedActions[a].guards[i].active && (this.activeGuardedActions[a].guards[i].property === _propName)) {
 
             if ((_propValue === this.activeGuardedActions[a].guards[i].value) && this.checkGuard(this.activeGuardedActions[a])) {
-               console.log(this.fullName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
+               console.log(this.uName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
                newActionsFound++;
                actionsMet.push(this.activeGuardedActions[a]);
             }
@@ -680,7 +680,7 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
          if (this.activeGuardedSources[a].guards[i].active && (this.activeGuardedSources[a].guards[i].property === _propName)) {
 
             if ((_propValue === this.activeGuardedSources[a].guards[i].value) && this.checkGuard(this.activeGuardedSources[a])) {
-               console.log(this.fullName + ": checkActiveSourceGuards() Found active guard!");
+               console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
                return this.activeGuardedSources[a];
             }
          }
@@ -755,7 +755,7 @@ State.prototype.checkSourceProperties = function() {
       for (var i = 0; i < this.sources.length; i++) {
 
          if (this.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
-            var sourceName = this.sources[i].hasOwnProperty("fullName") ? this.sources[i].fullName : this.owner.owner.fullName;
+            var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
             var sourceEventName = sourceName + ":" + this.sources[i].property + ":" + this.sources[i].value.toString();
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;
@@ -765,7 +765,7 @@ State.prototype.checkSourceProperties = function() {
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
                   immediateNextState = this.sources[i].nextState;
-                  console.log(this.fullName+": Immediate state transition match! source="+this.sources[i].fullName+" property="+this.sources[i].property+" value="+this.sources[i].value);
+                  console.log(this.uName+": Immediate state transition match! source="+this.sources[i].uName+" property="+this.sources[i].property+" value="+this.sources[i].value);
                   break;
                }
             }
@@ -791,26 +791,26 @@ State.prototype.exiting = function(_event, _value) {
 };
 
 State.prototype.scheduledEventTriggered = function(_event) {
-   console.log(this.fullName + ": scheduledEventTriggered() event name=" + _event.name);
+   console.log(this.uName + ": scheduledEventTriggered() event name=" + _event.name);
 
    if (_event.hasOwnProperty("name") && (_event.name != undefined)) {
 
       if (_event.hasOwnProperty("value")) {
-         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.fullName, value: _event.value });
+         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName, value: _event.value });
       }
       else {
-         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.fullName });
+         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName });
       }
    }
 
    if (_event.config.hasOwnProperty("nextState")) {
 
       if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
-         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.fullName });
+         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.uName });
       }
    }
    else {
-      this.owner.set(this.name, { sourceName: this.owner.owner.fullName });
+      this.owner.set(this.name, { sourceName: this.owner.owner.uName });
    }
 }
 

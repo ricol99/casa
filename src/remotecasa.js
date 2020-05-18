@@ -22,20 +22,20 @@ function RemoteCasa(_config, _peerCasa) {
    this.peerCasa.on('casa-active', (_data) => {
 
       if (!this.isActive()) {
-         console.log(this.fullName + ': Connected to my peer. Going active.');
+         console.log(this.uName + ': Connected to my peer. Going active.');
 
          // listen for source changes from peer casas
          this.establishListeners(true);
 
-         this.alignPropertyValue('ACTIVE', true, { sourceName: this.fullName });
+         this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
       }
    });
 
    this.peerCasa.on('casa-inactive', (_data) => {
 
       if (this.isActive()) {
-         console.log(this.fullName + ': Lost connection to my peer. Going inactive.');
-         this.alignPropertyValue('ACTIVE', false, { sourceName: this.fullName });
+         console.log(this.uName + ': Lost connection to my peer. Going inactive.');
+         this.alignPropertyValue('ACTIVE', false, { sourceName: this.uName });
       }
    });
 }
@@ -48,7 +48,7 @@ RemoteCasa.prototype.establishListeners = function(_force) {
 
       // listen for sourcechanges from peer casas
       this.peerCasa.on('source-property-changed', (_data) => {
-         console.log(this.fullName + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
+         console.log(this.uName + ': Event received from remote casa. Event name: property-changed, source: ' + _data.sourceName);
 
          if (this.sources[_data.sourceName]) {
             this.sources[_data.sourceName].sourceHasChangedProperty(_data);
@@ -57,7 +57,7 @@ RemoteCasa.prototype.establishListeners = function(_force) {
       });
 
       this.peerCasa.on('source-event-raised', (_data) => {
-         console.log(this.fullName + ': Event received from remote casa. Event name: event-raised, source: ' + _data.sourceName);
+         console.log(this.uName + ': Event received from remote casa. Event name: event-raised, source: ' + _data.sourceName);
 
          if (this.sources[_data.sourceName]) {
             this.sources[_data.sourceName].sourceHasRaisedEvent(_data);
@@ -87,9 +87,9 @@ RemoteCasa.prototype.setSourcePropertyWithRamp = function(_source, _property, _r
 
 RemoteCasa.prototype.addSource = function(_source) {
    // Peer source being added to remote casa
-   console.log(this.fullName + ': Source '  +_source.name + ' added to remote casa ');
+   console.log(this.uName + ': Source '  +_source.name + ' added to remote casa ');
    this.sources[_source.name] = _source;
-   console.log(this.fullName + ': ' + _source.name + ' associated!');
+   console.log(this.uName + ': ' + _source.name + ' associated!');
 }
 
 RemoteCasa.prototype.invalidate = function() {
@@ -97,7 +97,7 @@ RemoteCasa.prototype.invalidate = function() {
    for(var prop in this.sources) {
 
       if(this.sources.hasOwnProperty(prop)){
-         console.log(this.fullName + ': Invaliding source ' + this.sources[prop].name);
+         console.log(this.uName + ': Invaliding source ' + this.sources[prop].name);
          this.sources[prop].invalidate();
          delete this.sources[prop];
       }

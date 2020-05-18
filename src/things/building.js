@@ -53,7 +53,7 @@ function Building(_config, _parent) {
                                "source": { "property": "daylight", "transform": "!$value" }}, _config);
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findNamedObject(_config.users[u].fullName));
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
    }
 
    for (var i = 0; i < this.users.length; ++i) {
@@ -84,19 +84,19 @@ function Building(_config, _parent) {
       if (_config.hasOwnProperty('bedrooms')) {
 
          for (var j = 0; j < _config.bedrooms.length; ++j) {
-            var listen = _config.bedrooms[j].hasOwnProperty("users") ? _config.bedrooms[j].users.includes(this.users[i].fullName) : true;
+            var listen = _config.bedrooms[j].hasOwnProperty("users") ? _config.bedrooms[j].users.includes(this.users[i].uName) : true;
 
             if (listen) {
-               this.userStateConfigs[i].states[0].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[1].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[2].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": false, "nextState": "present" });
+               this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": false, "nextState": "present" });
             }
          }
       }
 
       this.ensurePropertyExists(this.users[i].name+"-present", 'property', { name: this.users[i].name+"-present", initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "fullName": this.fullName, "property": this.users[i].name+"-user-state" }}, {});
+      this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].name+"-user-state" }}, {});
 
       allUsersAwayConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"not-present\"" });
       allUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value!==\"present\"" });
@@ -135,15 +135,15 @@ function Building(_config, _parent) {
    if (_config.hasOwnProperty('bedrooms')) {
          
       for (var j = 0; j < _config.bedrooms.length; ++j) {
-         movementConfig.sources.push({ "fullName": _config.bedrooms[j].fullName, "property": "movement" });
-         anyUsersSensitiveConfig.sources.push({ "fullName": _config.bedrooms[j].fullName, "property": "users-sensitive" });
+         movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement" });
+         anyUsersSensitiveConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "users-sensitive" });
       }
    }
 
    if (_config.hasOwnProperty('rooms')) {
          
       for (var r = 0; r < _config.rooms.length; ++r) {
-         movementConfig.sources.push({ "fullName": _config.rooms[r].fullName, "property": "movement" });
+         movementConfig.sources.push({ "uName": _config.rooms[r].uName, "property": "movement" });
       }
    }
 

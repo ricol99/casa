@@ -38,8 +38,8 @@ function Property(_config, _owner) {
       for (var index = 0; index < _config.sources.length; ++index) {
          this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
 
-         if (!_config.sources[index].hasOwnProperty("fullName") || _config.sources[index].fullName == undefined) {
-            _config.sources[index].fullName = this.owner.fullName;
+         if (!_config.sources[index].hasOwnProperty("uName") || _config.sources[index].uName == undefined) {
+            _config.sources[index].uName = this.owner.uName;
          }
 
          var sourceListener = new SourceListener(_config.sources[index], this);
@@ -52,11 +52,11 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty('target')) {
-      _config.target.fullName = (_config.target.hasOwnProperty("fullName")) ? _config.target.fullName : this.owner.fullName;
+      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.uName;
       this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
       this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
 
-      this.targetListener = new SourceListener({ fullName: _config.target, property: this.targetProperty, isTarget: true,
+      this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
                                                  ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
                                                  transformMap:_config.targetTransformMap}, this);
 
@@ -81,7 +81,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.cancelCurrentRamp();
 
    if (_data == undefined) {
-      _data = { sourceName: this.owner.fullName };
+      _data = { sourceName: this.owner.uName };
    }
 
    this.checkData(_newPropValue, _data);
@@ -136,7 +136,7 @@ Property.prototype.cancelCurrentRamp = function() {
 };
 
 Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
-   console.log(this.fullName + ": New value from ramp, property=" + this.name + ", value=" + _value);
+   console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
    this.setPropertyInternal(_value, this.rampData);
 };
 
@@ -197,7 +197,7 @@ Property.prototype.sourceIsValid = function(_data) {
 // when they override Property.prototype.sourceIsInvalid()
 //
 Property.prototype.invalidate = function (_includeChildren) {
-   console.log(this.fullName + ': INVALID');
+   console.log(this.uName + ': INVALID');
    this.owner.propertyGoneInvalid(this.name);
    NamedObject.prototype.invalidate.call(this);
    this.cancelCurrentRamp();
@@ -213,7 +213,7 @@ Property.prototype.goValid = function (_data) {
 // Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
 Property.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.fullName + ': Property.prototype.sourceIsInvalid');
+   console.log(this.uName + ': Property.prototype.sourceIsInvalid');
 
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -274,9 +274,9 @@ Property.prototype.newEventReceivedFromTarget = function(_targetListener, _data)
 Property.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
-      console.log(this.fullName + ": Cold starting, emiting initialValue="+this.value);
+      console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
       this.cold = false;
-      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.fullName, coldStart: true });
+      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
 };
 
@@ -285,7 +285,7 @@ Property.prototype.coldStart = function(_data) {
 // ====================
 
 Property.prototype.setPropertyInternal = function(_newValue, _data) {
-   console.log(this.fullName + ": setPropertyInternal value="+_newValue);
+   console.log(this.uName + ": setPropertyInternal value="+_newValue);
 
    if (this.value !== _newValue || this.cold) {
 
@@ -337,7 +337,7 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
 
 Property.prototype.checkData = function(_value, _data) {
 
-   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.fullName;
+   if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.uName;
    if (!_data.hasOwnProperty('name')) _data.name = this.name;
    if (!_data.hasOwnProperty('value')) _data.value = _value;
 }

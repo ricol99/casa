@@ -7,7 +7,7 @@ function NamedObject(_config, _owner) {
    // Allow the creation of a named root
    if (_owner && (typeof _owner === "string")) {
       this.owner = null;
-      this.fullName = _owner;
+      this.uName = _owner;
       this.name = _config.name;
       this.type = _config.type;
    }
@@ -17,7 +17,7 @@ function NamedObject(_config, _owner) {
          this.owner = _owner.findOwner(_config.name);
 
          if (this.owner) {
-            this.name = _config.name.replace(this.owner.fullName+":", ""); 
+            this.name = _config.name.replace(this.owner.uName+":", ""); 
          }
          else {
             console.error("namedobject:"+_config.name+ ": Owner not found!");
@@ -29,7 +29,7 @@ function NamedObject(_config, _owner) {
          this.name = _config.name;
       }
 
-      this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
+      this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
       this.type = _config.type;
    }
 
@@ -51,14 +51,14 @@ NamedObject.prototype.setOwner = function(_owner) {
    }
 
    this.owner = _owner;
-   var oldFullName = this.fullName;
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : this.name;
+   var oldUName = this.uName;
+   this.uName = this.owner ? this.owner.uName + ":" + this.name : this.name;
    
    if (this.owner) {
       this.owner.addChildNamedObject(this);
    }
 
-   if (this.fullName !== oldFullName) {
+   if (this.uName !== oldUName) {
 
       for (var child in this.myNamedObjects) {
 
@@ -69,13 +69,13 @@ NamedObject.prototype.setOwner = function(_owner) {
    }
 };
 
-NamedObject.prototype.findOwner = function(_fullName) {
+NamedObject.prototype.findOwner = function(_uName) {
 
-   if (_fullName.length < 2) {
+   if (_uName.length < 2) {
       return null;
    }
 
-   var filterArray = _fullName.substr(2).split(":");
+   var filterArray = _uName.substr(2).split(":");
 
    if (filterArray.length <= 2) {
       return this;
@@ -96,7 +96,7 @@ NamedObject.prototype.findOwner = function(_fullName) {
 };
 
 NamedObject.prototype.addNamedObject = function(_obj) {
-   var owner = this.findOwner(_obj.fullName);
+   var owner = this.findOwner(_obj.uName);
 
    if (!owner) {
       return false;
@@ -106,8 +106,8 @@ NamedObject.prototype.addNamedObject = function(_obj) {
    return true;
 };
 
-NamedObject.prototype.detach = function(_fullName) {
-   console.log(this.fullName + ": AAAAAAAA detach()");
+NamedObject.prototype.detach = function(_uName) {
+   console.log(this.uName + ": AAAAAAAA detach()");
 
    if (this.owner) {
       this.owner.removeChildNamedObject(this);
@@ -115,8 +115,8 @@ NamedObject.prototype.detach = function(_fullName) {
 
    this.owner = null;
 
-   if (_fullName) {
-      this.fullName = _fullName;
+   if (_uName) {
+      this.uName = _uName;
 
       for (var child in this.myNamedObjects) {
 
@@ -128,14 +128,14 @@ NamedObject.prototype.detach = function(_fullName) {
 };
 
 NamedObject.prototype.setName = function(_name) {
-   console.log(this.fullName + ": About to change name to "+_name);
+   console.log(this.uName + ": About to change name to "+_name);
 
    if (this.owner) {
       this.owner.removeChildNamedObject(this);
    }
 
    this.name = _name;
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
+   this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
 
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -150,7 +150,7 @@ NamedObject.prototype.setName = function(_name) {
 };
 
 NamedObject.prototype.ownerHasNewName = function() {
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
+   this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
 
    for (var child in this.myNamedObjects) {
 
@@ -162,7 +162,7 @@ NamedObject.prototype.ownerHasNewName = function() {
 
 NamedObject.prototype.validate = function(_includeChildren) {
    var str =  _includeChildren ? " and all children" : "";
-   console.log(this.fullName + ": Validating object" + str);
+   console.log(this.uName + ": Validating object" + str);
 
    if (_includeChildren) {
 
@@ -177,7 +177,7 @@ NamedObject.prototype.validate = function(_includeChildren) {
 
 NamedObject.prototype.invalidate = function(_includeChildren) {
    var str =  _includeChildren ? " and all children" : "";
-   console.log(this.fullName + ": Invalidating object" +str);
+   console.log(this.uName + ": Invalidating object" +str);
 
    if (_includeChildren) {
 
@@ -245,10 +245,10 @@ NamedObject.prototype.filterName = function(_name)  {
       return result;
    }
    else if (newName === "") {
-      var fullName = (this.fullName === ":") ? "::" : this.fullName;
-      result.hits.push(fullName);
+      var uName = (this.uName === ":") ? "::" : this.uName;
+      result.hits.push(uName);
       result.namedObject = this;
-      result.name = fullName;
+      result.name = uName;
       result.remainingStr = "";
       return result;
    }
@@ -266,7 +266,7 @@ NamedObject.prototype.filterName = function(_name)  {
          perfectMatch = result.hits.length;
       }
 
-      result.hits.push(this.fullName+":"+_obj);
+      result.hits.push(this.uName+":"+_obj);
    });
 
    if (perfectMatch !== -1) {
@@ -281,7 +281,7 @@ NamedObject.prototype.filterName = function(_name)  {
       var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");
 
       if (!result.hasOwnProperty("remainingStr") || (result.remainingStr.length > remainingStr.length)) {
-         result.name = this.fullName;
+         result.name = this.uName;
          result.namedObject = this;
          result.remainingStr = remainingStr;
       }

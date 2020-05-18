@@ -14,7 +14,7 @@ function ChildCasaArea(_config) {
 util.inherits(ChildCasaArea, CasaArea);
 
 ChildCasaArea.prototype.broadcastCb = function(_message) {
-   console.log(this.fullName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
+   console.log(this.uName + ': Event received from child. Event name: ' + _message.message +', source: ' + _message.data.sourceName);
 
    // Broadcast to all my siblings
    for(var prop in this.gang.childCasaAreas) {
@@ -24,7 +24,7 @@ ChildCasaArea.prototype.broadcastCb = function(_message) {
 
          // Is the area a sibling?
          if (childCasaArea != this) {
-            console.log(this.fullName + ': Broadcasting to child area ' + childCasaArea.name);
+            console.log(this.uName + ': Broadcasting to child area ' + childCasaArea.name);
             childCasaArea.broadcastMessage(_message);
          }
       }
@@ -40,11 +40,11 @@ ChildCasaArea.prototype.broadcastCb = function(_message) {
 };
 
 ChildCasaArea.prototype.forwardRequestCb = function(_data) {
-   console.log(this.fullName + ': Forward event request from child. Source: ' + _data.data.sourceName);
+   console.log(this.uName + ': Forward event request from child. Source: ' + _data.data.sourceName);
 };
 
 ChildCasaArea.prototype.forwardResponseCb = function(_data) {
-   console.log(this.fullName + ': Forward event response from child. Source: ' + _data.data.sourceName);
+   console.log(this.uName + ': Forward event response from child. Source: ' + _data.data.sourceName);
 };
 
 ChildCasaArea.prototype.buildCasaForwardingList = function() {

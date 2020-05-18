@@ -427,18 +427,18 @@ Gang.prototype.createThing = function(_config, _owner) {
    var Thing = this.cleverRequire(_config.hasOwnProperty("type") ? _config.type : "thing", "things");
 
    if (!Thing) {
-      console.error(this.fullName + ": Thing "+_config.name+" does not exist");
+      console.error(this.uName + ": Thing "+_config.name+" does not exist");
       return null;
    }
 
    var thingObj = new Thing(_config, _owner);
-   this.things[thingObj.fullName] = thingObj;
-   console.log('New thing: ' + thingObj.fullName);
+   this.things[thingObj.uName] = thingObj;
+   console.log('New thing: ' + thingObj.uName);
    return thingObj;
 };
 
 Gang.prototype.removeThing = function(_thing) {
-   delete this.things[_thing.fullName];
+   delete this.things[_thing.uName];
    this.removeNamedObject(_thing);
 };
 
@@ -565,13 +565,13 @@ Gang.prototype.extractParentCasa = function() {
 
       var PeerCasa = require('./peercasa');
       this.parentCasa = new PeerCasa(this.config.parentCasa, this);
-      this.remoteCasas[this.parentCasa.fullName] = this.parentCasa;
-      console.log('New parentcasa: ' + this.parentCasa.fullName);
+      this.remoteCasas[this.parentCasa.uName] = this.parentCasa;
+      console.log('New parentcasa: ' + this.parentCasa.uName);
 
       var ParentCasaArea = require('./parentcasaarea');
       this.parentCasaArea = new ParentCasaArea ({ name: 'my-parent' });
-      this.casaAreas[this.parentCasaArea.fullName] = this.parentCasaArea;
-      console.log('New parentcasaarea: ' + this.parentCasaArea.fullName);
+      this.casaAreas[this.parentCasaArea.uName] = this.parentCasaArea;
+      console.log('New parentcasaarea: ' + this.parentCasaArea.uName);
 
       this.parentCasa.setCasaArea(this.parentCasaArea);
    }
@@ -582,7 +582,7 @@ Gang.prototype.coldStartThings = function() {
    for(var prop in this.things) {
 
       if (this.things.hasOwnProperty(prop)){
-         console.log(this.fullName + ': Cold starting thing ' + this.things[prop].fullName);
+         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
          this.things[prop].coldStart();
       }
    }
@@ -591,7 +591,7 @@ Gang.prototype.coldStartThings = function() {
 Gang.prototype.createPeerCasaArea = function() {
    var PeerCasaArea = require('./peercasaarea');
    this.peerCasaArea= new PeerCasaArea({ name: 'my-peers' });
-   this.casaAreas[this.peerCasaArea.fullName] = this.peerCasaArea;
+   this.casaAreas[this.peerCasaArea.uName] = this.peerCasaArea;
 }
 
 Gang.prototype.createChildCasaArea = function(_casas) {
@@ -600,8 +600,8 @@ Gang.prototype.createChildCasaArea = function(_casas) {
 
    this.areaId = (this.areaId + 1) % 100000;
 
-   this.casaAreas[childCasaArea.fullName] = childCasaArea;
-   this.childCasaAreas[childCasaArea.fullName] = childCasaArea;
+   this.casaAreas[childCasaArea.uName] = childCasaArea;
+   this.childCasaAreas[childCasaArea.uName] = childCasaArea;
 
    var len = _casas.length;
 
@@ -616,8 +616,8 @@ Gang.prototype.findCasaArea = function(_areaName) {
 }
 
 Gang.prototype.deleteCasaArea = function(_area) {
-   delete this.casaAreas[_area.fullName];
-   delete this.childCasaAreas[_area.fullName];
+   delete this.casaAreas[_area.uName];
+   delete this.childCasaAreas[_area.uName];
 
    if (_area == this.parentCasaArea) {
       this.parentCasaArea = null;
@@ -687,7 +687,7 @@ Gang.prototype.createChildCasa = function(_config, _peers) {
       childCasa.setCasaArea(area);
    }
 
-   this.remoteCasas[childCasa.fullName] = childCasa;
+   this.remoteCasas[childCasa.uName] = childCasa;
 
    this.setUberCasa(true);
    return childCasa;
@@ -701,7 +701,7 @@ Gang.prototype.createPeerCasa = function(_config, _anonymous) {
    peerCasa.setCasaArea(this.peerCasaArea);
 
    if (!_anonymous) {
-      this.remoteCasas[peerCasa.fullName] = peerCasa;
+      this.remoteCasas[peerCasa.uName] = peerCasa;
    }
 
    return peerCasa;
@@ -709,19 +709,19 @@ Gang.prototype.createPeerCasa = function(_config, _anonymous) {
 
 Gang.prototype.addRemoteCasa = function(_remoteCasa, _force) {
 
-   if (!_force && this.remoteCasas[_remoteCasa.fullName]) {
+   if (!_force && this.remoteCasas[_remoteCasa.uName]) {
       return false;
    }
 
-   this.remoteCasas[_remoteCasa.fullName] = _remoteCasa;
+   this.remoteCasas[_remoteCasa.uName] = _remoteCasa;
    return true;
 };
 
 Gang.prototype.removeRemoteCasa = function(_remoteCasa) {
 
-   if (this.remoteCasas[_remoteCasa.fullName]) {
-      delete this.remoteCasas[_remoteCasa.fullName];
-      this.remoteCasas[_remoteCasa.fullName] = null;
+   if (this.remoteCasas[_remoteCasa.uName]) {
+      delete this.remoteCasas[_remoteCasa.uName];
+      this.remoteCasas[_remoteCasa.uName] = null;
    }
 };
 
@@ -840,12 +840,12 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
    dbService.updateGangDbFromPeer(_parentCasa.address.hostname, _parentCasa.address.port, (_err, _res) => {
 
       if (_err) {
-         console.error(this.fullName + ": Unable to update my gang db from parent. Error: " + _err);
+         console.error(this.uName + ": Unable to update my gang db from parent. Error: " + _err);
          process.exit(2);
       }
       else {
          // Exit, we have to restart with new Db
-         console.log(this.fullName + ": Gang db updated from parent. Need to restart. Exiting....");
+         console.log(this.uName + ": Gang db updated from parent. Need to restart. Exiting....");
          process.exit(2);
 
          this.gangDb.close();
@@ -864,13 +864,13 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
 };
 
 Gang.prototype.addPeerCasa = function(_peerCasa) {
-  this.peerCasas[_peerCasa.fullName] = _peerCasa;
+  this.peerCasas[_peerCasa.uName] = _peerCasa;
 };
 
 Gang.prototype.removePeerCasa = function(_peerCasa) {
 
-  if (this.peerCasas.hasOwnProperty(_peerCasa.fullName)) {
-     delete this.peerCasas[_peerCasa.fullName];
+  if (this.peerCasas.hasOwnProperty(_peerCasa.uName)) {
+     delete this.peerCasas[_peerCasa.uName];
   }
 };
 
@@ -880,7 +880,7 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
 
    for (var peerCasaName in this.peerCasas) {
 
-      if (this.peerCasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.fullName)) {
+      if (this.peerCasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.uName)) {
          let newSource = this.peerCasas[peerCasaName].getSource(_peerSourceFullName);
 
          if (newSource) {
@@ -897,8 +897,8 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
 
 Gang.prototype.changePeerCasaName = function(_peerCasa, _newName) {
 
-   if (this.peerCasas.hasOwnProperty(_peerCasa.fullName)) {
-      delete this.peerCasas[_peerCasa.fullName];
+   if (this.peerCasas.hasOwnProperty(_peerCasa.uName)) {
+      delete this.peerCasas[_peerCasa.uName];
    }
    this.peerCasas[_newName] = _peerCasa;
 };

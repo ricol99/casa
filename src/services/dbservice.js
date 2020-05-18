@@ -44,7 +44,7 @@ DbService.prototype.coldStart = function() {
 };
 
 DbService.prototype.dbRequested = function(_request, _response) {
-   console.log(this.fullName+": dbRequested() request=", _request.params);
+   console.log(this.uName+": dbRequested() request=", _request.params);
 
    if (!_request.params.hasOwnProperty("dbName")) {
       this.sendFail(_request, _response);
@@ -71,7 +71,7 @@ DbService.prototype.dbRequested = function(_request, _response) {
 };
 
 DbService.prototype.dbHashRequested = function(_request, _response) {
-   console.log(this.fullName+": dbHashRequested() request=", _request.params);
+   console.log(this.uName+": dbHashRequested() request=", _request.params);
 
    if (!_request.params.hasOwnProperty("dbName") || ((_request.params.dbName !== this.gang.name) && (_request.params.dbName !== this.gang.casa.name))) {
       this.sendFail(_request, _response);
@@ -93,11 +93,11 @@ DbService.prototype.dbHashRequested = function(_request, _response) {
 };
 
 DbService.prototype.sceneRequested = function(_request, _response) {
-   console.log(this.fullName+": sceneRequested() request=", _request.params);
+   console.log(this.uName+": sceneRequested() request=", _request.params);
 };
 
 DbService.prototype.scenesRequested = function(_request, _response) {
-   console.log(this.fullName+": scenesRequested() request=", _request.params);
+   console.log(this.uName+": scenesRequested() request=", _request.params);
 
    if (_request.params.hasOwnProperty("scenes")) {
       var allProps = {};
@@ -115,15 +115,15 @@ DbService.prototype.scenesRequested = function(_request, _response) {
 };
 
 DbService.prototype.serviceRequested = function(_request, _response) {
-   console.log(this.fullName+": serviceRequested() request=", _request.params);
+   console.log(this.uName+": serviceRequested() request=", _request.params);
 };
 
 DbService.prototype.servicesRequested = function(_request, _response) {
-   console.log(this.fullName+": servicesRequested() request=", _request.params);
+   console.log(this.uName+": servicesRequested() request=", _request.params);
 };
 
 DbService.prototype.thingRequested = function(_request, _response) {
-   console.log(this.fullName+": thingRequested() request=", _request.params);
+   console.log(this.uName+": thingRequested() request=", _request.params);
 
    if (_request.params.hasOwnProperty("thingName")) {
       var allProps = {};
@@ -143,7 +143,7 @@ DbService.prototype.thingRequested = function(_request, _response) {
 };
 
 DbService.prototype.thingsRequested = function(_request, _response) {
-   console.log(this.fullName+": thingsRequested() request=", _request.params);
+   console.log(this.uName+": thingsRequested() request=", _request.params);
 
    var names = [];
 
@@ -163,7 +163,7 @@ DbService.prototype.getDbHash = function(_dbName) {
 };
 
 DbService.prototype.dbsRequested = function(_request, _response) {
-   console.log(this.fullName+": dbsRequested()");
+   console.log(this.uName+": dbsRequested()");
    _response.send([ this.gang.name, this.gang.casa.name ]);
 };
 

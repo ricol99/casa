@@ -23,21 +23,21 @@ function HomekitAccessory(_config, _parent) {
    this.invokeManualMode = (_config.hasOwnProperty("invokeManualMode")) ? _config.invokeManualMode : true;
    this.service = (_config.hasOwnProperty("service")) ? _config.service : "homekitservice";
 
-   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.fullName);
+   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.thingType + ':' + this.uName);
    this.hkAccessory = new Accessory(this.displayName, this.hkUUID);
 
    this.homekitService = this.casa.findService(this.service);
 
    if (this.homekitService) {
-      console.log(this.fullName+": Homekit service found, so using bridge configuration");
+      console.log(this.uName+": Homekit service found, so using bridge configuration");
    }
    else {
-      console.log(this.fullName+": Homekit service not found, so publishing each accessory separately");
+      console.log(this.uName+": Homekit service not found, so publishing each accessory separately");
       this.pincode = _config.pincode;
       this.username = _config.username;
       this.hkAccessory.username = this.username;
       this.hkAccessory.pincode = this.pincode;
-      this.port = this.casa.allocatePort(this.fullName);
+      this.port = this.casa.allocatePort(this.uName);
    }
 }
 

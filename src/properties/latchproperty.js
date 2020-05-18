@@ -7,7 +7,7 @@ function LatchProperty(_config, _owner) {
 
    if (_config.controller) {
       _config.ignoreTargetUpdates = false;
-      _config.target = _config.controller.fullName;
+      _config.target = _config.controller.uName;
       _config.targetProperty = _config.controller.property;
       _config.transform = _config.controller.transform;
       _config.transformMap = _config.controller.transformMap;
@@ -29,7 +29,7 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    this.lastData = _data;
 
    if (propValue) {
-      console.log(this.fullName + ': target ' + _data.sourceName + ' active!');
+      console.log(this.uName + ': target ' + _data.sourceName + ' active!');
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
@@ -45,7 +45,7 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       }
    }
    else {
-      console.log(this.fullName + ': target ' + _data.sourceName + ' inactive!');
+      console.log(this.uName + ': target ' + _data.sourceName + ' inactive!');
       this.sourceActive = false;
 
       if (this.active) {

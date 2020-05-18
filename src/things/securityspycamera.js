@@ -16,12 +16,12 @@ function SecuritySpyCamera(_config, _parent) {
    this.securitySpyService =  this.casa.findService(this.service);
 
    if (!this.securitySpyService) {
-      console.error(this.fullName + ": ***** Security Spy service not found! *************");
+      console.error(this.uName + ": ***** Security Spy service not found! *************");
       process.exit();
    }
 
    if (_config.hasOwnProperty("triggerSource")) {
-      _config.triggerSource.fullName = (_config.triggerSource.hasOwnProperty("fullName")) ? _config.triggerSource.fullName : this.fullName;
+      _config.triggerSource.uName = (_config.triggerSource.hasOwnProperty("uName")) ? _config.triggerSource.uName : this.uName;
       this.triggerSource = new SourceListener(_config.triggerSource, this);
    }
 
@@ -31,14 +31,14 @@ function SecuritySpyCamera(_config, _parent) {
 util.inherits(SecuritySpyCamera, Thing);
 
 SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   console.log(this.fullName + ': received property change, property='+ _data.sourceEventName + ' value=' + _data.value);
+   console.log(this.uName + ': received property change, property='+ _data.sourceEventName + ' value=' + _data.value);
 
    switch (_propName) {
       case "continuous-capture":
          this.securitySpyService.setContinuousCapture(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(this.fullName + ": Not able to trigger motion event for camera " + this.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
@@ -46,7 +46,7 @@ SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propVal
          this.securitySpyService.setMotionCapture(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(this.fullName + ": Not able to trigger motion event for camera " + this.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
@@ -54,7 +54,7 @@ SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propVal
          this.securitySpyService.setActions(this.id, _propValue, (_err, _res) => {
 
             if (_err) {
-               console.error(this.fullName + ": Not able to trigger motion event for camera " + this.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
          break;
@@ -87,7 +87,7 @@ SecuritySpyCamera.prototype.receivedEventFromSource = function(_data) {
          this.securitySpyService.triggerMotionRecording(this.id, (_err, _result) => {
 
             if (_err) {
-               console.error(this.fullName + ": Not able to trigger motion event for camera " + this.id + "!");
+               console.error(this.uName + ": Not able to trigger motion event for camera " + this.id + "!");
             }
          });
       }

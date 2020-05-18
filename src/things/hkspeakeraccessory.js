@@ -56,7 +56,7 @@ HomekitSpeakerAccessory.prototype.getMuted = function() {
 };
 
 HomekitSpeakerAccessory.prototype.setVolume = function(_status) {
-   console.log(this.fullName + ": Changing volume to " + _status);
+   console.log(this.uName + ": Changing volume to " + _status);
    this.setManualMode("volume");
    this.alignPropertyValue("volume", _status);
 };

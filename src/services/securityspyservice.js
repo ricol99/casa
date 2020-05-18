@@ -77,7 +77,7 @@ SecuritySpyService.prototype.cameraPropUpdateReceivedFromServer = function(_came
 };
 
 SecuritySpyService.prototype.syncWithCameraObj = function(_cameraId) {
-   console.log(this.fullName + ": syncWithCameraObj() Camera ID=" + _cameraId);
+   console.log(this.uName + ": syncWithCameraObj() Camera ID=" + _cameraId);
 
    if (!this.cameras[_cameraId.toString()] || (!this.cameras[_cameraId.toString()].cameraObj)) {
       return;
@@ -152,7 +152,7 @@ SecuritySpyService.prototype.makeNextRequest = function() {
 };
 
 SecuritySpyService.prototype.completeRequest = function(_error, _content) {
-   console.log(this.fullName + ": Request done!");
+   console.log(this.uName + ": Request done!");
 
    this.queue.shift().complete(_error, _content);
 

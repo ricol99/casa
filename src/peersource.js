@@ -2,12 +2,12 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_fullName, _name, _priority, _props, _peerCasa) {
+function PeerSource(_uName, _name, _priority, _props, _peerCasa) {
    var gang = Gang.mainInstance();
-   var bowingOwner = _peerCasa.getBowingSource(_fullName.replace(":"+_name));
+   var bowingOwner = _peerCasa.getBowingSource(_uName.replace(":"+_name));
 
-   var existingSource = gang.findNamedObject(_fullName);
-   var owner = bowingOwner ? bowingOwner : existingSource ? _fullName : gang.findOwner(_fullName);
+   var existingSource = gang.findNamedObject(_uName);
+   var owner = bowingOwner ? bowingOwner : existingSource ? _uName : gang.findOwner(_uName);
 
    SourceBase.call(this, { name: _name, type: "peersource" }, owner);
 
@@ -43,10 +43,10 @@ util.inherits(PeerSource, SourceBase);
 PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
 
    if (_subscription.hasOwnProperty("mirror")) {
-      console.log(this.fullName+": propertySubscribedTo() mirror, sub=",_subscription);
+      console.log(this.uName+": propertySubscribedTo() mirror, sub=",_subscription);
    }
    else {
-      console.log(this.fullName+": propertySubscribedTo() prop="+_property+", sub=",_subscription);
+      console.log(this.uName+": propertySubscribedTo() prop="+_property+", sub=",_subscription);
    }
    this.casa.propertySubscribedTo(this, _property, _subscription, _exists);
 };
@@ -60,11 +60,11 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
          return true;
       }
 
-      console.log(this.fullName + ': Setting Property ' + _propName + ' to ' + _propValue);
+      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
       var oldValue = this.props[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
-      sendData.sourceName = "::"+this.fullName;
+      sendData.sourceName = "::"+this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
@@ -73,7 +73,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       // Call the final hooks
       this.props[_propName].propertyAboutToChange(_propValue, sendData);
 
-      console.info(this.fullName + ': Property Changed: ' + _propName + ': ' + _propValue);
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
@@ -86,17 +86,17 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 }
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
-   console.log(this.fullName + ': Attempting to set source property');
+   console.log(this.uName + ': Attempting to set source property');
    return this.casa.setSourceProperty(this, _propName, _propValue, _data);
 };
 
 PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
-   console.log(this.fullName + ': Attempting to set Property ' + _propName + ' to ramp');
+   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
    return this.casa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
 };
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
-   console.log(this.fullName + ': received changed-property event from peer.');
+   console.log(this.uName + ': received changed-property event from peer.');
 
    let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
@@ -107,17 +107,17 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
 };
 
 PeerSource.prototype.sourceHasRaisedEvent = function(_data) {
-   console.log(this.fullName + ': received event-raised event from peer.');
-   console.info('Event Raised: ' + this.fullName + ':' + _data.name);
+   console.log(this.uName + ': received event-raised event from peer.');
+   console.info('Event Raised: ' + this.uName + ':' + _data.name);
    this.asyncEmit('event-raised', util.copy(_data));
 };
 
 PeerSource.prototype.findNewMainSource = function() {
 
    if (!this.bowing) {
-      var fullName = this.fullName;
-      this.bowToOtherSource(true, this.casa.topSources.hasOwnProperty(fullName));
-      this.casa.findNewMainSource(fullName);
+      var uName = this.uName;
+      this.bowToOtherSource(true, this.casa.topSources.hasOwnProperty(uName));
+      this.casa.findNewMainSource(uName);
    }
 };
 

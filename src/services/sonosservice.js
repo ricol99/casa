@@ -72,11 +72,11 @@ SonosService.prototype.coldStart = function() {
 
          if (!this.players.hasOwnProperty(_attrs.CurrentZoneName)) {
             this.players[_attrs.CurrentZoneName] = [ _device ];
-            console.log(this.fullName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
+            console.log(this.uName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
          }
          else {
             this.players[_attrs.CurrentZoneName].push(_device);
-            console.log(this.fullName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
+            console.log(this.uName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
          }
 
          _device.getTopology().then(_topology => {
@@ -85,7 +85,7 @@ SonosService.prototype.coldStart = function() {
                var u = url.parse(_topology.zones[i].location);
 
                if ((_device.host === u.hostname) && (_topology.zones[i].coordinator === 'true')) {
-                  console.log(this.fullName + ': Found controlling Sonos Player for zone '+_device._currentZoneName+' at ' + _device.host);
+                  console.log(this.uName + ': Found controlling Sonos Player for zone '+_device._currentZoneName+' at ' + _device.host);
 
                   if (_device._oldZoneName) {
 

@@ -9,7 +9,7 @@ function Alarm(_config, _parent) {
    this.scheduleService =  this.gang.casa.findService("scheduleservice");
 
    if (!this.scheduleService) {
-      console.error(this.fullName + ": ***** Schedule service not found! *************");
+      console.error(this.uName + ": ***** Schedule service not found! *************");
       process.exit();
    }
 
@@ -27,10 +27,10 @@ Alarm.prototype.scheduledEventTriggered = function(_event) {
    if (this.getProperty('ACTIVE') {
 
       if (_event.hasOwnProperty("value")) {
-         this.raiseEvent(_event.name, { sourceName: this.fullName, value: _event.value });
+         this.raiseEvent(_event.name, { sourceName: this.uName, value: _event.value });
       }
       else {
-         this.raiseEvent(_event.name, { sourceName: this.fullName });
+         this.raiseEvent(_event.name, { sourceName: this.uName });
       }
    }
 }

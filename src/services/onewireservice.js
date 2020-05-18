@@ -29,7 +29,7 @@ OneWireService.prototype.coldStart = function() {
             this.devices[_data.ids[i]] = this.createThing({ type: this.deviceTypes[deviceType], name: _data.ids[i] });
          }
          else {
-            console.log(this.fullName + ": Unknown Onewire device with type " + deviceType + " attached to pi, ignoring...");
+            console.log(this.uName + ": Unknown Onewire device with type " + deviceType + " attached to pi, ignoring...");
          }
       }
    });

@@ -21,35 +21,35 @@ util.inherits(ScheduleService, Service);
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
    var sched = new Schedule(_owner, _config, this);
 
-   if (this.schedules[_owner.fullName]) {
-      console.error(this.fullName + ": Conflict - an owner has registered more than one set of events! Not supported!");
+   if (this.schedules[_owner.uName]) {
+      console.error(this.uName + ": Conflict - an owner has registered more than one set of events! Not supported!");
       process.exit(3);
    }
 
-   this.schedules[_owner.fullName] = sched;
+   this.schedules[_owner.uName] = sched;
 };
 
 ScheduleService.prototype.getInitialValue = function(_owner) {
-   return this.schedules[_owner.fullName].getInitialValue();
+   return this.schedules[_owner.uName].getInitialValue();
 };
 
 ScheduleService.prototype.addEvent = function(_owner, _event) {
 
-   if (!this.schedules.hasOwnProperty(_owner.fullName)) {
+   if (!this.schedules.hasOwnProperty(_owner.uName)) {
       this.registerEvents(_owner, [ _event ]);
    }
    else {
-      this.schedules[_owner.fullName].addEvent(_event);
+      this.schedules[_owner.uName].addEvent(_event);
    }
 };
 
 ScheduleService.prototype.removeEvent = function(_owner, _eventName) {
 
-   if (!this.schedules.hasOwnProperty(_owner.fullName)) {
+   if (!this.schedules.hasOwnProperty(_owner.uName)) {
       return false;
    }
 
-   return this.schedules[_owner.fullName].removeEvent(_eventName);
+   return this.schedules[_owner.uName].removeEvent(_eventName);
 };
 
 ScheduleService.prototype.getSunTimes = function() {
@@ -95,7 +95,7 @@ Schedule.prototype.createEventsFromConfig = function(_eventsConfig) {
 };
 
 Schedule.prototype.createRuleFromConfig = function(_event, _ruleConfig) {
-   console.log(this.fullName + ": createRuleFromConfig() ruleConfig="+JSON.stringify(_ruleConfig));
+   console.log(this.uName + ": createRuleFromConfig() ruleConfig="+JSON.stringify(_ruleConfig));
    var rule = { event: _event, sunTime: false, job: null };
 
    if (typeof _ruleConfig == "string") {
@@ -173,7 +173,7 @@ Schedule.prototype.lastEventScheduledBeforeNow = function(_now, _rule) {
 
     } catch (err) {
        // Not scheduled during time period
-       console.log(this.fullName + ': Error: ' + err.message);
+       console.log(this.uName + ': Error: ' + err.message);
     }
 
     return (lastScheduled) ? lastScheduled.value : null;
@@ -264,11 +264,11 @@ Schedule.prototype.setSunTimes = function(_sunTimes) {
       for (var rindex = 0; rindex < this.events[index].rules.length; ++rindex) {
 
          if ((typeof this.events[index].rules[rindex].original == 'string') && _sunTimes[this.events[index].rules[rindex].original]) {
-            console.log(this.fullName + ': Rule ' + this.events[index].rules[rindex].original + ' is a sun time');
+            console.log(this.uName + ': Rule ' + this.events[index].rules[rindex].original + ' is a sun time');
             this.events[index].rules[rindex].rule = new Date(_sunTimes[this.events[index].rules[rindex].original]);
             this.events[index].rules[rindex].rule.setTime(this.events[index].rules[rindex].rule.getTime() + (this.events[index].rules[rindex].delta * 1000));
             this.events[index].rules[rindex].sunTime = true;
-            console.log(this.fullName + ': Sun time ' + this.events[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.events[index].rules[rindex].rule);
+            console.log(this.uName + ': Sun time ' + this.events[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.events[index].rules[rindex].rule);
          }
          else if (this.events[index].rules[rindex].random) {
             //  *** TBD how do we intepret CRON? Only a subset, one time per day per rule?
@@ -293,8 +293,8 @@ Schedule.prototype.resetJob = function(_rule) {
       _rule.job.mySchedule = this;
    }
    else {
-      console.error(this.fullName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
-      throw(this.name + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
+      console.error(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
+      throw(this.name + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.uName);
    }
 }
 
@@ -313,7 +313,7 @@ Schedule.prototype.getInitialValue = function() {
    }
 
    if (closestEvent) {
-      console.log(this.fullName + ": Closest event is " + closestEvent.rules[0].rule);
+      console.log(this.uName + ": Closest event is " + closestEvent.rules[0].rule);
 
       if (closestEvent.hasOwnProperty("ramp")) {
 
@@ -325,7 +325,7 @@ Schedule.prototype.getInitialValue = function() {
          }
       }
       else {
-         console.log(this.fullName + ": Closest Event - initial value = " + closestEvent.value);
+         console.log(this.uName + ": Closest Event - initial value = " + closestEvent.value);
          return { initialValueFound: true, value: closestEvent.value };
       }
    }

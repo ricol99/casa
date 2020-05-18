@@ -9,9 +9,9 @@ function SourceListener(_config, _owner) {
    this.casa = this.gang.casa;
    this.owner = _owner;
 
-   this.sourceName = _config.fullName;
+   this.sourceName = _config.uName;
 
-   if (_config.fullName == undefined) {
+   if (_config.uName == undefined) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
    }
 
@@ -61,14 +61,14 @@ function SourceListener(_config, _owner) {
       this.sourceEventName = this.sourceName + ":" + this.eventName;
    }
 
-   if (!this.owner.fullName) {
-      console.error('Owner '+this.owner.fullName + ' is not a named object!');
+   if (!this.owner.uName) {
+      console.error('Owner '+this.owner.uName + ' is not a named object!');
       process.exit(1);
    }
 
    NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, this.owner);
 
-   this._id = this.fullName;   // *** TBD
+   this._id = this.uName;   // *** TBD
 
    if (_config.steps) {
       this.pipeline = new Pipeline(_config.steps, this);
@@ -108,7 +108,7 @@ SourceListener.prototype.establishListeners = function() {
          this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
 
          if (!this.source.hasProperty(this.eventName)) {
-            console.log(this.fullName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.fullName + ". Fix config!");
+            console.log(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
             this.valid = false;
          }
       }
@@ -157,12 +157,12 @@ SourceListener.prototype.invalidCb = function(_data) {
 };
 
 SourceListener.prototype.refreshSource = function() {
-   console.log(this.fullName + ': refreshSource() current validity =' + this.valid);
+   console.log(this.uName + ': refreshSource() current validity =' + this.valid);
    var ret = true;
 
    if (!this.valid)  {
       ret = this.establishListeners();
-      console.log(this.fullName + ': Refreshed source listener. result=' + ret);
+      console.log(this.uName + ': Refreshed source listener. result=' + ret);
 
       if (ret) {
          this.stopMaskInvalidTimer();
@@ -182,7 +182,7 @@ SourceListener.prototype.refreshSource = function() {
 SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
    if ((_data.name === this.eventName) && this.valid) {
-      console.log(this.fullName + ': INVALID');
+      console.log(this.uName + ': INVALID');
 
       this.valid = false;
 
@@ -229,7 +229,7 @@ SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
       return;
    }
 
-   console.log(this.fullName + ": processing source event raised, event=" + _data.name);
+   console.log(this.uName + ": processing source event raised, event=" + _data.name);
 
    if (this.isTarget) {
       this.owner.receivedEventFromTarget(util.copy(_data));

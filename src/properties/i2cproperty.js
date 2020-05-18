@@ -42,7 +42,7 @@ function I2CProperty(_config, _owner) {
 util.inherits(I2CProperty, Property);
 
 I2CProperty.prototype.set = function(_propValue, _data) {
-   console.log(this.fullName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
+   console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;
 }
 
@@ -99,7 +99,7 @@ I2CProperty.prototype.transformInputReading = function(_inputReading) {
 }
 
 I2CProperty.prototype.publishNewPropertyValue = function(_inputReading, _propertyValue) {
-   console.log(this.fullName + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
+   console.log(this.uName + ': Input Reading: ' + _inputReading + 'V, property value: ' + _propertyValue);
    this.previousInputReading = _inputReading;
    this.previousOutputValue = _propertyValue;
    this.updatePropertyInternal(_propertyValue);
@@ -131,7 +131,7 @@ I2CProperty.prototype.startScanning = function() {
             }
             else {
                _this.ignoreCounter = 0;
-               console.log(_this.fullName + ': Ignored reading for too many intervals, accepting new value');
+               console.log(_this.uName + ': Ignored reading for too many intervals, accepting new value');
                _this.publishNewPropertyValue(inputReading, outputValue);
             }
          }

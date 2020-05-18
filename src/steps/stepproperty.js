@@ -29,7 +29,7 @@ util.inherits(StepProperty, Property);
 StepProperty.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
 
    if (_pipeline == this.sourcePipeline) {
-      console.log(this.fullName+": output from source pipeline. Property Value="+_newValue);
+      console.log(this.uName+": output from source pipeline. Property Value="+_newValue);
 
       var propValue = this.transformNewPropertyValue(_newValue, _data);
 
@@ -39,7 +39,7 @@ StepProperty.prototype.outputFromPipeline = function(_pipeline, _newValue, _data
       }
    }
    else {
-      console.log(this.fullName+": output from output step pipeline. Property Value="+_newValue+". Call hook outputStepsComplete()");
+      console.log(this.uName+": output from output step pipeline. Property Value="+_newValue+". Call hook outputStepsComplete()");
       this.outputStepsComplete(_newValue, _data);
    }
 };
@@ -88,7 +88,7 @@ StepProperty.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.cancelCurrentRamp();
 
    if (_data == undefined) {
-      _data = { sourceName: this.owner.fullName };
+      _data = { sourceName: this.owner.uName };
    }
 
    this.checkData(_newPropValue, _data);

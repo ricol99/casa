@@ -29,11 +29,11 @@ function CombineStateProperty(_config, _owner) {
 util.inherits(CombineStateProperty, StateProperty);
 
 CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   console.log(this.fullName + ": Event received when in state " + this.value);
+   console.log(this.uName + ": Event received when in state " + this.value);
    let sourceListener = this.sourceListeners[_sourceListener.sourceEventName];
 
    if (!sourceListener) {
-      console.log(this.fullName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
+      console.log(this.uName + ": Event received from sourcelistener that is not recognised! " + _sourceListener.sourceEventName);
       return;
    }
 
@@ -42,21 +42,21 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    let sourceFound = false;
 
    for (let i = 0; i < this.sources.length; ++i) {
-      let sn = (this.sources[i].hasOwnProperty("fullName")) ? this.sources[i].fullName : this.fullName;
+      let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.uName;
       let sl = this.sourceListeners[sn + ":" + this.sources[i].property];
 
       if (!sl) {
-         console.info(this.fullName + ": Event rejected as it came from source " + sourceName + " which is outside of sources specified");
+         console.info(this.uName + ": Event rejected as it came from source " + sourceName + " which is outside of sources specified");
          return;
       }
 
       if (sl.isCold()) {
-         console.log(this.fullName + ": Not ready as one or more sources is still cold");
+         console.log(this.uName + ": Not ready as one or more sources is still cold");
          return;
       }
 
       newState = newState + "" + sl.getPropertyValue();
-      sourceFound = sourceFound || (this.sources[i].fullName === sourceName);
+      sourceFound = sourceFound || (this.sources[i].uName === sourceName);
 
       if (i < this.sources.length - 1) {
          newState = newState + this.separator;
@@ -64,12 +64,12 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    }
 
    if (!sourceFound) {
-      console.info(this.fullName + ": Event rejected as it came from source " + sourceName + " which is outside of sources specified");
+      console.info(this.uName + ": Event rejected as it came from source " + sourceName + " which is outside of sources specified");
       return
    }
 
-   console.log(this.fullName + ": Attempting to move to state " + newState);
-   this.set(newState, { sourceName: this.owner.fullName });
+   console.log(this.uName + ": Attempting to move to state " + newState);
+   this.set(newState, { sourceName: this.owner.uName });
 };
 
 module.exports = exports = CombineStateProperty;

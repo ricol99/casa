@@ -18,8 +18,8 @@
  
 var util = require('util');
 
-function ContactIdProtocol(_fullName) {
-   this.fullName = _fullName;
+function ContactIdProtocol(_uName) {
+   this.uName = _uName;
 
    this.QUALIFIERS = {
       1 : 'Event/Activated',
@@ -88,12 +88,12 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
 
    // Validate
    if (!((_msg.length == 16) || (_msg.length == 12))) {
-      console.log(this.fullName + ": Invalid message size " + _msg.length);
+      console.log(this.uName + ": Invalid message size " + _msg.length);
       return undefined;
    }
 
    if (_msg.slice(4,6) != '18' && _msg.slice(4,6) != '98' && _msg.slice(4,6) != 'A1') {
-      console.log(this.fullName + ": Invalid message type " + _msg.slice(4,6));
+      console.log(this.uName + ": Invalid message type " + _msg.slice(4,6));
       return undefined;
    }
 
@@ -102,7 +102,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
    message.eventNum = _msg.slice(7,10);
 
    if (isNaN(message.qualifier) || isNaN(message.eventNum)) {
-      console.log(this.fullName + ": Unable to parse event!");
+      console.log(this.uName + ": Unable to parse event!");
       return undefined;
    }
 
@@ -111,7 +111,7 @@ ContactIdProtocol.prototype.decodeMessage = function(_msg) {
       message.value = _msg.slice(12,15).toString();
 
       if (isNaN(message.area) || isNaN(message.value)) {
-         console.log(this.fullName + ": Unable to parse event!");
+         console.log(this.uName + ": Unable to parse event!");
          return undefined;
       }
    }

@@ -28,7 +28,7 @@ ConsoleApiService.prototype.getGlobalConsoleApi = function() {
 };
 
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
-   console.log(this.fullName+": scopeExistsRequest() request=", _request.params);
+   console.log(this.uName+": scopeExistsRequest() request=", _request.params);
    
    if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
       this.sendFail(_request, _response);
@@ -41,7 +41,7 @@ ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
 };
 
 ConsoleApiService.prototype.extractScopeRequest = function(_request, _response) {
-   console.log(this.fullName+": extractScopeRequest() request=", _request.params);
+   console.log(this.uName+": extractScopeRequest() request=", _request.params);
 
    if (!_request.params.hasOwnProperty("scope") || !_request.params.hasOwnProperty("line")) {
       this.sendFail(_request, _response);
@@ -54,7 +54,7 @@ ConsoleApiService.prototype.extractScopeRequest = function(_request, _response) 
 };
 
 ConsoleApiService.prototype.executeCommandRequest = function(_request, _response) {
-   console.log(this.fullName+": executeCommandRequest() request=", _request.params);
+   console.log(this.uName+": executeCommandRequest() request=", _request.params);
 
    if (!_request.params.hasOwnProperty("obj") || !_request.params.hasOwnProperty("method")) {
       this.sendFail(_request, _response);
@@ -150,7 +150,7 @@ ConsoleApiService.prototype.getAllSessionsForConsoleApiObject = function(_consol
 ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {
 
    if (!this.sessions.hasOwnProperty(_id)) {
-      console.log(this.fullName + ': Creating new session for consoleApi ' + _id);
+      console.log(this.uName + ': Creating new session for consoleApi ' + _id);
       this.sessions[_id] = new ConsoleApiSession(_id, _consoleApi, this);
    }
 
@@ -165,7 +165,7 @@ ConsoleApiService.prototype.writeOutput = function(_sessionId, _output) {
 };
 
 ConsoleApiService.prototype.socketIoConnection = function(_socket) {
-   console.log(this.fullName + ': a consoleApi client has joined');
+   console.log(this.uName + ': a consoleApi client has joined');
    this.sessions[_socket.id] = new ConsoleApiSession(_socket.id+Date.now(), null, this);
    this.sessions[_socket.id].serveClient(_socket);
 };
@@ -173,7 +173,7 @@ ConsoleApiService.prototype.socketIoConnection = function(_socket) {
 ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
    var obj = null;
 
-   if (!this.consoleApiObjects.hasOwnProperty(_namedObject.fullName)) {
+   if (!this.consoleApiObjects.hasOwnProperty(_namedObject.uName)) {
 
       let classList = util.getClassHierarchy(_namedObject);
 
@@ -190,10 +190,10 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
       }
 
       obj = new ConsoleApiObj({ name: _namedObject.name }, this);
-      this.consoleApiObjects[_namedObject.fullName] = obj;
+      this.consoleApiObjects[_namedObject.uName] = obj;
    }
    else {
-      obj = this.consoleApiObjects[_namedObject.fullName];
+      obj = this.consoleApiObjects[_namedObject.uName];
    }
 
    return obj;

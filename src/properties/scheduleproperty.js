@@ -10,7 +10,7 @@ function ScheduleProperty(_config, _owner) {
    this.scheduleService = this.gang.casa.findService("scheduleservice");
 
    if (!this.scheduleService) {
-      console.error(this.fullName + ": ***** Schedule service not found! *************");
+      console.error(this.uName + ": ***** Schedule service not found! *************");
       process.exit(1);
    }
 
@@ -31,10 +31,10 @@ util.inherits(ScheduleProperty, Property);
 ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {
-      this.updatePropertyInternal(_event.value, { sourceName: this.owner.fullName });
+      this.updatePropertyInternal(_event.value, { sourceName: this.owner.uName });
    }
    else {
-      this.setWithRamp(_event.ramp, { sourceName: this.owner.fullName });
+      this.setWithRamp(_event.ramp, { sourceName: this.owner.uName });
    }
 }
 

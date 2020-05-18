@@ -23,7 +23,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "fullName": "::dumgoyne:alarm",
+               "uName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -33,7 +33,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "fullName": "::dumgoyne:alarm",
+               "uName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"
@@ -51,7 +51,7 @@ var SourceListener = require('./sourcelistener');
    "initialValue": "off",
    "sources": [
       {
-         "fullName": "::natalie",
+         "uName": "::natalie",
          "property": "in-bed-at-home",
          "states": {
             "off": {
@@ -65,7 +65,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "fullName": "::dumgoyne:alarm",
+               "uName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -75,7 +75,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "fullName": "::dumgoyne:alarm",
+               "uName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"
@@ -127,7 +127,7 @@ Agent.prototype.setAgentStates = function(_propertyValue) {
          var sourceListener = this.sourceListeners[this.sourceMap[_propertyValue][i].name];
 
          if (sourceListener.isValid()) {
-            sourceListener.getSource().setProperty(this.sourceMap[_propertyValue][i].property, this.sourceMap[_propertyValue][i].value, { sourceName: this.fullName });
+            sourceListener.getSource().setProperty(this.sourceMap[_propertyValue][i].property, this.sourceMap[_propertyValue][i].value, { sourceName: this.uName });
          }
       }
    }

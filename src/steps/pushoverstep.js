@@ -10,7 +10,7 @@ function PushoverStep(_config, _pipeline) {
    this.userGroup = this.gang.findNamedObject(_config.userGroup);
 
    if (!this.userGroup) {
-      console.error(this.fullName + ": ***** UserGroup not found! *************");
+      console.error(this.uName + ": ***** UserGroup not found! *************");
       process.exit(1);
    }
 
@@ -19,7 +19,7 @@ function PushoverStep(_config, _pipeline) {
    this.pushService = this.gang.casa.findService("pushoverservice");
 
    if (!this.pushService) {
-      console.error(this.fullName + ": ***** Pushover service not found! *************");
+      console.error(this.uName + ": ***** Pushover service not found! *************");
       process.exit(1);
    }
 }

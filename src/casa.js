@@ -70,7 +70,7 @@ Casa.prototype.createServer = function() {
    });
 
    app.get('/configfile/:filename', (req, res) => {
-      console.log(this.fullName + ": Serving file " + req.params.filename);
+      console.log(this.uName + ": Serving file " + req.params.filename);
       res.sendFile(this.configPath + '/' + req.params.filename);
    });
 
@@ -117,7 +117,7 @@ Casa.prototype.refreshSimpleConfig = function() {
    simpleConfig = {};
    simpleConfig.name = this.name;
    simpleConfig.displayName = this.displayName;
-   simpleConfig.gang = this.gang.fullName;
+   simpleConfig.gang = this.gang.uName;
    simpleConfig.sources = [];
 
    for (sourceName in this.sources) {
@@ -128,7 +128,7 @@ Casa.prototype.refreshSimpleConfig = function() {
          if (!source.local) {
             var allProps = {};
             source.getAllProperties(allProps, true);
-            simpleConfig.sources.push({ name: source.name, fullName: source.fullName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
+            simpleConfig.sources.push({ name: source.name, uName: source.uName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
          }
       }
    }
@@ -145,21 +145,21 @@ Casa.prototype.isActive = function() {
 };
 
 Casa.prototype.addSource = function(_source) {
-   console.log(this.fullName + ': Source '  + _source.fullName + ' added to casa ');
-   this.sources[_source.fullName] = _source;
+   console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
+   this.sources[_source.uName] = _source;
 
    _source.on('property-changed', (_data) => {
-      console.log(this.fullName + ': ' + _data.sourceName + ' has had a property change');
+      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change');
       this.emit('source-property-changed', _data);
    });
 
    _source.on('event-raised', (_data) => {
-      console.log(this.fullName + ': ' + _data.sourceName + ' has raised an event');
+      console.log(this.uName + ': ' + _data.sourceName + ' has raised an event');
       this.emit('source-event-raised', _data);
    });
 
-   this.emit('source-added', { sourceName: _source.fullName });
-   console.log(this.fullName + ': ' + _source.fullName + ' associated!');
+   this.emit('source-added', { sourceName: _source.uName });
+   console.log(this.uName + ': ' + _source.uName + ' associated!');
 
    var added = false;
 
@@ -167,13 +167,13 @@ Casa.prototype.addSource = function(_source) {
 
       if (this.topSources.hasOwnProperty(source)) {
 
-         if (_source.fullName.startsWith(source)) {
+         if (_source.uName.startsWith(source)) {
             added = true;
             break;
          }
-         else if (source.startsWith(_source.fullName)) {
+         else if (source.startsWith(_source.uName)) {
             delete this.topSources[source];
-            this.topSources[_source.fullName] = _source;
+            this.topSources[_source.uName] = _source;
             added = true;
             break;
          }
@@ -181,46 +181,46 @@ Casa.prototype.addSource = function(_source) {
    }
 
    if (!added) {
-      this.topSources[_source.fullName] = _source;
+      this.topSources[_source.uName] = _source;
    }
 
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
-   console.log(this.fullName + ': Renaming source '  + _source.name + ' to ' + _newName);
-   delete this.sources[_source.fullName];
+   console.log(this.uName + ': Renaming source '  + _source.name + ' to ' + _newName);
+   delete this.sources[_source.uName];
    _source.setName(_newName);
-   this.sources[_source.fullName] = _source;
+   this.sources[_source.uName] = _source;
 };
 
 Casa.prototype.removeSource = function(_source) {
-   console.log(this.fullName + ': Deleting source '  + _source.fullName);
-   this.emit('source-removed', { sourceName: _source.fullName });
+   console.log(this.uName + ': Deleting source '  + _source.uName);
+   this.emit('source-removed', { sourceName: _source.uName });
 
    this.gang.removeThing(_source);
-   delete this.sources[_source.fullName];
+   delete this.sources[_source.uName];
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
-   console.log(this.fullName + ": AAAA ****** New source listener added " + _sourceListener.fullName);
+   console.log(this.uName + ": AAAA ****** New source listener added " + _sourceListener.uName);
 
-   if (this.sourceListeners[_sourceListener.fullName]) {
-      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.fullName);
+   if (this.sourceListeners[_sourceListener.uName]) {
+      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
       process.exit(1);
    }
 
-   console.log(this.fullName + ': Source listener ' + _sourceListener.fullName + ' added to casa');
-   this.sourceListeners[_sourceListener.fullName] = _sourceListener;
+   console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
+   this.sourceListeners[_sourceListener.uName] = _sourceListener;
 };
 
-Casa.prototype.findListeners = function(_fullName) {
+Casa.prototype.findListeners = function(_uName) {
    var listeners = [];
 
    for (var listener in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(listener)) {
 
-         if (this.sourceListeners[listener].sourceName === _fullName) {
+         if (this.sourceListeners[listener].sourceName === _uName) {
             listeners.push(this.sourceListeners[listener]);
          }
       }
@@ -229,7 +229,7 @@ Casa.prototype.findListeners = function(_fullName) {
 };
 
 Casa.prototype.addService = function(_service) {
-   console.log(this.fullName + ': Service '  + _service.name + ' added to casa ');
+   console.log(this.uName + ': Service '  + _service.name + ' added to casa ');
 
    if (this.services[_service.type]) {
       console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.name);
@@ -246,12 +246,12 @@ Casa.prototype.findService = function(_serviceType) {
 Casa.prototype.findServiceName = function(_serviceType) {
    var service = this.findService(_serviceType);
 
-   return (service) ? service.fullName : null;
+   return (service) ? service.uName : null;
 };
 
 Casa.prototype.addWorker = function(_worker) {
-   console.log(this.fullName + ': Worker '  + _worker.fullName + ' added to casa ');
-   this.workers[_worker.fullName] = _worker;
+   console.log(this.uName + ': Worker '  + _worker.uName + ' added to casa ');
+   this.workers[_worker.uName] = _worker;
 };
 
 Casa.prototype.setUber = function(_uber) {
@@ -262,8 +262,8 @@ Casa.prototype.isUber = function() {
    return this.uber;
 };
 
-Casa.prototype.allocatePort = function(_fullName) {
-   this.ports[_fullName] = this.nextPortToAllocate;
+Casa.prototype.allocatePort = function(_uName) {
+   this.ports[_uName] = this.nextPortToAllocate;
    return this.nextPortToAllocate++;
 };
 
@@ -288,23 +288,23 @@ Casa.prototype.getHost = function() {
 };
 
 Casa.prototype.bowSource = function(_source, _currentlyActive) {
-   console.log(this.fullName + ": bowSource() Making source " + _source.fullName + " passive"); 
+   console.log(this.uName + ": bowSource() Making source " + _source.uName + " passive"); 
 
    if (_currentlyActive) {
       _source.detach();
    }
-   this.bowingSources[_source.fullName] = _source;
+   this.bowingSources[_source.uName] = _source;
 };
 
 Casa.prototype.standUpSourceFromBow = function(_source) {
-   console.log(this.fullName + ": standUpSourceFromBow() Making source " + _source.fullName + " active");
+   console.log(this.uName + ": standUpSourceFromBow() Making source " + _source.uName + " active");
 
    if (!this.gang.addNamedObject(_source)) {
-      console.error(this.fullName + ": standUpSourceFromBow() Unable to find owner for source=" + _source.fullName);
+      console.error(this.uName + ": standUpSourceFromBow() Unable to find owner for source=" + _source.uName);
       return;
    }
 
-   delete this.bowingSources[_source.fullName];
+   delete this.bowingSources[_source.uName];
 };
 
 Casa.prototype.getBowingSource = function(_sourceFullName) {

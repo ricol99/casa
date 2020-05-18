@@ -22,7 +22,7 @@ LocalConsole.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
    this.consoleApiService =  this.casa.findService("consoleapiservice");
-   this.consoleApiSession = this.consoleApiService.getSession(this.fullName, this);
+   this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
 
    this.start("::" + this.casa.name);
 };

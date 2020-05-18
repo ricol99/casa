@@ -29,7 +29,7 @@ LightwaveRfService.prototype.coldStart = function() {
 
    this.receiveSocket.on("listening", () => {
       var address = this.receiveSocket.address();
-      console.log(this.fullName + ": Receiver socket listening " + address.address + ":" + address.port);
+      console.log(this.uName + ": Receiver socket listening " + address.address + ":" + address.port);
    });
 
    //Bind to the receive port
@@ -38,7 +38,7 @@ LightwaveRfService.prototype.coldStart = function() {
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {
-   //console.log(this.fullName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
+   //console.log(this.uName+": AAAAA -- Receiver socket message: " + _message + " from " + _info.address + ":" + _info.port);
 
    //Check this came from the lightwave unit
    if ((_info.address !== this.linkAddress) || !_message) {
@@ -99,7 +99,7 @@ LightwaveRfService.prototype.registerWithLink = function(_callback) {
 }
 
 LightwaveRfService.prototype.addToQueue = function(_message, _callback) {
-   console.log(this.fullName + ": Added request to queue, message=" + _message);
+   console.log(this.uName + ": Added request to queue, message=" + _message);
    this.queue.push(new Request(this, _message, _callback));
    this.makeNextRequest();
 }
@@ -113,13 +113,13 @@ LightwaveRfService.prototype.makeNextRequest = function() {
 }
 
 LightwaveRfService.prototype.completeRequest = function(_code, _errorCode, _error) {
-   console.log(this.fullName + ': Request done! Code='+_code);
+   console.log(this.uName + ': Request done! Code='+_code);
 
    if (this.requests[_code] && this.queue.length > 0 && this.queue[0].code === _code) {
 
       if ((_error) && (_errorCode == "6") && (this.queue[0].sendCount < 3)) {
          this.messageGap += 50;
-         console.log(this.fullName + ": Buffer full in link so slowing down requests to 1 every " + this.messageGap + "ms");
+         console.log(this.uName + ": Buffer full in link so slowing down requests to 1 every " + this.messageGap + "ms");
       }
       else {
          this.queue.shift().complete(_error);
@@ -133,14 +133,14 @@ LightwaveRfService.prototype.completeRequest = function(_code, _errorCode, _erro
       }, this.messageGap, this);
    }
    else if (!this.requests[_code]) {
-      console.error(this.fullName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
+      console.error(this.uName+": Arhhhhhh - this code "+_code+" is not found!!!!!!");
    }
    else {
-      console.error(this.fullName + ": Something bad is happening - the received code does not match the top request in the queue!");
-      console.error(this.fullName + ": Code=" + _code + " queue length= " + this.queue.length);
+      console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
+      console.error(this.uName + ": Code=" + _code + " queue length= " + this.queue.length);
 
       if (this.queue.length > 0) {
-         console.error(this.fullName + ": Top request in queue has code " + this.queue[0].code);
+         console.error(this.uName + ": Top request in queue has code " + this.queue[0].code);
       }
    }
 }
@@ -153,7 +153,7 @@ LightwaveRfService.prototype.sendMessageToLink = function(_request) {
    }
 
    var buffer = new Buffer(zeroPadCode + "," + _request.message);
-   console.log(this.fullName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
+   console.log(this.uName + ": AAAAA Sending message '"+buffer.toString()+"' to lightwave link");
 
    this.sendSocket.send(buffer, 0, buffer.length, 9760, this.linkAddress);
    this.requests[_request.code] = _request;

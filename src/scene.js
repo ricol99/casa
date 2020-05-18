@@ -43,12 +43,12 @@ function Scene(_config, _owner) {
 
    for (var i = 0; i < _config.sources.length; i++) {
 
-      if (!(_config.sources[i].hasOwnProperty("fullName"))) {
-         _config.sources[i].fullName = this.fullName;
+      if (!(_config.sources[i].hasOwnProperty("uName"))) {
+         _config.sources[i].uName = this.uName;
       }
 
       this.sources.push(_config.sources[i]);
-      var sourceListenerName = _config.sources[i].fullName + ":" + _config.sources[i].property;
+      var sourceListenerName = _config.sources[i].uName + ":" + _config.sources[i].property;
       this.sources[this.sources.length-1].sourceListenerName = sourceListenerName;
 
       if (!this.sourceListeners.hasOwnProperty(sourceListenerName)) {
@@ -65,7 +65,7 @@ Scene.prototype.receivedEventFromSource = function(_data) {
 
    for (var i = 0; i < this.sources.length; i++) {
 
-      if ((this.sources[i].fullName === _data.sourceName) &&
+      if ((this.sources[i].uName === _data.sourceName) &&
           (this.sources[i].property === _data.name) &&
           (this.sources[i].currentValue !== _data.value)) {
 
@@ -104,7 +104,7 @@ Scene.prototype.setSceneStates = function() {
       this.sources[i].currentValue = this.sources[i].value;
 
       if (sourceListener.isValid()) {
-         sourceListener.getSource().setProperty(this.sources[i].property, this.sources[i].value, { sourceName: this.fullName });
+         sourceListener.getSource().setProperty(this.sources[i].property, this.sources[i].value, { sourceName: this.uName });
       }
    }
 };

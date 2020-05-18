@@ -8,7 +8,7 @@ function Thing(_config, _owner) {
    if (_owner && (_owner !== gang) && (_owner !== gang.casa)) {
 
       if (_config.hasOwnProperty("local") && !_config.local && _owner.local) {
-         console.error(this.fullName + ": Config broken as non-local thing owned by local thing!");
+         console.error(this.uName + ": Config broken as non-local thing owned by local thing!");
          process.exit(2);
       }
 
@@ -41,7 +41,7 @@ Thing.prototype.addThing = function(_thing) {
 // Actually update the property value and let all interested parties know
 // Also used to navigate down the composite thing tree to update a property shared by all
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
-   var data = (_data) ? _data : { sourceName: this.fullName };
+   var data = (_data) ? _data : { sourceName: this.uName };
 
    if (data.alignWithParent) {
 
@@ -150,7 +150,7 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
 Thing.prototype.raiseEvent = function(_eventName, _data) {
 
-   var data = (_data) ? _data : { sourceName: this.fullName };
+   var data = (_data) ? _data : { sourceName: this.uName };
 
    if (data.alignWithParent) {
       Source.prototype.raiseEvent.call(this, _eventName, data);

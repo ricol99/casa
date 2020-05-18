@@ -3,7 +3,7 @@ var Thing = require('../../thing');
 
 function OneWireServiceThermometer(_config, _owner) {
    Thing.call(this, _config, _owner);
-   console.log(this.fullName + ": New thermometer created");
+   console.log(this.uName + ": New thermometer created");
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 10000000;
    this.started = false;
    this.ensurePropertyExists("temperature", 'property', { initialValue: 0, }, this.config);
@@ -50,7 +50,7 @@ OneWireServiceThermometer.prototype.pollDevice = function() {
    }
 
    this.timer = setTimeout(() => {
-      console.log(this.fullName + ": Reading from one wire. Device="+this.sName);
+      console.log(this.uName + ": Reading from one wire. Device="+this.sName);
       this.owner.oneWireBus.getValueFrom(this.sName, "temperature")
       .then((_measure) => {
          this.alignPropertyValue("temperature", _measure.result.value);

@@ -15,7 +15,7 @@ function SourceBase(_config, _owner) {
 util.inherits(SourceBase, NamedObject);
 
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
-   console.log(this.fullName+": subscriptionRegistered() :" + _event);
+   console.log(this.uName+": subscriptionRegistered() :" + _event);
 
    if (_event === "property-changed") {
       this.propertySubscribedTo(_subscription.prop, _subscription, this.props.hasOwnProperty(_subscription.prop));
@@ -39,7 +39,7 @@ SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
 };
 
 SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
-   console.log(this.fullName+": Bowing to new source");
+   console.log(this.uName+": Bowing to new source");
    this.bowing = true;
    this.local = true;
 
@@ -53,11 +53,11 @@ SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
 };
 
 SourceBase.prototype.standUpFromBow = function() {
-   console.log(this.fullName+": Standing up to lower priority source");
+   console.log(this.uName+": Standing up to lower priority source");
 
    this.bowing = false;
    this.local = this.config.hasOwnProperty("local") ? this.config.local : false;
-   var currentSource = this.gang.findNamedObject(this.fullName);
+   var currentSource = this.gang.findNamedObject(this.uName);
 
    if (currentSource) {
       currentSource.bowToOtherSource(true, true);
@@ -92,7 +92,7 @@ SourceBase.prototype.hasProperty = function(_property) {
 SourceBase.prototype.getProperty = function(_property) {
 
    if (!this.props.hasOwnProperty(_property)) {
-      console.error(this.fullName + ": Asked for property " + _property + " that I don't have.");
+      console.error(this.uName + ": Asked for property " + _property + " that I don't have.");
    }
 
    return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
@@ -109,19 +109,19 @@ SourceBase.prototype.getAllProperties = function(_allProps) {
 };
 
 SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
-   console.log(this.fullName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
+   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
    var sendData = (_data) ? util.copy(_data) : {};
-   sendData.sourceName =  this.fullName;
+   sendData.sourceName =  this.uName;
    sendData.oldState = this.props[_propName].value;
    sendData.name = _propName;
-   console.log(this.fullName + ": Emitting invalid!");
+   console.log(this.uName + ": Emitting invalid!");
 
    this.emit('invalid', sendData);
 }
 
 SourceBase.prototype.invalidate = function(_includeChildren) {
-   console.log(this.fullName + ": Raising invalid on all props to drop source listeners");
+   console.log(this.uName + ": Raising invalid on all props to drop source listeners");
 
    if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {
       this.clearAlignmentQueue();
@@ -132,10 +132,10 @@ SourceBase.prototype.invalidate = function(_includeChildren) {
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
-   console.info(this.fullName + ': Property Changed: ' + _propName + ': ' + _propValue);
+   console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
 
    var sendData = (_data) ? util.copy(_data) : {};
-   sendData.sourceName = this.fullName;
+   sendData.sourceName = this.uName;
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
@@ -181,14 +181,14 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
 
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.local = this.local;
-   sendData.sourceName = this.fullName;
+   sendData.sourceName = this.uName;
    sendData.name = _eventName;
 
    if (!sendData.hasOwnProperty("value")) {
       sendData.value = true;
    }
 
-   console.log(this.fullName + ": Emitting event " + _eventName);
+   console.log(this.uName + ": Emitting event " + _eventName);
    this.asyncEmit('event-raised', sendData);
 }
 
@@ -212,7 +212,7 @@ SourceBase.prototype.deferToPeer = function(_newSource) {
 SourceBase.prototype.becomeMainSource = function() {
 
    if (this.bowing) {
-      console.log(this.fullName + ": Becoming main source again!");
+      console.log(this.uName + ": Becoming main source again!");
       return this.standUpFromBow();
    }
 
@@ -239,7 +239,7 @@ SourceBase.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
 SourceBase.prototype.alignProperties = function(_properties) {
 
    if (_properties && (_properties.length > 0)) {
-      console.log(this.fullName + ": alignProperties() ", _properties.length);
+      console.log(this.uName + ": alignProperties() ", _properties.length);
       this.addPropertiesForAlignment(_properties);
       this.alignNextProperty();
    }
@@ -264,7 +264,7 @@ SourceBase.prototype.addPropertiesForAlignment = function(_properties) {
          this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp });
       }
       else {
-         console.log(this.fullName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
+         console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
          this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value });
       }
    }
@@ -282,17 +282,17 @@ SourceBase.prototype.alignNextProperty = function() {
             var prop = this.propertyAlignmentQueue.shift();
 
             if (prop.hasOwnProperty("ramp")) {
-               console.log(this.fullName + ": Setting property " + prop.property + " to ramp");
-               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.fullName });
+               console.log(this.uName + ": Setting property " + prop.property + " to ramp");
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName });
             }
             else {
-               console.log(this.fullName + ": Setting property " + prop.property + " to value " + prop.value);
-               this.setProperty(prop.property, prop.value, { sourceName: this.fullName });
+               console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
+               this.setProperty(prop.property, prop.value, { sourceName: this.uName });
             }
             this.alignNextProperty();
          }
          else {
-            console.error(this.fullName + ": Something has gone wrong as no alignments are in the queue!");
+            console.error(this.uName + ": Something has gone wrong as no alignments are in the queue!");
          }
       }, 1);
    }

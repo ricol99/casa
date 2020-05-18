@@ -19,7 +19,7 @@ function HueLightGroup(_config, _parent) {
    this.hueService =  this.casa.findService(this.service);
 
    if (!this.hueService) {
-      console.error(this.fullName + ": ***** Hue service not found! *************");
+      console.error(this.uName + ": ***** Hue service not found! *************");
       process.exit();
    }
 
@@ -110,7 +110,7 @@ HueLightGroup.prototype.coldStart = function() {
       this.hueService.getLightGroups( (_err, _result) => {
 
          if (_err) {
-            console.error(this.fullName + ": Unable to find room on Hue Bridge!");
+            console.error(this.uName + ": Unable to find room on Hue Bridge!");
          }
          else {
             for (var i = 0; i < _result.length; ++i) {
@@ -123,7 +123,7 @@ HueLightGroup.prototype.coldStart = function() {
             }
 
             if (!this.hasOwnProperty('lightGroupId')) {
-               console.error(this.fullName + ": Unable to find room on Hue Bridge!");
+               console.error(this.uName + ": Unable to find room on Hue Bridge!");
             }
             Thing.prototype.coldStart.call(this);
          }

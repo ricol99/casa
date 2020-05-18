@@ -36,7 +36,7 @@ function Bedroom(_config, _parent) {
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
 
    for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findNamedObject(_config.users[u].fullName));
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
    }
 
    this.usersPresentAndAwakeConfig = { initialValue: false, sources: [] };
@@ -145,7 +145,7 @@ function Bedroom(_config, _parent) {
                                                                      { "property": this.users[i].name+"-in-building" } ]},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-in-building", 'property',
-                                { "initialValue": false, "source": { "fullName": this.buildingName, "property": this.users[i].name+"-user-state",
+                                { "initialValue": false, "source": { "uName": this.buildingName, "property": this.users[i].name+"-user-state",
                                                                      "transform": "$value !== \"not-present\"" }}, _config);
 
       this.usersPresentAndAwakeConfig.sources.push({ property: this.users[i].name+"-present-and-awake" });

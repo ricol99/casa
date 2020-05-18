@@ -22,7 +22,7 @@ util.inherits(LinearTransformStep, PipelineStep);
 // Call outputForNextStep() to pass on output to next step (when required)
 //
 LinearTransformStep.prototype.process = function(_value, _data) {
-   console.log(this.fullName + ': property ' + _data.name + ' has changed to ' + _value);
+   console.log(this.uName + ': property ' + _data.name + ' has changed to ' + _value);
 
    var placeInRange = (_value - this.inputMin) / this.inputRange;
    var outputVal = (this.outputRange * placeInRange) + this.outputMin;

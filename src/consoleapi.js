@@ -8,7 +8,7 @@ function ConsoleApi(_config, _owner) {
    NamedObject.call(this, _config, _owner);
 
    this.myObjName = _config.name;
-   this.myObjFullName = (_owner) ? _owner.fullName + ":" + _config.name : "::" + _config.name;
+   this.myObjFullName = (_owner) ? _owner.uName + ":" + _config.name : "::" + _config.name;
    this.consoleApiObjects = {};
 
    this.gang = Gang.mainInstance();

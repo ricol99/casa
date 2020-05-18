@@ -20,7 +20,7 @@ LatchStep.prototype.process = function(_value, _data) {
    this.lastData = _data;
 
    if (propValue) {
-      console.log(this.fullName + ': target ' + _data.sourceName + ' active!');
+      console.log(this.uName + ': target ' + _data.sourceName + ' active!');
       this.sourceActive = true;
    
       if (this.minOutputTime != undefined) {
@@ -30,7 +30,7 @@ LatchStep.prototype.process = function(_value, _data) {
       }
    }
    else {
-      console.log(this.fullName + ': target ' + _data.sourceName + ' inactive!');
+      console.log(this.uName + ': target ' + _data.sourceName + ' inactive!');
       this.sourceActive = false;
 
       if (this.active) {

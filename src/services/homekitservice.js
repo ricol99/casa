@@ -14,7 +14,7 @@ storage.initSync();
 function HomekitService(_config, _owner) {
    Service.call(this, _config, _owner);
 
-   this.port = this.casa.allocatePort(this.fullName);
+   this.port = this.casa.allocatePort(this.uName);
 
    this.displayName = _config.displayName;
    this.pincode = _config.pincode;

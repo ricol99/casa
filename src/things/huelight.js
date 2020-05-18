@@ -13,7 +13,7 @@ function HueLight(_config, _parent) {
    this.hueService =  this.casa.findService(this.service);
 
    if (!this.hueService) {
-      console.error(this.fullName + ": ***** Hue service not found! *************");
+      console.error(this.uName + ": ***** Hue service not found! *************");
       process.exit();
    }
 
@@ -39,7 +39,7 @@ function HueLight(_config, _parent) {
       this.hueService.getLightCapability(this.deviceId, (_err, _result) => {
 
          if (_err) {
-            console.error(this.fullName + ": Not able to find hue light id=", this.deviceId);
+            console.error(this.uName + ": Not able to find hue light id=", this.deviceId);
             return;
          }
 
