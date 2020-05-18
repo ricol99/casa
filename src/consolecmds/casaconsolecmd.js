@@ -54,7 +54,7 @@ CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
      
       Db = require('../db');
       var output = Db.export(_result);
-      var fileName = this.gang.configPath() + "/configs/" + this.myObjuName + ".json";
+      var fileName = this.gang.configPath() + "/configs/" + this.myObjName + ".json";
       var fs = require('fs');
       var content = JSON.stringify(output, null, 3);
 
@@ -68,19 +68,19 @@ CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var cjson = require('cjson');
-   var configFilename = this.gang.configPath() + "/configs/" + this.myObjuName + ".json";
+   var configFilename = this.gang.configPath() + "/configs/" + this.myObjName + ".json";
    var inputConfig = cjson.load(configFilename);
 
-   if (inputConfig.casa.uName !== this.myObjuName) {
+   if (inputConfig.casa.name !== this.myObjName) {
       return _callback("Config file corrupt.");
    }
 
    var Db = require('../db');
-   var db = new Db(this.myObjuName, undefined, true);
+   var db = new Db(this.myObjName, undefined, true);
   
    db.on('connected', () => {
       var configs = {};
-      configs.casa = { "uName": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
+      configs.casa = { "name": "", "type": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
       configs.users = [];
       configs.services = [];
       configs.scenes = [];

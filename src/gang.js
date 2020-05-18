@@ -6,7 +6,7 @@ var NamedObject = require('./namedobject');
 var _mainInstance = null;
 
 function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPath, _configPath, _version, _console) {
-   this.casaName = "casa:" + _casaName;
+   this.casaName = _casaName;
    this.version = _version;
    this._id = true;	// TDB!!!
 
@@ -58,14 +58,14 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
             this.config.secureMode = _secureMode;
             this.config.certPath = _certPath;
             this.config.configPath = _configPath;
-            this.uName = this.config.gang;
-            NamedObject.call(this, this.uName);
+            this.name = this.config.gang;
+            NamedObject.call(this, { name: this.name, type: "gang" });
             this.casaDb.setOwner(this);
 
             this.loadSystemServices();
 
-            this.gangDb = new Db(this.uName, _configPath, false, this);
-            this.dbs[this.uName] = this.gangDb;
+            this.gangDb = new Db(this.name, _configPath, false, this);
+            this.dbs[this.name] = this.gangDb;
 
             this.gangDb.on('connected', (_data) => {
                this.dbs[_data.name] = _data.db;
@@ -108,33 +108,33 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
       this.casaDb.connect();
    }
    else {
-      this.uName = "gang:"+_casaName;
-      NamedObject.call(this, this.uName);
-      this.casaName = "casa:console";
+      this.name = "gang-"+_casaName;
+      NamedObject.call(this, { name: this.name, type: "gang" });
+      this.casaName = "casa-console";
 
-      this.config = { uName: this.casaName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
+      this.config = { name: this.casaName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
       this.extractCasa();
       var casaShortName = this.casaName.split(":")[1];
-      this.extractServices([ { uName: "scheduleservice:"+casaShortName,  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                             { uName: "rampservice:"+casaShortName }, { uName: "dbservice:"+casaShortName } ], false, this.systemServices);
+      this.extractServices([ { name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                             { name: "ramp-service", type: "rampservice"}, { name: "db-service", type: "dbservice"} ], false, this.systemServices);
 
-      this.gangDb = new Db(this.uName, _configPath, false, this);
+      this.gangDb = new Db(this.name, _configPath, false, this);
 
       this.gangDb.on('connected', (_data) => {
          this.dbs[_data.name] = _data.db;
          var Console = require('./console');
-         this.console = new Console({ gangName: this.uName, casaName: null, secureMode: _secureMode, certPath: _certPath });
+         this.console = new Console({ gangName: this.name, casaName: null, secureMode: _secureMode, certPath: _certPath });
          this.console.coldStart();
       });
 
       this.gangDb.on('connect-error', (_data) => {
-         this.gangDb = new Db(this.uName, _configPath, true, this);
+         this.gangDb = new Db(this.name, _configPath, true, this);
 
          this.gangDb.on('connected', (_data) => {
             this.dbs[_data.name] = _data.db;
-            this.gangDb.appendToCollection("gang", { uName: this.uName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 });
+            this.gangDb.appendToCollection("gang", { name: this.name, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 });
             var Console = require('./console');
-            this.console = new Console({ gangName: this.uName, casaName: null, secureMode: _secureMode, certPath: _certPath });
+            this.console = new Console({ gangName: this.name, casaName: null, secureMode: _secureMode, certPath: _certPath });
             this.console.coldStart();
          });
 
@@ -185,28 +185,28 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
 
          if (!_err) {
             config.users = _users;
-            this.markObjects(config.users, "_db", config.uName); 
+            this.markObjects(config.users, "_db", config.name); 
          }
 
          _db.readCollection("services", (_err, _services) => {
 
             if (!_err) {
                config.services = _services;
-               this.markObjects(config.sevices, "_db", config.uName); 
+               this.markObjects(config.sevices, "_db", config.name); 
             }
 
             _db.readCollection("scenes", (_err, _scenes) => {
 
                if (!_err) {
                   config.scenes = _scenes;
-                  this.markObjects(config.scenes, "_db", config.uName); 
+                  this.markObjects(config.scenes, "_db", config.name); 
                }
 
                _db.readCollection("things", (_err, _things) => {
 
                   if (!_err) {
                      config.things = _things;
-                     this.markObjects(config.things, "_db", config.uName); 
+                     this.markObjects(config.things, "_db", config.name); 
                   }
                   _callback(null, true);
                });
@@ -283,8 +283,8 @@ Gang.prototype.init = function(_console) {
 
 Gang.prototype.loadSystemServices = function(_dbCallback) {
    var casaShortName = this.casaName.split(":")[1];
-   this.extractServices([ { uName: "scheduleservice:"+casaShortName,  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { uName: "rampservice:"+casaShortName }, { uName: "dbservice:"+casaShortName }, { uName: "consoleapiservice:"+casaShortName } ], true, this.systemServices);
+   this.extractServices([ { name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                          { name: "ramp-service", type: "rampservice" }, { name: "db-service", type: "dbservice" }, /*{ name: "console-api-service", type: "consoleapiservice" }*/], true, this.systemServices);
 };
 
 Gang.prototype.addSystemServicesToCasa = function() {
@@ -316,35 +316,33 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
    }
 };
 
-Gang.prototype.cleverRequire = function(_name, _path, _type) {
-   var str = (_type) ? _type : S(_name).between('', ':').s;
+Gang.prototype.cleverRequire = function(_type, _path) {
    var path = '';
 
-   if (_path && (_path !== str+'s')) {
+   if (_path && (_path !== _type+'s')) {
       path = _path + '/';
    }
 
-   if (!this.constructors[str]) {
-      console.log('loading more code: ./' + str);
+   if (!this.constructors[_type]) {
+      console.log('loading more code: ./' + _type);
 
       try {
-         this.constructors[str] = require('./' + path + str);
+         this.constructors[_type] = require('./' + path + _type);
       }
       catch (_err) {
          process.stderr.write(util.inspect(_err));
          return null;
       }
    }
-   return this.constructors[str];
+   return this.constructors[_type];
 }
 
 // Extract Users
 Gang.prototype.createUser = function(_user) {
-   var User = this.cleverRequire(_user.uName);
-   //_user.owner = this;
+   var User = this.cleverRequire(_user.type);
    var userObj = new User(_user, this);
-   this.users[userObj.uName] = userObj;
-   console.log('New user: ' + userObj.uName);
+   this.users[userObj.name] = userObj;
+   console.log('New user: ' + userObj.name);
 };
 
 Gang.prototype.extractUsers = function() {
@@ -359,19 +357,19 @@ Gang.prototype.extractUsers = function() {
 
 // Extract Services
 Gang.prototype.createService = function(_config, _serviceOwner) {
-   console.log('Loading service '+ _config.uName);
-   var Service = this.cleverRequire(_config.uName, 'services', _config.type);
+   console.log('Loading service '+ _config.name);
+   var Service = this.cleverRequire(_config.type, 'services');
 
    if (!Service) {
       return null;
    }
 
    var serviceObj = new Service(_config, this);
-   this.services[serviceObj.uName] = serviceObj;
-   console.log('New service: ' + _config.uName);
+   this.services[serviceObj.type] = serviceObj;
+   console.log('New service: ' + _config.name);
 
    if (_serviceOwner) {
-      _serviceOwner[serviceObj.uName] = serviceObj;
+      _serviceOwner[serviceObj.type] = serviceObj;
    }
    else {
       this.casa.addService(serviceObj);
@@ -401,7 +399,7 @@ Gang.prototype.coldStartServices = function() {
    for (var serviceName in this.services) {
 
       if (this.services.hasOwnProperty(serviceName)) {
-         console.log('Cold starting service '+ this.services[serviceName].uName);
+         console.log('Cold starting service '+ this.services[serviceName].name);
          this.services[serviceName].coldStart();
       }
    }
@@ -416,20 +414,20 @@ Gang.prototype.extractScenes = function(_config, _parent) {
    if (_config) {
 
       for (var index = 0; index < _config.length; ++index) {
-         var Scene = this.cleverRequire(_config[index].uName, 'scenes');
+         var Scene = this.cleverRequire(_config[index].type, 'scenes');
          var sceneObj = new Scene(_config[index], this);
-         this.scenes[sceneObj.uName] = sceneObj;
-         console.log('New scene: ' + _config[index].uName);
+         this.scenes[sceneObj.name] = sceneObj;
+         console.log('New scene: ' + _config[index].name);
       }
    }
 }
 
 // Extract Things
 Gang.prototype.createThing = function(_config, _owner) {
-   var Thing = this.cleverRequire(_config.uName, 'things', _config.type);
+   var Thing = this.cleverRequire(_config.hasOwnProperty("type") ? _config.type : "thing", "things");
 
    if (!Thing) {
-      console.error(this.fullName + ": Thing "+_config.uName+" does not exist");
+      console.error(this.fullName + ": Thing "+_config.name+" does not exist");
       return null;
    }
 
@@ -499,13 +497,13 @@ Gang.prototype.mergeThings = function(_sourceThings, _destThings, _override) {
    var tempAssoc = {};
 
    for (var j = 0; j < _destThings.length; ++j) {
-      tempAssoc[_destThings[j].uName] = j;
+      tempAssoc[_destThings[j].name] = j;
    }
 
    for (var i = 0; i < _sourceThings.length; ++i) {
 
-      if (tempAssoc.hasOwnProperty(_sourceThings[i].uName)) {
-         this.mergeThing(_sourceThings[i], _destThings[tempAssoc[_sourceThings[i].uName]]);
+      if (tempAssoc.hasOwnProperty(_sourceThings[i].name)) {
+         this.mergeThing(_sourceThings[i], _destThings[tempAssoc[_sourceThings[i].name]]);
       }
       else {
          _destThings.push(_sourceThings[i]);
@@ -552,11 +550,11 @@ Gang.prototype.mergeConfigs = function() {
 }
 
 Gang.prototype.extractCasa = function() {
-   var Casa = this.cleverRequire(this.config.uName);
+   var Casa = this.cleverRequire(this.config.type);
    var casaObj = new Casa(this.config, this);
    this.casa = casaObj;
-   this.casa.db = this.dbs[casaObj.uName];
-   console.log('New casa: ' + casaObj.uName);
+   this.casa.db = this.dbs[casaObj.name];
+   console.log('New casa: ' + casaObj.name);
 }
 
 Gang.prototype.extractParentCasa = function() {
@@ -571,7 +569,7 @@ Gang.prototype.extractParentCasa = function() {
       console.log('New parentcasa: ' + this.parentCasa.fullName);
 
       var ParentCasaArea = require('./parentcasaarea');
-      this.parentCasaArea = new ParentCasaArea ({ uName: 'parentcasaarea:my-parent' });
+      this.parentCasaArea = new ParentCasaArea ({ name: 'my-parent' });
       this.casaAreas[this.parentCasaArea.fullName] = this.parentCasaArea;
       console.log('New parentcasaarea: ' + this.parentCasaArea.fullName);
 
@@ -592,13 +590,13 @@ Gang.prototype.coldStartThings = function() {
 
 Gang.prototype.createPeerCasaArea = function() {
    var PeerCasaArea = require('./peercasaarea');
-   this.peerCasaArea= new PeerCasaArea({ uName: 'peercasaarea:my-peers' });
+   this.peerCasaArea= new PeerCasaArea({ name: 'my-peers' });
    this.casaAreas[this.peerCasaArea.fullName] = this.peerCasaArea;
 }
 
 Gang.prototype.createChildCasaArea = function(_casas) {
    var ChildCasaArea = require('./childcasaarea');
-   var childCasaArea = new ChildCasaArea({ uName: 'childcasaarea:' + this.casa.uName + this.areaId});
+   var childCasaArea = new ChildCasaArea({ name: this.casa.name + this.areaId});
 
    this.areaId = (this.areaId + 1) % 100000;
 
@@ -675,12 +673,12 @@ Gang.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
 }
 
 Gang.prototype.createChildCasa = function(_config, _peers) {
-   console.log('Creating a child casa for casa ' + _config.uName);
+   console.log('Creating a child casa for casa ' + _config.name);
 
    var area = null;
 
    // Resolve area
-   area = this.resolveCasaAreasAndPeers(_config.uName, _peers);
+   area = this.resolveCasaAreasAndPeers(_config.name, _peers);
 
    var PeerCasa = require('./peercasa');
    var childCasa = new PeerCasa(_config, this);
@@ -696,7 +694,7 @@ Gang.prototype.createChildCasa = function(_config, _peers) {
 };
 
 Gang.prototype.createPeerCasa = function(_config, _anonymous) {
-   console.log('Creating a peer casa for casa ' + _config.uName);
+   console.log('Creating a peer casa for casa ' + _config.name);
 
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config, this);
@@ -771,12 +769,12 @@ Gang.prototype.certPath = function() {
 };
 
 Gang.prototype.getDbs = function() {
-   return [ this.uName, this.casa.uName ];
+   return [ this.name, this.casa.name ];
 };
 
 Gang.prototype.getDb = function(_dbName, _meta, _callback) {
 
-   var dbName = (_dbName) ? _dbName : this.uName;
+   var dbName = (_dbName) ? _dbName : this.name;
 
    if (this.dbs.hasOwnProperty(dbName)) {
 
@@ -851,7 +849,7 @@ Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
          process.exit(2);
 
          this.gangDb.close();
-         this.gangDb = new Db(this.uName, this.configPath(), false, this);
+         this.gangDb = new Db(this.name, this.configPath(), false, this);
 
          this.gangDb.on('connected', () => {
 

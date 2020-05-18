@@ -17,7 +17,7 @@ function Db(_dbName, _dbPath, _newDb, _owner) {
 
    this.dbFullName = this.dbPath + "/" + _dbName + ".db";
    this.dbName = _dbName;
-   NamedObject.call(this, "db:"+this.dbName, _owner);
+   NamedObject.call(this, { name: this.dbName, type: "db" }, _owner);
 }
 
 util.inherits(Db, NamedObject);
@@ -120,27 +120,27 @@ Db.prototype.appendToCollection = function(_collectionName, _config, _callback) 
 
       for (var i = 0; i < _config.length; ++i) {
          _config[i]._collection = _collectionName;
-         _config[i]._id = _config[i].uName;
+         _config[i]._id = _config[i].name;
       }
       return this.db.insert(_config, _callback);
    }
    else {
       _config._collection = _collectionName;
-      _config._id = _config.uName;
+      _config._id = _config.name;
       return this.db.insert(_config, _callback);
    }
 };
 
-Db.prototype.find = function(_uName, _callback) {
-   return this.db.findOne({ _id: _uName }, _callback);
+Db.prototype.find = function(_name, _callback) {
+   return this.db.findOne({ _id: _name }, _callback);
 };
 
-Db.prototype.remove = function(_uName, _callback) {
-   return this.db.remove({ _id: _uName }, {}, _callback);
+Db.prototype.remove = function(_name, _callback) {
+   return this.db.remove({ _id: _name }, {}, _callback);
 };
 
 Db.prototype.update = function(_config, _callback) {
-   return this.db.update({ _id: _config.uName }, _config, {}, _callback);
+   return this.db.update({ _id: _config.name }, _config, {}, _callback);
 };
 
 Db.export = function(_content) {

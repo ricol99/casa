@@ -22,7 +22,7 @@ function Ramps(_owner, _config, _service) {
    this.name = _config.name;
    this.config = _config;
    this.service = _service;
-   this.uName = _service.uName + ":ramps:" + _owner.uName + ":" + _config.name;
+   this.name = _service.name + "-ramps-" + _owner.name + ":" + _config.name;
    this.owner = _owner;
    this.ramps = [];
    this.loop = _config.hasOwnProperty("loop") ? _config.loop : false;
@@ -89,7 +89,7 @@ function Ramp(_ramps, _config) {
    this.name = _config.name;
    this.config = _config;
    this.ramps = _ramps;
-   this.uName = "ramp:" + this.ramps.uName;
+   this.name = "ramp-" + this.ramps.name;
 
    this.endValue = this.config.endValue;
    this.duration = this.config.duration;

@@ -9,7 +9,7 @@ function RemoteCasa(_config, _peerCasa) {
    this.casa = this.gang.casa;
    this.peerCasa = _peerCasa;
 
-   SourceBase.call(this, _config.uName, this.gang);
+   SourceBase.call(this, _config, this.gang);
 
    this.loginAs = 'remote';
    this.sources = [];
@@ -87,9 +87,9 @@ RemoteCasa.prototype.setSourcePropertyWithRamp = function(_source, _property, _r
 
 RemoteCasa.prototype.addSource = function(_source) {
    // Peer source being added to remote casa
-   console.log(this.fullName + ': Source '  +_source.uName + ' added to remote casa ');
-   this.sources[_source.uName] = _source;
-   console.log(this.fullName + ': ' + _source.uName + ' associated!');
+   console.log(this.fullName + ': Source '  +_source.name + ' added to remote casa ');
+   this.sources[_source.name] = _source;
+   console.log(this.fullName + ': ' + _source.name + ' associated!');
 }
 
 RemoteCasa.prototype.invalidate = function() {
@@ -97,7 +97,7 @@ RemoteCasa.prototype.invalidate = function() {
    for(var prop in this.sources) {
 
       if(this.sources.hasOwnProperty(prop)){
-         console.log(this.fullName + ': Invaliding source ' + this.sources[prop].uName);
+         console.log(this.fullName + ': Invaliding source ' + this.sources[prop].name);
          this.sources[prop].invalidate();
          delete this.sources[prop];
       }

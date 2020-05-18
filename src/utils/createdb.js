@@ -8,7 +8,7 @@ parseConfigForSecureConfig(inputConfig);
 
 var gangDb = inputConfig.hasOwnProperty("gang");
 
-var db = new Db((gangDb) ? inputConfig.gang.uName : inputConfig.casa.uName, undefined, true);
+var db = new Db((gangDb) ? inputConfig.gang.name : inputConfig.casa.name, undefined, true);
 
 db.on('connected', () => {
    populateDbFromConfig();
@@ -19,8 +19,8 @@ db.connect();
 function populateDbFromConfig() {
 
    var configs = {};
-   configs.gang = { "uName": "", "displayName": "", "parentCasa": {} };
-   configs.casa = { "uName": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
+   configs.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
+   configs.casa = { "name": "", "type": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
    configs.users = [];
    configs.services = [];
    configs.scenes = [];
@@ -85,7 +85,7 @@ function parseConfigForSecureConfig(_config) {
       }
    }
    else if (_config.hasOwnProperty("secureConfig") && _config.secureConfig) {
-      loadSecureConfig(_config.uName, _config);
+      loadSecureConfig(_config.name, _config);
    }
    else {
       for (var prop in _config) {
@@ -97,8 +97,8 @@ function parseConfigForSecureConfig(_config) {
    }
 }
 
-function loadSecureConfig(_uName, _config) {
-   var secureConfig = secureRequire(_uName);
+function loadSecureConfig(_name, _config) {
+   var secureConfig = secureRequire(_name);
 
    if (!secureConfig) {
       return;

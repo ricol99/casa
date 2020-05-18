@@ -59,24 +59,24 @@ function Building(_config, _parent) {
    for (var i = 0; i < this.users.length; ++i) {
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
-         "name": this.users[i].sName+"-user-state",
+         "name": this.users[i].name+"-user-state",
          "type": "stateproperty",
          "initialValue": "not-present",
          "states": [
             {
                "name": "not-present",
-               "sources": [{ "property": this.users[i].sName+"-present", "value": true, "nextState": "present" }],
-               "action": { "event": "user-left", "value": this.users[i].sName }
+               "sources": [{ "property": this.users[i].name+"-present", "value": true, "nextState": "present" }],
+               "action": { "event": "user-left", "value": this.users[i].name }
             },
             {
                "name": "present",
-               "sources": [{ "property": this.users[i].sName+"-present", "value": false, "nextState": "not-present" }],
-               "action": { "guard": { "previousState": "not-present"}, "event": "user-arrived", "value": this.users[i].sName }
+               "sources": [{ "property": this.users[i].name+"-present", "value": false, "nextState": "not-present" }],
+               "action": { "guard": { "previousState": "not-present"}, "event": "user-arrived", "value": this.users[i].name }
             },
             {
                "name": "in-bed",
                "sources": [],
-               "action": { "event": "user-went-to-bed", "value": this.users[i].sName }
+               "action": { "event": "user-went-to-bed", "value": this.users[i].name }
             }
          ]
       };
@@ -87,20 +87,20 @@ function Building(_config, _parent) {
             var listen = _config.bedrooms[j].hasOwnProperty("users") ? _config.bedrooms[j].users.includes(this.users[i].fullName) : true;
 
             if (listen) {
-               this.userStateConfigs[i].states[0].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[1].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].sName+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[2].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].sName+"-in-bed", "value": false, "nextState": "present" });
+               this.userStateConfigs[i].states[0].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[1].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
+               this.userStateConfigs[i].states[2].sources.push({ "fullName": _config.bedrooms[j].fullName, "property": this.users[i].name+"-in-bed", "value": false, "nextState": "present" });
             }
          }
       }
 
-      this.ensurePropertyExists(this.users[i].sName+"-present", 'property', { name: this.users[i].sName+"-present", initialValue: false }, _config);
-      this.ensurePropertyExists(this.users[i].sName+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists(this.sName+"-building-state", 'property', { "initialValue": 'not-present', "source": { "fullName": this.fullName, "property": this.users[i].sName+"-user-state" }}, {});
+      this.ensurePropertyExists(this.users[i].name+"-present", 'property', { name: this.users[i].name+"-present", initialValue: false }, _config);
+      this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
+      this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "fullName": this.fullName, "property": this.users[i].name+"-user-state" }}, {});
 
-      allUsersAwayConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"not-present\"" });
-      allUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value!==\"present\"" });
-      someUsersInBedConfig.sources.push({ "property": this.users[i].sName+"-user-state", "transform": "$value===\"in-bed\"" });
+      allUsersAwayConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"not-present\"" });
+      allUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value!==\"present\"" });
+      someUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"in-bed\"" });
    }
 
    allUsersInBedConfig.sources.push({ "property": "some-users-in-bed" });

@@ -33,7 +33,7 @@ GangConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
 
       Db = require('../db');
       var output = Db.export(_result);
-      var fileName = this.gang.configPath() + "/configs/" + this.gang.uName + ".json";
+      var fileName = this.gang.configPath() + "/configs/" + this.gang.name + ".json";
       var fs = require('fs');
       var content = JSON.stringify(output, null, 3);
 
@@ -47,19 +47,19 @@ GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
    
    var cjson = require('cjson');
-   var configFilename = this.gang.configPath() + "/configs/" + this.gang.uName + ".json";
+   var configFilename = this.gang.configPath() + "/configs/" + this.gang.name + ".json";
    var inputConfig = cjson.load(configFilename); 
    
-   if (inputConfig.gang.uName !== this.gang.uName) {
+   if (inputConfig.gang.name !== this.gang.name) {
       return _callback("Config file corrupt.");
    }  
    
    var Db = require('../db');
-   var db = new Db(this.gang.uName, undefined, true);
+   var db = new Db(this.gang.name, undefined, true);
    
    db.on('connected', () => {
       var configs = {};
-      configs.gang = { "uName": "", "displayName": "", "parentCasa": {} };
+      configs.gang = { "name": "",, "type": "", "displayName": "", "parentCasa": {} };
       configs.users = [];
       configs.services = [];
       configs.scenes = [];

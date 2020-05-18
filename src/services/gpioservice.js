@@ -63,13 +63,13 @@ GpioPin.prototype.start = function() {
          this.gpio.watch( (_err, _value) => {
 
             if (_err) {
-               console.error(this.owner.uName + ": Error from gpio library! Error = " + _err);
+               console.error(this.owner.name + ": Error from gpio library! Error = " + _err);
             }
             else {
                var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
 
                if (newValue != this.value) {
-                  console.log(this.owner.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
+                  console.log(this.owner.name + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
                   this.value = newValue;
                   this.owner.gpioPinStatusChanged(this.gpioPin, this.value == 1);
                }

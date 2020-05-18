@@ -19,7 +19,7 @@ function Service(_config, _owner) {
 util.inherits(Service, Thing);
 
 Service.prototype.createThing = function(_config) {
-   var type = _config.uName.split(":")[0];
+   var type = _config.type;
    _config.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : false;
    _config.local = (_config.hasOwnProperty("local")) ? _config.local : this.localThings;
 

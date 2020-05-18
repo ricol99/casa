@@ -3,6 +3,7 @@ var schedule = require('node-schedule');
 var SunCalc = require('suncalc');
 var Parser = require('cron-parser');
 var Service = require('../service');
+var NamedObject = require('../namedobject');
 
 function ScheduleService(_config, _owner) {
    Service.call(this, _config, _owner);
@@ -74,15 +75,16 @@ ScheduleService.prototype.refreshSunEvents = function() {
 ScheduleService.prototype.coldStart = function() {
 };
 
-function Schedule(_owner, _config, _service) {
-   this.uName = _service.uName + ":" + _owner.fullName;
-   this.owner = _owner;
-   this.service = _service;
+function Schedule(_requester, _config, _owner) {
+   NamedObject.call(this, { name: _requester.name, type: "schedule" }, _owner);
+   this.requester = _requester;
    this.events = [];
 
    this.createEventsFromConfig(_config);
    this.scheduleAllEvents();
 };
+
+util.inherits(Schedule, NamedObject);
 
 Schedule.prototype.createEventsFromConfig = function(_eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
@@ -129,7 +131,7 @@ Schedule.prototype.createEventFromConfig = function(_eventConfig) {
       _eventConfig.rules = [ _eventConfig.rule ];
    }
 
-   var event = { name: _eventConfig.name, owner: this.owner, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true, config: _eventConfig };
+   var event = { name: _eventConfig.name, owner: this.requester, rules: [], active: (_eventConfig.hasOwnProperty('active')) ? _eventConfig.active : true, config: _eventConfig };
 
    for (var i = 0; i < _eventConfig.rules.length; ++i) {
       event.rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
@@ -214,7 +216,7 @@ Schedule.prototype.determineClosestRule = function(_now, _currentClosestSchedule
 };
 
 Schedule.prototype.scheduleAllEvents = function() {
-   this.setSunTimes(this.service.getSunTimes());
+   this.setSunTimes(this.owner.getSunTimes());
 
    for (var index = 0; index < this.events.length; ++index) {
       this.scheduleEvent(this.events[index]);
@@ -292,7 +294,7 @@ Schedule.prototype.resetJob = function(_rule) {
    }
    else {
       console.error(this.fullName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
-      throw(this.uName + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
+      throw(this.name + ": Unable to schedule rule '" + _rule.rule +"' for owner " + _rule.event.owner.fullName);
    }
 }
 

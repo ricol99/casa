@@ -3,10 +3,9 @@ var SourceBase = require('./sourcebase');
 var S = require('string');
 var io = require('socket.io-client');
 var Gang = require('./gang');
-var NamedObject = require('./namedobject');
 
 function PeerCasa(_config, _owner) {
-   this.name = _config.uName;
+   this.name = _config.name;
 
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
@@ -22,7 +21,7 @@ function PeerCasa(_config, _owner) {
    this.remoteCasas = [];
    this.deathTime = 500;
 
-   SourceBase.call(this, (_config.hasOwnProperty('uName')) ? _config.uName : _config.code + ":" + _config.name, _owner);
+   SourceBase.call(this, { name: (_config.hasOwnProperty('name')) ? _config.name : _config.code + "-" + _config.name, type: "peercasa" }, _owner);
 
    this.sources = [];
    this.workers = [];
@@ -111,7 +110,7 @@ PeerCasa.prototype.sourceAddedCasaCb = function(_data) {
          var source = this.casa.getSource(_data.sourceName);
          var allProps = {};
          source.getAllProperties(allProps, true);
-         _data.sourceUName = source.uName;
+         _data.sourceName = source.name;
          _data.sourcePriority = (source.hasOwnProperty('priority')) ? source.priority : 0;
          _data.sourceProperties = util.copy(allProps);
          this.sendMessage('source-added', _data);
@@ -402,7 +401,7 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    clearTimeout(this.loginTimer);
    this.loginTimer = null;
 
-   if (this.fullName != _data.casaName) {
+   if (this.fullName !== _data.casaName) {
       console.log(this.fullName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
       this.gang.removeRemoteCasa(this);
       this.gang.changePeerCasaName(this, _data.casaName);
@@ -584,7 +583,7 @@ PeerCasa.prototype.socketSourceAddedCb = function(_data) {
 
    var PeerSource = require('./peersource');
    console.log(this.fullName + ': Creating peer source named ' + _data.sourceName + ' priority =' + _data.sourcePriority);
-   var source = new PeerSource(_data.sourceName, _data.sourceUName, _data.sourcePriority, _data.sourceProperties, this);
+   var source = new PeerSource(_data.sourceName, _data.sourceName, _data.sourcePriority, _data.sourceProperties, this);
 
    // Refresh all inactive sources and workers
    this.gang.casa.refreshSourceListeners();
@@ -802,9 +801,9 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       var PeerSource = require('./peersource');
 
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.fullName + ': Creating peer source named ' + _data.casaConfig.sources[i].fullName + ' uName = ' + _data.casaConfig.sources[i].uName +
+         console.log(_peerCasa.fullName + ': Creating peer source named ' + _data.casaConfig.sources[i].fullName + ' name = ' + _data.casaConfig.sources[i].name +
                                           ' priority =' + _data.casaConfig.sources[i].priority);
-         var source = new PeerSource(_data.casaConfig.sources[i].fullName, _data.casaConfig.sources[i].uName, _data.casaConfig.sources[i].priority, _data.casaConfig.sources[i].properties, _peerCasa);
+         var source = new PeerSource(_data.casaConfig.sources[i].fullName, _data.casaConfig.sources[i].name, _data.casaConfig.sources[i].priority, _data.casaConfig.sources[i].properties, _peerCasa);
       }
    }
 

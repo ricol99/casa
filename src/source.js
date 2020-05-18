@@ -3,7 +3,7 @@ var SourceBase = require('./sourcebase');
 
 function Source(_config, _owner) {
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
-   SourceBase.call(this, _config.uName, _owner);
+   SourceBase.call(this, _config, _owner);
    this.config = _config;
 
    this.casa = this.gang.casa;

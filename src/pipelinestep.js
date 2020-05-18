@@ -4,7 +4,7 @@ var util = require('./util');
 // Constructor
 //
 function PipelineStep(_config, _pipeline) {
-   this.uName = _pipeline.uName+":"+_config.type;
+   this.name = _pipeline.name+"-"+_config.type;
    this.type = _config.type;
    this.pipeline = _pipeline;
    this.value = 0;
@@ -38,7 +38,7 @@ PipelineStep.prototype.process = function(_value, _data) {
 // Source has become available
 //
 PipelineStep.prototype.sourceIsValid = function(_data) {
-   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' is now valid');
+   console.log(this.pipeline.name + ': Source ' + _data.sourceName + ' property ' + _data.name + ' is now valid');
    this.sourceValid = true;
    var oldValid = this.valid;
    this.valid = this.amIValid();
@@ -53,7 +53,7 @@ PipelineStep.prototype.sourceIsValid = function(_data) {
 // Source is not available anymore
 //
 PipelineStep.prototype.sourceIsInvalid = function(_data) {
-   console.log(this.pipeline.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
+   console.log(this.pipeline.name + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
    this.sourceValid = false;
    var oldValid = this.valid;
    this.valid = this.amIValid();

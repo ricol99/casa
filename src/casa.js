@@ -19,7 +19,7 @@ function Casa(_config) {
 
    this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
-   NamedObject.call(this, _config.uName, this.gang);
+   NamedObject.call(this, _config, this.gang);
 
    this.id = _config.id;
    this.db = null;
@@ -89,7 +89,7 @@ Casa.prototype.createServer = function() {
      .on('connection', (_socket) => {
 
       console.log('a casa has joined');
-      var peerCasa = this.gang.createPeerCasa({uName: "casa:anonymous:"+Date.now()}, true);
+      var peerCasa = this.gang.createPeerCasa({ name: "anonymous-"+Date.now(), type: "casa"}, true);
       peerCasa.serveClient(_socket);
    });
 
@@ -115,7 +115,7 @@ Casa.prototype.getDb = function() {
 Casa.prototype.refreshSimpleConfig = function() {
    var simpleConfig = {};
    simpleConfig = {};
-   simpleConfig.uName = this.uName;
+   simpleConfig.name = this.name;
    simpleConfig.displayName = this.displayName;
    simpleConfig.gang = this.gang.fullName;
    simpleConfig.sources = [];
@@ -128,7 +128,7 @@ Casa.prototype.refreshSimpleConfig = function() {
          if (!source.local) {
             var allProps = {};
             source.getAllProperties(allProps, true);
-            simpleConfig.sources.push({ uName: source.uName, fullName: source.fullName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
+            simpleConfig.sources.push({ name: source.name, fullName: source.fullName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
          }
       }
    }
@@ -187,9 +187,9 @@ Casa.prototype.addSource = function(_source) {
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
-   console.log(this.fullName + ': Renaming source '  + _source.uName + ' to ' + _newName);
+   console.log(this.fullName + ': Renaming source '  + _source.name + ' to ' + _newName);
    delete this.sources[_source.fullName];
-   _source.setUName(_newName);
+   _source.setName(_newName);
    this.sources[_source.fullName] = _source;
 };
 
@@ -229,24 +229,24 @@ Casa.prototype.findListeners = function(_fullName) {
 };
 
 Casa.prototype.addService = function(_service) {
-   console.log(this.fullName + ': Service '  + _service.uName + ' added to casa ');
+   console.log(this.fullName + ': Service '  + _service.name + ' added to casa ');
 
-   if (this.services[_service.uName.split(":")[0]]) {
-      console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.uName);
+   if (this.services[_service.type]) {
+      console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.name);
       process.exit(1);
    }
 
-   this.services[_service.uName.split(":")[0]]  = _service;
+   this.services[_service.type]  = _service;
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return (_serviceType.indexOf(":") !== -1) ? this.gang.findNamedObject("::"+_serviceType) : this.services[_serviceType];
+   return (_serviceType.startsWith("::")) ? this.gang.findNamedObject(_serviceType) : this.services[_serviceType];
 };
 
 Casa.prototype.findServiceName = function(_serviceType) {
    var service = this.findService(_serviceType);
 
-   return (service) ? service.uName : null;
+   return (service) ? service.fullName : null;
 };
 
 Casa.prototype.addWorker = function(_worker) {

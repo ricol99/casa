@@ -18,7 +18,7 @@ CasaConsoleApi.prototype.cat = function(_params, _callback) {
    for (var source in this.myObj().sources) {
 
       if (this.myObj().sources.hasOwnProperty(source)) {
-         output.push(this.myObj().sources[source].uName);
+         output.push(this.myObj().sources[source].name);
       }
    }
 
@@ -29,7 +29,7 @@ CasaConsoleApi.prototype.sources = function(_params, _callback) {
    var sources = [];
 
    for (var source in this.myObj().sources) {
-      sources.push(this.myObj().sources[source].uName);
+      sources.push(this.myObj().sources[source].name);
    }
 
    _callback(null, sources);
@@ -39,7 +39,7 @@ CasaConsoleApi.prototype.services = function(_params, _callback) {
    var services = [];
 
    for (var service in this.myObj().services) {
-      services.push(this.myObj().services[service].uName);
+      services.push(this.myObj().services[service].name);
    }
 
    _callback(null, services);
@@ -50,14 +50,14 @@ CasaConsoleApi.prototype.createService = function(_params, _callback) {
    var newServiceConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findService(newServiceConfig.uName)) {
+   if (this.gang.findService(newServiceConfig.name)) {
       return _callback("Service already exists!");
    }
 
    if (persist) {
-      this.db = this.gang.getDb(this.gang.casa.uName);
+      this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(newServiceConfig.uName, (_err, _result) => {
+      this.db.find(newServiceConfig.name, (_err, _result) => {
 
          if (_err || (_result === null)) {
             var serviceObj = this.gang.createService(util.copy(newServiceConfig, true));
@@ -91,14 +91,14 @@ CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    var newThingConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findNamedObject("::"+newThingConfig.uName)) {
+   if (this.gang.findNamedObject("::"+newThingConfig.name)) {
       return _callback("Thing already exists!");
    }
 
    if (persist) {
-      this.db = this.gang.getDb(this.gang.casa.uName);
+      this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(newThingConfig.uName, (_err, _result) => {
+      this.db.find(newThingConfig.name, (_err, _result) => {
 
          if (_err || (_result === null)) {
             var thingObj = this.gang.createThing(util.copy(newThingConfig, true));
@@ -134,7 +134,7 @@ CasaConsoleApi.prototype.restart = function(_params, _callback) {
 CasaConsoleApi.prototype.pushDb = function(_params, _callback) {
    this.checkParams(2, _params);
 
-   var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.uName;
+   var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.name;
    var localHash = this.dbService.getDbHash(dbName);
 
    this.dbService.getPeerDbHash(dbName, localHash, _params[0], _params[1], (_err, _result) => {
@@ -159,7 +159,7 @@ CasaConsoleApi.prototype.pushDbs = function(_params, _callback) {
          _callback(_err);
       }
       else {
-         _params.push(this.gang.uName);
+         _params.push(this.gang.name);
          this.pushDb(_params, _callback);
       }
    });

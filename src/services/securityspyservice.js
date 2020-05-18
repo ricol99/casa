@@ -203,7 +203,7 @@ Request.prototype.send = function() {
       });
 
    }).on('error', (_err) => {
-      console.error(this.owner.uName + ": Received error from http link: " + _err.message);
+      console.error(this.owner.name + ": Received error from http link: " + _err.message);
       this.owner.completeRequest(_err.message, null);
    });
 };
@@ -269,7 +269,7 @@ LiveStreamListener.prototype.start = function() {
       });
 
    }).on('error', (_err) => {
-      console.error(this.owner.uName + ": Listener connection error=" + _err.message + ". Will reconnect soon");
+      console.error(this.owner.name + ": Listener connection error=" + _err.message + ". Will reconnect soon");
       this.lineOpen = false;
       this.restartLink();
    });
@@ -354,7 +354,7 @@ SystemInfo.prototype.sync = function(_callback) {
          this.processAllData(_callback);
       });
    }).on('error', (_err) => {
-      console.error(this.owner.uName + ": Unable to sync System Info, error=" + _err.message);
+      console.error(this.owner.name + ": Unable to sync System Info, error=" + _err.message);
    });
 };
 
@@ -364,13 +364,13 @@ SystemInfo.prototype.processAllData = function(_callback) {
    parseString(this.data, (_err, _result) => {
 
       if (_err) {
-         console.error(this.owner.uName + ": Unable to parse received XML string!");
+         console.error(this.owner.name + ": Unable to parse received XML string!");
          _callback(_err);
          return;
       }
 
       if (!_result.hasOwnProperty("system") || !_result.system.hasOwnProperty("cameralist") || !_result.system.cameralist[0].hasOwnProperty("camera")) {
-         console.error(this.owner.uName + ": Unable to parse received XML string!");
+         console.error(this.owner.name + ": Unable to parse received XML string!");
          _callback("Unable to parse XML string!");
          return;
       }

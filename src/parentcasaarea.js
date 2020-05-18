@@ -18,7 +18,7 @@ ParentCasaArea.prototype.broadcastCb = function(_message) {
    for(var prop in this.gang.childCasaAreas) {
 
       if(this.gang.childCasaAreas.hasOwnProperty(prop)){
-         console.log(this.fullName + ': Broadcasting to child area ' + this.gang.childCasaAreas[prop].uName);
+         console.log(this.fullName + ': Broadcasting to child area ' + this.gang.childCasaAreas[prop].name);
          this.gang.childCasaAreas[prop].broadcastMessage(_message);
       }
    }

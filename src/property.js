@@ -4,10 +4,7 @@ var Pipeline = require('./pipeline');
 var NamedObject = require('./namedobject');
 
 function Property(_config, _owner) {
-   this.name = _config.name;
-   this.type = _config.type;
-
-   NamedObject.call(this, this.type+":"+_config.name, _owner);
+   NamedObject.call(this, _config, _owner);
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;

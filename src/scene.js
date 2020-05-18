@@ -4,7 +4,7 @@ var SourceListener = require('./sourcelistener');
 
 /************************
 {
-   "uName": "scene:on-holiday",
+   "name": "scene:on-holiday",
    "displayName": "On Holiday Scene",
    "props": [
       {
@@ -26,7 +26,7 @@ var SourceListener = require('./sourcelistener');
    ],
    "sources": [
       {
-         "uName": "alarmtexecom:dumgoyne",
+         "name": "::dumgoyne",
          "property": "target-state",
          "value": "armed-full"
       }

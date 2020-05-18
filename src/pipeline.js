@@ -3,7 +3,7 @@ var util = require('util');
 function Pipeline(_config, _owner) {
    this.name = (_config.hasOwnProperty('name')) ? _config.name : "pipeline";
    this.owner = _owner;
-   this.uName = this.owner.uName+":"+this.name;
+   this.name = this.owner.name+"-"+this.name;
 
    this.loadSteps(_config);
 }

@@ -73,7 +73,7 @@ DbService.prototype.dbRequested = function(_request, _response) {
 DbService.prototype.dbHashRequested = function(_request, _response) {
    console.log(this.fullName+": dbHashRequested() request=", _request.params);
 
-   if (!_request.params.hasOwnProperty("dbName") || ((_request.params.dbName !== this.gang.uName) && (_request.params.dbName !== this.gang.casa.uName))) {
+   if (!_request.params.hasOwnProperty("dbName") || ((_request.params.dbName !== this.gang.name) && (_request.params.dbName !== this.gang.casa.name))) {
       this.sendFail(_request, _response);
    }
    else {
@@ -164,7 +164,7 @@ DbService.prototype.getDbHash = function(_dbName) {
 
 DbService.prototype.dbsRequested = function(_request, _response) {
    console.log(this.fullName+": dbsRequested()");
-   _response.send([ this.gang.uName, this.gang.casa.uName ]);
+   _response.send([ this.gang.name, this.gang.casa.name ]);
 };
 
 DbService.prototype.sendFail = function(_request, _response) {
@@ -180,9 +180,9 @@ DbService.prototype.sendFail = function(_request, _response) {
 
  
 DbService.prototype.checkGangDbAgainstPeer = function(_address, _port, _callback) {
-   var localHash = this.getDbHash(this.gang.uName);
+   var localHash = this.getDbHash(this.gang.name);
 
-   this.getPeerDbHash(this.gang.uName, localHash.hash, _address, _port, (_err, _peerHash) => {
+   this.getPeerDbHash(this.gang.name, localHash.hash, _address, _port, (_err, _peerHash) => {
 
       if (_err) {
          _callback("Unable to retrieve peer db hash, err: " + _err);
@@ -199,14 +199,14 @@ DbService.prototype.checkGangDbAgainstPeer = function(_address, _port, _callback
 
 DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) {
 
-   this.getPeerDb(this.gang.uName, _address, _port, (_err, _docs) => {
+   this.getPeerDb(this.gang.name, _address, _port, (_err, _docs) => {
 
       if (_err) {
          _callback("Unable to retrieve peer db, err: " + _err);
       }
       else {
          var Db = require('../db');
-         this.gang.gangDb = new Db(this.gang.uName, this.gang.configPath(), true);
+         this.gang.gangDb = new Db(this.gang.name, this.gang.configPath(), true);
 
          this.gang.gangDb.on('connected', () => {
             this.gang.gangDb.append(_docs, _callback);

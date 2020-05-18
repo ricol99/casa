@@ -24,7 +24,7 @@ GangConsoleApi.prototype.createUser = function(_params, _callback) {
    }
 
    if (!this.gang.findNamedObject(_params[0])) {
-      var userObj = this.gang.createUser({uName: _params[0]});
+      var userObj = this.gang.createUser({name: _params[0], type: "user"});
       return _callback(null, true);
    }
    else {
@@ -39,7 +39,7 @@ GangConsoleApi.prototype.restart = function(_params, _callback) {
 GangConsoleApi.prototype.updateDb = function(_params, _callback) {
    this.checkParams(2, _params);
 
-   var dbName = (_params.length > 2) ? _params[2] : this.gang.uName;
+   var dbName = (_params.length > 2) ? _params[2] : this.gang.name;
    var localHash = this.dbService.getDbHash(dbName);
 
    this.dbService.getPeerDbHash(dbName, localHash, _params[0], _params[1], (_err, _result) => {
@@ -64,7 +64,7 @@ GangConsoleApi.prototype.updateDbs = function(_params, _callback) {
          _callback(_err);
       }
       else {
-         _params.push(this.gang.casa.uName);
+         _params.push(this.gang.casa.name);
          this.updateDb(_params, _callback);
       }
    });

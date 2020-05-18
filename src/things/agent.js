@@ -4,7 +4,8 @@ var SourceListener = require('./sourcelistener');
 
 /************************
 {
-   "uName": "agent:on-holiday",
+   "name": "agent-on-holiday",
+   "type": "agent",
    "displayName": "On Holiday Agent",
    "eventProp": "receivedEvent",
    "stateProp": "currentState",
@@ -22,7 +23,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "uName": "alarmtexecom:dumgoyne",
+               "fullName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -32,7 +33,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "uName": "alarmtexecom:dumgoyne",
+               "fullName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"
@@ -50,7 +51,7 @@ var SourceListener = require('./sourcelistener');
    "initialValue": "off",
    "sources": [
       {
-         "uName": "user:natalie",
+         "fullName": "::natalie",
          "property": "in-bed-at-home",
          "states": {
             "off": {
@@ -64,7 +65,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "uName": "alarmtexecom:dumgoyne",
+               "fullName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -74,7 +75,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "uName": "alarmtexecom:dumgoyne",
+               "fullName": "::dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"

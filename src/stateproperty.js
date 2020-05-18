@@ -395,8 +395,7 @@ StateProperty.prototype.ownerHasNewName = function() {
 };
 
 function State(_config, _owner) {
-   this.name = _config.name;
-   NamedObject.call(this, "state:" + this.name, _owner);
+   NamedObject.call(this, { name: _config.name, type: "state" }, _owner);
 
    this._id = this.fullName;
    this.sourceMap = {};

@@ -8,22 +8,22 @@ function CasaArea(_config) {
 
    this.casas = {};
    this.casaCount = 0;
-   this.uName = _config.uName;
+   this.name = _config.name;
 
-   SourceBase.call(this, this.uName, this.gang.casa);
+   SourceBase.call(this, _config, this.gang.casa);
 }
 
 util.inherits(CasaArea, SourceBase);
 
 CasaArea.prototype.addCasa = function(_casa) {
-   this.casas[_casa.uName] = _casa;
+   this.casas[_casa.name] = _casa;
    this.casaCount++;
 
    this.setupCasaListeners(_casa);
 }
 
 CasaArea.prototype.removeCasa = function(_casa) {
-   delete this.casas[_casa.uName];
+   delete this.casas[_casa.name];
    this.casaCount--;
  
    this.removeCasaListeners(_casa);

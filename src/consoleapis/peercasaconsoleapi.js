@@ -21,7 +21,7 @@ PeerCasaConsoleApi.prototype.cat = function(_params, _callback) {
    for (var source in this.myObj().sources) {
 
       if (this.myObj().sources.hasOwnProperty(source)) {
-         output.push(this.myObj().sources[source].uName);
+         output.push(this.myObj().sources[source].name);
       }
    }
 
@@ -32,7 +32,7 @@ PeerCasaConsoleApi.prototype.sources = function(_params, _callback) {
    var sources = [];
 
    for (var source in this.myObj().sources) {
-      sources.push(this.myObj().sources[source].uName);
+      sources.push(this.myObj().sources[source].name);
    }
 
    return _callback(null, sources);

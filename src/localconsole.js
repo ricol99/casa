@@ -4,7 +4,7 @@ var readline = require('readline');
 var NamedObject = require('./namedobject');
 
 function LocalConsole(_owner) {
-   NamedObject.call(this, "console:"+Date.now(), _owner);
+   NamedObject.call(this, { name: "console-"+Date.now(), type: "localconsole" }, _owner);
 
    this.autoCompleteHandler = LocalConsole.prototype.autoCompleteCb.bind(this);
    this.lineReaderHandler = LocalConsole.prototype.lineReaderCb.bind(this);
@@ -24,7 +24,7 @@ LocalConsole.prototype.coldStart = function() {
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.fullName, this);
 
-   this.start("::" + this.casa.uName);
+   this.start("::" + this.casa.name);
 };
 
 LocalConsole.prototype.start = function(_startScope) {
@@ -50,12 +50,12 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
       process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
       var matches = _result.matchingScopes;
 
-      var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.uName + ":");
+      var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName);
+         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjName);
          matches = methodMatches.concat(_result.matchingScopes);
       }
 
@@ -101,14 +101,14 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 };
 
-LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName) {
+LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjName) {
    var cmdObj = null;
 
    for (var i = 0; i < _consoleObjHierarchy.length; ++i) {
 
       try {
          var ConsoleCmdObj = require("./consolecmds/" + _consoleObjHierarchy[i] +  "cmd");
-         cmdObj = new ConsoleCmdObj({ uName: _consoleObjuName }, this);
+         cmdObj = new ConsoleCmdObj({ name: _consoleObjName }, this);
          break;
       }
       catch (_err) {
@@ -120,12 +120,12 @@ LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consol
 };
 
 LocalConsole.prototype.processMatches = function(_line, _matches) {
-   var scope = (this.currentScope === "::") ? this.gang.uName : this.gang.uName + this.currentScope.substr(1);
+   var scope = (this.currentScope === "::") ? this.gang.name : this.gang.name + this.currentScope.substr(1);
 
    for (var i = 0; i < _matches.length; ++i) {
 
       if (_line[0] === ':') {
-         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.gang.uName.length+1) : ":"+_matches[i].replace(this.gang.uName+":"+this.getCasaName(), "").substr(1);
+         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.gang.name.length+1) : ":"+_matches[i].replace(this.gang.name+":"+this.getCasaName(), "").substr(1);
       }
       else  {
          _matches[i] = _matches[i].replace(scope, "").substr(1);
@@ -133,11 +133,11 @@ LocalConsole.prototype.processMatches = function(_line, _matches) {
    }
 };
 
-LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjuName, _perfectMatchRequired) {
+LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjName, _perfectMatchRequired) {
    var matches = [];
 
    if (_consoleObjHierarchy) {
-      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName);
+      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjName);
 
       if (cmdObj) {
          matches = cmdObj.filterMembers(_method, undefined, _scope);
@@ -202,7 +202,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
 
       if (methodResult.method && _result.hasOwnProperty("consoleObjHierarchy")) {
-         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
+         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjName);
 
          if (cmdObj) {
             var methodName = methodResult.method ? methodResult.method : "cat";
@@ -250,11 +250,11 @@ LocalConsole.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, 
 };
 
 LocalConsole.prototype.getPromptColour = function(_prompt) {
-   return (_prompt.startsWith("::"+this.casa.uName)) ? "\x1b[32m" : "\x1b[31m";
+   return (_prompt.startsWith("::"+this.casa.name)) ? "\x1b[32m" : "\x1b[31m";
 };
 
 LocalConsole.prototype.getCasaName = function(_line) {
-   this.gang.casa.uName;
+   this.gang.casa.name;
 };
 
 

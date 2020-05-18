@@ -26,7 +26,7 @@ ThingConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
 
 ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
 
-   if (_thingConfig.uName === this.myObjuName) {
+   if (_thingConfig.name === this.myObjName) {
       return _thingConfig;
    }
 
@@ -49,16 +49,16 @@ ThingConsoleApi.prototype.createThing = function(_params, _callback) {
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.gang.findNamedObject("::"+config.uName)) {
+   if (this.gang.findNamedObject("::"+config.name)) {
       return _callback("Thing already exists!");
    }
 
    var topThing = this.myObj().getTopThing();
 
    if (persist) {
-      this.db = this.gang.getDb(this.gang.casa.uName);
+      this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(topThing.uName, (_err, _topThingConfig) => {
+      this.db.find(topThing.name, (_err, _topThingConfig) => {
 
          if (_err || (_topThingConfig === null)) {
             return _callback("Unable to persist new Thing!");
@@ -105,16 +105,16 @@ ThingConsoleApi.prototype.createProperty = function(_params, _callback) {
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.myObj().props.hasOwnProperty(config.uName)) {
+   if (this.myObj().props.hasOwnProperty(config.name)) {
       return _callback("Property already exists!");
    }
 
    var topThing = this.myObj().getTopThing();
 
    if (persist) {
-      this.db = this.gang.getDb(this.gang.casa.uName);
+      this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(topThing.uName, (_err, _topThingConfig) => {
+      this.db.find(topThing.name, (_err, _topThingConfig) => {
 
          if (_err || (_topThingConfig === null)) {
             return _callback("Unable to persist new property!");

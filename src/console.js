@@ -275,7 +275,6 @@ function RemoteCasa(_config, _owner) {
    AsyncEmitter.call(this);
    this.owner = _owner;
    this.name = _config.name;
-   this.uName = this.name;
    this.host = _config.host;
    this.port = _config.port;
    this.db = null;
@@ -433,7 +432,7 @@ function OfflineCasa(_config, _owner) {
    this.db = this.owner.gang.getDb();
 
    var ConsoleCmdObj = require("./consolecmds/offlinecasaconsolecmd");
-   this.cmdObj = new ConsoleCmdObj({ uName: "casa:offlinecasa" }, this);
+   this.cmdObj = new ConsoleCmdObj({ name: "casa:offlinecasa" }, this);
    this.methods = Object.getPrototypeOf(this.cmdObj);
 }
 
@@ -465,7 +464,7 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    var consoleObjHierarchy = [ "offlinecasaconsole" ];
    var scope = "::";
    var arguments = [];
-   var consoleObjuName = "offlinecasaconsolecmd:offline";
+   var consoleObjName = "offline";
 
    if (line.split("(").length > 1) {
       var methodArguments = line.split("(").slice(1).join("(").trim();
@@ -485,10 +484,10 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    }
 
    if (_callback) {
-      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName });
+      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjName: consoleObjName });
    }
    else {
-      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName };
+      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjName: consoleObjName };
    }
 };
 

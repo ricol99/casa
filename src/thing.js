@@ -35,7 +35,7 @@ function Thing(_config, _owner) {
 util.inherits(Thing, Source);
 
 Thing.prototype.addThing = function(_thing) {
-   this.things[_thing.uName] = _thing;
+   this.things[_thing.name] = _thing;
 };
 
 // Actually update the property value and let all interested parties know

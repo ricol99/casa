@@ -1,41 +1,38 @@
 var util = require('./util');
 var AsyncEmitter = require('./asyncemitter');
 
-function NamedObject(_name, _owner) {
+function NamedObject(_config, _owner) {
    AsyncEmitter.call(this);
 
    // Allow the creation of a named root
    if (_owner && (typeof _owner === "string")) {
       this.owner = null;
       this.fullName = _owner;
-      this.oName = _name;
-      this.uName = this.oName;
+      this.name = _config.name;
+      this.type = _config.type;
    }
    else {
 
-      if (_name[0] === ":") {
-         this.owner = _owner.findOwner(_name);
+      if (_config.name[0] === ":") {
+         this.owner = _owner.findOwner(_config.name);
 
          if (this.owner) {
-            this.oName = _name.replace(this.owner.fullName+":", ""); 
-            this.uName = this.oName;
+            this.name = _config.name.replace(this.owner.fullName+":", ""); 
          }
          else {
-            console.error("namedobject:"+_name+ ": Owner not found!");
+            console.error("namedobject:"+_config.name+ ": Owner not found!");
             process.exit(2);
          }
       }
       else {
          this.owner = _owner;
-         this.oName = _name;
-         this.uName = this.oName;
+         this.name = _config.name;
       }
 
-      this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
+      this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
+      this.type = _config.type;
    }
 
-   this.sName = this.oName.split(":")[1];
-   this.tName = this.oName.split(":")[0];
    this.myNamedObjects = {};
    
    if (this.owner) {
@@ -55,7 +52,7 @@ NamedObject.prototype.setOwner = function(_owner) {
 
    this.owner = _owner;
    var oldFullName = this.fullName;
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : this.oName;
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : this.name;
    
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -130,22 +127,15 @@ NamedObject.prototype.detach = function(_fullName) {
    }
 };
 
-NamedObject.prototype.setUName = function(_uName) {
-   this.setOName(_uName);
-};
-
-NamedObject.prototype.setOName = function(_oName) {
-   console.log(this.fullName + ": About to change oName to "+_oName);
+NamedObject.prototype.setName = function(_name) {
+   console.log(this.fullName + ": About to change name to "+_name);
 
    if (this.owner) {
       this.owner.removeChildNamedObject(this);
    }
 
-   this.oName = _oName;
-   this.uName = this.oName;
-   this.sName = this.oName.split(":")[1];
-   this.tName = this.oName.split(":")[0];
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
+   this.name = _name;
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
 
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -160,7 +150,7 @@ NamedObject.prototype.setOName = function(_oName) {
 };
 
 NamedObject.prototype.ownerHasNewName = function() {
-   this.fullName = this.owner ? this.owner.fullName + ":" + this.oName : ":";
+   this.fullName = this.owner ? this.owner.fullName + ":" + this.name : ":";
 
    for (var child in this.myNamedObjects) {
 
@@ -201,15 +191,15 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
 };
 
 NamedObject.prototype.addChildNamedObject = function(_namedObject) {
-   this.myNamedObjects[_namedObject.oName] = _namedObject;
+   this.myNamedObjects[_namedObject.name] = _namedObject;
 };
 
 NamedObject.prototype.removeChildNamedObject = function(_namedObject) {
-   delete this.myNamedObjects[_namedObject.oName];
+   delete this.myNamedObjects[_namedObject.name];
 };
 
 NamedObject.prototype.stripMyName = function(_name) {
-   var myName = this.owner ? this.oName : ":";
+   var myName = this.owner ? this.name : ":";
 
    if (_name.startsWith(myName)) {
       var newName = _name.replace(myName, "");
@@ -232,11 +222,10 @@ NamedObject.prototype.findNamedObject = function(_name)  {
 
    var result = null;
    var filterArray = newName.split(":");
-   var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
    var obj = null;
 
    util.iterate(this.myNamedObjects, 0, (_obj) => {
-      if (_obj.oName === matchString) { obj = _obj; return true; }
+      if (_obj.name === filterArray[0]) { obj = _obj; return true; }
    });
 
    if (obj) {
@@ -267,7 +256,7 @@ NamedObject.prototype.filterName = function(_name)  {
    process.stdout.write("AAAAA filterName newName="+newName+"\n");
 
    var filterArray = newName.split(":");
-   var matchString = (filterArray.length === 1) ? filterArray[0] : filterArray[0]+":"+filterArray[1];
+   var matchString = filterArray[0];
    var perfectMatch = -1;
    var matches = util.filter(this.myNamedObjects, (_obj) => { return _obj.startsWith(matchString); });
 
@@ -282,21 +271,11 @@ NamedObject.prototype.filterName = function(_name)  {
 
    if (perfectMatch !== -1) {
       var namedObject = this.myNamedObjects[matchString];
-      //filterArray.splice(0, (filterArray.length >= 2) ? 2 : 1);
+      result = namedObject.filterName((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"));
 
-      //if (filterArray.length > 0) {
-         result = namedObject.filterName((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"));
-
-         if (!result.namedObject) {
-            result.namedObject = namedObject;
-         }
-      //}
-      //else {
-         //result.namedObject = namedObject;
-         //result.name = hits[perfectMatch];
-         //hits.splice(perfectMatch, 1);
-         //result.remainingStr = "";
-      //}
+      if (!result.namedObject) {
+         result.namedObject = namedObject;
+      }
    }
    else {
       var remainingStr = (filterArray.length === 0) ? "" : (filterArray.length === 1) ? filterArray[0] : filterArray.join(":");

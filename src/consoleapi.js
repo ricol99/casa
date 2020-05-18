@@ -5,10 +5,10 @@ var NamedObject = require('./namedobject');
 function ConsoleApi(_config, _owner) {
    this.config = _config;
    this.type = "consoleapi";
-   NamedObject.call(this, _config.uName.split(":")[0] + "consoleapi:" + _config.uName.split(":")[1], _owner);
+   NamedObject.call(this, _config, _owner);
 
-   this.myObjuName = _config.uName;
-   this.myObjFullName = (_owner) ? _owner.fullName + ":" + _config.uName : "::" + _config.uName;
+   this.myObjName = _config.name;
+   this.myObjFullName = (_owner) ? _owner.fullName + ":" + _config.name : "::" + _config.name;
    this.consoleApiObjects = {};
 
    this.gang = Gang.mainInstance();
@@ -37,11 +37,11 @@ ConsoleApi.prototype.getCurrentSession = function() {
 };
 
 ConsoleApi.prototype.getSessionVar = function() {
-   return this.consoleApiService.getCurrentSession().getSessionVar(_name, this.uName);
+   return this.consoleApiService.getCurrentSession().getSessionVar(_name, this.name);
 };
 
 ConsoleApi.prototype.addSessionVar = function() {
-   return this.consoleApiService.getCurrentSession().addSessionVar(_name, _variable, this.uName);
+   return this.consoleApiService.getCurrentSession().addSessionVar(_name, _variable, this.name);
 };
 
 ConsoleApi.prototype.filterArray = function(_array, _filter) {
@@ -89,8 +89,8 @@ ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previo
    return members;
 };
 
-ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
-   var segments = _uName.split(":");
+ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_name, _realObj) {
+   var segments = _name.split(":");
    var obj = null;
    var realObj = _realObj;
 
@@ -98,10 +98,10 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
       return null;
    }
 
-   if (!this.consoleApiObjects.hasOwnProperty(_uName)) {
+   if (!this.consoleApiObjects.hasOwnProperty(_name)) {
 
       if (!realObj) {
-         realObj = this.findGlobalObject(_uName);
+         realObj = this.findGlobalObject(_name);
 
          if (!realObj) {
             return null;
@@ -121,11 +121,11 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
          return null;
       }
 
-      obj = new ConsoleApiObj({ uName: _uName }, this);
-      this.consoleApiObjects[_uName] = obj;
+      obj = new ConsoleApiObj({ name: _name }, this);
+      this.consoleApiObjects[_name] = obj;
    }
    else {
-      obj = this.consoleApiObjects[_uName];
+      obj = this.consoleApiObjects[_name];
    }
 
    return obj;
@@ -158,7 +158,7 @@ ConsoleApi.prototype.findOrCreateConsoleApiObject = function(_uName, _realObj) {
    });
 
    if (perfectMatch !== -1) {
-      var consoleApiObj = this.findOrCreateConsoleApiObject(((filterArray.length === 1) ? this.myObjuName+":" : "") + matchString, _collection ? _collection[matchString] : undefined);
+      var consoleApiObj = this.findOrCreateConsoleApiObject(((filterArray.length === 1) ? this.myObjName+":" : "") + matchString, _collection ? _collection[matchString] : undefined);
 
       if (consoleApiObj) {
          filterArray.splice(0, (filterArray.length >= 2) ? 2 : 1);

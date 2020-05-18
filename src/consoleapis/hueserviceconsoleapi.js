@@ -42,9 +42,9 @@ HueServiceConsoleApi.prototype.setLinkId = function(_params, _callback) {
    var persist = (_params.length > 1) ? _params[1] : false;
 
    if (persist) {
-      this.db = this.gang.getDb(this.gang.casa.uName);
+      this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(this.myObjuName, (_err, _hueServiceConfig) => {
+      this.db.find(this.myObjName, (_err, _hueServiceConfig) => {
 
          if (_err || (_hueServiceConfig === null)) {
             return _callback("Unable to persist link id!");
@@ -82,9 +82,9 @@ HueServiceConsoleApi.prototype.createUserOnBridge = function(_params, _callback)
       }
 
       if (persist) {
-         this.db = this.gang.getDb(this.gang.casa.uName);
+         this.db = this.gang.getDb(this.gang.casa.name);
 
-         this.db.find(this.myObjuName, (_err, _hueServiceConfig) => {
+         this.db.find(this.myObjName, (_err, _hueServiceConfig) => {
 
             if (_err || (_hueServiceConfig === null)) {
                return _callback("Unable to persist user id!");

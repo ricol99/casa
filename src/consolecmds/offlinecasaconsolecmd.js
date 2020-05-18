@@ -9,7 +9,7 @@ util.inherits(OfflineCasaConsoleCmd, ConsoleCmd);
 
 OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
-   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.uName;
+   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;
 
    this.gang.getDb(name, null, (_err, _db) =>  {
 
@@ -38,22 +38,22 @@ OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback)
 
 OfflineCasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    this.checkArguments(0, _arguments);
-   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.uName;
+   var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;
 
    var cjson = require('cjson');
    var configFilename = this.gang.configPath() + "/configs/" + name + ".json";
    var inputConfig = cjson.load(configFilename); 
    
-   if (inputConfig.gang.uName !== this.gang.uName) {
+   if (inputConfig.gang.name !== this.gang.name) {
       return _callback("Config file corrupt.");
    }  
    
    var Db = require('../db');
-   var db = new Db(this.gang.uName, undefined, true);
+   var db = new Db(this.gang.name, undefined, true);
    
    db.on('connected', () => {
       var configs = {};
-      configs.gang = { "uName": "", "displayName": "", "parentCasa": {} };
+      configs.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
       configs.users = [];
       configs.services = [];
       configs.scenes = [];

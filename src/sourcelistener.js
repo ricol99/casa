@@ -66,7 +66,7 @@ function SourceListener(_config, _owner) {
       process.exit(1);
    }
 
-   NamedObject.call(this, "sourcelistener:"+this.sourceEventName.substr(2), this.owner);
+   NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, this.owner);
 
    this._id = this.fullName;   // *** TBD
 

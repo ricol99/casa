@@ -13,7 +13,7 @@ util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
    var GlobalConsoleApiObj = require("../consoleapis/globalconsoleapi");
-   this.globalConsoleApi = new GlobalConsoleApiObj({ uName: "global:global" });
+   this.globalConsoleApi = new GlobalConsoleApiObj({ name: "global" });
 
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
@@ -80,7 +80,7 @@ ConsoleApiService.prototype.sendFail = function(_request, _response) {
 ConsoleApiService.prototype.setCurrentSession = function(_session) {
 
    if (_session) {
-      this.currentSessionId = _session.uName;
+      this.currentSessionId = _session.name;
    }
    else {
       this.currentSessionId = null;
@@ -94,7 +94,7 @@ ConsoleApiService.prototype.getCurrentSession = function() {
 ConsoleApiService.prototype.getSessionVars = function(_consoleApiObj) {
 
    if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].consoleApiObjVars[_consoleApiObj.uName];
+      return this.sessions[this.currentSessionId].consoleApiObjVars[_consoleApiObj.name];
    }
    else {
       return null;
@@ -104,7 +104,7 @@ ConsoleApiService.prototype.getSessionVars = function(_consoleApiObj) {
 ConsoleApiService.prototype.getSessionVar = function(_name, _consoleApiObj) {
 
    if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].getSessionVar(_name, _consoleApiObj.uName);
+      return this.sessions[this.currentSessionId].getSessionVar(_name, _consoleApiObj.name);
    }
    else {
       return null;
@@ -138,8 +138,8 @@ ConsoleApiService.prototype.getAllSessionsForConsoleApiObject = function(_consol
 
        if (this.sessions.hasOwnProperty(session)) {
 
-          if (this.sessions[session].consoleApiObjVars.hasOwnProperty(_consoleApiObj.uName)) {
-             allSessions[session] = this.sessions[session].consoleApiObjVars[_consoleApiObj.uName];
+          if (this.sessions[session].consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
+             allSessions[session] = this.sessions[session].consoleApiObjVars[_consoleApiObj.name];
           }
        }
    }
@@ -178,7 +178,7 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
       let classList = util.getClassHierarchy(_namedObject);
 
       for (var i = 0; i < classList.length; ++i) {
-         var ConsoleApiObj = this.gang.cleverRequire(_namedObject.tName+"consoleapi:"+_namedObject.sName, "consoleapis", classList[i]+"consoleapi");
+         var ConsoleApiObj = this.gang.cleverRequire(_namedObject.tName+"consoleapi:"+_namedObject.name, "consoleapis", classList[i]+"consoleapi");
 
          if (ConsoleApiObj) {
             break;
@@ -189,7 +189,7 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
          return null;
       }
 
-      obj = new ConsoleApiObj({ uName: _namedObject.uName }, this);
+      obj = new ConsoleApiObj({ name: _namedObject.name }, this);
       this.consoleApiObjects[_namedObject.fullName] = obj;
    }
    else {
@@ -200,7 +200,7 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
 };
 
 function ConsoleApiSession(_id, _console, _owner) {
-   this.uName = _id;
+   this.name = _id;
    this.console = _console;
    this.owner = _owner;
    this.consoleApiObjVars = {};
@@ -269,20 +269,20 @@ ConsoleApiSession.prototype.getSessionVar = function(_name, _consoleApiObjId) {
 
 ConsoleApiSession.prototype.addSessionVar = function(_name, _variable, _consoleApiObj) {
 
-   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.uName)) {
-      this.consoleApiObjVars[_consoleApiObj.uName] = { consoleApiObj: _consoleApiObj };
+   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
+      this.consoleApiObjVars[_consoleApiObj.name] = { consoleApiObj: _consoleApiObj };
    }
 
-   this.consoleApiObjVars[_consoleApiObj.uName][_name] = _variable;
+   this.consoleApiObjVars[_consoleApiObj.name][_name] = _variable;
 };
 
 ConsoleApiSession.prototype.setSessionVar = function(_name, _value, _consoleApiObj) {
 
-   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.uName)) {
+   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
       return false;
    }
 
-   this.consoleApiObjVars[_consoleApiObj.uName][_name] = _value;
+   this.consoleApiObjVars[_consoleApiObj.name][_name] = _value;
    return true;
 };
 
@@ -322,11 +322,11 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
    }
 
    if ((line.length >= 1) && (line[0] === ':')) {
-      longScope = (line === "::") ? line.replace("::", this.owner.gang.uName) : (line === ":") ? this.owner.gang.uName + ":" + this.owner.gang.casa.uName : line.replace(":", this.owner.gang.uName);
-      shortScope = (line === ":") ? "::" + this.owner.gang.casa.uName : line;
+      longScope = (line === "::") ? line.replace("::", this.owner.gang.name) : (line === ":") ? this.owner.gang.name + ":" + this.owner.gang.casa.name : line.replace(":", this.owner.gang.name);
+      shortScope = (line === ":") ? "::" + this.owner.gang.casa.name : line;
    }
    else {
-      longScope = (_scope === "::") ? this.owner.gang.uName + ":" + line : this.owner.gang.uName + _scope.substr(1) + ":" + line;
+      longScope = (_scope === "::") ? this.owner.gang.name + ":" + line : this.owner.gang.name + _scope.substr(1) + ":" + line;
       shortScope = (_scope === "::") ? "::" + line : _scope + ":" + line;
    }
 
@@ -340,12 +340,12 @@ ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
 };
 
 ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _matches) {
-   var scope = (_currentScope === "::") ? this.owner.gang.uName : this.owner.gang.uName + _currentScope.substr(1);
+   var scope = (_currentScope === "::") ? this.owner.gang.name : this.owner.gang.name + _currentScope.substr(1);
 
    for (var i = 0; i < _matches.length; ++i) {
 
       if (_line[0] === ':') {
-         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.owner.gang.uName.length+1) : ":"+_matches[i].replace(this.owner.gang.uName+":"+this.owner.gang.casa.uName, "").substr(1);
+         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.owner.gang.name.length+1) : ":"+_matches[i].replace(this.owner.gang.name+":"+this.owner.gang.casa.name, "").substr(1);
       }
       else  {
          _matches[i] = _matches[i].replace(scope, "").substr(1);
@@ -410,8 +410,8 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
       }
 
       result.consoleObjHierarchy = this.getClassHierarchy(result.consoleApiObj);
-      result.consoleObjuName = result.consoleApiObj.myObjuName;
-      result.consoleObjCasaName = result.consoleApiObj.getCasa().uName;
+      result.consoleObjName = result.consoleApiObj.myObjName;
+      result.consoleObjCasaName = result.consoleApiObj.getCasa().name;
       delete result.consoleApiObj;
    }
 
@@ -488,7 +488,7 @@ ConsoleApiSession.prototype.sessionClosed = function() {
          this.consoleApiObjVars[consoleApiObjVars].consoleApiObj.sessionClosed(this.consoleApiObjVars[consoleApiObjVars]);
       }
    }
-   delete this.owner.sessions[this.uName];
+   delete this.owner.sessions[this.name];
 };
 
 module.exports = exports = ConsoleApiService;

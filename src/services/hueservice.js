@@ -310,7 +310,7 @@ function Request(_owner, _request, _deviceId, _config, _callback) {
 Request.prototype.send = function(_callback) {
 
    if (this.request === "get") {
-      console.log(this.owner.uName + ': getting light status, deviceId: ' + this.deviceId);
+      console.log(this.owner.name + ': getting light status, deviceId: ' + this.deviceId);
 
       this.owner.hue.lightStatus(this.deviceId, (_error, _result) => {
 
@@ -322,7 +322,7 @@ Request.prototype.send = function(_callback) {
       });
    }
    else if (this.request === "set") {
-      console.log(this.owner.uName + ': setting light status, deviceId: ' + this.deviceId + ' config=', this.config);
+      console.log(this.owner.name + ': setting light status, deviceId: ' + this.deviceId + ' config=', this.config);
 
       this.owner.hue.setLightState(this.deviceId, this.config, (_error, _result) => {
 
@@ -334,7 +334,7 @@ Request.prototype.send = function(_callback) {
       });
    }
    else if (this.request === "setGroup") {
-      console.log(this.owner.uName + ': setting light status, groupId: ' + this.deviceId + ' config=', this.config);
+      console.log(this.owner.name + ': setting light status, groupId: ' + this.deviceId + ' config=', this.config);
 
       this.owner.hue.setGroupLightState(this.deviceId, this.config, (_error, _result) => {
 
@@ -346,7 +346,7 @@ Request.prototype.send = function(_callback) {
       });
    }
    else if (this.request === "setScene") {
-      console.log(this.owner.uName + ': setting light scene, sceneId: ' + this.deviceId);
+      console.log(this.owner.name + ': setting light scene, sceneId: ' + this.deviceId);
 
       this.owner.hue.activateScene(this.deviceId, (_error, _result) => {
 
@@ -358,7 +358,7 @@ Request.prototype.send = function(_callback) {
       });
    }
    else if (this.request === "getLightGroups") {
-      console.log(this.owner.uName + ': getting light groups');
+      console.log(this.owner.name + ': getting light groups');
 
       this.owner.hue.groups( (_error, _result) => {
 

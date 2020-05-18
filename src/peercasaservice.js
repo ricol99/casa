@@ -18,8 +18,8 @@ function PeerCasaService(_config) {
    this.gang = Gang.mainInstance();
    this.queuedPeers = [];
 
-   this.uName = this.gang.config.uName;
-   this.id = this.gang.config.uName
+   this.name = this.gang.config.name;
+   this.id = this.gang.config.name
    this.listeningPort = this.gang.config.listeningPort;
    this.inFetchDbMode = _config.fetchDbMode;
    this.casasBeingEstablished = {};
@@ -36,10 +36,10 @@ function PeerCasaService(_config) {
          this.browser.on('serviceUp', (service) => {
             console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
-            if ((!((this.gang.uName || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.uName))) &&
-               (service.name != this.uName && !this.gang.remoteCasas[service.name])) {
+            if ((!((this.gang.name || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.name))) &&
+               (service.name != this.name && !this.gang.remoteCasas[service.name])) {
 
-               if (!(this.gang.hasOwnProperty("parentCasa") && this.gang.parentCasa && (this.gang.parentCasa.uName == service.name))) {
+               if (!(this.gang.hasOwnProperty("parentCasa") && this.gang.parentCasa && (this.gang.parentCasa.name == service.name))) {
                   // Found a peer
 
                   // Only try to connect if we don't have a session already AND it is our role to connect and not wait
@@ -51,7 +51,7 @@ function PeerCasaService(_config) {
                            this.dbCallback = null;
                         });
                      }
-                     else if (service.name > this.uName) {
+                     else if (service.name > this.name) {
                         this.casasBeingEstablished[service.name] = true;
                         this.establishConnectionWithPeer(service);
                      }
@@ -97,7 +97,7 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
       this.dbService.checkGangDbAgainstPeer(_service.host, _service.port, (_err, _res) => {
 
          if (_err) {
-            console.error(this.uName + ": Unable to check dbs against each other. Error: " + _err);
+            console.error(this.name + ": Unable to check dbs against each other. Error: " + _err);
             this.createPeerCasa(_service);
          }
          else {
@@ -114,7 +114,7 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
                this.dbService.updateGangDbFromPeer(_service.host, _service.port, (_err, _res) => {
 
                   if (_err) {
-                     console.error(this.uName + ": Unable to update my gang db from peer. Error: " + _err);
+                     console.error(this.name + ": Unable to update my gang db from peer. Error: " + _err);
                      this.createPeerCasa(_service);
                   }
                   else {
@@ -134,11 +134,11 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
 PeerCasaService.prototype.createPeerCasa = function(_service) {
 
    if (!this.inFetchDbMode) {
-      var peerCasa = this.gang.createPeerCasa({uName: _service.name});
+      var peerCasa = this.gang.createPeerCasa({name: _service.name});
       peerCasa.connectToPeerCasa({ address: { hostname: _service.host, port: _service.port }});
       this.casasBeingEstablished[_service.name] = null;
       delete this.casasBeingEstablished[_service.name];
-      console.log('peercasaservice: New peer casa: ' + peerCasa.uName);
+      console.log('peercasaservice: New peer casa: ' + peerCasa.name);
    }
    else {
       this.queuedPeers.push(util.copy(_service));
@@ -148,7 +148,7 @@ PeerCasaService.prototype.createPeerCasa = function(_service) {
 PeerCasaService.prototype.createAdvertisement = function() {
 
    try {
-     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.uName, txtRecord: { id: this.id, gang: this.gang.uName }});
+     this.ad = mdns.createAdvertisement(mdns.tcp('casa'), this.listeningPort, {name: this.name, txtRecord: { id: this.id, gang: this.gang.name }});
      this.ad.on('error', (_err) => {
         console.log('peercasaservice: Not advertising service! Error: ' + _err);
      });

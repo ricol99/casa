@@ -88,7 +88,7 @@ function AlarmTexecom(_config, _parent) {
    this.pollingTimeout = this.pollingInterval + this.pollingTolerance;
    this.pollsMissed = 0;
 
-   this.decoders = { 2: new ContactIdProtocol(this.fullName+":contactid:"+this.gang.casa.sName), 3: new SIAProtocol(this.fullName+":sia:"+this.gang.casa.sName) };
+   this.decoders = { 2: new ContactIdProtocol(this.fullName+":contactid:"+this.gang.casa.name), 3: new SIAProtocol(this.fullName+":sia:"+this.gang.casa.name) };
 
    this.eventHandlers = {};
    this.eventHandlers["401"] = AlarmTexecom.prototype.alarmArmNormalHandler;

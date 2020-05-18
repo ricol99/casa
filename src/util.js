@@ -215,10 +215,10 @@ function stringifyInternal(_source, _level) {
       return output;
    }
    else if (typeof _source === 'object') {
-      console.log(_level +  " " +_source.uName);
+      console.log(_level +  " " +_source.name);
 
       if ((_level > 0) && (_source.hasOwnProperty('_id') || (_source.hasOwnProperty('config') && _source.config.hasOwnProperty('_id')))) {
-         return '{uName:' + _source.uName + '}'
+         return '{ name:' + _source.name + '}'
       }
       
       var output = "{", i = 0;

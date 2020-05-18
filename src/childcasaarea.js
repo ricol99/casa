@@ -24,7 +24,7 @@ ChildCasaArea.prototype.broadcastCb = function(_message) {
 
          // Is the area a sibling?
          if (childCasaArea != this) {
-            console.log(this.fullName + ': Broadcasting to child area ' + childCasaArea.uName);
+            console.log(this.fullName + ': Broadcasting to child area ' + childCasaArea.name);
             childCasaArea.broadcastMessage(_message);
          }
       }

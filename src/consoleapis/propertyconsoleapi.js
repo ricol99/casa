@@ -3,9 +3,7 @@ var ConsoleApi = require('../consoleapi');
 
 function PropertyConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
-   this.uName = _config.uName.split(":")[0] + "consoleapi:" + _config.uName.split(":")[1] + ":" + _config.uName.split(":")[2];
-   this.name = _config.uName.split(":")[2];
-   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.name : this.myObjuName
+   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.name : this.myObjName
 }
 
 util.inherits(PropertyConsoleApi, ConsoleApi);

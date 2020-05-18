@@ -14,7 +14,7 @@ storage.initSync();
 function HomekitService(_config, _owner) {
    Service.call(this, _config, _owner);
 
-   this.port = this.casa.allocatePort(this.uName);
+   this.port = this.casa.allocatePort(this.fullName);
 
    this.displayName = _config.displayName;
    this.pincode = _config.pincode;
@@ -23,7 +23,7 @@ function HomekitService(_config, _owner) {
    this.model = (_config.model == undefined) ? "v1.0" : _config.model;
    this.serialNumber = (_config.serialNumber == undefined) ? "XXXXXXX" : _config.serialNumber;
 
-   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.uName);
+   this.hkUUID = uuid.generate('hap-nodejs:accessories:' + this.name);
 }
 
 util.inherits(HomekitService, Service);
