@@ -364,7 +364,7 @@ Gang.prototype.createService = function(_config, _serviceOwner) {
       return null;
    }
 
-   var serviceObj = new Service(_config, this);
+   var serviceObj = new Service(_config, this.casa);
    this.services[serviceObj.type] = serviceObj;
    console.log('New service: ' + _config.name);
 

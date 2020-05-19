@@ -12,6 +12,7 @@ function OneWireServiceThermometer(_config, _owner) {
 util.inherits(OneWireServiceThermometer, Thing);
 
 OneWireServiceThermometer.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   console.log(this.uName + ": AAAAA propertySubscribedTo() ", _subscription);
 
    if (_subscription.hasOwnProperty("pollDuration")) {
 
@@ -36,7 +37,7 @@ OneWireServiceThermometer.prototype.propertyAboutToChange = function(_propName, 
 OneWireServiceThermometer.prototype.start = function() {
    this.started = true;
 
-   this.owner.oneWireBus.getValueFrom(this.sName, "temperature")
+   this.owner.oneWireBus.getValueFrom(this.name, "temperature")
    .then((_measure) => {
       this.alignPropertyValue("temperature", _measure.result.value);
       this.pollDevice();
@@ -50,8 +51,8 @@ OneWireServiceThermometer.prototype.pollDevice = function() {
    }
 
    this.timer = setTimeout(() => {
-      console.log(this.uName + ": Reading from one wire. Device="+this.sName);
-      this.owner.oneWireBus.getValueFrom(this.sName, "temperature")
+      console.log(this.uName + ": Reading from one wire. Device="+this.name);
+      this.owner.oneWireBus.getValueFrom(this.name, "temperature")
       .then((_measure) => {
          this.alignPropertyValue("temperature", _measure.result.value);
          this.pollDevice();
