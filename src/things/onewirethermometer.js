@@ -21,7 +21,7 @@ function OneWireThermometer(_config, _parent) {
 
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 60000;
 
-   _config.mirrorSource = this.oneWireServiceName+":onewireservicethermometer:"+_config.deviceId;
+   _config.mirrorSource = this.oneWireServiceName+":"+_config.deviceId;
    _config.mirrorSourceSubscription = { pollDuration: this.pollDuration };
 
    Thing.call(this, _config, _parent);
