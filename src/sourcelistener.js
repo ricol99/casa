@@ -1,7 +1,6 @@
 var util = require('./util');
 var Source = require('./source');
 var Gang = require('./gang');
-var Pipeline = require('./pipeline');
 var NamedObject = require('./namedobject');
 
 function SourceListener(_config, _owner) {
@@ -69,10 +68,6 @@ function SourceListener(_config, _owner) {
    NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, this.owner);
 
    this._id = this.uName;   // *** TBD
-
-   if (_config.steps) {
-      this.pipeline = new Pipeline(_config.steps, this);
-   }
 
    this.valid = false;
    this.maskingInvalid = false;
@@ -166,13 +161,7 @@ SourceListener.prototype.refreshSource = function() {
 
       if (ret) {
          this.stopMaskInvalidTimer();
-
-         if (this.pipeline) {
-            this.pipeline.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
-         }
-         else {
-            this.goValid();
-         }
+         this.goValid();
       }
    }
 
@@ -205,12 +194,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
          this.startMaskInvalidTimer();
       }
       else {
-         if (this.pipeline) {
-            this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
-         }
-         else {
-            this.invalidate();
-         }
+         this.invalidate();
       }
    }
 }
@@ -244,30 +228,6 @@ SourceListener.prototype.isCold = function() {
 };
 
 //
-// Internal method - Called by the last step in the pipeline
-//
-SourceListener.prototype.outputFromPipeline = function(_pipeline, _newValue, _data) {
-   _data.value = _newValue;
-   this.sourcePropertyValue = _newValue;
-
-   this.makeClientAwareOfEvent(_data);
-};
-
-//
-// Internal method - Called by the last step in the pipeline
-//
-SourceListener.prototype.sourceIsValidFromPipeline = function(_pipeline, _data) {
-   this.goValid();
-};
-
-//
-// Internal method - Called by the last step in the pipeline
-//
-SourceListener.prototype.sourceIsInvalidFromPipeline = function(_pipeline, _data) {
-   this.invalidate();
-};
-
-//
 // Internal method
 //
 SourceListener.prototype.startMaskInvalidTimer = function() {
@@ -283,13 +243,7 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
          this.maskInvalidTimer = null;
 
          if (!this.valid) {
-
-            if (this.pipeline) {
-               this.pipeline.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
-            }
-            else {
-               this.invalidate();
-            }
+            this.invalidate();
          }
       }, this.maskInvalidTimeout*1000);
    }
@@ -360,13 +314,8 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
          this.lastData.value = this.transformInput(_data);
       }
 
-      if (this.pipeline) {
-         this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
-      }
-      else {
-         this.sourcePropertyValue = this.lastData.value;
-         this.makeClientAwareOfEvent(this.lastData);
-      }
+      this.sourcePropertyValue = this.lastData.value;
+      this.makeClientAwareOfEvent(this.lastData);
    }
 };
 
@@ -387,13 +336,7 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
       }
 
       this.sourceRawValue = this.lastData.value;
-
-      if (this.pipeline) {
-         this.pipeline.newInputForProcess(this.lastData.value, this.lastData);
-      }
-      else {
-         this.makeClientAwareOfEvent(this.lastData);
-      }
+      this.makeClientAwareOfEvent(this.lastData);
    }
 };
 

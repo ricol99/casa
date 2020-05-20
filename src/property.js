@@ -1,6 +1,5 @@
 var util = require('./util');
 var SourceListener = require('./sourcelistener');
-var Pipeline = require('./pipeline');
 var NamedObject = require('./namedobject');
 
 function Property(_config, _owner) {
@@ -67,15 +66,13 @@ function Property(_config, _owner) {
 util.inherits(Property, NamedObject);
 
 //
-// Returns current property value - not updated until all step pipeline has been processed
-// *NOTE* The value may be different to what step thinks as many steps can interact with the property
-// Steps are encouraged to use this.step.value to understand what they set previously
+// Returns current property value 
 //
 Property.prototype.getValue = function() {
    return this.value;
 };
 
-// Used internally by derived Property to set a new value for the property (subject to step pipeline processing)
+// Used internally by derived Property to set a new value for the property
 Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.rawPropertyValue = _newPropValue;
    this.cancelCurrentRamp();
@@ -93,8 +90,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 };
 
 //
-// Used to set the property directly, ignoring the defined sources and input step pipeline processing
-// Output step pipeline still executes
+// Used to set the property directly
 //
 Property.prototype.set = function(_propValue, _data) {
    this.cancelCurrentRamp();
@@ -103,9 +99,8 @@ Property.prototype.set = function(_propValue, _data) {
 };
 
 //
-// Used to set the property directly, ignoring the defined sources and input step pipeline processing
+// Used to set the property directly
 // Instead of specifying a value, specify a config for the ramp
-// Output step pipeline still executes
 //
 Property.prototype.setWithRamp = function(_config, _data) {
    this.cancelCurrentRamp();
@@ -150,7 +145,6 @@ Property.prototype.rampComplete = function(_ramp, _config) {
 
 //
 // Derived Properties can use this to be called just before the prooperty is changed
-// This is called after the input step pipeline processing has been done - just before the property is set
 // Useful when synchronising an external device with a property value (e.g. gpio in)
 // You cannot stop the property changing or change the value, it is for information only
 //
@@ -227,7 +221,6 @@ Property.prototype.sourceIsInvalid = function(_data) {
 
 //
 // Called by SourceListener as a defined source has changed it property value
-// Will invoke this property processing followed by the step pipeline processing
 //
 Property.prototype.receivedEventFromSource = function(_data) {
 
@@ -256,10 +249,7 @@ Property.prototype.receivedEventFromTarget = function(_data) {
 //
 // Derived Properties should override this to process property changes from defined sources
 // If the property wants to update its value, it should call this.updatePropertyInternal() method
-// This will then invoke the input step pipeline processing followed by the output step pipleline processing
 // Only then will the property value be set
-// *NOTE* the final value will probably differ because of the step pipleline processing
-//  --- Use this.rawPropertyValue to access previous value set (no affected by step pipeline processing)
 //
 Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyInternal(_data.value, _data);

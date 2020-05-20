@@ -1,15 +1,28 @@
 var util = require('util');
-var SourceStepProperty = require('../steps/sourcestepproperty');
+var Property = require('../property');
 
 function EdgeProperty(_config, _owner) {
+   Property.call(this, _config, _owner);
 
-   _config.sourceStep = { type: 'edgestep', 
-                          leadingEdgeOutput: _config.leadingEdgeOutput,
-                          trailingEdgeOutput: _config.trailingEdgeOutput };
+   if (_config.hasOwnProperty('leadingEdgeOutput')) {
+      this.leadingEdgeOutput = _config.leadingEdgeOutput;
+   }
 
-   SourceStepProperty.call(this, _config, _owner);
+   if (_config.hasOwnProperty('trailingEdgeOutput')) {
+      this.trailingEdgeOutput = _config.trailingEdgeOutput;
+   }
 }
 
-util.inherits(EdgeProperty, SourceStepProperty);
+util.inherits(EdgeProperty, Property);
+
+EdgeProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+
+   if (this.value && !_data.value && this.hasOwnProperty('trailingEdgeOutput')) {
+      this.updatePropertyInternal(this.trailingEdgeOutput, _data);
+   }
+   else if (!this.value && _data.value && this.hasOwnProperty('leadingEdgeOutput')) {
+      this.updatePropertyInternal(this.leadingEdgeOutput, _data);
+   }
+}
 
 module.exports = exports = EdgeProperty;
