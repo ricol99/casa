@@ -29,7 +29,7 @@ HueService.prototype.coldStart = function() {
       this.findBridges((_err, _bridges) => {
 
          if (_err || (_bridges.length === 0)) {
-            console.error(this.uName + ": Unable to find any bridges!");
+            console.error(this.uName + ": Unable to find any bridges! Error="+_err);
             process.exit(1);
          }
 
@@ -54,38 +54,35 @@ HueService.prototype.findBridges = function(_callback) {
 
       if (!_err) {
          bridgesAvailable = _bridgesFoundSearch1;
+      }
 
-         try {
-            Hue.upnpSearch(15000).then((_bridgesFoundSearch2) => {
-               this.fixIds(_bridgesFoundSearch2);
-               var availableLen = bridgesAvailable.length;
-               var matchFound;
+      try {
+         Hue.upnpSearch(20000).then((_bridgesFoundSearch2) => {
+            this.fixIds(_bridgesFoundSearch2);
+            var availableLen = bridgesAvailable.length;
+            var matchFound;
 
-               for (var i = 0; i <_bridgesFoundSearch2.length; ++i) {
-                  matchFound = false;
+            for (var i = 0; i <_bridgesFoundSearch2.length; ++i) {
+               matchFound = false;
 
-                  for (var j = 0; j < availableLen; ++j) {
+               for (var j = 0; j < availableLen; ++j) {
 
-                     if (bridgesAvailable[j].id === _bridgesFoundSearch2[i].id) {
-                        matchFound = true;
-                        break;
-                     }
-                  }
-
-                  if (!matchFound) {
-                     bridgesAvailable.push(_bridgesFoundSearch2[i]);
+                  if (bridgesAvailable[j].id === _bridgesFoundSearch2[i].id) {
+                     matchFound = true;
+                     break;
                   }
                }
 
-               _callback(null, bridgesAvailable);
-            }).done();
-         }
-         catch(_error) {
-            _callback(null, bridgesAvailable);
-         }
+               if (!matchFound) {
+                  bridgesAvailable.push(_bridgesFoundSearch2[i]);
+               }
+            }
+
+         _callback(null, bridgesAvailable);
+         }).done();
       }
-      else {
-         _callback(null, []);
+      catch(_error) {
+         _callback(null, bridgesAvailable);
       }
    });
 };
