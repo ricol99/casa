@@ -108,11 +108,11 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
       this.casaDb.connect();
    }
    else {
-      this.name = "gang-"+_casaName;
+      this.name = _casaName;
       NamedObject.call(this, { name: this.name, type: "gang" });
       this.casaName = "casa-console";
 
-      this.config = { name: this.casaName, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
+      this.config = { name: this.casaName, type: "casa", secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
       this.extractCasa();
       var casaShortName = this.casaName.split(":")[1];
       this.extractServices([ { name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
@@ -123,7 +123,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
       this.gangDb.on('connected', (_data) => {
          this.dbs[_data.name] = _data.db;
          var Console = require('./console');
-         this.console = new Console({ gangName: this.name, casaName: null, secureMode: _secureMode, certPath: _certPath });
+         this.console = new Console({ gangName: this.name, casaName: null, secureMode: _secureMode, certPath: _certPath }, this);
          this.console.coldStart();
       });
 
@@ -132,7 +132,7 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
 
          this.gangDb.on('connected', (_data) => {
             this.dbs[_data.name] = _data.db;
-            this.gangDb.appendToCollection("gang", { name: this.name, secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 });
+            this.gangDb.appendToCollection("gang", { name: this.name, type: "gang", secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 });
             var Console = require('./console');
             this.console = new Console({ gangName: this.name, casaName: null, secureMode: _secureMode, certPath: _certPath });
             this.console.coldStart();
@@ -284,7 +284,7 @@ Gang.prototype.init = function(_console) {
 Gang.prototype.loadSystemServices = function(_dbCallback) {
    var casaShortName = this.casaName.split(":")[1];
    this.extractServices([ { name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
-                          { name: "ramp-service", type: "rampservice" }, { name: "db-service", type: "dbservice" }, /*{ name: "console-api-service", type: "consoleapiservice" }*/], true, this.systemServices);
+                          { name: "ramp-service", type: "rampservice" }, { name: "db-service", type: "dbservice" }, { name: "console-api-service", type: "consoleapiservice" } ], true, this.systemServices);
 };
 
 Gang.prototype.addSystemServicesToCasa = function() {

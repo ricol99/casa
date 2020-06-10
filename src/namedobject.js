@@ -244,14 +244,14 @@ NamedObject.prototype.filterName = function(_name)  {
       result.remainingStr = _name;
       return result;
    }
-   else if (newName === "") {
-      var uName = (this.uName === ":") ? "::" : this.uName;
-      result.hits.push(uName);
-      result.namedObject = this;
-      result.name = uName;
-      result.remainingStr = "";
-      return result;
-   }
+   //else if (newName === "") {
+      //var uName = (this.uName === ":") ? "::" : this.uName;
+      //result.hits.push(uName);
+      //result.namedObject = this;
+      //result.name = uName;
+      //result.remainingStr = "";
+      //return result;
+   //}
 
    process.stdout.write("AAAAA filterName newName="+newName+"\n");
 
@@ -271,10 +271,9 @@ NamedObject.prototype.filterName = function(_name)  {
 
    if (perfectMatch !== -1) {
       var namedObject = this.myNamedObjects[matchString];
-      result = namedObject.filterName((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"));
 
-      if (!result.namedObject) {
-         result.namedObject = namedObject;
+      if (filterArray.length > 1) {
+         result = namedObject.filterName((filterArray.length === 1) ? filterArray[0] : filterArray.join(":"));
       }
    }
    else {

@@ -6,25 +6,17 @@ function ConsoleApiService(_config, _owner) {
    _config.socketIoSupported = true;
    WebService.call(this, _config, _owner);
    this.sessions = {};
-   this.consoleApiObjects = {};
 }
 
 util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
-   var GlobalConsoleApiObj = require("../consoleapis/globalconsoleapi");
-   this.globalConsoleApi = new GlobalConsoleApiObj({ name: "global" });
-
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:obj/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
 
    WebService.prototype.coldStart.call(this);
-};
-
-ConsoleApiService.prototype.getGlobalConsoleApi = function() {
-   return this.globalConsoleApi;
 };
 
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
@@ -34,7 +26,7 @@ ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
       this.sendFail(_request, _response);
    }
    else { 
-      var id = "oneshotconsoleapiesession:"+Date.now();
+      var id = "oneshotconsoleapiesession-"+Date.now();
       this.sessions[id] = new ConsoleApiSession(id, null, this);
       this.sessions[id].performOneShotHttpRequest('scopeExists', _request, _response);
    }
@@ -47,7 +39,7 @@ ConsoleApiService.prototype.extractScopeRequest = function(_request, _response) 
       this.sendFail(_request, _response);
    }
    else {
-      var id = "oneshotconsoleapiesession:"+Date.now();
+      var id = "oneshotconsoleapiesession-"+Date.now();
       this.sessions[id] = new ConsoleApiSession(id, null, this);
       this.sessions[id].performOneShotHttpRequest('extractScope', _request, _response);
    }
@@ -60,9 +52,9 @@ ConsoleApiService.prototype.executeCommandRequest = function(_request, _response
       this.sendFail(_request, _response);
    }
    else {
-      var id = "oneshotconsoleapisession:"+Date.now();
+      var id = "oneshotconsoleapisession-"+Date.now();
       this.sessions[id] = new ConsoleApiSession(id, null, this);
-      this.sessions[i].performOneShotHttpRequest('executeCommand', _request, _response);
+      this.sessions[id].performOneShotHttpRequest('executeCommand', _request, _response);
    }
 };
 
@@ -173,27 +165,24 @@ ConsoleApiService.prototype.socketIoConnection = function(_socket) {
 ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
    var obj = null;
 
-   if (!this.consoleApiObjects.hasOwnProperty(_namedObject.uName)) {
-
+   if (_namedObject.hasOwnProperty("__consoleObj")) {
+      obj = _namedObject.__consoleObj;
+   }
+   else {
       let classList = util.getClassHierarchy(_namedObject);
 
       for (var i = 0; i < classList.length; ++i) {
-         var ConsoleApiObj = this.gang.cleverRequire(_namedObject.tName+"consoleapi:"+_namedObject.name, "consoleapis", classList[i]+"consoleapi");
+         var ConsoleApiObj = this.gang.cleverRequire(classList[i]+"consoleapi", "consoleapis");
 
-         if (ConsoleApiObj) {
+         if (ConsoleApiObj || (classList[i] === "namedobject")) {
             break;
          }
       }
 
-      if (!ConsoleApiObj) {
-         return null;
+      if (ConsoleApiObj) {
+         obj = new ConsoleApiObj(_namedObject, this);
+         _namedObject.__consoleObj = obj;
       }
-
-      obj = new ConsoleApiObj({ name: _namedObject.name }, this);
-      this.consoleApiObjects[_namedObject.uName] = obj;
-   }
-   else {
-      obj = this.consoleApiObjects[_namedObject.uName];
    }
 
    return obj;
@@ -313,8 +302,7 @@ ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _requ
 };
 
 ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
-   var longScope;
-   var shortScope;
+   var scope;
    var line = _line;
 
    if ((line !== ":") && (line !== "::") && (line[line.length-1] === ':')) {
@@ -322,15 +310,13 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
    }
 
    if ((line.length >= 1) && (line[0] === ':')) {
-      longScope = (line === "::") ? line.replace("::", this.owner.gang.name) : (line === ":") ? this.owner.gang.name + ":" + this.owner.gang.casa.name : line.replace(":", this.owner.gang.name);
-      shortScope = (line === ":") ? "::" + this.owner.gang.casa.name : line;
+      scope = line;
    }
    else {
-      longScope = (_scope === "::") ? this.owner.gang.name + ":" + line : this.owner.gang.name + _scope.substr(1) + ":" + line;
-      shortScope = (_scope === "::") ? "::" + line : _scope + ":" + line;
+      scope = (_scope === "::") ? "::" + line : _scope + ":" + line;
    }
 
-   return shortScope;
+   return scope;
 };
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
@@ -340,15 +326,11 @@ ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {
 };
 
 ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _matches) {
-   var scope = (_currentScope === "::") ? this.owner.gang.name : this.owner.gang.name + _currentScope.substr(1);
 
    for (var i = 0; i < _matches.length; ++i) {
 
-      if (_line[0] === ':') {
-         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.owner.gang.name.length+1) : ":"+_matches[i].replace(this.owner.gang.name+":"+this.owner.gang.casa.name, "").substr(1);
-      }
-      else  {
-         _matches[i] = _matches[i].replace(scope, "").substr(1);
+      if (!((_line.length > 1) && _line.startsWith("::"))) {
+         _matches[i] = (_currentScope === "::") ? _matches[i].replace(_currentScope, "") : _matches[i].replace(_currentScope, "").substr(1);
       }
    }
 };
@@ -425,12 +407,26 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
 
 ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
    var result = [];
-
+ 
    if (_params.hasOwnProperty("obj")) {
-      this.owner.globalConsoleApi.filterScope(_params.obj, undefined, result, true);
-      result.scope = _params.obj;
-      result.method = _params.method;
-      result.arguments = _params.arguments;
+      var obj = this.owner.gang.findNamedObject(_params.obj);
+
+      if (!obj) {
+         result.error = "Object not found!";
+      }
+      else {
+         result.consoleApiObj = this.owner.findOrCreateConsoleApiObject(obj);
+         result.scope = _params.obj;
+         result.method = _params.method;
+         result.arguments = _params.arguments;
+      }
+   }
+   else {
+      result = this.extractScopeFromLine(_params.scope, _params.line);
+   }
+
+   if (result.error) {
+      return _callback(result.error);
    }
 
    var outputOfEvaluation = "Object not found!";

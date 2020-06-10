@@ -5,7 +5,7 @@ var util = require('./util');
 var LocalConsole = require('./localconsole');
 var AsyncEmitter = require('./asyncemitter');
 
-function Console(_params) {
+function Console(_params, _owner) {
    this.secureMode = _params.secureMode;
    this.certPath = _params.certPath;
    this.gangName = _params.gangName;
@@ -33,7 +33,7 @@ function Console(_params) {
       this.socketOptions = { reconnection: false, transports: ['websocket'], json: true };
    }
 
-   LocalConsole.call(this, { gangName: this.gangName });
+   LocalConsole.call(this, _owner);
 }
 
 util.inherits(Console, LocalConsole);
