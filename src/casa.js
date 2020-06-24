@@ -236,6 +236,7 @@ Casa.prototype.addService = function(_service) {
       process.exit(1);
    }
 
+   this.addChildNamedObject(_service);
    this.services[_service.type]  = _service;
 };
 
