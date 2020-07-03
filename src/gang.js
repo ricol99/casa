@@ -174,45 +174,69 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
 
       if (_collection === "gang") {
          this.gangConfig = _mainConfig[0];
-         config = this.gangConfig;
-      }
-      else {
-         this.config = _mainConfig[0];
-         config = this.config;
-      }
 
-      _db.readCollection("users", (_err, _users) => {
-
-         if (!_err) {
-            config.users = _users;
-            this.markObjects(config.users, "_db", config.name); 
-         }
-
-         _db.readCollection("services", (_err, _services) => {
+         _db.readCollection("gangUsers", (_err, _users) => {
 
             if (!_err) {
-               config.services = _services;
-               this.markObjects(config.sevices, "_db", config.name); 
+               this.gangConfig.users = _users;
+               this.markObjects(this.gangConfig.users, "_db", this.gangConfig.name); 
             }
 
-            _db.readCollection("scenes", (_err, _scenes) => {
+            _db.readCollection("gangScenes", (_err, _scenes) => {
 
                if (!_err) {
-                  config.scenes = _scenes;
-                  this.markObjects(config.scenes, "_db", config.name); 
+                  this.gangConfig.scenes = _scenes;
+                  this.markObjects(this.gangConfig.scenes, "_db", this.gangConfig.name); 
                }
 
-               _db.readCollection("things", (_err, _things) => {
+               _db.readCollection("gangThings", (_err, _things) => {
 
                   if (!_err) {
-                     config.things = _things;
-                     this.markObjects(config.things, "_db", config.name); 
+                     this.gangConfig.things = _things;
+                     this.markObjects(_things, "_db", this.gangConfig.name); 
                   }
                   _callback(null, true);
                });
             });
          });
-      });
+      }
+      else {
+         this.config = _mainConfig[0];
+
+         _db.readCollection("casaServices", (_err, _services) => {
+
+            if (!_err) {
+               this.config.services = _services;
+               this.markObjects(this.config.sevices, "_db", this.config.name); 
+            }
+
+            _db.readCollection("casaScenes", (_err, _scenes) => {
+
+               if (!_err) {
+                  this.config.scenes = _scenes;
+                  this.markObjects(this.config.scenes, "_db", this.config.name); 
+               }
+
+               _db.readCollection("casaThings", (_err, _casaThings) => {
+
+                  if (!_err) {
+                     this.config.things = _casaThings;
+                     this.markObjects(this.config.things, "_db", this.config.name); 
+                  }
+
+                  _db.readCollection("gangThings", (_err, _gangThings) => {
+
+                     if (!_err) {
+                        this.config.gangThings = _gangThings;
+                        this.markObjects(this.config.gangThings, "_db", this.config.name); 
+                     }
+
+                     _callback(null, true);
+                  });
+               });
+            });
+         });
+      }
    });
 };
 
@@ -255,8 +279,11 @@ Gang.prototype.init = function(_console) {
    // Extract Scenes
    this.extractScenes(this.config.scenes);
 
-   // Extract Things
-   this.extractThings(this.config.things);
+   // Extract Gang Things
+   this.extractThings(this.gangConfig.things, this);
+
+   // Extract Casa Things
+   this.extractThings(this.config.things, this.casa);
 
    // Extract Parent casa of parent area
    this.extractParentCasa();
@@ -347,10 +374,10 @@ Gang.prototype.createUser = function(_user) {
 
 Gang.prototype.extractUsers = function() {
 
-   if (this.config.users) {
+   if (this.gangConfig.users) {
 
-      for (var i = 0; i < this.config.users.length; ++i) { 
-         this.createUser(this.config.users[i]);
+      for (var i = 0; i < this.gangConfig.users.length; ++i) { 
+         this.createUser(this.gangConfig.users[i]);
       };
    }
 };
@@ -517,35 +544,14 @@ Gang.prototype.mergeConfigs = function() {
       this.config.parentCasa = this.gangConfig.parentCasa;
    }
 
-   this.config.users = this.gangConfig.users;
-
-   if (this.gangConfig.hasOwnProperty("services")) {
-
-      if (!this.config.hasOwnProperty("services") || !this.config.services) {
-         this.config.services = [];
-      }
-
-      for (var i = 0; i < this.gangConfig.services.length; ++i) {
-         this.config.services.push(this.gangConfig.services[i]);
-      }
-   }
-
    if (this.gangConfig.hasOwnProperty("things")) {
 
       if (this.config.hasOwnProperty("things")) {
-         this.mergeThings(this.gangConfig.things, this.config.things, false);
+         this.mergeThings(this.config.gangThings, this.gangConfig.things, false);
       }
       else {
-         this.config.things = this.gangConfig.things;
+         this.gangConfig.things = this.config.gangThings;
       }
-
-      //if (!this.config.hasOwnProperty("things") || !this.config.things) {
-         //this.config.things = [];
-      //}
-
-      //for (var i = 0; i < this.gangConfig.things.length; ++i) {
-         //this.config.things.push(this.gangConfig.things[i]);
-      //}
    }
 }
 
@@ -901,6 +907,14 @@ Gang.prototype.changePeerCasaName = function(_peerCasa, _newName) {
       delete this.peerCasas[_peerCasa.uName];
    }
    this.peerCasas[_newName] = _peerCasa;
+};
+
+Gang.prototype.uNameToLongForm = function(_name)  {
+   return ((_name.length === 1) && (_name[0] === ':')) ? this.casa.uName : ((_name.length > 1) && (_name[0] === ':') && (_name[1] !== ':')) ? this.casa.uName + _name : _name;
+};
+
+Gang.prototype.findNamedObject = function(_name)  {
+   return NamedObject.prototype.findNamedObject.call(this, this.uNameToLongForm(_name));
 };
 
 module.exports = exports = Gang;

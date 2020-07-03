@@ -8,7 +8,7 @@ function SourceListener(_config, _owner) {
    this.casa = this.gang.casa;
    this.owner = _owner;
 
-   this.sourceName = _config.uName;
+   this.sourceName = this.gang.uNameToLongForm(_config.uName);
 
    if (_config.uName == undefined) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
