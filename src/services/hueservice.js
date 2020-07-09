@@ -9,6 +9,7 @@ function HueService(_config, _owner) {
    this.linkId = _config.linkId;
    this.userId = _config.userId;
    this.username = _config.username;
+   this.linkAddress = _config.linkAddress;
    this.queue = [];
    this.requestPending = false;
    this.callbacks = {};
@@ -24,26 +25,36 @@ function b(_bridges) {
 
 HueService.prototype.coldStart = function() {
 
-   if (this.linkId && this.userId) {
+   if (this.userId) {
 
-      this.findBridges((_err, _bridges) => {
+      if (this.linkAddress) {
+         this.connectToBridge();
+      }
+      else if (this.linkId) {
 
-         if (_err || (_bridges.length === 0)) {
-            console.error(this.uName + ": Unable to find any bridges! Error="+_err);
-            process.exit(1);
-         }
+         this.findBridges((_err, _bridges) => {
 
-         console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
-         var bridge = this.findBridge(_bridges, this.linkId);
+            if (_err || (_bridges.length === 0)) {
+               console.error(this.uName + ": Unable to find any bridges! Error="+_err);
+               process.exit(1);
+            }
 
-         if (bridge) {
-            this.hueBridgeFound(bridge);
-         }
-         else {
-            console.error(this.uName + ": Bridge not found!");
-            process.exit(1);
-         }
-      });
+            console.log("Hue Bridges Found: " + JSON.stringify(_bridges));
+            var bridge = this.findBridge(_bridges, this.linkId);
+
+            if (bridge && bridge.ipAddress) {
+               this.linkAddress = bridge.ipAddress;
+               this.connectToBridge();
+            }
+            else {
+               console.error(this.uName + ": Bridge not found!");
+               process.exit(1);
+            }
+         });
+      }
+   }
+   else {
+      console.error(this.uName + ": Configuration for hue service not complete");
    }
 };
 
@@ -122,14 +133,7 @@ HueService.prototype.fixIds = function(_bridges) {
    }
 };
 
-HueService.prototype.hueBridgeFound = function(_bridge) {
-   this.linkAddress = _bridge.ipaddress;
-
-   if (!this.linkAddress) {
-      console.error(this.uName + ": Unable to find bridge, My link Id=" + this.linkId + " not Found!");
-      process.exit(1);
-   }
-
+HueService.prototype.connectToBridge = function() {
    this.hue = new Hue.HueApi(this.linkAddress, this.userId);
    this.lightState = Hue.lightState.create();
    this.ready = true;
