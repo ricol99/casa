@@ -7,66 +7,80 @@ var inputConfig = cjson.load(configFilename);
 parseConfigForSecureConfig(inputConfig);
 
 var casaDb = inputConfig.hasOwnProperty("casa");
-var db = new Db(casaDb ? inputConfig.casa.name : inputConfig.gang.name, undefined, true);
+populateDbFromConfig(inputConfig, casaDb);
 
-db.on('connected', () => {
-   populateDbFromConfig();
-});
+function populateDbFromConfig(_inputConfig, _casaDb) {
+   var db = new Db(_casaDb ? _inputConfig.casa.name : _inputConfig.gang.name, undefined, true);
 
-db.connect();
+   db.on('connected', () => {
+      var collections = {};
+      var writeAdditionalGangDb = false;
 
-function populateDbFromConfig() {
+      if (_casaDb) {
+         collections.casa = { "name": "", "type": "", "displayName": "", "location": {}, "listeningPort": 0 };
 
-   var collections = {};
+         for (var param in collections.casa) {
 
-   if (casaDb) {
-      collections.casa = { "name": "", "type": "", "displayName": "", "location": {}, "listeningPort": 0 };
+            if (_inputConfig.casa.hasOwnProperty(param)) {
+               collections.casa[param] = _inputConfig.casa[param];
+            }
+         }
 
-      for (var param in collections.casa) {
+         collections.casaServices = _inputConfig.casa.hasOwnProperty("services") ? _inputConfig.casa.services : [];
+         collections.casaScenes = _inputConfig.casa.hasOwnProperty("scenes") ? _inputConfig.casa.scenes : [];
+         collections.casaThings = _inputConfig.casa.hasOwnProperty("things") ? _inputConfig.casa.things : [];
+         collections.casaUsers = _inputConfig.casa.hasOwnProperty("users") ? _inputConfig.casa.users : [];
 
-         if (inputConfig.casa.hasOwnProperty(param)) {
-            collections.casa[param] = inputConfig.casa[param];
+         if (_inputConfig.hasOwnProperty("gang")) {
+            collections.casa.gang = _inputConfig.gang.name;
+            collections.gangThings = _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+         }
+         else {
+            collections.casa.gang = collections.casa.name + "-gang";
+            collections.gangThings = [];
+            writeAdditionalGangDb = true;
+         }
+      }
+      else {
+         collections.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
+
+         for (var param in collections.gang) {
+
+            if (_inputConfig.gang.hasOwnProperty(param)) {
+               collections.gang[param] = _inputConfig.gang[param];
+            }
+         }
+
+         collections.gangUsers = _inputConfig.gang.hasOwnProperty("users") ? _inputConfig.gang.users : [];
+         collections.gangScenes = _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
+         collections.gangThings = _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+      }
+
+      for (var collection in collections) {
+
+         if (collections.hasOwnProperty(collection)) {
+            db.appendToCollection(collection, collections[collection]);
          }
       }
 
-      collections.casa.gang = inputConfig.gang.name;
-      collections.casaServices = inputConfig.casa.hasOwnProperty("services") ? inputConfig.casa.services : [];
-      collections.casaScenes = inputConfig.casa.hasOwnProperty("scenes") ? inputConfig.casa.scenes : [];
-      collections.casaThings = inputConfig.casa.hasOwnProperty("things") ? inputConfig.casa.things : [];
-      collections.gangThings = inputConfig.gang.hasOwnProperty("things") ? inputConfig.gang.things : [];
-   }
-   else {
-      collections.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
+      db.readCollection("gangThings", function(_err, _res) {
 
-      for (var param in collections.gang) {
-
-         if (inputConfig.gang.hasOwnProperty(param)) {
-            collections.gang[param] = inputConfig.gang[param];
+         if (_err) {
+            console.error("Failed to read from database. Error="+_err);
+            db.close();
+            process.exit(1);
          }
-      }
 
-      collections.gangUsers = inputConfig.gang.hasOwnProperty("users") ? inputConfig.gang.users : [];
-      collections.gangScenes = inputConfig.gang.hasOwnProperty("scenes") ? inputConfig.gang.scenes : [];
-      collections.gangThings = inputConfig.gang.hasOwnProperty("things") ? inputConfig.gang.things : [];
-   }
-
-   for (var collection in collections) {
-
-      if (collections.hasOwnProperty(collection)) {
-         db.appendToCollection(collection, collections[collection]);
-      }
-   }
-
-   db.readCollection("gangThings", function(_err, _res) {
-
-      if (_err) {
-         console.error("Failed to read from database. Error="+_err);
          db.close();
-         process.exit(1);
-      }
 
-      db.close();
+         if (writeAdditionalGangDb) {
+            var gangConfig = { gang: { "name": collections.casa.name + "-gang", "type": "gang", "displayName": "Gang for " + collections.casa.name, "parentCasa": {} }};
+            populateDbFromConfig(gangConfig, false);
+         }
+      });
    });
+
+   db.connect();
 }
 
 function paramCount(_obj) {

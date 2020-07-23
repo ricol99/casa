@@ -203,35 +203,42 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
       else {
          this.config = _mainConfig[0];
 
-         _db.readCollection("casaServices", (_err, _services) => {
+         _db.readCollection("casaUsers", (_err, _users) => {
 
             if (!_err) {
-               this.config.services = _services;
-               this.markObjects(this.config.sevices, "_db", this.config.name); 
+               this.config.users = _users;
+               this.markObjects(this.config.users, "_db", this.config.name); 
             }
-
-            _db.readCollection("casaScenes", (_err, _scenes) => {
+            _db.readCollection("casaServices", (_err, _services) => {
 
                if (!_err) {
-                  this.config.scenes = _scenes;
-                  this.markObjects(this.config.scenes, "_db", this.config.name); 
+                  this.config.services = _services;
+                  this.markObjects(this.config.sevices, "_db", this.config.name); 
                }
 
-               _db.readCollection("casaThings", (_err, _casaThings) => {
+               _db.readCollection("casaScenes", (_err, _scenes) => {
 
                   if (!_err) {
-                     this.config.things = _casaThings;
-                     this.markObjects(this.config.things, "_db", this.config.name); 
+                     this.config.scenes = _scenes;
+                     this.markObjects(this.config.scenes, "_db", this.config.name); 
                   }
 
-                  _db.readCollection("gangThings", (_err, _gangThings) => {
+                  _db.readCollection("casaThings", (_err, _casaThings) => {
 
                      if (!_err) {
-                        this.config.gangThings = _gangThings;
-                        this.markObjects(this.config.gangThings, "_db", this.config.name); 
+                        this.config.things = _casaThings;
+                        this.markObjects(this.config.things, "_db", this.config.name); 
                      }
 
-                     _callback(null, true);
+                     _db.readCollection("gangThings", (_err, _gangThings) => {
+
+                        if (!_err) {
+                           this.config.gangThings = _gangThings;
+                           this.markObjects(this.config.gangThings, "_db", this.config.name); 
+                        }
+
+                        _callback(null, true);
+                     });
                   });
                });
             });
@@ -273,8 +280,11 @@ Gang.prototype.init = function(_console) {
       this.localConsole.coldStart();
    }
 
-   // Extract Users
-   this.extractUsers();
+   // Extract Gang Users
+   this.extractUsers(this.gangConfig.users, this);
+
+   // Extract Casa Users
+   this.extractUsers(this.config.users, this.casa);
 
    // Extract Scenes
    this.extractScenes(this.config.scenes);
@@ -365,19 +375,19 @@ Gang.prototype.cleverRequire = function(_type, _path) {
 }
 
 // Extract Users
-Gang.prototype.createUser = function(_user) {
+Gang.prototype.createUser = function(_user, _owner) {
    var User = this.cleverRequire(_user.type);
-   var userObj = new User(_user, this);
+   var userObj = new User(_user, _owner);
    this.users[userObj.name] = userObj;
    console.log('New user: ' + userObj.name);
 };
 
-Gang.prototype.extractUsers = function() {
+Gang.prototype.extractUsers = function(_config, _owner) {
 
-   if (this.gangConfig.users) {
+   if (_config) {
 
-      for (var i = 0; i < this.gangConfig.users.length; ++i) { 
-         this.createUser(this.gangConfig.users[i]);
+      for (var i = 0; i < _config.length; ++i) { 
+         this.createUser(_config[i], _owner);
       };
    }
 };
