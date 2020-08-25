@@ -66,6 +66,15 @@ Source.prototype.getScheduleService = function() {
    return scheduleService;
 };
 
+Source.prototype.raiseEvent = function(_eventName, _data) {
+   this.eventAboutToBeRaised(_eventName, _data);
+   SourceBase.prototype.raiseEvent.call(this, _eventName, _data);
+};
+
+// Override this to be informed when an event is being raised
+Source.prototype.eventAboutToBeRaised = function(_eventName, _data) {
+};
+
 Source.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.uName + ": scheduledEventTriggered() event=" + _event.name);
 
