@@ -201,6 +201,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
 SourceListener.prototype.goValid = function() {
    this.owner.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
+   this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.source.getProperty(this.eventName)}));
 }
 
 SourceListener.prototype.invalidate = function() {

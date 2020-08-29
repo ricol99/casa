@@ -300,6 +300,9 @@ StateProperty.prototype.raiseEvent = function(_eventName, _data) {
    this.owner.raiseEvent(_eventName, _data);
 };
 
+StateProperty.prototype.resolvePropertyValues = function(_properties) {
+};
+
 StateProperty.prototype.alignProperties = function(_properties) {
 
    if ((_properties && _properties.length > 0) && (this.ignoreControl || this.takeControl((this.currentState) ? this.currentState.priority : this.priority))) {
@@ -319,6 +322,14 @@ StateProperty.prototype.alignActions = function(_actions, _priority) {
       }
 
       if (props.length > 0) {
+
+         for (var z = 0; z < props.length; ++z) {
+
+            if (props[z].hasOwnProperty("fromProperty")) {
+               props[z].value = this.owner.getProperty(props[z].fromProperty);
+            }
+         }
+
          this.owner.alignProperties(props);
       }
 

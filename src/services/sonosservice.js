@@ -1,123 +1,57 @@
 var util = require('util');
+const { DeviceDiscovery } = require('sonos')
+const { Sonos } = require('sonos')
 var Service = require('../service');
-var Sonos = require('sonos');
-var search = Sonos.DeviceDiscovery();
-const url = require('url');
-
-const listener = require('sonos').Listener;
-
-// Just keep listening until CTRL + C is pressed
-process.on('SIGINT', () => {
-  console.log('Hold-on cancelling all subscriptions')
-  listener.stopListener().then(result => {
-    console.log('Cancelled all subscriptions')
-    process.exit()
-  }).catch(err => {
-    console.log('Error cancelling subscriptions, exit in 3 seconds  %s', err)
-    setTimeout(() => {
-      process.exit(1)
-    }, 2500)
-  })
-});
 
 function SonosService(_config, _owner) {
    Service.call(this, _config, _owner);
-   this.devices = {};
-   this.players = {};
-   this.callbacks = {};
-   this.portStart = _config.hasOwnProperty("portStart") ? _config.portStart : 12000;
-   this.currentPort = this.portStart;
-}
 
+   this.groups = {};
+   this.zones = {};
+   this.devices = {};
+};
+ 
 util.inherits(SonosService, Service);
 
-SonosService.prototype.registerForHostForZone = function(_zone, _callback) {
-
-   if (this.callbacks[_zone]) {
-      this.callbacks[_zone].push(_callback);
-   }
-   else {
-      this.callbacks[_zone] = [ _callback ];
-   }
-
-   if (this.players[_zone]) {
-      _callback(null, this.players[_zone][0]);
-   }
-};
-
 SonosService.prototype.coldStart = function() {
-   search.setMaxListeners(50);
 
-   search.on('DeviceAvailable', (_device, _model) => {
+   try {
+      DeviceDiscovery((_device) => {
 
-      _device.getZoneAttrs().then(_attrs => {
-
-         if (this.devices[_device.host]) {
-
-            if (this.devices[_device.host]._currentZoneName === _attrs.CurrentZoneName) {
-               // Known device
-               return;
-            }
-            else {
-               // Known device has changed zones *** TDB ** - DO something!
-               _device._oldZoneName = this.devices[_device.host]._currentZoneName;
-               _device._currentZoneName = _attrs.CurrentZoneName;
-               return;
-            }
-         }
-         else {
-            this.devices[_device.host] = _device;
-            _device._currentZoneName = _attrs.CurrentZoneName;
+         if (!this.devices.hasOwnProperty(_device.host+":"+_device.port)) {
+            console.log('found device at ' + _device.host);
+            this.devices[_device.host+":"+_device.port] = util.copy(_device, true);
          }
 
-         if (!this.players.hasOwnProperty(_attrs.CurrentZoneName)) {
-            this.players[_attrs.CurrentZoneName] = [ _device ];
-            console.log(this.uName + ': Found new Sonos Player for zone '+_attrs.CurrentZoneName+' at ' + _device.host + ', model:' + _model);
-         }
-         else {
-            this.players[_attrs.CurrentZoneName].push(_device);
-            console.log(this.uName + ': Adding host '+_device.host + ' to zone '+ _attrs.CurrentZoneName + ', model: ' + _model);
-         }
+         // get all groups
+         var sonos = new Sonos(_device.host)
 
-         _device.getTopology().then(_topology => {
+         sonos.getAllGroups().then(_groups => {
 
-            for (let i = 0; i < _topology.zones.length; ++i) {
-               var u = url.parse(_topology.zones[i].location);
+            for (var i = 0; i < _groups.length; ++i) {
 
-               if ((_device.host === u.hostname) && (_topology.zones[i].coordinator === 'true')) {
-                  console.log(this.uName + ': Found controlling Sonos Player for zone '+_device._currentZoneName+' at ' + _device.host);
+               if (!this.groups.hasOwnProperty(_groups[i].Name)) {
+                  console.log(this.uName + ": Found new group " + _groups[i].Name + "    " + _groups[i].host + ":" + _groups[i].port);
+                  this.groups[_groups[i].Name] = util.copy(_groups[i], true);
 
-                  if (_device._oldZoneName) {
+                  if (!this.zones.hasOwnProperty(_groups[i].ZoneGroupMember[0].ZoneName)) {
+                     console.log(this.uName + ": Found new zone " + _groups[i].ZoneGroupMember[0].ZoneName);
+                     this.zones[_groups[i].ZoneGroupMember[0].ZoneName] = { id: _groups[i].ID, host: _groups[i].host, port: _groups[i].port };
 
-                     if (this.devices[_device.host]._controller) {
+                     var thing = this.createThing({ type: "sonosservicezone", name: _groups[i].ZoneGroupMember[0].ZoneName.replace(/ /g, '-'),
+                                                    zone: _groups[i].ZoneGroupMember[0].ZoneName,
+                                                    host: _groups[i].host, port: _groups[i].port });
 
-                        for (var k = 0; k < this.callbacks[_device._oldZoneName].length; ++j) {
-                           this.callbacks[_device._oldZoneName][k]("Device has changed zone");
-                        }
-                     }
-                     _device._oldZoneName = null;
-                     delete _device._oldZoneName;
-                     this.devices[_device.host] = _device;
-                  }
-
-                  _device._controller = true;
-
-                  if (this.callbacks.hasOwnProperty(_device._currentZoneName)) {
-
-                     for (var j = 0; j < this.callbacks[_device._currentZoneName].length; ++j) {
-                        this.callbacks[_device._currentZoneName][j](null, _device);
-                     }
+                     this.zones[_groups[i].ZoneGroupMember[0].ZoneName].coordinator = thing;
                   }
                }
             }
-         }).catch(console.error);
-      }).catch(console.error);
-   });
-};
-
-SonosService.prototype.grabLocalListeningPort = function() {
-   this.currentPort++;
-   return this.currentPort - 1;
+         });
+      });
+   }
+   catch (_error) {
+      console.error(this.uName + ": Error " + _error + " received during device discovery");
+   }
 };
 
 module.exports = exports = SonosService;

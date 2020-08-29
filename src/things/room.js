@@ -116,7 +116,7 @@ function Room(_config, _parent) {
    this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
 
    if (this.hasProperty("users-sensitive")) {
-      this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", separator: "-",
+      this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", "initialValue": "no-users-present-normal", separator: "-",
                                                                                     sources: [{ property: "users-present-state" },
                                                                                               { property: "users-sensitive", transformMap: { false: "normal", true: "sensitive" }}] }, _config);
    }

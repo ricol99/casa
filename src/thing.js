@@ -71,6 +71,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       data.propertyOldValue = this.value;
+      data.alignWithParent = true;
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
       var needToUpdateChildren = this.propogateToChildren;
 
@@ -130,7 +131,7 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
-      _data.alignWithParent = true;
+      //_data.alignWithParent = true;
       this.updateProperty(_propName, _propValue, _data);
    }
 
