@@ -328,6 +328,9 @@ StateProperty.prototype.alignActions = function(_actions, _priority) {
             if (props[z].hasOwnProperty("fromProperty")) {
                props[z].value = this.owner.getProperty(props[z].fromProperty);
             }
+            else if (props[z].hasOwnProperty("source")) {
+               props[z].value = props[z].source.sourceListener.getPropertyValue();
+            }
          }
 
          this.owner.alignProperties(props);
@@ -542,6 +545,10 @@ function State(_config, _owner) {
                }
             }
          }
+         else if (this.actions[l].hasOwnProperty("source")) {
+            util.ensureExists(this.actions[l].source, "uName", this.owner.owner.uName);
+            this.actions[l].source.sourceListener = this.owner.fetchOrCreateSourceListener(this.actions[l].source);
+         }
       }
    }
 
@@ -592,6 +599,7 @@ State.prototype.initialise = function() {
 };
 
 State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
+   console.log(this.uName + " : AAAAAAAAAAAAAAAAAA");
    var sources = null;
    var source = this.checkActiveSourceGuards(_name, _value);
 
@@ -616,8 +624,9 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
          }
       }
    }
-   else if (this.processActiveActionGuards(_name, _value)) {
-      return null;
+   else {
+      this.processActiveActionGuards(_name, _value);
+      this.processActionsWithSources(_sourceEventName, _name, _value);
    }
 
    return null;
@@ -679,6 +688,20 @@ State.prototype.processActiveActionGuards = function(_propName, _propValue) {
    }
    else {
       return false;
+   }
+};
+
+State.prototype.processActionsWithSources = function(_sourceEventName, _propName, _propValue) {
+
+   if (this.actions) {
+
+      for (var a = 0; a < this.actions.length; ++a) {
+
+         if (this.actions[a].hasOwnProperty("source") && (this.actions[a].source.sourceListener.sourceEventName === _sourceEventName)) {
+            this.actions[a].value = _propValue;
+            this.owner.alignActions([ this.actions[a] ], this.priority);
+         }
+      }
    }
 };
 
