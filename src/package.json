@@ -16,6 +16,8 @@
     "express": "^4.16.3",
     "forecast.io": "0.0.11",
     "hap-nodejs": "^0.4.53",
+    "ht16k33": "^1.0.2",
+    "ht16k33-sevensegment-display": "^0.1.1",
     "lightwaverf": "0.0.1",
     "md5": "^2.2.1",
     "mdns": "^2.5.1",
