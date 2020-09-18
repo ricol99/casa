@@ -19,13 +19,20 @@ function Clock(_config, _parent) {
    this.ensurePropertyExists('month', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('year', 'property', { initialValue: 0 }, _config);
 
-   this.resolution = "none";
+   this.resolution = _config.hasOwnProperty("resolution") ? _config.resolution : "none";
+
 }
 
 util.inherits(Clock, Thing);
 
 Clock.prototype.coldStart = function() {
    this.updateAllProperties();
+
+   if (this.resolution === "seconds") {
+      this.secondTimerRequired = true;
+      this.startSecondTimer();
+   }
+
    Thing.prototype.coldStart.call(this);
 };
 
@@ -81,7 +88,6 @@ Clock.prototype.startSecondTimer = function() {
    if (this.secondTimerRequired) {
       let now = Date.now() % 1000;
       let delta = 1000 - now;
-      console.log("AAAAAAAAAAAA " + delta);
 
       this.secondTimer = setTimeout( () => {
          this.startSecondTimer();

@@ -45,13 +45,6 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      // Moving to a model where you must declare the property in the thing, if you want it to emit
-      // Will out a check into sourcelistener to make sure the property there when listening is established
-      // Don't check result, never emit if property is not there
-      //if (!Source.prototype.updateProperty.call(this, _propName, _propValue, data)) {
-         //this.emitPropertyChange(_propName, _propValue, data);
-      //}
-
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
       if (this.propogateToChildren) {
@@ -131,7 +124,6 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
-      //_data.alignWithParent = true;
       this.updateProperty(_propName, _propValue, _data);
    }
 

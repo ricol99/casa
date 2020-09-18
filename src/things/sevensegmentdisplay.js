@@ -12,11 +12,11 @@ function SevenSegmentDisplay(_config, _parent) {
    this.ensurePropertyExists('digit-3', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('minutes', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('hours', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('seconds', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('point-0', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('point-1', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('point-2', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('point-3', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('colon', 'property', { initialValue: false }, _config);
 }
 
 util.inherits(SevenSegmentDisplay, Thing);
@@ -42,7 +42,6 @@ SevenSegmentDisplay.prototype.propertyAboutToChange = function(_propName, _propV
          break;
 
       case "minutes":
-         console.log(this.uName+": AAAAAA ");
          this.display.writeDigit(4, _propValue % 10);
          this.display.writeDigit(3, Math.floor(_propValue / 10));
          break;
@@ -52,8 +51,8 @@ SevenSegmentDisplay.prototype.propertyAboutToChange = function(_propName, _propV
          this.display.writeDigit(0, Math.floor(_propValue / 10));
          break;
 
-      case "colon":
-         this.display.writeDigit(2, _propValue ? 1 : 0);
+      case "seconds":
+         this.display.writeDigit(2, (_propValue % 2) > 0 ? 1 : false);
          break;
    }
 };
