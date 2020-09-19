@@ -98,19 +98,35 @@ SevenSegmentDisplay.prototype.propertyAboutToChange = function(_propName, _propV
    switch (_propName) {
 
       case "digit-0":
-         this.display.writeDigit(4, _propValue);
+         this.display.writeDigit(4, _propValue, this.getProperty("point-0"));
          break;
 
       case "digit-1":
-         this.display.writeDigit(3, _propValue);
+         this.display.writeDigit(3, _propValue, this.getProperty("point-1"));
          break;
 
       case "digit-2":
-         this.display.writeDigit(1, _propValue);
+         this.display.writeDigit(1, _propValue, this.getProperty("point-2"));
          break;
 
       case "digit-3":
-         this.display.writeDigit(0, _propValue);
+         this.display.writeDigit(0, _propValue, this.getProperty("point-3"));
+         break;
+
+      case "point-0":
+         this.display.writeDigit(4, this.getProperty("digit-0"), _propValue);
+         break;
+
+      case "point-1":
+         this.display.writeDigit(3, this.getProperty("digit-1"), _propValue);
+         break;
+
+      case "point-2":
+         this.display.writeDigit(1, this.getProperty("digit-2"), _propValue);
+         break;
+
+      case "point-3":
+         this.display.writeDigit(0, this.getProperty("digit-3"), _propValue);
          break;
 
       case "resolution":
