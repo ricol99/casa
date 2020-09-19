@@ -16,6 +16,7 @@ function SevenSegmentDisplay(_config, _parent) {
    this.resolution = _config.hasOwnProperty("resolution") ? _config.resolution : "none";
    this.display = new SevenSegment(0x70, 1);
 
+   this.ensurePropertyExists('brightness', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('digit-0', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('digit-1', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('digit-2', 'property', { initialValue: false }, _config);
@@ -96,6 +97,10 @@ SevenSegmentDisplay.prototype.updateClock = function() {
 SevenSegmentDisplay.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    switch (_propName) {
+
+      case "brightness":
+         this.display.display.setBrightness(Math.floor((_propValue / 100.0) * 15));
+         break;
 
       case "digit-0":
          this.display.writeDigit(4, _propValue, this.getProperty("point-0"));
