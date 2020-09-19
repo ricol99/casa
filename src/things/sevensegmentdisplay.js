@@ -28,7 +28,7 @@ function SevenSegmentDisplay(_config, _parent) {
    this.ensurePropertyExists('display-clock', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('resolution', 'property', { initialValue: "minutes" }, _config);
 
-   this.time  = { year: 0, month: 0, day: 0, hours: 0, minutes: 0, seconds: 0 };
+   this.now  = { year: 0, month: 0, day: 0, hours: 0, minutes: 0, seconds: 0 };
    this.tick = true;
 }
 
@@ -74,7 +74,7 @@ SevenSegmentDisplay.prototype.updateDisplayFromProperties = function() {
    this.display.writeDigit(3, this.getProperty("digit-1"));
    this.display.writeDigit(1, this.getProperty("digit-2"));
    this.display.writeDigit(0, this.getProperty("digit-3"));
-   this.display.writeDigit(2, this.getProperty("colon"));
+   this.display.writeDigit(2, this.getProperty("colon") ? 1 : false);
 };
 
 SevenSegmentDisplay.prototype.updateClock = function() {
@@ -82,17 +82,14 @@ SevenSegmentDisplay.prototype.updateClock = function() {
    this.now.seconds = d.getSeconds();
    this.now.minutes = d.getMinutes();
    this.now.hours = d.getHours();
-   this.now.day = d.getDate();
-   this.now.month = d.getMonth() + 1;
-   this.now.year = d.getFullYear();
 
-   this.display.writeDigit(4, _propValue % 10);
-   this.display.writeDigit(3, Math.floor(_propValue / 10));
-   this.display.writeDigit(1, _propValue % 10);
-   this.display.writeDigit(0, Math.floor(_propValue / 10));
+   this.updateProperty('digit-0', this.now.minutes % 10);
+   this.updateProperty('digit-1', Math.floor(this.now.minutes / 10));
+   this.updateProperty('digit-2', this.now.hours % 10);
+   this.updateProperty('digit-3', Math.floor(this.now.hours / 10));
 
-   if (res === "seconds") {
-      this.display.writeDigit(2, (_propValue % 2) > 0 ? 1 : false);
+   if (this.getProperty("resolution") === "seconds") {
+      this.display.writeDigit(2, (this.now.seconds % 2) > 0 ? 1 : false);
    }
 };
 
@@ -123,7 +120,7 @@ SevenSegmentDisplay.prototype.propertyAboutToChange = function(_propName, _propV
          break;
 
       case "display-clock":
-         if (_propValue)) {
+         if (_propValue) {
             this.startDisplayingClock();
          }
          else {
@@ -148,7 +145,7 @@ SevenSegmentDisplay.prototype.startSecondTimer = function() {
 
       this.secondTimer = setTimeout( () => {
          this.startSecondTimer();
-         this.display.writeDigit(2, (this.tick ? 1 : false);
+         this.display.writeDigit(2, this.tick ? 1 : false);
          this.tick = !this.tick;
       }, delta);
    }
