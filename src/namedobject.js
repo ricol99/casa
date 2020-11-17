@@ -107,7 +107,6 @@ NamedObject.prototype.addNamedObject = function(_obj) {
 };
 
 NamedObject.prototype.detach = function(_uName) {
-   console.log(this.uName + ": AAAAAAAA detach()");
 
    if (this.owner) {
       this.owner.removeChildNamedObject(this);

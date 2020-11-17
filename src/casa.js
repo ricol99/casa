@@ -17,7 +17,6 @@ function Casa(_config) {
    this.certPath = _config.certPath;
    this.configPath = _config.configPath;
 
-   this.area = _config.area;
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
    NamedObject.call(this, _config, this.gang);
 

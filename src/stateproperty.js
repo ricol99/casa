@@ -599,7 +599,6 @@ State.prototype.initialise = function() {
 };
 
 State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
-   console.log(this.uName + " : AAAAAAAAAAAAAAAAAA");
    var sources = null;
    var source = this.checkActiveSourceGuards(_name, _value);
 

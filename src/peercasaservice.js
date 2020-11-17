@@ -37,24 +37,21 @@ function PeerCasaService(_config) {
             console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
             if ((!((this.gang.name || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.name))) &&
-               (service.name != this.name && !this.gang.remoteCasas[service.name])) {
+               (service.name != this.name && !this.gang.peerCasas[service.name])) {
 
-               if (!(this.gang.hasOwnProperty("parentCasa") && this.gang.parentCasa && (this.gang.parentCasa.name == service.name))) {
-                  // Found a peer
+               // Found a peer
+               // Only try to connect if we don't have a session already AND it is our role to connect and not wait
+               if (!this.gang.peerCasas[service.name] && !this.casasBeingEstablished[service.name]) {
 
-                  // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-                  if (!this.gang.remoteCasas[service.name] && !this.casasBeingEstablished[service.name]) {
-
-                     if (this.inFetchDbMode) {
-                        this.dbService.updateGangDbFromPeer(service.host, service.port, (_err, _res) => {
-                           this.dbCallback(_err, _res);
-                           this.dbCallback = null;
-                        });
-                     }
-                     else if (service.name > this.name) {
-                        this.casasBeingEstablished[service.name] = true;
-                        this.establishConnectionWithPeer(service);
-                     }
+                  if (this.inFetchDbMode) {
+                     this.dbService.updateGangDbFromPeer(service.host, service.port, (_err, _res) => {
+                        this.dbCallback(_err, _res);
+                        this.dbCallback = null;
+                     });
+                  }
+                  else if (service.name > this.name) {
+                     this.casasBeingEstablished[service.name] = true;
+                     this.establishConnectionWithPeer(service);
                   }
                }
             }

@@ -5,32 +5,21 @@ var NamedObject = require('./namedobject');
 
 var _mainInstance = null;
 
-function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPath, _configPath, _version, _console) {
+function Gang(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console) {
    this.casaName = _casaName;
    this.version = _version;
    this._id = true;	// TDB!!!
 
-   this.uberCasa = false;
    this.users = [];
    this.scenes = {};
    this.things = {};
    this.topLevelThings = [];
-   this.casaAreas = [];
    this.casa = null;
    this.peerCasas = [];
-   this.parentCasa = null;
-   this.remoteCasas = [];
    this.services = {};
    this.systemServices = {};
-
-   this.casaArea = null;
-   this.parentCasaArea = null;
-   this.peerCasaArea = null;
-   this.childCasaAreas = [];
-
    this.constructors = {};
 
-   this.areaId = 1;
    this.dbs = {};
    this.dbCallbacks = {};
 
@@ -54,7 +43,6 @@ function Gang(_casaName, _connectToPeers, _connectToParent, _secureMode, _certPa
             }
 
             this.config.connectToPeers = _connectToPeers;
-            this.config.connectToParent = _connectToParent;
             this.config.secureMode = _secureMode;
             this.config.certPath = _certPath;
             this.config.configPath = _configPath;
@@ -295,26 +283,13 @@ Gang.prototype.init = function(_console) {
    // Extract Casa Things
    this.extractThings(this.config.things, this.casa);
 
-   // Extract Parent casa of parent area
-   this.extractParentCasa();
-
-   // Create area for peer casas to live in
-   this.createPeerCasaArea();
-
    // Make sure all listeners are refreshed now that all sources are available
    this.casa.refreshSourceListeners();
 
    // Cold start all defined things now that everything has been created
    this.coldStartThings();
 
-   // start conecting to parent, if it exists
-   if (this.config.connectToParent && this.parentCasa) {
-
-      setTimeout( () => {
-         this.parentCasa.connectToPeerCasa(this.config.parentCasa);
-      }, 10000);
-   }
-
+   // Start connecting to Peers
    this.connectToPeers();
 }
 
@@ -550,10 +525,6 @@ Gang.prototype.mergeThings = function(_sourceThings, _destThings, _override) {
 
 Gang.prototype.mergeConfigs = function() {
 
-   if (this.config.connectToParent) {
-      this.config.parentCasa = this.gangConfig.parentCasa;
-   }
-
    if (this.gangConfig.hasOwnProperty("things")) {
 
       if (this.config.hasOwnProperty("things")) {
@@ -573,26 +544,6 @@ Gang.prototype.extractCasa = function() {
    console.log('New casa: ' + casaObj.name);
 }
 
-Gang.prototype.extractParentCasa = function() {
-
-   if (this.config.hasOwnProperty("parentCasa") && this.config.parentCasa) {
-      this.config.parentCasa.loginAs = "child";
-      this.config.parentCasa.persistent = true;
-
-      var PeerCasa = require('./peercasa');
-      this.parentCasa = new PeerCasa(this.config.parentCasa, this);
-      this.remoteCasas[this.parentCasa.uName] = this.parentCasa;
-      console.log('New parentcasa: ' + this.parentCasa.uName);
-
-      var ParentCasaArea = require('./parentcasaarea');
-      this.parentCasaArea = new ParentCasaArea ({ name: 'my-parent' });
-      this.casaAreas[this.parentCasaArea.uName] = this.parentCasaArea;
-      console.log('New parentcasaarea: ' + this.parentCasaArea.uName);
-
-      this.parentCasa.setCasaArea(this.parentCasaArea);
-   }
-}
-
 Gang.prototype.coldStartThings = function() {
 
    for(var prop in this.things) {
@@ -604,140 +555,34 @@ Gang.prototype.coldStartThings = function() {
    }
 }
 
-Gang.prototype.createPeerCasaArea = function() {
-   var PeerCasaArea = require('./peercasaarea');
-   this.peerCasaArea= new PeerCasaArea({ name: 'my-peers' });
-   this.casaAreas[this.peerCasaArea.uName] = this.peerCasaArea;
-}
-
-Gang.prototype.createChildCasaArea = function(_casas) {
-   var ChildCasaArea = require('./childcasaarea');
-   var childCasaArea = new ChildCasaArea({ name: this.casa.name + this.areaId});
-
-   this.areaId = (this.areaId + 1) % 100000;
-
-   this.casaAreas[childCasaArea.uName] = childCasaArea;
-   this.childCasaAreas[childCasaArea.uName] = childCasaArea;
-
-   var len = _casas.length;
-
-   for (var i = 0 ; i < len; ++i) {
-      _casas[i].setArea(childCasaArea);
-   }
-   return childCasaArea;
-}
-
-Gang.prototype.findCasaArea = function(_areaName) {
-   return this.casaAreas[_areaName];
-}
-
-Gang.prototype.deleteCasaArea = function(_area) {
-   delete this.casaAreas[_area.uName];
-   delete this.childCasaAreas[_area.uName];
-
-   if (_area == this.parentCasaArea) {
-      this.parentCasaArea = null;
-   }
-   _area.removeAllCasas();
-
-   delete _area;
-}
-
-Gang.prototype.resolveCasaAreasAndPeers = function(_casaName, _peers) {
-   var knownPeerCasas = [];
-
-   if (_peers) {
-      var len = _peers.length;
-
-      for (var i = 0 ; i < len; ++i) {
-
-         if (this.remoteCasas[_peers[i]]) {
-            knownPeerCasas.push(this.remoteCasas[_peers[i]]);
-         }
-      }
-   }
-
-   var len = knownPeerCasas.length;
-   var peerAreas = [];
-
-   for (i = 0 ; i < len; ++i) {
-
-      if (knownPeerCasas[i].casaArea) {
-         peerAreas.push(knownPeerCasas[i].casaArea);
-      }
-   }
-
-   if (peerAreas.length == 0) {
-      return this.createChildCasaArea(knownPeerCasas);
-   }
-   else if (peerAreas.length == 1) {
-      return knownPeerCasas[0].casaArea;
-   }
-   else if (peerAreas.length > 1) {
-      // set all casaAreas to the same, if they are not
-     
-      var len = knownPeerCasas.length;
-
-      for (i = 0 ; i < len; ++i) {
-
-         if (!knownPeerCasas[i].casaArea || knownPeerCasas[i].casaArea != peerAreas[0]) {
-            knownPeerCasas[i].setCasaArea(peerAreas[0]);
-         }
-      }
-      return peerAreas[0];
-   }
-}
-
-Gang.prototype.createChildCasa = function(_config, _peers) {
-   console.log('Creating a child casa for casa ' + _config.name);
-
-   var area = null;
-
-   // Resolve area
-   area = this.resolveCasaAreasAndPeers(_config.name, _peers);
-
-   var PeerCasa = require('./peercasa');
-   var childCasa = new PeerCasa(_config, this);
-
-   if (area) {
-      childCasa.setCasaArea(area);
-   }
-
-   this.remoteCasas[childCasa.uName] = childCasa;
-
-   this.setUberCasa(true);
-   return childCasa;
-};
-
 Gang.prototype.createPeerCasa = function(_config, _anonymous) {
    console.log('Creating a peer casa for casa ' + _config.name);
 
    var PeerCasa = require('./peercasa');
    var peerCasa = new PeerCasa(_config, this);
-   peerCasa.setCasaArea(this.peerCasaArea);
 
    if (!_anonymous) {
-      this.remoteCasas[peerCasa.uName] = peerCasa;
+      this.peerCasas[peerCasa.uName] = peerCasa;
    }
 
    return peerCasa;
 };
 
-Gang.prototype.addRemoteCasa = function(_remoteCasa, _force) {
+Gang.prototype.addPeerCasa = function(_peerCasa, _force) {
 
-   if (!_force && this.remoteCasas[_remoteCasa.uName]) {
+   if (!_force && this.peerCasas[_peerCasa.uName]) {
       return false;
    }
 
-   this.remoteCasas[_remoteCasa.uName] = _remoteCasa;
+   this.peerCasas[_peerCasa.uName] = _peerCasa;
    return true;
 };
 
-Gang.prototype.removeRemoteCasa = function(_remoteCasa) {
+Gang.prototype.removePeerCasa = function(_peerCasa) {
 
-   if (this.remoteCasas[_remoteCasa.uName]) {
-      delete this.remoteCasas[_remoteCasa.uName];
-      this.remoteCasas[_remoteCasa.uName] = null;
+   if (this.peerCasas[_peerCasa.uName]) {
+      delete this.peerCasas[_peerCasa.uName];
+      this.peerCasas[_peerCasa.uName] = null;
    }
 };
 
@@ -745,27 +590,12 @@ Gang.prototype.findUser = function (_userName) {
    return this.users[_userName];
 };
 
-Gang.prototype.findRemoteCasa = function (_casaName) {
-   return this.remoteCasas[_casaName];
+Gang.prototype.findPeerCasa = function (_casaName) {
+   return this.peerCasas[_casaName];
 };
 
 Gang.prototype.findService = function(_serviceName) {
    return this.services[_serviceName];
-};
-
-Gang.prototype.setUberCasa = function(_uberCasa) {
-   if (_uberCasa && !this.uberCasa) {
-      // Becoming an uber casa
-      this.uberCasa = _uberCasa;
-   }
-   else if (!_uberCasa && this.uberCasa) {
-      // Losing uber casa status
-      this.uberCasa = _uberCasa;
-   }
-};
-
-Gang.prototype.isUberCasa = function() {
-  return this.uberCasa;
 };
 
 Gang.prototype.inSecureMode = function() {
@@ -848,35 +678,6 @@ Gang.prototype.getDb = function(_dbName, _meta, _callback) {
 
 Gang.mainInstance = function() {
    return _mainInstance;
-};
-
-Gang.prototype.updateGangDbFromParent = function(_parentCasa) {
-   var dbService = this.casa.findService("dbservice");
-
-   dbService.updateGangDbFromPeer(_parentCasa.address.hostname, _parentCasa.address.port, (_err, _res) => {
-
-      if (_err) {
-         console.error(this.uName + ": Unable to update my gang db from parent. Error: " + _err);
-         process.exit(2);
-      }
-      else {
-         // Exit, we have to restart with new Db
-         console.log(this.uName + ": Gang db updated from parent. Need to restart. Exiting....");
-         process.exit(2);
-
-         this.gangDb.close();
-         this.gangDb = new Db(this.name, this.configPath(), false, this);
-
-         this.gangDb.on('connected', () => {
-
-            this.loadConfig(this.gangDb, "gang", (_err, _config) => {
-            });
-
-         });
-
-         this.gangDb.connect();
-      }
-   });
 };
 
 Gang.prototype.addPeerCasa = function(_peerCasa) {
