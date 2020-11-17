@@ -65,6 +65,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       if (_propName == "power") {
 
          if (_propValue) {
+            this.syncDeviceProperties();
             this.hueService.turnLightOn(this.deviceId);
             this.syncDeviceProperties();
          }

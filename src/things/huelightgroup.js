@@ -54,6 +54,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
       if (_propName == "power") {
 
          if (_propValue) {
+            this.syncDeviceProperties();
             this.hueService.setLightGroupState(this.lightGroupId, { power: true });
             this.syncDeviceProperties();
          }
