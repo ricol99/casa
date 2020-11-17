@@ -344,7 +344,7 @@ PeerCasa.prototype.socketConnectCb = function() {
       this.manualDisconnect = true;
       this.socket.disconnect();
       this.deleteMeIfNeeded();
-   }, 10000);
+   }, 20000);
 
 };
 
