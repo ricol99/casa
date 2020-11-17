@@ -184,7 +184,7 @@ PeerCasa.prototype.serveClient = function(_socket) {
       this.socket.disconnect();
       this.manualDisconnect = true;
       this.deleteMeIfNeeded();
-   }, 10000);
+   }, 20000);
 
    console.log(this.uName + ': Connected to my peer. Waiting for login.');
 };
