@@ -15,16 +15,13 @@ util.inherits(ThresholdProperty, Property);
 ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newPropertyValue = _data.value;
 
-   if (this.cold) {
-      this.cold = false;
-   }
-   else {
+   if (!this.cold) {
       if (this.activeThreshold == -1) {
 
          for (var index = 0; index < this.thresholds.length; ++index) {
 
-            if (((this.value >= this.thresholds[index]) && (_data.value <= this.thresholds[index])) ||
-                ((this.value <= this.thresholds[index]) && (_data.value >= this.thresholds[index]))) {
+            if (((this.value >= this.thresholds[index]) && (newPropertyValue <= this.thresholds[index])) ||
+                ((this.value <= this.thresholds[index]) && (newPropertyValue >= this.thresholds[index]))) {
 
                this.activeThreshold = index;
                break;
@@ -35,7 +32,7 @@ ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListene
       if (this.activeThreshold != -1) {
 
          // We are currently buffering
-         if (Math.abs(_data.value - this.thresholds[this.activeThreshold]) > this.buffer) {
+         if (Math.abs(newPropertyValue - this.thresholds[this.activeThreshold]) > this.buffer) {
             this.activeThreshold = -1;
          }
          else {
