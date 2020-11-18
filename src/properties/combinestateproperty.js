@@ -28,6 +28,43 @@ function CombineStateProperty(_config, _owner) {
 
 util.inherits(CombineStateProperty, StateProperty);
 
+CombineStateProperty.prototype.coldStart = function(_data) {
+
+   if (!this.initialValueSet) {
+      let newState = "";
+      let completed = true;
+
+      for (let i = 0; i < this.sources.length; ++i) {
+         let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.owner.uName;
+         let sl = this.sourceListeners[sn + ":" + this.sources[i].property];
+
+         if (!sl) {
+            completed = false;
+            break;
+         }
+
+         if (sl.isCold()) {
+            console.log(this.uName + ": Not ready as one or more sources is still cold");
+            completed = false;
+            break;
+         }
+
+         newState = newState + "" + sl.getPropertyValue();
+
+         if (i < this.sources.length - 1) {
+            newState = newState + this.separator;
+         }
+      }
+
+      if (completed) {
+         this.initialValueSet = true;
+         this.value = newState;
+      }
+   }
+
+   Property.prototype.coldStart.call(this, _data);
+};
+
 CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ": Event received when in state " + this.value);
    let sourceListener = this.sourceListeners[_sourceListener.sourceEventName];
@@ -42,7 +79,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
    let sourceFound = false;
 
    for (let i = 0; i < this.sources.length; ++i) {
-      let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.uName;
+      let sn = (this.sources[i].hasOwnProperty("uName")) ? this.sources[i].uName : this.owner.uName;
       let sl = this.sourceListeners[sn + ":" + this.sources[i].property];
 
       if (!sl) {

@@ -208,6 +208,8 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
+   console.log(this.uName + ': AAAAA HERE 1: ');
+
    if (_config.casaVersion && _config.casaVersion < parseFloat(this.gang.version)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
       this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "version-mismatch" });
@@ -215,24 +217,31 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
+   console.log(this.uName + ': AAAAA HERE 2: ');
+
    this.config = util.copy(_config, true);
    this.gang.changePeerCasaName(this, this.config.casaName);
    this.changeName(this.config.casaName.substr(2));	// XXX HACK
    this.createSources(this.config, this);
+   console.log(this.uName + ': AAAAA HERE 3: ');
 
    clearTimeout(this.loginTimer);
    this.loginTimer = null;
 
    var simpleConfig = this.casa.refreshSimpleConfig();
+   console.log(this.uName + ': AAAAA HERE 4: ');
 
    // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
+   console.log(this.uName + ': AAAAA HERE 5: ');
 
    this.ackMessage('login', { messageId: _config.messageId, gangHash: this.gang.gangDb.getHash(), casaName: this.casa.uName, casaConfig: simpleConfig });
    this.establishHeartbeat();
 
+   console.log(this.uName + ': AAAAA HERE 6: ');
    this.resendUnAckedMessages();
    this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
+   console.log(this.uName + ': AAAAA HERE 7: ');
 };
 
 PeerCasa.prototype.connectToPeerCasa = function(_config) {
