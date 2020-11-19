@@ -318,12 +318,14 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
          this.peerCasaService.exitFetchDbMode();
       }
       else {
-         var PeerCasaService = require('./peercasaservice');
-         this.peerCasaService = new PeerCasaService({ gang: this.config.gang, fetchDbMode: (_dbCallback != undefined) });
+         setTimeout( (_dbCallback_) => {
+            var PeerCasaService = require('./peercasaservice');
+            this.peerCasaService = new PeerCasaService({ gang: this.config.gang, fetchDbMode: (_dbCallback_ != undefined) });
 
-         if (_dbCallback) {
-            this.peerCasaService.setDbCallback(_dbCallback);
-         }
+            if (_dbCallback_) {
+               this.peerCasaService.setDbCallback(_dbCallback_);
+            }
+         }, 30000, _dbCallback);
       }
    }
 };
