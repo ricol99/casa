@@ -94,7 +94,7 @@ Casa.prototype.createServer = function() {
 
 };
 
-Casa,prototype.startListening = function () {
+Casa.prototype.startListening = function () {
 
    http.listen(this.listeningPort, () => {
       console.log('listening on *:' + this.listeningPort);
