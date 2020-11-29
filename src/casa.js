@@ -32,7 +32,7 @@ function Casa(_config) {
 
    this.uber = false;
 
-   this.createServer();
+   //this.createServer();
 }
 
 util.inherits(Casa, NamedObject);
