@@ -319,7 +319,7 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
       }
       else {
          setTimeout( (_dbCallback_) => {
-            this.casa.createServer();
+            this.casa.startListening();
             var PeerCasaService = require('./peercasaservice');
             this.peerCasaService = new PeerCasaService({ gang: this.config.gang, fetchDbMode: (_dbCallback_ != undefined) });
 

@@ -32,7 +32,7 @@ function Casa(_config) {
 
    this.uber = false;
 
-   //this.createServer();
+   this.createServer();
 }
 
 util.inherits(Casa, NamedObject);
@@ -91,6 +91,10 @@ Casa.prototype.createServer = function() {
       var peerCasa = this.gang.createPeerCasa({ name: "anonymous-"+Date.now(), type: "casa"}, true);
       peerCasa.serveClient(_socket);
    });
+
+};
+
+Casa,prototype.startListening = function () {
 
    http.listen(this.listeningPort, () => {
       console.log('listening on *:' + this.listeningPort);
