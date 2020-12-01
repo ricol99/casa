@@ -20,7 +20,7 @@
     "ht16k33-sevensegment-display": "^0.1.1",
     "lightwaverf": "0.0.1",
     "md5": "^2.2.1",
-    "mdns": "^2.5.1",
+    "mdns": "^2.7.2",
     "nedb": "^1.8.0",
     "node-hue-api": "^2.4.6",
     "node-persist": "^2.0.7",

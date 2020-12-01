@@ -5,7 +5,7 @@ var Property = require('../property');
 function GPIOProperty(_config, _owner) {
 
    this.gpioPin = _config.gpioPin;
-   this.triggerLow = (_config.triggerLow) ? _config.triggerLow : false;
+   this.triggerLow = _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false;
    this.direction = (_config.hasOwnProperty("direction")) ? _config.direction : ((this.writable) ? 'out' : 'in');
    this.serviceName = (_config.hasOwnProperty("service")) ? _config.service : _owner.gang.casa.findServiceName("gpioservice");
 

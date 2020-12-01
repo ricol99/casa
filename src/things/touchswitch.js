@@ -6,9 +6,8 @@ function TouchSwitch(_config, _parent) {
    this.thingType = "touch-switch";
 
    this.gpioTouchPin = _config.gpioTouchPin;
-   this.triggerLow = _config.hasOwnProperty("triggerLow") ? _config.triggerLow : true,
-
-   this.gpioFeedbackPin = _config.hasOwnProperty("gpioFeedbackPin") ? _config.gpioFeedbackPin : null,
+   this.triggerLow = _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false;
+   this.gpioFeedbackPin = _config.hasOwnProperty("gpioFeedbackPin") ? _config.gpioFeedbackPin : null;
    this.feedbackProp = _config.hasOwnProperty("feedbackProp") ? _config.feedbackProp : "ACTIVE";
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
 

@@ -40,11 +40,11 @@ function GpioPin(_owner, _pin, _direction, _triggerLow) {
    this.owner = _owner;
    this.gpioPin = _pin;
    this.direction = _direction;
-   this.triggerLow = (_triggerLow == undefined) ? true :_triggerLow;
+   this.triggerLow = _triggerLow;
    this.writable = (this.direction === 'out') || (this.direction === 'inout');
    this.value = false;
 
-   this.gpio = new Gpio(this.gpioPin, this.direction, 'both');
+   this.gpio = new Gpio(this.gpioPin, this.direction, 'both', { activeLow: this.triggerLow });
 
    process.on('SIGINT', () => {
       if (this.gpio) {
@@ -58,15 +58,18 @@ GpioPin.prototype.start = function() {
    if ((this.direction === 'in') || (this.direction === 'inout')) {
 
       this.gpio.read( (_err, _value) => {
-         this.value = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+         //this.value = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+         this.value = _value;
 
          this.gpio.watch( (_err, _value) => {
+            console.error(this.owner.name + ": AAAAAAA _value = "+_value);
 
             if (_err) {
                console.error(this.owner.name + ": Error from gpio library! Error = " + _err);
             }
             else {
-               var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+               //var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
+               var newValue = _value;
 
                if (newValue != this.value) {
                   console.log(this.owner.name + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
