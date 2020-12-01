@@ -58,24 +58,17 @@ GpioPin.prototype.start = function() {
    if ((this.direction === 'in') || (this.direction === 'inout')) {
 
       this.gpio.read( (_err, _value) => {
-         //this.value = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
          this.value = _value;
 
          this.gpio.watch( (_err, _value) => {
-            console.error(this.owner.name + ": AAAAAAA _value = "+_value);
 
             if (_err) {
                console.error(this.owner.name + ": Error from gpio library! Error = " + _err);
             }
-            else {
-               //var newValue = this.triggerLow ? (_value == 1 ? 0 : 1) : _value;
-               var newValue = _value;
-
-               if (newValue != this.value) {
-                  console.log(this.owner.name + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + newValue);
-                  this.value = newValue;
-                  this.owner.gpioPinStatusChanged(this.gpioPin, this.value == 1);
-               }
+            else if (_value != this.value) {
+               console.log(this.owner.name + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _value);
+               this.value = _value;
+               this.owner.gpioPinStatusChanged(this.gpioPin, this.value === 1);
             }
          });
       });
