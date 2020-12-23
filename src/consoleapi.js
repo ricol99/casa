@@ -49,41 +49,6 @@ ConsoleApi.prototype.filterArray = function(_array, _filter) {
    }
 };
 
-ConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions, _previousMatches) {
-   var mainProto = Object.getPrototypeOf(this);
-   var proto = mainProto;
-
-   while (proto.constructor.name !== 'ConsoleApi') {
-       proto = Object.getPrototypeOf(proto);
-   }
-
-   var members = _previousMatches ? _previousMatches : [];
-   var excObj = {};
-
-   if (_exclusions) {
-
-      for (var i = 0; i < _exclusions.length; ++i) {
-         excObj[_exclusions[i]] = true;
-      }
-   }
-
-   for (var method in mainProto) {
-
-      if (mainProto.hasOwnProperty(method)) {
-
-         if (!proto.hasOwnProperty(method) && !excObj.hasOwnProperty(method)) {
-            members.push(this.myObjuName+"."+method);
-         }
-      }
-   }
-
-   members.push(this.myObjuName+"."+"ls");
-   members.push(this.myObjuName+"."+"cat");
-
-   this.filterArray(members, this.myObjuName+"."+_filterArray);
-   return members;
-};
-
 ConsoleApi.prototype.myObj = function() {
    return this.gang.findNamedObject(this.myObjuName);
 };

@@ -13,17 +13,6 @@ ThingConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResul
    ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().things, _prevResult, _perfectMatchRequired);
 };
 
-ThingConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var myExclusions = [ "findMyThingInConfig" ];
-
-   if (_exclusions) {
-      return SourceConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
-   }
-   else {
-      return SourceConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions);
-   }
-};
-
 ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
 
    if (_thingConfig.name === this.myObjName) {

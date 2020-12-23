@@ -7,17 +7,6 @@ function SourceConsoleApi(_config, _owner) {
 
 util.inherits(SourceConsoleApi, SourceBaseConsoleApi);
 
-SourceConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var myExclusions = [ "persistUpdatedSource" ];
-
-   if (_exclusions) {
-      return SourceBaseConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
-   }
-   else {
-      return SourceBaseConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions);
-   }
-};
-
 SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, _action, _callback) {
    this.db = this.gang.getDb(this.gang.casa.name);
 

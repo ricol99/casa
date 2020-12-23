@@ -13,17 +13,6 @@ SourceBaseConsoleApi.prototype.filterScope = function(_scope, _collection, _prev
    ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props, _prevResult, _perfectMatchRequired);
 };
 
-SourceBaseConsoleApi.prototype.filterMembers = function(_filterArray, _exclusions) {
-   var myExclusions = [ "sessionClosed", "sourceIsValid", "sourceIsInvalid", "receivedEventFromSource", "removeListener", "getWatchList", "findOrCreateSourceListener" ]
-
-   if (_exclusions) {
-      return ConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions.concat(_exclusions));
-   }
-   else {
-      return ConsoleApi.prototype.filterMembers.call(this, _filterArray, myExclusions);
-   }
-};
-
 SourceBaseConsoleApi.prototype.cat = function(_params, _callback) {
    var output = [];
 
