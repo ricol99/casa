@@ -464,7 +464,7 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    var consoleObjHierarchy = [ "offlinecasaconsole" ];
    var scope = "::";
    var arguments = [];
-   var consoleObjName = "offline";
+   var consoleObjuName = "offline";
 
    if (line.split("(").length > 1) {
       var methodArguments = line.split("(").slice(1).join("(").trim();
@@ -484,10 +484,10 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    }
 
    if (_callback) {
-      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjName: consoleObjName });
+      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName });
    }
    else {
-      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjName: consoleObjName };
+      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName };
    }
 };
 

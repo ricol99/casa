@@ -2,17 +2,17 @@ var util = require('util');
 var NamedObject = require('./namedobject');
 
 function ConsoleCmd(_config, _console) {
-   this.config = _config;
-   this.type = "consolecmd";
-   NamedObject.call(this, _config);
+   this.myObjuName = _config.objuName;
+   this.gang = Gang.mainInstance();
+   this.uName = _console.uName + ":" + this.gang.name + this.myObjuName.substring(1);
+
+   //process.stdout.write("AAAAA ConsoleCmd() My uName is "+this.uName + "\n");
+   //process.stdout.write("AAAAA ConsoleCmd() My object uName is "+this.myObjuName + "\n");
 
    this.myObjName = _config.name;
    this.console = _console;
-   this.gang = Gang.mainInstance();
    this.casa = this.console.getCasa(this.myObjName);
 }
-
-util.inherits(ConsoleCmd, NamedObject);
 
 ConsoleCmd.prototype.coldStart = function() {
 };
@@ -48,21 +48,29 @@ ConsoleCmd.prototype.filterArray = function(_array, _filter) {
 };
 
 ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullScopeName) {
-   var mainProto = Object.getPrototypeOf(this);
-   var proto = mainProto;
+   var proto = Object.getPrototypeOf(this);
+   var consoleCmdProto = proto;
    var fullScope = (_fullScopeName) ? _fullScopeName + "." : "";
 
-   while (proto.constructor.name !== 'ConsoleCmd') {
-       proto = Object.getPrototypeOf(proto);
+   while (consoleCmdProto.constructor.name !== 'ConsoleCmd') {
+      consoleCmdProto = Object.getPrototypeOf(consoleCmdProto);
    }
 
    var members = _previousMatches ? _previousMatches : [];
    var excObj = {};
 
-   for (var method in mainProto) {
+   //process.stdout.write("AAAAA proto of obj = "+util.inspect(proto)+"\n");
+   //process.stdout.write("AAAAA proto of ConsoleCmd = "+util.inspect(consoleCmdProto)+"\n");
 
-      if (!proto.hasOwnProperty(method) && !method.startsWith("_")) {
-         members.push(fullScope+method);
+   for (var method in proto) {
+
+      if (proto.hasOwnProperty(method)) {
+         //process.stdout.write("AAAAA method name = "+method+"\n");
+
+         if (!consoleCmdProto.hasOwnProperty(method) && !method.startsWith("_")) {
+            members.push(fullScope+method);
+            //process.stdout.write("AAAAA method "+method+" Added\n");
+         }
       }
    }
 

@@ -252,7 +252,7 @@ NamedObject.prototype.filterName = function(_name)  {
       //return result;
    //}
 
-   process.stdout.write("AAAAA filterName newName="+newName+"\n");
+   //process.stdout.write("AAAAA filterName newName="+newName+"\n");
 
    var filterArray = newName.split(":");
    var matchString = filterArray[0];

@@ -341,13 +341,13 @@ Gang.prototype.cleverRequire = function(_type, _path) {
    if (!this.constructors[_type]) {
       console.log('loading more code: ./' + _type);
 
-      //try {
+      try {
          this.constructors[_type] = require('./' + path + _type);
-      //}
-      //catch (_err) {
+      }
+      catch (_err) {
          //process.stderr.write(util.inspect(_err));
-         //return null;
-      //}
+         return null;
+      }
    }
    return this.constructors[_type];
 }

@@ -47,7 +47,7 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
          return _callback(_err);
       }
 
-      process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
+      //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
       var matches = _result.matchingScopes;
 
       var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
@@ -55,7 +55,7 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
       var method = (methodResult.method) ? methodResult.method : "";
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjName);
+         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName);
          matches = methodMatches.concat(_result.matchingScopes);
       }
 
@@ -101,14 +101,14 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 };
 
-LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjName) {
+LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName) {
    var cmdObj = null;
 
    for (var i = 0; i < _consoleObjHierarchy.length; ++i) {
 
       try {
          var ConsoleCmdObj = require("./consolecmds/" + _consoleObjHierarchy[i] +  "cmd");
-         cmdObj = new ConsoleCmdObj({ name: _consoleObjName }, this);
+         cmdObj = new ConsoleCmdObj({ objuName: _consoleObjuName }, this);
          break;
       }
       catch (_err) {
@@ -133,11 +133,12 @@ LocalConsole.prototype.processMatches = function(_line, _matches) {
    }
 };
 
-LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjName, _perfectMatchRequired) {
+LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjuName, _perfectMatchRequired) {
    var matches = [];
 
    if (_consoleObjHierarchy) {
-      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjName);
+      //process.stdout.write("AAAA matchMethods() console Heirarch = "+util.inspect(_consoleObjHierarchy)+"\n");
+      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName);
 
       if (cmdObj) {
          matches = cmdObj.filterMembers(_method, undefined, _scope);
@@ -195,14 +196,18 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
    this.extractScope(_line, (_err, _result) => {
       var err = _err ? _err : "Object not found";
 
-      if (_err || !_result.scope) {
+      //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
+
+      if (_err) { 
          return _callback(_err);
       }
+
+      var scope = (_result.scope) ? _result.scope : this.currentScope;
 
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
 
       if (methodResult.method && _result.hasOwnProperty("consoleObjHierarchy")) {
-         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjName);
+         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);
 
          if (cmdObj) {
             var methodName = methodResult.method ? methodResult.method : "cat";
@@ -212,7 +217,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
             if (cmdMethod) {
 
                try {
-                  Object.getPrototypeOf(cmdObj)[methodName].call(cmdObj, _result.scope, methodResult.arguments, _callback);
+                  Object.getPrototypeOf(cmdObj)[methodName].call(cmdObj, scope, methodResult.arguments, _callback);
                }
                catch (_err) {
                   _callback(_err);
@@ -242,6 +247,7 @@ LocalConsole.prototype.extractScope = function(_line, _callback) {
 };
 
 LocalConsole.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
+   //process.stdout.write("AAAAA executeParsedCommand() obj="+util.inspect(_obj)+"\n");
    this.consoleApiSession.executeCommand({ obj: _obj, method: _method, arguments: _arguments }, _callback);
 };
 

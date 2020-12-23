@@ -180,7 +180,7 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
       }
 
       if (ConsoleApiObj) {
-         obj = new ConsoleApiObj(_namedObject, this);
+         obj = new ConsoleApiObj({ objuName: _namedObject.uName }, this);
          _namedObject.__consoleObj = obj;
       }
    }
@@ -392,7 +392,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
       }
 
       result.consoleObjHierarchy = this.getClassHierarchy(result.consoleApiObj);
-      result.consoleObjName = result.consoleApiObj.myObjName;
+      result.consoleObjuName = result.consoleApiObj.myObjuName;
       result.consoleObjCasaName = result.consoleApiObj.getCasa().name;
       delete result.consoleApiObj;
    }

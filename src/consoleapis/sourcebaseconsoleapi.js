@@ -64,11 +64,11 @@ SourceBaseConsoleApi.prototype.removeListener = function(_name) {
 };
 
 SourceBaseConsoleApi.prototype.getWatchList = function() {
-   var watchList = this.consoleApiService.getSessionVar("watchList", this);
+   var watchList = this.owner.getSessionVar("watchList", this);
 
    if (!watchList) {
       watchList = {};
-      this.consoleApiService.addSessionVar("watchList", watchList, this);
+      this.owner.addSessionVar("watchList", watchList, this);
    }
 
    return watchList;
@@ -127,7 +127,7 @@ SourceBaseConsoleApi.prototype.listeners = function(_params, _callback) {
    var listenerUnames = [];
 
    for (var i=0; i < listeners.length; ++i) {
-
+      // XXXXX wrong use of owner, need to fix!
       if ((listeners[i].owner.type !== "consoleapi") && ((_params[0] == undefined) || (_params[0] === listeners[i].eventName))) {
          listenerUnames.push(listeners[i].owner.name);
       }
@@ -154,7 +154,7 @@ SourceBaseConsoleApi.prototype.sourceIsInvalid = function(_data) {
 };
 
 SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
-   var allSessionVars = this.consoleApiService.getAllSessionsForConsoleApiObject(this);
+   var allSessionVars = this.owner.getAllSessionsForConsoleApiObject(this);
 
    for (var session in allSessionVars) {
 
@@ -163,7 +163,7 @@ SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
           if (allSessionVars[session].hasOwnProperty("watchList")) {
 
              if (allSessionVars[session].watchList.hasOwnProperty(_data.name)) {
-                this.consoleApiService.writeOutput(session, "Watched property " + this.myObjName +":"+_data.name+" changed to "+_data.value);
+                this.owner.writeOutput(session, "Watched property " + this.myObjName +":"+_data.name+" changed to "+_data.value);
              }
           }
        }
