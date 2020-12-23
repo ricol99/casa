@@ -265,7 +265,7 @@ NamedObject.prototype.filterName = function(_name)  {
          perfectMatch = result.hits.length;
       }
 
-      result.hits.push(this.uName+":"+_obj);
+      result.hits.push(this.uName+":"+_obj+":");
    });
 
    if (perfectMatch !== -1) {

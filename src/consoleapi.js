@@ -103,7 +103,7 @@ ConsoleApi.prototype.ls = function(_params, _callback) {
    for (var namedObject in obj.myNamedObjects) {
 
       if (obj.myNamedObjects.hasOwnProperty(namedObject)) {
-         results.push(obj.myNamedObjects[namedObject].name);
+         results.push(obj.myNamedObjects[namedObject].name + ":");
       }
    }
 
