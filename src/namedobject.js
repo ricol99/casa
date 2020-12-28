@@ -44,6 +44,59 @@ function NamedObject(_config, _owner) {
 
 util.inherits(NamedObject, AsyncEmitter);
 
+NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {
+   var nextObjName = this.stripMyUName(_uName);
+
+   if (nextObjName === null) {
+      return null;
+   }
+
+   if (nextObjName === "") {
+      return this;
+   }
+
+   var spr = nextObjName.split(":");
+
+   if (spr.length === 0) {
+      return this;
+   }
+
+   if (this.myNamedObjects.hasOwnProperty(spr[0])) {
+      return this.myNamedObjects[spr[0]].findOrCreate(_uName, _constructor, _constructorParams);
+   }
+
+   return this.create(_uName, _constructor, _constructorParams);
+};
+
+NamedObject.prototype.create = function(_uName, _constructor, _constructorParams) {
+   var nextObjName = this.stripMyUName(_uName);
+
+   if (nextObjName === null) {
+      return null;
+   }
+
+   if (nextObjName === "") {
+      return this;
+   }
+
+   process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
+
+   var spr = nextObjName.split(":");
+
+   if (spr.length === 0) {
+      return this;
+   }
+
+   var nextObj = _constructor(_uName, this, _constructorParams);
+
+   if (nextObj) {
+      return nextObj.create(_uName, _constructor, _constructorParams);
+   }
+   else {
+      return null;
+   }
+};
+
 NamedObject.prototype.setOwner = function(_owner) {
 
    if (this.owner) {
@@ -197,6 +250,10 @@ NamedObject.prototype.removeChildNamedObject = function(_namedObject) {
    delete this.myNamedObjects[_namedObject.name];
 };
 
+NamedObject.prototype.stripMyUName = function(_uName) {
+   return (_uName.length > this.uName.length) ? _uName.replace(this.uName+":", "") : _uName.replace(this.uName, "");
+};
+
 NamedObject.prototype.stripMyName = function(_name) {
    var myName = this.owner ? this.name : ":";
 
@@ -211,6 +268,8 @@ NamedObject.prototype.stripMyName = function(_name) {
 
 NamedObject.prototype.findNamedObject = function(_name)  {
    var newName = this.stripMyName(_name);
+
+   //process.stdout.write("AAAAA findNamedObject() newName="+newName+"\n");
 
    if (newName === null) {
       return null;

@@ -1,17 +1,25 @@
 var Gang = require('./gang');
 var util = require('util');
-
+var NamedObject = require('./namedobject');
+ 
 function ConsoleApi(_config, _owner) {
-   this.owner = _owner;
-   this.myObjuName = _config.objuName;
+   this.config = _config;
+   this.type = "consoleapi";
+   NamedObject.call(this, _config, _owner);
+
    this.gang = Gang.mainInstance();
-   this.uName = _owner.uName + ":" + this.gang.name + this.myObjuName.substring(1);
 
    //process.stdout.write("AAAAA ConsoleAPI() My uName is "+this.uName + "\n");
    //process.stdout.write("AAAAA ConsoleAPI() My object uName is "+this.myObjuName + "\n");
 
+   this.consoleApiService =  this.gang.casa.findService("consoleapiservice");
    this.db = this.gang.getDb();
 }
+
+util.inherits(ConsoleApi, NamedObject);
+
+ConsoleApi.prototype.coldStart = function() {
+};
 
 ConsoleApi.prototype.getCasa = function() {
    return this.gang.casa;
@@ -50,13 +58,13 @@ ConsoleApi.prototype.filterArray = function(_array, _filter) {
 };
 
 ConsoleApi.prototype.myObj = function() {
-   return this.gang.findNamedObject(this.myObjuName);
+   return this.gang.findNamedObject(this.uName);
 };
 
 ConsoleApi.prototype.ls = function(_params, _callback) {
    this.checkParams(0, _params);
 
-   var obj = this.gang.findNamedObject(this.myObjuName);
+   var obj = this.gang.findNamedObject(this.uName);
 
    if (!obj) {
       _callback("Object not found!");

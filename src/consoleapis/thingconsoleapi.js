@@ -15,7 +15,7 @@ ThingConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResul
 
 ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
 
-   if (_thingConfig.name === this.myObjName) {
+   if (_thingConfig.name === this.uName) {
       return _thingConfig;
    }
 

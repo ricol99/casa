@@ -1,8 +1,8 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 
-function GangConsoleCmd(_config, _console) {
-   ConsoleCmd.call(this, _config, _console);
+function GangConsoleCmd(_config, _owner, _console) {
+   ConsoleCmd.call(this, _config, _owner, _console);
 }
 
 util.inherits(GangConsoleCmd, ConsoleCmd);
@@ -59,7 +59,7 @@ GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
    
    db.on('connected', () => {
       var configs = {};
-      configs.gang = { "name": "",, "type": "", "displayName": "", "parentCasa": {} };
+      configs.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
       configs.users = [];
       configs.services = [];
       configs.scenes = [];

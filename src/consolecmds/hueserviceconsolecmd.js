@@ -1,8 +1,8 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 
-function HueServiceConsoleCmd(_config, _console) {
-   ConsoleCmd.call(this, _config, _console);
+function HueServiceConsoleCmd(_config, _owner, _console) {
+   ConsoleCmd.call(this, _config, _owner, _console);
 }
 
 util.inherits(HueServiceConsoleCmd, ConsoleCmd);

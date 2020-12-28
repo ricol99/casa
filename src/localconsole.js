@@ -21,6 +21,10 @@ util.inherits(LocalConsole, NamedObject);
 LocalConsole.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
+
+   var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
+   this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name }, null, this);
+
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
 
@@ -101,14 +105,17 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
    }
 };
 
-LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName) {
+LocalConsole.prototype.createConsoleCmdObj = function(_uName, _owner, _consoleObjHierarchy) {
+   process.stdout.write("AAAAA LocalConsole.prototype.createConsoleCmdObj() _uName="+_uName+"\n");
    var cmdObj = null;
+   var spr = _uName.split(":");
+   var name = spr[spr.length-1];
 
    for (var i = 0; i < _consoleObjHierarchy.length; ++i) {
 
       try {
          var ConsoleCmdObj = require("./consolecmds/" + _consoleObjHierarchy[i] +  "cmd");
-         cmdObj = new ConsoleCmdObj({ objuName: _consoleObjuName }, this);
+         cmdObj = new ConsoleCmdObj({ name: name }, _owner, this);
          break;
       }
       catch (_err) {
@@ -116,7 +123,16 @@ LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consol
       }
    }
 
+   if (!cmdObj) {
+      var ConsoleCmdObj = require("./consolecmd");
+      cmdObj = new ConsoleCmdObj({ name: name }, _owner, this);
+   }
+
    return cmdObj;
+};
+
+LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName) {
+   return this.gangConsoleCmd.findOrCreate(_consoleObjuName, LocalConsole.prototype.createConsoleCmdObj.bind(this), _consoleObjHierarchy);
 };
 
 LocalConsole.prototype.processMatches = function(_line, _matches) {
@@ -138,6 +154,8 @@ LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _
 
    if (_consoleObjHierarchy) {
       //process.stdout.write("AAAA matchMethods() console Heirarch = "+util.inspect(_consoleObjHierarchy)+"\n");
+      //process.stdout.write("AAAA matchMethods() console obj = "+_consoleObjuName+"\n");
+
       var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName);
 
       if (cmdObj) {
@@ -205,6 +223,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
       var scope = (_result.scope) ? _result.scope : this.currentScope;
 
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
+      //process.stdout.write("AAAA Method Result="+util.inspect(methodResult)+"\n");
 
       if (methodResult.method && _result.hasOwnProperty("consoleObjHierarchy")) {
          var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName);

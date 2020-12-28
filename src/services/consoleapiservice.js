@@ -11,12 +11,16 @@ function ConsoleApiService(_config, _owner) {
 util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
+   var GangConsoleApiObj = this.gang.cleverRequire("gangconsoleapi", "consoleapis");
+   this.gangConsoleApi = new GangConsoleApiObj({ name: this.gang.name }, null);
+
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:obj/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
 
    WebService.prototype.coldStart.call(this);
+
 };
 
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
@@ -162,6 +166,36 @@ ConsoleApiService.prototype.socketIoConnection = function(_socket) {
    this.sessions[_socket.id].serveClient(_socket);
 };
 
+ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
+   process.stdout.write("AAAAA createConsoleApiObject() _uName="+_uName+" _owner="+_owner.uName+"\n");
+   var namedObject = this.gang.findNamedObject(_uName);
+   //process.stdout.write("AAAAA createConsoleApiObject() namedObject="+namedObject+"\n");
+   var consoleObj = null;
+
+   if (!namedObject) {
+      return null;
+   }
+
+   let classList = util.getClassHierarchy(namedObject);
+
+   for (var i = 0; i < classList.length; ++i) {
+      var ConsoleApiObj = this.gang.cleverRequire(classList[i]+"consoleapi", "consoleapis");
+
+      if (ConsoleApiObj || (classList[i] === "namedobject")) {
+         break;
+      }
+   }
+
+   if (!ConsoleApiObj) {
+      ConsoleApiObj = require("../consoleapi");
+   }
+
+   consoleObj = new ConsoleApiObj({ name: namedObject.name }, _owner);
+   namedObject.__consoleObj = consoleObj;
+
+   return consoleObj;
+};
+
 ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
    var obj = null;
 
@@ -169,20 +203,7 @@ ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject
       obj = _namedObject.__consoleObj;
    }
    else {
-      let classList = util.getClassHierarchy(_namedObject);
-
-      for (var i = 0; i < classList.length; ++i) {
-         var ConsoleApiObj = this.gang.cleverRequire(classList[i]+"consoleapi", "consoleapis");
-
-         if (ConsoleApiObj || (classList[i] === "namedobject")) {
-            break;
-         }
-      }
-
-      if (ConsoleApiObj) {
-         obj = new ConsoleApiObj({ objuName: _namedObject.uName }, this);
-         _namedObject.__consoleObj = obj;
-      }
+      return this.gangConsoleApi.findOrCreate(_namedObject.uName, ConsoleApiService.prototype.createConsoleApiObject.bind(this));
    }
 
    return obj;
@@ -356,6 +377,7 @@ ConsoleApiSession.prototype.extractScopeFromLine = function(_currentScope, _line
    this.processMatches(_currentScope, shortenedLine, matchingScopes);
 
    var scope = result.scope;
+   //process.stdout.write("AAAAAA ConsoleApiSession.prototype.extractScopeFromLine() result="+util.inspect(result)+"\n");
    var consoleApiObj = result.namedObject ? this.owner.findOrCreateConsoleApiObject(result.namedObject) : null;
    return { scope: scope, matchingScopes: matchingScopes, consoleApiObj: consoleApiObj, remainingStr: result.remainingStr+trimmedString };
 };
@@ -392,7 +414,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
       }
 
       result.consoleObjHierarchy = this.getClassHierarchy(result.consoleApiObj);
-      result.consoleObjuName = result.consoleApiObj.myObjuName;
+      result.consoleObjuName = result.consoleApiObj.uName;
       result.consoleObjCasaName = result.consoleApiObj.getCasa().name;
       delete result.consoleApiObj;
    }

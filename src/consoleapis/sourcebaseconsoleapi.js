@@ -29,7 +29,7 @@ SourceBaseConsoleApi.prototype.cat = function(_params, _callback) {
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {
-      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ name: this.myObjName, property: _name }, this) };
+      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ name: this.uName, property: _name }, this) };
       this.sourceListeners[_name].sourceListener.establishListeners();
    }
    else {
@@ -112,7 +112,7 @@ SourceBaseConsoleApi.prototype.unwatch = function(_params, _callback) {
 SourceBaseConsoleApi.prototype.listeners = function(_params, _callback) {
    this.checkParams(1, _params);
 
-   var listeners = this.gang.casa.findListeners(this.myObjName);
+   var listeners = this.gang.casa.findListeners(this.uName);
    var listenerUnames = [];
 
    for (var i=0; i < listeners.length; ++i) {
@@ -152,7 +152,7 @@ SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
           if (allSessionVars[session].hasOwnProperty("watchList")) {
 
              if (allSessionVars[session].watchList.hasOwnProperty(_data.name)) {
-                this.owner.writeOutput(session, "Watched property " + this.myObjName +":"+_data.name+" changed to "+_data.value);
+                this.owner.writeOutput(session, "Watched property " + this.uName +":"+_data.name+" changed to "+_data.value);
              }
           }
        }

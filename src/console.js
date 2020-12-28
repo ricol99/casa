@@ -41,6 +41,9 @@ util.inherits(Console, LocalConsole);
 Console.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
 
+   var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
+   this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name }, null, this);
+
    var CasaFinder = require('./casafinder');
    var casaFinder = new CasaFinder({ gang: this.gangName, casa: this.casaName });
 
@@ -50,7 +53,7 @@ Console.prototype.coldStart = function() {
    casaFinder.coldStart();
    casaFinder.startSearching();
 
-   this.offlineCasa = new OfflineCasa({ name: "casa:offlinecase" }, this);
+   this.offlineCasa = new OfflineCasa({ name: "offlinecasa" }, this);
 
    this.start("::");
 };
@@ -432,7 +435,7 @@ function OfflineCasa(_config, _owner) {
    this.db = this.owner.gang.getDb();
 
    var ConsoleCmdObj = require("./consolecmds/offlinecasaconsolecmd");
-   this.cmdObj = new ConsoleCmdObj({ name: "casa:offlinecasa" }, this);
+   this.cmdObj = new ConsoleCmdObj({ name: "offlinecasa" }, this.owner.gangConsoleCmd, this.owner);
    this.methods = Object.getPrototypeOf(this.cmdObj);
 }
 

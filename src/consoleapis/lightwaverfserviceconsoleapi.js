@@ -27,7 +27,7 @@ LightwaveRfServiceConsoleApi.prototype.setLinkAddress = function(_params, _callb
    if (persist) {
       this.db = this.gang.getDb(this.gang.casa.name);
 
-      this.db.find(this.myObjName, (_err, _hueServiceConfig) => {
+      this.db.find(this.uName, (_err, _hueServiceConfig) => {
 
          if (_err || (_hueServiceConfig === null)) {
             return _callback("Unable to persist link id!");

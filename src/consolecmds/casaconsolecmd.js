@@ -1,8 +1,8 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 
-function CasaConsoleCmd(_config, _console) {
-   ConsoleCmd.call(this, _config, _console);
+function CasaConsoleCmd(_config, _owner, _console) {
+   ConsoleCmd.call(this, _config, _owner, _console);
 }
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);

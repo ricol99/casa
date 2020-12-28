@@ -3,15 +3,9 @@ var ConsoleApi = require('../consoleapi');
 
 function PropertyConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
-   this.fullScopeName = (this.owner && this.owner.fullScopeName !== "") ? this.owner.fullScopeName+":"+this.name : this.myObjName
 }
 
 util.inherits(PropertyConsoleApi, ConsoleApi);
-
-PropertyConsoleApi.prototype.myObj = function() {
-   var myObj = this.owner.myObj();
-   return (myObj) ? myObj.props[this.name] : null;
-};
 
 PropertyConsoleApi.prototype.cat = function(_params, _callback) {
    _callback(null, this.myObj().getValue());

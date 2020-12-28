@@ -10,12 +10,12 @@ util.inherits(SourceConsoleApi, SourceBaseConsoleApi);
 SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, _action, _callback) {
    this.db = this.gang.getDb(this.gang.casa.name);
 
-   this.db.find(this.myObjName, (_err, _result) => {
+   this.db.find(this.uName, (_err, _result) => {
 
       if (_err || (_result === null)) {
          this.db = this.gang.getDb();
 
-         this.db.find(this.myObjName, (_err2, _result2) => {
+         this.db.find(this.uName, (_err2, _result2) => {
 
             if (_err2 || (_result2 === null)) {
                return _callback(_err2);
