@@ -191,22 +191,12 @@ ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
    }
 
    consoleObj = new ConsoleApiObj({ name: namedObject.name }, _owner);
-   namedObject.__consoleObj = consoleObj;
 
    return consoleObj;
 };
 
 ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
-   var obj = null;
-
-   if (_namedObject.hasOwnProperty("__consoleObj")) {
-      obj = _namedObject.__consoleObj;
-   }
-   else {
-      return this.gangConsoleApi.findOrCreate(_namedObject.uName, ConsoleApiService.prototype.createConsoleApiObject.bind(this));
-   }
-
-   return obj;
+   return this.gangConsoleApi.findOrCreate(_namedObject.uName, ConsoleApiService.prototype.createConsoleApiObject.bind(this));
 };
 
 function ConsoleApiSession(_id, _console, _owner) {

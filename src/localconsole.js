@@ -51,7 +51,7 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
          return _callback(_err);
       }
 
-      //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
+      process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
       var matches = _result.matchingScopes;
 
       var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
