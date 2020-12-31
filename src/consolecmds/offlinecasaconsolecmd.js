@@ -7,7 +7,7 @@ function OfflineCasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(OfflineCasaConsoleCmd, ConsoleCmd);
 
-OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
+OfflineCasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;
 
@@ -36,7 +36,7 @@ OfflineCasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback)
    });
 };
 
-OfflineCasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
+OfflineCasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;
 

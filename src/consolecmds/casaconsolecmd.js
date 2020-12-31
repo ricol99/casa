@@ -7,28 +7,28 @@ function CasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
-CasaConsoleCmd.prototype.pushDbs = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "pushDbs", [ myAddress, port], _callback);
+   this.executeParsedCommand("pushDbs", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.pushDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.console.executeParsedCommand(_obj, "pushDb", [ myAddress, port], _callback);
+   this.executeParsedCommand("pushDb", [ myAddress, port], _callback);
 };
 
-CasaConsoleCmd.prototype.pullDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
    /// TDB To be comnpleted!
    this.checkArguments(0, _arguments);
-   this.console.executeParsedCommand(_obj, "pullDb", null, (_err, _result) => {
+   this.executeParsedCommand("pullDb", null, (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
@@ -43,10 +43,10 @@ CasaConsoleCmd.prototype.pullDb = function(_obj, _arguments, _callback) {
    });
 };
 
-CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
-   this.console.executeParsedCommand(_obj, "exportDb", null, (_err, _result) => {
+   this.executeParsedCommand("exportDb", null, (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
@@ -64,7 +64,7 @@ CasaConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
    });
 };
 
-CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
+CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var cjson = require('cjson');
@@ -113,7 +113,7 @@ CasaConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
       var myAddress = util.getLocalIpAddress();
       var port = this.gang.mainListeningPort();
 
-      this.console.executeParsedCommand(_obj, "pushDb", [ myAddress, port], _callback);
+      this.executeParsedCommand("pushDb", [ myAddress, port], _callback);
    });
 
    db.on('error', (_data) => {

@@ -6,8 +6,7 @@ function ConsoleCmd(_config, _owner, _console) {
    this.type = "consolecmd";
    NamedObject.call(this, _config, _owner);
 
-   //process.stdout.write("AAAAA ConsoleCmd() My uName is "+this.uName + "\n");
-
+   this.casaName = _config.hasOwnProperty("casaName") ? _config.casaName : null;
    this.console = _console;
    this.gang = Gang.mainInstance();
    this.casa = this.console.getCasa(this.uName);
@@ -25,14 +24,22 @@ ConsoleCmd.prototype.checkArguments = function(_minLength, _arguments) {
    }
 };
 
-ConsoleCmd.prototype.cat = function(_obj, _arguments, _callback) {
-   this.checkArguments(0, _arguments);
-   this.console.executeParsedCommand(_obj, "cat", [], _callback);
+ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callback) {
+   this.console.executeParsedCommand(this, _method, _arguments, _callback);
 };
 
-ConsoleCmd.prototype.ls = function(_obj, _arguments, _callback) {
+ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _arguments, _callback) {
+   this.console.executeParsedCommandOnAllCasas(this.uName, _method, _arguments, _callback);
+};
+
+ConsoleCmd.prototype.cat = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
-   this.console.executeParsedCommand(_obj, "ls", [], _callback);
+   this.executeParsedCommand("cat", [], _callback);
+};
+
+ConsoleCmd.prototype.ls = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   this.executeParsedCommand("ls", [], _callback);
 };
 
 ConsoleCmd.prototype.filterArray = function(_array, _filter) {

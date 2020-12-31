@@ -7,25 +7,25 @@ function GangConsoleCmd(_config, _owner, _console) {
 
 util.inherits(GangConsoleCmd, ConsoleCmd);
 
-GangConsoleCmd.prototype.restart = function(_obj, _arguments, _callback)  {
-   this.console.executeParsedCommandOnAllCasas(_obj, "restart", _arguments, _callback);
+GangConsoleCmd.prototype.restart = function(_arguments, _callback)  {
+   this.executeParsedCommandOnAllCasas("restart", _arguments, _callback);
 };
 
-GangConsoleCmd.prototype.updateDbs = function(_obj, _arguments, _callback) {
+GangConsoleCmd.prototype.updateDbs = function(_arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
-   this.console.executeParsedCommandOnAllCasas(_obj, "updateDbs", [ myAddress, port ], _callback);
+   this.executeParsedCommandOnAllCasas("updateDbs", [ myAddress, port ], _callback);
 };
 
-GangConsoleCmd.prototype.updateDb = function(_obj, _arguments, _callback) {
+GangConsoleCmd.prototype.updateDb = function(_arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
-   this.console.executeParsedCommandOnAllCasas(_obj, "updateDb", [ myAddress, port ], _callback);
+   this.executeParsedCommandOnAllCasas("updateDb", [ myAddress, port ], _callback);
 };
 
-GangConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
+GangConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
 
-   this.console.executeParsedCommand(_obj, "exportDb", null, (_err, _result) => {
+   this.executeParsedCommand("exportDb", null, (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
@@ -43,7 +43,7 @@ GangConsoleCmd.prototype.exportDb = function(_obj, _arguments, _callback) {
    });
 };
 
-GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
+GangConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    
    var cjson = require('cjson');
@@ -92,7 +92,7 @@ GangConsoleCmd.prototype.importDb = function(_obj, _arguments, _callback) {
       var myAddress = util.getLocalIpAddress();
       var port = this.gang.mainListeningPort();
       
-      this.console.executeParsedCommandOnAllCasas(_obj, "updateDb", [ myAddress, port], _callback);
+      this.executeParsedCommandOnAllCasas("updateDb", [ myAddress, port], _callback);
    });
    
    db.on('error', (_data) => {

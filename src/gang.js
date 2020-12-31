@@ -306,6 +306,7 @@ Gang.prototype.addSystemServicesToCasa = function() {
       if (this.systemServices.hasOwnProperty(service)) {
          this.casa.addService(this.systemServices[service]);
          this.systemServices[service].setOwner(this.casa);
+         this.systemServices[service].casa = this.casa;
       }
    }
 };
