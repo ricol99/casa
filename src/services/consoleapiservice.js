@@ -167,7 +167,7 @@ ConsoleApiService.prototype.socketIoConnection = function(_socket) {
 };
 
 ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
-   process.stdout.write("AAAAA createConsoleApiObject() _uName="+_uName+" _owner="+_owner.uName+"\n");
+   //process.stdout.write("AAAAA createConsoleApiObject() _uName="+_uName+" _owner="+_owner.uName+"\n");
    var namedObject = this.gang.findNamedObject(_uName);
    //process.stdout.write("AAAAA createConsoleApiObject() namedObject="+namedObject+"\n");
    var consoleObj = null;

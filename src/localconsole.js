@@ -45,6 +45,10 @@ LocalConsole.prototype.start = function(_startScope) {
    });
 };
 
+LocalConsole.prototype.getCasas = function() {
+   return [{name: this.casa.name, connected: true}];
+};
+
 LocalConsole.prototype.setSourceCasa = function(_casaName) {
    this.writeOutput("Unable to change source casa in local console mode");
 };

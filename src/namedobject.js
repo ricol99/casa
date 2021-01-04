@@ -109,7 +109,7 @@ NamedObject.prototype.create = function(_uName, _replace, _copyChildren, _constr
    }
 
    var spr = nextObjName.split(":");
-   process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
+   //process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
 
    if (this.myNamedObjects.hasOwnProperty(spr[0])) {
 

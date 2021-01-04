@@ -59,6 +59,18 @@ Console.prototype.coldStart = function() {
    this.start("::");
 };
 
+Console.prototype.getCasas = function() {
+   var casas = [];
+
+   for (var casa in this.remoteCasas) {
+
+      if (this.remoteCasas.hasOwnProperty(casa)) {
+         casas.push({name: this.remoteCasas[casa].name, connected: this.remoteCasas[casa].connected});
+      }
+   }
+   return casas;
+};
+
 Console.prototype.setSourceCasa = function(_casaName) {
 
    if (_casaName) {

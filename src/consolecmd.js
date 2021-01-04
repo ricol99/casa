@@ -34,6 +34,10 @@ ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _argumen
    this.console.executeParsedCommandOnAllCasas(this.uName, _method, _arguments, _callback);
 };
 
+ConsoleCmd.prototype.casas = function(_arguments, _callback) {
+   _callback(null, this.console.getCasas());
+};
+
 ConsoleCmd.prototype.cc = function(_arguments, _callback) {
    var res = this.console.setSourceCasa((_arguments && _arguments.length === 1) ? _arguments[0] : null);
 
@@ -101,6 +105,7 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
       }
    }
 
+   members.push(fullScope+"casas");
    members.push(fullScope+"cc");
    members.push(fullScope+"ls");
    members.push(fullScope+"cat");
