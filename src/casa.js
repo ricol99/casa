@@ -16,7 +16,6 @@ function Casa(_config) {
    this.secureMode = _config.secureMode;
    this.certPath = _config.certPath;
    this.configPath = _config.configPath;
-   this.casa = this;
 
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
    NamedObject.call(this, _config, this.gang);
@@ -37,6 +36,10 @@ function Casa(_config) {
 }
 
 util.inherits(Casa, NamedObject);
+
+Casa.prototype.getCasa = function() {
+   return this;
+};
 
 Casa.prototype.createServer = function() {
    express = require('express');

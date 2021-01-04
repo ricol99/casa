@@ -27,12 +27,14 @@ LocalConsole.prototype.coldStart = function() {
 
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
+   this.sourceCasa = null;
 
    this.start("::" + this.casa.name);
 };
 
 LocalConsole.prototype.start = function(_startScope) {
    this.currentScope = _startScope;
+   this.currentCmdObj = this.gangConsoleCmd;
    this.setPrompt(this.currentScope);
 
    this.prompt();
@@ -41,6 +43,10 @@ LocalConsole.prototype.start = function(_startScope) {
    this.rl.on('close', () => {
      process.exit(0);
    });
+};
+
+LocalConsole.prototype.setSourceCasa = function(_casaName) {
+   this.writeOutput("Unable to change source casa in local console mode");
 };
 
 LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
@@ -55,11 +61,12 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
       var matches = _result.matchingScopes;
 
       var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
+      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", ":");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName);
+         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
          matches = methodMatches.concat(_result.matchingScopes);
       }
 
@@ -73,21 +80,18 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
 };
 
 LocalConsole.prototype.lineReaderCb = function(_line) {
-
-   if (_line === 'exit' || _line ==='quit') {
-      process.exit(0);
-   }
-
    var line = _line.trim();
 
    if (line !== "") {
 
       if (line[line.length-1] === ':') {
-         this.scopeExists(line, (_err, _result) => {
+         this.extractScope(_line, (_err, _result) => {
 
-            if (!_err && _result.exists) {
-               this.currentScope = _result.newScope;
-               this.setPrompt(_result.newScope);
+            if (!_err && _result.hasOwnProperty("consoleObjHierarchy") && _result.remainingStr === "") {
+               //process.stdout.write("AAAA LocalConsole.prototype.lineReaderCb() _result="+util.inspect(_result)+"\n");
+               this.currentScope = (_result.consoleObjuName === ":") ? "::" : _result.consoleObjuName;
+               this.currentCmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
+               this.setPrompt(this.currentScope);
             }
             this.prompt();
          });
@@ -115,7 +119,7 @@ LocalConsole.prototype.createConsoleCmdObj = function(_uName, _owner, _args) {
 
       try {
          var ConsoleCmdObj = require("./consolecmds/" + _args.consoleObjHierarchy[i] +  "cmd");
-         cmdObj = new ConsoleCmdObj({ name: name, casaName: _args.consoleObjCasaName }, _owner, this);
+         cmdObj = new ConsoleCmdObj({ name: name, casaName: _args.consoleObjCasaName, sourceCasa: _args.sourceCasa }, _owner, this);
          break;
       }
       catch (_err) {
@@ -125,15 +129,17 @@ LocalConsole.prototype.createConsoleCmdObj = function(_uName, _owner, _args) {
 
    if (!cmdObj) {
       var ConsoleCmdObj = require("./consolecmd");
-      cmdObj = new ConsoleCmdObj({ name: name, casaName: _args.consoleObjCasaName }, _owner, this);
+      cmdObj = new ConsoleCmdObj({ name: name, casaName: _args.consoleObjCasaName, sourceCasa: _args.sourceCasa }, _owner, this);
    }
 
    return cmdObj;
 };
 
-LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName) {
+LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName, _sourceCasa) {
    return this.gangConsoleCmd.findOrCreate(_consoleObjuName,
-                                           LocalConsole.prototype.createConsoleCmdObj.bind(this), {  consoleObjHierarchy: _consoleObjHierarchy, consoleObjCasaName: _consoleObjCasaName });
+                                           LocalConsole.prototype.createConsoleCmdObj.bind(this), {  consoleObjHierarchy: _consoleObjHierarchy,
+                                                                                                     consoleObjCasaName: _consoleObjCasaName,
+                                                                                                     sourceCasa: _sourceCasa });
 };
 
 LocalConsole.prototype.processMatches = function(_line, _matches) {
@@ -150,14 +156,14 @@ LocalConsole.prototype.processMatches = function(_line, _matches) {
    }
 };
 
-LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName, _perfectMatchRequired) {
+LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName, _sourceCasa, _perfectMatchRequired) {
    var matches = [];
 
    if (_consoleObjHierarchy) {
       //process.stdout.write("AAAA matchMethods() console Heirarch = "+util.inspect(_consoleObjHierarchy)+"\n");
       //process.stdout.write("AAAA matchMethods() console obj = "+_consoleObjuName+"\n");
 
-      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName);
+      var cmdObj = this.getConsoleCmdObj(_consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName, _sourceCasa);
 
       if (cmdObj) {
          matches = cmdObj.filterMembers(_method, undefined, _scope);
@@ -327,7 +333,7 @@ LocalConsole.prototype.prompt = function() {
 
 LocalConsole.prototype.setPrompt = function(_prompt) {
    var colour = this.getPromptColour(_prompt);
-   this.rl.setPrompt(colour + _prompt + " > \x1b[0m");
+   this.rl.setPrompt(colour + "[" + this.casa.name +"] " + _prompt + " > \x1b[0m");
 };
 
 module.exports = exports = LocalConsole;

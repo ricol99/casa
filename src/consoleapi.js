@@ -22,8 +22,8 @@ ConsoleApi.prototype.coldStart = function() {
 };
 
 ConsoleApi.prototype.getCasa = function() {
-   return this.myObj().casa;
-   //return this.gang.casa;
+   //process.stdout.write("AAAA ConsoleApi.prototype.getCasa() obj="+util.inspect(this.myObj())+"\n");
+   return this.myObj().getCasa();
 };
 
 ConsoleApi.prototype.checkParams = function(_minLength, _params) {

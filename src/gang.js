@@ -140,6 +140,10 @@ function Gang(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _
 
 util.inherits(Gang, NamedObject);
 
+Gang.prototype.getCasa = function() {
+   return this.casa;
+};
+
 Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
 
    if (_objects) {

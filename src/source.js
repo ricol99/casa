@@ -107,9 +107,8 @@ Source.prototype.getRampService = function() {
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
 
-   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
-
    if (this.props.hasOwnProperty(_propName)) {
+      console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
       return this.props[_propName].set(_propValue, _data);
    }
    else {
@@ -118,9 +117,9 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
 };
 
 Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
-   console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
 
    if (this.props.hasOwnProperty(_propName)) {
+      console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
       return this.props[_propName].setWithRamp(_ramp, _data);
    }
    else {
@@ -141,9 +140,9 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
-   console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
    if (this.props.hasOwnProperty(_propName)) {
+      console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
       if ((!(_data && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
          return true;

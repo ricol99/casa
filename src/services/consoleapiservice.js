@@ -406,6 +406,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
       result.consoleObjHierarchy = this.getClassHierarchy(result.consoleApiObj);
       result.consoleObjuName = result.consoleApiObj.uName;
       result.consoleObjCasaName = result.consoleApiObj.getCasa().name;
+      result.sourceCasa = this.owner.casa.name;
       delete result.consoleApiObj;
    }
 

@@ -86,6 +86,10 @@ function Schedule(_requester, _config, _owner) {
 
 util.inherits(Schedule, NamedObject);
 
+Schedule.prototype.getCasa = function() {
+   return this.owner.getCasa();
+}
+
 Schedule.prototype.createEventsFromConfig = function(_eventsConfig) {
    var eventsConfigLen = _eventsConfig.length;
 

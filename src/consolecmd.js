@@ -10,6 +10,8 @@ function ConsoleCmd(_config, _owner, _console) {
    this.console = _console;
    this.gang = Gang.mainInstance();
    this.casa = this.console.getCasa(this.uName);
+
+   this.sourceCasa = _config.hasOwnProperty("sourceCasa") ? _config.sourceCasa :  null;
 }
 
 util.inherits(ConsoleCmd, NamedObject);
@@ -30,6 +32,20 @@ ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callb
 
 ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _arguments, _callback) {
    this.console.executeParsedCommandOnAllCasas(this.uName, _method, _arguments, _callback);
+};
+
+ConsoleCmd.prototype.cc = function(_arguments, _callback) {
+   this.console.setSourceCasa((arguments && arguments.length === 1) ? _arguments[0] : null);
+};
+
+ConsoleCmd.prototype.quit = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   process.exit(1);
+};
+
+ConsoleCmd.prototype.exit = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   process.exit(1);
 };
 
 ConsoleCmd.prototype.cat = function(_arguments, _callback) {
@@ -58,7 +74,7 @@ ConsoleCmd.prototype.filterArray = function(_array, _filter) {
 ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullScopeName) {
    var proto = Object.getPrototypeOf(this);
    var consoleCmdProto = proto;
-   var fullScope = (_fullScopeName) ? _fullScopeName + "." : "";
+   var fullScope = (_fullScopeName) ? _fullScopeName + ":" : "";
 
    while (consoleCmdProto.constructor.name !== 'ConsoleCmd') {
       consoleCmdProto = Object.getPrototypeOf(consoleCmdProto);
@@ -82,8 +98,11 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
       }
    }
 
+   members.push(fullScope+"sc");
    members.push(fullScope+"ls");
    members.push(fullScope+"cat");
+   members.push(fullScope+"quit");
+   members.push(fullScope+"exit");
 
    this.filterArray(members, fullScope+_filter);
    return members;

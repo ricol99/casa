@@ -65,6 +65,10 @@ function Property(_config, _owner) {
 
 util.inherits(Property, NamedObject);
 
+Property.prototype.getCasa = function() {
+   return this.owner.getCasa();
+};
+
 //
 // Returns current property value 
 //

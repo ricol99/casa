@@ -14,6 +14,7 @@ function Console(_params, _owner) {
    this.offline = true;
    this.connectedCasas = 0;
    this.defaultCasa = null;
+   this.sourceCasa =  null;
 
    if (this.secureMode) {
       var fs = require('fs');
@@ -58,6 +59,17 @@ Console.prototype.coldStart = function() {
    this.start("::");
 };
 
+Console.prototype.setSourceCasa = function(_casaName) {
+
+   if (_casaName) {
+      this.sourceCasa = this.remoteCasas[_casaName] ? this.remoteCasas[_casaName] : null;
+      this.updatePrompt();
+   }
+   else {
+      this.sourceCasa = null;
+   }
+};
+
 Console.prototype.casaFound = function(_params) {
 
    if (!this.remoteCasas.hasOwnProperty(_params.name)) {
@@ -84,22 +96,32 @@ Console.prototype.casaFound = function(_params) {
          if (this.connectedCasas === 0) {
             this.offline = true;
             this.currentScope = "::";
+            this.sourceCasa = null;
          }
 
          this.updatePrompt();
          this.writeOutput("Casa "+_data.name+" disconnected");
 
-         if ((this.connectedCasas >  0) && (this.defaultCasa && this.defaultCasa === this.remoteCasas[_data.name])) {
-            this.defaultCasa = null;
+         if (this.connectedCasas >  0)  {
 
-            for (var casa in this.remoteCasas) {
+            if ((this.defaultCasa && this.defaultCasa === this.remoteCasas[_data.name])) {
+               this.defaultCasa = null;
 
-               if (this.remoteCasas.hasOwnProperty(casa) && this.remoteCasas[casa].connected) {
-                  this.defaultCasa = this.remoteCasas[casa];
-                  break;
+               for (var casa in this.remoteCasas) {
+
+                  if (this.remoteCasas.hasOwnProperty(casa) && this.remoteCasas[casa].connected) {
+                     this.defaultCasa = this.remoteCasas[casa];
+                     break;
+                  }
                }
             }
+
+            if (this.sourceCasa && this.sourceCasa === this.remoteCasas[_data.name]) {
+               this.sourceCasa = null;
+               this.updatePrompt();
+            }
          }
+
       });
 
       remoteCasa.on("output", (_data) => {
@@ -113,27 +135,17 @@ Console.prototype.casaFound = function(_params) {
    }
 };
 
+Console.prototype.cmdObjectSourcedFromOwner = function(_objectName) {
+   var cmdObj = this.gangConsoleCmd.findNamedObject(_objectName);
+   return (cmdObj && cmdObj.casaName) ? (cmdObj.casaName === cmdObj.sourceCasa) : true;
+};
+
 Console.prototype.getPromptColour = function(_prompt) {
-   var cmdObj = this.gangConsoleCmd.findNamedObject(_prompt.split(" :")[0]);
-
-   if (cmdObj && cmdObj.casaName) {
-      return (this.remoteCasas.hasOwnProperty(cmdObj.casaName) && this.remoteCasas[cmdObj.casaName].connected) ? "\x1b[32m" : "\x1b[31m";
-   }
-   else {
-      return "\x1b[32m"
-   }
-
-   /*if (_prompt.startsWith(":: ")) {
-      return "\x1b[32m";
-   }
-   else {
-      var currentCasa = _prompt.substr(2).replace(" ", ":").split(":")[0] +":" + _prompt.substr(2).replace(" ", ":").split(":")[1];
-      return (this.remoteCasas.hasOwnProperty(currentCasa) && this.remoteCasas[currentCasa].connected) ? "\x1b[32m" : "\x1b[31m";
-   }*/
+   return this.cmdObjectSourcedFromOwner(_prompt.split(" :")[0])  ? "\x1b[32m" : "\x1b[31m";
 };
 
 Console.prototype.identifyCasa = function(_line) {
-   return this.offline ? this.offlineCasa : this.defaultCasa;
+   return this.offline ? this.offlineCasa : this.sourceCasa ? this.sourceCasa : (this.remoteCasas.hasOwnProperty(this.currentCmdObj.casaName) && this.remoteCasas[this.currentCmdObj.casaName].connected) ? this.remoteCasas[this.currentCmdObj.casaName] : this.defaultCasa;
 };
 
 Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
@@ -217,16 +229,22 @@ Console.prototype.extractScope = function(_line, _callback) {
             return _callback(_err);
          }
 
-         if (_result.hasOwnProperty("consoleObjCasaName") && _result.consoleObjCasaName && (_result.consoleObjCasaName !== casa.name)) {
+         if (!this.sourceCasa && _result.hasOwnProperty("consoleObjCasaName") && _result.consoleObjCasaName && (_result.consoleObjCasaName !== casa.name)) {
             // Object resides in a different casa - need to send request to owning casa
 
             if (!this.remoteCasas.hasOwnProperty(_result.consoleObjCasaName)) {
                return _callback("Object not available as not connected to owning casa!");
             }
 
-            this.sendCommandToCasa(this.remoteCasas[_result.consoleObjCasaName], _line, "extractScope", _callback);
+            var newCasaName = this.remoteCasas[_result.consoleObjCasaName].name;
+
+            this.sendCommandToCasa(this.remoteCasas[_result.consoleObjCasaName], _line, "extractScope", (_err,_result) =>  {
+               if (!_err) _result.sourceCasa = newCasaName;
+               return _callback(_err, _result);
+            });
          }
          else {
+            //_result.sourceCasa = casa.name;
             return _callback(_err, _result);
          }
       });
@@ -282,7 +300,16 @@ Console.prototype.getConnectedCasas = function() {
 };
 
 Console.prototype.setPrompt = function(_prompt) {
-   LocalConsole.prototype.setPrompt.call(this, _prompt + " [" + this.connectedCasas + "]");
+   var colour = this.getPromptColour(_prompt);
+
+   if (this.sourceCasa) {
+      this.rl.setPrompt(colour + "[" + this.sourceCasa.name +"] " + _prompt + " [" + this.connectedCasas + "]" + " > \x1b[0m");
+   }
+   else {
+      var cmdObj = this.gangConsoleCmd.findNamedObject(_prompt.split(" :")[0]);
+      var casaName = (cmdObj && cmdObj.sourceCasa)  ?  cmdObj.sourceCasa : this.defaultCasa ? this.defaultCasa.name : "null";
+      this.rl.setPrompt(colour + "[" + casaName +"*] " + _prompt + " [" + this.connectedCasas + "]" + " > \x1b[0m");
+  }
 };
 
 Console.prototype.updatePrompt = function() {
@@ -458,7 +485,7 @@ function OfflineCasa(_config, _owner) {
    this.db = this.owner.gang.getDb();
 
    var ConsoleCmdObj = require("./consolecmds/offlinecasaconsolecmd");
-   this.cmdObj = new ConsoleCmdObj({ name: "offlinecasa", casaName: "offlinecasa" }, this.owner.gangConsoleCmd, this.owner);
+   this.cmdObj = new ConsoleCmdObj({ name: "offlinecasa", casaName: "offlinecasa", sourceCasa: "offlinecasa" }, this.owner.gangConsoleCmd, this.owner);
    this.methods = Object.getPrototypeOf(this.cmdObj);
 }
 

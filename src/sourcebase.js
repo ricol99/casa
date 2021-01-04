@@ -14,6 +14,10 @@ function SourceBase(_config, _owner) {
 
 util.inherits(SourceBase, NamedObject);
 
+SourceBase.prototype.getCasa = function() {
+   return this.casa;
+};
+
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
 
