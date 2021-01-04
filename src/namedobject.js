@@ -65,10 +65,10 @@ NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructor
       return this.myNamedObjects[spr[0]].findOrCreate(_uName, _constructor, _constructorParams);
    }
 
-   return this.create(_uName, _constructor, _constructorParams);
+   return this.create(_uName, false, false, _constructor, _constructorParams);
 };
 
-NamedObject.prototype.create = function(_uName, _constructor, _constructorParams) {
+NamedObject.prototype.create = function(_uName, _replace, _copyChildren, _constructor, _constructorParams) {
    var nextObjName = this.stripMyUName(_uName);
 
    if (nextObjName === null) {
@@ -76,24 +76,81 @@ NamedObject.prototype.create = function(_uName, _constructor, _constructorParams
    }
 
    if (nextObjName === "") {
-      return this;
-   }
 
-   process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
+      if (!this.owner) {
+
+         if (!_replace) {
+            return null;
+         }
+
+         // Replacing the root!
+         var newNamedObj = _constructor(this.name, null, _constructorParams);
+
+         if (newNamedObj) {
+
+            if (_copyChildren) {
+
+               for (var child in this.myNamedObjects) {
+
+                  if (this.myNamedObjects.hasOwnProperty(child)) {
+                     this.myNamedObjects[child].setOwner(newNamedObj);
+                  }
+               }
+            }
+            return newNamedObj;
+         }
+         else {
+            return null;
+         }
+      }
+      else {
+         return this;
+      }
+   }
 
    var spr = nextObjName.split(":");
+   process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
 
-   if (spr.length === 0) {
-      return this;
-   }
+   if (this.myNamedObjects.hasOwnProperty(spr[0])) {
 
-   var nextObj = _constructor(_uName, this, _constructorParams);
+      if (spr.length > 1) {
+         return this.myNamedObjects[spr[0]].create(_uName, _replace, _copyChildren, _constructor, _constructorParams);
+      }
+      else if (!_replace) { // spr length is 1 and we need to replace
+         return null;
+      }
+      else {
+         var existingNamedObj = this.myNamedObjects[spr[0]];
+         var newNamedObj = _constructor(this.uName+":"+spr[0], this, _constructorParams);
 
-   if (nextObj) {
-      return nextObj.create(_uName, _constructor, _constructorParams);
+         if (newNamedObj) {
+
+            if (_copyChildren) {
+
+               for (var child in existingNamedObj.myNamedObjects) {
+
+                  if (existingNamedObj.myNamedObjects.hasOwnProperty(child)) {
+                     existingNamedObj.myNamedObjects[child].setOwner(newNamedObj);
+                  }
+               }
+            }
+
+            return newNamedObj.create(_uName, _replace, _copyChildren, _constructor, _constructorParams);
+         }
+         else {
+            return null;
+         }
+      }
    }
    else {
-      return null;
+      var nextObj = _constructor(this.uName+":"+spr[0], this, _constructorParams);
+
+      if (nextObj) {
+         return nextObj.create(_uName, _replace, _copyChildren, _constructor, _constructorParams);
+      }
+      else {
+         return null;
+      }
    }
 };
 

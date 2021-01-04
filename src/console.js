@@ -145,7 +145,22 @@ Console.prototype.getPromptColour = function(_prompt) {
 };
 
 Console.prototype.identifyCasa = function(_line) {
-   return this.offline ? this.offlineCasa : this.sourceCasa ? this.sourceCasa : (this.remoteCasas.hasOwnProperty(this.currentCmdObj.casaName) && this.remoteCasas[this.currentCmdObj.casaName].connected) ? this.remoteCasas[this.currentCmdObj.casaName] : this.defaultCasa;
+
+   if (this.offline) {
+      return this.offlineCasa;
+   }
+   else if (this.sourceCasa) {
+      return this.sourceCasa;
+   }
+   else if (_line[0] === ":") {
+      return this.defaultCasa;
+   }
+   else if (this.remoteCasas.hasOwnProperty(this.currentCmdObj.casaName) && this.remoteCasas[this.currentCmdObj.casaName].connected) {
+      return this.remoteCasas[this.currentCmdObj.casaName];
+   }
+   else {
+      return this.defaultCasa;
+   }
 };
 
 Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
@@ -236,15 +251,9 @@ Console.prototype.extractScope = function(_line, _callback) {
                return _callback("Object not available as not connected to owning casa!");
             }
 
-            var newCasaName = this.remoteCasas[_result.consoleObjCasaName].name;
-
-            this.sendCommandToCasa(this.remoteCasas[_result.consoleObjCasaName], _line, "extractScope", (_err,_result) =>  {
-               if (!_err) _result.sourceCasa = newCasaName;
-               return _callback(_err, _result);
-            });
+            this.sendCommandToCasa(this.remoteCasas[_result.consoleObjCasaName], _line, "extractScope", _callback);
          }
          else {
-            //_result.sourceCasa = casa.name;
             return _callback(_err, _result);
          }
       });
@@ -259,7 +268,7 @@ Console.prototype.autoComplete = function(_line, _callback) {
 };
 
 Console.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
-   process.stdout.write("AAAA Console.prototype.executeParsedCommand() _obj.casaName="+_obj.casaName+", _obj.uName="+_obj.uName+"\n");
+   //process.stdout.write("AAAA Console.prototype.executeParsedCommand() _obj.casaName="+_obj.casaName+", _obj.uName="+_obj.uName+"\n");
 
    if (_obj.casaName) {
 
@@ -303,17 +312,18 @@ Console.prototype.setPrompt = function(_prompt) {
    var colour = this.getPromptColour(_prompt);
 
    if (this.sourceCasa) {
-      this.rl.setPrompt(colour + "[" + this.sourceCasa.name +"] " + _prompt + " [" + this.connectedCasas + "]" + " > \x1b[0m");
+      this.rl.setPrompt(colour + "[" + this.sourceCasa.name +"("+ this.connectedCasas + ")] " + _prompt + " > \x1b[0m");
    }
    else {
       var cmdObj = this.gangConsoleCmd.findNamedObject(_prompt.split(" :")[0]);
       var casaName = (cmdObj && cmdObj.sourceCasa)  ?  cmdObj.sourceCasa : this.defaultCasa ? this.defaultCasa.name : "null";
-      this.rl.setPrompt(colour + "[" + casaName +"*] " + _prompt + " [" + this.connectedCasas + "]" + " > \x1b[0m");
+      this.rl.setPrompt(colour + "[" + casaName + "*(" + this.connectedCasas + ")] " + _prompt + " > \x1b[0m");
   }
 };
 
 Console.prototype.updatePrompt = function() {
-   LocalConsole.prototype.setPrompt.call(this, this.currentScope + " [" + this.connectedCasas + "]");
+   this.setPrompt(this.currentScope);
+   //LocalConsole.prototype.setPrompt.call(this, this.currentScope + " [" + this.connectedCasas + "]");
 };
 
 Console.prototype.updatePromptMidLine = function() {

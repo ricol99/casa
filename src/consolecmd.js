@@ -99,7 +99,7 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
       }
    }
 
-   members.push(fullScope+"sc");
+   members.push(fullScope+"cc");
    members.push(fullScope+"ls");
    members.push(fullScope+"cat");
    members.push(fullScope+"quit");

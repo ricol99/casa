@@ -23,7 +23,7 @@ LocalConsole.prototype.coldStart = function() {
    this.casa = this.gang.casa;
 
    var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
-   this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name }, null, this);
+   this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name, sourceCasa: this.casa.name, casaName: this.casa.name }, null, this);
 
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
@@ -139,10 +139,29 @@ LocalConsole.prototype.createConsoleCmdObj = function(_uName, _owner, _args) {
 };
 
 LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consoleObjuName, _consoleObjCasaName, _sourceCasa) {
-   return this.gangConsoleCmd.findOrCreate(_consoleObjuName,
-                                           LocalConsole.prototype.createConsoleCmdObj.bind(this), {  consoleObjHierarchy: _consoleObjHierarchy,
-                                                                                                     consoleObjCasaName: _consoleObjCasaName,
-                                                                                                     sourceCasa: _sourceCasa });
+
+   var cmdObj = this.gangConsoleCmd.findOrCreate(_consoleObjuName,
+                                                 LocalConsole.prototype.createConsoleCmdObj.bind(this), { consoleObjHierarchy: _consoleObjHierarchy,
+                                                                                                          consoleObjCasaName: _consoleObjCasaName,
+                                                                                                          sourceCasa: _sourceCasa });
+   if (cmdObj && (cmdObj.sourceCasa !== _sourceCasa)) {
+
+      var updateGang =  (cmdObj === this.gangConsoleCmd);
+
+      // CmdObj have been sourced from different casas - replace with new one.
+      //process.stdout.write("AAAAAAA LocalConsole.prototype.getConsoleCmdObj() cmdObj.sourceCasa="+cmdObj.sourceCasa+", _sourceCasa="+_sourceCasa+", updateGang="+updateGang+"\n");
+      cmdObj = this.gangConsoleCmd.create(_consoleObjuName, true, true,
+                                          LocalConsole.prototype.createConsoleCmdObj.bind(this), { consoleObjHierarchy: _consoleObjHierarchy,
+                                                                                                   consoleObjCasaName: _consoleObjCasaName,
+                                                                                                   sourceCasa: _sourceCasa });
+
+      if (cmdObj && updateGang) {
+         //process.stdout.write("AAAAAAA LocalConsole.prototype.getConsoleCmdObj() cmdObj===this.gangConsoleCmd="+util.inspect(cmdObj===this.gangConsoleCmd)+"\n");
+         this.gangConsoleCmd = cmdObj
+      }
+   }
+
+   return cmdObj;
 };
 
 LocalConsole.prototype.processMatches = function(_line, _matches) {
@@ -231,7 +250,7 @@ LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback)
       //process.stdout.write("AAAA Method Result="+util.inspect(methodResult)+"\n");
 
       if (methodResult.method && _result.hasOwnProperty("consoleObjHierarchy")) {
-         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName);
+         var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
 
          if (cmdObj) {
             var methodName = methodResult.method ? methodResult.method : "cat";
