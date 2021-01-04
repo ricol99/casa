@@ -57,10 +57,13 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
          return _callback(_err);
       }
 
-      process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
+      //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
       var matches = _result.matchingScopes;
 
-      var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
+      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
+      var scope = (this.currentScope === "::") ? ":" : this.currentScope;
+
+      //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() scope="+scope+"\n");
       //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", ":");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
@@ -110,7 +113,7 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
 };
 
 LocalConsole.prototype.createConsoleCmdObj = function(_uName, _owner, _args) {
-   process.stdout.write("AAAAA LocalConsole.prototype.createConsoleCmdObj() _uName="+_uName+", casaName="+_args.consoleObjCasaName+"\n");
+   //process.stdout.write("AAAAA LocalConsole.prototype.createConsoleCmdObj() _uName="+_uName+", casaName="+_args.consoleObjCasaName+"\n");
    var cmdObj = null;
    var spr = _uName.split(":");
    var name = spr[spr.length-1];
@@ -143,15 +146,12 @@ LocalConsole.prototype.getConsoleCmdObj = function(_consoleObjHierarchy, _consol
 };
 
 LocalConsole.prototype.processMatches = function(_line, _matches) {
-   var scope = (this.currentScope === "::") ? this.gang.name : this.gang.name + this.currentScope.substr(1);
 
    for (var i = 0; i < _matches.length; ++i) {
 
-      if (_line[0] === ':') {
-         _matches[i] = (_line[1] === ':') ? "::"+_matches[i].substr(this.gang.name.length+1) : ":"+_matches[i].replace(this.gang.name+":"+this.getCasaName(), "").substr(1);
-      }
-      else  {
-         _matches[i] = _matches[i].replace(scope, "").substr(1);
+      if (_line[0] !== ':') {
+         var newLine = _matches[i].replace(this.currentScope, "");
+         _matches[i] = (newLine[0] === ":") ? newLine.substr(1) : newLine;
       }
    }
 };

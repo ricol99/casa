@@ -75,6 +75,7 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
    var proto = Object.getPrototypeOf(this);
    var consoleCmdProto = proto;
    var fullScope = (_fullScopeName) ? _fullScopeName + ":" : "";
+   //process.stdout.write("AAAAA fullScope= "+fullScope+"\n");
 
    while (consoleCmdProto.constructor.name !== 'ConsoleCmd') {
       consoleCmdProto = Object.getPrototypeOf(consoleCmdProto);
@@ -93,7 +94,7 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
 
          if (!consoleCmdProto.hasOwnProperty(method) && !method.startsWith("_")) {
             members.push(fullScope+method);
-            //process.stdout.write("AAAAA method "+method+" Added\n");
+            //process.stdout.write("AAAAA method "+fullScope+method+" Added\n");
          }
       }
    }

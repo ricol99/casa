@@ -585,6 +585,10 @@ function State(_config, _owner) {
 
 util.inherits(State, NamedObject);
 
+State.prototype.getCasa = function() {
+   return this.owner.getCasa();
+};
+
 State.prototype.initialise = function() {
    var immediateState = this.checkSourceProperties();
 
