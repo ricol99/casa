@@ -62,12 +62,21 @@ Console.prototype.coldStart = function() {
 Console.prototype.setSourceCasa = function(_casaName) {
 
    if (_casaName) {
-      this.sourceCasa = this.remoteCasas[_casaName] ? this.remoteCasas[_casaName] : null;
-      this.updatePrompt();
+
+      if (this.remoteCasas.hasOwnProperty(_casaName)) {
+         this.sourceCasa = this.remoteCasas[_casaName];
+         this.updatePrompt();
+         return true;
+      }
+      else {
+         return false;
+      }
    }
    else {
       this.sourceCasa = null;
+      this.updatePrompt();
    }
+   return true;
 };
 
 Console.prototype.casaFound = function(_params) {

@@ -35,7 +35,9 @@ ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _argumen
 };
 
 ConsoleCmd.prototype.cc = function(_arguments, _callback) {
-   this.console.setSourceCasa((arguments && arguments.length === 1) ? _arguments[0] : null);
+   var res = this.console.setSourceCasa((_arguments && _arguments.length === 1) ? _arguments[0] : null);
+
+   _callback(res ? null : "Unable to find casa!", res);
 };
 
 ConsoleCmd.prototype.quit = function(_arguments, _callback) {
