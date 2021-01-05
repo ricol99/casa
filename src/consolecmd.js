@@ -39,9 +39,7 @@ ConsoleCmd.prototype.casas = function(_arguments, _callback) {
 };
 
 ConsoleCmd.prototype.cc = function(_arguments, _callback) {
-   var res = this.console.setSourceCasa((_arguments && _arguments.length === 1) ? _arguments[0] : null);
-
-   _callback(res ? null : "Unable to find casa!", res);
+   this.console.setSourceCasa((_arguments && _arguments.length === 1) ? _arguments[0] : null, _callback);
 };
 
 ConsoleCmd.prototype.quit = function(_arguments, _callback) {

@@ -71,24 +71,31 @@ Console.prototype.getCasas = function() {
    return casas;
 };
 
-Console.prototype.setSourceCasa = function(_casaName) {
+Console.prototype.setSourceCasa = function(_casaName, _callback) {
+   //process.stdout.write("AAAAA Console.prototype.setSourceCasa() _casaName="+util.inspect(_casaName)+"\n");
 
    if (_casaName) {
 
       if (this.remoteCasas.hasOwnProperty(_casaName)) {
          this.sourceCasa = this.remoteCasas[_casaName];
-         this.updatePrompt();
-         return true;
       }
       else {
-         return false;
+         return _callback("Unable to find casa!");;
       }
    }
    else {
       this.sourceCasa = null;
-      this.updatePrompt();
    }
-   return true;
+
+   this.extractScope(this.currentScope+":", (_err, _result) => {
+
+      if (!_err && _result.hasOwnProperty("consoleObjHierarchy") && _result.remainingStr === "") {
+         this.currentCmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
+         this.updatePrompt();
+      }
+
+      _callback(_err, true);
+   });
 };
 
 Console.prototype.casaFound = function(_params) {
@@ -156,15 +163,6 @@ Console.prototype.casaFound = function(_params) {
    }
 };
 
-Console.prototype.cmdObjectSourcedFromOwner = function(_objectName) {
-   var cmdObj = this.gangConsoleCmd.findNamedObject(_objectName);
-   return (cmdObj && cmdObj.casaName) ? (cmdObj.casaName === cmdObj.sourceCasa) : true;
-};
-
-Console.prototype.getPromptColour = function(_prompt) {
-   return this.cmdObjectSourcedFromOwner(_prompt.split(" :")[0])  ? "\x1b[32m" : "\x1b[31m";
-};
-
 Console.prototype.identifyCasa = function(_line) {
 
    if (this.offline) {
@@ -173,10 +171,9 @@ Console.prototype.identifyCasa = function(_line) {
    else if (this.sourceCasa) {
       return this.sourceCasa;
    }
-   else if (_line[0] === ":") {
-      return this.defaultCasa;
-   }
-   else if (this.remoteCasas.hasOwnProperty(this.currentCmdObj.casaName) && this.remoteCasas[this.currentCmdObj.casaName].connected) {
+   else if (this.remoteCasas.hasOwnProperty(this.currentCmdObj.casaName) &&
+            this.remoteCasas[this.currentCmdObj.casaName].connected) {
+
       return this.remoteCasas[this.currentCmdObj.casaName];
    }
    else {
@@ -257,9 +254,11 @@ Console.prototype.scopeExists = function(_line, _callback) {
 
 Console.prototype.extractScope = function(_line, _callback) {
    var casa = this.identifyCasa(_line);
+   //process.stdout.write("AAAAA Console.prototype.extractScope() casa="+casa.name+"\n");
 
    if (casa) {
       this.sendCommandToCasa(casa, _line, "extractScope", (_err, _result) => {
+         //process.stdout.write("AAAAA Console.prototype.extractScope() _result="+util.inspect(_result)+"\n");
 
          if (_err) {
             return _callback(_err);
@@ -330,15 +329,15 @@ Console.prototype.getConnectedCasas = function() {
 };
 
 Console.prototype.setPrompt = function(_prompt) {
-   var colour = this.getPromptColour(_prompt);
+   var colour = this.currentCmdObj ? (this.currentCmdObj.casaName === this.currentCmdObj.sourceCasa) ? "\x1b[32m" : "\x1b[31m" : "\x1b[31m";
 
    if (this.sourceCasa) {
-      this.rl.setPrompt(colour + "[" + this.sourceCasa.name +"("+ this.connectedCasas + ")] " + _prompt + " > \x1b[0m");
+      this.rl.setPrompt(colour + "[" + this.sourceCasa.name +":"+ this.connectedCasas + "] " + _prompt + " > \x1b[0m");
    }
    else {
       var cmdObj = this.gangConsoleCmd.findNamedObject(_prompt.split(" :")[0]);
       var casaName = (cmdObj && cmdObj.sourceCasa)  ?  cmdObj.sourceCasa : this.defaultCasa ? this.defaultCasa.name : "null";
-      this.rl.setPrompt(colour + "[" + casaName + "*(" + this.connectedCasas + ")] " + _prompt + " > \x1b[0m");
+      this.rl.setPrompt(colour + "[" + casaName + "*:" + this.connectedCasas + "] " + _prompt + " > \x1b[0m");
   }
 };
 

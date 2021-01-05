@@ -49,8 +49,8 @@ LocalConsole.prototype.getCasas = function() {
    return [{name: this.casa.name, connected: true}];
 };
 
-LocalConsole.prototype.setSourceCasa = function(_casaName) {
-   this.writeOutput("Unable to change source casa in local console mode");
+LocalConsole.prototype.setSourceCasa = function(_casaName, _callback) {
+   _callback("Unable to change source casa in local console mode");
 };
 
 LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
