@@ -303,7 +303,7 @@ LocalConsole.prototype.executeParsedCommandOnAllCasas = function(_obj, _method, 
 };
 
 LocalConsole.prototype.getPromptColour = function(_prompt) {
-   return (_prompt.startsWith("::"+this.casa.name)) ? "\x1b[32m" : "\x1b[31m";
+   return this.currentCmdObj ? (this.currentCmdObj.casaName === this.currentCmdObj.sourceCasa) ? "\x1b[32m" : "\x1b[31m" : "\x1b[31m";
 };
 
 LocalConsole.prototype.getCasaName = function(_line) {
