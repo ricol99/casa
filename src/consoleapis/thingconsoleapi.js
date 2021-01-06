@@ -33,7 +33,7 @@ ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
    return null;
 };
 
-ThingConsoleApi.prototype.createThing = function(_params, _callback) {
+ThingConsoleApi.prototype.createThing = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
@@ -89,7 +89,7 @@ ThingConsoleApi.prototype.createThing = function(_params, _callback) {
    }
 };
 
-ThingConsoleApi.prototype.createProperty = function(_params, _callback) {
+ThingConsoleApi.prototype.createProperty = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;

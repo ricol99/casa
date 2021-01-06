@@ -12,7 +12,7 @@ CasaConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult
    return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources, _prevResult, _perfectMatchRequired);
 };
 
-CasaConsoleApi.prototype.cat = function(_params, _callback) {
+CasaConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 
    for (var source in this.myObj().sources) {
@@ -25,7 +25,7 @@ CasaConsoleApi.prototype.cat = function(_params, _callback) {
    _callback(null, output);
 };
 
-CasaConsoleApi.prototype.sources = function(_params, _callback) {
+CasaConsoleApi.prototype.sources = function(_session, _params, _callback) {
    var sources = [];
 
    for (var source in this.myObj().sources) {
@@ -35,7 +35,7 @@ CasaConsoleApi.prototype.sources = function(_params, _callback) {
    _callback(null, sources);
 };
 
-CasaConsoleApi.prototype.services = function(_params, _callback) {
+CasaConsoleApi.prototype.services = function(_session, _params, _callback) {
    var services = [];
 
    for (var service in this.myObj().services) {
@@ -45,7 +45,7 @@ CasaConsoleApi.prototype.services = function(_params, _callback) {
    _callback(null, services);
 };
 
-CasaConsoleApi.prototype.createService = function(_params, _callback) {
+CasaConsoleApi.prototype.createService = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var newServiceConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
@@ -86,7 +86,7 @@ CasaConsoleApi.prototype.createService = function(_params, _callback) {
    }
 };
 
-CasaConsoleApi.prototype.createThing = function(_params, _callback) {
+CasaConsoleApi.prototype.createThing = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var newThingConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
@@ -127,11 +127,11 @@ CasaConsoleApi.prototype.createThing = function(_params, _callback) {
    }
 };
 
-CasaConsoleApi.prototype.restart = function(_params, _callback) {
+CasaConsoleApi.prototype.restart = function(_session, _params, _callback) {
    process.exit(3);
 };
 
-CasaConsoleApi.prototype.pushDb = function(_params, _callback) {
+CasaConsoleApi.prototype.pushDb = function(_session, _params, _callback) {
    this.checkParams(2, _params);
 
    var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.name;
@@ -151,7 +151,7 @@ CasaConsoleApi.prototype.pushDb = function(_params, _callback) {
    });
 };
 
-CasaConsoleApi.prototype.pushDbs = function(_params, _callback) {
+CasaConsoleApi.prototype.pushDbs = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    this.pushDb(_params, (_err, _result) => {
 
@@ -165,11 +165,11 @@ CasaConsoleApi.prototype.pushDbs = function(_params, _callback) {
    });
 };
 
-CasaConsoleApi.prototype.exportDb = function(_params, _callback) {
+CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    this.gang.casa.getDb().readAll(_callback);
 };
 
-CasaConsoleApi.prototype.importDb = function(_params, _callback) {
+CasaConsoleApi.prototype.importDb = function(_session, _params, _callback) {
    this.pushDb(_params, _callback);
 };
 

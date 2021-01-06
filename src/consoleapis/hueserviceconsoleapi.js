@@ -9,12 +9,12 @@ function HueServiceConsoleApi(_config, _owner) {
 
 util.inherits(HueServiceConsoleApi, ServiceConsoleApi);
 
-HueServiceConsoleApi.prototype.findBridges = function(_params, _callback) {
+HueServiceConsoleApi.prototype.findBridges = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    this.myObj().findBridges(_callback);
 };
 
-HueServiceConsoleApi.prototype.findBridge = function(_params, _callback) {
+HueServiceConsoleApi.prototype.findBridge = function(_session, _params, _callback) {
    this.checkParams(0, _params);
 
    var linkId = (_params.length > 0) ? _params[0] : this.myObj().linkId;
@@ -36,7 +36,7 @@ HueServiceConsoleApi.prototype.findBridge = function(_params, _callback) {
    });
 };
 
-HueServiceConsoleApi.prototype.setLinkId = function(_params, _callback) {
+HueServiceConsoleApi.prototype.setLinkId = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var linkId = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
@@ -70,7 +70,7 @@ HueServiceConsoleApi.prototype.setLinkId = function(_params, _callback) {
 
 };
 
-HueServiceConsoleApi.prototype.createUserOnBridge = function(_params, _callback) {
+HueServiceConsoleApi.prototype.createUserOnBridge = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var linkIpAddress = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
@@ -112,7 +112,7 @@ HueServiceConsoleApi.prototype.createUserOnBridge = function(_params, _callback)
    });
 };
 
-HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
+HueServiceConsoleApi.prototype.lights = function(_session, _params, _callback) {
    var output = [];
 
    this.hue.lights(function(_err, _result) {
@@ -129,7 +129,7 @@ HueServiceConsoleApi.prototype.lights = function(_params, _callback) {
    });
 };
 
-HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
+HueServiceConsoleApi.prototype.groups = function(_session, _params, _callback) {
    var output = [];
    
    this.hue.lightGroups(function(_err, _result) {
@@ -146,7 +146,7 @@ HueServiceConsoleApi.prototype.groups = function(_params, _callback) {
    });
 };
 
-HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
+HueServiceConsoleApi.prototype.scenes = function(_session, _params, _callback) {
    var output = [];
    
    this.hue.scenes(function(_err, _result) {
@@ -163,7 +163,7 @@ HueServiceConsoleApi.prototype.scenes = function(_params, _callback) {
    });
 };
 
-HueServiceConsoleApi.prototype.createGroup = function(_params, _callback) {
+HueServiceConsoleApi.prototype.createGroup = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    var name = _params[0];
    var lightIds = _params[1];
@@ -171,7 +171,7 @@ HueServiceConsoleApi.prototype.createGroup = function(_params, _callback) {
    this.hue.createGroup(name, lightIds, _callback);
 };
 
-HueServiceConsoleApi.prototype.deleteGroup = function(_params, _callback) {
+HueServiceConsoleApi.prototype.deleteGroup = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var id = _params[0];
 

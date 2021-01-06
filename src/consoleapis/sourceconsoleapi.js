@@ -57,17 +57,17 @@ SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, 
    });
 };
 
-SourceConsoleApi.prototype.setProperty = function(_params, _callback) {
+SourceConsoleApi.prototype.setProperty = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    _callback(null, this.myObj().setProperty(_params[0], _params[1], {}));
 };
 
-SourceConsoleApi.prototype.events = function(_params, _callback) {
+SourceConsoleApi.prototype.events = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    _callback(null, this.myObj().events);
 };
 
-SourceConsoleApi.prototype.addScheduledEvent = function(_params, _callback) {
+SourceConsoleApi.prototype.addScheduledEvent = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    var rules = (_params[1] instanceof Array) ? _params[1] : [ _params[1] ];
    var persist = (_params.length > 2) ? _params[2] : false;
@@ -84,7 +84,7 @@ SourceConsoleApi.prototype.addScheduledEvent = function(_params, _callback) {
    }
 };
 
-SourceConsoleApi.prototype.removeScheduledEvent = function(_params, _callback) {
+SourceConsoleApi.prototype.removeScheduledEvent = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var persist = (_params.length > 1) ? _params[1] : false;
 
@@ -98,7 +98,7 @@ SourceConsoleApi.prototype.removeScheduledEvent = function(_params, _callback) {
    }
 };
 
-SourceConsoleApi.prototype.updateScheduledEvent = function(_params, _callback) {
+SourceConsoleApi.prototype.updateScheduledEvent = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    var rules = (_params[1] instanceof Array) ? _params[1] : [ _params[1] ];
    var persist = (_params.length > 2) ? _params[2] : false;
@@ -113,7 +113,7 @@ SourceConsoleApi.prototype.updateScheduledEvent = function(_params, _callback) {
    }
 };
 
-SourceConsoleApi.prototype.createProperty = function(_params, _callback) {
+SourceConsoleApi.prototype.createProperty = function(_session, _params, _callback) {
    this.checkParams(2, _params);
    var propertyName = _params[0];
    var propertyConfig = _params[1];

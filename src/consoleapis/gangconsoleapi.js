@@ -13,11 +13,11 @@ GangConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult
    ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.allObjects, _prevResult, _perfectMatchRequired);
 };
 
-GangConsoleApi.prototype.cat = function(_params, _callback) {
+GangConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
 };
 
-GangConsoleApi.prototype.createUser = function(_params, _callback) {
+GangConsoleApi.prototype.createUser = function(_session, _params, _callback) {
 
    if (params.length < 1) {
        return _callback("Name not passed as a parameter");
@@ -32,11 +32,11 @@ GangConsoleApi.prototype.createUser = function(_params, _callback) {
    }
 };
 
-GangConsoleApi.prototype.restart = function(_params, _callback) {
+GangConsoleApi.prototype.restart = function(_session, _params, _callback) {
    process.exit(3);
 };
 
-GangConsoleApi.prototype.updateDb = function(_params, _callback) {
+GangConsoleApi.prototype.updateDb = function(_session, _params, _callback) {
    this.checkParams(2, _params);
 
    var dbName = (_params.length > 2) ? _params[2] : this.gang.name;
@@ -56,26 +56,26 @@ GangConsoleApi.prototype.updateDb = function(_params, _callback) {
    });
 };
 
-GangConsoleApi.prototype.updateDbs = function(_params, _callback) {
+GangConsoleApi.prototype.updateDbs = function(_session, _params, _callback) {
    this.checkParams(2, _params);
-   this.updateDb(_params, (_err, _result) => {
+   this.updateDb(_session, _params, (_err, _result) => {
 
       if (_err)  {
          _callback(_err);
       }
       else {
          _params.push(this.gang.casa.name);
-         this.updateDb(_params, _callback);
+         this.updateDb(_session, _params, _callback);
       }
    });
 };
 
-GangConsoleApi.prototype.exportDb = function(_params, _callback) {
+GangConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    this.gang.getDb().readAll(_callback);
 };
 
-GangConsoleApi.prototype.importDb = function(_params, _callback) {
-   this.updateDb(_params, _callback);
+GangConsoleApi.prototype.importDb = function(_session, _params, _callback) {
+   this.updateDb(_session, _params, _callback);
 };
 
 module.exports = exports = GangConsoleApi;

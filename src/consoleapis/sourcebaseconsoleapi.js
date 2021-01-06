@@ -13,7 +13,7 @@ SourceBaseConsoleApi.prototype.filterScope = function(_scope, _collection, _prev
    ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props, _prevResult, _perfectMatchRequired);
 };
 
-SourceBaseConsoleApi.prototype.cat = function(_params, _callback) {
+SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 
    for (var prop in this.myObj().props) {
@@ -22,20 +22,18 @@ SourceBaseConsoleApi.prototype.cat = function(_params, _callback) {
          output.push(this.myObj().props[prop].name+"="+this.myObj().props[prop].getValue());
       }
    }
-
    _callback(null, output);
 };
 
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {
-      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ name: this.uName, property: _name }, this) };
+      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ uName: this.uName, property: _name }, this) };
       this.sourceListeners[_name].sourceListener.establishListeners();
    }
    else {
       this.sourceListeners[_name].refCount = this.sourceListeners[_name].refCount + 1;
    }
-
    return this.sourceListeners[_name].sourceListener;
 };
 
@@ -52,20 +50,18 @@ SourceBaseConsoleApi.prototype.removeListener = function(_name) {
    }
 };
 
-SourceBaseConsoleApi.prototype.getWatchList = function() {
-   var watchList = this.owner.getSessionVar("watchList", this);
+SourceBaseConsoleApi.prototype.getWatchList = function(_session) {
+   var sessionObj = this.getSessionObj(_session);
 
-   if (!watchList) {
-      watchList = {};
-      this.owner.addSessionVar("watchList", watchList, this);
+   if (!sessionObj.hasOwnProperty("watchList")) {
+      sessionObj.watchList = {};
    }
-
-   return watchList;
+   return sessionObj.watchList;
 };
 
-SourceBaseConsoleApi.prototype.watching = function(_params, _callback) {
+SourceBaseConsoleApi.prototype.watching = function(_session, _params, _callback) {
    var output = [];
-   var watchList = this.getWatchList();
+   var watchList = this.getWatchList(_session);
 
    for (var prop in watchList) {
 
@@ -73,19 +69,18 @@ SourceBaseConsoleApi.prototype.watching = function(_params, _callback) {
          output.push(prop);
       }
    }
-
    return _callback(null, output);
 };
 
-SourceBaseConsoleApi.prototype.watch = function(_params, _callback) {
+SourceBaseConsoleApi.prototype.watch = function(_session, _params, _callback) {
    this.checkParams(1, _params);
 
-   var watchList = this.getWatchList();
+   var watchList = this.getWatchList(_session);
 
    if (watchList.hasOwnProperty(_params[0])) {
       return _callback("Already watching \""+_params[0]+"\"");
    }
-   else if (this.myObj().props.hasOwnProperty(_params[0])) {
+   else if (this.myObj() && this.myObj().props.hasOwnProperty(_params[0])) {
       watchList[_params[0]] = this.findOrCreateSourceListener(_params[0]);
       return _callback(null, "Watching \""+_params[0]+"\"");
    }
@@ -94,10 +89,10 @@ SourceBaseConsoleApi.prototype.watch = function(_params, _callback) {
    }
 };
 
-SourceBaseConsoleApi.prototype.unwatch = function(_params, _callback) {
+SourceBaseConsoleApi.prototype.unwatch = function(_session, _params, _callback) {
    this.checkParams(1, _params);
 
-   var watchList = this.getWatchList();
+   var watchList = this.getWatchList(_session);
 
    if (!watchList.hasOwnProperty(_params[0])) {
       return _callback("Not currently watching \""+_params[0]+"\"");
@@ -109,24 +104,23 @@ SourceBaseConsoleApi.prototype.unwatch = function(_params, _callback) {
    }
 };
 
-SourceBaseConsoleApi.prototype.listeners = function(_params, _callback) {
+SourceBaseConsoleApi.prototype.listeners = function(_session, _params, _callback) {
    this.checkParams(1, _params);
 
    var listeners = this.gang.casa.findListeners(this.uName);
    var listenerUnames = [];
 
    for (var i=0; i < listeners.length; ++i) {
-      // XXXXX wrong use of owner, need to fix!
       if ((listeners[i].owner.type !== "consoleapi") && ((_params[0] == undefined) || (_params[0] === listeners[i].eventName))) {
-         listenerUnames.push(listeners[i].owner.name);
+         listenerUnames.push(listeners[i].owner.uName);
       }
    }
 
    return _callback(null, listenerUnames);
 };
 
-SourceBaseConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _sessionId) {
-   var watchList = _consoleApiObjVars.watchList;
+SourceBaseConsoleApi.prototype.sessionClosed = function(_session) {
+   var watchList = this.getSessionObj(_session).watchList;
 
    if (watchList) {
 
@@ -134,6 +128,8 @@ SourceBaseConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _ses
          this.unwatch(name);
       }
    }
+
+   ConsoleApi.prototype.sessionClosed.call(this, _session);
 };
 
 SourceBaseConsoleApi.prototype.sourceIsValid = function(_sourceEventName, _sourceName, _eventName) {
@@ -143,16 +139,15 @@ SourceBaseConsoleApi.prototype.sourceIsInvalid = function(_data) {
 };
 
 SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
-   var allSessionVars = this.owner.getAllSessionsForConsoleApiObject(this);
 
-   for (var session in allSessionVars) {
+   for (var session in this.sessions) {
 
-       if (allSessionVars.hasOwnProperty(session)) {
+       if (this.sessions.hasOwnProperty(session)) {
 
-          if (allSessionVars[session].hasOwnProperty("watchList")) {
+          if (this.sessions[session].hasOwnProperty("watchList")) {
 
-             if (allSessionVars[session].watchList.hasOwnProperty(_data.name)) {
-                this.owner.writeOutput(session, "Watched property " + this.uName +":"+_data.name+" changed to "+_data.value);
+             if (this.sessions[session].watchList.hasOwnProperty(_data.name)) {
+                this.consoleApiService.writeOutput(session, "Watched property " + this.uName +":"+_data.name+" changed to "+_data.value);
              }
           }
        }

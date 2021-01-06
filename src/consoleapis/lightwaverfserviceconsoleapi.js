@@ -9,17 +9,17 @@ function LightwaveRfServiceConsoleApi(_config, _owner) {
 
 util.inherits(LightwaveRfServiceConsoleApi, ServiceConsoleApi);
 
-LightwaveRfServiceConsoleApi.prototype.findBridges = function(_params, _callback) {
+LightwaveRfServiceConsoleApi.prototype.findBridges = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    _callback("Not currently supported!");
 };
 
-LightwaveRfServiceConsoleApi.prototype.findBridge = function(_params, _callback) {
+LightwaveRfServiceConsoleApi.prototype.findBridge = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    _callback("Not currently supported!");
 };
 
-LightwaveRfServiceConsoleApi.prototype.setLinkAddress = function(_params, _callback) {
+LightwaveRfServiceConsoleApi.prototype.setLinkAddress = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var linkAddress = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;

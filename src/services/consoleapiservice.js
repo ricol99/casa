@@ -23,6 +23,16 @@ ConsoleApiService.prototype.coldStart = function() {
 
 };
 
+ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {
+
+   if (!this.sessions.hasOwnProperty(_id)) {
+      console.log(this.uName + ': Creating new session for consoleApi ' + _id);
+      this.sessions[_id] = new ConsoleApiSession(_id, _consoleApi, this);
+   }
+
+   return this.sessions[_id];
+};
+
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
    console.log(this.uName+": scopeExistsRequest() request=", _request.params);
    
@@ -73,86 +83,6 @@ ConsoleApiService.prototype.sendFail = function(_request, _response) {
    }
 };
 
-ConsoleApiService.prototype.setCurrentSession = function(_session) {
-
-   if (_session) {
-      this.currentSessionId = _session.name;
-   }
-   else {
-      this.currentSessionId = null;
-   }
-};
-
-ConsoleApiService.prototype.getCurrentSession = function() {
-   return this.sessions[this.currentSessionId];
-};
-
-ConsoleApiService.prototype.getSessionVars = function(_consoleApiObj) {
-
-   if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].consoleApiObjVars[_consoleApiObj.name];
-   }
-   else {
-      return null;
-   }
-};
-
-ConsoleApiService.prototype.getSessionVar = function(_name, _consoleApiObj) {
-
-   if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].getSessionVar(_name, _consoleApiObj.name);
-   }
-   else {
-      return null;
-   }
-};
-
-ConsoleApiService.prototype.addSessionVar = function(_name, _variable, _consoleApiObj) {
-
-   if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].addSessionVar(_name, _variable, _consoleApiObj);
-   }
-   else {
-      return false;
-   }
-};
-
-ConsoleApiService.prototype.setSessionVar = function(_name, _value, _consoleApiObj) {
-
-   if (this.sessions.hasOwnProperty(this.currentSessionId)) {
-      return this.sessions[this.currentSessionId].setSessionVar(_name, _variable, _consoleApiObj);
-   }
-   else {
-      return false;
-   }
-};
-
-ConsoleApiService.prototype.getAllSessionsForConsoleApiObject = function(_consoleApiObj) {
-   var allSessions = {};
-
-   for (var session in this.sessions) {
-
-       if (this.sessions.hasOwnProperty(session)) {
-
-          if (this.sessions[session].consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
-             allSessions[session] = this.sessions[session].consoleApiObjVars[_consoleApiObj.name];
-          }
-       }
-   }
-
-   return allSessions;
-};
-
-ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {
-
-   if (!this.sessions.hasOwnProperty(_id)) {
-      console.log(this.uName + ': Creating new session for consoleApi ' + _id);
-      this.sessions[_id] = new ConsoleApiSession(_id, _consoleApi, this);
-   }
-
-   return this.sessions[_id];
-};
-
 ConsoleApiService.prototype.writeOutput = function(_sessionId, _output) {
 
    if (this.sessions.hasOwnProperty(_sessionId)) {
@@ -162,8 +92,9 @@ ConsoleApiService.prototype.writeOutput = function(_sessionId, _output) {
 
 ConsoleApiService.prototype.socketIoConnection = function(_socket) {
    console.log(this.uName + ': a consoleApi client has joined');
-   this.sessions[_socket.id] = new ConsoleApiSession(_socket.id+Date.now(), null, this);
-   this.sessions[_socket.id].serveClient(_socket);
+   var id = _socket.id+Date.now();
+   this.sessions[id] = new ConsoleApiSession(id, null, this);
+   this.sessions[id].serveClient(_socket);
 };
 
 ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
@@ -203,7 +134,7 @@ function ConsoleApiSession(_id, _console, _owner) {
    this.name = _id;
    this.console = _console;
    this.owner = _owner;
-   this.consoleApiObjVars = {};
+   this.consoleApiObjs = {};
 }
 
 ConsoleApiSession.prototype.serveClient = function(_socket) {
@@ -254,36 +185,6 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          this.sessionClosed();
       }
    });
-};
-
-ConsoleApiSession.prototype.getSessionVar = function(_name, _consoleApiObjId) {
-   var consoleApiObj = this.consoleApiObjVars[_consoleApiObjId];
-
-   if (consoleApiObj) {
-      return consoleApiObj[_name];
-   }
-   else {
-      return null;
-   }
-};
-
-ConsoleApiSession.prototype.addSessionVar = function(_name, _variable, _consoleApiObj) {
-
-   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
-      this.consoleApiObjVars[_consoleApiObj.name] = { consoleApiObj: _consoleApiObj };
-   }
-
-   this.consoleApiObjVars[_consoleApiObj.name][_name] = _variable;
-};
-
-ConsoleApiSession.prototype.setSessionVar = function(_name, _value, _consoleApiObj) {
-
-   if (!this.consoleApiObjVars.hasOwnProperty(_consoleApiObj.name)) {
-      return false;
-   }
-
-   this.consoleApiObjVars[_consoleApiObj.name][_name] = _value;
-   return true;
 };
 
 ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _request, _response) {
@@ -447,26 +348,12 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
    if (result.scope && result.consoleApiObj) {
 
       if (result.method) {
-         this.owner.setCurrentSession(this);
+         this.consoleApiObjs[result.consoleApiObj.uName] = result.consoleApiObj;
       
          try {
-            Object.getPrototypeOf(result.consoleApiObj)[result.method].call(result.consoleApiObj, result.arguments, _callback);
-            this.owner.setCurrentSession(null);
+            Object.getPrototypeOf(result.consoleApiObj)[result.method].call(result.consoleApiObj, this, result.arguments, _callback);
          }
          catch (_err) {
-            this.owner.setCurrentSession(null);
-            _callback(_err);
-         }
-      }
-      else if ((result.matchingScopes && (result.matchingScopes.length > 0)) && !result.methodNotFound) {
-         this.owner.setCurrentSession(this);
-
-         try {
-            result.consoleApiObj.cat([], _callback);
-            this.owner.setCurrentSession(null);
-         }
-         catch (_err) {
-            this.owner.setCurrentSession(null);
             _callback(_err);
          }
       }
@@ -491,10 +378,10 @@ ConsoleApiSession.prototype.writeOutput = function(_output) {
 
 ConsoleApiSession.prototype.sessionClosed = function() {
 
-   for (var consoleApiObjVars in this.consoleApiObjVars) {
+   for (var consoleApiObj in this.consoleApiObjs) {
 
-      if (this.consoleApiObjVars.hasOwnProperty(consoleApiObjVars)) {
-         this.consoleApiObjVars[consoleApiObjVars].consoleApiObj.sessionClosed(this.consoleApiObjVars[consoleApiObjVars]);
+      if (this.consoleApiObjs.hasOwnProperty(consoleApiObj)) {
+         this.consoleApiObjs[consoleApiObj].sessionClosed(this);
       }
    }
    delete this.owner.sessions[this.name];

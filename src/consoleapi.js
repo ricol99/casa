@@ -6,6 +6,7 @@ function ConsoleApi(_config, _owner) {
    this.config = _config;
    this.type = "consoleapi";
    NamedObject.call(this, _config, _owner);
+   this.sessions = {};
 
    this.gang = Gang.mainInstance();
 
@@ -26,23 +27,23 @@ ConsoleApi.prototype.getCasa = function() {
    return myObj ? myObj.getCasa() : null;
 };
 
+ConsoleApi.prototype.getSessionObj = function(_session) {
+
+   if (!this.sessions.hasOwnProperty(_session.name)) {
+      this.sessions[_session.name] = {};
+   }
+   return this.sessions[_session.name];
+};
+
+ConsoleApi.prototype.sessionClosed = function(_session) {
+   delete this.sessions[_session.name];
+};
+
 ConsoleApi.prototype.checkParams = function(_minLength, _params) {
 
    if (_params.length < _minLength)  {
       throw("Not enough parameters");
    }
-};
-
-ConsoleApi.prototype.getCurrentSession = function() {
-   return this.consoleApiService.getCurrentSession();
-};
-
-ConsoleApi.prototype.getSessionVar = function() {
-   return this.consoleApiService.getCurrentSession().getSessionVar(_name, this.name);
-};
-
-ConsoleApi.prototype.addSessionVar = function() {
-   return this.consoleApiService.getCurrentSession().addSessionVar(_name, _variable, this.name);
 };
 
 ConsoleApi.prototype.filterArray = function(_array, _filter) {
@@ -62,7 +63,7 @@ ConsoleApi.prototype.myObj = function() {
    return this.gang.findNamedObject(this.uName);
 };
 
-ConsoleApi.prototype.ls = function(_params, _callback) {
+ConsoleApi.prototype.ls = function(_session, _params, _callback) {
    this.checkParams(0, _params);
 
    var obj = this.gang.findNamedObject(this.uName);
@@ -84,11 +85,8 @@ ConsoleApi.prototype.ls = function(_params, _callback) {
    _callback(null, results);
 };
 
-ConsoleApi.prototype.cat = function(_params, _callback) {
+ConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
-};
-
-ConsoleApi.prototype.sessionClosed = function(_consoleApiObjVars, _sessionId) {
 };
 
 module.exports = exports = ConsoleApi;
