@@ -260,7 +260,7 @@ Console.prototype.extractScope = function(_line, _callback) {
 
    if (casa) {
       this.sendCommandToCasa(casa, _line, "extractScope", (_err, _result) => {
-         process.stdout.write("AAAAA Console.prototype.extractScope() _result="+util.inspect(_result)+"\n");
+         //process.stdout.write("AAAAA Console.prototype.extractScope() _result="+util.inspect(_result)+"\n");
 
          if (_err) {
             return _callback(_err);
