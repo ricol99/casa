@@ -124,6 +124,7 @@ Console.prototype.casaFound = function(_params) {
          if (this.connectedCasas === 0) {
             this.offline = true;
             this.currentScope = "::";
+            this.currentCmdObj = this.gangConsoleCmd;
             this.sourceCasa = null;
          }
 
@@ -197,9 +198,10 @@ Console.prototype.sendCommandToCasa = function(_casa, _line, _func, _callback) {
 };
 
 Console.prototype.sendCommandToAllCasas = function(_line, _func, _callback) {
+   //process.stdout.write("AAAAA Console.prototype.sendCommandToAllCasas() _line="+util.inspect(_line)+", _func="+_func+"\n");
 
    if (this.offline) {
-      return this.sendCommandToCasa(this.offlineCasa, _linw, _func, _callback);
+      return this.sendCommandToCasa(this.offlineCasa, _line, _func, _callback);
    }
 
    if (this.allCasaCommandOngoing)  {
@@ -258,13 +260,13 @@ Console.prototype.extractScope = function(_line, _callback) {
 
    if (casa) {
       this.sendCommandToCasa(casa, _line, "extractScope", (_err, _result) => {
-         //process.stdout.write("AAAAA Console.prototype.extractScope() _result="+util.inspect(_result)+"\n");
+         process.stdout.write("AAAAA Console.prototype.extractScope() _result="+util.inspect(_result)+"\n");
 
          if (_err) {
             return _callback(_err);
          }
 
-         if (!this.sourceCasa && _result.hasOwnProperty("consoleObjCasaName") && _result.consoleObjCasaName && (_result.consoleObjCasaName !== casa.name)) {
+         if (!this.offline && !this.sourceCasa && _result.hasOwnProperty("consoleObjCasaName") && _result.consoleObjCasaName && (_result.consoleObjCasaName !== casa.name)) {
             // Object resides in a different casa - need to send request to owning casa
 
             if (!this.remoteCasas.hasOwnProperty(_result.consoleObjCasaName)) {
@@ -343,7 +345,6 @@ Console.prototype.setPrompt = function(_prompt) {
 
 Console.prototype.updatePrompt = function() {
    this.setPrompt(this.currentScope);
-   //LocalConsole.prototype.setPrompt.call(this, this.currentScope + " [" + this.connectedCasas + "]");
 };
 
 Console.prototype.updatePromptMidLine = function() {
@@ -542,39 +543,15 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
       }
    }
 
-   var line = _line.replace("::", "");
-   var method = _line.split("(")[0];
-   var consoleObjHierarchy = [ "offlinecasaconsole" ];
-   var scope = "::";
-   var arguments = [];
-   var consoleObjuName = "offline";
-
-   if (line.split("(").length > 1) {
-      var methodArguments = line.split("(").slice(1).join("(").trim();
-      var i;
-
-      for (i = methodArguments.length-1; i >= 0; --i) {
-
-         if (methodArguments.charAt(i) == ')') {
-            break;
-         }
-      }
-
-      if (i !== 0) {
-         methodArguments = methodArguments.substring(0, i);
-         arguments = JSON.parse("["+methodArguments+"]");
-      }
-   }
-
    if (_callback) {
-      _callback(null, { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName });
+      _callback(null, { remainingStr: _line.replace("::", ""), consoleObjHierarchy: [ "offlinecasaconsole" ], scope: "::", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" });
    }
    else {
-      return { line: _line, method: method, consoleObjHierarchy: consoleObjHierarchy, scope: scope, arguments: arguments, consoleObjuName: consoleObjuName };
+      return { remainingStr: line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: "::", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
    }
 };
 
-OfflineCasa.prototype.executeParsedCommand = function(_obj, _method, _arguments, _callback) {
+OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {
    _callback("Casa is offline!");
 };
 

@@ -291,6 +291,11 @@ ConsoleApiSession.prototype.getClassHierarchy = function(_consoleApiObj) {
 };
 
 ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
+
+   if (!_params.scope || !_params.line) {
+      return _callback("Internal error - parameters malformed");
+   }
+
    var result = this.extractScopeFromLine(_params.scope, _params.line);
 
    if (result.error) {
@@ -321,7 +326,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
 
 ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
    var result = [];
- 
+
    if (_params.hasOwnProperty("obj")) {
       var obj = this.owner.gang.findNamedObject(_params.obj);
 
@@ -336,6 +341,11 @@ ConsoleApiSession.prototype.executeCommand = function(_params, _callback) {
       }
    }
    else {
+
+      if (!_params.scope || !_params.line) {
+         return _callback("Internal error - parameters malformed");
+      }
+ 
       result = this.extractScopeFromLine(_params.scope, _params.line);
    }
 

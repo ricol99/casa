@@ -31,7 +31,7 @@ ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callb
 };
 
 ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _arguments, _callback) {
-   this.console.executeParsedCommandOnAllCasas(this.uName, _method, _arguments, _callback);
+   this.console.executeParsedCommandOnAllCasas(this, _method, _arguments, _callback);
 };
 
 ConsoleCmd.prototype.casas = function(_arguments, _callback) {
