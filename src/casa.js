@@ -220,6 +220,20 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
    this.sourceListeners[_sourceListener.uName] = _sourceListener;
 };
 
+Casa.prototype.removeSourceListener = function(_sourceListener) {
+   console.log(this.uName + ": Casa.prototype.removeSourceListener() " + _sourceListener.uName);
+   
+   if (this.sourceListeners[_sourceListener.uName]) {
+      delete this.sourceListeners[_sourceListener.uName];
+      return true;
+   }
+   else {
+      return false;
+   }
+
+   console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' removed from casa');
+};
+
 Casa.prototype.findListeners = function(_uName) {
    var listeners = [];
 

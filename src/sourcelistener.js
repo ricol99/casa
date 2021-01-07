@@ -131,6 +131,7 @@ SourceListener.prototype.stopListening = function() {
    }
 
    this.source.removeListener('invalid', this.invalidHandler);
+   this.casa.removeSourceListener(this);
 };
 
 SourceListener.prototype.propertyChangedCb = function(_data) {
