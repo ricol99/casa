@@ -69,6 +69,7 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
 
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() scope="+scope+"\n");
       //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", ":");
+      process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() _result.remainingStr="+_result.remainingStr+"\n");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
 

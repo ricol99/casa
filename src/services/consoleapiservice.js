@@ -304,7 +304,11 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
 
    if (result.consoleApiObj) {
 
-      if (!result.remainingStr || (result.remainingStr.length === 0)) {
+      if (!result.remainingStr) {
+         result.remainingStr = "";
+      }
+
+      if (result.remainingStr.length === 0) {
          var processedScopeAndLine = this.processScopeAndLine(_params.scope, _params.line);
          result.newScope = processedScopeAndLine.shortScope;
       }
