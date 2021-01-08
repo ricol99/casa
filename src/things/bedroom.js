@@ -163,7 +163,7 @@ function Bedroom(_config, _parent) {
 
    this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
-   this.ensurePropertyExists("night-time", 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists("night-time", 'property', { initialValue: false, source: { uName: this.buildingName, property: "night-time" } }, _config);
 
    this.ensurePropertyExists("some-present-users-awake", 'orproperty', this.usersPresentAndAwakeConfig, _config);
    this.ensurePropertyExists("some-present-users-asleep", 'orproperty', this.usersPresentAndAsleepConfig, _config);
