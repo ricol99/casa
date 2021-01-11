@@ -69,7 +69,7 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
 
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() scope="+scope+"\n");
       //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", ":");
-      process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() _result.remainingStr="+_result.remainingStr+"\n");
+      //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() _result="+util.inspect(_result)+"\n");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
 
@@ -199,7 +199,7 @@ LocalConsole.prototype.matchMethods = function(_originalLine, _method, _scope, _
 };
 
 LocalConsole.prototype.extractMethodAndArguments = function(_originalLine, _line) {
-   var line = (_line.length > 0) ? ((_line[0] === ".") ? _line.substr(1) : _line) : _line;
+   var line = (_line) ? ((_line.length > 0) ? ((_line[0] === ".") ? _line.substr(1) : _line) : _line) : "";
    var spacePos = (line.indexOf(' ') === -1) ? 10000 : line.indexOf(' ');
    var bracketPos = (line.indexOf('(') === -1) ? 10000 : line.indexOf('(');
    var separator = '(';

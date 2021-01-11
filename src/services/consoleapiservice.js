@@ -291,12 +291,13 @@ ConsoleApiSession.prototype.getClassHierarchy = function(_consoleApiObj) {
 };
 
 ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
+   var line = _params.line ? _params.line : "";
 
-   if (!_params.scope || !_params.line) {
+   if (!_params.scope) {
       return _callback("Internal error - parameters malformed");
    }
 
-   var result = this.extractScopeFromLine(_params.scope, _params.line);
+   var result = this.extractScopeFromLine(_params.scope, line);
 
    if (result.error) {
       return _callback(result.error);
@@ -309,7 +310,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
       }
 
       if (result.remainingStr.length === 0) {
-         var processedScopeAndLine = this.processScopeAndLine(_params.scope, _params.line);
+         var processedScopeAndLine = this.processScopeAndLine(_params.scope, line);
          result.newScope = processedScopeAndLine.shortScope;
       }
 
