@@ -1,6 +1,7 @@
 var util = require('util');
 var ConsoleApi = require('../consoleapi');
 var SourceListener = require('../sourcelistener');
+var dateFormat = require ('dateFormat');
 
 function SourceBaseConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
@@ -147,7 +148,7 @@ SourceBaseConsoleApi.prototype.receivedEventFromSource = function(_data) {
           if (this.sessions[session].hasOwnProperty("watchList")) {
 
              if (this.sessions[session].watchList.hasOwnProperty(_data.name)) {
-                this.consoleApiService.writeOutput(session, "Watched property " + this.uName +":"+_data.name+" changed to "+_data.value);
+                this.consoleApiService.writeOutput(session, dateFormat() + ": Watched property " + this.uName +":"+_data.name+" changed to "+_data.value);
              }
           }
        }
