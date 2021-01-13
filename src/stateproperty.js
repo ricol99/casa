@@ -111,7 +111,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
    if (_state.hasOwnProperty('timeout')) {
 
-      if (_state.timeout.inheritsFrom[this.states[this.value].name]) {
+      if (this.states.hasOwnProperty(this.value) && _state.timeout.inheritsFrom[this.states[this.value].name]) {
 
          if (_timeoutDuration == undefined) {
 

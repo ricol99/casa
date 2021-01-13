@@ -17,15 +17,15 @@ PropertyConsoleApi.prototype.getValue = function(_session, _params, _callback) {
 
 PropertyConsoleApi.prototype.set = function(_session, _params, _callback) {
    this.checkParams(1, _params);
-   this.owner.setProperty([this.name, _params[0]], _callback);
+   this.owner.setProperty(_session, [this.name, _params[0]], _callback);
 };
 
 PropertyConsoleApi.prototype.watch = function(_session, _params, _callback) {
-   this.owner.watch(_session, _params, _callback);
+   this.owner.watch(_session, [this.name], _callback);
 };
 
 PropertyConsoleApi.prototype.unwatch = function(_session, _params, _callback) {
-   this.owner.unwatch(_session, _params, _callback);
+   this.owner.unwatch(_session, [this.name], _callback);
 };
 
 PropertyConsoleApi.prototype.watching = function(_session, _params, _callback) {
@@ -33,7 +33,7 @@ PropertyConsoleApi.prototype.watching = function(_session, _params, _callback) {
 };
 
 PropertyConsoleApi.prototype.listeners = function(_session, _params, _callback) {
-   this.owner.listeners([this.name], _callback);
+   this.owner.listeners(_session, [this.name], _callback);
 };
 
 module.exports = exports = PropertyConsoleApi;
