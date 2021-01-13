@@ -1,7 +1,7 @@
 var util = require('util');
 var ConsoleApi = require('../consoleapi');
 var SourceListener = require('../sourcelistener');
-var dateFormat = require ('dateFormat');
+var dateFormat = require ('dateformat');
 
 function SourceBaseConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
