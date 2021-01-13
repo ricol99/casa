@@ -1,11 +1,11 @@
-var ConsoleCmd = require('../consolecmd');
+var SourceBaseConsoleCmd = require('./sourcebaseconsolecmd');
 var util = require('util');
 
 function SourceConsoleCmd(_config, _owner, _console) {
-   ConsoleCmd.call(this, _config, _owner, _console);
+   SourceBaseConsoleCmd.call(this, _config, _owner, _console);
 }
 
-util.inherits(SourceConsoleCmd, ConsoleCmd);
+util.inherits(SourceConsoleCmd, SourceBaseConsoleCmd);
 
 SourceConsoleCmd.prototype.set = function(_arguments, _callback) {
    this.checkArguments(2, _arguments);

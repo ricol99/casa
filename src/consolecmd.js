@@ -91,15 +91,28 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
    //process.stdout.write("AAAAA proto of obj = "+util.inspect(proto)+"\n");
    //process.stdout.write("AAAAA proto of ConsoleCmd = "+util.inspect(consoleCmdProto)+"\n");
 
-   for (var method in proto) {
+   while (proto.constructor.name !== 'ConsoleCmd') {
 
-      if (proto.hasOwnProperty(method)) {
-         //process.stdout.write("AAAAA method name = "+method+"\n");
+      for (var method in proto) {
 
-         if (!consoleCmdProto.hasOwnProperty(method) && !method.startsWith("_")) {
-            members.push(fullScope+method);
-            //process.stdout.write("AAAAA method "+fullScope+method+" Added\n");
+         if (proto.hasOwnProperty(method)) {
+            //process.stdout.write("AAAAA method name = "+method+"\n");
+
+            if (!consoleCmdProto.hasOwnProperty(method) && !method.startsWith("_")) {
+               excObj[fullScope+method] = true;
+               //members.push(fullScope+method);
+               //process.stdout.write("AAAAA method "+fullScope+method+" Added\n");
+            }
          }
+      }
+
+      proto = Object.getPrototypeOf(proto);
+   }
+
+   for (var member in excObj) {
+
+      if (excObj.hasOwnProperty(member)) {
+         members.push(member);
       }
    }
 

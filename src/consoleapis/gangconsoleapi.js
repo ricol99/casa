@@ -8,11 +8,6 @@ function GangConsoleApi(_config, _owner) {
 
 util.inherits(GangConsoleApi, ConsoleApi);
 
-GangConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired)  {
-   var collection = {};
-   ConsoleApi.prototype.filterScope.call(this, _scope, this.gang.allObjects, _prevResult, _perfectMatchRequired);
-};
-
 GangConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
 };

@@ -8,11 +8,6 @@ function ThingConsoleApi(_config, _owner) {
 
 util.inherits(ThingConsoleApi, SourceConsoleApi);
 
-ThingConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
-   SourceConsoleApi.prototype.filterScope.call(this, _scope, _collection, _prevResult, _perfectMatchRequired);
-   ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().things, _prevResult, _perfectMatchRequired);
-};
-
 ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
 
    if (_thingConfig.name === this.uName) {

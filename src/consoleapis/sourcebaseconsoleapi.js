@@ -10,10 +10,6 @@ function SourceBaseConsoleApi(_config, _owner) {
 
 util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
-SourceBaseConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
-   ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().props, _prevResult, _perfectMatchRequired);
-};
-
 SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 

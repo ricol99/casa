@@ -8,10 +8,6 @@ function CasaConsoleApi(_config, _owner) {
 
 util.inherits(CasaConsoleApi, ConsoleApi);
 
-CasaConsoleApi.prototype.filterScope = function(_scope, _collection, _prevResult, _perfectMatchRequired) {
-   return ConsoleApi.prototype.filterScope.call(this, _scope, this.myObj().sources, _prevResult, _perfectMatchRequired);
-};
-
 CasaConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 
