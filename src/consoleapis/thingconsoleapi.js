@@ -1,6 +1,5 @@
 var util = require('util');
 var SourceConsoleApi = require('./sourceconsoleapi');
-var ConsoleApi = require('../consoleapi');
 
 function ThingConsoleApi(_config, _owner) {
    SourceConsoleApi.call(this, _config, _owner);
