@@ -20,10 +20,16 @@ var Room = require('./room');
 function Bedroom(_config, _parent) {
    this.overrideTimeout = (_config.hasOwnProperty("overrideProperty")) ? _config.overrideProperty : 600;
    _config.userOverrideConfig =  { initialValue: 'not-active',
-                                   states: [{ name: "not-active",
+                                   states: [{ name: "not-active", priority: 0,
                                               source: { guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" }},
-                                            { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
+                                            { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
+
+   _config.roomStates = [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 0},
+                         { name: "no-users-present-dull-day", priority: 0}, { name: "users-present-dull-day", priority: 5},
+                         { name: "no-users-present-evening", priority: 0}, { name: "users-present-evening", priority: 5},
+                         { name: "no-users-present-night", priority: 0}, { name: "users-present-night", priority: 0}];
+
    Room.call(this, _config, _parent);
 
    if (_config.hasOwnProperty('user')) {
@@ -56,44 +62,45 @@ function Bedroom(_config, _parent) {
          "type": "stateproperty",
          "initialValue": "not-present",
          "ignoreControl": true,
+         "takeControlOnTransition": true,
          "states": [
             {
-               "name": "not-present",
+               "name": "not-present", "priority": 0,
                "sources": [{ "guard": { active: false, property: "evening-possible", value: true }, "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "guard": { active: false, property: "night-time", value: true }, "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" }],
                "schedule": { "rule": "5 2 * * *", "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": true }, "nextState": "asleep-in-bed" }
             },
             {
-               "name": "room-switch-touched",
+               "name": "room-switch-touched", "priority": 10,
                "sources": [{ "property": "night-time", "value": true, "nextState": "reading-in-bed" },
                            { "property": "night-time", "value": false, "nextState": "not-present" }]
             },
             {
-               "name": "initial-reading-in-bed",
+               "name": "initial-reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" }],
                "actions": [{ "property": "night-time", "value": true }]
             },
             {
-               "name": "reading-in-bed",
+               "name": "reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
-               "name": "reading-in-bed-others-asleep",
+               "name": "reading-in-bed-others-asleep", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" }]
             },
             {
-               "name": "asleep-in-bed",
+               "name": "asleep-in-bed", "priority": 10,
                "sources": [ { "event": this.users[i].name+"-switch-event", "nextState": "reading-in-bed" },
                             { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                             { "event": "wake-up-event", "nextState": "awake-in-bed"} ]
             },
             {
-               "name": "waking-up-in-bed",
+               "name": "waking-up-in-bed", "priority": 10,
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" }
             },
             {
-               "name": "awake-in-bed",
+               "name": "awake-in-bed", "priority": 0,
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
                "source": { "event": "wake-up-event", "nextState": "awake-in-bed" },
                "actions": [{ "property": "night-time", "value": false }]

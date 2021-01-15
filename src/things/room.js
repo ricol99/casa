@@ -76,12 +76,16 @@ function Room(_config, _parent) {
 
    this.buildingName = _config.building;
 
+   this.roomStates = _config.hasOwnProperty("roomStates") ? _config.roomStates : [];
+   this.sensitivityStates = _config.hasOwnProperty("sensitivityStates") ? _config.sensitivityStates : [{ name: "no-users-present-normal", priority: -1 }, { name: "users-present-normal", priority: -1 },
+                                                                                                       { name: "no-users-present-sensitive", priority: 15 }, { name: "users-present-sensitive", priority: 15 } ];
+
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
    this.ensurePropertyExists('override-timeout', 'property', { initialValue: this.overrideTimeouts.day }, _config);
 
-   this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", ignoreControl: true, type: "stateproperty", initialValue: "day", 
+   this.ensurePropertyExists('day-state', 'stateproperty', { name: "day-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "day", 
                                                              states: [{ name: "day", sources: [{ property: "low-light", value: true, nextState: "dull-day" },
                                                                                                { property: "night-time", "value": true, nextState: "night" }],
                                                                                      actions: [{ property: "movement-timeout", value: this.movementTimeouts["day"] },
@@ -105,20 +109,21 @@ function Room(_config, _parent) {
                                                                                                          source: { property: "movement", "value": true, nextState: "users-present" }} ]}, _config);
 
    this.ensurePropertyExists('room-state', 'combinestateproperty', { name: "room-state", type: "combinestateproperty", separator: "-", initialValue: "no-users-present-day",
-                                                                     sources: [{ property: "users-present-state" }, { property: "day-state" }] }, _config);
+                                                                     sources: [{ property: "users-present-state" }, { property: "day-state" }], states: this.roomStates }, _config);
 
    var userOverrideConfig = (_config.hasOwnProperty("userOverrideConfig")) ? _config.userOverrideConfig
-                                                                           : { initialValue: 'not-active',
-                                                                               states: [{ name: "not-active", source: { event: "room-switch-event", nextState: "active" }},
-                                                                                        { name: "active", source: { event: "room-switch-event", nextState: "not-active" },
+                                                                           : { initialValue: 'not-active', takeControlOnTransition: true,
+                                                                               states: [{ name: "not-active", priority: 0, source: { event: "room-switch-event", nextState: "active" }},
+                                                                                        { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
                                                                                           timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
 
    this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
 
    if (this.hasProperty("users-sensitive")) {
-      this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", "initialValue": "no-users-present-normal", separator: "-",
+      this.ensurePropertyExists('user-sensitivity-state', 'combinestateproperty', { name: "user-sensitivity-state", type: "combinestateproperty", takeControlOnTransition: true, "initialValue": "no-users-present-normal", separator: "-",
                                                                                     sources: [{ property: "users-present-state" },
-                                                                                              { property: "users-sensitive", transformMap: { false: "normal", true: "sensitive" }}] }, _config);
+                                                                                              { property: "users-sensitive", transformMap: { false: "normal", true: "sensitive" }}],
+                                                                                    states: this.sensitivityStates }, _config);
    }
 }
 

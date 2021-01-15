@@ -169,6 +169,10 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.props[_propName].value = _propValue;
       this.props[_propName].previousValue = oldValue;
 
+      if (sendData.hasOwnProperty("priority")) {
+         _data.priority = sendData.priority;
+      }
+
       delete sendData.alignWithParent;	// This should never be emitted - only for composite management
       delete sendData.sourcePeerCasa;
 

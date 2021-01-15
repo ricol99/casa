@@ -5,7 +5,7 @@ var StateProperty = require('../stateproperty');
 function CombineStateProperty(_config, _owner) {
 
    if (!_config.hasOwnProperty('states') || (_config.states.length === 0)) {
-      _config.states = [ { name: "DEFAULT",  priority: -9999 } ];
+      _config.states = [ { name: "DEFAULT" } ];
    }
    else {
       let defFound = false;
@@ -15,11 +15,12 @@ function CombineStateProperty(_config, _owner) {
       }
 
       if (!defFound) {
-         _config.states.push({ name: "DEFAULT", priority: -9999 });
+         _config.states.push({ name: "DEFAULT" });
       }
    }
 
    StateProperty.call(this, _config, _owner);
+
    this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";
    this.allSourcesRequiredForValidity = true;
 

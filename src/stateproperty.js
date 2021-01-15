@@ -11,6 +11,7 @@ function StateProperty(_config, _owner) {
    this.states = {};
    this.regExStates = [];
    this.controllingOwner = false;
+   this.priorityDefined = _config.hasOwnProperty('priority');
    this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
    this.currentPriority = this.priority;
    this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
@@ -38,7 +39,7 @@ util.inherits(StateProperty, Property);
 StateProperty.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
-      this.setState(this.value);
+      this.setState(this.value, false);
    }
 
    Property.prototype.coldStart.call(this, _data);
@@ -46,7 +47,11 @@ StateProperty.prototype.coldStart = function(_data) {
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
    console.log(this.uName + ": state about to change to " + _propertyValue);
-   this.setState(_propertyValue);
+   this.setState(_propertyValue, _data.hasOwnProperty("priority"), _data.priority);
+
+   if (this.currentState && this.currentState.priorityDefined) {
+      _data.priority = this.currentState.priority;
+   }
 };
 
 StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
@@ -236,7 +241,7 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
    return state;
 };
 
-StateProperty.prototype.setState = function(_nextStateName) {
+StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPriorityDefined, _parentPropertyPriority) {
    console.log(this.uName+": setState state="+_nextStateName);
    this.previousState = this.value;
 
@@ -271,7 +276,7 @@ StateProperty.prototype.setState = function(_nextStateName) {
    //var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.states["DEFAULT"];
 
    if (nextState) {
-      var immediateNextState = nextState.initialise();
+      var immediateNextState = nextState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority);
 
       if (immediateNextState) {
          console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
@@ -421,6 +426,7 @@ function State(_config, _owner) {
       this.regEx = new RegExp(_config.regEx);
    }
 
+   this.priorityDefined = _config.hasOwnProperty('priority') || _owner.priorityDefined;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 
    if (_config.hasOwnProperty("source")) {
@@ -589,10 +595,14 @@ State.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
 
-State.prototype.initialise = function() {
+State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority) {
    var immediateState = this.checkSourceProperties();
 
    if (!immediateState) {
+
+      if (_parentPropertyPriorityDefined && !this.priorityDefined) {
+         this.priority = _parentPropertyPriority
+      }
 
       if (!this.alignActions() && this.owner.takeControlOnTransition) {
          this.owner.takeControl(this.priority);
