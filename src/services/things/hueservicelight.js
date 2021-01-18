@@ -13,6 +13,7 @@ util.inherits(HueServiceLight, ServiceNode);
 
 HueServiceLight.prototype.transactionReadyForProcessing = function(_transaction, _callback) {
    var power = _transaction.properties.hasOwnProperty("power") ? _transaction.properties.power : this.getProperty("power");
+   console.log(this.uName + ": Tranaction ready to process: ", _transaction);
 
    if (power === false) {
       // Not ready to process right now, try a requeue
@@ -21,7 +22,6 @@ HueServiceLight.prototype.transactionReadyForProcessing = function(_transaction,
 
    _transaction.properties.power = true;
    var config = this.owner.convertProperties(_transaction.properties);
-   console.error(this.uName + ": Tranaction ready to process: ", _transaction);
    //this.owner.hue.setLightState(this.deviceId, this.config, _callback);
    return true;
 };
