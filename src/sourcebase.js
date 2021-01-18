@@ -256,8 +256,9 @@ SourceBase.prototype.addPropertiesForAlignment = function(_properties) {
       this.propertyAlignmentQueue = [];
    }
 
+   var transactionId = this.uName + "-" + Date.now();
+
    for (var i = 0; i < _properties.length; ++i) {
-      var transactionEnd = (i === _properties.length - 1);
 
       if (_properties[i].hasOwnProperty("ramp")) {
          var ramp = util.copy(_properties[i].ramp);
@@ -266,11 +267,11 @@ SourceBase.prototype.addPropertiesForAlignment = function(_properties) {
             ramp.ramps = util.copy(_properties[i].ramp.ramps, true);
          }
 
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp, transactionEnd: transactionEnd });
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp, transactionId: transactionId });
       }
       else {
          console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value, transactionEnd: transactionEnd });
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value, transactionId: transactionId });
       }
    }
 };

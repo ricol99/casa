@@ -3,6 +3,8 @@ var Service = require('../service');
 var Hue = require("node-hue-api");
 
 function HueService(_config, _owner) {
+   _config.queueQuant = 50;
+
    Service.call(this, _config, _owner);
 
    this.bridgesAvailable = [];
@@ -14,9 +16,33 @@ function HueService(_config, _owner) {
    this.requestPending = false;
    this.callbacks = {};
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
+
+   this.deviceTypes = {
+      "light": "hueservicelight"
+   };
+
+   this.ensurePropertyExists("hub-connected", 'property', { initialValue: false }, this.config);
 }
 
 util.inherits(HueService, Service);
+
+HueService.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+
+   if ((_property === "hub-connected") && _subscription.hasOwnProperty("type") &&
+       _subscription.hasOwnProperty("id") && _subscription.hasOwnProperty("subscriber")) {
+      var objName = _subscription.type + "-" + _subscription.id;
+
+      if (this.deviceTypes.hasOwnProperty(_subscription.type)) {
+
+         if (!this.myNamedObjects.hasOwnProperty(objName)) {
+            var thing = this.createThing({ type: this.deviceTypes[_subscription.type], name: objName, subscription: _subscription });
+         }
+         else {
+            this.myNamedObjects[objName].newSubscriber(_subscription);
+         }
+      }
+   }
+};
 
 function b(_bridges) {
    console.log(this.username+": Hue Bridges Found: " + JSON.stringify(_bridges));
@@ -277,6 +303,33 @@ HueService.prototype.makeNextRequest = function() {
          }, 100, this);
       });
    }
+};
+
+HueService.prototype.convertProperties = function(_props) {
+   var config = {};
+
+   for (var prop in _props) {
+
+      if (_props.hasOwnProperty(prop)) {
+
+         switch (prop) {
+            case "power":
+               config.on = props[prop];
+               break;
+            case "brightness":
+               config.bri = Math.floor(parseFloat(props[prop] * 255 / 100));
+               break;
+            case "hue":
+               config.hue = Math.floor(parseFloat(props[prop] * 65535 / 360));
+               break;
+            case "saturation":
+               config.sat = Math.floor(parseFloat(props[prop] * 255 / 100));
+               break;
+         }
+      }
+   }
+
+   return config;
 };
 
 function Request(_owner, _request, _deviceId, _config, _callback) {

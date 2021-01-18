@@ -17,6 +17,8 @@ function HueLight(_config, _parent) {
       process.exit();
    }
 
+   this.hueServiceName =  this.casa.findServiceName(this.service);
+
    this.brightnessSupported = _config.hasOwnProperty("brightnessSupported") ? _config.brightnessSupported : true;
 
    if (this.brightnessSupported)  {
@@ -54,6 +56,9 @@ function HueLight(_config, _parent) {
          }
       });
    }
+
+   this.ensurePropertyExists('hub-connected', 'property', { initialValue: false, source: { uName: this.hueServiceName, property: "hub-connected", 
+                                                            subscription: { subscriber: this.uName, type: "light", id: this.deviceId, subscriberProperties: [ "power", "brightness"] } }}, _config);
 }
 
 util.inherits(HueLight, Thing);

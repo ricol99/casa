@@ -69,6 +69,14 @@ Property.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
 
+// Add a new source to the property - not persisted
+Property.prototype.addNewSource = function(_config) {
+   var sourceListener = new SourceListener(_config, this);
+   this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
+   this.noOfSources++;  
+   this.sourceListener.refreshSource();
+};
+
 //
 // Returns current property value 
 //

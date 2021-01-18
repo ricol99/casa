@@ -13,7 +13,12 @@ function Service(_config, _owner) {
 
    Thing.call(this, _config, _owner);
 
+   this.queueQuant = _config.hasOwnProperty("queueQuant") ? _config.queueQuant : 100;
+   this.queueRetryLimit = _config.hasOwnProperty("queueRetryLimit") ? _config.queueRetryLimit : 5;
    this.localThings = _config.hasOwnProperty("localThings") ? _config.localThings : true;
+   this.transactions = {};
+   this.queue = [];
+   this.queueTimer = null;
 }
 
 util.inherits(Service, Thing);
@@ -28,6 +33,78 @@ Service.prototype.createThing = function(_config) {
    this.gang.casa.refreshSourceListeners();
 
    return thing;
+};
+
+Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
+
+   if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_data.transactionId)) {
+
+      if (_serviceNode.name !== this.transactions[_data.transactionId].serviceNode.name) {
+         console.error(this.uName + ":Transaction is across two different service nodes. Not allowed!");
+      }
+      else {
+         this.transactions[_data.transactionId].properties[_propName] = _propValue;
+      }
+   }
+   else {
+      var transaction = { serviceNode: _serviceNode, properties: {} };
+      transaction.properties[_propName] = _propValue;
+
+      if (_data.hasOwnProperty("transactionId")) {
+         transaction.transactionId = _data.transactionId;
+      }
+
+      this.queueTransaction(transaction);
+   }
+};
+
+Service.prototype.queueTransaction = function(_transaction) {
+   _transaction.queued =  _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
+
+   if (_transaction.queued > this.queueRetryLimit) {
+      console.error(this.uName + ": Unable to queue transaction as it has been requeued too many times");
+      return false;
+   }
+
+   if (_transaction.hasOwnProperty("transactionId")) {
+      this.transactions[_transaction.transactionId] = _transaction;
+   }
+
+   this.queue.push(_transaction);
+   this.pokeQueue();
+   return true;
+};
+
+Service.prototype.pokeQueue = function() {
+
+   if (!this.queueTimer && this.queue.length > 0) {
+
+      this.queueTimer = setTimeout( () => {
+
+         if (this.queue.length > 0) {
+            var transaction = this.queue.shift();
+            
+            if (transaction.hasOwnProperty("transactionId")) {
+               delete this.transactions[transaction.transactionId];
+            }
+
+            if (!transaction.serviceNode.transactionReadyForProcessing(transaction, (_err, _res) => {
+
+               if (_err) {
+                  console.error(this.uName + ": Unable to process transaction. Error=" + _err);
+               }
+
+               this.queueTimer = null;
+               this.pokeQueue();
+
+            })) {
+               this.queueTransaction(transaction);
+               this.queueTimer = null;
+               this.pokeQueue();
+            }
+         }
+      }, this.queueQuant);
+   }
 };
 
 module.exports = exports = Service;
