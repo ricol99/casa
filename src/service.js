@@ -38,19 +38,24 @@ Service.prototype.createThing = function(_config) {
 Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
 
    if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_data.transactionId)) {
+      console.log(this.uName + ": AAAA HERE A!");
 
       if (_serviceNode.name !== this.transactions[_data.transactionId].serviceNode.name) {
+      console.log(this.uName + ": AAAA HERE B!");
          console.error(this.uName + ":Transaction is across two different service nodes. Not allowed!");
       }
       else {
+      console.log(this.uName + ": AAAA HERE C!");
          this.transactions[_data.transactionId].properties[_propName] = _propValue;
       }
    }
    else {
+      console.log(this.uName + ": AAAA HERE D!");
       var transaction = { serviceNode: _serviceNode, properties: {} };
       transaction.properties[_propName] = _propValue;
 
       if (_data.hasOwnProperty("transactionId")) {
+      console.log(this.uName + ": AAAA HERE E!");
          transaction.transactionId = _data.transactionId;
       }
 
@@ -60,6 +65,7 @@ Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _
 
 Service.prototype.queueTransaction = function(_transaction) {
    _transaction.queued =  _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
+            console.log(this.uName+": AAAAAA HERE F!");
 
    if (_transaction.queued > this.queueRetryLimit) {
       console.error(this.uName + ": Unable to queue transaction as it has been requeued too many times");
@@ -77,30 +83,35 @@ Service.prototype.queueTransaction = function(_transaction) {
 
 Service.prototype.pokeQueue = function() {
 
+            console.log(this.uName+": AAAAAA HERE G! Queue length="+this.queue.length);
    if (!this.queueTimer && this.queue.length > 0) {
 
       this.queueTimer = setTimeout( () => {
+         console.log(this.uName+": AAAAAA HERE H!");
 
          if (this.queue.length > 0) {
             var transaction = this.queue.shift();
+            console.log(this.uName+": AAAAAA HERE I! transaction=", transaction.properties);
             
             if (transaction.hasOwnProperty("transactionId")) {
                delete this.transactions[transaction.transactionId];
             }
 
-            if (!transaction.serviceNode.transactionReadyForProcessing(transaction, (_err, _res) => {
+            if (transaction.serviceNode.transactionReadyForProcessing(transaction)) {
 
-               if (_err) {
-                  console.error(this.uName + ": Unable to process transaction. Error=" + _err);
-               }
+               transaction.serviceNode.processTransaction(transaction, (_err, _res) => {
 
+                  if (_err) {
+                     console.error(this.uName + ": Unable to process transaction. Error=" + _err);
+                  }
+
+                  this.queueTimer = null;
+                  this.pokeQueue();
+               });
+            }
+            else {
                this.queueTimer = null;
-               this.pokeQueue();
-
-            })) {
                this.queueTransaction(transaction);
-               this.queueTimer = null;
-               this.pokeQueue();
             }
          }
       }, this.queueQuant);

@@ -18,7 +18,8 @@ function HueService(_config, _owner) {
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
 
    this.deviceTypes = {
-      "light": "hueservicelight"
+      "light": "hueservicelight",
+      "lightgroup": "hueservicelightgroup"
    };
 
    this.ensurePropertyExists("hub-connected", 'property', { initialValue: false }, this.config);
@@ -314,16 +315,16 @@ HueService.prototype.convertProperties = function(_props) {
 
          switch (prop) {
             case "power":
-               config.on = props[prop];
+               config.on = _props[prop];
                break;
             case "brightness":
-               config.bri = Math.floor(parseFloat(props[prop] * 255 / 100));
+               config.bri = Math.floor(parseFloat(_props[prop] * 255 / 100));
                break;
             case "hue":
-               config.hue = Math.floor(parseFloat(props[prop] * 65535 / 360));
+               config.hue = Math.floor(parseFloat(_props[prop] * 65535 / 360));
                break;
             case "saturation":
-               config.sat = Math.floor(parseFloat(props[prop] * 255 / 100));
+               config.sat = Math.floor(parseFloat(_props[prop] * 255 / 100));
                break;
          }
       }

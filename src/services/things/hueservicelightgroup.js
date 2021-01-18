@@ -1,26 +1,26 @@
 var util = require('util');
 var ServiceNode = require('./servicenode');
 
-function HueServiceLight(_config, _owner) {
+function HueServiceLightGroup(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
    this.id = _config.subscription.id;
-   console.log(this.uName + ": New Hue Light Node created");
+   console.log(this.uName + ": New Hue Light Group Node created");
    this.ensurePropertyExists("power", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
 }
 
-util.inherits(HueServiceLight, ServiceNode);
+util.inherits(HueServiceLightGroup, ServiceNode);
 
-HueServiceLight.prototype.transactionReadyForProcessing = function(_transaction) {
+HueServiceLightGroup.prototype.transactionReadyForProcessing = function(_transaction) {
    return true;
 };
 
-HueServiceLight.prototype.processTransaction = function(_transaction, _callback) {
+HueServiceLightGroup.prototype.processTransaction = function(_transaction, _callback) {
    var config = this.owner.convertProperties(_transaction.properties);
    console.log(this.uName + ": AAAAA processTransaction() props="+util.inspect(_transaction.properties));
-   //this.owner.hue.setLightState(this.id, this.config, _callback);
+   //this.owner.hue.setGroupLightState(this.id, this.config, _callback);
    return _callback(null, true);
 };
 
-module.exports = exports = HueServiceLight;
+module.exports = exports = HueServiceLightGroup;
 

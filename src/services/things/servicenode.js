@@ -40,17 +40,22 @@ ServiceNode.prototype.createProperty = function(_property, _subscriber) {
 };
 
 ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
+   console.log(this.uName + ":ServiceNode.prototype.propertyAboutToChange() property="+_propName);
    this.owner.notifyChange(this, _propName, _propValue, _data);
 };
 
-// Override this to process a transaction coming off the queue
+// Override this to indicate if a transaction is ready to come off the queue
 // @return true - transaction successfully processed
 //         false - transaction has not been processed, please requeue if possible
+ServiceNode.prototype.transactionReadyForProcessing = function(_transaction) {
+   return true;
+};
+
+// Override this to process a transaction coming off the queue
 // @callback error - just logged
 //           ret -  ignored
-ServiceNode.prototype.transactionReadyForProcessing = function(_transaction, _callback) {
+ServiceNode.prototype.processTransaction = function(_transaction, _callback) {
    _callback(null, true);
-   return true;
 };
 
 module.exports = exports = ServiceNode;
