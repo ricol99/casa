@@ -12,7 +12,7 @@ function HueService(_config, _owner) {
    this.userId = _config.userId;
    this.username = _config.username;
    this.linkAddress = _config.linkAddress;
-   this.queue = [];
+   this.q = [];
    this.requestPending = false;
    this.callbacks = {};
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
@@ -283,19 +283,19 @@ HueService.prototype.addToQueue = function(_request, _deviceId, _config, _callba
       return;
    }
 
-   this.queue.push(new Request(this, _request, _deviceId, _config, cb));
+   this.q.push(new Request(this, _request, _deviceId, _config, cb));
    this.makeNextRequest();
 };
 
 HueService.prototype.makeNextRequest = function() {
 
-   if ((this.queue.length > 0) && !this.requestPending) {
+   if ((this.q.length > 0) && !this.requestPending) {
       this.requestPending = true;
 
-      this.queue[0].send( (_owner, _error, _result) => {
+      this.q[0].send( (_owner, _error, _result) => {
          console.log(this.uName + ': Request done! Error='+_error);
-         this.queue[0].complete(_error, _result);
-         delete this.queue.shift();
+         this.q[0].complete(_error, _result);
+         delete this.q.shift();
 
          var delay = setTimeout(function(_this) {
             _this.requestPending = false;

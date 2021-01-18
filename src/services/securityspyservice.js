@@ -15,7 +15,7 @@ function SecuritySpyService(_config, _owner) {
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 5;
    this.options = { hostname: this.hostname, port: this.port, auth: this.userId + ':' + this.password, rejectUnauthorized: false, requestCert: true, agent: false, timeout: this.requestTimeout*1000 };
 
-   this.queue = [];
+   this.q = [];
    this.cameras = {};
    this.requestPending = false;
    this.initialInfoReceived = false;
@@ -139,24 +139,24 @@ SecuritySpyService.prototype.getCameraModes = function(_cameraId, _callback) {
 };
 
 SecuritySpyService.prototype.addToQueue = function(_path, _requestType, _callback) {
-   this.queue.push(new Request(this, _requestType, _path, _callback));
+   this.q.push(new Request(this, _requestType, _path, _callback));
    this.makeNextRequest();
 };
 
 SecuritySpyService.prototype.makeNextRequest = function() {
 
-   if ((this.queue.length > 0) && !this.requestPending) {
+   if ((this.q.length > 0) && !this.requestPending) {
       this.requestPending = true;
-      this.queue[0].send();
+      this.q[0].send();
    }
 };
 
 SecuritySpyService.prototype.completeRequest = function(_error, _content) {
    console.log(this.uName + ": Request done!");
 
-   this.queue.shift().complete(_error, _content);
+   this.q.shift().complete(_error, _content);
 
-   if (this.queue.length > 0) {
+   if (this.q.length > 0) {
 
       // More in the queue, so reschedule after the link has had time to settle down
       var delay = setTimeout(function(_this) {

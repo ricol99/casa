@@ -8,7 +8,7 @@ function LightwaveRfService(_config, _owner) {
    this.linkAddress = _config.linkAddress;
    this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
 
-   this.queue = [];
+   this.q = [];
    this.requestPending = false;
    this.messageNumber = 0;
 
@@ -100,29 +100,29 @@ LightwaveRfService.prototype.registerWithLink = function(_callback) {
 
 LightwaveRfService.prototype.addToQueue = function(_message, _callback) {
    console.log(this.uName + ": Added request to queue, message=" + _message);
-   this.queue.push(new Request(this, _message, _callback));
+   this.q.push(new Request(this, _message, _callback));
    this.makeNextRequest();
 }
 
 LightwaveRfService.prototype.makeNextRequest = function() {
 
-   if ((this.queue.length > 0) && !this.requestPending) {
+   if ((this.q.length > 0) && !this.requestPending) {
       this.requestPending = true;
-      this.queue[0].send(++this.messageNumber);
+      this.q[0].send(++this.messageNumber);
    }
 }
 
 LightwaveRfService.prototype.completeRequest = function(_code, _errorCode, _error) {
    console.log(this.uName + ': Request done! Code='+_code);
 
-   if (this.requests[_code] && this.queue.length > 0 && this.queue[0].code === _code) {
+   if (this.requests[_code] && this.q.length > 0 && this.q[0].code === _code) {
 
-      if ((_error) && (_errorCode == "6") && (this.queue[0].sendCount < 3)) {
+      if ((_error) && (_errorCode == "6") && (this.q[0].sendCount < 3)) {
          this.messageGap += 50;
          console.log(this.uName + ": Buffer full in link so slowing down requests to 1 every " + this.messageGap + "ms");
       }
       else {
-         this.queue.shift().complete(_error);
+         this.q.shift().complete(_error);
       }
       delete this.requests[_code];
 
@@ -137,10 +137,10 @@ LightwaveRfService.prototype.completeRequest = function(_code, _errorCode, _erro
    }
    else {
       console.error(this.uName + ": Something bad is happening - the received code does not match the top request in the queue!");
-      console.error(this.uName + ": Code=" + _code + " queue length= " + this.queue.length);
+      console.error(this.uName + ": Code=" + _code + " queue length= " + this.q.length);
 
-      if (this.queue.length > 0) {
-         console.error(this.uName + ": Top request in queue has code " + this.queue[0].code);
+      if (this.q.length > 0) {
+         console.error(this.uName + ": Top request in queue has code " + this.q[0].code);
       }
    }
 }
