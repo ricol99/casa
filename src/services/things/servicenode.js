@@ -50,13 +50,10 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 
 ServiceNode.prototype.addMissingProperties = function(_props) {
 
-   for (var prop in this.subscriberProps) {
+   for (var i = 0; i < this.subscriberProps.length; ++i) {
 
-      if (this.subscriberProps.hasOwnProperty(prop)) {
-
-         if (!_props.hasOwnProperty(prop)) {
-            _props[prop] = this.getProperty(prop);
-         }
+      if (!_props.hasOwnProperty(this.subscriberProps[i])) {
+         _props[this.subscriberProps[i]] = this.getProperty(this.subscriberProps[i]);
       }
    }
 };
