@@ -38,11 +38,9 @@ Service.prototype.createThing = function(_config) {
 Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
 
    if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_data.transactionId)) {
-      console.log(this.uName + ": AAAA HERE A!");
 
       if (_serviceNode.name !== this.transactions[_data.transactionId].serviceNode.name) {
-      console.log(this.uName + ": AAAA HERE B!");
-         console.error(this.uName + ":Transaction is across two different service nodes. Not allowed!");
+         console.error(this.uName + ":Transaction is across two different service nodes. Not allowed! Service node " + _serviceNode.name + " and " + this.transactions[_data.transactionId].serviceNode.name);
       }
       else {
       console.log(this.uName + ": AAAA HERE C!");
