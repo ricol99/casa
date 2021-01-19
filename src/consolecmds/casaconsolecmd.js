@@ -7,6 +7,11 @@ function CasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
+CasaConsoleCmd.prototype.restart = function(_arguments, _callback)  {
+   this.executeParsedCommand("restart", _arguments, _callback);
+};
+
+
 CasaConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
