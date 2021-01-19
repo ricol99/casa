@@ -21,10 +21,14 @@ ServiceNode.prototype.newSubscriber = function(_subscription) {
 ServiceNode.prototype.createProperties = function(_subscription) {
 
    if (_subscription.hasOwnProperty("subscriberProperties")) {
+      this.subscriberProps = util.copy(_subscription.subscriberProperties);
 
       for (var i = 0; i < _subscription.subscriberProperties.length; ++i) {
          this.createProperty(_subscription.subscriberProperties[i], _subscription.subscriber);
       }
+   }
+   else {
+      this.subscriberProps = [];
    }
 };
 
@@ -42,6 +46,19 @@ ServiceNode.prototype.createProperty = function(_property, _subscriber) {
 ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ":ServiceNode.prototype.propertyAboutToChange() property="+_propName);
    this.owner.notifyChange(this, _propName, _propValue, _data);
+};
+
+ServiceNode.prototype.addMissingProperties = function(_props) {
+
+   for (var prop in this.subscriberProps) {
+
+      if (this.subscriberProps.hasOwnProperty(prop)) {
+
+         if (!_props.hasOwnProperty(prop)) {
+            _props[prop] = this.getProperty(prop);
+         }
+      }
+   }
 };
 
 // Override this to indicate if a transaction is ready to come off the queue
