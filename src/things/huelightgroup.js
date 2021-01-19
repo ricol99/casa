@@ -57,7 +57,7 @@ util.inherits(HueLightGroup, Thing);
 
 HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (!_data.coldStart) {
+   /*if (!_data.coldStart) {
 
       if (_propName == "power") {
 
@@ -77,7 +77,7 @@ HueLightGroup.prototype.propertyAboutToChange = function(_propName, _propValue, 
       else if (this.getProperty("power")) {
          this.syncDeviceProperty(_propName, _propValue);
       }
-   }
+   }*/
 };
 
 HueLightGroup.prototype.syncDeviceProperties = function() {
@@ -95,7 +95,7 @@ HueLightGroup.prototype.syncDeviceProperties = function() {
        config["saturation"] =  this.getProperty("saturation");
    }
    
-   this.hueService.setLightGroupState(this.lightGroupId, config);
+   //this.hueService.setLightGroupState(this.lightGroupId, config);
 };
 
 HueLightGroup.prototype.syncDeviceProperty = function(_propName, _propValue) {
@@ -107,14 +107,14 @@ HueLightGroup.prototype.syncDeviceProperty = function(_propName, _propValue) {
       case  "brightness":
       case  "hue":
       case  "saturation":
-         this.hueService.setLightGroupState(this.lightGroupId, temp);
+         //this.hueService.setLightGroupState(this.lightGroupId, temp);
          break;
    }
 };
 
 HueLightGroup.prototype.coldStart = function() {
 
-   if (this.hueGroupName) {
+   /*if (this.hueGroupName) {
 
       this.hueService.getLightGroups( (_err, _result) => {
 
@@ -138,9 +138,9 @@ HueLightGroup.prototype.coldStart = function() {
          }
       });
    }
-   else {
+   else {*/
       Thing.prototype.coldStart.call(this);
-   }
+   //}
 };
 
 

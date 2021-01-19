@@ -69,7 +69,7 @@ util.inherits(HueLight, Thing);
 
 HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (!_data.coldStart) {
+   /*if (!_data.coldStart) {
 
       if (_propName == "power") {
 
@@ -85,7 +85,7 @@ HueLight.prototype.propertyAboutToChange = function(_propName, _propValue, _data
       else if (this.getProperty("power")) {
          this.syncDeviceProperty(_propName, _propValue);
       }
-   }
+   }*/
 };
 
 HueLight.prototype.syncDeviceProperties = function() {
@@ -103,7 +103,7 @@ HueLight.prototype.syncDeviceProperties = function() {
        config["saturation"] =  this.getProperty("saturation");
    }
 
-   this.hueService.setLightState(this.deviceId, config);
+   //this.hueService.setLightState(this.deviceId, config);
 };
 
 HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
@@ -112,7 +112,7 @@ HueLight.prototype.syncDeviceProperty = function(_propName, _propValue) {
              saturation: "setLightSaturation" };
 
    if (f[_propName]) {
-      this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue);
+      //this.hueService[f[_propName]].call(this.hueService, this.deviceId, _propValue);
    }
 };
 
