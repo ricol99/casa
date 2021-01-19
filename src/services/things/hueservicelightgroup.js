@@ -25,7 +25,7 @@ HueServiceLightGroup.prototype.processTransaction = function(_transaction, _call
 
    var config = this.owner.convertProperties(_transaction.properties);
    console.log(this.uName + ": AAAAA processTransaction() props="+util.inspect(_transaction.properties));
-   //this.owner.hue.setGroupLightState(this.id, this.config, _callback);
+   this.owner.hue.setGroupLightState(this.id, config, _callback);
    return _callback(null, true);
 };
 
