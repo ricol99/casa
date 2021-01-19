@@ -37,24 +37,15 @@ Service.prototype.createThing = function(_config) {
 
 Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
 
-   if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_data.transactionId)) {
-
-      if (_serviceNode.name !== this.transactions[_data.transactionId].serviceNode.name) {
-         console.error(this.uName + ":Transaction is across two different service nodes. Not allowed! Service node " + _serviceNode.name + " and " + this.transactions[_data.transactionId].serviceNode.name);
-      }
-      else {
-      console.log(this.uName + ": AAAA HERE C!");
-         this.transactions[_data.transactionId].properties[_propName] = _propValue;
-      }
+   if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId)) {
+      this.transactions[_serviceNode.name + "-" + _data.transactionId].properties[_propName] = _propValue;
    }
    else {
-      console.log(this.uName + ": AAAA HERE D!");
       var transaction = { serviceNode: _serviceNode, properties: {} };
       transaction.properties[_propName] = _propValue;
 
       if (_data.hasOwnProperty("transactionId")) {
-      console.log(this.uName + ": AAAA HERE E!");
-         transaction.transactionId = _data.transactionId;
+         transaction.transactionId = _serviceNode.name + "-" + _data.transactionId;
       }
 
       this.queueTransaction(transaction);
@@ -63,7 +54,6 @@ Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _
 
 Service.prototype.queueTransaction = function(_transaction) {
    _transaction.queued =  _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
-            console.log(this.uName+": AAAAAA HERE F!");
 
    if (_transaction.queued > this.queueRetryLimit) {
       console.error(this.uName + ": Unable to queue transaction as it has been requeued too many times");
@@ -81,15 +71,12 @@ Service.prototype.queueTransaction = function(_transaction) {
 
 Service.prototype.pokeQueue = function() {
 
-            console.log(this.uName+": AAAAAA HERE G! Queue length="+this.queue.length);
    if (!this.queueTimer && this.queue.length > 0) {
 
       this.queueTimer = setTimeout( () => {
-         console.log(this.uName+": AAAAAA HERE H!");
 
          if (this.queue.length > 0) {
             var transaction = this.queue.shift();
-            console.log(this.uName+": AAAAAA HERE I! transaction=", transaction.properties);
             
             if (transaction.hasOwnProperty("transactionId")) {
                delete this.transactions[transaction.transactionId];
