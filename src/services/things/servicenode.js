@@ -51,12 +51,8 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 ServiceNode.prototype.addMissingProperties = function(_props) {
 
    for (var i = 0; i < this.subscriberProps.length; ++i) {
-      console.log(this.uName + ": AAAAA sub props=", this.subscriberProps);
 
       if (!_props.hasOwnProperty(this.subscriberProps[i])) {
-         console.log(this.uName + ": AAAAA missing prop=", this.subscriberProps[i]);
-         console.log(this.uName + ": AAAAA adding in prop with value=", this.getProperty(this.subscriberProps[i]));
-
          _props[this.subscriberProps[i]] = this.getProperty(this.subscriberProps[i]);
       }
    }
