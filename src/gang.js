@@ -331,7 +331,7 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
             if (_dbCallback_) {
                this.peerCasaService.setDbCallback(_dbCallback_);
             }
-         }, 30000, _dbCallback);
+         }, 20000 + Math.floor(Math.random(20000)), _dbCallback);
       }
    }
 };
