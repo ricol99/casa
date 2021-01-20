@@ -23,16 +23,26 @@ function Service(_config, _owner) {
 
 util.inherits(Service, Thing);
 
-Service.prototype.createThing = function(_config) {
+Service.prototype.createNode = function(_config) {
    var type = _config.type;
    _config.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : false;
    _config.local = (_config.hasOwnProperty("local")) ? _config.local : this.localThings;
 
-   var ServiceOwnedThing = require("./services/things/"+type);
-   var thing = new ServiceOwnedThing(_config, this);
+   var ServiceOwnedNode = require("./services/nodes/"+type);
+   var thing = new ServiceOwnedNode(_config, this);
    this.gang.casa.refreshSourceListeners();
 
    return thing;
+};
+
+Service.prototype.findOrCreateNode = function(_config) {
+
+   if (this.myNamedObjects.hasOwnProperty(_config.name)) {
+      return this.myNamedObjects[_config.name];
+   }
+   else {
+      return this.createNode(_config);
+   }
 };
 
 Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
@@ -41,18 +51,18 @@ Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _
       this.transactions[_serviceNode.name + "-" + _data.transactionId].properties[_propName] = _propValue;
    }
    else {
-      var transaction = { serviceNode: _serviceNode, properties: {} };
+      var transaction = { "action": "propertyChanged", properties: {} };
       transaction.properties[_propName] = _propValue;
 
       if (_data.hasOwnProperty("transactionId")) {
          transaction.transactionId = _serviceNode.name + "-" + _data.transactionId;
       }
 
-      this.queueTransaction(transaction);
+      this.queueTransaction(_serviceNode, transaction);
    }
 };
 
-Service.prototype.queueTransaction = function(_transaction) {
+Service.prototype.queueTransaction = function(_serviceNode, _transaction) {
    _transaction.queued =  _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
 
    if (_transaction.queued > this.queueRetryLimit) {
@@ -60,8 +70,19 @@ Service.prototype.queueTransaction = function(_transaction) {
       return false;
    }
 
+   _transaction.serviceNode = _serviceNode;
+
    if (_transaction.hasOwnProperty("transactionId")) {
       this.transactions[_transaction.transactionId] = _transaction;
+   }
+
+   if (!_transaction.hasOwnProperty("callback")) {
+      _transaction.callback = function(_err, _res) {
+
+         if (_err) {
+            console.error(this.uName + ": Unable to process transaction. Error=" + _err);
+         }
+      };
    }
 
    this.queue.push(_transaction);
@@ -84,19 +105,16 @@ Service.prototype.pokeQueue = function() {
 
             if (transaction.serviceNode.transactionReadyForProcessing(transaction)) {
 
-               transaction.serviceNode.processTransaction(transaction, (_err, _res) => {
+               setTimeout( (_transaction) => {
+                  Object.getPrototypeOf(_transaction.serviceNode)["process" + _transaction.action[0].toUpperCase() + _transaction.action.slice(1)].call(_transaction.serviceNode, _transaction, _transaction.callback);
+               }, 0, transaction);
 
-                  if (_err) {
-                     console.error(this.uName + ": Unable to process transaction. Error=" + _err);
-                  }
-
-                  this.queueTimer = null;
-                  this.pokeQueue();
-               });
+               this.queueTimer = null;
+               this.pokeQueue();
             }
             else {
                this.queueTimer = null;
-               this.queueTransaction(transaction);
+               this.queueTransaction(transaction.serviceNode, transaction);
             }
          }
       }, this.queueQuant);

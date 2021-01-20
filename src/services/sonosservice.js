@@ -38,7 +38,7 @@ SonosService.prototype.coldStart = function() {
                      console.log(this.uName + ": Found new zone " + _groups[i].ZoneGroupMember[0].ZoneName);
                      this.zones[_groups[i].ZoneGroupMember[0].ZoneName] = { id: _groups[i].ID, host: _groups[i].host, port: _groups[i].port };
 
-                     var thing = this.createThing({ type: "sonosservicezone", name: _groups[i].ZoneGroupMember[0].ZoneName.replace(/ /g, '-'),
+                     var thing = this.createNode({ type: "sonosservicezone", name: _groups[i].ZoneGroupMember[0].ZoneName.replace(/ /g, '-'),
                                                     zone: _groups[i].ZoneGroupMember[0].ZoneName,
                                                     host: _groups[i].host, port: _groups[i].port });
 

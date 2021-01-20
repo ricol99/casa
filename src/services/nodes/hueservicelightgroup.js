@@ -11,11 +11,19 @@ function HueServiceLightGroup(_config, _owner) {
 
 util.inherits(HueServiceLightGroup, ServiceNode);
 
+HueServiceLightGroup.prototype.setState = function(_properties, _callback) {
+   var transaction = { action: "setState", properties: util.copy(_properties), callback: _callback };
+   this.owner.queueTransaction(this, transaction);
+};
+
+//////////////////////////
+// Callbacks from Service
+//////////////////////////
 HueServiceLightGroup.prototype.transactionReadyForProcessing = function(_transaction) {
    return true;
 };
 
-HueServiceLightGroup.prototype.processTransaction = function(_transaction, _callback) {
+HueServiceLightGroup.prototype.processPropertyChanged = function(_transaction, _callback) {
 
    if ((_transaction.properties.hasOwnProperty("power") && (_transaction.properties.power === true)) ||
        (this.getProperty("power") === true)) {
@@ -23,11 +31,13 @@ HueServiceLightGroup.prototype.processTransaction = function(_transaction, _call
       this.addMissingProperties(_transaction.properties);
    }
 
-   var config = this.owner.convertProperties(_transaction.properties);
-   console.log(this.uName + ": AAAAA processTransaction() props="+util.inspect(_transaction.properties));
-   this.owner.hue.setGroupLightState(this.id, config, _callback);
-   return _callback(null, true);
+   this.processSetState(_transaction, _callback);
 };
+
+HueServiceLightGroup.prototype.processSetState = function(_transaction, _callback) {
+   var config = this.owner.convertProperties(_transaction.properties);
+   this.owner.hue.setGroupLightState(this.id, config, _callback);
+}
 
 module.exports = exports = HueServiceLightGroup;
 

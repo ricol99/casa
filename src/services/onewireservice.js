@@ -26,7 +26,7 @@ OneWireService.prototype.coldStart = function() {
          var deviceType = _data.ids[i].split("-")[0];
 
          if (this.deviceTypes[deviceType]) {
-            this.devices[_data.ids[i]] = this.createThing({ type: this.deviceTypes[deviceType], name: _data.ids[i] });
+            this.devices[_data.ids[i]] = this.createNode({ type: this.deviceTypes[deviceType], name: _data.ids[i] });
          }
          else {
             console.log(this.uName + ": Unknown Onewire device with type " + deviceType + " attached to pi, ignoring...");

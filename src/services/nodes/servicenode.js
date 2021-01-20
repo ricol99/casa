@@ -65,12 +65,5 @@ ServiceNode.prototype.transactionReadyForProcessing = function(_transaction) {
    return true;
 };
 
-// Override this to process a transaction coming off the queue
-// @callback error - just logged
-//           ret -  ignored
-ServiceNode.prototype.processTransaction = function(_transaction, _callback) {
-   _callback(null, true);
-};
-
 module.exports = exports = ServiceNode;
 
