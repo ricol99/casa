@@ -3,7 +3,7 @@ var Service = require('../service');
 var Hue = require("node-hue-api");
 
 function HueService(_config, _owner) {
-   _config.queueQuant = 50;
+   _config.queueQuant = 100;
 
    Service.call(this, _config, _owner);
 
