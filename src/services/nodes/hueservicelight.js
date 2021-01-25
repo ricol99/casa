@@ -26,7 +26,7 @@ HueServiceLight.prototype.transactionReadyForProcessing = function(_transaction)
 };
 
 HueServiceLight.prototype.processPropertyChanged = function(_transaction, _callback) {
-   console.log(this.uName + ": processPropertyChanged() transaction=", _transaction.properties");
+   console.log(this.uName + ": processPropertyChanged() transaction=", _transaction.properties);
 
    if ((_transaction.properties.hasOwnProperty("power") && (_transaction.properties.power === true)) ||
        (this.getProperty("power") === true)) {
