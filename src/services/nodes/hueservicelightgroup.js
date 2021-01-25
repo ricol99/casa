@@ -36,7 +36,7 @@ HueServiceLightGroup.prototype.processPropertyChanged = function(_transaction, _
 };
 
 HueServiceLightGroup.prototype.processSetState = function(_transaction, _callback) {
-   console.log(this.uName + ": processSetState() transaction=", _transaction.properties");
+   console.log(this.uName + ": processSetState() transaction=", _transaction.properties);
 
    var config = this.owner.convertProperties(_transaction.properties);
    this.owner.hue.setGroupLightState(this.id, config, _callback);
