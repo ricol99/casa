@@ -26,14 +26,14 @@ HueServiceLightGroup.prototype.transactionReadyForProcessing = function(_transac
 HueServiceLightGroup.prototype.processPropertyChanged = function(_transaction, _callback) {
    console.log(this.uName + ": processPropertyChanged() transaction=", _transaction.properties);
 
-   if ((_transaction.properties.hasOwnProperty("power") && _transaction.properties.power) ||
+   if (_transaction.properties.hasOwnProperty("power") && !_transaction.properties.power) {
+      delete _transaction.properties;
+      _transaction.properties = { power: false };
+   }
+   else if ((_transaction.properties.hasOwnProperty("power") && _transaction.properties.power) ||
        (this.getProperty("power") === true)) {
       
       this.addMissingProperties(_transaction.properties);
-   }
-   else if (_transaction.properties.hasOwnProperty("power") && !_transaction.properties.power) {
-      delete _transaction.properties;
-      _transaction.properties = { power: false };
    }
    else {
       return _callback(null, true);
