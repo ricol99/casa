@@ -59,8 +59,8 @@ ServiceNode.prototype.addMissingProperties = function(_props) {
 };
 
 // Override this to indicate if a transaction is ready to come off the queue
-// @return true - transaction successfully processed
-//         false - transaction has not been processed, please requeue if possible
+// @return true - transaction ready processed
+//         false - transaction not ready to be processed, please requeue if possible
 ServiceNode.prototype.transactionReadyForProcessing = function(_transaction) {
    return true;
 };
