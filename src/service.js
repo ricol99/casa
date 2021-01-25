@@ -104,6 +104,7 @@ Service.prototype.pokeQueue = function() {
             }
 
             if (transaction.serviceNode.transactionReadyForProcessing(transaction)) {
+               console.log(this.uName + ": Dispatching transaction for processing, " + util.inspect(transaction.properties));
 
                setTimeout( (_transaction) => {
                   Object.getPrototypeOf(_transaction.serviceNode)["process" + _transaction.action[0].toUpperCase() + _transaction.action.slice(1)].call(_transaction.serviceNode, _transaction, _transaction.callback);
