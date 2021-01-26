@@ -41,7 +41,6 @@ ConsoleCmd.prototype.checkArguments = function(_minLength, _arguments) {
          }
       }
    }
-   process.stdout.write(util.inspect(_arguments)+"\n");
 };
 
 ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callback) {
