@@ -23,6 +23,8 @@ function Thing(_config, _owner) {
    Source.call(this, _config, _owner);
 
    this.displayName = _config.displayName;
+   this.ignoreParent = (_config.hasOwnProperty('ignoreParent')) ? _config.ignoreParent : false;
+   this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
    this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
    this.things = {};
@@ -45,14 +47,16 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
+      if (!this.ignoreParent) {
+         Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
-      if (this.propogateToChildren) {
+         if (this.propogateToChildren) {
 
-         for (var thing in this.things) {
+            for (var thing in this.things) {
 
-            if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].updateProperty(_propName, _propValue, data);
+               if (this.things.hasOwnProperty(thing)) {
+                  this.things[thing].updateProperty(_propName, _propValue, data);
+               }
             }
          }
       }
@@ -86,38 +90,49 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 };
 
 Thing.prototype.inheritChildProps = function() {
-   var childProps = {};
 
-   for (var thing in this.things) {
+   if (!this.ignoreChildren) {
+      var childProps = {};
 
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].getAllProperties(childProps);
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].getAllProperties(childProps);
+         }
       }
-   }
 
-   for (var prop in childProps) {
+      for (var prop in childProps) {
 
-      if (childProps.hasOwnProperty(prop)) {
-         this.ensurePropertyExists(prop, "property", { initialValue: childProps[prop] }, this.config);
+         if (childProps.hasOwnProperty(prop)) {
+            this.ensurePropertyExists(prop, "property", { initialValue: childProps[prop] }, this.config);
+         }
       }
    }
 };
 
 Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
-   if (_ignorePropogation || (this.topLevelThing || this.propogateToParent)) {
+   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propogateToParent))) {
       Source.prototype.getAllProperties.call(this, _allProps);
 
-      for (var thing in this.things) {
+      if (!this.ignoreChildren) {
 
-         if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].getAllProperties(_allProps);
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].getAllProperties(_allProps);
+            }
          }
       }
    }
 };
 
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
+
+   if (this.ignoreChildren) {
+      return false;
+   }
+
    var ret = this.propogateToChildren;
 
    if (!this.topLevelThing && this.propogateToParent) {
@@ -132,12 +147,15 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
 
 Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
-   if (!this.topLevelThing) {
-      this.owner.childRaisedEvent(_eventName, this, _data);
-   }
-   else {
-      _data.alignWithParent = true;
-      this.raiseEvent(_eventName, _data);
+   if (!this.ignoreChildren) {
+
+      if (!this.topLevelThing) {
+         this.owner.childRaisedEvent(_eventName, this, _data);
+      }
+      else {
+         _data.alignWithParent = true;
+         this.raiseEvent(_eventName, _data);
+      }
    }
 };
 
