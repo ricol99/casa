@@ -166,8 +166,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.propertyAboutToChange(_propName, _propValue, sendData);
 
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
-      this.props[_propName].value = _propValue;
-      this.props[_propName].previousValue = oldValue;
+      this.props[_propName]._actuallySetPropertyValue(_propValue);
 
       if (sendData.hasOwnProperty("priority")) {
          _data.priority = sendData.priority;

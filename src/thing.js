@@ -63,9 +63,9 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
 
-      //if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.props.hasOwnProperty(_propName) && (_propValue === this.props[_propName].value)) {
-         //return true;
-      //}
+      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.props.hasOwnProperty(_propName) && (_propValue === this.props[_propName].value)) {
+         return true;
+      }
 
       data.propertyOldValue = this.value;
       data.alignWithParent = true;

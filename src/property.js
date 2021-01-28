@@ -286,19 +286,31 @@ Property.prototype.coldStart = function(_data) {
 // INTERNAL METHODS
 // ====================
 
-Property.prototype.setPropertyInternal = function(_newValue, _data) {
-   console.log(this.uName + ": setPropertyInternal value="+_newValue);
+// Not to be called by anything other than owner (Thing or Source)
+Property.prototype._actuallySetPropertyValue = function(_newValue) {
 
-   if (this.value !== _newValue || this.cold) {
+   if ((this.value !== _newValue) || this.cold) {
 
       if (this.cold) {
-         _data.coldStart = true;
          this.cold = false;
       }
 
+      this.previousValue = this.value;
+      this.value = _newValue;
+   }
+};
+
+Property.prototype.setPropertyInternal = function(_newValue, _data) {
+   console.log(this.uName + ": setPropertyInternal value="+_newValue);
+
+   if ((this.value !== _newValue) || this.cold) {
+
+      if (this.cold) {
+         _data.coldStart = true;
+      }
+
       _data.local = this.local;
-      this.owner.updateProperty(this.name, _newValue, _data);
-      return true;
+      return this.owner.updateProperty(this.name, _newValue, _data);
    }
    else {
       return false;
