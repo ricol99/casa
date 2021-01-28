@@ -203,8 +203,11 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 SourceListener.prototype.goValid = function() {
    this.owner.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 
-   if (this.subscription && this.subscription.hasOwnProperty("prop")) {
-      this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.source.getProperty(this.eventName), coldStart: true }));
+   if (this.subscription && this.subscription.hasOwnProperty("prop") && this.source.props.hasOwnProperty(this.eventName)) {
+
+      if (!this.source.props[this.eventName].cold || this.source.props[this.eventName].initialValueSet) {
+         this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.source.getProperty(this.eventName), coldStart: true }));
+      }
    }
 }
 
