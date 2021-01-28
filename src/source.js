@@ -144,7 +144,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    if (this.props.hasOwnProperty(_propName)) {
       console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
-      if ((!(_data && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
+      if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
          return true;
       }
 
