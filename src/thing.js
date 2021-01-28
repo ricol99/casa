@@ -104,7 +104,8 @@ Thing.prototype.inheritChildProps = function() {
       for (var prop in childProps) {
 
          if (childProps.hasOwnProperty(prop)) {
-            this.ensurePropertyExists(prop, "property", { initialValue: childProps[prop] }, this.config);
+            var oSpec = (childProps[prop] == undefined) ? { name: prop } : { name: prop, initialValue: childProps[prop] };
+            this.ensurePropertyExists(prop, "property", oSpec, this.config);
          }
       }
    }
