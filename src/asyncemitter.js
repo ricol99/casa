@@ -19,7 +19,7 @@ AsyncEmitter.prototype.setAsyncEmitTimer = function() {
    if (!this.asyncEmitTimer) {
 
       this.asyncEmitTimer = setTimeout( () => {
-         let event = this.eventQueue.pop();
+         let event = this.eventQueue.shift();
          this.emit(event.eventName, event.data);
          this.asyncEmitTimer = null;
 
