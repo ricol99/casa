@@ -118,7 +118,7 @@ function Building(_config, _parent) {
                                          { name: "occupied-going-to-bed", sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
                                                                                     { property: "all-users-away", value: true, nextState: "empty" }]},
                                          { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-may-be-waking-up" },
-                                                                              { event: "user-arrived", nextState: "occupied-going-to-bed" },
+                                                                              { event: "user-arrived", nextState: "user-arrived-during-bedtime" },
                                                                               { property: "all-users-away", value: true, nextState: "empty" }] },
                                          { name: "occupied-may-be-waking-up", source: { event: "user-arrived", nextState: "user-arrived-during-bedtime" },
                                            timeout: { duration: 5, nextState: "occupied-waking-up" } },

@@ -53,7 +53,7 @@ function Bedroom(_config, _parent) {
 
    this.bedStatusConfig = { name: "bed-state", initialValue: "empty" };
    this.bedFullConfig = { initialValue: false, sources: [] };
-   this.userMonitorConfig = { initialValue: "idle", states: [{ "name": "idle", sources: [] }] };
+   this.userMonitorConfig = { initialValue: "idle", states: [{ "name": "idle", "priority": 0, sources: [] }] };
 
    for (var i = 0; i < _config.users.length; ++i) {
       this.userStateConfigs.push({});
@@ -192,7 +192,7 @@ function Bedroom(_config, _parent) {
    this.ensurePropertyExists("users-sensitive", 'orproperty', { initialValue: false, sources: [{ property: "all-present-users-in-bed" },
                                                                                                { property: "some-present-users-asleep" }] }, _config);
 
-   this.userMonitorConfig.states.push({ name: "room-switch-event-required", action: { "event": "room-switch-event" }, "timeout": { "duration": 0.5, "nextState": "PREVIOUS-STATE" }}),
+   this.userMonitorConfig.states.push({ name: "room-switch-event-required", priority: 15, action: { "event": "room-switch-event" }, "timeout": { "duration": 0.5, "nextState": "PREVIOUS-STATE" }}),
    this.ensurePropertyExists("monitor-users", 'stateproperty', this.userMonitorConfig, _config);
 }
 
