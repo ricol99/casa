@@ -180,6 +180,11 @@ HueService.prototype.setLightSaturation = function(_deviceId, _saturation, _call
    serviceNode.setState({ saturation: _saturation }, _callback);
 };
 
+HueService.prototype.setLightColourTemp = function(_deviceId, _colourTemp, _callback) {
+   var serviceNode = this.findOrCreateNode("light", _deviceId);
+   serviceNode.setState({ "colour-temp": _colourTemp }, _callback);
+};
+
 HueService.prototype.getLightState = function(_deviceId, _callback) {
    var serviceNode = this.findOrCreateNode("light", _deviceId);
    serviceNode.getState(_callback);
@@ -209,6 +214,9 @@ HueService.prototype.convertProperties = function(_props) {
                break;
             case "saturation":
                config.sat = Math.floor(parseFloat(_props[prop] * 255 / 100));
+               break;
+            case "colour-temp":
+               config.ct = _props[prop];
                break;
          }
       }

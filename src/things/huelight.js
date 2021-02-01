@@ -38,6 +38,11 @@ function HueLight(_config, _parent) {
          this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
       }
    }
+   else if (_config.colourTempSupported) {
+      this.colourTempSupported = true;
+      serviceProps.push("colour-temp");
+      this.ensurePropertyExists('colour-temp', 'property', { initialValue: 153 }, _config);
+   }
 
    this.ensurePropertyExists('hub-connected', 'property', { initialValue: false, source: { uName: this.hueServiceName, property: "hub-connected", 
                                                             subscription: { subscriber: this.uName, type: "light", id: this.deviceId, subscriberProperties: serviceProps } }}, _config);

@@ -45,6 +45,11 @@ function HueLightGroup(_config, _parent) {
          this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
       }
    }
+   else if (_config.colourTempSupported) {
+      this.colourTempSupported = true;
+      serviceProps.push("colour-temp");
+      this.ensurePropertyExists('colour-temp', 'property', { initialValue: 153 }, _config);
+   }
 
    this.ensurePropertyExists('scene', 'property', { initialValue: false }, _config);
 
