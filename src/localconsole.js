@@ -237,6 +237,23 @@ LocalConsole.prototype.extractMethodAndArguments = function(_originalLine, _line
       }
    }
 
+   if (methodArguments) {
+
+      for (var i = 0; i < methodArguments.length; ++i) {
+         var f = parseFloat(methodArguments[i]);
+
+         if (!isNaN(f)) {
+            methodArguments[i] = f;
+         }
+         else if (methodArguments[i] === "false") {
+            methodArguments[i] = false;
+         }
+         else if (methodArguments[i] === "true") {
+            methodArguments[i] = true;
+         }
+      }
+   }
+
    return { method: method, arguments: methodArguments };
 };
 

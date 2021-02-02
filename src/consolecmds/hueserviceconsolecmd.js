@@ -1,5 +1,6 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
+var commandLineArgs = require('command-line-args')
 
 function HueServiceConsoleCmd(_config, _owner, _console) {
    ConsoleCmd.call(this, _config, _owner, _console);
@@ -37,6 +38,27 @@ HueServiceConsoleCmd.prototype.createUserOnBridge = function(_arguments, _callba
          this.executeParsedCommand("createUserOnBridge", [ _bridge.ipaddress, persist ], _callback);
       });
    });
+};
+
+HueServiceConsoleCmd.prototype.lights = function(_arguments, _callback) {
+   this.executeParsedCommand("lights", [], _callback);
+};
+
+HueServiceConsoleCmd.prototype.groups = function(_arguments, _callback) {
+
+   if (_arguments && (_arguments.length > 0)) {
+
+      var lightGroupDefinitions = [
+         { name: 'groupId', alias: 'l', type: String, defaultOption: true },
+         { name: 'create', alias: 'c', type: String }
+      ];
+
+      var options = commandLineArgs(lightGroupDefinitions, { argv: _arguments });
+      return _callback(options);
+   }
+   else {
+      this.executeParsedCommand("groups", _arguments, _callback);
+   }
 };
 
 module.exports = exports = HueServiceConsoleCmd;

@@ -24,23 +24,6 @@ ConsoleCmd.prototype.checkArguments = function(_minLength, _arguments) {
    if ((!_arguments && (_minLength > 0)) || (_arguments && (_arguments.length < _minLength)))  {
       throw("Not enough arguments");
    }
-
-   if (_arguments) {
-
-      for (var i = 0; i < _arguments.length; ++i) {
-         var f = parseFloat(_arguments[i]);
-
-         if (!isNaN(f)) {
-            _arguments[i] = f;
-         }
-         else if (_arguments[i] === "false") {
-            _arguments[i] = false;
-         }
-         else if (_arguments[i] === "true") {
-            _arguments[i] = true;
-         }
-      }
-   }
 };
 
 ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callback) {
