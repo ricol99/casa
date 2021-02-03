@@ -109,12 +109,15 @@ function Room(_config, _parent) {
       _config.scenes.push({ name: "not-active" });
 
       for (var g = 0; g < (_config.scenes.length - 1); ++g) {
-         sceneConfig.states.push({ name: _config.scenes[g].name, sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }],
-                                   priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 8,
-                                   timeout: { duration: _config.scenes[g].hasOwnProperty("timeout") ? _config.scenes[g].timeout : 900, nextState: "not-active" }});
+         var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 8, 
+                             sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }, { property: "night-time", value: true, nextState: "not-active"}] };
+
+         if (_config.scenes[g].hasOwnProperty("timeout")) {
+            stateConfig.timeout = { duration: _config.scenes[g].timeout, nextState: "not-active" };
+         }
+         sceneConfig.states.push(stateConfig);
       }
 
-      console.log(this.uName+": AAAAA scene config = ", sceneConfig);
       this.ensurePropertyExists('scene-state', 'stateproperty', sceneConfig, _config);
    }
    else {
