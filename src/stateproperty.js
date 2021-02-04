@@ -429,6 +429,14 @@ function State(_config, _owner) {
    this.priorityDefined = _config.hasOwnProperty('priority') || _owner.priorityDefined;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : _owner.priority;
 
+   if (_config.hasOwnProperty("guard")) {
+      _config.guards = [ _config.guard ];
+   }
+
+   if (_config.hasOwnProperty("guards")) {
+      this.guards = _config.guards;
+   }
+
    if (_config.hasOwnProperty("source")) {
       _config.sources = [ _config.source ];
    }
@@ -596,7 +604,7 @@ State.prototype.getCasa = function() {
 };
 
 State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority) {
-   var immediateState = this.checkSourceProperties();
+   var immediateState = this.checkStateGuards() || this.checkSourceProperties();
 
    if (!immediateState) {
 
@@ -792,6 +800,28 @@ State.prototype.alignActions = function() {
    this.owner.alignActions(filteredActions, this.priority);
 
    return (filteredActions && (filteredActions.length > 0));
+};
+
+State.prototype.checkStateGuards = function() {
+   var immediateNextState = null;
+
+   if (this.guards) {
+
+      for (var i = 0; i < this.guards.length; i++) {
+
+         if (this.checkGuard({ guards: [ this.guards[i] ] }) && this.guards[i].hasOwnProperty("nextState")) {
+
+            // Property already matches so move to next state immediately
+            if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
+               immediateNextState = this.guards[i].nextState;
+               console.log(this.uName+": Immediate state transition required as guard has matched! Property="+this.guards[i].property+" value="+this.guards[i].value+", nextState="+immediateNextState);
+               break;
+            }
+         }
+      }
+   }
+
+   return immediateNextState;
 };
 
 State.prototype.checkSourceProperties = function() {

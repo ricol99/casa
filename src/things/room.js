@@ -112,9 +112,14 @@ function Room(_config, _parent) {
          var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 8, 
                              sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }, { property: "night-time", value: true, nextState: "not-active"}] };
 
+         if (_config.scenes[g].hasOwnProperty("guard")) {
+            stateConfig.guard = { property: _config.scenes[g].guard.property, value: _config.scenes[g].guard.hasOwnProperty("value") ? _config.scenes[g].guard.value : true, nextState: _config.scenes[g + 1].name };
+         }
+
          if (_config.scenes[g].hasOwnProperty("timeout")) {
             stateConfig.timeout = { duration: _config.scenes[g].timeout, nextState: "not-active" };
          }
+
          sceneConfig.states.push(stateConfig);
       }
 
