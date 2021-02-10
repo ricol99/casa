@@ -76,10 +76,10 @@ function Room(_config, _parent) {
    this.buildingName = _config.building;
 
    this.roomStates = _config.hasOwnProperty("roomStates") ? _config.roomStates : 
-                                                            [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 0},
+                                                            [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 5},
                                                              { name: "no-users-present-dull-day", priority: 0}, { name: "users-present-dull-day", priority: 5},
                                                              { name: "no-users-present-evening", priority: 0}, { name: "users-present-evening", priority: 5},
-                                                             { name: "no-users-present-night", priority: 0}, { name: "users-present-night", priority: 0}];
+                                                             { name: "no-users-present-night", priority: 0}, { name: "users-present-night", priority: 5}];
 
    this.sensitivityStates = _config.hasOwnProperty("sensitivityStates") ? _config.sensitivityStates : [{ name: "no-users-present-normal", priority: -1 }, { name: "users-present-normal", priority: -1 },
                                                                                                        { name: "no-users-present-sensitive", priority: 15 }, { name: "users-present-sensitive", priority: 15 } ];
