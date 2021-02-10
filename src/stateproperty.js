@@ -241,58 +241,60 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
    return state;
 };
 
+StateProperty.prototype.matchState = function(_stateName) {
+
+   if (this.states.hasOwnProperty(_stateName)) {
+      return this.states[_stateName];
+   }
+   else {
+      return this.matchRegExState(_stateName);
+   }
+};
+
 StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPriorityDefined, _parentPropertyPriority) {
    console.log(this.uName+": setState state="+_nextStateName);
    this.previousState = this.value;
 
-   var clearTimerResult = this.clearStateTimer();
+   var currentMatchedState = (this.cold) ? null : this.matchState(this.value);
+   var nextMatchedState = this.matchState(_nextStateName);
+   var clearTimerResult = {};
 
-   if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
-      // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
-      console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
-      clearTimerResult.timeLeft = 1;
-   }
+   if (currentMatchedState !== nextMatchedState) {
 
-   var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.matchRegExState(_nextStateName);
+      if (currentMatchedState) {
+         clearTimerResult = this.clearStateTimer();
 
-   if (!this.cold) {
-
-      if (this.states[this.value]) {
-         this.states[this.value].exiting();
-      }
-      else {
-         var currentRegExState = this.matchRegExState(this.value);
-
-         if (currentRegExState && nextState && (currentRegExState != nextState)) {
-            currentRegExState.exiting();
+         if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
+            // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
+            console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
+            clearTimerResult.timeLeft = 1;
          }
 
-         //if (this.states["DEFAULT"] && this.states[_nextStateName]) {
-            //this.states["DEFAULT"].exiting();
-         //}
+         currentMatchedState.exiting();
       }
-   }
 
-   //var nextState = (this.states[_nextStateName]) ? this.states[_nextStateName] : this.states["DEFAULT"];
+      if (nextMatchedState) {
+         var immediateNextState = nextMatchedState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority);
 
-   if (nextState) {
-      var immediateNextState = nextState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority);
+         if (immediateNextState) {
+            console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
 
-      if (immediateNextState) {
-         console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
+            setTimeout( (_nextStateName) => {
+               this.set(_nextStateName, { sourceName: this.owner.uName });
+            }, 1, this.transformNextState(immediateNextState));
+         }
+         else {
+            this.currentState = nextMatchedState;
+         }
 
-         setTimeout( (_nextStateName) => {
-            this.set(_nextStateName, { sourceName: this.owner.uName });
-         }, 1, this.transformNextState(immediateNextState));
+         this.setStateTimer(nextMatchedState, clearTimerResult.timeLeft);
       }
       else {
-         this.currentState = nextState;
+         console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
       }
-
-      this.setStateTimer(nextState, clearTimerResult.timeLeft);
    }
    else {
-      console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
+      console.log(this.uName + ": Not changing state as nextMatchedState= " + nextMatchedState.name + " is the same as the current matched state");
    }
 };
 
