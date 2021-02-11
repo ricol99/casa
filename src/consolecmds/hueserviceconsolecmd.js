@@ -61,4 +61,49 @@ HueServiceConsoleCmd.prototype.groups = function(_arguments, _callback) {
    }
 };
 
+HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
+
+   if (_arguments && (_arguments.length > 0)) {
+      let mainDefinitions = [ { name: 'name', defaultOption: true } ];
+
+      const mainCommand = commandLineArgs(mainDefinitions, { argv: _arguments, stopAtFirstUnknown: true })
+      let argv = mainCommand._unknown || [];
+
+      if (mainCommand.name === "show") {
+         var target = (argv.length > 0) ? argv[0] : "lights";
+
+         switch (target) {
+            case "lights":
+               return this.executeParsedCommand("lights", [], _callback);
+               break;
+            case "groups":
+               return this.executeParsedCommand("groups", _arguments, _callback);
+               break;
+            default:
+               return _callback("Unrecognised target!");
+         }
+      }
+      else if (mainCommand.name === "create") {
+
+         if (argv.length === 0) {
+            return _callback("Nothing to create!");
+         }
+
+         if (argv[0] === "group") {
+  
+            const createGroupDefinitions = [
+               { name: 'name', alias: 'n', type: String },
+               { name: 'ids', multiple: true, type: String, defaultOption: true }
+            ];
+
+            argv.shift();
+            const createGroupOptions = commandLineArgs(createGroupDefinitions, { argv, stopAtFirstUnknown: true })
+            argv = createGroupOptions._unknown || [];
+            return _callback(null, util.inspect(createGroupOptions));
+         }
+      }
+   }
+   return _callback("Subcommand not found!");
+};
+
 module.exports = exports = HueServiceConsoleCmd;
