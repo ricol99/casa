@@ -396,7 +396,13 @@ ConsoleApiSession.prototype.sessionClosed = function() {
    for (var consoleApiObj in this.consoleApiObjs) {
 
       if (this.consoleApiObjs.hasOwnProperty(consoleApiObj)) {
-         this.consoleApiObjs[consoleApiObj].sessionClosed(this);
+
+         try {
+            this.consoleApiObjs[consoleApiObj].sessionClosed(this);
+         }
+         catch (_error) {
+            console.error(this.owner.uName + ": closing session caused an exception: " + _error);
+         }
       }
    }
    delete this.owner.sessions[this.name];

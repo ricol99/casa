@@ -122,7 +122,8 @@ SourceBaseConsoleApi.prototype.sessionClosed = function(_session) {
    if (watchList) {
 
       for (var name in watchList) {
-         this.unwatch(name);
+         this.removeListener(name);
+         delete watchList[name];
       }
    }
 

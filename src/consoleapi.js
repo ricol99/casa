@@ -41,7 +41,7 @@ ConsoleApi.prototype.sessionClosed = function(_session) {
 
 ConsoleApi.prototype.checkParams = function(_minLength, _params) {
 
-   if (!_params || _params.length < _minLength)  {
+   if ((_minLength > 0) && (!_params || (_params.length < _minLength)))  {
       throw("Not enough parameters");
    }
 };
