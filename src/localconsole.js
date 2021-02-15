@@ -238,24 +238,27 @@ LocalConsole.prototype.extractMethodAndArguments = function(_originalLine, _line
    }
 
    if (methodArguments) {
-
-      for (var i = 0; i < methodArguments.length; ++i) {
-         var f = parseFloat(methodArguments[i]);
-
-         if (!isNaN(f)) {
-            methodArguments[i] = f;
-         }
-         else if (methodArguments[i] === "false") {
-            methodArguments[i] = false;
-         }
-         else if (methodArguments[i] === "true") {
-            methodArguments[i] = true;
-         }
-      }
+      this.correctArgumentTypes(methodArguments);
    }
 
    return { method: method, arguments: methodArguments };
 };
+
+LocalConsole.prototype.correctArgumentTypes = function(_arguments) {
+
+   for (var i = 0; i < _arguments.length; ++i) {
+
+      if (!isNaN(_arguments[i]) && !isNaN(parseFloat(_arguments[i]))) {
+         _arguments[i] = parseFloat(_arguments[i]);
+      }
+      else if (_arguments[i] === "false") {
+         _arguments[i] = false;
+      }
+      else if (_arguments[i] === "true") {
+         _arguments[i] = true;
+      }
+   }
+}
 
 LocalConsole.prototype.assessScopeAndExecuteCommand = function(_line, _callback) {
 

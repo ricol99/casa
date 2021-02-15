@@ -3,22 +3,6 @@ var Property = require('../property');
 var StateProperty = require('../stateproperty');
 
 function CombineStateProperty(_config, _owner) {
-
-   if (!_config.hasOwnProperty('states') || (_config.states.length === 0)) {
-      _config.states = [ { name: "DEFAULT" } ];
-   }
-   else {
-      let defFound = false;
-
-      for (let i = 0; i < _config.states.length; ++i) {
-         defFound = defFound || (_config.states[i].name === "DEFAULT");
-      }
-
-      if (!defFound) {
-         _config.states.push({ name: "DEFAULT" });
-      }
-   }
-
    StateProperty.call(this, _config, _owner);
 
    this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";

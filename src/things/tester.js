@@ -260,7 +260,7 @@ Tester.prototype.runTestEvent = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
-      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SENDING EVENT event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
+      console.info(this.uName+": TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 

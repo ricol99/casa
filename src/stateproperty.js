@@ -20,7 +20,8 @@ function StateProperty(_config, _owner) {
 
    var regExIndex = 0;
 
-   if (_config.hasOwnProperty("states")) {
+   if (_config.hasOwnProperty("states") && (_config.states.length > 0)) {
+      let defFound = false;
 
       for (var i = 0; i < _config.states.length; ++i) {
 
@@ -29,8 +30,16 @@ function StateProperty(_config, _owner) {
          }
          else {
             this.states[_config.states[i].name] = new State(_config.states[i], this);
+            defFound = defFound || (_config.states[i].name === "DEFAULT");
          }
       }
+
+      if (!defFound) {
+         this.states["DEFAULT"] = new State( { name: "DEFAULT" }, this);
+      }
+   }
+   else {
+      this.states["DEFAULT"] = new State( { name: "DEFAULT" }, this);
    }
 }
 
@@ -249,6 +258,8 @@ StateProperty.prototype.matchState = function(_stateName) {
    else {
       return this.matchRegExState(_stateName);
    }
+
+   return state;
 };
 
 StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPriorityDefined, _parentPropertyPriority) {
@@ -362,7 +373,7 @@ StateProperty.prototype.becomeController = function() {
          if (this.currentState === _state) {
             this.currentState.alignActions();
          }
-      }, 500, this.currentState);
+      }, 100, this.currentState);
    }
 };
 

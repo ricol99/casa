@@ -45,8 +45,8 @@ function Building(_config, _parent) {
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    this.ensurePropertyExists("evening-possible", 'scheduleproperty',
-                             { "initialValue": false, "events": [ { "rule": "sunset:-3600", "value": true }],
-                               "source": { "property": "night-time", "value": true, "transform": "!$value" }}, _config);
+                             { "initialValue": false, "events": [ { "rule": "sunset:-3600", "value": true }, { "rule": "5 2 * * *", "value": false } ]/*,
+                               "source": { "property": "night-time", "value": true, "transform": "!$value" } */}, _config);
 
    this.ensurePropertyExists("dark", 'property',
                              { "name": "dark", "initialValue": false, "writable": false,
@@ -112,21 +112,35 @@ function Building(_config, _parent) {
 
    this.ensurePropertyExists("users-state", "stateproperty",
                              { initialValue: "empty",
-                               states: [ { name: "empty", source: { property: "all-users-away", value: false, nextState: "occupied-awake" }},
-                                         { name: "occupied-awake", sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
-                                                                             { property: "all-users-away", value: true, nextState: "empty" }]},
-                                         { name: "occupied-going-to-bed", sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
-                                                                                    { property: "all-users-away", value: true, nextState: "empty" }]},
-                                         { name: "occupied-asleep", sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-may-be-waking-up" },
-                                                                              { event: "user-arrived", nextState: "user-arrived-during-bedtime" },
-                                                                              { property: "all-users-away", value: true, nextState: "empty" }] },
-                                         { name: "occupied-may-be-waking-up", source: { event: "user-arrived", nextState: "user-arrived-during-bedtime" },
-                                           timeout: { duration: 5, nextState: "occupied-waking-up" } },
-                                         { name: "user-arrived-during-bedtime", action: { property: "evening-possible", value: true },
-                                           timeout: { duration: 1, nextState: "occupied-going-to-bed" } },
-                                         { name: "occupied-waking-up", sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
-                                                                                 { property: "all-users-away", value: true, nextState: "empty" }],
-                                           action: { property: "evening-possible", value: false } }]}, _config);
+                               states: [ { name: "empty",
+                                           source: { property: "all-users-away", value: false, nextState: "occupied-awake" }},
+
+                                         { name: "occupied-awake",
+                                           sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
+                                                     { property: "all-users-away", value: true, nextState: "empty" }]},
+
+                                         { name: "occupied-going-to-bed",
+                                           sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
+                                                     { property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
+                                                     { property: "all-users-away", value: true, nextState: "empty" }]},
+
+                                         { name: "occupied-asleep",
+                                           sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-may-be-waking-up" },
+                                                     { event: "user-arrived", nextState: "user-arrived-while-others-asleep" },
+                                                     { property: "all-users-away", value: true, nextState: "empty" }] },
+
+                                         { name: "user-arrived-while-others-asleep",
+                                           sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-going-to-bed" }],
+                                           timeout: { duration: 1, nextState: "occupied-going-to-bed"} }, // Hack because all-users-in-bed not updated yet
+
+                                         { name: "occupied-may-be-waking-up",
+                                           sources: [{ event: "user-arrived", nextState: "occupied-going-to-bed" },
+                                                     { property: "some-users-in-bed", value: false, nextState: "occupied-waking-up" }],
+                                           timeout: { duration: 2, nextState: "occupied-waking-up" } },
+
+                                         { name: "occupied-waking-up",
+                                           sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
+                                                     { property: "all-users-away", value: true, nextState: "empty" }] }] }, _config);
 
    // Movement property
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };

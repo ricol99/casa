@@ -1,6 +1,6 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
-var commandLineArgs = require('command-line-args')
+var commandLineArgs = require('command-line-args');
 
 function HueServiceConsoleCmd(_config, _owner, _console) {
    ConsoleCmd.call(this, _config, _owner, _console);
@@ -64,9 +64,19 @@ HueServiceConsoleCmd.prototype.groups = function(_arguments, _callback) {
 HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
 
    if (_arguments && (_arguments.length > 0)) {
-      let mainDefinitions = [ { name: 'name', defaultOption: true } ];
+      let mainDefinitions = [ { name: 'name', defaultOption: true },
+                              { name: 'usage', type: Boolean },
+                              { name: 'help', type: Boolean } ];
 
       const mainCommand = commandLineArgs(mainDefinitions, { argv: _arguments, stopAtFirstUnknown: true })
+
+      if (mainCommand.usage || mainCommand.help) {
+         this.console.write("Usage: events [--usage | --help]");
+         this.console.write("              <mainCommand> [ --help | <mainCommandOptions> ] <subCommand> [ --help | <subCommandOptions> ]");
+         this.console.write("              <mainCommand> :== show | create | delete | replace\n");
+         return _callback(null, true);
+      }
+
       let argv = mainCommand._unknown || [];
 
       if (mainCommand.name === "show") {
