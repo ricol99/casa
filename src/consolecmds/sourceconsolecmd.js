@@ -25,7 +25,7 @@ SourceConsoleCmd.prototype.events = function(_arguments, _callback) {
       if (mainCommand.usage || mainCommand.help) {
          this.console.write("Usage: events [--usage | --help]");
          this.console.write("              <mainCommand> [ --help | <mainCommandOptions> ]");
-         this.console.write("              <mainCommand> :== show | create | delete | update\n");
+         this.console.write("              <mainCommand> :== show | raise | create | delete | update\n");
          return _callback(null, true);
       }
 
@@ -58,6 +58,26 @@ SourceConsoleCmd.prototype.events = function(_arguments, _callback) {
 
          this.console.correctArgumentTypes(createEventOptions.rules);
          return this.executeParsedCommand("addScheduledEvent", [ createEventOptions.name, createEventOptions.rules, persist ], _callback);
+      }
+      else if (mainCommand.command === "raise") {
+
+         if (argv.length === 0) {
+            return _callback("Nothing to raise!");
+         }
+
+         const raiseEventDefinitions = [ { name: 'name', alias: 'n', type: String },
+                                         { name: 'value', type: String, defaultOption: true } ];
+
+         const raiseEventOptions = commandLineArgs(raiseEventDefinitions, { argv: argv });
+
+         if (!raiseEventOptions.hasOwnProperty("name") || !raiseEventOptions.name) {
+            return _callback("events: Event must have a name (use --name <name>)!");
+         }
+
+         let value = raiseEventOptions.hasOwnProperty("value") ? raiseEventOptions.value : false;
+         var params = [ raiseEventOptions.name, value ];
+         this.console.correctArgumentTypes(params);
+         return this.executeParsedCommand("raiseEvent", params, _callback);
       }
       else if (mainCommand.command === "delete") {
 

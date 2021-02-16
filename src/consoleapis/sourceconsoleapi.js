@@ -131,5 +131,14 @@ SourceConsoleApi.prototype.createProperty = function(_session, _params, _callbac
    }
 };
 
+SourceConsoleApi.prototype.raiseEvent = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+   var eventName = _params[0];
+   var eventValue = (_params.length > 1) ? _params[1] : false;
+
+   this.myObj().raiseEvent(eventName, { value: eventValue});
+   _callback(null, true);
+};
+
 module.exports = exports = SourceConsoleApi;
  
