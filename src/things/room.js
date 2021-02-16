@@ -109,7 +109,7 @@ function Room(_config, _parent) {
       _config.scenes.push({ name: "not-active" });
 
       for (var g = 0; g < (_config.scenes.length - 1); ++g) {
-         var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 8, 
+         var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 20, 
                              sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }, { property: "night-time", value: true, nextState: "not-active"}] };
 
          if (_config.scenes[g].hasOwnProperty("guard")) {
@@ -145,7 +145,7 @@ function Room(_config, _parent) {
       var userOverrideConfig = (_config.hasOwnProperty("userOverrideConfig")) ? _config.userOverrideConfig
                                                                               : { initialValue: 'not-active', takeControlOnTransition: true,
                                                                                   states: [{ name: "not-active", priority: 0, source: { event: "room-switch-event", nextState: "active" }},
-                                                                                           { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
+                                                                                           { name: "active", priority: 20, source: { event: "room-switch-event", nextState: "not-active" },
                                                                                              timeout: { property: "override-timeout", "nextState": "not-active" }} ]};
 
       this.ensurePropertyExists('user-override-state', 'stateproperty', userOverrideConfig, _config);
