@@ -18,6 +18,10 @@ SourceBase.prototype.getCasa = function() {
    return this.casa;
 };
 
+// Override this if you want to create sources on demand - based on subscription (used by services)
+SourceBase.prototype.interestInNewChild = function(_uName) {
+};
+
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
 

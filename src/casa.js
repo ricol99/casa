@@ -41,6 +41,9 @@ Casa.prototype.getCasa = function() {
    return this;
 };
 
+Casa.prototype.interestInNewChild = function(_uName) {
+};
+
 Casa.prototype.createServer = function() {
    express = require('express');
    app = express();

@@ -312,6 +312,8 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
       this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
+      this.socket.removeListener('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
+      this.socket.removeListener('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.removeListener('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
       this.socket.removeListener('source-added', this.socketSourceAddedHandler);
@@ -464,6 +466,21 @@ PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
 
 PeerCasa.prototype.socketSourcePropertySubscribedToAckCb = function(_data) {
    console.log(this.uName + ': Property-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourceInterestInNewChildCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: interest-in-new-child, source: ' + _data.sourceName);
+
+   if (this.casa.sources[_data.sourceName]) {
+      this.casa.sources[_data.sourceName].interestInNewChild(_data.uName);
+   }
+
+   this.ackMessage('source-interest-in-new-child', _data);
+};
+
+PeerCasa.prototype.socketSourceInterestInNewChildAckCb = function(_data) {
+   console.log(this.uName + ': Interest in new child Event ACKed by my peer. Source=' + _data.sourceName);
    this.messageHasBeenAcked(_data);
 };
 
@@ -756,6 +773,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
       this.socketSourcePropertySubscribedToHandler = PeerCasa.prototype.socketSourcePropertySubscribedToCb.bind(this);
       this.socketSourcePropertySubscribedToAckHandler = PeerCasa.prototype.socketSourcePropertySubscribedToAckCb.bind(this);
+      this.socketSourceInterestInNewChildHandler = PeerCasa.prototype.socketSourceInterestInNewChildCb.bind(this);
+      this.socketSourceInterestInNewChildAckHandler = PeerCasa.prototype.socketSourceInterestInNewChildAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
       this.socketSourceEventRaisedAckHandler = PeerCasa.prototype.socketSourceEventRaisedAckCb.bind(this);
       this.socketSourceAddedHandler = PeerCasa.prototype.socketSourceAddedCb.bind(this);
@@ -781,6 +800,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.on('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
       this.socket.on('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
+      this.socket.on('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
+      this.socket.on('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
       this.socket.on('source-event-raisedAACCKK', this.socketSourceEventRaisedAckHandler);
       this.socket.on('source-added', this.socketSourceAddedHandler);
@@ -928,6 +949,14 @@ PeerCasa.prototype.propertySubscribedTo = function(_source, _property, _subscrip
    if (this.connected) {
       console.log(this.uName + ': source ' + _source.uName + ' subscribed to');
       this.sendMessage('source-property-subscribed-to', { sourceName: _source.uName, property: _property, subscription: _subscription, exists: _exists });
+   }
+};
+
+PeerCasa.prototype.interestInNewChild = function(_source, _uName) {
+
+   if (this.connected) {
+      console.log(this.uName + ': source ' + _source.uName + ' interested in new child " + _uName + " being created');
+      this.sendMessage('source-interest-in-new-child', { sourceName: _source.uName, uName: _uName });
    }
 };
 

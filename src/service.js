@@ -19,9 +19,39 @@ function Service(_config, _owner) {
    this.transactions = {};
    this.queue = [];
    this.queueTimer = null;
+   this.deviceTypes = util.copy(_config.deviceTypes);
+   this.statusPropertyName = _config.hasOwnProperty("statusPropertyName") ? _config.statusPropertyName : "status";
+   this.ensurePropertyExists(this.statusPropertyName, 'property', { initialValue: false }, this.config);
 }
 
 util.inherits(Service, Thing);
+
+// Create a service node, if needed
+Service.prototype.interestInNewChild = function(_uName) {
+   var splitUName = _uName.split(":");
+
+   if (splitUName.length <= 1) {
+      return;
+   }
+
+   var objName = splitUName[splitUName.length - 1];
+   var splitName = objName.split("-");
+
+   if (splitName.length <= 1) {
+      return;
+   }
+
+   var type = splitName[0];
+   var id = splitName[1];
+
+   if (this.deviceTypes.hasOwnProperty(type)) {
+
+      if (!this.myNamedObjects.hasOwnProperty(objName)) {
+         var serviceNode = this.createNode({ type: this.deviceTypes[_subscription.type], name: objName });
+         serviceNode.coldStart();
+      }
+   }
+};
 
 Service.prototype.createNode = function(_config) {
    var type = _config.type;
@@ -35,13 +65,14 @@ Service.prototype.createNode = function(_config) {
    return thing;
 };
 
-Service.prototype.findOrCreateNode = function(_config) {
+Service.prototype.findOrCreateNode = function(_type, _id) {
+   let config = { name: _type + "-" + _id, type: this.deviceTypes[_type], subscription: {} };
 
-   if (this.myNamedObjects.hasOwnProperty(_config.name)) {
-      return this.myNamedObjects[_config.name];
+   if (this.myNamedObjects.hasOwnProperty(config.name)) {
+      return this.myNamedObjects[config.name];
    }
    else {
-      return this.createNode(_config);
+      return this.createNode(config);
    }
 };
 

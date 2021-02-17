@@ -4,42 +4,70 @@ var Thing = require('../../thing');
 function ServiceNode(_config, _owner) {
    Thing.call(this, _config, _owner);
    this.subscribers = {};
-   this.subscribers[_config.subscription.subscriber] = true;
-   this.createProperties(_config.subscription);
+   this.serviceProps = [];
+   this.sync = { read: false; write: false };
+
+   if (_config.hasOwnProperty("subscription")) {
+      this.createProperties(_config.subscription);
+   }
 }
 
 util.inherits(ServiceNode, Thing);
 
-ServiceNode.prototype.newSubscriber = function(_subscription) {
+ServiceNode.prototype.coldStart = function() {
+};
 
-   if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
-      this.subscribers[_subscription.subscriber] = true;
-      this.createProperties(_subscription);
-   }
+// Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
+Service.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   this.createProperties(_subscription);
 };
 
 ServiceNode.prototype.createProperties = function(_subscription) {
 
-   if (_subscription.hasOwnProperty("subscriberProperties")) {
-      this.subscriberProps = _subscription.subscriberProperties.slice();
+   if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
+      this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, props: {} };
+   }
 
-      for (var i = 0; i < _subscription.subscriberProperties.length; ++i) {
-         this.createProperty(_subscription.subscriberProperties[i], _subscription.subscriber);
+   var sub = this.subscribers[_subscription.subscriber];
+
+   sub.sync = _subscription.hasOwnProperty("sync") ? _subscription.sync : "read";
+   this.sync.read = this.sync.read || _subscription.sync.startsWith("read");
+   this.sync.write = this.sync.write || _subscription.sync.endsWith("write");
+
+   if (_subscription.hasOwnProperty("subscriberProperties")) {
+
+      for (var prop in _subscription.subscriberProperties) {
+
+         if (_subscription.subscriberProperties.hasOwnPropertry(prop)) {
+            sub.props[prop] = _subscription.subscriberProperties[prop];
+            this.createProperty(prop, _subscription.subscriberProperties[prop], sub.uName, sub.sync);
+         }
       }
    }
    else {
-      this.subscriberProps = [];
+      sub.props = {};
    }
 };
 
-ServiceNode.prototype.createProperty = function(_property, _subscriber) {
+ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _subscriber, _sync) {
 
-   if (this.props.hasOwnProperty(_property)) {
-      this.props[_property].addNewSource({ uName: _subscriber, property: _property });
+   if (this.props.hasOwnProperty(_property) {
+
+      if (_sync !== "read") {
+         this.props[_property].addNewSource({ uName: _subscriber, property: _subscriberProp });
+      }
    }
    else {
-      this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false,
-                                                         source: { uName: _subscriber, property: _property }});
+
+      if (_sync === "read") {
+         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false });
+      }
+      else {
+         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false,
+                                                            source: { uName: _subscriber, property: _subscriberProp }});
+      }
+
+      this.serviceProps.push(_property);
    }
 };
 
@@ -50,10 +78,10 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 
 ServiceNode.prototype.addMissingProperties = function(_props) {
 
-   for (var i = 0; i < this.subscriberProps.length; ++i) {
+   for (var i = 0; i < this.serviceProps.length; ++i) {
 
-      if (!_props.hasOwnProperty(this.subscriberProps[i])) {
-         _props[this.subscriberProps[i]] = this.getProperty(this.subscriberProps[i]);
+      if (!_props.hasOwnProperty(this.serviceProps[i])) {
+         _props[this.serviceProps[i]] = this.getProperty(this.serviceProps[i]);
       }
    }
 };

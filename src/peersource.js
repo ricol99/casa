@@ -51,6 +51,11 @@ PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _
    this.casa.propertySubscribedTo(this, _property, _subscription, _exists);
 };
 
+PeerSource.prototype.interestInNewChild = function(_uName) {
+   this.casa.interestInNewChild(this, _uName);
+};
+
+
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
 PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 

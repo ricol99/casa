@@ -144,6 +144,9 @@ Gang.prototype.getCasa = function() {
    return this.casa;
 };
 
+Gang.prototype.interestInNewChild = function(_uName) {
+};
+
 Gang.prototype.markObjects = function(_objects, _markId, _markValue) {
 
    if (_objects) {
@@ -350,7 +353,7 @@ Gang.prototype.cleverRequire = function(_type, _path) {
          this.constructors[_type] = require('./' + path + _type);
       }
       catch (_err) {
-         //process.stderr.write(util.inspect(_err));
+         process.stderr.write(util.inspect(_err));
          return null;
       }
    }
@@ -732,8 +735,19 @@ Gang.prototype.uNameToLongForm = function(_name)  {
    return ((_name.length === 1) && (_name[0] === ':')) ? this.casa.uName : ((_name.length > 1) && (_name[0] === ':') && (_name[1] !== ':')) ? this.casa.uName + _name : _name;
 };
 
-Gang.prototype.findNamedObject = function(_name)  {
-   return NamedObject.prototype.findNamedObject.call(this, this.uNameToLongForm(_name));
+Gang.prototype.findNamedObject = function(_uName)  {
+   var uName = this.uNameToLongForm(_uName);
+   var namedObj = NamedObject.prototype.findNamedObject.call(this, uName);
+
+   if (!namedObj) {
+      var owner = this.findOwner(uName);
+
+      if (owner && owner.casa) {
+         owner.interestInNewChild(uName);
+      }
+   }
+
+   return namedObj;
 };
 
 module.exports = exports = Gang;

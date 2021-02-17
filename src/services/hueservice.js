@@ -4,6 +4,8 @@ var Hue = require("node-hue-api");
 
 function HueService(_config, _owner) {
    _config.queueQuant = 150;
+   _config.statusPropertyName = "hub-connected";
+   _config.deviceTypes = { "light": "hueservicelight", "lightgroup": "hueservicelightgroup" };
 
    Service.call(this, _config, _owner);
 
@@ -12,43 +14,9 @@ function HueService(_config, _owner) {
    this.userId = _config.userId;
    this.username = _config.username;
    this.linkAddress = _config.linkAddress;
-   this.q = [];
-   this.requestPending = false;
-   this.callbacks = {};
-   this.requestTimeout = _config.hasOwnProperty("requestTimeout") ? _config.requestTimeout : 3;
-
-   this.deviceTypes = {
-      "light": "hueservicelight",
-      "lightgroup": "hueservicelightgroup"
-   };
-
-   this.ensurePropertyExists("hub-connected", 'property', { initialValue: false }, this.config);
 }
 
 util.inherits(HueService, Service);
-
-HueService.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-
-   if ((_property === "hub-connected") && _subscription.hasOwnProperty("type") &&
-       _subscription.hasOwnProperty("id") && _subscription.hasOwnProperty("subscriber")) {
-      var objName = _subscription.type + "-" + _subscription.id;
-
-      if (this.deviceTypes.hasOwnProperty(_subscription.type)) {
-
-         if (!this.myNamedObjects.hasOwnProperty(objName)) {
-            var thing = this.createNode({ type: this.deviceTypes[_subscription.type], name: objName, subscription: _subscription });
-         }
-         else {
-            this.myNamedObjects[objName].newSubscriber(_subscription);
-         }
-      }
-   }
-};
-
-HueService.prototype.findOrCreateNode = function(_type, _id) {
-   var config = { name: _type + "-" + _id, type: this.deviceTypes[_type], subscription: {} };
-   return Service.prototype.findOrCreateNode.call(this, config);
-};
 
 HueService.prototype.coldStart = function() {
 
