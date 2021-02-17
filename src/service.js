@@ -116,7 +116,7 @@ Service.prototype.queueTransaction = function(_serviceNode, _transaction) {
          if (_err) {
             console.error(this.uName + ": Unable to process transaction. Error=" + _err);
          }
-      };
+      }.bind(this);
    }
 
    this.queue.push(_transaction);

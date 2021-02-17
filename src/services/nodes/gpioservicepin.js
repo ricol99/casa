@@ -8,6 +8,7 @@ function GpioServicePin(_config, _owner) {
    this.direction = "inout";
    this.triggerLow = true;
    this.pinValue = 0;
+   this.writable = false;
 
    console.log(this.uName + ": New GPIO pin node created");
    this.ready = false;
@@ -24,6 +25,7 @@ GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
       let map = { read: "in", write: "out", readwrite: "inout" };
       this.direction = map[_subscription.sync];
       this.triggerLow = _subscription.args.triggerLow;
+      this.writeable = this.direction.endsWith("out");
       this.gpio = new Gpio(this.id, this.direction, 'both', { activeLow: this.triggerLow });
       this.ready = true;
    }
@@ -85,18 +87,21 @@ GpioServicePin.prototype.processPropertyChanged = function(_transaction, _callba
 GpioServicePin.prototype.processSetState = function(_transaction, _callback) {
    console.log(this.uName + ": processSetState() transaction=", _transaction.properties);
 
-   if (this.writable) {
+   if (this.ready) {
 
-      this.gpio.write(this.triggerLow ? (_transaction.properties.state ? 0 : 1) : (_transaction.properties.state ? 1 : 0), (_err, _result) => {
+      if (this.writable) {
 
-         if (!_err) {
-            this.alignPropertyValue('state', _transaction.properties.state);
-         }
-         _callback(_err, _result);
-      });
-   }
-   else {
-      _callback("GPIO pin is not writable!");
+         this.gpio.write(this.triggerLow ? (_transaction.properties.state ? 0 : 1) : (_transaction.properties.state ? 1 : 0), (_err, _result) => {
+
+            if (!_err) {
+               this.alignPropertyValue('state', _transaction.properties.state);
+            }
+            _callback(_err, _result);
+         });
+      }
+      else {
+         _callback("GPIO pin is not writable!");
+      }
    }
 }
 
