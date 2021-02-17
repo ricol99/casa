@@ -5,21 +5,36 @@ var Gpio = require('onoff').Gpio;
 function GpioServicePin(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
-   this.id = _config.subscription.id;
-   this.direction = _config.subscription.direction;
-   this.writable = (this.direction === 'out') || (this.direction === 'inout');
-   this.triggerLow = _config.subscription.triggerLow;
-   this.propertyName = _config.subscription.properties
+   this.direction = "inout";
+   this.triggerLow = true;
    this.pinValue = 0;
+
    console.log(this.uName + ": New GPIO pin node created");
+   this.ready = false;
+   this.listening = false;
 
    this.ensurePropertyExists("state", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(GpioServicePin, ServiceNode);
 
-GpioServicePin.prototype.coldStart = function() {
-   this.gpio = new Gpio(this.id, this.direction, 'both', { activeLow: this.triggerLow });
+GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
+
+   if (!this.ready) {
+      let map = { read: "in", write: "out", readwrite: "inout" };
+      this.direction = map[_subscription.sync];
+      this.triggerLow = _subscription.args.triggerLow;
+      this.gpio = new Gpio(this.id, this.direction, 'both', { activeLow: this.triggerLow });
+      this.ready = true;
+   }
+
+   if (this.direction.startsWith("in") && !this.listening) {
+      this.startListening();
+   }
+};
+
+GpioServicePin.prototype.startListening = function() {
+   this.listening = true;
 
    process.on('SIGINT', () => {
 
@@ -39,7 +54,7 @@ GpioServicePin.prototype.coldStart = function() {
                console.error(this.owner.name + ": Error from gpio library! Error = " + _err);
             }
             else if (_pinValue != this.pinValue) {
-               console.log(this.uName + ': Value changed on GPIO Pin ' + this.gpioPin + ' to ' + _pinValue);
+               console.log(this.uName + ': Value changed on GPIO Pin ' + this.id + ' to ' + _pinValue);
                this.pinValue = _pinValue;
                this.alignPropertyValue('state', this.pinValue === 1);
             }
@@ -48,13 +63,13 @@ GpioServicePin.prototype.coldStart = function() {
    }
 };
 
-GpioServicePin.prototype.setPin = function(_value, _callback) {
-   var transaction = { action: "setPin", properties: { state: _value }, callback: _callback };
+GpioServicePin.prototype.setState = function(_value, _callback) {
+   var transaction = { action: "setState", properties: { state: _value }, callback: _callback };
    this.owner.queueTransaction(this, transaction);
 };
 
-GpioServicePin.prototype.getPin = function(_callback) {
-   var transaction = { action: "getPin", callback: _callback };
+GpioServicePin.prototype.getState = function(_callback) {
+   var transaction = { action: "getState", callback: _callback };
    this.owner.queueTransaction(this, transaction);
 };
       
@@ -67,8 +82,8 @@ GpioServicePin.prototype.processPropertyChanged = function(_transaction, _callba
    this.processSetState(_transaction, _callback);
 };
 
-GpioServicePin.prototype.processSetPin = function(_transaction, _callback) {
-   console.log(this.uName + ": processSetPin() transaction=", _transaction.properties);
+GpioServicePin.prototype.processSetState = function(_transaction, _callback) {
+   console.log(this.uName + ": processSetState() transaction=", _transaction.properties);
 
    if (this.writable) {
 
@@ -85,7 +100,7 @@ GpioServicePin.prototype.processSetPin = function(_transaction, _callback) {
    }
 }
 
-GpioServicePin.prototype.processGetPin = function(_transaction, _callback) {
+GpioServicePin.prototype.processGetState = function(_transaction, _callback) {
    this.gpio.read(_callback);
 };
 

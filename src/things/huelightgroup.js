@@ -15,28 +15,28 @@ function HueLightGroup(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('power', 'serviceproperty', { initialValue: false, id: this.deviceId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
+   this.ensurePropertyExists('power', 'serviceproperty', { initialValue: false, id: this.lightGroupId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
    this.brightnessSupported = _config.hasOwnProperty("brightnessSupported") ? _config.brightnessSupported : true;
 
    if (this.brightnessSupported)  {
-      this.ensurePropertyExists('brightness', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
+      this.ensurePropertyExists('brightness', 'serviceproperty', { initialValue: 100, id: this.lightGroupId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
    }
 
    if (_config.hasOwnProperty("hueSupported")) {
 
       if (_config.hueSupported) {
          this.hueSupported = true;
-         this.ensurePropertyExists('hue', 'serviceproperty', { initialValue: 360, id: this.deviceId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
+         this.ensurePropertyExists('hue', 'serviceproperty', { initialValue: 360, id: this.lightGroupId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
       }
 
       if (_config.saturationSupported) {
          this.saturationSupported = true;
-         this.ensurePropertyExists('saturation', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
+         this.ensurePropertyExists('saturation', 'serviceproperty', { initialValue: 100, id: this.lightGroupId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
       }
    }
    else if (_config.colourTempSupported) {
       this.colourTempSupported = true;
-      this.ensurePropertyExists('colour-temp', 'serviceproperty', { initialValue: 153, id: this.deviceId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
+      this.ensurePropertyExists('colour-temp', 'serviceproperty', { initialValue: 153, id: this.lightGroupId, serviceType: "lightgroup", serviceName: this.service, sync: "write" }, _config);
    }
 
    this.ensurePropertyExists('scene', 'property', { initialValue: false }, _config);

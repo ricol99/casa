@@ -6,8 +6,9 @@ function GPIOProperty(_config, _owner) {
    _config.serviceType = "pin";
    _config.serviceProperty = "state";
    _config.serviceName = "gpioservice";
+   _config.serviceArgs = { triggerLow: _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false };
+
    var direction = (_config.hasOwnProperty("direction")) ? _config.direction : ((this.writable) ? "out" : "in");
-   _config.serviceArgs = { triggerLow: _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false, direction: direction };
    _config.sync = (direction === "out") ? "write" : "read";
 
    ServiceProperty.call(this, _config, _owner);

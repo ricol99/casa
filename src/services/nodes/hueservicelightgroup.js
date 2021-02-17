@@ -4,7 +4,6 @@ var ServiceNode = require('./servicenode');
 function HueServiceLightGroup(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
-   this.id = _config.subscription.id;
    console.log(this.uName + ": New Hue Light Group Node created");
    this.ensurePropertyExists("power", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
 }

@@ -23,10 +23,14 @@ ServiceNode.prototype.propertySubscribedTo = function(_property, _subscription, 
    this.processSubscription(_subscription);
 };
 
+// Override this to be informed everytime a new subscription is added
+ServiceNode.prototype.newSubscriptionAdded = function(_subscription) {
+};
+
 ServiceNode.prototype.processSubscription = function(_subscription) {
 
    if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
-      this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, props: {} };
+      this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, props: {}, args: _subscription.args };
    }
 
    var sub = this.subscribers[_subscription.subscriber];
@@ -37,26 +41,27 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
 
    if (_subscription.hasOwnProperty("serviceProperty")) {
       sub.props[_subscription.serviceProperty] = _subscription.hasOwnProperty("subscriberProperty") ? _subscription.subscriberProperty : _subscription.serviceProperty;
-      this.createProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub.uName, sub.sync);
+      this.createProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub);
    }
+   this.newSubscriptionAdded(sub);
 };
 
-ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _subscriber, _sync) {
+ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub) {
 
    if (this.props.hasOwnProperty(_property)) {
 
-      if (_sync !== "read") {
-         this.props[_property].addNewSource({ uName: _subscriber, property: _subscriberProp });
+      if (_sub.sync !== "read") {
+         this.props[_property].addNewSource({ uName: _sub.uName, property: _subscriberProp });
       }
    }
    else {
 
-      if (_sync === "read") {
+      if (_sub.sync === "read") {
          this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false });
       }
       else {
          this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false,
-                                                            source: { uName: _subscriber, property: _subscriberProp }});
+                                                            source: { uName: _sub.uName, property: _subscriberProp }});
       }
 
       this.serviceProps.push(_property);

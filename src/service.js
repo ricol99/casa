@@ -60,7 +60,10 @@ Service.prototype.createNode = function(_config) {
 
    var ServiceOwnedNode = require("./services/nodes/"+type);
    var thing = new ServiceOwnedNode(_config, this);
-   this.gang.casa.refreshSourceListeners();
+
+   setTimeout( () => {
+      this.gang.casa.refreshSourceListeners();
+   }, 500);
 
    return thing;
 };
