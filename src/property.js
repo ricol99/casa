@@ -74,7 +74,7 @@ Property.prototype.addNewSource = function(_config) {
    var sourceListener = new SourceListener(_config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    this.noOfSources++;  
-   this.sourceListener.refreshSource();
+   sourceListener.refreshSource();
 };
 
 //

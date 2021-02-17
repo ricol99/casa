@@ -47,7 +47,7 @@ Service.prototype.interestInNewChild = function(_uName) {
    if (this.deviceTypes.hasOwnProperty(type)) {
 
       if (!this.myNamedObjects.hasOwnProperty(objName)) {
-         var serviceNode = this.createNode({ type: this.deviceTypes[_subscription.type], name: objName });
+         var serviceNode = this.createNode({ id: id, type: this.deviceTypes[type], name: objName });
          serviceNode.coldStart();
       }
    }

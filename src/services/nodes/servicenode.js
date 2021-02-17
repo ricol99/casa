@@ -5,10 +5,11 @@ function ServiceNode(_config, _owner) {
    Thing.call(this, _config, _owner);
    this.subscribers = {};
    this.serviceProps = [];
-   this.sync = { read: false; write: false };
+   this.sync = { read: false, write: false };
+   this.id = _config.id;
 
    if (_config.hasOwnProperty("subscription")) {
-      this.createProperties(_config.subscription);
+      this.processSubscription(_config.subscription);
    }
 }
 
@@ -18,11 +19,11 @@ ServiceNode.prototype.coldStart = function() {
 };
 
 // Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
-Service.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-   this.createProperties(_subscription);
+ServiceNode.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   this.processSubscription(_subscription);
 };
 
-ServiceNode.prototype.createProperties = function(_subscription) {
+ServiceNode.prototype.processSubscription = function(_subscription) {
 
    if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
       this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, props: {} };
@@ -34,24 +35,15 @@ ServiceNode.prototype.createProperties = function(_subscription) {
    this.sync.read = this.sync.read || _subscription.sync.startsWith("read");
    this.sync.write = this.sync.write || _subscription.sync.endsWith("write");
 
-   if (_subscription.hasOwnProperty("subscriberProperties")) {
-
-      for (var prop in _subscription.subscriberProperties) {
-
-         if (_subscription.subscriberProperties.hasOwnPropertry(prop)) {
-            sub.props[prop] = _subscription.subscriberProperties[prop];
-            this.createProperty(prop, _subscription.subscriberProperties[prop], sub.uName, sub.sync);
-         }
-      }
-   }
-   else {
-      sub.props = {};
+   if (_subscription.hasOwnProperty("serviceProperty")) {
+      sub.props[_subscription.serviceProperty] = _subscription.hasOwnProperty("subscriberProperty") ? _subscription.subscriberProperty : _subscription.serviceProperty;
+      this.createProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub.uName, sub.sync);
    }
 };
 
 ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _subscriber, _sync) {
 
-   if (this.props.hasOwnProperty(_property) {
+   if (this.props.hasOwnProperty(_property)) {
 
       if (_sync !== "read") {
          this.props[_property].addNewSource({ uName: _subscriber, property: _subscriberProp });
