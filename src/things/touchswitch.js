@@ -20,14 +20,6 @@ function TouchSwitch(_config, _parent) {
       this.holdTimerDuration = (_config.hasOwnProperty("holdTimerDuration")) ? _config.holdTimerDuration : 3;
       this.holding = false;
    }
-   this.service = (_config.hasOwnProperty("service")) ? _config.service :  "gpioservice";
-
-   this.gpioService =  this.casa.findService(this.service);
-
-   if (!this.gpioService) {
-      console.error(this.uName + ": ***** GpioService service not found! *************");
-      process.exit(1);
-   }
 
    if (this.gpioFeedbackPin) {
       this.ensurePropertyExists(this.feedbackProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioFeedbackPin, direction: "out" }, _config);
@@ -36,49 +28,12 @@ function TouchSwitch(_config, _parent) {
       this.ensurePropertyExists(this.feedbackProp, 'property', { initialValue: false }, _config);
    }
 
-   if (!this.stateless) {
-      this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
+   this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
 
-      this.ensurePropertyExists(this.switchProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow,
-                                                                   sourceSteps: [ { type: "latchstep", minOutputTime: 2 } ] }, _config);
-   }
-   else {
-      this.gpioService.createPin(this, this.gpioTouchPin, "in", this.triggerLow);
-   }
+   this.ensurePropertyExists(this.switchProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow }, _config);
 }
 
 util.inherits(TouchSwitch, Thing);
-
-TouchSwitch.prototype.gpioPinStatusChanged = function(_pin, _value) {
-
-   if (_value) {
-
-      if (this.holdEventName) {
-
-         this.holdTimer = setTimeout( () => {
-            this.holdTimer = null;
-            this.raiseEvent(this.holdEventName);
-            this.raiseEvent(this.holdEventName+"-start");
-            this.holding = true;
-         }, this.holdTimerDuration * 1000);
-      }
-      else {
-         this.raiseEvent(this.eventName);
-      }
-   }
-   else if (this.holdEventName) {
-
-      if (this.holdTimer) {
-         clearTimeout(this.holdTimer);
-         this.holdTimer = null;
-         this.raiseEvent(this.eventName);
-      }
-      else if (this.holding) {
-         this.holding = false;
-         this.raiseEvent(this.holdEventName+"-end");
-      }
-   }
-};
 
 TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
@@ -86,7 +41,37 @@ TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _d
 
       if (_propName === this.switchProp) {
 
-         if (this.invokeManualMode) {
+         if (this.stateless) {
+
+            if (_propValue) {
+
+               if (this.holdEventName) {
+
+                  this.holdTimer = setTimeout( () => {
+                     this.holdTimer = null;
+                     this.raiseEvent(this.holdEventName);
+                     this.raiseEvent(this.holdEventName+"-start");
+                     this.holding = true;
+                  }, this.holdTimerDuration * 1000);
+               }
+               else {
+                  this.raiseEvent(this.eventName);
+               }
+            }
+            else if (this.holdEventName) {
+
+               if (this.holdTimer) {
+                  clearTimeout(this.holdTimer);
+                  this.holdTimer = null;
+                  this.raiseEvent(this.eventName);
+               }
+               else if (this.holding) {
+                  this.holding = false;
+                  this.raiseEvent(this.holdEventName+"-end");
+               }
+            }
+         }
+         else if (this.invokeManualMode) {
             this.setManualMode();
          }
       }
