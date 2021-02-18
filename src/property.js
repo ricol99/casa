@@ -98,6 +98,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
    _data.value = propValue;
+    console.log(this.uName + ": AAAAA Property.prototype.updatePropertyInternal() _data=",_data);
    this.setPropertyInternal(propValue, _data);
 };
 

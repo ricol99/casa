@@ -162,8 +162,8 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       // Call the final hooks
-      this.props[_propName].propertyAboutToChange(_propValue, sendData);
-      this.propertyAboutToChange(_propName, _propValue, sendData);
+      this.props[_propName].propertyAboutToChange(_propValue, _data);
+      this.propertyAboutToChange(_propName, _propValue, _data);
 
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
       this.props[_propName]._actuallySetPropertyValue(_propValue);
