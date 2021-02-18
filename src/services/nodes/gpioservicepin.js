@@ -25,7 +25,7 @@ GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
       let map = { read: "in", write: "out", readwrite: "inout" };
       this.direction = map[_subscription.sync];
       this.triggerLow = _subscription.args.triggerLow;
-      this.writeable = this.direction.endsWith("out");
+      this.writable = this.direction.endsWith("out");
       this.gpio = new Gpio(this.id, this.direction, 'both', { activeLow: this.triggerLow });
       this.ready = true;
    }
