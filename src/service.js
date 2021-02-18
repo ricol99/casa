@@ -44,7 +44,7 @@ Service.prototype.interestInNewChild = function(_uName) {
    var type = splitName[0];
    var id = splitName[1];
 
-   if (this.deviceTypes.hasOwnProperty(type)) {
+   if (this.deviceTypes && this.deviceTypes.hasOwnProperty(type)) {
 
       if (!this.myNamedObjects.hasOwnProperty(objName)) {
          var serviceNode = this.createNode({ id: id, type: this.deviceTypes[type], name: objName });
