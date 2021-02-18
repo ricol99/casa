@@ -28,7 +28,7 @@ function TouchSwitch(_config, _parent) {
       this.ensurePropertyExists(this.feedbackProp, 'property', { initialValue: false }, _config);
    }
 
-   this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
+   this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "switch-state";
 
    this.ensurePropertyExists(this.switchProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow }, _config);
 }
