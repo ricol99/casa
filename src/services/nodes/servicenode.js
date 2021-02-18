@@ -70,7 +70,10 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
 
 ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ":ServiceNode.prototype.propertyAboutToChange() property="+_propName);
-   this.owner.notifyChange(this, _propName, _propValue, _data);
+
+   if (!(_data.hasOwnProperty("alignment") && _data.alignment)) {
+      this.owner.notifyChange(this, _propName, _propValue, _data);
+   }
 };
 
 ServiceNode.prototype.addMissingProperties = function(_props) {
