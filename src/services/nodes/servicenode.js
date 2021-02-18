@@ -75,7 +75,7 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
       this.owner.notifyChange(this, _propName, _propValue, _data);
    }
    else {
-      console.log(this.uName + ": AAAAA property was changed locally, not from source. Source name ="+_data.sourceName);
+      console.log(this.uName + ": Property was changed locally, not from source. Source name ="+_data.sourceName);
    }
 };
 
