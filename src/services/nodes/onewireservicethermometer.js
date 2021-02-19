@@ -11,10 +11,9 @@ function OneWireServiceThermometer(_config, _owner) {
 
 util.inherits(OneWireServiceThermometer, Thing);
 
-OneWireServiceThermometer.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-   console.log(this.uName + ": AAAAA propertySubscribedTo() ", _subscription);
+GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
 
-   if (_subscription.hasOwnProperty("pollDuration")) {
+   if (_subscription.args.hasOwnProperty("pollDuration")) {
 
       if (this.pollDuration === 10000000 || (_subscription.pollDuration < this.pollDuration)) {
          this.pollDuration = _subscription.pollDuration;
@@ -28,10 +27,6 @@ OneWireServiceThermometer.prototype.propertySubscribedTo = function(_property, _
    if (!this.started) {
       this.start();
    }
-};
-
-OneWireServiceThermometer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-   // Do nothing as read only
 };
 
 OneWireServiceThermometer.prototype.start = function() {
@@ -59,6 +54,10 @@ OneWireServiceThermometer.prototype.pollDevice = function() {
       });
    }, this.pollDuration);
 }
+
+OneWireServiceThermometer.prototype.processPropertyChanged = function(_transaction, _callback) {
+   // Do nothing, read only
+};
 
 module.exports = exports = OneWireServiceThermometer;
 

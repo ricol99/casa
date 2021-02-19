@@ -1,38 +1,22 @@
 var util = require('util');
 var Thing = require('../thing');
-var Gang = require('../gang');
 
 function OneWireThermometer(_config, _parent) {
-   this.gang = Gang.mainInstance();
+   Thing.call(this, _config, _parent);
+   this.serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  this.gang.casa.findServiceName("onewireservice");
 
-   if (_config.hasOwnProperty("service")) {
-      this.oneWireServiceName = _config.service;
-   }
-   else {
-      var service =  this.gang.casa.findService("onewireservice");
-
-      if (!service) {
-         console.error(this.uName + ": ***** OneWire service not found! *************");
-         process.exit();
-      }
-
-      this.oneWireServiceName = service.uName;
+   if (!this.serviceName) {
+      console.error(this.uName + ": ***** Hue service not found! *************");
+      process.exit();
    }
 
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 60000;
 
-   _config.mirrorSource = this.oneWireServiceName+":"+_config.deviceId;
-   _config.mirrorSourceSubscription = { pollDuration: this.pollDuration };
-
-   Thing.call(this, _config, _parent);
-   this.ensurePropertyExists('temperature', 'property', { initialValue: 0 }, _config);
-   this.thingType = "onewire-thermometer";
    this.deviceId = _config.deviceId;
+   this.ensurePropertyExists('temperature', 'onewireproperty', { initialValue: 0, deviceId: this.deviceId, deviceType: "28", serviceProperty: "temperature", serviceName: this.serviceName, sync: "read", serviceArgs: { pollDuration: this.pollDuration} }, _config);
+   this.thingType = "onewire-thermometer";
 }
 
 util.inherits(OneWireThermometer, Thing);
-
-OneWireThermometer.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-};
 
 module.exports = exports = OneWireThermometer;
