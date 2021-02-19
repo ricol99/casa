@@ -4,7 +4,6 @@ var Hue = require("node-hue-api");
 
 function HueService(_config, _owner) {
    _config.queueQuant = 150;
-   _config.statusPropertyName = "hub-connected";
    _config.deviceTypes = { "light": "hueservicelight", "lightgroup": "hueservicelightgroup" };
 
    Service.call(this, _config, _owner);

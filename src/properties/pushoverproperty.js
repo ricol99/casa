@@ -1,39 +1,22 @@
 var util = require('util');
-var push = require( 'pushover-notifications' );
-var Gang = require('../gang');
-var Property = require('../property');
+var ServiceProperty = require('./serviceproperty');
 
 function PushoverProperty(_config, _owner) {
-   this.messagePriority = (_config.priority) ? _config.priority : 0;
    _config.allSourcesRequiredForValidity = false;
+   var split = _config.userGroup.split(":");
+   _config.id = split[split.length - 1];
+   _config.serviceType = "group";
+   _config.serviceProperty = "message";
+   _config.serviceName = _config.hasOwnProperty("serviceName") ? _config.serviceName : _owner.gang.casa.findServiceName("pushoverservice");
+   _config.serviceArgs = { messagePriority: _config.hasOwnProperty("priority") ? _config.priority : 0,
+                           userGroup: _config.userGroup };
+   _config.sync = "write";
 
-   Property.call(this, _config, _owner);
-
-   this.gang = Gang.mainInstance();
-   this.userGroup = this.gang.findNamedObject(_config.userGroup);
-
-   if (!this.userGroup) {
-      console.error(this.uName + ": ***** UserGroup not found! *************");
-      process.exit(1);
-   }
-
-   this.pushService = this.gang.casa.findService("pushoverservice");
-
-   if (!this.pushService) {
-      console.error(this.uName + ": ***** Pushover service not found! *************");
-      process.exit(1);
-   }
+   console.error("AAAAAAAAAAAAAAAA pushover config=",_config);
+   ServiceProperty.call(this, _config, _owner);
 }
 
-util.inherits(PushoverProperty, Property);
-
-PushoverProperty.prototype.propertyAboutToChange = function(_newValue, _data) {
-
-   if (_data.coldStart) {
-      return;
-   }
-
-   this.pushService.sendMessage(this.userGroup.getProperty('pushoverDestAddr'), this.messagePriority, _newValue);
-};
+util.inherits(PushoverProperty, ServiceProperty);
 
 module.exports = exports = PushoverProperty;
+ 

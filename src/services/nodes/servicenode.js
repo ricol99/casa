@@ -72,7 +72,7 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
    console.log(this.uName + ":ServiceNode.prototype.propertyAboutToChange() property="+_propName);
 
    if (!(_data.hasOwnProperty("sourceName") && (_data.sourceName === this.uName))) {
-      this.owner.notifyChange(this, _propName, _propValue, _data);
+      this.owner.notifyChange(this, _propName, _propValue, _data, this.subscribers[_data.sourceName]);
    }
    else {
       console.log(this.uName + ": Property was changed locally, not from source. Source name ="+_data.sourceName);

@@ -20,8 +20,6 @@ function Service(_config, _owner) {
    this.queue = [];
    this.queueTimer = null;
    this.deviceTypes = util.copy(_config.deviceTypes);
-   this.statusPropertyName = _config.hasOwnProperty("statusPropertyName") ? _config.statusPropertyName : "status";
-   this.ensurePropertyExists(this.statusPropertyName, 'property', { initialValue: false }, this.config);
 }
 
 util.inherits(Service, Thing);
@@ -79,13 +77,13 @@ Service.prototype.findOrCreateNode = function(_type, _id) {
    }
 };
 
-Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data) {
+Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data, _subscriber) {
 
    if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId)) {
       this.transactions[_serviceNode.name + "-" + _data.transactionId].properties[_propName] = _propValue;
    }
    else {
-      var transaction = { "action": "propertyChanged", properties: {} };
+      var transaction = { "action": "propertyChanged", properties: {}, subscriber: _subscriber };
       transaction.properties[_propName] = _propValue;
 
       if (_data.hasOwnProperty("transactionId")) {
@@ -97,7 +95,7 @@ Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _
 };
 
 Service.prototype.queueTransaction = function(_serviceNode, _transaction) {
-   _transaction.queued =  _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
+   _transaction.queued = _transaction.hasOwnProperty("queued") ? _transaction.queued + 1 : 1;
 
    if (_transaction.queued > this.queueRetryLimit) {
       console.error(this.uName + ": Unable to queue transaction as it has been requeued too many times");
