@@ -1,17 +1,18 @@
 var util = require('util');
-var Thing = require('../../thing');
+var ServiceNode = require('./servicenode');
+
 
 function OneWireServiceThermometer(_config, _owner) {
-   Thing.call(this, _config, _owner);
+   ServiceNode.call(this, _config, _owner);
    console.log(this.uName + ": New thermometer created");
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 10000000;
    this.started = false;
    this.ensurePropertyExists("temperature", 'property', { initialValue: 0, }, this.config);
 }
 
-util.inherits(OneWireServiceThermometer, Thing);
+util.inherits(OneWireServiceThermometer, ServiceNode);
 
-GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
+OneWireServiceThermometer.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (_subscription.args.hasOwnProperty("pollDuration")) {
 
