@@ -39,16 +39,16 @@ Last24HourWeather.prototype.fetchLast24HourWeather = function(_callback) {
          this.result.shift();
       }
 
-      var result = { "temperature": this.average("temperature"),
-                     "temperature-feels-like": this.average("temperature-feels-like"),
-                     "visibility": this.average("visibility"),
+      var result = { "temperature": parseFloat(this.average("temperature").toFixed(1)),
+                     "temperature-feels-like": parseFloat(this.average("temperature-feels-like").toFixed(1)),
+                     "visibility": parseFloat(this.average("visibility").toFixed(0)),
                      "three-hour-precipitation-total": this.total("three-hour-precipitation-total"),
                      "three-hour-snow-total": this.total("three-hour-precipitation-total"),
-                     "wind-direction": this.average("wind-direction"),
-                     "average-wind-speed": this.average("average-wind-speed"),
-                     "max-wind-gust": this.max("max-wind-gust"),
-                     "humidity": this.average("humidity"),
-                     "uv-index": this.average("uv-index") };
+                     "wind-direction": parseFloat(this.average("wind-direction").toFixed(0)),
+                     "average-wind-speed": parseFloat(this.average("average-wind-speed").toFixed(1)),
+                     "max-wind-gust": parseFloat(this.max("max-wind-gust").toFixed(1)),
+                     "humidity": parseFloat(this.average("humidity").toFixed(2)),
+                     "uv-index": parseFloat(this.average("uv-index").toFixed(0)) };
 
       if (_callback) {
          return _callback(null, result);
