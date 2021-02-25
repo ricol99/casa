@@ -40,8 +40,10 @@ PushoverServiceGroup.prototype.processPropertyChanged = function(_transaction, _
       return _callback("No message passed to send!");
    }
 
-   var messagePriority = _transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0;
-   this.sendMessage(messagePriority, _transaction.properties.message, _callback);
+   if (!_transaction.coldStart) {
+      var messagePriority = _transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0;
+      this.sendMessage(messagePriority, _transaction.properties.message, _callback);
+   }
 };
 
 
