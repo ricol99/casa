@@ -9,7 +9,8 @@ function WeatherService(_config, _owner) {
 
    this.deviceTypes = {
       "current": "currentweather",
-      "last24hour": "last24hoursweather"
+      "last24hours": "last24hoursweather",
+      "lastweek": "lastweekweather"
    };
 
    this.devices = {};
