@@ -19,6 +19,7 @@
     "ht16k33": "^1.0.2",
     "ht16k33-sevensegment-display": "^0.1.1",
     "lightwaverf": "0.0.1",
+    "mcp-spi-adc": "^3.1.0",
     "md5": "^2.2.1",
     "mdns": "^2.7.2",
     "nedb": "^1.8.0",
