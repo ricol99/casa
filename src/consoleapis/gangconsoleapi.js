@@ -28,7 +28,13 @@ GangConsoleApi.prototype.createUser = function(_session, _params, _callback) {
 };
 
 GangConsoleApi.prototype.restart = function(_session, _params, _callback) {
-   process.exit(3);
+
+   if ((_params && (_params.length > 0) && _params[0]) || (!this.gang.ignoreRestart)) {
+      process.exit(3);
+   }
+   else {
+      return _callback(this.gang.casa.uName + ": Ignoring restart!");
+   }
 };
 
 GangConsoleApi.prototype.updateDb = function(_session, _params, _callback) {

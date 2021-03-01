@@ -197,6 +197,7 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
       }
       else {
          this.config = _mainConfig[0];
+         this.ignoreRestart = this.config.hasOwnProperty("ignoreRestart") ? this.config.ignoreRestart : false;
 
          _db.readCollection("casaUsers", (_err, _users) => {
 
