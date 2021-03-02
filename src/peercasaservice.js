@@ -4,14 +4,19 @@ var PeerCasa = require('./peercasa');
 var Gang = require('./gang');
 
 if (!process.env.INTERNETCASA) {
-   var mdns = require('mdns');
 
-   // workaround for raspberry pi
-   var sequence = [
-       mdns.rst.DNSServiceResolve(),
-       'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({families:[4]}),
-       mdns.rst.makeAddressesUnique()
-   ];
+   try {
+      var mdns = require('mdns');
+
+      // workaround for raspberry pi
+      var sequence = [
+          mdns.rst.DNSServiceResolve(),
+          'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({families:[4]}),
+          mdns.rst.makeAddressesUnique()
+      ];
+   } catch (_err) {
+      console.error('peercasaservice: Error: ', _err);
+   }
 }
 
 function PeerCasaService(_config) {
