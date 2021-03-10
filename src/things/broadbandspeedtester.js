@@ -17,27 +17,33 @@ function BroadbandSpeedTester(_config, _parent) {
 util.inherits(BroadbandSpeedTester, Thing);
 
 BroadbandSpeedTester.prototype.testSpeed = function() {
-   var test = speedTest({ maxTime: this.maxTime });
+   try {
+      var test = speedTest({ maxTime: this.maxTime });
 
-   test.on('data', (_data) => {
+      test.on('data', (_data) => {
 
-      if (_data.hasOwnProperty('speeds')) {
-         this.alignPropertyValue('download-speed', _data.speeds.download);
-         this.alignPropertyValue('upload-speed', _data.speeds.upload);
+         if (_data.hasOwnProperty('speeds')) {
+            this.alignPropertyValue('download-speed', _data.speeds.download);
+            this.alignPropertyValue('upload-speed', _data.speeds.upload);
 
-         if (_data.hasOwnProperty('server')) {
-            this.alignPropertyValue('ping-time', _data.server.ping);
-            this.alignPropertyValue('server-address', _data.server.host);
+            if (_data.hasOwnProperty('server')) {
+               this.alignPropertyValue('ping-time', _data.server.ping);
+               this.alignPropertyValue('server-address', _data.server.host);
 
-            this.alignPropertyValue('test-result', 'Speed Test: D=' + _data.speeds.download +
-                                    ' U=' + _data.speeds.upload + ' P=' + _data.server.ping);
+               this.alignPropertyValue('test-result', 'Speed Test: D=' + _data.speeds.download +
+                                       ' U=' + _data.speeds.upload + ' P=' + _data.server.ping);
+            }
          }
-      }
-   });
+      });
+   
+      test.on('error', (_err) => {
+         console.error(this.uName + ": Error performing speed test. Error: " + _err);
+      });
 
-   test.on('error', (_err) => {
+   }
+   catch (_err) {
       console.error(this.uName + ": Error performing speed test. Error: " + _err);
-   });
+   }
 };
 
 BroadbandSpeedTester.prototype.scheduledEventTriggered = function(_event) {

@@ -14,7 +14,6 @@ util.inherits(PushoverServiceGroup, ServiceNode);
 PushoverServiceGroup.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.userGroup) {
-      console.error(this.uName + ": AAAAA usergroup=" + _subscription.args.userGroup);
       this.userGroup = this.gang.findNamedObject(_subscription.args.userGroup);
    }
 
