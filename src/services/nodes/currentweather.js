@@ -92,6 +92,7 @@ CurrentWeather.prototype.updateLocalProperties = function(_result) {
 
 CurrentWeather.prototype.processPropertyChanged = function(_transaction, _callback) {
    // Do nothing, read only
+   _callback(null, true);
 };
 
 module.exports = exports = CurrentWeather;

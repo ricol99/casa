@@ -58,6 +58,7 @@ OneWireServiceThermometer.prototype.pollDevice = function() {
 
 OneWireServiceThermometer.prototype.processPropertyChanged = function(_transaction, _callback) {
    // Do nothing, read only
+   _callback(null, true);
 };
 
 module.exports = exports = OneWireServiceThermometer;

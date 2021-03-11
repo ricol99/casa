@@ -89,6 +89,7 @@ LastPeriodWeather.prototype.average = function(_param) {
 
 LastPeriodWeather.prototype.processPropertyChanged = function(_transaction, _callback) {
    // Do nothing, read only
+   _callback(null, true);
 };
 
 module.exports = exports = LastPeriodWeather;

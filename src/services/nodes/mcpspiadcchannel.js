@@ -12,6 +12,7 @@ function McpSpiAdcChannel(_config, _owner) {
    this.interval = 100000000000;
 
    this.ensurePropertyExists("reading", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("interval", 'property', { initialValue: 10000, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(McpSpiAdcChannel, ServiceNode);
@@ -20,6 +21,7 @@ McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (_subscription.interval < this.interval) {
       this.interval = _subscription.interval;
+      this.alignPropertyValue('interval', this.interval);
    }
    
    if (!this.listening) {
@@ -83,7 +85,15 @@ McpSpiAdcChannel.prototype.transactionReadyForProcessing = function(_transaction
 };
 
 McpSpiAdcChannel.prototype.processPropertyChanged = function(_transaction, _callback) {
-   // Do nothing - read only
+
+   if (_transaction.props && _transaction.props.hasOwnProperty("interval")) {
+      this.interval = _transaction.props.interval;
+
+      if (this.ready) {
+         this.startListening();
+      }
+   }
+   _callback(null, true);
 };
 
 McpSpiAdcChannel.prototype.processFetchReading = function(_transaction, _callback) {
