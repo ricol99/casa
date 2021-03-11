@@ -167,8 +167,8 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          this.timeoutDuration = _state.timeout.duration * 1000;
          this.timeoutNextState = _state.timeout.nextState;
       }
-      else if (_state.timeout.hasOwnProperty('property')) {
-         var value = this.owner.getProperty(_state.timeout.property);
+      else if (_state.timeout.hasOwnProperty('property') || _state.timeout.hasOwnProperty('source')) {
+         var value = _state.timeout.hasOwnProperty('property') ? this.owner.getProperty(_state.timeout.property) : _state.timeout.source.sourceListener.getPropertyValue();
             
          if (typeof value !== 'number') {
                 
@@ -509,6 +509,10 @@ function State(_config, _owner) {
             this.timeout.inheritsFrom[_config.timeout.from[z]] = true;
          }
       }
+      else if (this.timeout.hasOwnProperty("source")) {
+         util.ensureExists(this.timeout.source, "uName", this.owner.owner.uName);
+         this.timeout.source.sourceListener = this.owner.fetchOrCreateSourceListener(this.timeout.source);
+      }
    }
 
    if (this.sources) {
@@ -661,6 +665,7 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    else {
       this.processActiveActionGuards(_name, _value);
       this.processActionsWithSources(_sourceEventName, _name, _value);
+      this.processTimeoutWithSource(_sourceEventName, _value);
    }
 
    return null;
@@ -736,6 +741,13 @@ State.prototype.processActionsWithSources = function(_sourceEventName, _propName
             this.owner.alignActions([ this.actions[a] ], this.priority);
          }
       }
+   }
+};
+
+State.prototype.processTimeoutWithSource = function(_sourceEventName, _timeout) {
+
+   if (this.timeout && this.timeout.hasOwnProperty("source") && (this.timeout.source.sourceListener.sourceEventName === _sourceEventName)) {
+      this.owner.resetStateTimer(this);
    }
 };
 
