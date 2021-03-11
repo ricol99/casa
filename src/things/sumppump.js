@@ -34,7 +34,7 @@ function SumpPump(_config, _parent) {
    }
    else {
       var value = (_config.hasOwnProperty('pumpTimeout')) ? _config.pumpTimeout : 600;
-      this.pumpTimeouts = { "low": value, "mid": value, "near-high": value, "high": value, "full": value };
+      this.pumpTimeouts = { "empty": value, "low": value, "mid": value, "near-high": value, "high": value, "full": value };
    }
 
    this.ensurePropertyExists('pump-timeout', 'property', { initialValue: this.pumpTimeouts.low }, _config);
@@ -53,7 +53,7 @@ function SumpPump(_config, _parent) {
 
    this.ensurePropertyExists('pump-state', 'stateproperty', { name: "pump-state", type: "stateproperty", initialValue: "pump-idle", 
                                                                        states: [{ name: "pump-idle", },
-                                                                                { name: "pump-active", timeout: { source: { property: "pump-timeout" }, nextState: "pump-idle" }},
+                                                                                { name: "pump-active", timeout: { source: { property: "pump-timeout" }, nextState: "pump-failure" }},
                                                                                 { name: "pump-failure", sources: [{ event: "pump-reset", nextState: "pump-idle" }]} ]}, _config);
 
    this.ensurePropertyExists('sump-pump-state', 'combinestateproperty', { name: "sump-pump-state", type: "combinestateproperty", separator: "-", initialValue: "sump-empty-pump-idle",
