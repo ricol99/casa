@@ -18,12 +18,15 @@ function QuantiseProperty(_config, _owner) {
 util.inherits(QuantiseProperty, Property);
 
 QuantiseProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   var name = this.boundaries[this.boundaries.length - 1].name;
+   var name = this.boundaries[0].name;
 
    for (var q = 0; q < this.boundaries.length; ++q) {
 
-      if (_data.value < this.boundaries[q].value) {
+      if (_data.value >= this.boundaries[q].value) {
          name = this.boundaries[q].name;
+      }
+      else {
+         break;
       }
    }
 

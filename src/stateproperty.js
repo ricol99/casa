@@ -349,6 +349,13 @@ StateProperty.prototype.alignActions = function(_actions, _priority) {
             else if (props[z].hasOwnProperty("source")) {
                props[z].value = props[z].source.sourceListener.getPropertyValue();
             }
+            else if (props[z].hasOwnProperty("apply")) {
+               var currentValue = this.owner.getProperty(props[z].property);
+               var output = false;
+               var exp = props[z].apply.replace(/\$value/g, "currentValue");
+               eval("output = " + exp);
+               props[z].value = output;
+            }
          }
 
          this.owner.alignProperties(props);

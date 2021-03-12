@@ -73,7 +73,7 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
       }
 
       if (sl.isCold()) {
-         console.log(this.uName + ": Not ready as one or more sources is still cold");
+         console.log(this.uName + ": Not ready as one or more sources is still cold. SourceEventName="+sl.sourceEventName);
          return;
       }
 
