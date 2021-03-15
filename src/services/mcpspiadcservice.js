@@ -27,7 +27,13 @@ McpSpiAdcService.prototype.fetchReading = function(_id, _callback) {
 
 McpSpiAdcService.prototype.openMcpChannel = function(_channel, _callback) {
    var fn = "openMcp"+this.mcpDevice.toString();
-   McpSpiAdc[fn].call(this, _channel, { speedHz: this.busSpeed }, _callback);
+
+   try {
+      McpSpiAdc[fn].call(this, _channel, { speedHz: this.busSpeed }, _callback);
+   }
+   catch(_error) {
+      _callback(_error);
+   }
 };
 
 module.exports = exports = McpSpiAdcService;
