@@ -7,7 +7,7 @@ function McpSpiAdcChannel(_config, _parent) {
    this.displayName = _config.displayName;
    this.channelId = _config.channelId;
    this.interval = (_config.hasOwnProperty("interval")) ? _config.interval : 10000;
-   this.serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  this.gang.casa.findServiceName("hueservice");
+   this.serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  this.gang.casa.findServiceName("mcpspiadcservice");
 
    if (!this.serviceName) {
       console.error(this.uName + ": ***** MCP SPI ADC service not found! *************");

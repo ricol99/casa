@@ -7,14 +7,14 @@ function McpSpiAdcService(_config, _owner) {
    _config.deviceTypes = { "channel": "mcpspiadcchannel" };
    
    Service.call(this, _config, _owner);
-   this.mcpDevice = _config.hasOwnProperty("mcpDevice") ? _config.mcpDevice : 3008;
+   this.mcpDevice = _config.hasOwnProperty("mcpDevice") ? _config.mcpDevice : 3208;
 
    if (_config.hasOwnProperty("busSpeed")) {
       this.busSpeed = _config.busSpeed;
    }
    else {
       var busSpeedMap = { 3002: 1200000, 3004: 1350000, 3008: 1350000, 3202: 900000, 3204: 1000000, 3208: 1000000 };
-      this.busSpeed busSpeedMap[this.mcpDevice);
+      this.busSpeed = busSpeedMap[this.mcpDevice];
    }
 }
 
@@ -27,8 +27,7 @@ McpSpiAdcService.prototype.fetchReading = function(_id, _callback) {
 
 McpSpiAdcService.prototype.openMcpChannel = function(_channel, _callback) {
    var fn = "openMcp"+this.mcpDevice.toString();
-
-   McpSpiAdc.call(this, fn, _channel, this.busSpeed, _callback);
+   McpSpiAdc[fn].call(this, _channel, { speedHz: this.busSpeed }, _callback);
 };
 
 module.exports = exports = McpSpiAdcService;

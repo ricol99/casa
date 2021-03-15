@@ -32,7 +32,7 @@ McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
    }
 };
 
-McpSpiAdcChannel.prototype.initaliseAndStartListening = function() {
+McpSpiAdcChannel.prototype.initialiseAndStartListening = function() {
    this.listening = true;
 
    this.mcpAdcChannel = this.owner.openMcpChannel(this.id, (_err) => {
@@ -75,7 +75,7 @@ McpSpiAdcChannel.prototype.startListening = function () {
 
 };
 
-McpSpiAdcChannel.prototype.fetchReading = fetchReading(_callback) {
+McpSpiAdcChannel.prototype.fetchReading = function(_callback) {
    var transaction = { action: "fetchReading", callback: _callback };
    this.owner.queueTransaction(this, transaction);
 };
