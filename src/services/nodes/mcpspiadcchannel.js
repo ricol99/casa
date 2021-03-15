@@ -39,6 +39,7 @@ McpSpiAdcChannel.prototype.initialiseAndStartListening = function() {
 
       if (_err) {
          console.error(this.uName + ": Unable to open MCP SPI ADC on channel " + this.id + ", error = " + _err);
+         this.initialisationStarted = false;
          return;
       }
 
@@ -93,7 +94,10 @@ McpSpiAdcChannel.prototype.processPropertyChanged = function(_transaction, _call
    if (_transaction.props && _transaction.props.hasOwnProperty("interval")) {
       this.interval = _transaction.props.interval;
 
-      if (this.ready) {
+      if (!this.initialisationStarted) {
+         this.initialiseAndStartListening();
+      }
+      else if (this.ready) {
          this.restartListening();
       }
    }
