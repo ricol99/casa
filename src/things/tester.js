@@ -51,7 +51,7 @@ Tester.prototype.findTestCaseStep = function(_name, _type) {
       for (var i = 0; i < this.config[_type].length; ++i) {
 
          if (this.config[_type][i].name === _name) {
-            return this.config[_type][i];
+            return util.copy(this.config[_type][i], true);
          }
       }
    }
@@ -79,19 +79,21 @@ Tester.prototype.addTargetUnderTest = function(_testCase) {
 };
 
 Tester.prototype.replaceInnerTestCases = function(_testCaseStep) {
+   var ret = false;
 
    for (var i = 0; i < _testCaseStep.driveSequence.length; ++i) {
 
       let innerTestCaseStep = null;
 
       if (_testCaseStep.driveSequence[i].hasOwnProperty("testCase")) {
-         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testCase, "testCases");
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testCase.name, "testCases");
       }
       else if (_testCaseStep.driveSequence[i].hasOwnProperty("testStep")) {
-         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testCase, "testSteps");
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.driveSequence[i].testStep.name, "testSteps");
       }
 
       if (innerTestCaseStep) {
+         ret = true;
          this.replaceInnerTestCases(innerTestCaseStep);
          _testCaseStep.driveSequence.splice(i, 1, ...innerTestCaseStep.driveSequence);
          i += innerTestCaseStep.driveSequence.length - 1;
@@ -103,22 +105,30 @@ Tester.prototype.replaceInnerTestCases = function(_testCaseStep) {
       let innerTestCaseStep = null;
 
       if (_testCaseStep.expectedSequence[j].hasOwnProperty("testCase")) {
-         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testCase, "testCases");
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testCase.name, "testCases");
       }
       else if (_testCaseStep.expectedSequence[j].hasOwnProperty("testStep")) {
-         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testCase, "testSteps");
+         innerTestCaseStep = this.findTestCaseStep(_testCaseStep.expectedSequence[j].testStep.name, "testSteps");
       }
 
       if (innerTestCaseStep) {
+         ret = true;
          this.replaceInnerTestCases(innerTestCaseStep);
          _testCaseStep.expectedSequence.splice(j, 1, ...(innerTestCaseStep.expectedSequence));
          j += innerTestCaseStep.expectedSequence.length - 1;
       }
    }
+
+   return ret;
 };
 
 Tester.prototype.buildTestCase = function(_testCase) {
-   this.replaceInnerTestCases(_testCase);
+   var innerCasesFound = true;
+
+   while (innerCasesFound) {
+      innerCasesFound = this.replaceInnerTestCases(_testCase);
+   }
+
    _testCase.driveSequence[0].wait = (_testCase.driveSequence[0].hasOwnProperty("wait")) ? _testCase.driveSequence[0].wait + this.settleTime : this.settleTime;
    this.testCases.push({ driveSequence: _testCase.driveSequence, expectedSequence: [] });
 
