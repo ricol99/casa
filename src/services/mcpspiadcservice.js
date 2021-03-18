@@ -13,7 +13,8 @@ function McpSpiAdcService(_config, _owner) {
       this.busSpeed = _config.busSpeed;
    }
    else {
-      var busSpeedMap = { 3002: 1200000, 3004: 1350000, 3008: 1350000, 3202: 900000, 3204: 1000000, 3208: 1000000 };
+      //var busSpeedMap = { 3002: 1200000, 3004: 1350000, 3008: 1350000, 3202: 900000, 3204: 1000000, 3208: 1000000 };
+      var busSpeedMap = { 3002: 1200000, 3004: 1350000, 3008: 1350000, 3202: 900000, 3204: 1000000, 3208: 500000 };
       this.busSpeed = busSpeedMap[this.mcpDevice];
    }
 }
@@ -29,7 +30,7 @@ McpSpiAdcService.prototype.openMcpChannel = function(_channel, _callback) {
    var fn = "openMcp"+this.mcpDevice.toString();
 
    try {
-      McpSpiAdc[fn].call(this, _channel, { speedHz: this.busSpeed }, _callback);
+      return McpSpiAdc[fn].call(this, parseInt(_channel), { speedHz: this.busSpeed }, _callback);
    }
    catch(_error) {
       _callback(_error);

@@ -9,19 +9,17 @@ function McpSpiAdcChannel(_config, _owner) {
    console.log(this.uName + ": New MCP SPI ADC channel created");
    this.ready = false;
    this.initialisationStarted = false;
-   this.interval = 100000000000;
 
    this.ensurePropertyExists("reading", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
-   this.ensurePropertyExists("interval", 'property', { initialValue: 10000, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("interval", 'property', { initialValue: 1000000, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(McpSpiAdcChannel, ServiceNode);
 
 McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
 
-   if (_subscription.interval < this.interval) {
-      this.interval = _subscription.interval;
-      this.alignPropertyValue('interval', this.interval);
+   if (_subscription.interval < this.getProperty("interval")) {
+      this.alignPropertyValue('interval', _subscription.interval);
    }
    
    if (!this.initialisationStarted) {
@@ -36,6 +34,7 @@ McpSpiAdcChannel.prototype.initialiseAndStartListening = function() {
    this.initialisationStarted = true;
 
    this.mcpAdcChannel = this.owner.openMcpChannel(this.id, (_err) => {
+      console.log(this.uName + ": AAAAAA Here!");
 
       if (_err) {
          console.error(this.uName + ": Unable to open MCP SPI ADC on channel " + this.id + ", error = " + _err);
@@ -55,7 +54,7 @@ McpSpiAdcChannel.prototype.restartListening = function () {
    }
 
    if (this.intervalTimer) {
-      clearTimeout(this.intervalTimer);
+      clearInterval(this.intervalTimer);
    }
 
    this.intervalTimer = setInterval( () => {
@@ -65,11 +64,11 @@ McpSpiAdcChannel.prototype.restartListening = function () {
          if (_err) {
             console.error(this.uName + ": Unable to read channel, error = " + _err);
          }
-         else {
-            this.alignPropertyValue('reading', _reading);
+         else if (_reading.value !== this.getProperty("reading")) {
+            this.alignPropertyValue('reading', _reading.value);
          }
       });
-   }, this.interval);
+   }, this.getProperty("interval"));
       
    process.on('SIGINT', () => {
 
@@ -92,7 +91,6 @@ McpSpiAdcChannel.prototype.transactionReadyForProcessing = function(_transaction
 McpSpiAdcChannel.prototype.processPropertyChanged = function(_transaction, _callback) {
 
    if (_transaction.props && _transaction.props.hasOwnProperty("interval")) {
-      this.interval = _transaction.props.interval;
 
       if (!this.initialisationStarted) {
          this.initialiseAndStartListening();
