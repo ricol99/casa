@@ -55,7 +55,9 @@ Tester.prototype.findTestCaseStep = function(_name, _type) {
          }
       }
    }
-   return null;
+
+   console.log("\x1b[31m" + _type + " " + _name + " not found! Exiting.\x1b[0m");
+   process.exit(2);
 };
 
 Tester.prototype.addTargetUnderTest = function(_testCase) {

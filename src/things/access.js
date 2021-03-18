@@ -16,21 +16,14 @@ var Thing = require('../thing');
 // Property to set
 // target - "open" or "closed" - set to make the access move based on this property
 
-// Resulting target-state
-// target-unknown - no outstanding request
-// target-open-requested  - request to open access, waiting for access to confirm it has started to open (waiting for fully-closed to be false)
-// target-opening - access has confirmed it is opening (fully-closed is now false)
-// target-closed-requested - request to open access, waiting for access to confirm it has started to close (waiting for fully-open to be false)
-// target-closing - access has confirmed it is closing (fully-open is now false)
-// target-achieved - target was achieved within the timing required
-// target-not-achieved - target was not achieved, see other states for why
-
 // Resulting access-state
 // access-unknown - Initialisation - no clue what the state of the access is, waiting for fully-closed or fully-open to be set
-// access-closed - access fully closed (raised for bollard)
+// access-open-requested - access has been asked to open, response-timer started and waiting for access to respond (waiting for fully-closed to go false)
 // access-opening - access moving from closed to open
 // access-open - access fully open (recessed in the ground for bollard)
+// access-closed-requested - access has been asked to closed, response-timer started and waiting for access to respond (waiting for fully-open to go false)
 // access-closing - access moving from open to closed
+// access-closed - access fully closed (raised for bollard)
 
 // Resulting alarm-state
 // normal - everything is operating normally
@@ -65,41 +58,30 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('retry-allowed', 'compareproperty', { initialValue: true,
                                                                    sources: [{ property: "retry-count" }, { property: "max-retries" }], comparison: "$values[0] < $values[1]" }, _config);
 
-   this.ensurePropertyExists('target-state', 'stateproperty', { name: "target-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "target-unknown",
-                                                                states: [{ name: "target-unknown",
-                                                                           sources: [{ property: "target", value: "open", nextState: "target-open-requested" },
-                                                                                     { property: "target", value: "closed", nextState: "target-closed-requested" }] },
-                                                                         { name: "target-open-requested",
-                                                                           sources: [{ property: "access-state", value: "access-opening", nextState: "target-opening" }],
-                                                                           timeout: { property: "response-timeout", nextState: "target-not-achieved" }},
-                                                                         { name: "target-opening",
-                                                                           sources: [{ property: "access-state", value: "access-open", nextState: "target-achieved" }],
-                                                                           timeout: { property: "opening-timeout", nextState: "target-not-achieved" }},
-                                                                         { name: "target-closed-requested",
-                                                                           sources: [{ property: "access-state", value: "access-closing", nextState: "target-closing" }],
-                                                                           timeout: { property: "response-timeout", nextState: "target-not-achieved" }},
-                                                                         { name: "target-closing",
-                                                                           sources: [{ property: "access-state", value: "access-closed", nextState: "target-achieved" }],
-                                                                           timeout: { property: "opening-timeout", nextState: "target-not-achieved" }},
-                                                                         { name: "target-achieved", actions: [ { property: "target", value: "unknown"}, { event: "target-achieved" }],
-                                                                           timeout: { duration: 0.5 , nextState: "target-unknown" }},
-                                                                         { name: "target-not-achieved", actions: [ { property: "target", value: "unknown" }, { event: "target-not-achieved" }],
-                                                                           timeout: { duration: 0.5 , nextState: "target-unknown" }} ]}, _config);
-
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                  states: [{ name: "access-unknown",
-                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-closed"},
-                                                                                      { property: "fully-open", value: true, nextState: "access-open"}]},
-                                                                          { name: "access-closed", actions: [{ property: "retry-count", value: 0 }],
-                                                                            sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
-                                                                          { name: "access-opening",
-                                                                            sources: [{ property: "fully-open", value: true, nextState: "access-open" },
-                                                                                      { property: "fully-closed", value: true, nextState: "access-closed" }] },
-                                                                          { name: "access-open", actions: [{ property: "retry-count", value: 0 }],
-                                                                            sources: [{ property: "fully-open", value: false, nextState: "access-closing" }] },
-                                                                          { name: "access-closing",
                                                                             sources: [{ property: "fully-closed", value: true, nextState: "access-closed" },
-                                                                                      { property: "fully-open", value: true, nextState: "access-open" }]} ]}, _config);
+                                                                                      { property: "fully-open", value: true, nextState: "access-open" }]},
+                                                                          { name: "access-open-requested",
+                                                                            sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
+                                                                          { name: "access-opening", actions: [{ property: "target", value: "open" }],
+                                                                            sources: [{ property: "fully-open", value: true, nextState: "access-open" },
+                                                                                      { property: "fully-closed", value: true, nextState: "access-returned-to-closed" }] },
+                                                                          { name: "access-returned-to-open", actions: [{ property: "target", value: "open" }],
+                                                                            sources: [{ property: "target", value: "open", nextState: "access-open"}] },
+                                                                          { name: "access-open", actions: [{ property: "retry-count", value: 0 }],
+                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed-requested" },
+                                                                                      { property: "fully-open", value: false, nextState: "access-closing" }] },
+                                                                          { name: "access-closed-requested",
+                                                                            sources: [{ property: "fully-open", value: false, nextState: "access-closing" }] },
+                                                                          { name: "access-closing", actions: [{ property: "target", value: "closed" }],
+                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-closed" },
+                                                                                      { property: "fully-open", value: true, nextState: "access-returned-to-open" }]},
+                                                                          { name: "access-returned-to-closed", actions: [{ property: "target", value: "closed" }],
+                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed"}] },
+                                                                          { name: "access-closed", actions: [{ property: "retry-count", value: 0 }],
+                                                                            sources: [{ property: "target", value: "open", nextState: "access-open-requested" },
+                                                                                      { property: "fully-closed", value: false, nextState: "access-opening" }] } ]}, _config);
 
    this.ensurePropertyExists('alarm-state', 'stateproperty', { name: "alarm-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "normal",
                                                                states: [{ name: "normal", sources: [{ property: "safety-triggered", value: true, nextState: "safety-triggered" }]},
@@ -114,21 +96,39 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('access-alarm-state', 'combinestateproperty', { name: "access-alarm-state", type: "combinestateproperty", ignoreControl: true,
                                                                               takeControlOnTransition: true, separator: "-", 
                                                                               sources: [{ property: "access-state" }, { property: "alarm-state" }],
-                                                                              states: [{ name: "access-opening-normal",
+                                                                              states: [{ name: "access-open-requested-normal",
+                                                                                         timeout: { property: "response-timeout", nextState: "access-open-requested-timed-out" } },
+                                                                                       { name: "access-opening-normal",
                                                                                          timeout: { property: "opening-timeout", nextState: "access-opening-timed-out" } },
+                                                                                       { name: "access-closed-requested-normal",
+                                                                                         timeout: { property: "response-timeout", nextState: "access-closed-requested-timed-out" } },
                                                                                        { name: "access-closing-normal",
-                                                                                         timeout: { property: "closing-timeout", nextState: "access-closing-timeout" } },
-                                                                                       { name: "access-opening-timed-out", actions: [{ property: "alarm-state", value: "timed-out"}] },
-                                                                                       { name: "access-closing-timed-out", actions: [{ property: "alarm-state", value: "timed-out"}] }] }, _config);
+                                                                                         timeout: { property: "closing-timeout", nextState: "access-closing-timed-out" } },
+                                                                                       { name: "access-open-requested-timed-out",
+                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] },
+                                                                                       { name: "access-closed-requested-timed-out",
+                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] },
+                                                                                       { name: "access-open-requested-failure",
+                                                                                         actions: [ { property: "target", "value": "closed" },
+                                                                                                    { property: "access-state", value: "access-closed" }] },
+                                                                                       { name: "access-closed-requested-failure",
+                                                                                         actions: [{ property: "target", "value": "open" },
+                                                                                                   { property: "access-state", value: "access-open"}] },
+                                                                                       { name: "access-opening-timed-out",
+                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] },
+                                                                                       { name: "access-closing-timed-out",
+                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] }] }, _config);
 
    this.ensurePropertyExists('auto-close-state', 'stateproperty', { name: 'auto-close-state', initialValue: "not-active",  ignoreControl: true, takeControlOnTransition: true,
                                                                     states: [{ name: "not-active",
                                                                                sources: [{ guard: { "active": true, "property": "auto-close" },
                                                                                            property: "access-alarm-state", value: "access-open-normal", nextState: "primed" }] },
                                                                              { name: "primed", timeout: { property: "pause-time", nextState: "active" },
-                                                                               sources: [{ property: "access-state", value: "access-closing", nextState: "not-active" },
+                                                                               sources: [{ property: "access-state", value: "access-closed-requested", nextState: "not-active" },
+                                                                                         { property: "access-state", value: "access-closing", nextState: "not-active" },
                                                                                          { property: "access-state", value: "access-closed", nextState: "not-active" },
                                                                                          { property: "access-state", value: "access-opening", nextState: "not-active" },
+                                                                                         { property: "access-state", value: "access-open-requested", nextState: "not-active" },
                                                                                          { property: "alarm-state", value: "safey-alert", nextState: "not-active" },
                                                                                          { property: "alarm-state", value: "timed-out", nextState: "not-active" },
                                                                                          { property: "alarm-state", value: "failure", nextState: "not-active" }]},
