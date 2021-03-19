@@ -1,16 +1,16 @@
 var util = require('util');
 var Property = require('../property');
 
-function CompareProperty(_config, _owner) {
+function EvalProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = true;
-   this.comparison = _config.comparison;
+   this.expression = _config.expression;
 
    Property.call(this, _config, _owner);
 }
 
-util.inherits(CompareProperty, Property);
+util.inherits(EvalProperty, Property);
 
-CompareProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+EvalProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  
    if (newValue !== this.value) {
@@ -18,7 +18,7 @@ CompareProperty.prototype.newEventReceivedFromSource = function(_sourceListener,
    }
 };
 
-CompareProperty.prototype.calculateOutputValue = function() {
+EvalProperty.prototype.calculateOutputValue = function() {
 
    var inputs = [];
    var i = 0;
@@ -34,12 +34,12 @@ CompareProperty.prototype.calculateOutputValue = function() {
    }
 
    var output = false;
-   var exp = this.comparison.replace(/\$values/g, "inputs");
+   var exp = this.expression.replace(/\$values/g, "inputs");
    eval("output = " + exp);
    return output;
 };
 
-CompareProperty.prototype.amIValid = function() {
+EvalProperty.prototype.amIValid = function() {
 
    var ret = Property.prototype.amIValid.call(this);
 
@@ -54,4 +54,4 @@ CompareProperty.prototype.amIValid = function() {
    return ret;
 };
 
-module.exports = exports = CompareProperty;
+module.exports = exports = EvalProperty;

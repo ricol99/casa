@@ -47,6 +47,7 @@ function Access(_config, _parent) {
    }
 
    this.ensurePropertyExists('target', 'property', { initialValue: "unknown" }, _config);
+
    this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
    this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
    this.ensurePropertyExists('response-timeout', 'property', { initialValue: _config.hasOwnProperty("responseTimeout") ? _config.responseTimeout : 5 }, _config);
@@ -55,8 +56,8 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('max-retries', 'property', { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
    this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
-   this.ensurePropertyExists('retry-allowed', 'compareproperty', { initialValue: true,
-                                                                   sources: [{ property: "retry-count" }, { property: "max-retries" }], comparison: "$values[0] < $values[1]" }, _config);
+   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
+                                                                   sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                  states: [{ name: "access-unknown",
@@ -96,7 +97,7 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('access-alarm-state', 'combinestateproperty', { name: "access-alarm-state", type: "combinestateproperty", ignoreControl: true,
                                                                               takeControlOnTransition: true, separator: "-", 
                                                                               sources: [{ property: "access-state" }, { property: "alarm-state" }],
-                                                                              states: [{ name: "access-open-requested-normal",
+                                                                              states: [ { name: "access-open-requested-normal",
                                                                                          timeout: { property: "response-timeout", nextState: "access-open-requested-timed-out" } },
                                                                                        { name: "access-opening-normal",
                                                                                          timeout: { property: "opening-timeout", nextState: "access-opening-timed-out" } },
@@ -108,6 +109,10 @@ function Access(_config, _parent) {
                                                                                          actions: [{ property: "alarm-state", value: "timed-out"}] },
                                                                                        { name: "access-closed-requested-timed-out",
                                                                                          actions: [{ property: "alarm-state", value: "timed-out"}] },
+                                                                                       { name: "access-open-failure",
+                                                                                         actions: [ { property: "target", "value": "open" }] },
+                                                                                       { name: "access-close-failure",
+                                                                                         actions: [ { property: "target", "value": "close" }] },
                                                                                        { name: "access-open-requested-failure",
                                                                                          actions: [ { property: "target", "value": "closed" },
                                                                                                     { property: "access-state", value: "access-closed" }] },

@@ -43,7 +43,7 @@ function SumpPump(_config, _parent) {
 
    this.ensurePropertyExists('max-retries', 'property', { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
    this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('retry-allowed', 'compareproperty', { initialValue: true, sources: [{ property: "retry-count" }, { property: "max-retries" }], comparison: "$values[0] < $values[1]" }, _config);
+   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true, sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
    this.ensurePropertyExists('pump-timeout', 'property', { initialValue: this.pumpTimeouts.low }, _config);
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);

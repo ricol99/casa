@@ -95,9 +95,15 @@ Tester.prototype.replaceInnerTestCases = function(_testCaseStep) {
       }
 
       if (innerTestCaseStep) {
+         var waitTime = _testCaseStep.driveSequence[i].wait;
          ret = true;
-         this.replaceInnerTestCases(innerTestCaseStep);
+         this.replaceInnerTestCases(innerTestCaseStep, _testCaseStep.driveSequence[i].wait);
          _testCaseStep.driveSequence.splice(i, 1, ...innerTestCaseStep.driveSequence);
+
+         if (waitTime) {
+            _testCaseStep.driveSequence[i].wait = waitTime;
+         }
+
          i += innerTestCaseStep.driveSequence.length - 1;
       }
    }
