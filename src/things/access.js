@@ -8,10 +8,13 @@ var Thing = require('../thing');
 // *retryTimeout - How many secondss to wait until retry occurs (default 10)
 // *responseTimeout - ow long are the access allowed to take before responding to a commmand (open or close) (defualt 5)
 
+// Events to control access
+// access-reset - clear a failure condition
+
 // Properties to define
 // fully-closed - true when access is fully raised
 // fully-open - true when access is fully in the ground
-// safety-triggered - true when a safety system has halted everything
+// safety-alert - true when a safety system has halted everything
 
 // Property to set
 // target - "open" or "closed" - set to make the access move based on this property
@@ -20,9 +23,11 @@ var Thing = require('../thing');
 // access-unknown - Initialisation - no clue what the state of the access is, waiting for fully-closed or fully-open to be set
 // access-open-requested - access has been asked to open, response-timer started and waiting for access to respond (waiting for fully-closed to go false)
 // access-opening - access moving from closed to open
+// access-returned-to-close - access was opening but sensors have recognised that the access has returned to closed (manual intervention)
 // access-open - access fully open (recessed in the ground for bollard)
 // access-closed-requested - access has been asked to closed, response-timer started and waiting for access to respond (waiting for fully-open to go false)
 // access-closing - access moving from open to closed
+// access-returned-to-open - access was closing but sensors have recognised that the access has returned to open (manual intervention)
 // access-closed - access fully closed (raised for bollard)
 
 // Resulting alarm-state
@@ -85,11 +90,11 @@ function Access(_config, _parent) {
                                                                                       { property: "fully-closed", value: false, nextState: "access-opening" }] } ]}, _config);
 
    this.ensurePropertyExists('alarm-state', 'stateproperty', { name: "alarm-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "normal",
-                                                               states: [{ name: "normal", sources: [{ property: "safety-triggered", value: true, nextState: "safety-triggered" }]},
-                                                                        { name: "safety-alert", sources: [{ property: "safety-triggered", value: false, nextState: "normal" }]},
+                                                               states: [{ name: "normal", sources: [{ property: "safety-alert", value: true, nextState: "safety-alert" }]},
+                                                                        { name: "safety-alert", sources: [{ property: "safety-alert", value: false, nextState: "normal" }]},
                                                                         { name: "timed-out",
                                                                           actions: [{ property: "retry-count", apply: "++$value" }],
-                                                                          sources: [{ property: "safety-triggered", value: true, nextState: "safety-alert" },
+                                                                          sources: [{ property: "safety-alert", value: true, nextState: "safety-alert" },
                                                                                     { property: "retry-allowed", value: false, nextState: "failure" }],
                                                                           timeout: { property: "retry-timeout", nextState: "normal" }},
                                                                         { name: "failure", sources: [{ event: "access-reset", nextState: "normal" }]} ]}, _config);
@@ -113,6 +118,12 @@ function Access(_config, _parent) {
                                                                                          actions: [ { property: "target", "value": "open" }] },
                                                                                        { name: "access-close-failure",
                                                                                          actions: [ { property: "target", "value": "close" }] },
+                                                                                       { name: "access-open-requested-safety-alert",
+                                                                                         actions: [ { property: "target", "value": "closed" },
+                                                                                                    { property: "access-state", value: "access-closed" }] },
+                                                                                       { name: "access-closed-requested-safety-alert",
+                                                                                         actions: [{ property: "target", "value": "open" },
+                                                                                                   { property: "access-state", value: "access-open"}] },
                                                                                        { name: "access-open-requested-failure",
                                                                                          actions: [ { property: "target", "value": "closed" },
                                                                                                     { property: "access-state", value: "access-closed" }] },
