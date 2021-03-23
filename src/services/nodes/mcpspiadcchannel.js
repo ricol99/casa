@@ -30,11 +30,10 @@ McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
    }
 };
 
-McpSpiAdcChannel.prototype.initialiseAndStartListening = function() {
+McpSpiAdcChannel.prototype.initialiseAndStartListening = function(_interval) {
    this.initialisationStarted = true;
 
    this.mcpAdcChannel = this.owner.openMcpChannel(this.id, (_err) => {
-      console.log(this.uName + ": AAAAAA Here!");
 
       if (_err) {
          console.error(this.uName + ": Unable to open MCP SPI ADC on channel " + this.id + ", error = " + _err);
@@ -43,11 +42,11 @@ McpSpiAdcChannel.prototype.initialiseAndStartListening = function() {
       }
 
       this.ready = true;
-      this.restartListening();
+      this.restartListening(_interval);
    });
 }
 
-McpSpiAdcChannel.prototype.restartListening = function () {
+McpSpiAdcChannel.prototype.restartListening = function (_interval) {
 
    if (!this.ready) {
       return;
@@ -56,6 +55,8 @@ McpSpiAdcChannel.prototype.restartListening = function () {
    if (this.intervalTimer) {
       clearInterval(this.intervalTimer);
    }
+
+   var interval = _interval ? _interval :  this.getProperty("interval");
 
    this.intervalTimer = setInterval( () => {
 
@@ -69,7 +70,7 @@ McpSpiAdcChannel.prototype.restartListening = function () {
             this.alignPropertyValue('reading', _reading.value);
          }
       });
-   }, this.getProperty("interval"));
+   }, interval);
       
    process.on('SIGINT', () => {
 
@@ -94,10 +95,10 @@ McpSpiAdcChannel.prototype.processPropertyChanged = function(_transaction, _call
    if (_transaction.props && _transaction.props.hasOwnProperty("interval")) {
 
       if (!this.initialisationStarted) {
-         this.initialiseAndStartListening();
+         this.initialiseAndStartListening(_transaction.props.interval);
       }
       else if (this.ready) {
-         this.restartListening();
+         this.restartListening(_transaction.props.interval);
       }
    }
    _callback(null, true);
