@@ -92,13 +92,13 @@ McpSpiAdcChannel.prototype.transactionReadyForProcessing = function(_transaction
 
 McpSpiAdcChannel.prototype.processPropertyChanged = function(_transaction, _callback) {
 
-   if (_transaction.props && _transaction.props.hasOwnProperty("interval")) {
+   if (_transaction.properties && _transaction.properties.hasOwnProperty("interval")) {
 
       if (!this.initialisationStarted) {
-         this.initialiseAndStartListening(_transaction.props.interval);
+         this.initialiseAndStartListening(_transaction.properties.interval);
       }
       else if (this.ready) {
-         this.restartListening(_transaction.props.interval);
+         this.restartListening(_transaction.properties.interval);
       }
    }
    _callback(null, true);
