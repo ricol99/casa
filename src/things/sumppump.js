@@ -51,7 +51,7 @@ function SumpPump(_config, _parent) {
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);
    this.ensurePropertyExists('delayed-level', 'delayproperty', { delay: this.assessmentDuration, source: { property: "level"} }, _config);
    this.ensurePropertyExists('assessed-level-difference', 'evalproperty', { expression: "$values[1] - $values[0]", sources: [{ property: "level"}, { property: "delayed-level" }] }, _config);
-   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$values[0] > 3", sources: [{ property: "assessed-sump-level-difference"}] }, _config);
+   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$values[0] > 3", sources: [{ property: "assessed-level-difference"}] }, _config);
 
    this.ensurePropertyExists('sump-level-state', 'stateproperty', { name: "sump-level-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "sump-empty",
                                                                     source: { property: "sump-level", transform: "\"sump-\" + $value" },
