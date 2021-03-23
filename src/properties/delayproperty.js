@@ -15,7 +15,7 @@ DelayProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
 DelayProperty.prototype.deleteDelayedEvent = function() {
    // Delete first element in the array
-   this.delayedEvents = this.delayedEvents.splice(0,1);
+   let event = this.delayedEvents.shift();
 }
 
 function DelayedEvent(_value, _eventData, _owner) {

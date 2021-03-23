@@ -91,7 +91,8 @@ GpioServicePin.prototype.processSetState = function(_transaction, _callback) {
 
       if (this.writable) {
 
-         this.gpio.write(this.triggerLow ? (_transaction.properties.state ? 0 : 1) : (_transaction.properties.state ? 1 : 0), (_err, _result) => {
+         //this.gpio.write(this.triggerLow ? (_transaction.properties.state ? 0 : 1) : (_transaction.properties.state ? 1 : 0), (_err, _result) => {
+         this.gpio.write(_transaction.properties.state ? 1 : 0, (_err, _result) => {
 
             if (!_err) {
                this.alignPropertyValue('state', _transaction.properties.state);

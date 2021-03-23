@@ -41,12 +41,17 @@ function SumpPump(_config, _parent) {
       this.pumpTimeouts = { "empty": value, "low": value, "mid": value, "high": value, "full": value };
    }
 
+   this.assessmentDuration = _config.hasOwnProperty("assessmentDuration") ? _config.assessmentDuration : 5;
+
    this.ensurePropertyExists('max-retries', 'property', { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
    this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true, sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
    this.ensurePropertyExists('pump-timeout', 'property', { initialValue: this.pumpTimeouts.low }, _config);
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);
+   this.ensurePropertyExists('delayed-sump-level', 'delayproperty', { delay: this.assessmentDuration, source: { property: "level"} }, _config);
+   this.ensurePropertyExists('assessed-sump-level-difference', 'evalproperty', { expression: "$value[1] - $value[0]", sources: [{ property: "sump-level"}, { property: "delayed-sump-level" }] }, _config);
+   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$value[0] > 3", sources: [{ property: "assessed-sump-level-difference"}] }, _config);
 
    this.ensurePropertyExists('sump-level-state', 'stateproperty', { name: "sump-level-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "sump-empty",
                                                                     source: { property: "sump-level", transform: "\"sump-\" + $value" },
@@ -65,11 +70,23 @@ function SumpPump(_config, _parent) {
                                                                                   timeout: { property: "retry-timeout", nextState: "pump-active" }}, 
                                                                                 { name: "pump-failure", sources: [{ event: "pump-reset", nextState: "pump-idle" }]} ]}, _config);
 
-   this.ensurePropertyExists('sump-pump-state', 'combinestateproperty', { name: "sump-pump-state", type: "combinestateproperty", ignoreControl: true, takeControlOnTransition: true, separator: "-", initialValue: "sump-empty-pump-idle",
+   this.ensurePropertyExists('sump-pump-state', 'combinestateproperty', { name: "sump-pump-state", type: "combinestateproperty", ignoreControl: true,
+                                                                          takeControlOnTransition: true, separator: "-", initialValue: "sump-empty-pump-idle",
                                                                           sources: [{ property: "sump-level-state" }, { property: "pump-state" }],
                                                                           states: [{ name: "sump-empty-pump-active", actions: [{ property: "pump-state", value: "pump-idle" }] },
                                                                                    { name: "sump-high-pump-idle", actions: [{ property: "pump-state", value: "pump-active" }] },
                                                                                    { name: "sump-full-pump-idle", actions: [{ property: "pump-state", value: "pump-active" }] }]}, _config);
+
+   this.ensurePropertyExists('pump-watch-dog', 'stateproperty', { name: "pump-watch-dog", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "not-active", 
+                                                                       states: [{ name: "not-active", sources: [{ property: "pump-state", value: "pump-active", nextState: "priming" }] },
+                                                                                { name: "priming", timeout: { duration: this.assessmentDuration + 1, nextState: "active" }},
+                                                                                { name" "active",
+                                                                                  sources: [{ property: "pump-state", value: "pump-idle", nextState: "not-active"},
+                                                                                            { property: "pump-state", value: "pump-timed-out", nextState: "not-active"},
+                                                                                            { property: "pump-state", value: "pump-failure", nextState: "not-active"},
+                                                                                            { property: "watch-dog-happy", value: false, nextState: "not-happy"}] },
+                                                                                { name: "not-happy", actions: [{ property: "pump-state", value: "pump-failure" }],
+                                                                                  timeout: { duration: 0.5, nextState: "not-active"} }] }, _config); 
 }
 
 util.inherits(SumpPump, Thing);
