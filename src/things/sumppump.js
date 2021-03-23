@@ -49,9 +49,9 @@ function SumpPump(_config, _parent) {
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
    this.ensurePropertyExists('pump-timeout', 'property', { initialValue: this.pumpTimeouts.low }, _config);
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);
-   this.ensurePropertyExists('delayed-sump-level', 'delayproperty', { delay: this.assessmentDuration, source: { property: "level"} }, _config);
-   this.ensurePropertyExists('assessed-sump-level-difference', 'evalproperty', { expression: "$value[1] - $value[0]", sources: [{ property: "sump-level"}, { property: "delayed-sump-level" }] }, _config);
-   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$value[0] > 3", sources: [{ property: "assessed-sump-level-difference"}] }, _config);
+   this.ensurePropertyExists('delayed-level', 'delayproperty', { delay: this.assessmentDuration, source: { property: "level"} }, _config);
+   this.ensurePropertyExists('assessed-level-difference', 'evalproperty', { expression: "$values[1] - $values[0]", sources: [{ property: "level"}, { property: "delayed-level" }] }, _config);
+   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$values[0] > 3", sources: [{ property: "assessed-sump-level-difference"}] }, _config);
 
    this.ensurePropertyExists('sump-level-state', 'stateproperty', { name: "sump-level-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "sump-empty",
                                                                     source: { property: "sump-level", transform: "\"sump-\" + $value" },
@@ -80,7 +80,7 @@ function SumpPump(_config, _parent) {
    this.ensurePropertyExists('pump-watch-dog', 'stateproperty', { name: "pump-watch-dog", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "not-active", 
                                                                        states: [{ name: "not-active", sources: [{ property: "pump-state", value: "pump-active", nextState: "priming" }] },
                                                                                 { name: "priming", timeout: { duration: this.assessmentDuration + 1, nextState: "active" }},
-                                                                                { name" "active",
+                                                                                { name: "active",
                                                                                   sources: [{ property: "pump-state", value: "pump-idle", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-timed-out", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-failure", nextState: "not-active"},

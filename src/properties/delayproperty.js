@@ -24,7 +24,7 @@ function DelayedEvent(_value, _eventData, _owner) {
    this.owner = _owner;
 
    this.timeoutObj = setTimeout( () => {
-      this.updatePropertyInternal(this.value, this.eventData);
+      this.owner.updatePropertyInternal(this.value, this.eventData);
       this.owner.deleteDelayedEvent();
    }, this.owner.delay*1000);
 }
