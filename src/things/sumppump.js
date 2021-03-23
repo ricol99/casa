@@ -43,15 +43,15 @@ function SumpPump(_config, _parent) {
 
    this.assessmentDuration = _config.hasOwnProperty("assessmentDuration") ? _config.assessmentDuration : 5;
 
-   this.ensurePropertyExists('max-retries', 'property', { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
-   this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true, sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
-   this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
-   this.ensurePropertyExists('pump-timeout', 'property', { initialValue: this.pumpTimeouts.low }, _config);
+   this.ensurePropertyExists('max-retries', 'property', { local: true, initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
+   this.ensurePropertyExists('retry-count', 'property', { local: true, initialValue: 0 }, _config);
+   this.ensurePropertyExists('retry-allowed', 'evalproperty', { local: true, initialValue: true, sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
+   this.ensurePropertyExists('retry-timeout', 'property', { local: true, initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
+   this.ensurePropertyExists('pump-timeout', 'property', { local: true, initialValue: this.pumpTimeouts.low }, _config);
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);
-   this.ensurePropertyExists('delayed-level', 'delayproperty', { delay: this.assessmentDuration, source: { property: "level"} }, _config);
-   this.ensurePropertyExists('assessed-level-difference', 'evalproperty', { expression: "$values[1] - $values[0]", sources: [{ property: "level"}, { property: "delayed-level" }] }, _config);
-   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { expression: "$values[0] > 3", sources: [{ property: "assessed-level-difference"}] }, _config);
+   this.ensurePropertyExists('delayed-level', 'delayproperty', { local: true, delay: this.assessmentDuration, source: { property: "level"} }, _config);
+   this.ensurePropertyExists('assessed-level-difference', 'evalproperty', { local: true, expression: "$values[1] - $values[0]", sources: [{ property: "level"}, { property: "delayed-level" }] }, _config);
+   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { local: true, expression: "$values[0] > 3", sources: [{ property: "assessed-level-difference"}] }, _config);
 
    this.ensurePropertyExists('sump-level-state', 'stateproperty', { name: "sump-level-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "sump-empty",
                                                                     source: { property: "sump-level", transform: "\"sump-\" + $value" },
