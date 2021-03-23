@@ -65,6 +65,7 @@ McpSpiAdcChannel.prototype.restartListening = function () {
             console.error(this.uName + ": Unable to read channel, error = " + _err);
          }
          else if (_reading.value !== this.getProperty("reading")) {
+            console.log(this.uName+": Raw Reading: ", _reading);
             this.alignPropertyValue('reading', _reading.value);
          }
       });

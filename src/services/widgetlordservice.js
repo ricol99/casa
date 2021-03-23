@@ -38,7 +38,6 @@ function WidgetLordChannel(_channel) {
 }
 
 WidgetLordChannel.prototype.read = function(_callback) {
-   console.log(this.uName + ":AAAA Hello!");
 
    try {
       _callback(null, { value: widgetlords.pi_spi_8ai_read_single(parseInt(this.channel),0) });

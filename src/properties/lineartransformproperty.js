@@ -8,6 +8,7 @@ function LinearTransformProperty(_config, _owner) {
    this.inputMax = _config.inputMax;
    this.outputMin = _config.outputMin;
    this.outputMax = _config.outputMax;
+   this.floorOutput = _config.hasOwnProperty("floorOutput") ? _config.floorOutput : false;
 
    this.inverted = (this.inputMin < this.inputMax && this.outputMin > this.outputMax) || (this.inputMin > this.inputMax && this.outputMin < this.outputMax);
    this.inputRange = this.inputMax - this.inputMin;
@@ -21,7 +22,8 @@ LinearTransformProperty.prototype.newEventReceivedFromSource = function(_sourceL
 
    var placeInRange = (_data.value - this.inputMin) / this.inputRange;
    var outputVal = (this.outputRange * placeInRange) + this.outputMin;
-   this.updatePropertyInternal(outputVal, _data);
+
+   this.updatePropertyInternal(this.floorOutput ? Math.floor(outputVal) : outputVal, _data);
 }
 
 module.exports = exports = LinearTransformProperty;
