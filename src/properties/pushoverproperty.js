@@ -20,7 +20,7 @@ util.inherits(PushoverProperty, ServiceProperty);
 
 PushoverProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    _data.messagePriority = this.messagePriority;
-   Property.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+   ServiceProperty.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
 };
 
 module.exports = exports = PushoverProperty;
