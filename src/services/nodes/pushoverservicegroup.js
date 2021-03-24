@@ -40,7 +40,7 @@ PushoverServiceGroup.prototype.processPropertyChanged = function(_transaction, _
    }
 
    if (!_transaction.coldStart) {
-      var messagePriority = _transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0;
+      var messagePriority = _transaction.propData.hasOwnProperty("messagePriority") ? _transaction.propData.messagePriority : (_transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0);
       this.sendMessage(messagePriority, _transaction.properties.message, _callback);
    }
    else {

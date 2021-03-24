@@ -12,11 +12,16 @@ function PushoverProperty(_config, _owner) {
                            userGroup: _config.userGroup };
    _config.sync = "write";
 
-   console.error("AAAAAAAAAAAAAAAA pushover config=",_config);
    ServiceProperty.call(this, _config, _owner);
+   this.messagePriority = _config.hasOwnProperty("priority") ? _config.priority : 0;
 }
 
 util.inherits(PushoverProperty, ServiceProperty);
+
+PushoverProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   _data.messagePriority = this.messagePriority;
+   Property.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+};
 
 module.exports = exports = PushoverProperty;
  

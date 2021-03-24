@@ -81,10 +81,15 @@ Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _
 
    if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId)) {
       this.transactions[_serviceNode.name + "-" + _data.transactionId].properties[_propName] = _propValue;
+
+      for (var arg in _data) {
+         this.transactions[_serviceNode.name + "-" + _data.transactionId].propData[arg] = _data[arg];
+      }
    }
    else {
       var transaction = { "action": "propertyChanged", properties: {}, coldStart: _data.hasOwnProperty("coldStart") && _data.coldStart, subscriber: _subscriber };
       transaction.properties[_propName] = _propValue;
+      transaction.propData = util.copy(_data);
 
       if (_data.hasOwnProperty("transactionId")) {
          transaction.transactionId = _serviceNode.name + "-" + _data.transactionId;
