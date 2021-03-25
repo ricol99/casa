@@ -157,8 +157,8 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
 
-      if (this.hasOwnProperty('local')) {
-         sendData.local = this.local;
+      if (this.local) {
+         sendData.local = true;
       }
 
       // Call the final hooks
