@@ -13,7 +13,7 @@ function HomekitWaterLevelSensorAccessory(_config, _parent) {
    this.ensurePropertyExists('water-level', 'property', { initialValue: 1 }, _config);
 
    this.hkAccessory
-      .addService(Service.HumiditySensor, this.displayName) // services exposed to the user should have "names" like "HumiditySensor" for this case
+      .addService(Service.HumidifierDehumidifier, this.displayName) // services exposed to the user should have "names" like "HumiditySensor" for this case
       .getCharacteristic(Characteristic.WaterLevel)
       .on('get', (_callback) => {
          _callback(null, this.getCurrentWaterLevel());
@@ -30,7 +30,7 @@ HomekitWaterSensorAccessory.prototype.propertyAboutToChange = function(_propName
 
    if (_propName === "water-level") {
       this.hkAccessory
-        .getService(Service.WaterSensor)
+        .getService(Service.HumidifierDehumidifier)
         .getCharacteristic(Characteristic.WaterLevel)
         .updateValue(_propValue);
    }
