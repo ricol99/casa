@@ -107,14 +107,14 @@ Thing.prototype.inheritChildProps = function() {
       for (var thing in this.things) {
 
          if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].getAllProperties(childProps);
+            this.things[thing].findAllProperties(childProps);
          }
       }
 
       for (var prop in childProps) {
 
          if (childProps.hasOwnProperty(prop)) {
-            var oSpec = (childProps[prop] == undefined) ? { name: prop } : { name: prop, initialValue: childProps[prop] };
+            var oSpec = { name: prop, initialValue: childProps[prop].value, local: childProps[prop].local };
             this.ensurePropertyExists(prop, "property", oSpec, this.config);
          }
       }
@@ -132,6 +132,23 @@ Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
             if (this.things.hasOwnProperty(thing)) {
                this.things[thing].getAllProperties(_allProps);
+            }
+         }
+      }
+   }
+};
+
+Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
+
+   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propogateToParent))) {
+      Source.prototype.findAllProperties.call(this, _allProps);
+
+      if (!this.ignoreChildren) {
+
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].findAllProperties(_allProps);
             }
          }
       }

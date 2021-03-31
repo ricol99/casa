@@ -116,6 +116,16 @@ SourceBase.prototype.getAllProperties = function(_allProps) {
    }
 };
 
+SourceBase.prototype.findAllProperties = function(_allProps) {
+
+   for (var prop in this.props) {
+
+      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
+         _allProps[prop] = { value: this.props[prop].value, local: this.props[prop].local };
+      }
+   }
+};
+
 SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
    console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
 
