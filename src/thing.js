@@ -48,6 +48,11 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    if (data.alignWithParent) {
 
       if (!this.ignoreParent) {
+
+         if (this.props.hasOwnProperty(_propName)) {
+            data.local = this.props[_propName].local;
+         }
+
          Source.prototype.updateProperty.call(this, _propName, _propValue, data);
 
          if (this.propogateToChildren) {
