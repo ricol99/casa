@@ -69,6 +69,11 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       data.propertyOldValue = this.value;
       data.alignWithParent = true;
+
+      if (this.local) {
+         data.local = true;
+      }
+
       Source.prototype.updateProperty.call(this, _propName, _propValue, data);
       var needToUpdateChildren = this.propogateToChildren;
 
