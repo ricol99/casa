@@ -88,13 +88,16 @@ function SumpPump(_config, _parent) {
 
    this.ensurePropertyExists('pump-watch-dog', 'stateproperty', { name: "pump-watch-dog", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "not-active", 
                                                                        states: [{ name: "not-active", sources: [{ property: "pump-state", value: "pump-active", nextState: "priming" }] },
-                                                                                { name: "priming", timeout: { duration: this.assessmentDuration + 1, nextState: "active" }},
+                                                                                { name: "priming", timeout: { duration: this.assessmentDuration + 1, nextState: "active" },
+                                                                                  sources: [{ property: "pump-state", value: "pump-idle", nextState: "not-active"},
+                                                                                            { property: "pump-state", value: "pump-timed-out", nextState: "not-active"},
+                                                                                            { property: "pump-state", value: "pump-failure", nextState: "not-active"}]},
                                                                                 { name: "active",
                                                                                   sources: [{ property: "pump-state", value: "pump-idle", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-timed-out", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-failure", nextState: "not-active"},
                                                                                             { property: "watch-dog-happy", value: false, nextState: "not-happy"}] },
-                                                                                { name: "not-happy", actions: [{ property: "pump-state", value: "pump-failure" }],
+                                                                                { name: "not-happy", actions: [{ property: "pump-state", value: "pump-timed-out" }],
                                                                                   timeout: { duration: 0.5, nextState: "not-active"} }] }, _config); 
 }
 
