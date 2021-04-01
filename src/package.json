@@ -9,6 +9,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "bt-presence": "^2.0.0",
     "cjson": "^0.5.0",
     "command-line-args": "^5.1.1",
     "cron-parser": "^0.7.0",
