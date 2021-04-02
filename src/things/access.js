@@ -57,7 +57,7 @@ function Access(_config, _parent) {
       this.operatingTimeouts = { "opening": value, "closing": value };
    }
 
-   this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "closed" }, { event: "close-access", transform: "closed" }] }, _config);
+   this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
 
@@ -74,8 +74,12 @@ function Access(_config, _parent) {
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                  states: [{ name: "access-unknown",
-                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-closed" },
-                                                                                      { property: "fully-open", value: true, nextState: "access-open" }]},
+                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-setup-closed" },
+                                                                                      { property: "fully-open", value: true, nextState: "access-setup-open" }]},
+                                                                          { name: "access-setup-open", actions: [{ property: "target", value: "open" }],
+                                                                            sources: [{ property: "target", value: "open", nextState: "access-open" }]},
+                                                                          { name: "access-setup-closed", actions: [{ property: "target", value: "closed" }],
+                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed" }]},
                                                                           { name: "access-open-requested",
                                                                             sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
                                                                           { name: "access-opening", actions: [{ property: "target", value: "open" }],

@@ -275,7 +275,7 @@ SourceListener.prototype.stopMaskInvalidTimer = function() {
 };
 
 SourceListener.prototype.transformInput = function(_data) {
-   var input = _data.value;
+   var input = _data.hasOwnProperty("value") ? _data.value : false;
    var newInput = input;
 
    if (this.transform) {
