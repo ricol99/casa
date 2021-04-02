@@ -43,7 +43,12 @@ WeatherService.prototype.fetchCurrentWeather = function(_serviceNode, _latitude,
         return _callback(_error);
      }
 
-     _callback(null, JSON.parse(_body).features[0].properties.timeSeries[0]);
+     try {
+        _callback(null, JSON.parse(_body).features[0].properties.timeSeries[0]);
+     }
+     catch (_err) {
+        _callback(_err);
+     }
    });
 };
 
