@@ -11,6 +11,8 @@ var Thing = require('../thing');
 
 // Events to control access
 // access-reset - clear a failure condition
+// open-access - command access to open access(does nothing if already open)
+// close-access - command access to close access (does nothing if already closed)
 
 // Properties to define
 // fully-closed - true when access is fully raised
@@ -55,7 +57,7 @@ function Access(_config, _parent) {
       this.operatingTimeouts = { "opening": value, "closing": value };
    }
 
-   this.ensurePropertyExists('target', 'property', { initialValue: "unknown" }, _config);
+   this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "closed" }, { event: "close-access", transform: "closed" }] }, _config);
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
 
