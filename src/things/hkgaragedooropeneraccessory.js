@@ -71,6 +71,10 @@ HomekitGarageDoorOpenerAccessory.prototype.propertyAboutToChange = function(_pro
         .getService(Service.GarageDoorOpener)
         .getCharacteristic(Characteristic.CurrentDoorState)
         .updateValue(_propValue);
+
+      if (this.getProperty("target-state") !== _propValue) {
+         this.alignPropertyValue("target-state", _propValue);
+      }
    }
 };
 
