@@ -6,7 +6,8 @@ var Thing = require('../thing');
 //   or operatingTimeouts - object of timeouts for access { opening, closing } (default 20 for all)
 // *maxRetries - number of retries before entering failure (default 2)
 // *retryTimeout - How many secondss to wait until retry occurs (default 10)
-// *responseTimeout - ow long are the access allowed to take before responding to a commmand (open or close) (defualt 5)
+// *responseTimeout - ow long are the access allowed to take before responding to a commmand (open or close) (default 5)
+// startPulseLength - how long is start pulse for open and close (seconds) (default 1)
 
 // Events to control access
 // access-reset - clear a failure condition
@@ -39,6 +40,9 @@ var Thing = require('../thing');
 // Resulting access-alarm-state
 // access-<status>-<alarm> - e.g. "access-open-normal" or "access-failure-normal"
 
+// Resulting pulse to open or close
+// start - true for <start-pulse-length> when open or shut is ordered
+
 function Access(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "access";
@@ -52,6 +56,8 @@ function Access(_config, _parent) {
    }
 
    this.ensurePropertyExists('target', 'property', { initialValue: "unknown" }, _config);
+   this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
 
    this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
    this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
@@ -150,6 +156,18 @@ function Access(_config, _parent) {
                                                                                          { property: "alarm-state", value: "failure", nextState: "not-active" }]},
                                                                              { name: "active", actions: [{ property: "target", value: "closed" }], 
                                                                                timeout: { duration: 2, nextState: "not-active" }} ]}, _config);
+
+   this.ensurePropertyExists('start-pulse-state', 'stateproperty', { name: 'start-pulse-state', initialValue: "not-active",  ignoreControl: true, takeControlOnTransition: true,
+                                                                     states: [{ name: "not-active",
+                                                                                sources: [{ "property": "access-alarm-state", "value": "access-open-requested-normal", "nextState": "active-opening" },
+                                                                                          { "property": "access-alarm-state", "value": "access-closed-requested-normal", "nextState": "active-closing" }] },
+                                                                              { "name": "active-opening", "actions": [{ "property": "start", "value": true }],
+                                                                                "timeout": { "property": "start-pulse-length", "nextState": "await-action-finished" }},
+                                                                              { "name": "active-closing", "actions": [{ "property": "start", "value": true }],
+                                                                                "timeout": { "property": "start-pulse-length", "nextState": "await-action-finished" }},
+                                                                              { "name": "await-action-finished", "actions": [{ "property": "start", "value": false }],
+                                                                                sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
+                                                                                          { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" }] }]}, _config);
 }
 
 util.inherits(Access, Thing);
