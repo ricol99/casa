@@ -97,6 +97,7 @@ BtleService.prototype.removeDeviceFromScan = function(_serviceNode, _macAddress)
 BtleService.prototype.devicePresentCb = function(_macAddress) {
    console.log(this.uName + ": Device present " + _macAddress);
    this.presentDevices[_macAddress] = new PresentDevice(this, _macAddress);
+   console.log(this.presentDevices);
 
    if (this.scanList.hasOwnProperty(_macAddress)) {
       this.scanList[_macAddress].deviceFound();
