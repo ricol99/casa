@@ -28,10 +28,12 @@ function PresentDevice(_owner, _address) {
 }
 
 PresentDevice.prototype.clearTimeout = function() {
+   console.log(this.owner.uName + ": Timer cleared for BTLE device " + this.address);
    clearTimeout(this.timeout);
 };
 
 PresentDevice.prototype.resetTimeout = function() {
+   console.log(this.owner.uName + ": Timer being reset for BTLE device " + this.address);
    clearTimeout(this.timeout);
 
    this.timeout = setTimeout( () => {
