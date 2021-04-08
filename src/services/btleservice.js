@@ -4,7 +4,7 @@ const BeaconScanner = require('node-beacon-scanner');
  
 function BtleService(_config, _owner) {
    Service.call(this, _config, _owner);
-   this.devicePresenceTimeout = _config.hasOwnProperty("devicePresenceTimeout") ? _config.devicePresenceTimeout : 5;
+   this.devicePresenceTimeout = _config.hasOwnProperty("devicePresenceTimeout") ? _config.devicePresenceTimeout : 20;
 
    this.deviceTypes = {
       "nearby": "btlenearbydevice"
