@@ -33,7 +33,6 @@ PresentDevice.prototype.clearTimeout = function() {
 };
 
 PresentDevice.prototype.resetTimeout = function() {
-   console.log(this.owner.uName + ": Timer being reset for BTLE device " + this.address);
    clearTimeout(this.timeout);
 
    this.timeout = setTimeout( () => {
