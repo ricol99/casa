@@ -44,6 +44,8 @@ var Thing = require('../thing');
 
 // Resulting pulse to open or close
 // start - true for <start-pulse-length> when open or shut is ordered
+// open - true for <start-pulse-length> when open is ordered
+// close - true for duration of close manoeuvre when closure is ordered
 
 function Access(_config, _parent) {
    Thing.call(this, _config, _parent);
@@ -60,6 +62,8 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
+   this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
    this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
@@ -76,9 +80,13 @@ function Access(_config, _parent) {
                                                                  states: [{ name: "access-unknown",
                                                                             sources: [{ property: "fully-closed", value: true, nextState: "access-setup-closed" },
                                                                                       { property: "fully-open", value: true, nextState: "access-setup-open" }]},
-                                                                          { name: "access-setup-open", actions: [{ property: "target", value: "open" }, { property: "start", value: false }],
+                                                                          { name: "access-setup-open",
+                                                                            actions: [{ property: "target", value: "open" }, { property: "start", value: false },
+                                                                                      { property: "open", value: false }, { property: "close", value: false }],
                                                                             sources: [{ property: "target", value: "open", nextState: "access-open" }]},
-                                                                          { name: "access-setup-closed", actions: [{ property: "target", value: "closed" }, { property: "start", value: false }],
+                                                                          { name: "access-setup-closed",
+                                                                            actions: [{ property: "target", value: "closed" }, { property: "start", value: false },
+                                                                                      { property: "open", value: false }, { property: "close", value: false }],
                                                                             sources: [{ property: "target", value: "closed", nextState: "access-closed" }]},
                                                                           { name: "access-open-requested",
                                                                             sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
@@ -165,15 +173,25 @@ function Access(_config, _parent) {
 
    this.ensurePropertyExists('start-pulse-state', 'stateproperty', { name: 'start-pulse-state', initialValue: "not-active",  ignoreControl: true, takeControlOnTransition: true,
                                                                      states: [{ name: "not-active",
+                                                                                actions: [{ "property": "close", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-requested-normal", "nextState": "active-opening" },
                                                                                           { "property": "access-alarm-state", "value": "access-closed-requested-normal", "nextState": "active-closing" }] },
-                                                                              { "name": "active-opening", "actions": [{ "property": "start", "value": true }],
-                                                                                "timeout": { "property": "start-pulse-length", "nextState": "await-action-finished" }},
-                                                                              { "name": "active-closing", "actions": [{ "property": "start", "value": true }],
-                                                                                "timeout": { "property": "start-pulse-length", "nextState": "await-action-finished" }},
-                                                                              { "name": "await-action-finished", "actions": [{ "property": "start", "value": false }],
+                                                                              { name: "active-opening",
+                                                                                actions: [{ "property": "start", "value": true }, { "property": "open", "value": true }],
+                                                                                timeout: { "property": "start-pulse-length", "nextState": "await-open-action-finished" }},
+                                                                              { name: "active-closing",
+                                                                                actions: [{ "property": "start", "value": true }, { "property": "close", "value": true }],
+                                                                                timeout: { "property": "start-pulse-length", "nextState": "await-close-action-finished" }},
+                                                                              { name: "await-open-action-finished",
+                                                                                actions: [{ "property": "start", "value": false }, { "property": "open", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
-                                                                                          { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" }] }]}, _config);
+                                                                                          { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" },
+                                                                                          { "property": "fully-open", "value": true, "nextState": "not-active" }]},
+                                                                              { name: "await-close-action-finished",
+                                                                                actions: [{ "property": "start", "value": false }],
+                                                                                sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
+                                                                                          { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" },
+                                                                                          { "property": "fully-closed", "value": true, "nextState": "not-active" }] }]}, _config);
 }
 
 util.inherits(Access, Thing);
