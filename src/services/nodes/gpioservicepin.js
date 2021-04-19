@@ -5,7 +5,7 @@ var Gpio = require('onoff').Gpio;
 function GpioServicePin(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
-   this.direction = "inout";
+   this.direction = "in";
    this.triggerLow = true;
    this.pinValue = 0;
    this.writable = false;
@@ -22,15 +22,21 @@ util.inherits(GpioServicePin, ServiceNode);
 GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.ready) {
-      let map = { read: "in", write: "out", readwrite: "inout" };
+      let map = { read: "in", write: "out", readwrite: "in" };
       this.direction = map[_subscription.sync];
       this.triggerLow = _subscription.args.triggerLow;
-      this.writable = this.direction.endsWith("out");
-      this.gpio = new Gpio(this.id, this.direction, 'both', { activeLow: this.triggerLow });
+      var initialDirection = this.direction;
+
+      if ((this.direction === "out") && _subscription.args.hasOwnProperty("initialValue")) {
+         initialDirection = this.triggerLow ? (_subscription.args.initialValue ? "low" : "high") : (_subscription.args.initialValue ? "high" : "low");
+      }
+
+      this.writable = (this.direction === "out");
+      this.gpio = new Gpio(this.id, initialDirection, 'both', { activeLow: this.triggerLow });
       this.ready = true;
    }
 
-   if (this.direction.startsWith("in") && !this.listening) {
+   if ((this.direction === "in") && !this.listening) {
       this.startListening();
    }
 };
@@ -45,10 +51,11 @@ GpioServicePin.prototype.startListening = function() {
       }
    });
 
-   if ((this.direction === 'in') || (this.direction === 'inout')) {
+   if (this.direction === 'in') {
 
       this.gpio.read( (_err, _pinValue) => {
          this.pinValue = _pinValue;
+         this.alignPropertyValue('state', this.pinValue === 1);
 
          this.gpio.watch( (_err, _pinValue) => {
 

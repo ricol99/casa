@@ -11,6 +11,10 @@ function GPIOProperty(_config, _owner) {
    var direction = _config.hasOwnProperty("direction") ? _config.direction : "in";
    _config.sync = (direction === "out") ? "write" : "read";
 
+   if (_config.sync === "write") {
+      _config.serviceArgs.initialValue = _config.hasOwnProperty("initialValue") ? _config.initialValue : false;
+   }
+
    ServiceProperty.call(this, _config, _owner);
 }
 
