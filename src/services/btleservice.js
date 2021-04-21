@@ -78,18 +78,13 @@ BtleService.prototype.addDeviceToScan = function(_serviceNode, _macAddress, _int
 BtleService.prototype.removeDeviceFromScan = function(_serviceNode, _macAddress) {
    console.log(this.uName + ": Requested to stop scanning for bluetooth device with address " + _macAddress);
 
-   this.btp.removeDevices([_macAddress]);
    delete this.scanList[_macAddress];
    this.scanListLength = this.scanListLength - 1;
 
    if (this.scanListLength === 0) {
-
       // Start scanning
-      this.scanner.stopScan().then(() => {
-         console.log(this.uName + ": Stopped scanning for bluetooth LE devices");
-      }).catch((_error) => {
-        console.error(this.uName + ": An error has occurred while trying to stop scanning: " + _error);
-      });
+      this.scanner.stopScan();
+      console.log(this.uName + ": Stopped scanning for bluetooth LE devices");
    }
 
    return true;
