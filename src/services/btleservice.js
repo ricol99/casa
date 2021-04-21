@@ -132,28 +132,19 @@ BtleService.prototype.scanOnce = function(_duration, _callback) {
 
    tempScanner.onadvertisement = (_advert) => {
       clearTimeout(this.scanOnceTimeout);
-
-      tempScanner.stopScan().then(() => {
-         this.tempScanning = false;
-      }).catch((_error) => {
-         this.tempScanning = false;
-      });
-
+      tempScanner.stopScan();
+      this.tempScanning = false;
       _callback(null, _advert);
    };
 
    tempScanner.startScan().then(() => {
 
       this.scanOnceTimeout = setTimeout( () => {
-
-         tempScanner.stopScan().then(() => {
-            this.tempScanning = false;
-         }).catch((_error) => {
-            this.tempScanning = false;
-         });
-
+         tempScanner.stopScan();
+         this.tempScanning = false;
          _callback(null, []);
       }, scanDuration * 1000);
+
    }).catch((_error) => {
       this.tempScanning = false;
       _callback("Unable to start scan. Error: " + _error);
