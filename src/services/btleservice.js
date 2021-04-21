@@ -122,6 +122,7 @@ BtleService.prototype.scanOnce = function(_duration, _callback) {
 
    if (this.tempScanning) {
       _callback("Currently scanning for another client");
+      return;
    }
    else {
       this.tempScanning = true;
