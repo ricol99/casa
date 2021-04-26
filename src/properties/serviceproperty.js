@@ -13,6 +13,7 @@ function ServiceProperty(_config, _owner) {
 
    if (_config.source) {
       _config.sources = [ _config.source ];
+      delete _config.source;
    }
 
    if (!_config.hasOwnProperty("sources")) {
