@@ -56,7 +56,7 @@ Casa.prototype.createServer = function() {
         cert: fs.readFileSync(this.certPath+'/server.crt'),
         ca: fs.readFileSync(this.certPath+'/ca.crt'),
         requestCert: true,
-        rejectUnauthorized: false
+        rejectUnauthorized: true
       };
 
       http = require('https').Server(serverOptions, app);
