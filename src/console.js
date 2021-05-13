@@ -26,6 +26,7 @@ function Console(_params, _owner) {
          key: fs.readFileSync(this.certPath+'/client.key'),
          cert: fs.readFileSync(this.certPath+'/client.crt'),
          ca: fs.readFileSync(this.certPath+'/ca.crt'),
+         transports: ['websocket'],
          json: true
       };
    }
