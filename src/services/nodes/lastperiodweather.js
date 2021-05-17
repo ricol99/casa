@@ -34,6 +34,16 @@ LastPeriodWeather.prototype.fetchLastPeriodWeather = function(_callback) {
          }
       }
 
+      var params = { "temperature": true, "temperature-feels-like": true, "visibility": true, "three-hour-precipitation-total": true, "three-hour-snow-total": true,
+                     "wind-direction": true, "average-wind-speed": true, "max-wind-gust": true, "humidity": true, "uv-index": true };
+
+      for (var param in params) {
+
+         if (!_result.hasOwnProperty(param)) {
+            return _callback ? _callback("Bad response from server") : false;
+         }
+      }
+
       this.results.push(_result);
 
       if (this.results.length > this.periods) {
