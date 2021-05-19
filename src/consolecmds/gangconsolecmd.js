@@ -7,6 +7,16 @@ function GangConsoleCmd(_config, _owner, _console) {
 
 util.inherits(GangConsoleCmd, ConsoleCmd);
 
+GangConsoleCmd.prototype.reboot = function(_arguments, _callback)  {
+
+   if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {
+      this.executeParsedCommandOnAllCasas("reboot", [ true ], _callback);
+   }
+   else {
+      this.executeParsedCommandOnAllCasas("reboot", _arguments, _callback);
+   }
+};
+
 GangConsoleCmd.prototype.restart = function(_arguments, _callback)  {
 
    if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {

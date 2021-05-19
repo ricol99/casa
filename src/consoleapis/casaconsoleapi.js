@@ -123,6 +123,17 @@ CasaConsoleApi.prototype.createThing = function(_session, _params, _callback) {
    }
 };
 
+CasaConsoleApi.prototype.reboot = function(_session, _params, _callback) {
+
+   if ((_params && (_params.length > 0) && _params[0]) || (!this.gang.ignoreRestart)) {
+      require('reboot').reboot();
+      return _callback("Unable to reboot - insufficient permissions!");
+   }
+   else {
+      return _callback(this.gang.casa.uName + ": Ignoring reboot!");
+   }
+};
+
 CasaConsoleApi.prototype.restart = function(_session, _params, _callback) {
 
    if ((_params && (_params.length > 0) && _params[0]) || (!this.gang.ignoreRestart)) {

@@ -7,6 +7,16 @@ function CasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
+CasaConsoleCmd.prototype.reboot = function(_arguments, _callback)  {
+
+   if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {
+      this.executeParsedCommand("reboot", [ true ], _callback);
+   }
+   else {
+      this.executeParsedCommand("reboot", _arguments, _callback);
+   }
+};
+
 CasaConsoleCmd.prototype.restart = function(_arguments, _callback)  {
  
    if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {
