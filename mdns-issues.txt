@@ -1,0 +1,9 @@
+https://github.com/agnat/node_mdns/issues/130
+I just happened on this with node_mdns 2.5.1 on Ubuntu 18.04 with its default /etc/nsswitch.conf saying
+
+hosts:          files mdns4_minimal [NOTFOUND=return] dns myhostname
+Replacing that by
+
+hosts:          files mdns_minimal [NOTFOUND=return] dns mdns myhostname
+fixes the issue, however in order to make node_mdns fail more gracefully in the former case, @danyocom’s solution seems to work well:
+

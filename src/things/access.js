@@ -74,7 +74,7 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
    this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
-                                                                   sources: [{ property: "retry-count" }, { property: "max-retries" }], expression: "$values[0] < $values[1]" }, _config);
+                                                                   sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                  states: [{ name: "access-unknown",
@@ -131,7 +131,8 @@ function Access(_config, _parent) {
                                                                                        { name: "access-closing-normal",
                                                                                          timeout: { property: "closing-timeout", nextState: "access-closing-timed-out" } },
                                                                                        { name: "access-open-requested-timed-out",
-                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] },
+                                                                                         actions: [{ property: "alarm-state", value: "timed-out"}] ,
+                                                                                         sources: [{ property: "alarm-state", value: "safety-alert", nextState: "access-returned-to-closed-safety-alert"}] },
                                                                                        { name: "access-closed-requested-timed-out",
                                                                                          actions: [{ property: "alarm-state", value: "timed-out"}] },
                                                                                        { name: "access-open-failure",
@@ -139,8 +140,9 @@ function Access(_config, _parent) {
                                                                                        { name: "access-close-failure",
                                                                                          actions: [ { property: "target", "value": "close" }] },
                                                                                        { name: "access-open-requested-safety-alert",
-                                                                                         actions: [ { property: "target", "value": "closed" },
-                                                                                                    { property: "access-state", value: "access-closed" }] },
+                                                                                         timeout: { property: "response-timeout", nextState: "access-open-requested-timed-out" } },
+                                                                                       { name: "access-opening-safety-alert",
+                                                                                         timeout: { property: "opening-timeout", nextState: "access-opening-timed-out" } },
                                                                                        { name: "access-closed-requested-safety-alert",
                                                                                          actions: [{ property: "target", "value": "open" },
                                                                                                    { property: "access-state", value: "access-open"}] },
@@ -175,6 +177,7 @@ function Access(_config, _parent) {
                                                                      states: [{ name: "not-active",
                                                                                 actions: [{ "property": "close", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-requested-normal", "nextState": "active-opening" },
+                                                                                          { "property": "access-alarm-state", "value": "access-open-requested-safety-alert", "nextState": "active-opening" },
                                                                                           { "property": "access-alarm-state", "value": "access-closed-requested-normal", "nextState": "active-closing" }] },
                                                                               { name: "active-opening",
                                                                                 actions: [{ "property": "start", "value": true }, { "property": "open", "value": true }],
@@ -185,11 +188,13 @@ function Access(_config, _parent) {
                                                                               { name: "await-open-action-finished",
                                                                                 actions: [{ "property": "start", "value": false }, { "property": "open", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
+                                                                                          { "property": "access-alarm-state", "value": "access-open-safety-alert", "nextState": "not-active" },
                                                                                           { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" },
                                                                                           { "property": "fully-open", "value": true, "nextState": "not-active" }]},
                                                                               { name: "await-close-action-finished",
                                                                                 actions: [{ "property": "start", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
+                                                                                          { "property": "access-alarm-state", "value": "access-open-safety-alert", "nextState": "not-active" },
                                                                                           { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" },
                                                                                           { "property": "fully-closed", "value": true, "nextState": "not-active" }] }]}, _config);
 }
