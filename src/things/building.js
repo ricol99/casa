@@ -1,5 +1,5 @@
 var util = require('util');
-var Thing = require('../thing');
+var Location = require('./location');
 
 // Please provide inputs
 // users - users that will use the building
@@ -33,12 +33,11 @@ var Thing = require('../thing');
 
 function Building(_config, _parent) {
 
-   Thing.call(this, _config, _parent);
+   Location.call(this, _config, _parent);
    this.thingType = "building";
 
    this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout')) ? _config.bedtimeTimeout : 3600 + 1800;
 
-   this.users = [];
    this.userStateConfigs = [];
    var allUsersAwayConfig = { "name": "all-users-away", "type": "andproperty", "initialValue": true, "sources": [] };
    var someUsersInBedConfig = { "name": "some-users-in-bed", "type": "orproperty", "initialValue": false, "sources": [] };
@@ -51,10 +50,6 @@ function Building(_config, _parent) {
    this.ensurePropertyExists("dark", 'property',
                              { "name": "dark", "initialValue": false, "writable": false,
                                "source": { "property": "daylight", "transform": "!$value" }}, _config);
-
-   for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
-   }
 
    for (var i = 0; i < this.users.length; ++i) {
       this.userStateConfigs.push({});
@@ -94,7 +89,6 @@ function Building(_config, _parent) {
          }
       }
 
-      this.ensurePropertyExists(this.users[i].name+"-present", 'property', { name: this.users[i].name+"-present", initialValue: false }, _config);
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].name+"-user-state" }}, {});
 
@@ -273,6 +267,6 @@ function Building(_config, _parent) {
    this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' }, _config);
 }
 
-util.inherits(Building, Thing);
+util.inherits(Building, Location);
 
 module.exports = exports = Building;

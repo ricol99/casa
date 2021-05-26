@@ -80,7 +80,6 @@ function Car(_config, _parent) {
    for (var s = 0; s < this.locations.length; ++s) {
       var occupiedAtConfig = { initialValue: false, sources: [] };
       var locName2 = this.locations[s].uName.replace(/:/g, "-").replace("--", "");
-      console.log("+++++++++++++++++++++++++++++++++++++++ location="+locName2, this.locations[s]);
 
       for (var t = 0; t < _config.users.length; ++t) {
          var userAboardAtConfig = { initialValue: false, sources: [] };
