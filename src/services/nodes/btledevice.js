@@ -1,48 +1,48 @@
 var util = require('util');
 var ServiceNode = require('./servicenode');
 
-function BtleNearbyDevice(_config, _owner) {
+function BtleDevice(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
    this.ensurePropertyExists("available", 'property', { initialValue: false, allSourcesRequiredForValidity: false }, this.config);
 }
 
-util.inherits(BtleNearbyDevice, ServiceNode);
+util.inherits(BtleDevice, ServiceNode);
 
-BtleNearbyDevice.prototype.newSubscriptionAdded = function(_subscription) {
+BtleDevice.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);
    this.macAddress = _subscription.args.macAddress.toLowerCase();
    this.start();
 };
 
-BtleNearbyDevice.prototype.start = function(_interval) {
+BtleDevice.prototype.start = function(_interval) {
 
    if (this.started) {
       return;
    }
 
    this.started = true;
-   this.owner.addDeviceToScan(this, this.macAddress);
+   this.owner.addAdvertisementToScan(this, "address", this.macAddress);
 }
 
-BtleNearbyDevice.prototype.stop = function() {
+BtleDevice.prototype.stop = function() {
 
    if (this.started) {
-      this.owner.removeDeviceFromScan(this, this.macAddress);
+      this.owner.removeAdvertisementToScan(this, "address", this.macAddress);
       this.started = false;
    }
 }
 
-BtleNearbyDevice.prototype.deviceFound = function() {
+BtleDevice.prototype.advertisementFound = function() {
    this.alignPropertyValue("available", true);
 };
 
-BtleNearbyDevice.prototype.deviceLost = function() {
+BtleDevice.prototype.advertisementLost = function() {
    this.alignPropertyValue("available", false);
 };
 
-BtleNearbyDevice.prototype.processPropertyChanged = function(_transaction, _callback) {
+BtleDevice.prototype.processPropertyChanged = function(_transaction, _callback) {
    _callback(null, true);
 };
 
 
-module.exports = exports = BtleNearbyDevice;
+module.exports = exports = BtleDevice;
