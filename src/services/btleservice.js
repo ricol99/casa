@@ -63,9 +63,6 @@ ScanField.prototype.addAdvertisementWatcher = function(_serviceNode, _match) {
    var matchField = this.createMatchField(_match);
    var matchString = this.createMatchString(_match);
 
-      console.log(this.uName + ": AAAAA matchField="+matchField);
-      console.log(this.uName + ": AAAAA matchString="+matchString);
-
    if (this.matchFields.hasOwnProperty(matchField)) {
 
       if (this.matchFields[matchField].hasOwnProperty(matchString)) {
@@ -114,10 +111,8 @@ ScanField.prototype.removeAdvertisementWatcher = function(_serviceNode, _match) 
 ScanField.prototype.processAdvert = function(_advert) {
 
    if (_advert.hasOwnProperty(this.field)) {
-      //console.log("AAAAA" + typeof _advert[this.field] + " field="+this.field);
 
       if (typeof _advert[this.field] === "object") {
-         console.log("AAAAAA object match ="+util.inspect(_advert));
 
          for (var matchField in this.matchFields) {
             var matchFields = matchField.split("@@@");
