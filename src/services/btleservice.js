@@ -6,7 +6,7 @@ function BtleService(_config, _owner) {
    Service.call(this, _config, _owner);
    this.advertisementPresenceTimeout = _config.hasOwnProperty("advertisementPresenceTimeout") ? _config.advertisementPresenceTimeout : 20;
 
-   this.advertisementTypes = {
+   this.deviceTypes = {
       "device": "btledevice",
       "ibeacon": "btleibeacon"
    };
@@ -18,7 +18,7 @@ function BtleService(_config, _owner) {
 
 util.inherits(BtleService, Service);
 
-function AdvertisementMatcher(_owner, _serviceNode, _matchString) {
+function AdvertisementWatcher(_owner, _serviceNode, _match) {
    this.owner = _owner;
    this.serviceNode = _serviceNode;
    this.match = _match;
@@ -59,28 +59,31 @@ function ScanField(_owner, _field) {
    this.noOfadvertisementWatchers = 0;
 }
 
-Scanfield.prototype.addAdvertisementWatcher = function(_serviceNode, _match) {
+ScanField.prototype.addAdvertisementWatcher = function(_serviceNode, _match) {
    var matchField = this.createMatchField(_match);
    var matchString = this.createMatchString(_match);
+
+      console.log(this.uName + ": AAAAA matchField="+matchField);
+      console.log(this.uName + ": AAAAA matchString="+matchString);
 
    if (this.matchFields.hasOwnProperty(matchField)) {
 
       if (this.matchFields[matchField].hasOwnProperty(matchString)) {
-         this.matchFields[matchField][matchString].push(new AdvertisementWatcher(this, _serviceNode, _match);
+         this.matchFields[matchField][matchString].push(new AdvertisementWatcher(this, _serviceNode, _match));
       }
       else {
           this.matchFields[matchField][matchString] = [ new AdvertisementWatcher(this, _serviceNode, _match) ];
       }
    }
    else {
-      this.matchfields[matchField] = {};
-      this.matchfields[matchField][matchString] = [ new AdvertisementWatcher(this, _serviceNode, _match) ];
+      this.matchFields[matchField] = {};
+      this.matchFields[matchField][matchString] = [ new AdvertisementWatcher(this, _serviceNode, _match) ];
    }
 
    this.noOfadvertisementWatchers = this.noOfadvertisementWatchers + 1;
 };
 
-Scanfield.prototype.removeAdvertisementWatcher = function(_serviceNode, _match) {
+ScanField.prototype.removeAdvertisementWatcher = function(_serviceNode, _match) {
    var matchField = this.createMatchField(_match);
    var matchString = this.createMatchString(_match);
 
@@ -111,8 +114,10 @@ Scanfield.prototype.removeAdvertisementWatcher = function(_serviceNode, _match) 
 ScanField.prototype.processAdvert = function(_advert) {
 
    if (_advert.hasOwnProperty(this.field)) {
+      //console.log("AAAAA" + typeof _advert[this.field] + " field="+this.field);
 
       if (typeof _advert[this.field] === "object") {
+         console.log("AAAAAA object match ="+util.inspect(_advert));
 
          for (var matchField in this.matchFields) {
             var matchFields = matchField.split("@@@");
@@ -135,16 +140,16 @@ ScanField.prototype.processAdvert = function(_advert) {
 
                if (this.matchFields[matchField].hasOwnProperty(matchString)) {
 
-                  for (var i = 0; i < this.matchfields[matchField][matchString].length; ++i) {
+                  for (var i = 0; i < this.matchFields[matchField][matchString].length; ++i) {
                      this.matchFields[matchField][matchString][i].processAdvert(_advert);
                   }
                }
             }
          }
       }
-      else if (this.matchfields.hasOwmProperty(_advert[this.field]) && this.matchfields[_advert[this.field]].hasOwnProperty(_advert[this.field])) {
+      else if (this.matchFields.hasOwnProperty(_advert[this.field]) && this.matchFields[_advert[this.field]].hasOwnProperty(_advert[this.field])) {
 
-         for (var i = 0; i < this.matchfields[_advert[this.field]][_advert[this.field]].length; ++i) {
+         for (var i = 0; i < this.matchFields[_advert[this.field]][_advert[this.field]].length; ++i) {
             this.matchFields[_advert[this.field]][_advert[this.field]][i].processAdvert(_advert);
          }
       }
@@ -163,7 +168,7 @@ ScanField.prototype.createMatchField = function(_match) {
       for (var member in _match) {
 
          if (_match.hasOwnProperty(member)) {
-            str.concat(member + "@@@");
+            str = str.concat(member + "@@@");
          }
       }
 
@@ -185,7 +190,7 @@ ScanField.prototype.createMatchString = function(_match) {
       for (var member in _match) {
 
          if (_match.hasOwnProperty(member)) {
-            str.concat(member + ":" + _match[member] + "@@@");
+            str = str.concat(member + ":" + _match[member] + "@@@");
          }
       }
 
@@ -200,7 +205,10 @@ BtleService.prototype.coldStart = function() {
    this.scanner.onadvertisement = (_advert) => {
 
       for (var field in this.scanFieldList) {
-         this.scanFieldList[field].processAdvert(_advert);
+
+         if (this.scanFieldList.hasOwnProperty(field)) {
+            this.scanFieldList[field].processAdvert(_advert);
+         }
       }
     };
 };

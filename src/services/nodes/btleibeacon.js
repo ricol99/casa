@@ -10,10 +10,10 @@ util.inherits(BtleIBeacon, ServiceNode);
 
 BtleIBeacon.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);
-   this.uid = _subscription.args.uid.toLowerCase();
+   this.uuid = _subscription.args.uuid.toUpperCase();
    this.major = _subscription.args.major;
    this.minor = _subscription.args.minor;
-   this.match = { uid: this.uid };
+   this.match = { uuid: this.uuid };
 
    if (this.major) {
       this.match.major = this.major;
