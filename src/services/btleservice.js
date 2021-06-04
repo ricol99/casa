@@ -8,7 +8,8 @@ function BtleService(_config, _owner) {
 
    this.deviceTypes = {
       "device": "btledevice",
-      "ibeacon": "btleibeacon"
+      "ibeacon": "btleibeacon",
+      "eddybeacon": "btleeddybeacon"
    };
 
    this.scanFieldList = {};
