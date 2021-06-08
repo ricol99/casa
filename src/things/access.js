@@ -18,6 +18,8 @@ var Thing = require('../thing');
 // fully-closed - true when access is fully raised
 // fully-open - true when access is fully in the ground
 // safety-alert - true when a safety system has halted everything
+// movement - true when safety systems detect any movement
+// movement-when-closed - true when safety systems detect any movement when the access is closed
 
 // Property to set
 // target - "open" or "closed" - set to make the access move based on this property
@@ -64,6 +66,8 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
    this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('movement', 'property', { initialValue: false, source: { property: "safety-alert" } }, _config);
+   this.ensurePropertyExists('movement-when-closed', 'andproperty', { sources: [{ property: "movement" }, { property: "access-state", transform: "$value === \"access-closed\"" }] }, _config);
 
    this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
    this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
