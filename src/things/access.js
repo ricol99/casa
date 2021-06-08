@@ -194,7 +194,7 @@ function Access(_config, _parent) {
                                                                               { name: "await-close-action-finished",
                                                                                 actions: [{ "property": "start", "value": false }],
                                                                                 sources: [{ "property": "access-alarm-state", "value": "access-open-normal", "nextState": "not-active" },
-                                                                                          { "property": "access-alarm-state", "value": "access-open-safety-alert", "nextState": "not-active" },
+                                                                                          { "property": "alarm-state", "value": "safety-alert", "nextState": "not-active" },
                                                                                           { "property": "access-alarm-state", "value": "access-closed-normal", "nextState": "not-active" },
                                                                                           { "property": "fully-closed", "value": true, "nextState": "not-active" }] }]}, _config);
 }
