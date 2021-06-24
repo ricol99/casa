@@ -9,7 +9,7 @@ function BtleIBeacon(_config, _owner) {
 util.inherits(BtleIBeacon, ServiceNode);
 
 BtleIBeacon.prototype.newSubscriptionAdded = function(_subscription) {
-   console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);
+   console.log(this.uName + ": newSubscriptionAdded() serviceProperty=" + _subscription.serviceProperty + ", args = ", _subscription.args);
    this.uuid = _subscription.args.uuid.toUpperCase();
    this.major = _subscription.args.major;
    this.minor = _subscription.args.minor;

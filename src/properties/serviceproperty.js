@@ -26,8 +26,9 @@ function ServiceProperty(_config, _owner) {
       sourceConfig.ignoreSourceUpdates = true;
    }
 
+   sourceConfig.subscription.serviceProperty = this.serviceProperty;
+
    if (this.sync.endsWith("write")) {
-      sourceConfig.subscription.serviceProperty = this.serviceProperty;
       sourceConfig.subscription.subscriberProperty = _config.name;
    }
 
