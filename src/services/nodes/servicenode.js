@@ -20,6 +20,7 @@ ServiceNode.prototype.coldStart = function() {
 
 // Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
 ServiceNode.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   console.log(this.uName + ": subscription=", _subscription);
    this.processSubscription(_subscription);
 };
 
@@ -36,6 +37,7 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
    var sub = this.subscribers[_subscription.subscriber];
 
    sub.sync = _subscription.hasOwnProperty("sync") ? _subscription.sync : "read";
+   sub.serviceProperty = _subscription.serviceProperty;
    this.sync.read = this.sync.read || _subscription.sync.startsWith("read");
    this.sync.write = this.sync.write || _subscription.sync.endsWith("write");
 

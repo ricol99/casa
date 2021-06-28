@@ -67,7 +67,8 @@ Service.prototype.createNode = function(_config) {
 };
 
 Service.prototype.findOrCreateNode = function(_type, _id) {
-   let config = { name: _type + "-" + _id, type: this.deviceTypes[_type], subscription: {} };
+
+   let config = { name: _type + "-" + _id, type: this.deviceTypes[_type]};
 
    if (this.myNamedObjects.hasOwnProperty(config.name)) {
       return this.myNamedObjects[config.name];
