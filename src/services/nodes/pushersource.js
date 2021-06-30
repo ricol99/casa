@@ -18,22 +18,28 @@ PusherSource.prototype.newSubscriptionAdded = function(_subscription) {
 
 PusherSource.prototype.start = function(_property) {
 
-   if (!this.started) {
-      var channel = this.owner.pusher.subscribe(this.pusherSource.replace(/:/g, "_"));
+   try {
 
-      channel.bind("property-changed", (_data) => {
-         console.log(this.uName + ": Property Change: name: " + _data.propName + ", value: " + _data.propValue);
+      if (!this.started) {
+         var channel = this.owner.pusher.subscribe(this.pusherSource.replace(/:/g, "_"));
 
-         if (_data && _data.hasOwnProperty("propName") && _data.hasOwnProperty("propValue") && this.props.hasOwnProperty(_data.propName)) {
-            this.alignPropertyValue(_data.propName, _data.propValue);
-         }
-      }, this);
+         channel.bind("property-changed", (_data) => {
+            console.log(this.uName + ": Property Change: name: " + _data.propName + ", value: " + _data.propValue);
 
-      this.started = true;
+            if (_data && _data.hasOwnProperty("propName") && _data.hasOwnProperty("propValue") && this.props.hasOwnProperty(_data.propName)) {
+               this.alignPropertyValue(_data.propName, _data.propValue);
+            }
+         }, this);
+
+         this.started = true;
+      }
+
+      if (!this.subscriptions.hasOwnProperty(_property)) {
+         this.subscriptions[_property] = new Subscription(_property, this);
+      }
    }
-
-   if (!this.subscriptions.hasOwnProperty(_property)) {
-      this.subscriptions[_property] = new Subscription(_property, this);
+   catch (_error) {
+      console.error(this.uName + ": Unable to bind to Pusher channel. Error: ", _error);
    }
 }
 

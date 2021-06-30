@@ -6,9 +6,10 @@ var app = express();
 
 function WebService(_config, _owner) {
    Service.call(this, _config, _owner);
-   this.hangingOffMainServer = true;
    this.secure = _config.hasOwnProperty("secure") ? _config.secure : this.gang.inSecureMode();
    this.socketIoSupported = _config.hasOwnProperty("socketIoSupported") ? _config.socketIoSupported : false;
+   this.localHost = _config.hasOwnProperty("localHost") ? _config.localHost : false;
+   this.hangingOffMainServer = !this.localHost;
 
    if (_config.hasOwnProperty("mediaRoute")) {
       this.mediaRoute = _config.mediaRoute;
@@ -102,9 +103,18 @@ WebService.prototype.coldStart = function() {
          });
       }
 
-      this.http.listen(this.port, () => {
-         console.log(this.uName + ': listening on *: ' + this.port);
-      });
+      if (this.localHost) {
+
+         this.http.listen(this.port, 'localhost', () => {
+            console.log(this.uName + ': listening on (localhost) *: ' + this.port);
+         });
+      }
+      else {
+
+         this.http.listen(this.port, () => {
+            console.log(this.uName + ': listening on *: ' + this.port);
+         });
+      }
    }
 };
 
