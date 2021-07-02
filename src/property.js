@@ -35,15 +35,7 @@ function Property(_config, _owner) {
       this.valid = false;
 
       for (var index = 0; index < _config.sources.length; ++index) {
-         this.hasSourceOutputValues = this.hasSourceOutputValues || (_config.sources[index].hasOwnProperty('outputValues'));
-
-         if (!_config.sources[index].hasOwnProperty("uName") || _config.sources[index].uName == undefined) {
-            _config.sources[index].uName = this.owner.uName;
-         }
-
-         var sourceListener = new SourceListener(_config.sources[index], this);
-         this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-         this.noOfSources++;
+         this._addSource(_config.sources[index]);
       }
    }
    else {
@@ -347,13 +339,39 @@ Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    }
 
    return actualOutputValue;
-}
+};
 
 Property.prototype.checkData = function(_value, _data) {
 
    if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.uName;
    if (!_data.hasOwnProperty('name')) _data.name = this.name;
    if (!_data.hasOwnProperty('value')) _data.value = _value;
-}
+};
+
+Property.prototype._addSource = function(_source) {
+   this.hasSourceOutputValues = this.hasSourceOutputValues || (_source.hasOwnProperty('outputValues'));
+
+   if (!_source.hasOwnProperty("uName") || _source.uName == undefined) {
+      _source.uName = this.owner.uName;
+   }
+
+   var sourceListener = new SourceListener(_source, this);
+   this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
+   this.noOfSources++;
+};
+
+Property.prototype._cleanUp = function() {
+
+   for (var sl in this.sourceListeners) {
+
+      if (this.sourceListeners.hasOwnProperty(sl)) {
+         this.sourceListeners[sl].stopListening();
+      }
+   }
+
+   if (this.targetListener) {
+      this.targetListener.stopListening();
+   }
+};
 
 module.exports = exports = Property;

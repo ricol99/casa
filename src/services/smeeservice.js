@@ -63,4 +63,8 @@ SmeeService.prototype.registerSource = function(_sourceName, _smeeNode) {
    this.smeeSources[_sourceName] = _smeeNode;
 };
 
+SmeeService.prototype.getUrl = function() {
+   return "https://smee.io/" + this.channelName;
+}
+
 module.exports = exports = SmeeService;

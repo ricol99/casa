@@ -195,6 +195,16 @@ SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _conf
    return false;
 };
 
+SourceBase.prototype.overrideExistingProperty = function(_propName, _propType, _config, _mainConfig) {
+
+   if (this.props.hasOwnProperty(_propName)) {
+      this.props[_propName]._cleanUp();
+      delete this.props[_propName];
+   }
+
+   this.ensurePropertyExists(_propName, _propType, _config, _mainConfig) ;
+};
+
 SourceBase.prototype.raiseEvent = function(_eventName, _data) {
 
    var sendData = (_data) ? util.copy(_data) : {};
