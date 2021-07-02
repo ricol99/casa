@@ -9,7 +9,7 @@ function PushcutService(_config, _owner) {
    };
 
    this.secret = _config.secret;
-   this.notificationName = _config.hasOwnProperty("notificationName") ? _config.notificationName : "casa-notification";
+   this.notificationName = _config.hasOwnProperty("notificationName") ? _config.notificationName : "Casa-Notification";
    this.user = this.gang.findNamedObject(_config.user.uName);
 }
 
