@@ -448,7 +448,8 @@ Gang.prototype.extractScenes = function(_config, _parent) {
 
 // Extract Things
 Gang.prototype.createThing = function(_config, _owner) {
-   var Thing = this.cleverRequire(_config.hasOwnProperty("type") ? _config.type : "thing", "things");
+   var type = _config.hasOwnProperty("type") ? _config.type : "thing";
+   var Thing = this.cleverRequire(type, type.endsWith("notifier") ? "notifiers" : "things");
 
    if (!Thing) {
       console.error(this.uName + ": Thing "+_config.name+" does not exist");

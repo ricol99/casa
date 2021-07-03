@@ -9,13 +9,12 @@ var Thing = require('./thing');
 
 // Resulting properties
 // notifer-state - Notifier state { "idle", "notifying", "responded", "timed-out" }
-// responded - set when notifier has been responded to, reset at idle
-// <response-properties> - user's response - valid when responded is true
+// <response-properties> - user's response - valid when notifier-state is "responded"
 
 function Notifier(_config, _parent) {
    Thing.call(this, _config, _parent);
 
-   var smeeServiceName = _config.hasOwnProperty("smeeServiceName") ? _config.smeeServiceName : _owner.gang.casa.findServiceName("smeeservice");
+   var smeeServiceName = _config.hasOwnProperty("smeeServiceName") ? _config.smeeServiceName : this.gang.casa.findServiceName("smeeservice");
    var smeeService =  this.casa.findService(smeeServiceName);
 
    if (!smeeService) {
@@ -24,14 +23,13 @@ function Notifier(_config, _parent) {
    }
 
    var serviceConfig = _config.serviceConfig;
-   var id = this.uName.replace("::", "").replace(/:/g, "-") : _config.name;
-   servicConfig.id = id;
+   serviceConfig.id = this.uName.replace("::", "").replace(/:/g, "-");
    serviceConfig.serviceArgs.notifierUName = this.uName;
-   serviceConfig.serviceArgs.smeUrl = smeService.getUrl();
+   serviceConfig.serviceArgs.smeeUrl = smeeService.getUrl();
    serviceConfig.serviceArgs.title = _config.title;
    serviceConfig.serviceArgs.text = _config.text;
 
-   this.responseTimeout = _config.hasOwnProperty("responseTimeout") > _config.responseTimeout : _config.hasOwnProperty("responses") ? 60 : 1;
+   this.responseTimeout = _config.hasOwnProperty("responseTimeout") ? _config.responseTimeout : _config.hasOwnProperty("responses") ? 60 : 1;
    serviceConfig.serviceArgs.responseTimeout = this.responseTimeout;
 
    this.responses =  util.copy(_config.responses, true);
@@ -43,7 +41,7 @@ function Notifier(_config, _parent) {
 
       for (var j = 0; j < this.responses.length; ++j) {
          respondPropSources.push({ property: this.responses[j].property, value: this.responses[j].value, nextState: "responded" });
-         this.ensurePropertyExists(this.responses[j].property, "smeeproperty", { serviceName: smeeServiceName }, _config);
+         this.ensurePropertyExists(this.responses[j].property, "smeeproperty", { serviceName: smeeServiceName, source: { property: "notifier-state", value: "idle", transform: "false" }}, _config);
       }
    }
 
@@ -55,6 +53,8 @@ function Notifier(_config, _parent) {
                                                              sources: respondPropSources },
                                         { name: "responded", timeout: { duration: 1, nextState: "idle" }},
                                         { name: "timed-out", timeout: { duration: 1, nextState: "idle" }} ]}, _config);
+
+   this.ensurePropertyExists("service-notifier-state", 'serviceproperty', this._formConfig(serviceConfig, { source: { "property": "notifier-state" }}, "write"), _config);
 }
 
 util.inherits(Notifier, Thing);

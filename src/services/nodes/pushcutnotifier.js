@@ -15,7 +15,7 @@ PushcutNotifier.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.notifierUName) {
       this.notifierUName = _subscription.args.notifierUName;
-      this.smeUrl = _subscription.args.smeUrl;
+      this.smeeUrl = _subscription.args.smeeUrl;
       this.title = _subscription.args.title;
       this.text = _subscription.args.text;
       this.sound = _subscription.args.sound;
@@ -30,7 +30,7 @@ PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callb
    try {
       for (var prop in _transaction.properties) {
 
-         if ((prop === "pushcut-notifier-state") && (_transaction.properties[prop] === "notifying")) {
+         if ((prop === "service-notifier-state") && (_transaction.properties[prop] === "notifying")) {
             var notification = { title: this.title, text: this.text };
 
             if (this.sound) { notification.sound = this.sound; }
@@ -41,24 +41,21 @@ PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callb
                notification.actions = [];
 
                for (var i = 0; i < this.responses.length; ++i) {
-                  notification.actions.push({ name: this.responses[i].label, keepNotification: this.responses[i].keepNotification, url: this.smeUrl, runOnServer: false,
+                  notification.actions.push({ name: this.responses[i].label, keepNotification: this.responses[i].keepNotification, url: this.smeeUrl, runOnServer: false,
                                               urlBackgroundOptions: { httpMethod: "POST", httpContentType: "application/json",
-                                                                      httpBody: JSON.stringify({ "uName": this.notifierUName, 
-                                                                                                 "propName": this.responses[i].property,
+                                                                      httpBody: JSON.stringify({ "uName": this.notifierUName, "propName": this.responses[i].property,
                                                                                                  "propValue": this.responses[i].value})}});
 
                   if (this.responses[i].default) {
-                     notification.defaultAction = { name: this.responses[i].label, url: this.smeUrl,
+                     notification.defaultAction = { name: this.responses[i].label, url: this.smeeUrl,
                                                     urlBackgroundOptions: { httpMethod: "POST", httpContentType: "application/json", runOnServer: false,
-                                                                            httpBody: JSON.stringify({ "uName": this.notifierUName, 
-                                                                                                       "propName": this.responses[i].property,
+                                                                            httpBody: JSON.stringify({ "uName": this.notifierUName, "propName": this.responses[i].property,
                                                                                                        "propValue": this.responses[i].value})}};
-
                   }
                }
             }
-
             this.owner.notifyUser(notification, this);
+            break;
          }
       }
       _callback(null, true);

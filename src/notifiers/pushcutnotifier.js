@@ -4,37 +4,31 @@ var Notifier = require('../notifier');
 function PushcutNotifier(_config, _parent) {
    var serviceArgs = {};
    
-   if (config.hasOwnProperty("sound")) {
+   if (_config.hasOwnProperty("sound")) {
       serviceArgs.sound = _config.sound;
    }
    
-   if (config.hasOwnProperty("image")) {
+   if (_config.hasOwnProperty("image")) {
       serviceArgs.image = _config.image;
    }
    
-   if (config.hasOwnProperty("devices")) {
+   if (_config.hasOwnProperty("devices")) {
       serviceArgs.devices = _config.devices;
    }
    
-   this.serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  this.gang.casa.findServiceName("pushcutservice");
+   var serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  _parent.gang.casa.findServiceName("pushcutservice");
 
-   if (!this.serviceName) {
+   if (!serviceName) {
       console.error(this.uName + ": ***** Pushcut service not found! *************");
       process.exit();
    }
 
-   _config.serviceConfig = { serviceType: "notifier", serviceName: this.serviceName, serviceArgs: serviceArgs };
+   _config.serviceConfig = { serviceType: "notifier", serviceName: serviceName, serviceArgs: serviceArgs };
 
    Notifier.call(this, _config, _parent);
    this.thingType = "pushcut-notifier";
-
-   this.ensurePropertyExists("pushcut-notifier-state", 'serviceproperty',
-                             { id: id, serviceType: "notifier", serviceName: this.serviceName, sync: "readwrite", serviceArgs: serviceArgs,
-                               source: { "property": "notifier-state"} }, _config);
-
-   this.props["notifier-state"]._addSource({ property: : "pushcut-notifier-state" });
 }
 
-util.inherits(PushcutNotifier, Thing);
+util.inherits(PushcutNotifier, Notifier);
 
 module.exports = exports = PushcutNotifier;

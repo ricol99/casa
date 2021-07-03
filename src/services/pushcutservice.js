@@ -41,7 +41,7 @@ PushcutService.prototype.notifyUser = function(_notification, _node) {
       })
 
       req.write(data);
-      req.end():
+      req.end();
    }
    catch (_error) {
       console.error(this.uName + ": Unable to publish message on channel "+_channel);
