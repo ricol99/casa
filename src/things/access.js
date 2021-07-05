@@ -121,7 +121,9 @@ function Access(_config, _parent) {
                                                                           sources: [{ property: "safety-alert", value: true, nextState: "safety-alert" },
                                                                                     { property: "retry-allowed", value: false, nextState: "failure" }],
                                                                           timeout: { property: "retry-timeout", nextState: "normal" }},
-                                                                        { name: "failure", sources: [{ event: "access-reset", nextState: "normal" }]} ]}, _config);
+                                                                        { name: "failure",
+                                                                          sources: [{ event: "access-reset", nextState: "normal" }],
+                                                                          timeout: { duration: 300, nextState: "normal" } }] }, _config);
 
    this.ensurePropertyExists('access-alarm-state', 'combinestateproperty', { name: "access-alarm-state", type: "combinestateproperty", ignoreControl: true,
                                                                               takeControlOnTransition: true, separator: "-", 
