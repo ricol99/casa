@@ -15,7 +15,15 @@ function PushcutService(_config, _owner) {
 
 util.inherits(PushcutService, Service);
 
-PushcutService.prototype.notifyUser = function(_notification, _node) {
+PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _node) {
+
+   var userOrGroup = this.gang.findNamedObject(_userOrGroup.uName);
+
+   if (!userOrGroup) {
+      return false;
+   }
+
+   var users = userOrGroup.hasOwnProperty("users") ? userOrGroup.users : [userOrGroup];
 
    try {
       const https = require('https')
@@ -42,10 +50,20 @@ PushcutService.prototype.notifyUser = function(_notification, _node) {
 
       req.write(data);
       req.end();
+      return true;
    }
    catch (_error) {
       console.error(this.uName + ": Unable to publish message on channel "+_channel);
+      return false;
    }
 };
+
+function PushcutNotification(_user, _node, _owner) {
+   this.user = _user;
+   this.node = _node;
+   this.owner = _owner;
+}
+
+PushcutNotification
 
 module.exports = exports = PushcutService;

@@ -23,6 +23,13 @@ PushcutNotifier.prototype.newSubscriptionAdded = function(_subscription) {
       this.devices = _subscription.args.devices;
       this.responses = _subscription.args.responses;
    }
+
+   var users = [];
+
+   for (var i = 0; i < _config.users.length; ++i) {
+      users.push(this.gang.findNamedObject(_config.users[i].uName));
+   }
+
 };
 
 PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callback) {
