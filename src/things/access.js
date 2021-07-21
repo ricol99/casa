@@ -8,6 +8,10 @@ var Thing = require('../thing');
 // *retryTimeout - How many secondss to wait until retry occurs (default 10)
 // *responseTimeout - ow long are the access allowed to take before responding to a commmand (open or close) (default 5)
 // startPulseLength - how long is start pulse for open and close (seconds) (default 1)
+// simulateFullyOpen - used where bollards cannot indicate they are fully open
+// simulatedOpeningTime - on required when simulating fully-open - time taken for bollards to open in seconds (default 10)
+// simulatedClosingTiemout - on required when simulating fully-open - timeout to assume closure will not happen and bollards have returned to open state (default 20)
+// movementTimeout - timeout for using safety sensors as movement sensors - in seconds - default 5
 
 // Events to control access
 // access-reset - clear a failure condition
@@ -16,7 +20,7 @@ var Thing = require('../thing');
 
 // Properties to define
 // fully-closed - true when access is fully raised
-// fully-open - true when access is fully in the ground
+// fully-open - true when access is fully in the ground (not required if simulateFullyOpen is true)
 // safety-alert - true when a safety system has halted everything
 // movement - true when safety systems detect any movement
 // movement-when-closed - true when safety systems detect any movement when the access is closed
@@ -61,13 +65,55 @@ function Access(_config, _parent) {
       this.operatingTimeouts = { "opening": value, "closing": value };
    }
 
+   this.movementTimeout = _config.hasOwnProperty("movementTimeout") ? _config.movementTimeout : 5;
+
+   if (_config.simulateFullyOpen) {
+      this.ensurePropertyExists('fully-open', 'property', {}, _config);
+      this.simulatedOpeningResponseTime = _config.hasOwnProperty("simulatedOpeningResponseTime") ? _config.simulatedOpeningResponseTime : 0.5;
+      this.simulatedOpeningTime = _config.hasOwnProperty("simulatedOpeningTime") ? _config.simulatedOpeningTime : 10;
+      this.simulatedClosingTimeout = _config.hasOwnProperty("simulatedClosingTimeout") ? _config.simulatedClosingTimeout : 20;
+
+      this.ensurePropertyExists('fully-open-state', 'stateproperty', { initialValue: "unknown", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
+                                                                       states: [{ name: "unknown",
+                                                                                  sources: [{ property: "fully-closed", value: true, nextState: "fully-closed" },
+                                                                                            { property: "fully-open", value: true, nextState: "fully-open" } ]},
+                                                                                { name: "fully-open", actions: [{ property: "fully-open", value: true }],
+                                                                                  sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
+                                                                                            { property: "access-alarm-state", value: "access-closed-requested-normal", nextState: "closed-requested" }] },
+                                                                                { name: "fully-closed", actions: [{ property: "fully-open", value: false }],
+                                                                                  sources: [{ property: "fully-closed", value: false, nextState: "opening"}] },
+                                                                                { name: "opening", 
+                                                                                  timeout: { "duration": this.simulatedOpeningTime, nextState: "fully-open" },
+                                                                                  sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
+                                                                                            { property: "access-alarm-state", value: "access-closed-requested-normal", nextState: "closing" }] },
+                                                                                { name: "closed-requested", 
+                                                                                  timeout: { "duration": this.simulatedOpeningResponseTime, nextState: "closing" },
+                                                                                  sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
+                                                                                            { property: "access-alarm-state", value: "access-open-requested-normal", nextState: "opening" }] },
+                                                                                { name: "closing", actions: [{ property: "fully-open", value: false }],
+                                                                                  timeout: { "duration": this.simulatedClosingTimeout, nextState: "fully-open" },
+                                                                                  sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
+                                                                                            { property: "alarm-state", value: "timed-out", nextState: "closing" },
+                                                                                            { property: "alarm-state", value: "failure", nextState: "unknown" },
+                                                                                            { property: "alarm-state", value: "safety-alert", nextState: "unknown" },
+                                                                                            { property: "access-alarm-state", value: "access-open-requested-normal", nextState: "opening" }] } ]}, _config);
+   }
+
    this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
    this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('movement', 'property', { initialValue: false, source: { property: "safety-alert" } }, _config);
-   this.ensurePropertyExists('movement-when-closed', 'andproperty', { sources: [{ property: "movement" }, { property: "access-state", transform: "$value === \"access-closed\"" }] }, _config);
+
+   this.ensurePropertyExists('movement-state', 'stateproperty', { initialValue: "no-movement", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
+                                                                  states: [{ name: "no-movement",
+                                                                             sources: [{ property: "movement", value: true, nextState: "movement" } ]},
+                                                                           { name: "movement", actions: [{ property: "movement", value: true }], timeout: { duration: this.movementTimeout, nextState: "no-movement" } } ]}, _config);
+
+   this.ensurePropertyExists('movement-access-state', 'combinestateproperty', { separator: "-", sources: [{ property: "movement-state" }, { property: "access-state" }] }, _config);
+   this.ensurePropertyExists('movement-when-closed', 'property', { sources: [{ property: "movement-access-state", transform: "$value === \"movement-access-closed\"" }] }, _config);
+   //this.ensurePropertyExists('movement-when-closed', 'andproperty', { sources: [{ property: "movement" }, { property: "access-state", transform: "$value === \"access-closed\"" }] }, _config);
 
    this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
    this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
@@ -78,42 +124,43 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
    this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
    this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
-                                                                   sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
+                                                                sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
-                                                                 states: [{ name: "access-unknown",
-                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-setup-closed" },
-                                                                                      { property: "fully-open", value: true, nextState: "access-setup-open" }]},
-                                                                          { name: "access-setup-open",
-                                                                            actions: [{ property: "target", value: "open" }],
-                                                                            sources: [{ property: "target", value: "open", nextState: "access-open" }]},
-                                                                          { name: "access-setup-closed",
-                                                                            actions: [{ property: "target", value: "closed" }],
-                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed" }]},
-                                                                          { name: "access-open-requested", actions: [{ property: "close", value: false }],
-                                                                            sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
-                                                                          { name: "access-opening", actions: [{ property: "target", value: "open" }],
-                                                                            sources: [{ property: "fully-open", value: true, nextState: "access-open" },
-                                                                                      { property: "fully-closed", value: true, nextState: "access-returned-to-closed" }] },
-                                                                          { name: "access-returned-to-open", actions: [{ property: "target", value: "open" }],
-                                                                            sources: [{ property: "target", value: "open", nextState: "access-open"}] },
-                                                                          { name: "access-open",
-                                                                            actions: [{ property: "retry-count", value: 0 }, { property: "start", value: false },
-                                                                                      { property: "open", value: false }, { property: "close", value: false }],
-                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed-requested" },
-                                                                                      { property: "fully-open", value: false, nextState: "access-closing" }] },
-                                                                          { name: "access-closed-requested",
-                                                                            sources: [{ property: "fully-open", value: false, nextState: "access-closing" }] },
-                                                                          { name: "access-closing", actions: [{ property: "target", value: "closed" }],
-                                                                            sources: [{ property: "fully-closed", value: true, nextState: "access-closed" },
-                                                                                      { property: "fully-open", value: true, nextState: "access-returned-to-open" }]},
-                                                                          { name: "access-returned-to-closed", actions: [{ property: "target", value: "closed" }],
-                                                                            sources: [{ property: "target", value: "closed", nextState: "access-closed"}] },
-                                                                          { name: "access-closed",
-                                                                            actions: [{ property: "retry-count", value: 0 }, { property: "start", value: false },
-                                                                                      { property: "open", value: false }, { property: "close", value: false }],
-                                                                            sources: [{ property: "target", value: "open", nextState: "access-open-requested" },
-                                                                                      { property: "fully-closed", value: false, nextState: "access-opening" }] } ]}, _config);
+                                                                states: [{ name: "access-unknown",
+                                                                           sources: [{ property: "fully-closed", value: true, nextState: "access-setup-closed" },
+                                                                                     { property: "fully-open", value: true, nextState: "access-setup-open" }]},
+                                                                         { name: "access-setup-open",
+                                                                           actions: [{ property: "target", value: "open" }],
+                                                                           sources: [{ property: "target", value: "open", nextState: "access-open" }]},
+                                                                         { name: "access-setup-closed",
+                                                                           actions: [{ property: "target", value: "closed" }],
+                                                                           sources: [{ property: "target", value: "closed", nextState: "access-closed" }]},
+                                                                         { name: "access-open-requested", actions: [{ property: "close", value: false }],
+                                                                           sources: [{ property: "fully-closed", value: false, nextState: "access-opening" }] },
+                                                                         { name: "access-opening", actions: [{ property: "target", value: "open" }],
+                                                                           sources: [{ property: "fully-open", value: true, nextState: "access-open" },
+                                                                                     { property: "fully-closed", value: true, nextState: "access-returned-to-closed" }] },
+                                                                         { name: "access-returned-to-open", actions: [{ property: "target", value: "open" }],
+                                                                           sources: [{ property: "target", value: "open", nextState: "access-open"}] },
+                                                                         { name: "access-open",
+                                                                           actions: [{ property: "retry-count", value: 0 }, { property: "start", value: false },
+                                                                                     { property: "open", value: false }, { property: "close", value: false }],
+                                                                           sources: [{ property: "target", value: "closed", nextState: "access-closed-requested" },
+                                                                                     { guard: { property: "fully-closed", value: false }, property: "fully-open", value: false, nextState: "access-closing" },
+                                                                                     { property: "fully-closed", value: true, nextState: "access-returned-to-closed" }] },
+                                                                         { name: "access-closed-requested",
+                                                                           sources: [{ property: "fully-open", value: false, nextState: "access-closing" }] },
+                                                                         { name: "access-closing", actions: [{ property: "target", value: "closed" }],
+                                                                           sources: [{ property: "fully-closed", value: true, nextState: "access-closed" },
+                                                                                     { property: "fully-open", value: true, nextState: "access-returned-to-open" }]},
+                                                                         { name: "access-returned-to-closed", actions: [{ property: "target", value: "closed" }],
+                                                                           sources: [{ property: "target", value: "closed", nextState: "access-closed"}] },
+                                                                         { name: "access-closed",
+                                                                           actions: [{ property: "retry-count", value: 0 }, { property: "start", value: false },
+                                                                                     { property: "open", value: false }, { property: "close", value: false }],
+                                                                           sources: [{ property: "target", value: "open", nextState: "access-open-requested" },
+                                                                                     { property: "fully-closed", value: false, nextState: "access-opening" }] } ]}, _config);
 
    this.ensurePropertyExists('alarm-state', 'stateproperty', { name: "alarm-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "normal",
                                                                states: [{ name: "normal", sources: [{ property: "safety-alert", value: true, nextState: "safety-alert" }]},
