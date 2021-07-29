@@ -289,10 +289,7 @@ StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPrior
 
          if (immediateNextState) {
             console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
-
-            setTimeout( (_nextStateName) => {
-               this.set(_nextStateName, { sourceName: this.owner.uName });
-            }, 1, this.transformNextState(immediateNextState));
+            this.owner.alignPropertyValue(this.name, this.transformNextState(immediateNextState));
          }
          else {
             this.currentState = nextMatchedState;
