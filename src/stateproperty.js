@@ -84,11 +84,13 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
             if (source.hasOwnProperty('nextState')) {
 
-               if (source.nextState === this.currentState.name) {
+               var nextState = this.transformNextState(source.nextState);
+
+               if ((source.nextState === this.currentState.name) || (nextState === this.currentState.name)) {
                   this.resetStateTimer(this.currentState);
                }
                else {
-                  this.set(this.transformNextState(source.nextState), { sourceName: this.owner.uName });
+                  this.set(nextState, { sourceName: this.owner.uName });
                }
             }
             else if (source.hasOwnProperty('handler')) {
@@ -195,7 +197,16 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
 
 StateProperty.prototype.timeoutInternal = function(_timeoutState) {
    this.stateTimer = null;
-   this.set(this.transformNextState(_timeoutState), { sourceName: this.owner.uName });
+
+   var nextState = this.transformNextState(_timeoutState);
+
+   if (nextState === this.currentState.name) {
+      // Immediate next state is the same as the one we are in. Restart timer
+      this.resetStateTimer(this.currentState)
+   }
+   else {
+      this.set(nextState, { sourceName: this.owner.uName });
+   }
 };
 
 StateProperty.prototype.transformNextState = function(_nextState) {
