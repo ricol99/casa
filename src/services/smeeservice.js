@@ -15,6 +15,7 @@ function SmeeService(_config, _owner) {
    this.messageEventHandler = this.newEventReceived.bind(this);
    this.openEventHandler = this.connected.bind(this);
    this.errorEventHandler = this.error.bind(this);
+   this.heartbeat = new Heartbeat(this);
 }
 
 util.inherits(SmeeService, Service);
@@ -34,6 +35,8 @@ SmeeService.prototype.start = function() {
         this.events.addEventListener('message', this.messageEventHandler);
         this.events.addEventListener('open', this.openEventHandler);
         this.events.addEventListener('error', this.errorEventHandler);
+
+        this.heartbeat.start();
    }
    catch(_error) {
       console.error(this.uName + ": Unable to establish link to Smee service. Error: ", _error);
@@ -50,7 +53,7 @@ SmeeService.prototype.newEventReceived = function(_msg) {
          console.log(this.uName+": newEventReceived() valid message!");
 
          if (this.smeeSources.hasOwnProperty(data.body.uName)) {
-            console.log(this.uName+": newEventReceived() Frowarding message to node");
+            console.log(this.uName+": newEventReceived() Forwarding message to node");
             this.smeeSources[data.body.uName].newEventReceived(data.body);
          }
       }
@@ -86,7 +89,7 @@ SmeeService.prototype.restartSmeClient = function() {
       this.events.removeEventListener('message', this.messageEventHandler);
       this.events.removeEventListener('open', this.openEventHandler);
       this.events.removeEventListener('error', this.errorEventHandler);
-      delete this.events();
+      delete this.events;
       this.start();
    }
    catch(_error) {
@@ -151,7 +154,6 @@ Heartbeat.prototype.sendHeartbeatAndStartTimers = function() {
       this.receiveTimeout = null;
       this.stop();
       this.owner.restartSmeClient();
-      this.start();
    }, 5000);
 
    this.sendHeartbeat();
