@@ -105,11 +105,8 @@ function Access(_config, _parent) {
    this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
 
    this.ensurePropertyExists('movement-state', 'stateproperty', { initialValue: "no-movement", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
-                                                                  states: [{ name: "no-movement",
-                                                                             sources: [{ property: "safety-alert", value: true, nextState: "movement" }] },
-                                                                           { name: "movement",
-                                                                             sources: [{ property: "safety-alert", value: true, nextState: "movement" }],
-                                                                             timeout: { duration: this.movementTimeout, nextState: "no-movement" } } ]}, _config);
+                                                                  states: [{ name: "no-movement", sources: [{ property: "safety-alert", value: true, nextState: "movement" }] },
+                                                                           { name: "movement", timeout: { duration: this.movementTimeout, nextState: "no-movement" } } ]}, _config);
 
    this.ensurePropertyExists('movement-access-state', 'combinestateproperty', { separator: "-", sources: [{ property: "movement-state" }, { property: "access-state" }] }, _config);
    this.ensurePropertyExists('movement-when-closed', 'property', { sources: [{ property: "movement-access-state", transform: "$value === \"movement-access-closed\"" }] }, _config);
