@@ -7,7 +7,7 @@ function SmeeProperty(_config, _owner) {
    _config.serviceType = "source";
    _config.serviceName = _config.hasOwnProperty("serviceName") ? _config.serviceName : _owner.gang.casa.findServiceName("smeeservice");
    _config.serviceArgs = _config.hasOwnProperty("serviceArgs") ? _config.serviceArgs : { smeeSource: smeeSource };
-   _config.sync = "readwrite";
+   _config.sync = "read";
 
    ServiceProperty.call(this, _config, _owner);
 }
