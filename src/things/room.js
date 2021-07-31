@@ -156,7 +156,8 @@ function Room(_config, _parent) {
 
    this.ensurePropertyExists('users-present-state', 'stateproperty', { name: "users-present-state", type: "stateproperty", initialValue: "no-users-present", 
                                                                        states: [{ name: "no-users-present", source: { property: "movement", "value": true, nextState: "users-present" } },
-                                                                                { name: "users-present", timeout: { property: "movement-timeout", nextState: "no-users-present" } } ]}, _config);
+                                                                                { name: "users-present", timeout: { property: "movement-timeout", nextState: "no-users-present" },
+                                                                                                         source: { property: "movement", "value": true, nextState: "users-present" }} ]}, _config);
 
    this.ensurePropertyExists('room-state', 'combinestateproperty', { name: "room-state", type: "combinestateproperty", separator: "-", initialValue: "no-users-present-day",
                                                                      sources: [{ property: "users-present-state" }, { property: "day-state" }], states: this.roomStates }, _config);
