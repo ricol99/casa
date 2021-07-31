@@ -62,7 +62,7 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
          this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false });
       }
       else {
-         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false,
+         this.ensurePropertyExists(_property, 'property', { allSourcesRequiredForValidity: false,
                                                             source: { uName: _sub.uName, property: _subscriberProp }});
       }
 
