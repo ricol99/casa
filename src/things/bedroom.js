@@ -23,11 +23,13 @@ function Bedroom(_config, _parent) {
    _config.userOverrideConfig =  { initialValue: 'not-active',
                                    states: [{ name: "not-active", priority: 0,
                                               sources: [{ guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" },
-                                                        { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "cancel-bedtime" }] },
+                                                        { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "may-need-to-cancel-bedtime" }] },
                                             { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }},
-                                            { name: "cancel-bedtime", priority: 8, action: { event: "cancel-bedtime-event" },
-                                              timeout: { "duration": 1, "nextState": "not-active" }} ]};
+                                            { name: "may-need-to-cancel-bedtime", source: { event: "room-switch-event", nextState: "cancel-bedtime"},
+                                              timeout: { "duration": 0.4, "nextState": "not-active" }},
+                                            { name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
+                                              timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
 
    _config.roomStates = [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 0},
                          { name: "no-users-present-dull-day", priority: 0}, { name: "users-present-dull-day", priority: 5},
@@ -211,7 +213,7 @@ function Bedroom(_config, _parent) {
    this.ensurePropertyExists("users-sensitive", 'orproperty', { initialValue: false, sources: [{ property: "all-present-users-in-bed" },
                                                                                                { property: "some-present-users-asleep" }] }, _config);
 
-   this.userMonitorConfig.states.push({ name: "room-switch-event-required", priority: 15, action: { "event": "room-switch-event" }, "timeout": { "duration": 0.5, "nextState": "PREVIOUS-STATE" }}),
+   this.userMonitorConfig.states.push({ name: "room-switch-event-required", priority: 15, action: { "event": "room-switch-event" }, "timeout": { "duration": 0.1, "nextState": "PREVIOUS-STATE" }}),
    this.ensurePropertyExists("monitor-users", 'stateproperty', this.userMonitorConfig, _config);
 }
 
