@@ -98,7 +98,14 @@ function Access(_config, _parent) {
                                                                                             { property: "access-alarm-state", value: "access-open-requested-normal", nextState: "opening" }] } ]}, _config);
    }
 
-   this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
+   if (this.props.hasOwnProperty("target")) {
+      this.props["target"].addNewSource({ event: "open-access", transform: "\"open\"" });
+      this.props["target"].addNewSource({ event: "close-access", transform: "\"closed\"" });
+   }
+   else {
+      this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
+   }
+
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
    this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
