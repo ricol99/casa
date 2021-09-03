@@ -109,12 +109,34 @@ Casa.prototype.startListening = function () {
 };
 
 Casa.prototype.refreshSourceListeners = function() {
+   this.cancelScheduledRefreshSourceListeners();
 
    for (var sourceListenerName in this.sourceListeners) {
 
       if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
          this.sourceListeners[sourceListenerName].refreshSource();
       }
+   }
+};
+
+Casa.prototype.cancelScheduledRefreshSourceListeners = function() {
+   this.sourceListenerRefreshRequired = false;
+
+   if (this.refreshSourceListenersTimeout) {
+      clearTimeout(this.refreshSourceListenersTimeout);
+      this.refreshSourceListenersTimeout = null;
+   }
+};
+
+Casa.prototype.scheduleRefreshSourceListeners = function() {
+
+   if (!this.sourceListenerRefreshRequired) {
+      this.sourceListenerRefreshRequired = true;
+
+      this.refreshSourceListenersTimeout = setTimeout( () => {
+         this.refreshSourceListenersTimeout = null;
+         this.gang.casa.refreshSourceListeners();
+      }, 500);
    }
 };
 
@@ -194,6 +216,7 @@ Casa.prototype.addSource = function(_source) {
       this.topSources[_source.uName] = _source;
    }
 
+   this.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
@@ -221,6 +244,7 @@ Casa.prototype.addSourceListener = function(_sourceListener) {
 
    console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
    this.sourceListeners[_sourceListener.uName] = _sourceListener;
+   this.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.removeSourceListener = function(_sourceListener) {

@@ -112,7 +112,7 @@ SourceListener.prototype.establishListeners = function() {
          this.source.on('event-raised', this.eventRaisedHandler);
       }
       else {
-         this.source.on('event-raised', this.eventRaisedHandler);
+         this.source.on('event-raised', this.eventRaisedHandler, this.subscription);
       }
 
       this.source.on('invalid', this.invalidHandler);

@@ -11,8 +11,13 @@ function Service(_config, _owner) {
       _config.propogateToChildren = false;
    }
 
+   if (!_config.hasOwnProperty("ignoreChildren")) {
+      _config.ignoreChildren = true;
+   }
+
    Thing.call(this, _config, _owner);
 
+   this.optimiseTransactions = _config.hasOwnProperty("optimiseTransactions") ? _config.optimiseTransactions : true;
    this.queueQuant = _config.hasOwnProperty("queueQuant") ? _config.queueQuant : 100;
    this.queueRetryLimit = _config.hasOwnProperty("queueRetryLimit") ? _config.queueRetryLimit : 5;
    this.localThings = _config.hasOwnProperty("localThings") ? _config.localThings : true;
@@ -58,11 +63,6 @@ Service.prototype.createNode = function(_config) {
 
    var ServiceOwnedNode = require("./services/nodes/"+type);
    var thing = new ServiceOwnedNode(_config, this);
-
-   setTimeout( () => {
-      this.gang.casa.refreshSourceListeners();
-   }, 500);
-
    return thing;
 };
 
@@ -80,24 +80,47 @@ Service.prototype.findOrCreateNode = function(_type, _id) {
 
 Service.prototype.notifyChange = function(_serviceNode, _propName, _propValue, _data, _subscriber) {
 
-   if (_data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId)) {
-      this.transactions[_serviceNode.name + "-" + _data.transactionId].properties[_propName] = _propValue;
+   if (this.optimiseTransactions && _data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId + "-" + "propertyChanged")) {
+      this.transactions[_serviceNode.name + "-" + _data.transactionId + "-" + "propertyChanged"].properties[_propName] = _propValue;
 
       for (var arg in _data) {
-         this.transactions[_serviceNode.name + "-" + _data.transactionId].propData[arg] = _data[arg];
+         this.transactions[_serviceNode.name + "-" + _data.transactionId + "-" + "propertyChanged"].propData[arg] = _data[arg];
       }
    }
    else {
-      var transaction = { "action": "propertyChanged", properties: {}, coldStart: _data.hasOwnProperty("coldStart") && _data.coldStart, subscriber: _subscriber };
+      var transaction = { "action": "propertyChanged", events: {}, properties: {}, coldStart: _data.hasOwnProperty("coldStart") && _data.coldStart, subscriber: _subscriber };
       transaction.properties[_propName] = _propValue;
       transaction.propData = util.copy(_data);
 
       if (_data.hasOwnProperty("transactionId")) {
-         transaction.transactionId = _serviceNode.name + "-" + _data.transactionId;
+         transaction.transactionId = _serviceNode.name + "-" + _data.transactionId + "-" + "propertyChanged";
       }
 
       this.queueTransaction(_serviceNode, transaction);
    }
+};
+
+Service.prototype.notifyEvent = function(_serviceNode, _eventName, _data, _subscriber) {
+
+   if (this.optimiseTransactions && _data.hasOwnProperty("transactionId") && this.transactions.hasOwnProperty(_serviceNode.name + "-" + _data.transactionId + "-" + "eventRaised")) {
+      this.transactions[_serviceNode.name + "-" + _data.transactionId + "-" + "eventRaised"].events[_eventName] = true;
+
+      for (var arg in _data) {
+         this.transactions[_serviceNode.name + "-" + _data.transactionId + "-" + "eventRaised"].eventData[arg] = _data[arg];
+      }
+   }
+   else {
+      var transaction = { "action": "eventRaised", events: {}, properties: {}, coldStart: _data.hasOwnProperty("coldStart") && _data.coldStart, subscriber: _subscriber };
+      transaction.events[_eventName] = true;
+      transaction.eventData = util.copy(_data);
+
+      if (_data.hasOwnProperty("transactionId")) {
+         transaction.transactionId = _serviceNode.name + "-" + _data.transactionId + "-" + "eventRaised";
+      }
+
+      this.queueTransaction(_serviceNode, transaction);
+   }
+
 };
 
 Service.prototype.queueTransaction = function(_serviceNode, _transaction) {

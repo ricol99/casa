@@ -12,7 +12,7 @@ function SmeeService(_config, _owner) {
    this.channelName = _config.channel;
    this.smeeSources = {};
 
-   this.messageEventHandler = this.newEventReceived.bind(this);
+   this.messageEventHandler = this.newMessageReceived.bind(this);
    this.openEventHandler = this.connected.bind(this);
    this.errorEventHandler = this.error.bind(this);
    this.heartbeat = new Heartbeat(this);
@@ -21,20 +21,18 @@ function SmeeService(_config, _owner) {
 util.inherits(SmeeService, Service);
 
 SmeeService.prototype.coldStart = function() {
-
    Service.prototype.coldStart.call(this);
    this.start();
-
 };
 
 SmeeService.prototype.start = function() {
 
    try { 
-        this.events = new EventSource("https://smee.io/" + this.channelName);
-        this.events.reconnectInterval = 0;
-        this.events.addEventListener('message', this.messageEventHandler);
-        this.events.addEventListener('open', this.openEventHandler);
-        this.events.addEventListener('error', this.errorEventHandler);
+        this.smeeEvents = new EventSource("https://smee.io/" + this.channelName);
+        this.smeeEvents.reconnectInterval = 0;
+        this.smeeEvents.addEventListener('message', this.messageEventHandler);
+        this.smeeEvents.addEventListener('open', this.openEventHandler);
+        this.smeeEvents.addEventListener('error', this.errorEventHandler);
 
         this.heartbeat.start();
    }
@@ -43,18 +41,28 @@ SmeeService.prototype.start = function() {
    }
 };
 
-SmeeService.prototype.newEventReceived = function(_msg) {
+SmeeService.prototype.newMessageReceived = function(_msg) {
 
    if (_msg && _msg.hasOwnProperty("data")) {
-      console.log(this.uName+": newEventReceived() request=", _msg.data);
+      console.log(this.uName+": newMessageReceived() request=", _msg.data);
       var data = JSON.parse(_msg.data);
 
-      if (data && data.hasOwnProperty("body") && data.body.hasOwnProperty("uName") && data.body.hasOwnProperty("propName") && data.body.hasOwnProperty("propValue") /*&& this.props.hasOwnProperty(data.body.propName)*/) {
-         console.log(this.uName+": newEventReceived() valid message!");
+      if (data && data.hasOwnProperty("body") && data.body.hasOwnProperty("uName")) {
+         console.log(this.uName+": newMessageReceived() valid message!");
 
          if (this.smeeSources.hasOwnProperty(data.body.uName)) {
-            console.log(this.uName+": newEventReceived() Forwarding message to node");
-            this.smeeSources[data.body.uName].newEventReceived(data.body);
+
+            if (!(data.body.hasOwnProperty("sourceCasa") && !this.smeeSources[data.body.uName].ignoreSourceCasa && (data.body.sourceCasa === this.casa.uName))) {
+
+               if (data.body.hasOwnProperty("propName") && data.body.hasOwnProperty("propValue")) {
+                  console.log(this.uName+": newMessageReceived() Forwarding property change message to node");
+                  this.smeeSources[data.body.uName].handler.newPropertyChangeReceived(data.body);
+               }
+               else if (data.body.hasOwnProperty("eventName")) {
+                  console.log(this.uName+": newMessageReceived() Forwarding event message to node");
+                  this.smeeSources[data.body.uName].handler.newEventReceived(data.body);
+               }
+            }
          }
       }
    }
@@ -71,8 +79,8 @@ SmeeService.prototype.error = function(_error) {
    console.error(this.uName + ": Error from smee channel ", _error);
 };
 
-SmeeService.prototype.registerSource = function(_sourceName, _smeeNode) {
-   this.smeeSources[_sourceName] = _smeeNode;
+SmeeService.prototype.registerSource = function(_sourceName, _smeeNode, _ignoreSourceCasa) {
+   this.smeeSources[_sourceName] = { handler: _smeeNode, ignoreSourceCasa: _ignoreSourceCasa ? true : false };
 };
 
 SmeeService.prototype.deRegisterSource = function(_sourceName) {
@@ -83,48 +91,55 @@ SmeeService.prototype.getUrl = function() {
    return "https://smee.io/" + this.channelName;
 }
 
+SmeeService.prototype.sendMessage = function(_body, _callback) {
+
+  try {
+      const https = require('https')
+      var body = util.copy(_body);
+      body.sourceCasa = this.gang.casa.uName;
+      const data = JSON.stringify(body);
+
+      const options = {
+        hostname: 'smee.io',
+        port: 443,
+        path: '/'+this.channelName,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length
+        }
+      }
+
+      const req = https.request(options, res => {
+        console.log(this.uName + ": Smee message send completed with " + `statusCode: ${res.statusCode}`);
+        if (_callback) _callback(null, true);
+      })
+
+      req.on('error', (_error) => {
+        console.error(this.uName + ": Error trying to send smee message. Error: ", _error);
+        if (_callback) _callback(_error);
+      })
+
+      req.write(data);
+      req.end();
+   }
+   catch (_error) {
+      if (_callback) _callback(_error);
+   }
+};
+
 SmeeService.prototype.restartSmeClient = function() {
 
    try {
-      this.events.removeEventListener('message', this.messageEventHandler);
-      this.events.removeEventListener('open', this.openEventHandler);
-      this.events.removeEventListener('error', this.errorEventHandler);
-      delete this.events;
+      this.smeeEvents.removeEventListener('message', this.messageEventHandler);
+      this.smeeEvents.removeEventListener('open', this.openEventHandler);
+      this.smeeEvents.removeEventListener('error', this.errorEventHandler);
+      delete this.smeeEvents;
       this.start();
    }
    catch(_error) {
       console.error(this.uName + ": Unable to retstart link to Smee service. Error: ", _error);
    }
-};
-
-SmeeService.prototype.newEventReceived = function(_msg) {
-
-   if (_msg && _msg.hasOwnProperty("data")) {
-      console.log(this.uName+": newEventReceived() request=", _msg.data);
-      var data = JSON.parse(_msg.data);
-
-      if (data && data.hasOwnProperty("body") && data.body.hasOwnProperty("uName") && data.body.hasOwnProperty("propName") && data.body.hasOwnProperty("propValue") /*&& this.props.hasOwnProperty(data.body.propName)*/) {
-
-         //if (data.body.uName !== "___heartbeat___") {
-            console.log(this.uName+": newEventReceived() valid message!");
-         //}
-
-         if (this.smeeSources.hasOwnProperty(data.body.uName)) {
-            console.log(this.uName+": newEventReceived() Frowarding message to node");
-            this.smeeSources[data.body.uName].newEventReceived(data.body);
-         }
-      }
-   }
-   else {
-      console.error(this.uName + ": Received corrupt message from Smee channel " + this.channelName);
-   }
-};
-
-SmeeService.prototype.connected = function(_data) {
-   console.log(this.uName + ": Connected to smee channel "+ this.channelName);
-};
-
-SmeeService.prototype.error = function(_error) {
 };
 
 function Heartbeat(_owner, _interval) {
@@ -133,7 +148,7 @@ function Heartbeat(_owner, _interval) {
 }
 
 Heartbeat.prototype.start = function() {
-   this.owner.registerSource("___heartbeat___"+this.owner.gang.casa.uName, this);
+   this.owner.registerSource("___heartbeat___"+this.owner.gang.casa.uName, this, true);
    this.sendHeartbeatAndStartTimers();
 
 };
@@ -180,38 +195,10 @@ Heartbeat.prototype.stop = function() {
 };
 
 Heartbeat.prototype.sendHeartbeat = function() {
+   this.owner.sendMessage({ uName: "___heartbeat___"+this.owner.gang.casa.uName, eventName: "heartbeat" });
+};
 
-  try {
-      const https = require('https')
-      const data = JSON.stringify({ uName: "___heartbeat___"+this.owner.gang.casa.uName, propName: "___NA___", propValue: "___NA___" });
-
-      const options = {
-        hostname: 'smee.io',
-        port: 443,
-        path: '/'+this.owner.channelName,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': data.length
-        }
-      }
-
-      const req = https.request(options, res => {
-        console.log(this.uName + ": Smee Heartbeat send completed with " + `statusCode: ${res.statusCode}`);
-      })
-
-      req.on('error', (_error) => {
-        console.error(this.uName + ": Error trying to send smee heartbeat. Error: ", _error);
-      })
-
-      req.write(data);
-      req.end();
-      return true;
-   }
-   catch (_error) {
-      console.error(this.uName + ": Unable to send heartbeat on smee channel "+_channel);
-      return false;
-   }
+Heartbeat.prototype.newPropertyChangeReceived = function(_msg) {
 };
 
 Heartbeat.prototype.newEventReceived = function(_msg) {

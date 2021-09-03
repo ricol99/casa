@@ -53,6 +53,10 @@ function Property(_config, _owner) {
 
       this.target = this.targetListener.source;
    }
+
+   if (this.owner.gang.casa) {
+      this.owner.gang.casa.scheduleRefreshSourceListeners();
+   }
 }
 
 util.inherits(Property, NamedObject);

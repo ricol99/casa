@@ -26,7 +26,17 @@ function Source(_config, _owner) {
       }
    }
 
-   this.events = (_config.hasOwnProperty("events")) ? util.copy(_config.events, true) : [];
+   this.events = {};
+
+   if (_config.hasOwnProperty("events")) {
+
+      for (var index = 0; index < _config.events.length; ++index) {
+         var type = _config.events[index].hasOwnProperty("type") ? _config.events[index].type : "event";
+         var Event = this.gang.cleverRequire(type, 'events'); 
+         var eventObj = new Event(_config.events[index], this);
+         this.events[eventObj.name] = eventObj;
+      }
+   }
 
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { "initialValue": 'auto', "takeControlOnTransition": true,
@@ -67,6 +77,11 @@ Source.prototype.getScheduleService = function() {
 };
 
 Source.prototype.raiseEvent = function(_eventName, _data) {
+
+   if (this.events.hasOwnProperty(_eventName)) {
+      this.events[_eventName].eventAboutToBeRaised(_eventName, _data);
+   }
+
    this.eventAboutToBeRaised(_eventName, _data);
    SourceBase.prototype.raiseEvent.call(this, _eventName, _data);
 };
@@ -190,13 +205,6 @@ Source.prototype.updateEvent = function(_modifiedEvent) {
       return false;
    }
 
-   //for (var prop in _modifiedEvent) {
-
-      //if (_modifiedEvent.hasOwnProperty(prop)) {
-         //this.events[eventIndex][prop] = _modifiedEvent[prop];
-      //}
-   //}
-
    if (this.deleteEvent(_modifiedEvent.name)) {
       return this.addEvent(_modifiedEvent);
    }
@@ -207,50 +215,38 @@ Source.prototype.updateEvent = function(_modifiedEvent) {
 
 Source.prototype.addEvent = function(_event) {
 
-   if (this.getEventIndex(_event.name) !== -1) {
+   if (this.events.hasOwnProperty(_event.name)) {
       return false;
    }
 
-   this.events.push(_event);
-   this.scheduleService.addEvent(this, _event);
+   var type = _event.hasOwnProperty("type") ? _event.type : "event";
+   var Event = this.gang.cleverRequire(type, 'events');
+   var eventObj = new Event(_config.events[index], this);
+   this.events[eventObj.name] = eventObj;
+   eventObj.coldStart(null);
    return true;
-};
-
-Source.prototype.getEventIndex = function(_eventName) {
-   var eventIndex = -1;
-
-   for (var i = 0; i < this.events.length; ++i) {
-
-      if (this.events[i].name === _eventName) {
-         eventIndex = i;
-         break;
-      }
-   }
-
-   return eventIndex;
 };
 
 Source.prototype.deleteEvent = function(_eventName) {
 
-   var eventIndex = this.getEventIndex(_eventName);
-
-   if (eventIndex === -1) {
+   if (this.events.hasOwnProperty(_eventName)) {
       return false;
    }
 
-   this.events.splice(eventIndex, 1);
-   this.scheduleService.removeEvent(this, _eventName);
+   this.events[_eventName].aboutToBeDeleted();
+   delete this.events[_eventName];
    return true;
 };
 
 Source.prototype.coldStart = function() {
-
-   if (this.events.length > 0) {
-      this.scheduleService = this.getScheduleService();
-      this.scheduleService.registerEvents(this, this.events);
-   }
-
    SourceBase.prototype.coldStart.call(this);
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].coldStart();
+      }
+   }
 }
 
 // Called by stateproperty to take control based on setting a action property
@@ -421,6 +417,19 @@ Source.prototype.receivedEventFromSource = function(_data) {
          this.raiseEvent(_data.name, _data);
       }
    }
+};
+
+Source.prototype.ensureEventExists = function(_eventName, _eventType, _config) {
+
+   if (!this.events.hasOwnProperty(_eventName)) {
+      _config.name = _eventName;
+      _config.type = _eventType;
+      var Event = this.gang.cleverRequire(_eventType, 'events');
+      var eventObj = new Event(_config, this);
+      this.events[eventObj.name] = eventObj;
+      return true;
+   }
+   return false;
 };
 
 module.exports = exports = Source;

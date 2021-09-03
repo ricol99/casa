@@ -1048,6 +1048,8 @@ PeerCasa.prototype.addSource = function(_source) {
    if (!added) {
       this.topSources[_source.uName] = _source;
    }
+
+   this.gang.casa.scheduleRefreshSourceListeners();
 }
 
 PeerCasa.prototype.addWorker = function(_worker) {

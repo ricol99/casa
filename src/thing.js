@@ -175,16 +175,21 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
 
 Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 
-   if (!this.ignoreChildren) {
-
-      if (!this.topLevelThing) {
-         this.owner.childRaisedEvent(_eventName, this, _data);
-      }
-      else {
-         _data.alignWithParent = true;
-         this.raiseEvent(_eventName, _data);
-      }
+   if (this.ignoreChildren) {
+      return false;
    }
+
+   var ret = this.propogateToChildren;
+
+   if (!this.topLevelThing && this.propogateToParent) {
+      ret = ret && this.owner.childRaisedEvent(_eventName, this, _data);
+   }
+   else {
+      _data.alignWithParent = true;
+      this.raiseEvent(_eventName, _data);
+   }
+
+   return ret;
 };
 
 Thing.prototype.raiseEvent = function(_eventName, _data) {
@@ -202,7 +207,27 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
       }
    }
    else {
-      this.childRaisedEvent(_eventName, this, data);
+
+      if (this.topLevelThing || !this.propogateToParent) {
+         Source.prototype.raiseEvent.call(this, _eventName, data);
+      }
+
+      var needToUpdateChildren = this.propogateToChildren;
+
+      if (!this.topLevelThing && this.propogateToParent) {
+         needToUpdateChildren = !this.owner.childRaisedEvent(_eventName, this, data);
+      }
+
+      if (needToUpdateChildren) {
+         data.alignWithParent = true;
+
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].raiseEvent(_eventName, data);
+            }
+         }
+      }
    }
 };
 

@@ -78,7 +78,7 @@ ScheduleService.prototype.coldStart = function() {
 function Schedule(_requester, _config, _owner) {
    NamedObject.call(this, { name: _requester.name, type: "schedule" }, _owner);
    this.requester = _requester;
-   this.events = [];
+   this.scheduledEvents = [];
 
    this.createEventsFromConfig(_config);
    this.scheduleAllEvents();
@@ -150,7 +150,7 @@ Schedule.prototype.createEventFromConfig = function(_eventConfig) {
       event.ramp = util.copy(_eventConfig.ramp);
    }
 
-   this.events.push(event);
+   this.scheduledEvents.push(event);
 };
 
 Schedule.prototype.lastEventScheduledBeforeNow = function(_now, _rule) {
@@ -222,8 +222,8 @@ Schedule.prototype.determineClosestRule = function(_now, _currentClosestSchedule
 Schedule.prototype.scheduleAllEvents = function() {
    this.setSunTimes(this.owner.getSunTimes());
 
-   for (var index = 0; index < this.events.length; ++index) {
-      this.scheduleEvent(this.events[index]);
+   for (var index = 0; index < this.scheduledEvents.length; ++index) {
+      this.scheduleEvent(this.scheduledEvents[index]);
    }
 }
 
@@ -249,12 +249,12 @@ Schedule.prototype.scheduleEvent = function(_event) {
 Schedule.prototype.refreshSunEvents = function(_sunTimes) {
    this.setSunTimes(_sunTimes);
 
-   for (var index = 0; index < this.events.length; ++index) {
+   for (var index = 0; index < this.scheduledEvents.length; ++index) {
 
-      for (var rindex = 0; rindex < this.events[index].rules.length; ++rindex) {
+      for (var rindex = 0; rindex < this.scheduledEvents[index].rules.length; ++rindex) {
 
-         if (this.events[index].rules[rindex].sunTime && (this.events[index].rules[rindex].rule > new Date())) {
-            this.resetJob(this.events[index].rules[rindex]);
+         if (this.scheduledEvents[index].rules[rindex].sunTime && (this.scheduledEvents[index].rules[rindex].rule > new Date())) {
+            this.resetJob(this.scheduledEvents[index].rules[rindex]);
          }
       }
    }
@@ -263,18 +263,18 @@ Schedule.prototype.refreshSunEvents = function(_sunTimes) {
 Schedule.prototype.setSunTimes = function(_sunTimes) {
    var result = false;
 
-   for (var index = 0; index < this.events.length; ++index) {
+   for (var index = 0; index < this.scheduledEvents.length; ++index) {
 
-      for (var rindex = 0; rindex < this.events[index].rules.length; ++rindex) {
+      for (var rindex = 0; rindex < this.scheduledEvents[index].rules.length; ++rindex) {
 
-         if ((typeof this.events[index].rules[rindex].original == 'string') && _sunTimes[this.events[index].rules[rindex].original]) {
-            console.log(this.uName + ': Rule ' + this.events[index].rules[rindex].original + ' is a sun time');
-            this.events[index].rules[rindex].rule = new Date(_sunTimes[this.events[index].rules[rindex].original]);
-            this.events[index].rules[rindex].rule.setTime(this.events[index].rules[rindex].rule.getTime() + (this.events[index].rules[rindex].delta * 1000));
-            this.events[index].rules[rindex].sunTime = true;
-            console.log(this.uName + ': Sun time ' + this.events[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.events[index].rules[rindex].rule);
+         if ((typeof this.scheduledEvents[index].rules[rindex].original == 'string') && _sunTimes[this.scheduledEvents[index].rules[rindex].original]) {
+            console.log(this.uName + ': Rule ' + this.scheduledEvents[index].rules[rindex].original + ' is a sun time');
+            this.scheduledEvents[index].rules[rindex].rule = new Date(_sunTimes[this.scheduledEvents[index].rules[rindex].original]);
+            this.scheduledEvents[index].rules[rindex].rule.setTime(this.scheduledEvents[index].rules[rindex].rule.getTime() + (this.scheduledEvents[index].rules[rindex].delta * 1000));
+            this.scheduledEvents[index].rules[rindex].sunTime = true;
+            console.log(this.uName + ': Sun time ' + this.scheduledEvents[index].rules[rindex].original + ' for start of schedule. Actual scheduled time is ' + this.scheduledEvents[index].rules[rindex].rule);
          }
-         else if (this.events[index].rules[rindex].random) {
+         else if (this.scheduledEvents[index].rules[rindex].random) {
             //  *** TBD how do we intepret CRON? Only a subset, one time per day per rule?
          }
       }
@@ -307,11 +307,11 @@ Schedule.prototype.getInitialValue = function() {
    var closestEventSchedule = null;
    var now = new Date();
 
-   for (var index = 0; index < this.events.length; ++index) {
-      var tempClosestSchedule = this.determineClosestEvent(now, closestEventSchedule, this.events[index]);
+   for (var index = 0; index < this.scheduledEvents.length; ++index) {
+      var tempClosestSchedule = this.determineClosestEvent(now, closestEventSchedule, this.scheduledEvents[index]);
 
       if (tempClosestSchedule) {
-         closestEvent = this.events[index];
+         closestEvent = this.scheduledEvents[index];
          closestEventSchedule = new Date(tempClosestSchedule);
       }
    }
@@ -340,15 +340,15 @@ Schedule.prototype.getInitialValue = function() {
 
 Schedule.prototype.addEvent = function(_event) {
    this.createEventFromConfig(_event);
-   this.scheduleEvent(this.events[this.events.length - 1]);
+   this.scheduleEvent(this.scheduledEvents[this.scheduledEvents.length - 1]);
 };
 
 Schedule.prototype.removeEvent = function(_eventName) {
    var index = -1;
 
-   for (var i = 0; i < this.events.length; ++i) {
+   for (var i = 0; i < this.scheduledEvents.length; ++i) {
 
-      if (this.events[i].name === _eventName) {
+      if (this.scheduledEvents[i].name === _eventName) {
          index = i;
          break;
       }
@@ -358,12 +358,12 @@ Schedule.prototype.removeEvent = function(_eventName) {
       return false;
    }
 
-   if (this.events[index].job) {
-     this.events[index].job.cancel();
-     this.events[index].job = null;
+   if (this.scheduledEvents[index].job) {
+     this.scheduledEvents[index].job.cancel();
+     this.scheduledEvents[index].job = null;
    }
 
-   this.events.splice(index, 1);
+   this.scheduledEvents.splice(index, 1);
    return true;
 };
 
