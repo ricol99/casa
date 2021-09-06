@@ -14,7 +14,6 @@ function PushcutService(_config, _owner) {
 util.inherits(PushcutService, Service);
 
 PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _node) {
-   console.log(this.uName + ": AAAAAAA _notification=", _notification);
 
    var userOrGroup = this.gang.findNamedObject(_userOrGroup);
 
@@ -29,7 +28,6 @@ PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _nod
    }
 
    var apiKey = userOrGroup.getProperty("pushcut-api-key");
-   console.log(this.uName + ": AAAAAA Api Key = ", apiKey);
 
    try {
       const https = require('https')

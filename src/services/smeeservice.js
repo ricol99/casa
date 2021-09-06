@@ -150,7 +150,13 @@ SmeeService.prototype.addHttpInfoToResponses = function(_target, _responses) {
       _responses[i].http.contentType = "application/json";
       _responses[i].http.url = this.getUrl();
       _responses[i].http.header = null;
-      _responses[i].http.body = { uName: _target, propName: _responses[i].property, propValue: _responses[i].responseValue };
+
+      if (_responses[i].hasOwnProperty("property")) {
+         _responses[i].http.body = { uName: _target, propName: _responses[i].property, propValue: _responses[i].responseValue };
+      }
+      else {
+         _responses[i].http.body = { uName: _target, eventName: _responses[i].event };
+      }
    }
 };
 

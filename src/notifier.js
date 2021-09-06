@@ -5,7 +5,9 @@ var Thing = require('./thing');
 // title - Title of notification
 // text - Text of notification
 // responseTimeout - maximum time the notification should remain
-// responses - undefined assumes no response required.  [ { label: "a:" property: "a-prop", initialValue: false, responseValue: true, default: true } ] for multiple choice.
+// responses - undefined assumes no response required.
+//   - Either property based [ { label: "a:" property: "a-prop", initialValue: false, responseValue: true, default: true } ] for multiple choice.
+//   - Or event based [ { label: "a:" event: "an-event", default: true } ] for multiple choice.
 
 // Resulting properties
 // notifer-state - Notifier state { "idle", "notifying", "responded", "timed-out" }
@@ -23,6 +25,7 @@ function Notifier(_config, _parent) {
    }
 
    var responseServicePropertyType = _config.hasOwnProperty("responseServicePropertyType") ? _config.responseServicePropertyType : "smeeproperty";
+   var responseServiceEventType = _config.hasOwnProperty("responseServiceEventType") ? _config.responseServiceEventType : "smeeevent";
 
    var serviceConfig = _config.serviceConfig;
    serviceConfig.id = this.uName.replace("::", "").replace(/:/g, "-");
@@ -38,16 +41,23 @@ function Notifier(_config, _parent) {
    this.responses =  util.copy(_config.responses, true);
    serviceConfig.serviceArgs.responses = this.responses;
 
-   var respondPropSources = [];
+   var respondSources = [];
 
    if (this.responses) {
 
       for (var j = 0; j < this.responses.length; ++j) {
-         respondPropSources.push({ property: this.responses[j].property, value: this.responses[j].responseValue, nextState: "responded" });
 
-         this.ensurePropertyExists(this.responses[j].property, responseServicePropertyType,
-                                   { serviceName: responseServiceName, initialValue: this.responses[j].initialValue,
-                                     source: { property: "notifier-state", value: "idle", transformMap: { "idle": this.responses[j].initialValue }}}, _config);
+         if (this.responses[j].hasOwnProperty("property")) {
+            respondSources.push({ property: this.responses[j].property, value: this.responses[j].responseValue, nextState: "responded" });
+
+            this.ensurePropertyExists(this.responses[j].property, responseServicePropertyType,
+                                      { serviceName: responseServiceName, initialValue: this.responses[j].initialValue,
+                                        source: { property: "notifier-state", value: "idle", transformMap: { "idle": this.responses[j].initialValue }}}, _config);
+         }
+         else if (this.responses[j].hasOwnProperty("event")) {
+            respondSources.push({ event: this.responses[j].event, nextState: "responded" });
+            this.ensureEventExists(this.responses[j].event, responseServiceEventType, { serviceName: responseServiceName }, _config);
+         }
       }
    }
 
@@ -56,7 +66,7 @@ function Notifier(_config, _parent) {
                                states: [{ name: "idle", sources: [{ event: "notify-"+this.name,  nextState: "notifying" }],
                                                         actions: [{ property: "responded", value: false }]},
                                         { name: "notifying", timeout: { duration: this.responseTimeout, nextState: "timed-out" },
-                                                             sources: respondPropSources },
+                                                             sources: respondSources },
                                         { name: "responded", timeout: { duration: 1, nextState: "idle" }},
                                         { name: "timed-out", timeout: { duration: 1, nextState: "idle" }} ]}, _config);
 

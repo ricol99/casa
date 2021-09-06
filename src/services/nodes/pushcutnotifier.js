@@ -30,7 +30,6 @@ PushcutNotifier.prototype.newSubscriptionAdded = function(_subscription) {
       }
 
       this.responseService.addHttpInfoToResponses(this.notifierUName, this.responses);
-      console.log(this.uName + ": AAAAAAAAA Responses = ", this.responses);
    }
 };
 
@@ -48,10 +47,8 @@ PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callb
 
             if (this.responses) {
                notification.actions = [];
-               console.log(this.uName + ": AAAAAAAA responses=", this.responses);
 
                for (var i = 0; i < this.responses.length; ++i) {
-                  console.log(this.uName + ": AAAAAAAA body=", this.responses[i].http.body);
 
                   notification.actions.push({ name: this.responses[i].label, keepNotification: this.responses[i].hasOwnProperty("keepNotification") ? this.responses[i].keepNotification : false,
                                               url: this.responses[i].http.url, runOnServer: false,
