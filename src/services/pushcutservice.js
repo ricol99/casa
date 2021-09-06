@@ -8,22 +8,28 @@ function PushcutService(_config, _owner) {
       "notifier": "pushcutnotifier"
    };
 
-   this.secret = _config.secret;
    this.notificationName = _config.hasOwnProperty("notificationName") ? _config.notificationName : "Casa-Notification";
-   this.user = this.gang.findNamedObject(_config.user.uName);
 }
 
 util.inherits(PushcutService, Service);
 
 PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _node) {
+   console.log(this.uName + ": AAAAAAA _notification=", _notification);
 
-   var userOrGroup = this.gang.findNamedObject(_userOrGroup.uName);
+   var userOrGroup = this.gang.findNamedObject(_userOrGroup);
 
    if (!userOrGroup) {
+      console.error(this.uName + ": User not found: " + userOrGroup);
       return false;
    }
 
-   var users = userOrGroup.hasOwnProperty("users") ? userOrGroup.users : [userOrGroup];
+   if (!userOrGroup.hasProperty("pushcut-api-key")) {
+      console.error(this.uName + ": No Pushcut API key defined for user " + userOrGroup.name);
+      return false;
+   }
+
+   var apiKey = userOrGroup.getProperty("pushcut-api-key");
+   console.log(this.uName + ": AAAAAA Api Key = ", apiKey);
 
    try {
       const https = require('https')
@@ -32,9 +38,10 @@ PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _nod
       const options = {
         hostname: 'api.pushcut.io',
         port: 443,
-        path: '/'+this.secret+"/notifications/"+this.notificationName,
+        path: "/v1/notifications/"+this.notificationName,
         method: 'POST',
         headers: {
+          'API-Key': apiKey,
           'Content-Type': 'application/json',
           'Content-Length': data.length
         }
@@ -57,13 +64,5 @@ PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _nod
       return false;
    }
 };
-
-function PushcutNotification(_user, _node, _owner) {
-   this.user = _user;
-   this.node = _node;
-   this.owner = _owner;
-}
-
-PushcutNotification
 
 module.exports = exports = PushcutService;

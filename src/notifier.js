@@ -5,7 +5,7 @@ var Thing = require('./thing');
 // title - Title of notification
 // text - Text of notification
 // responseTimeout - maximum time the notification should remain
-// responses - undefined assumes no response required.  [ { label: "a:" property: "a-prop", value: true, default: true } ] for multiple choice.
+// responses - undefined assumes no response required.  [ { label: "a:" property: "a-prop", initialValue: false, responseValue: true, default: true } ] for multiple choice.
 
 // Resulting properties
 // notifer-state - Notifier state { "idle", "notifying", "responded", "timed-out" }
@@ -14,18 +14,21 @@ var Thing = require('./thing');
 function Notifier(_config, _parent) {
    Thing.call(this, _config, _parent);
 
-   var smeeServiceName = _config.hasOwnProperty("smeeServiceName") ? _config.smeeServiceName : this.gang.casa.findServiceName("smeeservice");
-   var smeeService =  this.casa.findService(smeeServiceName);
+   var responseServiceName = _config.hasOwnProperty("responseServiceName") ? _config.responseServiceName : this.gang.casa.findServiceName("smeeservice");
+   var responseService =  this.casa.findService(responseServiceName);
 
-   if (!smeeService) {
-      console.error(this.uName + ": ***** Smee service not found! *************");
+   if (!responseService) {
+      console.error(this.uName + ": ***** Response service not found! *************");
       process.exit(3)
    }
+
+   var responseServicePropertyType = _config.hasOwnProperty("responseServicePropertyType") ? _config.responseServicePropertyType : "smeeproperty";
 
    var serviceConfig = _config.serviceConfig;
    serviceConfig.id = this.uName.replace("::", "").replace(/:/g, "-");
    serviceConfig.serviceArgs.notifierUName = this.uName;
-   serviceConfig.serviceArgs.smeeUrl = smeeService.getUrl();
+   serviceConfig.serviceArgs.user = _config.user.uName;
+   serviceConfig.serviceArgs.responseServiceName = responseServiceName;
    serviceConfig.serviceArgs.title = _config.title;
    serviceConfig.serviceArgs.text = _config.text;
 
@@ -40,8 +43,11 @@ function Notifier(_config, _parent) {
    if (this.responses) {
 
       for (var j = 0; j < this.responses.length; ++j) {
-         respondPropSources.push({ property: this.responses[j].property, value: this.responses[j].value, nextState: "responded" });
-         this.ensurePropertyExists(this.responses[j].property, "smeeproperty", { serviceName: smeeServiceName, source: { property: "notifier-state", value: "idle", transform: "false" }}, _config);
+         respondPropSources.push({ property: this.responses[j].property, value: this.responses[j].responseValue, nextState: "responded" });
+
+         this.ensurePropertyExists(this.responses[j].property, responseServicePropertyType,
+                                   { serviceName: responseServiceName, initialValue: this.responses[j].initialValue,
+                                     source: { property: "notifier-state", value: "idle", transformMap: { "idle": this.responses[j].initialValue }}}, _config);
       }
    }
 

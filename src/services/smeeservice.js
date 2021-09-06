@@ -142,6 +142,18 @@ SmeeService.prototype.restartSmeClient = function() {
    }
 };
 
+SmeeService.prototype.addHttpInfoToResponses = function(_target, _responses) {
+
+   for (var i = 0; i < _responses.length; ++i) {
+      _responses[i].http = {};
+      _responses[i].http.method = "POST";
+      _responses[i].http.contentType = "application/json";
+      _responses[i].http.url = this.getUrl();
+      _responses[i].http.header = null;
+      _responses[i].http.body = { uName: _target, propName: _responses[i].property, propValue: _responses[i].responseValue };
+   }
+};
+
 function Heartbeat(_owner, _interval) {
    this.owner = _owner;
    this.interval = _interval ? _interval : 60;

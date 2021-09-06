@@ -4,8 +4,6 @@ var ServiceNode = require('./servicenode');
 function PushcutNotifier(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
    this.started = false;
-   this.pusherSubscriptions = {};
-   this.noOfPushcutNotifiers = 0;
 }
 
 util.inherits(PushcutNotifier, ServiceNode);
@@ -15,21 +13,25 @@ PushcutNotifier.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.notifierUName) {
       this.notifierUName = _subscription.args.notifierUName;
-      this.smeeUrl = _subscription.args.smeeUrl;
+      this.responseServiceName = _subscription.args.responseServiceName;
+      this.user = _subscription.args.user;
       this.title = _subscription.args.title;
       this.text = _subscription.args.text;
       this.sound = _subscription.args.sound;
       this.image = _subscription.args.image;
       this.devices = _subscription.args.devices;
       this.responses = _subscription.args.responses;
+
+      this.responseService =  this.casa.findService(this.responseServiceName);
+
+      if (!this.responseService) {
+         console.error(this.uName + ": ***** Response service not found! *************");
+         process.exit(3)
+      }
+
+      this.responseService.addHttpInfoToResponses(this.notifierUName, this.responses);
+      console.log(this.uName + ": AAAAAAAAA Responses = ", this.responses);
    }
-
-   var users = [];
-
-   for (var i = 0; i < _config.users.length; ++i) {
-      users.push(this.gang.findNamedObject(_config.users[i].uName));
-   }
-
 };
 
 PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callback) {
@@ -46,22 +48,23 @@ PushcutNotifier.prototype.processPropertyChanged = function(_transaction, _callb
 
             if (this.responses) {
                notification.actions = [];
+               console.log(this.uName + ": AAAAAAAA responses=", this.responses);
 
                for (var i = 0; i < this.responses.length; ++i) {
-                  notification.actions.push({ name: this.responses[i].label, keepNotification: this.responses[i].keepNotification, url: this.smeeUrl, runOnServer: false,
-                                              urlBackgroundOptions: { httpMethod: "POST", httpContentType: "application/json",
-                                                                      httpBody: JSON.stringify({ "uName": this.notifierUName, "propName": this.responses[i].property,
-                                                                                                 "propValue": this.responses[i].value})}});
+                  console.log(this.uName + ": AAAAAAAA body=", this.responses[i].http.body);
+
+                  notification.actions.push({ name: this.responses[i].label, keepNotification: this.responses[i].hasOwnProperty("keepNotification") ? this.responses[i].keepNotification : false,
+                                              url: this.responses[i].http.url, runOnServer: false,
+                                              urlBackgroundOptions: { httpMethod: this.responses[i].http.method, httpContentType: this.responses[i].http.contentType, httpBody: JSON.stringify(this.responses[i].http.body)}});
 
                   if (this.responses[i].default) {
-                     notification.defaultAction = { name: this.responses[i].label, url: this.smeeUrl,
-                                                    urlBackgroundOptions: { httpMethod: "POST", httpContentType: "application/json", runOnServer: false,
-                                                                            httpBody: JSON.stringify({ "uName": this.notifierUName, "propName": this.responses[i].property,
-                                                                                                       "propValue": this.responses[i].value})}};
+                     notification.actions.push({ name: this.responses[i].label, url: this.responses[i].http.url, runOnServer: false,
+                                                 urlBackgroundOptions: { httpMethod: this.responses[i].http.method, httpContentType: this.responses[i].http.contentType, httpBody: JSON.stringify(this.responses[i].http.body)}});
                   }
                }
             }
-            this.owner.notifyUser(notification, this);
+
+            this.owner.notifyUser(this.user, notification, this);
             break;
          }
       }
