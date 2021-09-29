@@ -27,7 +27,7 @@ function Bedroom(_config, _parent) {
                                             { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }},
                                             { name: "may-need-to-cancel-bedtime", source: { event: "room-switch-event", nextState: "cancel-bedtime"},
-                                              timeout: { "duration": 0.4, "nextState": "not-active" }},
+                                              timeout: { "duration": 1.4, "nextState": "not-active" }},
                                             { name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
                                               timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
 
