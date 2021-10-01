@@ -94,6 +94,7 @@ SmeeService.prototype.getUrl = function() {
 SmeeService.prototype.sendMessage = function(_body, _callback) {
 
   try {
+      var callback = _callback;
       const https = require('https')
       var body = util.copy(_body);
       body.sourceCasa = this.gang.casa.uName;
@@ -111,20 +112,32 @@ SmeeService.prototype.sendMessage = function(_body, _callback) {
       }
 
       const req = https.request(options, res => {
-        console.log(this.uName + ": Smee message send completed with " + `statusCode: ${res.statusCode}`);
-        if (_callback) _callback(null, true);
+         console.log(this.uName + ": Smee message send completed with " + `statusCode: ${res.statusCode}`);
+
+         if (callback) {
+            callback(null, true);
+            callback = null;
+         }
       })
 
       req.on('error', (_error) => {
-        console.error(this.uName + ": Error trying to send smee message. Error: ", _error);
-        if (_callback) _callback(_error);
+         console.error(this.uName + ": Error trying to send smee message. Error: ", _error);
+
+         if (callback) {
+            callback(_error);
+            callback = null;
+         }
       })
 
       req.write(data);
       req.end();
    }
    catch (_error) {
-      if (_callback) _callback(_error);
+
+      if (callback) {
+         callback(_error);
+         callback = null;
+      }
    }
 };
 
