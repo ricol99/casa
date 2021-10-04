@@ -1,6 +1,6 @@
 var util = require('util');
 const EventSource = require("eventsource");
-var Service = require('./webservice');
+var Service = require('../service');
 
 function SmeeService(_config, _owner) {
    Service.call(this, _config, _owner);
@@ -92,53 +92,43 @@ SmeeService.prototype.getUrl = function() {
 }
 
 SmeeService.prototype.sendMessage = function(_body, _callback) {
+   var callback = _callback;
+   const https = require('https')
+   var body = util.copy(_body);
+   body.sourceCasa = this.gang.casa.uName;
+   const data = JSON.stringify(body);
 
-  try {
-      var callback = _callback;
-      const https = require('https')
-      var body = util.copy(_body);
-      body.sourceCasa = this.gang.casa.uName;
-      const data = JSON.stringify(body);
-
-      const options = {
-        hostname: 'smee.io',
-        port: 443,
-        path: '/'+this.channelName,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': data.length
-        }
+   const options = {
+      hostname: 'smee.io',
+      port: 443,
+      path: '/'+this.channelName,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
       }
-
-      const req = https.request(options, res => {
-         console.log(this.uName + ": Smee message send completed with " + `statusCode: ${res.statusCode}`);
-
-         if (callback) {
-            callback(null, true);
-            callback = null;
-         }
-      })
-
-      req.on('error', (_error) => {
-         console.error(this.uName + ": Error trying to send smee message. Error: ", _error);
-
-         if (callback) {
-            callback(_error);
-            callback = null;
-         }
-      })
-
-      req.write(data);
-      req.end();
    }
-   catch (_error) {
+
+   const req = https.request(options, res => {
+      console.log(this.uName + ": Smee message send completed with " + `statusCode: ${res.statusCode}`);
+
+      if (callback) {
+         callback(null, true);
+         callback = null;
+      }
+   });
+
+   req.on('error', (_error) => {
+      console.error(this.uName + ": Error trying to send smee message. Error: ", _error);
 
       if (callback) {
          callback(_error);
          callback = null;
       }
-   }
+   });
+
+   req.write(data);
+   req.end();
 };
 
 SmeeService.prototype.restartSmeClient = function() {
