@@ -33,6 +33,10 @@ function Tester(_config, _parent) {
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
          this.noOfSources++;
       }
+
+      if (this.gang.casa) {
+         this.gang.casa.scheduleRefreshSourceListeners();
+      }
    }
 
    this.buildTestCases(_config.testRun, _config.testCases);

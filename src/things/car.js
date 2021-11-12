@@ -6,6 +6,10 @@ var Thing = require('../thing');
 // <user>-aboard - true or false
 // locations - meaningful locations where a user can be present (property is <location>:<username>-present)
 
+// Events listened to
+// <user>-onboarded - user has onboarded to the car
+// <user>-offboarded - user has onboarded from the car
+
 // Resulting properties
 // car-state - empty or occupied
 // occupied - true or false
@@ -51,28 +55,48 @@ function Car(_config, _parent) {
          "states": [
             {
                name: "not-present", "priority": 0,
-               sources: [ { property: this.users[i].name+"-aboard", value: true, nextState: "aboard" }]
+               sources: [ { property: this.users[i].name+"-aboard", value: true, nextState: "aboard" },
+                          { event: this.users[i].name+"-onboarded", nextState: "onboarding" }]
             },
             {
                name: "aboard", "priority": 0,
-               sources: [ { property: this.users[i].name+"-aboard", value: false, nextState: "not-present" }]
+               sources: [ { property: this.users[i].name+"-aboard", value: false, nextState: "not-present" },
+                          { event: this.users[i].name+"-offboarded", nextState: "offboarding" }]
+            },
+            {
+               name: "onboarding", "priority": 0,
+               action: { property: this.users[i].name+"-aboard", value: true },
+               timeout: { duration: 0.1, nextState: "not-present" }
+            },
+            {
+               name: "offboarding", "priority": 0,
+               action: { property: this.users[i].name+"-aboard", value: false },
+               timeout: { duration: 0.1, nextState: "aboard" }
             }
          ]
       };
 
       for (var z = 0; z < this.locations.length; ++z) {
          var locName = this.locations[z].uName.replace(/:/g, "-").replace("--", "");
-         userStateConfigs[i].states[1].sources.push({ uName: this.locations[z].uName, property: this.users[i].name+"-present", value: true, nextState: "aboard-in-" + locName });
+         userStateConfigs[i].states[1].sources.push({ uName: this.locations[z].uName, property: this.users[i].name+"-present", value: true, nextState: "aboard-at-" + locName });
 
-         userStateConfigs[i].states.push({ name: "aboard-in-" + locName,
-                                           sources: [{ property: this.users[i].name+"-aboard", value: false, nextState: "not-present" },
-                                                     { uName: this.locations[z].uName, property: this.users[i].name+"-present", value: false, nextState: "aboard" }]});
+         var aboardAtConfig = { name: "aboard-at-" + locName,
+                                sources: [{ property: this.users[i].name+"-aboard", value: false, nextState: "not-present" },
+                                          { event: this.users[i].name+"-offboarded", nextState: "offboarding" },
+                                          { uName: this.locations[z].uName, property: this.users[i].name+"-present", value: false, nextState: "aboard" }]}
 
+         if (this.locations[z].hasOwnProperty("autoOffboard")) {
+            aboardAtConfig.timeout = { duration: this.locations[z].autoOffboard, nextState: "offboarding" };
+         }
+
+         userStateConfigs[i].states.push(util.copy(aboardAtConfig, true));
       }
 
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', userStateConfigs[i], _config);
 
       occupiedConfig.sources.push({ property: this.users[i].name+"-aboard" });
+
+      this.ensurePropertyExists(this.users[i].name+"-aboard", 'property', { initialValue: false }, _config);
    }
 
    this.ensurePropertyExists("occupied", 'orproperty', occupiedConfig, _config);
