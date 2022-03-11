@@ -72,7 +72,10 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          return true;
       }
 
-      data.propertyOldValue = this.props[_propName].value;
+      if (this.props.hasOwnProperty(_propName)) {
+         data.propertyOldValue = this.props[_propName].value;
+      }
+
       data.alignWithParent = true;
 
       if (this.local) {
