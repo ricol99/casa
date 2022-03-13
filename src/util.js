@@ -176,7 +176,15 @@ Util.copyMatch = function(_source, _matchFunc) {
 
       for (var prop in _source) {
 
-         if (_matchFunc(_source, prop)) {
+         var matchResult = _matchFunc(_source, prop);
+
+         if (typeof matchResult === 'object') {
+
+            if (matchResult.hasOwnProperty("replace")) {
+               dest[prop] = matchResult.replace;
+            }
+         }
+         else if (matchResult) {
 
             if (_source[prop] instanceof Array) {
                dest[prop] = this.copyMatch(_source[prop], _matchFunc);

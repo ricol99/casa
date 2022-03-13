@@ -687,18 +687,19 @@ State.prototype.export = function(_exportObj) {
          _exportObj.activeGuardedActions.push(this.activeGuardedActions[i]);
       }
 
-      _exportObj.actionTimeouts = [];
+      _exportObj.actionTimeouts = util.copyMatch(this.actionTimeouts, (_source, _prop) => {
+         return (_prop === "timeout" ) ? { replace: _source.timeout ? _source.timeout.left() : -1 } : true;
+      }); 
 
-      for (var i = 0; i < this.actionTimeouts.length; ++i) {
-         _exportObj.actionTimeouts.push( { action: this.actionTimeouts[i].action });
-         _exportObj.actionTimeouts[i].timeout = this.actionTimeouts[i].timeout ? this.actionTimeouts[i].timeout.left() : -1;
+      var matchFunc = function(_source, _prop) {
+         return (_prop === "sourceListener" ) ? { replace: _source.sourceListener ? _source.sourceListener.uName : null } : true;
       }
 
       _exportObj.guards = this.guards;
-      _exportObj.sources = util.copyMatch(this.sources, (_source, _prop) => { return _prop != "sourceListener" });
-      _exportObj.actions = util.copyMatch(this.actions, (_action, _prop) => { return _prop != "sourceListener" });
-      _exportObj.schedules = util.copyMatch(this.schedules, (_schedule, _prop) => { return _prop != "sourceListener" });
-      _exportObj.timeout = util.copyMatch(this.timeout, (_timeout, _prop) => { return _prop != "sourceListener" });
+      _exportObj.sources = util.copyMatch(this.sources, matchFunc);
+      _exportObj.actions = util.copyMatch(this.actions, matchFunc);
+      _exportObj.schedules = util.copyMatch(this.schedules, matchFunc);
+      _exportObj.timeout = util.copyMatch(this.timeout, matchFunc);
       _exportObj.actionHandler = this.actionHandler;
 
       return true;
