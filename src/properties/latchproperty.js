@@ -24,6 +24,21 @@ function LatchProperty(_config, _owner) {
 
 util.inherits(LatchProperty, Property);
 
+// Called when system state is required
+LatchProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.left() : -1;
+      _exportObj.sourceActive = this.sourceActive;
+      _exportObj.controllerActive = this.controllerActive;
+      _exportObj.active = this.active;
+      _exportObj.lastData = util.copy(this.lastData);
+      return true;
+   }
+
+   return false;
+};
+
 LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
    this.lastData = _data;
@@ -102,10 +117,10 @@ LatchProperty.prototype.newPropertyValueReceivedFromTarget = function(_targetLis
 LatchProperty.prototype.restartTimer = function() {
 
    if (this.minOutputTimeObj) {
-      clearTimeout(this.minOutputTimeObj);
+      util.clearTimeout(this.minOutputTimeObj);
    }
 
-   this.minOutputTimeObj = setTimeout(function(_this) {
+   this.minOutputTimeObj = util.setTimeout(function(_this) {
       _this.minOutputTimeObj = null;
 
       if (!_this.sourceActive) {

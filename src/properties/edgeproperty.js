@@ -15,6 +15,18 @@ function EdgeProperty(_config, _owner) {
 
 util.inherits(EdgeProperty, Property);
 
+// Called when system state is required
+EdgeProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.leadingEdgeOutput = this.leadingEdgeOutput;
+      _exportObj.trailingEdgeOutput = this.trailingEdgeOutput;
+      return true;
+   }
+
+   return false;
+};
+
 EdgeProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    if (this.value && !_data.value && this.hasOwnProperty('trailingEdgeOutput')) {

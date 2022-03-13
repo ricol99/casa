@@ -15,6 +15,21 @@ function DebounceProperty(_config, _owner) {
 
 util.inherits(DebounceProperty, Property);
 
+// Called when system state is required
+DebounceProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.threshold = this.threshold;
+      _exportObj.invalidValue = this.invalidValue;
+      _exportObj.sourceState = this.sourceState;
+      _exportObj.outputState = this.outputState;
+      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
+      return true;
+   }
+
+   return false;
+};
+
 DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;
    console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
@@ -80,27 +95,25 @@ DebounceProperty.prototype.sourceIsValid = function(_data) {
 
 DebounceProperty.prototype.startTimer = function() {
 
-   this.timeoutObj = setTimeout(function(_this) {
-      console.log(_this.uName + ": Timer expired!");
-      _this.timeoutObj = null;
+   this.timeoutObj = util.setTimeout( () => {
+      console.log(this.uName + ": Timer expired!");
+      this.timeoutObj = null;
 
-      if (_this.lastData) {
-         _this.outputState = _this.sourceState;
-         _this.updatePropertyInternal(_this.sourceState, _this.lastData);
-         _this.lastData = null;
+      if (this.lastData) {
+         this.outputState = this.sourceState;
+         this.updatePropertyInternal(this.sourceState, this.lastData);
+         this.lastData = null;
       }
 
-      if (!_this.sourceValid) {
+      if (!this.sourceValid) {
 
-         if (_this.invalidValue != undefined) {
-            _this.updatePropertyInternal(_this.invalidValue);
+         if (this.invalidValue != undefined) {
+            this.updatePropertyInternal(this.invalidValue);
          }
 
-         Property.prototype.sourceIsInvalid.call(_this, _this.invalidData);
-         //_this.readyToGoInvalid = true;
-         //_this.goInvalid(_this.invalidData);
+         Property.prototype.sourceIsInvalid.call(this, this.invalidData);
       }
-   }, this.threshold*1000, this);
+   }, this.threshold*1000);
 }
 
 module.exports = exports = DebounceProperty;

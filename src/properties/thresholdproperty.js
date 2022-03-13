@@ -12,10 +12,24 @@ function ThresholdProperty(_config, _owner) {
 
 util.inherits(ThresholdProperty, Property);
 
+// Called when system state is required
+ThresholdProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.thresholds = this.thresholds;
+      _exportObj.buffer = this.buffer;
+      _exportObj.activeThreshold = this.activeThreshold;
+      return true;
+   }
+
+   return false;
+};
+
 ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newPropertyValue = _data.value;
 
    if (!this.cold) {
+
       if (this.activeThreshold == -1) {
 
          for (var index = 0; index < this.thresholds.length; ++index) {

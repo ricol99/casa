@@ -15,13 +15,29 @@ function SmootherProperty(_config, _owner) {
 
 util.inherits(SmootherProperty, Property);
 
+// Called when system state is required
+SmootherProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.rate = this.rate;
+      _exportObj.resolution = this.resolution;
+      _exportObj.floorOutput = this.floorOutput;
+      _exportObj.calculatedResolution = this.calculatedResolution;
+      _exportObj.targetValue = this.targetValue;
+      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
+      return true;
+   }
+
+   return false;
+};
+
 SmootherProperty.prototype.restartTimer = function() {
 
    if (this.timeoutObj) {
-      clearTimeout(this.timeoutObj);
+      util.clearTimeout(this.timeoutObj);
    }
 
-   this.timeoutObj = setTimeout( () => {
+   this.timeoutObj = util.setTimeout( () => {
       this.timeoutObj = null;
 
       if (this.valid) {

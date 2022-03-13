@@ -10,6 +10,19 @@ function RollingAverageProperty(_config, _owner) {
 
 util.inherits(RollingAverageProperty, Property);
 
+// Called when system state is required
+RollingAverageProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.periods = this.periods;
+      _exportObj.floorOutput = this.floorOutput;
+      _exportObj.periodValues = this.periodValues;
+      return true;
+   }
+
+   return false;
+};
+
 RollingAverageProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.periodValues.push(_data.value);
 

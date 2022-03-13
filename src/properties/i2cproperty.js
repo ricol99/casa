@@ -41,6 +41,32 @@ function I2CProperty(_config, _owner) {
 
 util.inherits(I2CProperty, Property);
 
+// Called when system state is required
+I2CProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.address1 = this.address1;
+      _exportObj.address2 = this.address2;
+      _exportObj.channel = this.channel;
+      _exportObj.interval = this.interval;
+      _exportObj.maxChange = this.maxChange;
+      _exportObj.maxIgnore = this.maxIgnore;
+      _exportObj.transforming = this.transforming;
+      _exportObj.outputResolution = this.outputResolution;
+      _exportObj.inputDeltaMinimum = this.inputDeltaMinimum;
+      _exportObj.floorOutput = this.floorOutput;
+      _exportObj.inputMin = this.inputMin;
+      _exportObj.inputMax = this.inputMax;
+      _exportObj.outputMin = this.outputMin;
+      _exportObj.outputMax = this.outputMax;
+      _exportObj.scanning = this.scanning;
+      _exportObj.ignoreCounter = this.ignoreCounter;
+      return true;
+   }
+
+   return false;
+};
+
 I2CProperty.prototype.set = function(_propValue, _data) {
    console.log(this.uName + ': Not allowed to set property ' + this.name + ' to ' + _propValue);
    return false;

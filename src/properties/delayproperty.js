@@ -9,6 +9,33 @@ function DelayProperty(_config, _owner) {
 
 util.inherits(DelayProperty, Property);
 
+// Called when system state is required
+DelayProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.delay = this.delay;
+
+      _exportObj.delayedEvents = util.copyMatch(this.delayedEvents, (_source, _prop) => {
+
+         if (_prop === "owner") {
+            return false;
+         }
+         else if (_prop === "timeoutObj") {
+            return { replace: _source[_prop] ? _source[_prop].left() : -1 };
+         }
+         else if (_prop === "eventData") {
+            return { replace: _source[_prop] ? util.copy(_source[_prop]) : null };
+         }
+
+         return true;
+      });
+
+      return true;
+   }
+
+   return false;
+};
+
 DelayProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.delayedEvents.push(new DelayedEvent(_data.value, _data, this));
 }
@@ -23,7 +50,8 @@ function DelayedEvent(_value, _eventData, _owner) {
    this.eventData = util.copy(_eventData);
    this.owner = _owner;
 
-   this.timeoutObj = setTimeout( () => {
+   this.timeoutObj = util.setTimeout( () => {
+      this.timeoutObj = null;
       this.owner.updatePropertyInternal(this.value, this.eventData);
       this.owner.deleteDelayedEvent();
    }, this.owner.delay*1000);

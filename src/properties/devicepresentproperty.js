@@ -12,6 +12,20 @@ function DevicePresentProperty(_config, _owner) {
 
 util.inherits(DevicePresentProperty, Property);
 
+// Called when system state is required
+DevicePresentProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.host = this.host;
+      _exportObj.interval = this.interval;
+      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
+      return true;
+   }
+
+   return false;
+};
+
+
 DevicePresentProperty.prototype.coldStart = function(_event) {
    this.restartTimer();
 }
@@ -23,10 +37,10 @@ DevicePresentProperty.prototype.coldStart = function(_event) {
 DevicePresentProperty.prototype.restartTimer = function() {
 
    if (this.timeoutObj) {
-      clearTimeout(this.timeoutObj);
+      util.clearTimeout(this.timeoutObj);
    }
 
-   this.timeoutObj = setTimeout( () => {
+   this.timeoutObj = util.setTimeout( () => {
       this.timeoutObj = null;
 
       if (this.valid) {

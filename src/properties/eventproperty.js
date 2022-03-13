@@ -11,6 +11,17 @@ function EventProperty(_config, _owner) {
 
 util.inherits(EventProperty, Property);
 
+// Called when system state is required
+EventProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.eventMap = this.eventMap;
+      return true;
+   }
+
+   return false;
+};
+
 EventProperty.prototype.propertyAboutToChange = function(_actualOutputValue, _data) {
 
    if (_data.coldStart) {
@@ -26,10 +37,6 @@ EventProperty.prototype.propertyAboutToChange = function(_actualOutputValue, _da
    else {
       this.owner.raiseEvent(_actualOutputValue, _data);
    }
-
-   //if (_actualOutputValue !== this.value) {
-      //this.updatePropertyInternal(_actualOutputValue, _data);
-   //}
 };
 
 

@@ -11,6 +11,17 @@ function TopValidProperty(_config, _owner) {
 
 util.inherits(TopValidProperty, Property);
 
+// Called when system state is required
+TopValidProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.highestValidSource = this.highestValidSource ? this.highestValidSource.uName : null;
+      return true;
+   }
+
+   return false;
+};
+
 function findHighestPriorityValidSource(_this) {
    var highestPriorityFound = 99999;
    var highestPrioritySource = null;

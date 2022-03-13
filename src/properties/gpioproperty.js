@@ -20,5 +20,18 @@ function GPIOProperty(_config, _owner) {
 
 util.inherits(GPIOProperty, ServiceProperty);
 
+// Called when system state is required
+GPIOProperty.prototype.export = function(_exportObj) {
+
+   if (ServiceProperty.prototype.export.call(this, _exportObj)) {
+      _exportObj.direction = this.direction;
+      return true;
+   }
+
+   return false;
+};
+
+
+
 module.exports = exports = GPIOProperty;
  

@@ -28,6 +28,17 @@ function ScheduleProperty(_config, _owner) {
 
 util.inherits(ScheduleProperty, Property);
 
+// Called when system state is required
+ScheduleProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.events = this.events;
+      return true;
+   }
+
+   return false;
+};
+
 ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {
