@@ -75,6 +75,23 @@ function Notifier(_config, _parent) {
 
 util.inherits(Notifier, Thing);
 
+// Called when system state is required
+Notifier.prototype.export = function(_exportObj) {
+
+   if (Thing.prototype.export.call(this, _exportObj)) {
+      _exportObj.responseServiceName = this.responseServiceName;
+      _exportObj.responseServicePropertyType = this.responseServicePropertyType;
+      _exportObj.responseServiceEventType = this.responseServiceEventType;
+      _exportObj.responseTimeout = this.responseTimeout;
+      _exportObj.responses = this.responses;
+
+      return true;
+   }
+
+   return false;
+};
+
+
 Notifier.prototype._formConfig = function(_baseConfig, _newConfig, _sync) {
    var config = util.copy(_baseConfig, true);
    util.assign(config, _newConfig);

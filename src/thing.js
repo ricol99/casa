@@ -36,6 +36,23 @@ function Thing(_config, _owner) {
 
 util.inherits(Thing, Source);
 
+// Called when system state is required
+Thing.prototype.export = function(_exportObj) {
+
+   if (Source.prototype.export.call(this, _exportObj)) {
+      _exportObj.displayName = this.displayName;
+      _exportObj.ignoreParent = this.ignoreParent;
+      _exportObj.ignoreChildren = this.ignoreChildren;
+      _exportObj.propogateToParent = this.propogateToParent;
+      _exportObj.propogateToChildren = this.propogateToChildren;
+      _exportObj.topLevelThing = this.topLevelThing;
+      
+      return true;
+   }
+
+   return false;
+};
+
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.name] = _thing;
 };

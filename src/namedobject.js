@@ -39,10 +39,42 @@ function NamedObject(_config, _owner) {
       this.owner.addChildNamedObject(this);
    }
 
+   if (_config && _config.hasOwnProperty("transient")) {
+      this.transient = _config.transient;
+   }
+
    this.setMaxListeners(0);
 }
 
 util.inherits(NamedObject, AsyncEmitter);
+
+// Called when current state required
+NamedObject.prototype.export = function(_exportObj) {
+
+   if (!(this.hasOwnProperty("transient") && this.transient))  {
+      _exportObj.uName = this.uName;
+      _exportObj.name = this.name;
+      _exportObj.type = this.type;
+      _exportObj.myNamedObjects = {};
+
+      for (var namedObj in this.myNamedObjects) {
+
+         if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+            var nextNamedObj = {};
+
+            if (this.myNamedObjects[nameObj].hibernate(nextNamedObj)) {
+               _exportObj.myNamedObjects[namedObj] = nextNamedObj;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   return false;
+};
+
+
 
 NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {
    var nextObjName = this.stripMyUName(_uName);

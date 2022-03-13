@@ -19,10 +19,10 @@ function PeerCasa(_config, _owner) {
 
    this.deathTime = 500;
 
-   SourceBase.call(this, { name: (_config.hasOwnProperty('name')) ? _config.name : _config.code + "-" + _config.name, type: "peercasa" }, _owner);
+   SourceBase.call(this, { name: ( _config.hasOwnProperty('name')) ? _config.name : _config.code + "-" + _config.name,
+                           type: "peercasa", transient: true }, _owner);
 
    this.sources = [];
-   this.workers = [];
 
    this.listenersSetUp = false;
    this.casaListeners = [];
@@ -523,7 +523,7 @@ PeerCasa.prototype.socketSourceAddedCb = function(_data) {
    console.log(this.uName + ': Creating peer source named ' + _data.sourceName + ' priority =' + _data.sourcePriority);
    var source = new PeerSource(_data.sourceName, _data.sourceName, _data.sourcePriority, _data.sourceProperties, this);
 
-   // Refresh all inactive sources and workers
+   // Refresh all inactive sources
    this.gang.casa.refreshSourceListeners();
 
    this.ackMessage('source-added', _data);
@@ -738,7 +738,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       }
    }
 
-   // Refresh all inactive sources and workers
+   // Refresh all inactive sources
    this.gang.casa.refreshSourceListeners();
 }
 
@@ -1050,11 +1050,6 @@ PeerCasa.prototype.addSource = function(_source) {
    }
 
    this.gang.casa.scheduleRefreshSourceListeners();
-}
-
-PeerCasa.prototype.addWorker = function(_worker) {
-   console.log(this.uName + ': Worker '  + _worker.uName + ' added to peercasa ');
-   this.workers[_worker.uName] = _worker;
 }
 
 PeerCasa.prototype.findNewMainSource = function(_oldPeerSourceName) {

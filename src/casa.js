@@ -27,7 +27,6 @@ function Casa(_config) {
    this.topSources = {};
    this.sourceListeners = {};
    this.services = {};
-   this.workers = {};
    this.bowingSources = {};
 
    this.uber = false;
@@ -36,6 +35,21 @@ function Casa(_config) {
 }
 
 util.inherits(Casa, NamedObject);
+
+// Called when system state is required
+Casa.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.secureMode = this.secureMode;
+      _exportObj.certPath = this.certPath;
+      _exportObj.configPath = this.configPath;
+      _exportObj.listeningPort = this.listeningPort;
+      _exportObj.id = this.id;
+      return true;
+   }
+
+   return false;
+};
 
 Casa.prototype.getCasa = function() {
    return this;
@@ -296,11 +310,6 @@ Casa.prototype.findServiceName = function(_serviceType) {
    var service = this.findService(_serviceType);
 
    return (service) ? service.uName : null;
-};
-
-Casa.prototype.addWorker = function(_worker) {
-   console.log(this.uName + ': Worker '  + _worker.uName + ' added to casa ');
-   this.workers[_worker.uName] = _worker;
 };
 
 Casa.prototype.setUber = function(_uber) {

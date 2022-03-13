@@ -45,6 +45,40 @@ function StateProperty(_config, _owner) {
 
 util.inherits(StateProperty, Property);
 
+// Called when system state is required
+StateProperty.prototype.export = function(_exportObj) {
+
+   if (Property.prototype.export.call(this, _exportObj)) {
+      _exportObj.controllingOwner = this.controllingOwner;
+      _exportObj.priorityDefined = this.priorityDefined;
+      _exportObj.priority = this.priority;
+      _exportObj.currentPriority = this.currentPriority;
+      _exportObj.ignoreControl = this.ignoreControl;
+      _exportObj.takeControlOnTransition = this.takeControlOnTransition;
+      _exportObj.allSourcesRequiredForValidity = this.allSourcesRequiredForValidity;
+      _exportObj.states = [];
+
+      for (var state in this.states) {
+
+         if (this.states.hasOwnProperty(state)) {
+            _exportObj.states.push(this.states[state].name);
+         }
+      }
+
+      _exportObj.regExStates = [];
+
+      for (var i = 0; i < this.regExStates.length; ++i) {
+         _exportObj.regExStates.push(this.regExStates[i].name);
+      }
+
+      _exportObj.stateTimer = this.stateTimer ? this.stateTimer.left() : -1;
+
+      return true;
+   }
+
+   return false;
+};
+
 StateProperty.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
@@ -113,10 +147,9 @@ StateProperty.prototype.clearStateTimer = function() {
    var result = { timerActive: false };
    
    if (this.stateTimer) {
-      clearTimeout(this.stateTimer);
+      result.timeLeft = this.stateTimer.left();
+      util.clearTimeout(this.stateTimer);
       result.timerActive = true;
-      result.timeLeft = this.timeoutDuration + this.timerStartedAt - Date.now();
-      this.timerStartedAt = 0;
       this.stateTimer = null;
    }
 
@@ -190,8 +223,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          return;
       }
 
-      this.timerStartedAt = Date.now();
-      this.stateTimer = setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, this.timeoutNextState);
+      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, this.timeoutNextState);
    }
 };
 
@@ -631,6 +663,50 @@ function State(_config, _owner) {
 
 util.inherits(State, NamedObject);
 
+// Called when system state is required
+State.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+
+      if (this.regEx) {
+         _exportObj.regEx = this.regEx.toString();
+      }
+
+      _exportObj.priorityDefined = this.priorityDefined;
+      _exportObj.priority = this.priority;
+
+      _exportObj.activeGuardedSources = [];
+
+      for (var i = 0; i < this.activeGuardedSources.length; ++i) {
+         _exportObj.activeGuardedSources.push(this.activeGuardedSources[i]);
+      }
+
+      _exportObj.activeGuardedActions = [];
+
+      for (var i = 0; i < this.activeGuardedActions.length; ++i) {
+         _exportObj.activeGuardedActions.push(this.activeGuardedActions[i]);
+      }
+
+      _exportObj.actionTimeouts = [];
+
+      for (var i = 0; i < this.actionTimeouts.length; ++i) {
+         _exportObj.actionTimeouts.push( { action: this.actionTimeouts[i].action });
+         _exportObj.actionTimeouts[i].timeout = this.actionTimeouts[i].timeout ? this.actionTimeouts[i].timeout.left() : -1;
+      }
+
+      _exportObj.guards = this.guards;
+      _exportObj.sources = util.copyMatch(this.sources, (_source, _prop) => { return _prop != "sourceListener" });
+      _exportObj.actions = util.copyMatch(this.actions, (_action, _prop) => { return _prop != "sourceListener" });
+      _exportObj.schedules = util.copyMatch(this.schedules, (_schedule, _prop) => { return _prop != "sourceListener" });
+      _exportObj.timeout = util.copyMatch(this.timeout, (_timeout, _prop) => { return _prop != "sourceListener" });
+      _exportObj.actionHandler = this.actionHandler;
+
+      return true;
+   }
+
+   return false;
+};
+
 State.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
@@ -797,7 +873,7 @@ State.prototype.filterActions = function(_actions) {
 
       if (_actions[i].hasOwnProperty("delay")) {
 
-         this.actionTimeouts.push({ action: _actions[i], timeout: setTimeout( (_index) => {
+         this.actionTimeouts.push({ action: _actions[i], timeout: util.setTimeout( (_index) => {
 
             if (this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
                this.launchActionHandlers([ this.actionTimeouts[_index].action]);
@@ -900,7 +976,8 @@ State.prototype.exiting = function(_event, _value) {
    for (var i = 0; i < this.actionTimeouts.length; ++i) {
 
       if (this.actionTimeouts[i]) {
-         clearTimeout(this.actionTimeouts[i].timeout);
+         util.clearTimeout(this.actionTimeouts[i].timeout);
+         this.actionTimeouts[i].timeout = null;
       }
    }
 

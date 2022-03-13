@@ -155,6 +155,45 @@ Util.copy = function(_source, _deep) {
    }
 };
 
+// Supports object, array of objects and deep objects of objects and arrays of objects
+Util.copyMatch = function(_source, _matchFunc) {
+
+   if (!_source) {
+      return null;
+   }
+
+   var dest;
+
+   if (_source instanceof Array) {
+      dest = [];
+
+      for (var i = 0; i < _source.length; ++i) {
+         dest.push(this.copyExcept(_source[i]), _matchFunc);
+      }
+   }
+   else if (typeof _source === 'object') {
+      dest = {};
+
+      for (var prop in _source) {
+
+         if (_matchFunc(_source, prop)) {
+
+            if (_source[prop] instanceof Array) {
+               dest[prop] = this.copyMatch(_source[prop], _matchFunc);
+            }
+            else if (typeof _source[prop] === 'object') {
+               dest[prop] = this.copyMatch(_source[prop], _matchFunc);
+            }
+            else {
+               dest[prop] = _source[prop];
+            }
+         }
+      }
+   }
+
+   return dest;
+};
+
 Util.allAssocArrayElementsDo = function(_obj, _func) {
 
    for (var prop in _obj) {
@@ -262,6 +301,52 @@ Util.ensureExists = function(_obj, _name, _value) {
    else {
       return false;
    }
+};
+
+Util.setTimeout = function() {
+   var timer = new Timer();
+   Timer.prototype.setTimeout.apply(timer, arguments);
+   return timer;
+};
+
+Util.clearTimeout = function(_timer) {
+   _timer.clearTimeout();
+};
+
+function Timer() {
+   this.timeout = null;
+}
+
+Timer.prototype.setTimeout = function(_callback, _duration) {
+
+   if (this.active()) {
+      this.clearTimeout();
+   }
+
+   this.startTime = Date.now();
+   this.duration = _duration;
+   this.timeout = setTimeout.apply(null, arguments);
+};
+
+Timer.prototype.clearTimeout = function() {
+   clearTimeout(this.timeout);
+   this.timeout = null;
+};
+
+Timer.prototype.active = function() {
+   return this.timeout ? (Date.now() - this.startTime) < this.duration : false;
+};
+
+// Returns milliseconds left on the active timer
+// -1 if not active
+Timer.prototype.left = function() {
+   return this.active() ? this.duration - (Date.now() - this.startTime) : -1;
+};
+
+// Returns Date.now() for when the active timer will expire
+// -1 if not active
+Timer.prototype.expiration = function() {
+   return this.active() ? this.duration + this.startTime : -1;
 };
 
 module.exports = exports = Util;

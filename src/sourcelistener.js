@@ -6,7 +6,6 @@ var NamedObject = require('./namedobject');
 function SourceListener(_config, _owner) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
-   this.owner = _owner;
 
    this.sourceName = this.gang.uNameToLongForm(_config.uName);
 
@@ -60,12 +59,7 @@ function SourceListener(_config, _owner) {
       this.sourceEventName = this.sourceName + ":" + this.eventName;
    }
 
-   if (!this.owner.uName) {
-      console.error('Owner '+this.owner.uName + ' is not a named object!');
-      process.exit(1);
-   }
-
-   NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, this.owner);
+   NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, _owner);
 
    this._id = this.uName;   // *** TBD
 
@@ -77,6 +71,36 @@ function SourceListener(_config, _owner) {
 }
 
 util.inherits(SourceListener, NamedObject);
+
+// Called when system state is required
+SourceListener.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.casa = this.casa;
+      _exportObj.sourceName = this.sourceName;
+      _exportObj.transform = this.transform;
+      _exportObj.transformMap = this.transformMap;
+      _exportObj.ignoreSourceUpdates = this.ignoreSourceUpdates;
+      _exportObj.isTarget = this.isTarget;
+      _exportObj.priority = this.priority;
+      _exportObj.outputValues = this.outputValues;
+      _exportObj.maskInvalid = this.maskInvalid;
+      _exportObj.maskInvalidValueDefined = this.maskInvalidValueDefined;
+      _exportObj.maskInvalidTimeout = this.maskInvalidTimeout;
+      _exportObj.maskInvalidValue = this.maskInvalidValue;
+      _exportObj.listeningToPropertyChange = this.listeningToPropertyChange;
+      _exportObj.eventName = this.eventName;
+      _exportObj.subscription = this.subscription;
+      _exportObj.capturingAllEvents = this.capturingAllEvents;
+      _exportObj.matchingValueDefined = this.matchingValueDefined;
+      _exportObj.matchingValue = this.matchingValue;
+      _exportObj.sourceEventName = this.sourceEventName;
+
+      return true;
+   }
+
+   return false;
+};
 
 SourceListener.prototype.establishListeners = function() {
 

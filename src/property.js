@@ -61,6 +61,18 @@ function Property(_config, _owner) {
 
 util.inherits(Property, NamedObject);
 
+// Called when system state is required
+Property.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.value = this.value;
+      _exportObj.local = this.local;
+      return true;
+   }
+
+   return false;
+};
+
 Property.prototype.getCasa = function() {
    return this.owner.getCasa();
 };

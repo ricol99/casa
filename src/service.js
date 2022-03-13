@@ -29,6 +29,22 @@ function Service(_config, _owner) {
 
 util.inherits(Service, Thing);
 
+// Called when system state is required
+Service.prototype.export = function(_exportObj) {
+
+   if (Thing.prototype.export.call(this, _exportObj)) {
+      _exportObj.optimiseTransaction = this.optimiseTransaction;
+      _exportObj.queueQuant = this.queueQuant;
+      _exportObj.queueRetryLimit = this.queueRetryLimit;
+      _exportObj.localThings = this.localThings;
+      _exportObj.deviceTypes = this.deviceTypes;
+
+      return true;
+   }
+
+   return false;
+};
+
 // Create a service node, if needed
 Service.prototype.interestInNewChild = function(_uName) {
    var splitUName = _uName.split(":");

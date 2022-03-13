@@ -14,6 +14,17 @@ function SourceBase(_config, _owner) {
 
 util.inherits(SourceBase, NamedObject);
 
+// Called when system state is required
+SourceBase.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.casa = this.casa.uName;
+      return true;
+   }
+
+   return false;
+};
+
 SourceBase.prototype.getCasa = function() {
    return this.casa;
 };

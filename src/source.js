@@ -50,6 +50,27 @@ function Source(_config, _owner) {
 
 util.inherits(Source, SourceBase);
 
+// Called when system state is required
+Source.prototype.export = function(_exportObj) {
+
+   if (SourceBase.prototype.export.call(this, _exportObj)) {
+      _exportObj.config = this.config;
+      _exportObj.priority = this.priority;
+      _exportObj.manualOverrideTimeout = this.manualOverrideTimeout;
+      _exportObj.controllerPriority = this.controllerPriority;
+      _exportObj.controller = this.controller ? this.controller.uName : null;
+
+      if (this.mirroring) {
+         _exportObj.mirroring = this.mirroring;
+         _exportObj.mirrorSourceListener.name;
+      }
+      
+      return true;
+   }
+
+   return false;
+};
+
 Source.prototype.createProperty = function(_config) {
 
    if (this.props.hasOwnProperty(_config.name)) {
