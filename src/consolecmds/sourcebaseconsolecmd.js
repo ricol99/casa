@@ -7,6 +7,10 @@ function SourceBaseConsoleCmd(_config, _owner, _console) {
 
 util.inherits(SourceBaseConsoleCmd, ConsoleCmd);
 
+SourceBaseConsoleCmd.prototype.export = function(_arguments, _callback)  {
+   this.executeParsedCommand("export", _arguments, _callback);
+};
+
 SourceBaseConsoleCmd.prototype.watch = function(_arguments, _callback) {
    this.checkArguments(1, _arguments);
    this.executeParsedCommand("watch", _arguments, _callback);

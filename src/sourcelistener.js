@@ -76,7 +76,7 @@ util.inherits(SourceListener, NamedObject);
 SourceListener.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.casa = this.casa;
+      _exportObj.casa = this.casa.uName;
       _exportObj.sourceName = this.sourceName;
       _exportObj.transform = this.transform;
       _exportObj.transformMap = this.transformMap;

@@ -10,6 +10,17 @@ function SourceBaseConsoleApi(_config, _owner) {
 
 util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
+SourceBaseConsoleApi.prototype.export = function(_session, _params, _callback) {
+   var exportData = {};
+
+   if (this.myObj().export(exportData)) {
+      _callback(null, exportData);
+   }
+   else {
+      _callback("No objects to export!");
+   }
+};
+
 SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 
