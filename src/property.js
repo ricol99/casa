@@ -65,6 +65,7 @@ util.inherits(Property, NamedObject);
 Property.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.cold = this.cold;
       _exportObj.value = this.value;
       _exportObj.local = this.local;
       return true;
