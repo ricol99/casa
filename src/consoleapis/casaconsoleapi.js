@@ -8,6 +8,17 @@ function CasaConsoleApi(_config, _owner) {
 
 util.inherits(CasaConsoleApi, ConsoleApi);
 
+CasaConsoleApi.prototype.export = function(_session, _params, _callback) {
+   var exportData = {};
+
+   if (this.gang.export(exportData)) {
+      _callback(null, exportData);
+   }
+   else {
+      _callback("No objects to export!");
+   }
+};
+
 CasaConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 

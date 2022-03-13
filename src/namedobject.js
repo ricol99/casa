@@ -62,7 +62,7 @@ NamedObject.prototype.export = function(_exportObj) {
          if (this.myNamedObjects.hasOwnProperty(namedObj)) {
             var nextNamedObj = {};
 
-            if (this.myNamedObjects[nameObj].hibernate(nextNamedObj)) {
+            if (this.myNamedObjects[namedObj].export(nextNamedObj)) {
                _exportObj.myNamedObjects[namedObj] = nextNamedObj;
             }
          }

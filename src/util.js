@@ -168,7 +168,7 @@ Util.copyMatch = function(_source, _matchFunc) {
       dest = [];
 
       for (var i = 0; i < _source.length; ++i) {
-         dest.push(this.copyExcept(_source[i]), _matchFunc);
+         dest.push(this.copyMatch(_source[i], _matchFunc));
       }
    }
    else if (typeof _source === 'object') {

@@ -27,6 +27,10 @@ CasaConsoleCmd.prototype.restart = function(_arguments, _callback)  {
    }
 };
 
+CasaConsoleCmd.prototype.export = function(_arguments, _callback)  {
+   this.executeParsedCommand("export", _arguments, _callback);
+};
+
 
 CasaConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
