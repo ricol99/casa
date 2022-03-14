@@ -19,8 +19,6 @@ util.inherits(DebounceProperty, Property);
 DebounceProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.threshold = this.threshold;
-      _exportObj.invalidValue = this.invalidValue;
       _exportObj.sourceState = this.sourceState;
       _exportObj.outputState = this.outputState;
       _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;

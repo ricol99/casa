@@ -17,21 +17,6 @@ function LinearTransformProperty(_config, _owner) {
 
 util.inherits(LinearTransformProperty, Property);
 
-// Called when system state is required
-LinearTransformProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.inputMin = this.inputMin;
-      _exportObj.inputMax = this.inputMax;
-      _exportObj.outputMin = this.outputMin;
-      _exportObj.outputMax = this.outputMax;
-      _exportObj.floorOutput = this.floorOutput;
-      return true;
-   }
-
-   return false;
-};
-
 LinearTransformProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ': property ' + _data.name + ' has changed to ' + _data.value);
 

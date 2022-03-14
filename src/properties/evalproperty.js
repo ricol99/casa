@@ -10,17 +10,6 @@ function EvalProperty(_config, _owner) {
 
 util.inherits(EvalProperty, Property);
 
-// Called when system state is required
-EvalProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.expression = this.expression;
-      return true;
-   }
-
-   return false;
-};
-
 EvalProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

@@ -13,18 +13,6 @@ function CombineStateProperty(_config, _owner) {
 
 util.inherits(CombineStateProperty, StateProperty);
 
-// Called when system state is required
-CombineStateProperty.prototype.export = function(_exportObj) {
-
-   if (StateProperty.prototype.export.call(this, _exportObj)) {
-      _exportObj.separator = this.separator;
-      _exportObj.sources = this.sources;
-      return true;
-   }
-
-   return false;
-};
-
 CombineStateProperty.prototype.coldStart = function(_data) {
 
    if (!this.initialValueSet) {

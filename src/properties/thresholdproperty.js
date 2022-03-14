@@ -16,8 +16,6 @@ util.inherits(ThresholdProperty, Property);
 ThresholdProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.thresholds = this.thresholds;
-      _exportObj.buffer = this.buffer;
       _exportObj.activeThreshold = this.activeThreshold;
       return true;
    }

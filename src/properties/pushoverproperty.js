@@ -18,19 +18,6 @@ function PushoverProperty(_config, _owner) {
 
 util.inherits(PushoverProperty, ServiceProperty);
 
-// Called when system state is required
-PushoverProperty.prototype.export = function(_exportObj) {
-
-   if (ServiceProperty.prototype.export.call(this, _exportObj)) {
-      _exportObj.messagePriority = this.messagePriority;
-
-      return true;
-   }
-
-   return false;
-};
-
-
 PushoverProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    _data.messagePriority = this.messagePriority;
    ServiceProperty.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);

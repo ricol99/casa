@@ -19,9 +19,6 @@ util.inherits(SmootherProperty, Property);
 SmootherProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.rate = this.rate;
-      _exportObj.resolution = this.resolution;
-      _exportObj.floorOutput = this.floorOutput;
       _exportObj.calculatedResolution = this.calculatedResolution;
       _exportObj.targetValue = this.targetValue;
       _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;

@@ -11,18 +11,6 @@ function CameraProperty(_config, _owner) {
 
 util.inherits(CameraProperty, Property);
 
-// Called when system state is required
-CameraProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.options = this.options;
-      _exportObj.id = this.id;
-      return true;
-   }
-
-   return false;
-};
-
 CameraProperty.prototype.propertyAboutToChange = function(_newValue, _data) {
    console.log(this.uName + ': Property about to change to ' + _newValue);
 

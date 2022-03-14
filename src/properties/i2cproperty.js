@@ -15,7 +15,7 @@ function I2CProperty(_config, _owner) {
    this.maxChange = _config.maxChange;
    this.maxIgnore = _config.maxIgnore;
 
-   this.transforming = _config.inputMin != undefined;
+   this.transforming = _config.hasOwnProperty("inputMin");
    this.outputResolution = _config.outputResolution;
    this.inputDeltaMinimum = _config.inputDeltaMinimum;
    this.floorOutput = _config.floorOutput;
@@ -45,20 +45,6 @@ util.inherits(I2CProperty, Property);
 I2CProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.address1 = this.address1;
-      _exportObj.address2 = this.address2;
-      _exportObj.channel = this.channel;
-      _exportObj.interval = this.interval;
-      _exportObj.maxChange = this.maxChange;
-      _exportObj.maxIgnore = this.maxIgnore;
-      _exportObj.transforming = this.transforming;
-      _exportObj.outputResolution = this.outputResolution;
-      _exportObj.inputDeltaMinimum = this.inputDeltaMinimum;
-      _exportObj.floorOutput = this.floorOutput;
-      _exportObj.inputMin = this.inputMin;
-      _exportObj.inputMax = this.inputMax;
-      _exportObj.outputMin = this.outputMin;
-      _exportObj.outputMax = this.outputMax;
       _exportObj.scanning = this.scanning;
       _exportObj.ignoreCounter = this.ignoreCounter;
       return true;

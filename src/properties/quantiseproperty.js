@@ -17,18 +17,6 @@ function QuantiseProperty(_config, _owner) {
 
 util.inherits(QuantiseProperty, Property);
 
-// Called when system state is required
-QuantiseProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.quanta = this.quanta;
-      _exportObj.boundaries = this.boundaries;
-      return true;
-   }
-
-   return false;
-};
-
 QuantiseProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var name = this.boundaries[0].name;
 

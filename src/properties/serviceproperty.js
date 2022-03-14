@@ -40,22 +40,5 @@ function ServiceProperty(_config, _owner) {
 
 util.inherits(ServiceProperty, Property);
 
-// Called when system state is required
-ServiceProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.id = this.id;
-      _exportObj.serviceType = this.serviceType;
-      _exportObj.serviceProperty = this.serviceProperty;
-      _exportObj.serviceName = this.serviceName;
-      _exportObj.serviceArgs = util.copy(this.serviceArgs);
-      _exportObj.sync = this.sync;
-
-      return true;
-   }
-
-   return false;
-};
-
 module.exports = exports = ServiceProperty;
  

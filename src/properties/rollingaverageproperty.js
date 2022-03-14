@@ -14,8 +14,6 @@ util.inherits(RollingAverageProperty, Property);
 RollingAverageProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.periods = this.periods;
-      _exportObj.floorOutput = this.floorOutput;
       _exportObj.periodValues = this.periodValues;
       return true;
    }

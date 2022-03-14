@@ -13,7 +13,6 @@ util.inherits(DelayProperty, Property);
 DelayProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.delay = this.delay;
 
       _exportObj.delayedEvents = util.copyMatch(this.delayedEvents, (_source, _prop) => {
 
