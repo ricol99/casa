@@ -183,6 +183,21 @@ function AlarmTexecom(_config, _parent) {
 
 util.inherits(AlarmTexecom, Thing);
 
+// Called when system state is required
+AlarmTexecom.prototype.export = function(_exportObj) {
+
+   if (Thing.prototype.export.call(this, _exportObj)) {
+      _exportObj.transactionTarget = this.transactionTarget;
+      _exportObj.pollsMissed = this.pollsMissed;
+      _exportObj.acknowledgementTimer = this.acknowledgementTimer ? this.acknowledgementTimer.left() : -1;
+      _exportObj.watchdog = this.watchdog ? this.watchdog.left() : -1;
+
+      return true;
+   }
+
+   return false;
+};
+
 AlarmTexecom.prototype.newConnection = function(_socket) {
    console.log(this.uName + ": New connection from Texecom Alarm at address " + _socket.remoteAddress);
 
@@ -321,11 +336,11 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
 AlarmTexecom.prototype.restartWatchdog = function() {
 
    if (this.watchdog) {
-      clearTimeout(this.watchdog);
+      util.clearTimeout(this.watchdog);
       this.pollsMissed = 0;
    }
 
-   this.watchdog = setTimeout( () => {
+   this.watchdog = util.setTimeout( () => {
       this.watchdog = null;
       this.pollsMissed++;
 
@@ -345,7 +360,7 @@ AlarmTexecom.prototype.restartWatchdog = function() {
 AlarmTexecom.prototype.stopWatchdog = function() {
 
    if (this.watchdog) {
-      this.clearTimeout(this.watchdog);
+      util.clearTimeout(this.watchdog);
       this.watchdog = null;
    }
 };
@@ -374,7 +389,7 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
 
 AlarmTexecom.prototype.setAcknowledgementTimer = function() {
 
-   this.acknowledgementTimer = setTimeout( () => {
+   this.acknowledgementTimer = util.setTimeout( () => {
       console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
       this.alignPropertyValue("target-state", this.getProperty("current-state"));
    }, 60000);
@@ -383,7 +398,7 @@ AlarmTexecom.prototype.setAcknowledgementTimer = function() {
 AlarmTexecom.prototype.clearAcknowledgementTimer = function() {
 
    if (this.acknowledgementTimer) {
-      clearTimeout(this.acknowledgementTimer);
+      util.clearTimeout(this.acknowledgementTimer);
       this.acknowledgementTimer = null;
    }
 };

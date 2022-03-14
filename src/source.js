@@ -4,7 +4,6 @@ var SourceBase = require('./sourcebase');
 function Source(_config, _owner) {
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    SourceBase.call(this, _config, _owner);
-   this.config = _config;
 
    this.casa = this.gang.casa;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
@@ -54,7 +53,6 @@ util.inherits(Source, SourceBase);
 Source.prototype.export = function(_exportObj) {
 
    if (SourceBase.prototype.export.call(this, _exportObj)) {
-      _exportObj.config = this.config;
       _exportObj.priority = this.priority;
       _exportObj.manualOverrideTimeout = this.manualOverrideTimeout;
       _exportObj.controllerPriority = this.controllerPriority;

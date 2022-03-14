@@ -9,12 +9,11 @@ function PeerSource(_uName, _name, _priority, _props, _peerCasa) {
    var existingSource = gang.findNamedObject(_uName);
    var owner = bowingOwner ? bowingOwner : existingSource ? _uName : gang.findOwner(_uName);
 
-   SourceBase.call(this, { name: _name, type: "peersource", transient: true }, owner);
+   SourceBase.call(this, { name: _name, type: "peersource", transient: true, local: true }, owner);
 
    this.priority = _priority;
    this.casa = _peerCasa;
 
-   this.config = { local: true };
    this.local = true;
 
    if (bowingOwner) {

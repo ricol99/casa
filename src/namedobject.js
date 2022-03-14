@@ -3,6 +3,7 @@ var AsyncEmitter = require('./asyncemitter');
 
 function NamedObject(_config, _owner) {
    AsyncEmitter.call(this);
+   this.config = _config;
 
    // Allow the creation of a named root
    if (_owner && (typeof _owner === "string")) {
@@ -52,6 +53,7 @@ util.inherits(NamedObject, AsyncEmitter);
 NamedObject.prototype.export = function(_exportObj) {
 
    if (!(this.hasOwnProperty("transient") && this.transient))  {
+      _exportObj.config = this.config;
       _exportObj.uName = this.uName;
       _exportObj.name = this.name;
       _exportObj.type = this.type;

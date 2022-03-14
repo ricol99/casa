@@ -2,7 +2,6 @@ var util = require('util');
 var NamedObject = require('./namedobject');
 
 function ConsoleCmd(_config, _owner, _console) {
-   this.config = _config;
    this.type = "consolecmd";
    NamedObject.call(this, _config, _owner);
 

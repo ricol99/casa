@@ -11,7 +11,6 @@ function PeerCasa(_config, _owner) {
    this.casa = this.gang.casa;
    this.consoleApiService =  this.gang.casa.findService("consoleapiservice");
 
-   this.config = _config;
    this.secureMode = this.casa.secureMode;
    this.certPath = this.casa.certPath;
    this.persistent = false;
@@ -208,16 +207,12 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
-   console.log(this.uName + ': AAAAA HERE 1: ');
-
    if (_config.casaVersion && _config.casaVersion < parseFloat(this.gang.version)) {
       console.info(this.uName + ': rejecting login from casa' + _config.casaName + '. Version mismatch!');
       this.socket.emit('loginRREEJJ', { messageId: _config.messageId, casaName: this.casa.uName, reason: "version-mismatch" });
       this.disconnectFromClient();
       return;
    }
-
-   console.log(this.uName + ': AAAAA HERE 2: ');
 
    this.config = util.copy(_config, true);
    this.gang.changePeerCasaName(this, this.config.casaName);

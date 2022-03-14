@@ -42,11 +42,11 @@ function Gang(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _
                process.exit(1);
             }
 
-            this.config.connectToPeers = _connectToPeers;
-            this.config.secureMode = _secureMode;
-            this.config.certPath = _certPath;
-            this.config.configPath = _configPath;
-            this.name = this.config.gang;
+            this.casaConfig.connectToPeers = _connectToPeers;
+            this.casaConfig.secureMode = _secureMode;
+            this.casaConfig.certPath = _certPath;
+            this.casaConfig.configPath = _configPath;
+            this.name = this.casaConfig.gang;
             NamedObject.call(this, { name: this.name, type: "gang" });
             this.casaDb.setOwner(this);
 
@@ -100,7 +100,7 @@ function Gang(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _
       NamedObject.call(this, { name: this.name, type: "gang" });
       this.casaName = "casa-console";
 
-      this.config = { name: this.casaName, type: "casa", secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
+      this.casaConfig = { name: this.casaName, type: "casa", secureMode: _secureMode, certPath: _certPath, configPath: _configPath, listeningPort: 8999 };
       this.extractCasa();
       var casaShortName = this.casaName.split(":")[1];
       this.extractServices([ { name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
@@ -196,41 +196,41 @@ Gang.prototype.loadConfig = function(_db, _collection, _callback) {
          });
       }
       else {
-         this.config = _mainConfig[0];
-         this.ignoreRestart = this.config.hasOwnProperty("ignoreRestart") ? this.config.ignoreRestart : false;
+         this.casaConfig = _mainConfig[0];
+         this.ignoreRestart = this.casaConfig.hasOwnProperty("ignoreRestart") ? this.casaConfig.ignoreRestart : false;
 
          _db.readCollection("casaUsers", (_err, _users) => {
 
             if (!_err) {
-               this.config.users = _users;
-               this.markObjects(this.config.users, "_db", this.config.name); 
+               this.casaConfig.users = _users;
+               this.markObjects(this.casaConfig.users, "_db", this.casaConfig.name); 
             }
             _db.readCollection("casaServices", (_err, _services) => {
 
                if (!_err) {
-                  this.config.services = _services;
-                  this.markObjects(this.config.sevices, "_db", this.config.name); 
+                  this.casaConfig.services = _services;
+                  this.markObjects(this.casaConfig.sevices, "_db", this.casaConfig.name); 
                }
 
                _db.readCollection("casaScenes", (_err, _scenes) => {
 
                   if (!_err) {
-                     this.config.scenes = _scenes;
-                     this.markObjects(this.config.scenes, "_db", this.config.name); 
+                     this.casaConfig.scenes = _scenes;
+                     this.markObjects(this.casaConfig.scenes, "_db", this.casaConfig.name); 
                   }
 
                   _db.readCollection("casaThings", (_err, _casaThings) => {
 
                      if (!_err) {
-                        this.config.things = _casaThings;
-                        this.markObjects(this.config.things, "_db", this.config.name); 
+                        this.casaConfig.things = _casaThings;
+                        this.markObjects(this.casaConfig.things, "_db", this.casaConfig.name); 
                      }
 
                      _db.readCollection("gangThings", (_err, _gangThings) => {
 
                         if (!_err) {
-                           this.config.gangThings = _gangThings;
-                           this.markObjects(this.config.gangThings, "_db", this.config.name); 
+                           this.casaConfig.gangThings = _gangThings;
+                           this.markObjects(this.casaConfig.gangThings, "_db", this.casaConfig.name); 
                         }
 
                         _callback(null, true);
@@ -266,7 +266,7 @@ Gang.prototype.init = function(_console) {
    this.extractCasa();
 
    // Extract Services
-   this.extractServices(this.config.services);
+   this.extractServices(this.casaConfig.services);
 
    this.addSystemServicesToCasa();
 
@@ -280,16 +280,16 @@ Gang.prototype.init = function(_console) {
    this.extractUsers(this.gangConfig.users, this);
 
    // Extract Casa Users
-   this.extractUsers(this.config.users, this.casa);
+   this.extractUsers(this.casaConfig.users, this.casa);
 
    // Extract Scenes
-   this.extractScenes(this.config.scenes);
+   this.extractScenes(this.casaConfig.scenes);
 
    // Extract Gang Things
    this.extractThings(this.gangConfig.things, this);
 
    // Extract Casa Things
-   this.extractThings(this.config.things, this.casa);
+   this.extractThings(this.casaConfig.things, this.casa);
 
    // Make sure all listeners are refreshed now that all sources are available
    this.casa.refreshSourceListeners();
@@ -321,7 +321,7 @@ Gang.prototype.addSystemServicesToCasa = function() {
 
 Gang.prototype.connectToPeers = function(_dbCallback) {
 
-   if (this.config.connectToPeers) {
+   if (this.casaConfig.connectToPeers) {
 
       if (this.peerCasaService) {
          this.peerCasaService.exitFetchDbMode();
@@ -330,7 +330,7 @@ Gang.prototype.connectToPeers = function(_dbCallback) {
          setTimeout( (_dbCallback_) => {
             this.casa.startListening();
             var PeerCasaService = require('./peercasaservice');
-            this.peerCasaService = new PeerCasaService({ gang: this.config.gang, fetchDbMode: (_dbCallback_ != undefined) });
+            this.peerCasaService = new PeerCasaService({ gang: this.casaConfig.gang, fetchDbMode: (_dbCallback_ != undefined) });
 
             if (_dbCallback_) {
                this.peerCasaService.setDbCallback(_dbCallback_);
@@ -540,18 +540,18 @@ Gang.prototype.mergeConfigs = function() {
 
    if (this.gangConfig.hasOwnProperty("things")) {
 
-      if (this.config.hasOwnProperty("things")) {
-         this.mergeThings(this.config.gangThings, this.gangConfig.things, false);
+      if (this.casaConfig.hasOwnProperty("things")) {
+         this.mergeThings(this.casaConfig.gangThings, this.gangConfig.things, false);
       }
       else {
-         this.gangConfig.things = this.config.gangThings;
+         this.gangConfig.things = this.casaConfig.gangThings;
       }
    }
 }
 
 Gang.prototype.extractCasa = function() {
-   var Casa = this.cleverRequire(this.config.type);
-   var casaObj = new Casa(this.config, this);
+   var Casa = this.cleverRequire(this.casaConfig.type);
+   var casaObj = new Casa(this.casaConfig, this);
    this.casa = casaObj;
    this.casa.db = this.dbs[casaObj.name];
    console.log('New casa: ' + casaObj.name);
@@ -612,7 +612,7 @@ Gang.prototype.findService = function(_serviceName) {
 };
 
 Gang.prototype.inSecureMode = function() {
-   return this.config.secureMode;
+   return this.casaConfig.secureMode;
 };
 
 Gang.prototype.mainListeningPort = function() {
@@ -620,11 +620,11 @@ Gang.prototype.mainListeningPort = function() {
 };
 
 Gang.prototype.configPath = function() {
-   return this.config.configPath;
+   return this.casaConfig.configPath;
 };
 
 Gang.prototype.certPath = function() {
-   return this.config.certPath;
+   return this.casaConfig.certPath;
 };
 
 Gang.prototype.getDbs = function() {

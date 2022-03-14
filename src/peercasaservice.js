@@ -23,9 +23,9 @@ function PeerCasaService(_config) {
    this.gang = Gang.mainInstance();
    this.queuedPeers = [];
 
-   this.name = this.gang.config.name;
-   this.id = this.gang.config.name
-   this.listeningPort = this.gang.config.listeningPort;
+   this.name = this.gang.casaConfig.name;
+   this.id = this.gang.casaConfig.name
+   this.listeningPort = this.gang.casaConfig.listeningPort;
    this.inFetchDbMode = _config.fetchDbMode;
    this.casasBeingEstablished = {};
 
