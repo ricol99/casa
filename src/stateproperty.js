@@ -50,27 +50,9 @@ StateProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
       _exportObj.controllingOwner = this.controllingOwner;
-      _exportObj.priorityDefined = this.priorityDefined;
-      _exportObj.priority = this.priority;
       _exportObj.currentPriority = this.currentPriority;
-      _exportObj.ignoreControl = this.ignoreControl;
-      _exportObj.takeControlOnTransition = this.takeControlOnTransition;
-      _exportObj.allSourcesRequiredForValidity = this.allSourcesRequiredForValidity;
-      _exportObj.states = [];
-
-      for (var state in this.states) {
-
-         if (this.states.hasOwnProperty(state)) {
-            _exportObj.states.push(this.states[state].name);
-         }
-      }
-
-      _exportObj.regExStates = [];
-
-      for (var i = 0; i < this.regExStates.length; ++i) {
-         _exportObj.regExStates.push(this.regExStates[i].name);
-      }
-
+      _exportObj.currentState = this.currentState ? this.currentState.name : null;
+      _exportObj.previousState = this.previousState ? this.previousState.name : null;
       _exportObj.stateTimer = this.stateTimer ? this.stateTimer.left() : -1;
 
       return true;
@@ -667,14 +649,6 @@ util.inherits(State, NamedObject);
 State.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
-
-      if (this.regEx) {
-         _exportObj.regEx = this.regEx.toString();
-      }
-
-      _exportObj.priorityDefined = this.priorityDefined;
-      _exportObj.priority = this.priority;
-
       _exportObj.activeGuardedSources = [];
 
       for (var i = 0; i < this.activeGuardedSources.length; ++i) {
@@ -694,13 +668,6 @@ State.prototype.export = function(_exportObj) {
       var matchFunc = function(_source, _prop) {
          return (_prop === "sourceListener" ) ? { replace: _source.sourceListener ? _source.sourceListener.uName : null } : true;
       }
-
-      _exportObj.guards = this.guards;
-      _exportObj.sources = util.copyMatch(this.sources, matchFunc);
-      _exportObj.actions = util.copyMatch(this.actions, matchFunc);
-      _exportObj.schedules = util.copyMatch(this.schedules, matchFunc);
-      _exportObj.timeout = util.copyMatch(this.timeout, matchFunc);
-      _exportObj.actionHandler = this.actionHandler;
 
       return true;
    }
