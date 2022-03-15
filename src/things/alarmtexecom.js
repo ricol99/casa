@@ -189,8 +189,8 @@ AlarmTexecom.prototype.export = function(_exportObj) {
    if (Thing.prototype.export.call(this, _exportObj)) {
       _exportObj.transactionTarget = this.transactionTarget;
       _exportObj.pollsMissed = this.pollsMissed;
-      _exportObj.acknowledgementTimer = this.acknowledgementTimer ? this.acknowledgementTimer.left() : -1;
-      _exportObj.watchdog = this.watchdog ? this.watchdog.left() : -1;
+      _exportObj.acknowledgementTimer = this.acknowledgementTimer ? this.acknowledgementTimer.expiration() : -1;
+      _exportObj.watchdog = this.watchdog ? this.watchdog.expiration() : -1;
 
       return true;
    }

@@ -29,6 +29,11 @@ function Service(_config, _owner) {
 
 util.inherits(Service, Thing);
 
+// Used to classify the type and understand where to load the javascript module
+Service.prototype.superType = function(_type) {
+   return "service";
+};
+
 // Called when system state is required
 Service.prototype.export = function(_exportObj) {
 

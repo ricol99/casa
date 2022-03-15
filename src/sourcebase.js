@@ -186,7 +186,7 @@ SourceBase.prototype.rejectPropertyUpdate = function(_propName) {
 SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
 
    if (!this.props.hasOwnProperty(_propName)) {
-      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'properties/'
+      var loadPath =  ((_propType === 'property') || (_propType === 'stateproperty')) ? '' : 'props/'
       var Prop = require('./' + loadPath + _propType);
       _config.name = _propName;
       _config.type = _propType;

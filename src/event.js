@@ -29,6 +29,11 @@ function Event(_config, _owner) {
 
 util.inherits(Event, NamedObject);
 
+// Used to classify the type and understand where to load the javascript module
+Event.prototype.superType = function(_type) {
+   return "event";
+};
+
 // Called when system state is required
 Event.prototype.export = function(_exportObj) {
 

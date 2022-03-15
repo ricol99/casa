@@ -20,7 +20,7 @@ DelayProperty.prototype.export = function(_exportObj) {
             return false;
          }
          else if (_prop === "timeoutObj") {
-            return { replace: _source[_prop] ? _source[_prop].left() : -1 };
+            return { replace: _source[_prop] ? _source[_prop].expiration() : -1 };
          }
          else if (_prop === "eventData") {
             return { replace: _source[_prop] ? util.copy(_source[_prop]) : null };

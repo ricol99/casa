@@ -61,6 +61,11 @@ function Property(_config, _owner) {
 
 util.inherits(Property, NamedObject);
 
+// Used to classify the type and understand where to load the javascript module
+Property.prototype.superType = function(_type) {
+   return "property";
+};
+
 // Called when system state is required
 Property.prototype.export = function(_exportObj) {
 

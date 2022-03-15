@@ -28,7 +28,7 @@ util.inherits(LatchProperty, Property);
 LatchProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.left() : -1;
+      _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.expiration() : -1;
       _exportObj.sourceActive = this.sourceActive;
       _exportObj.controllerActive = this.controllerActive;
       _exportObj.active = this.active;

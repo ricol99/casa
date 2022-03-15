@@ -36,6 +36,11 @@ function Thing(_config, _owner) {
 
 util.inherits(Thing, Source);
 
+// Used to classify the type and understand where to load the javascript module
+Thing.prototype.superType = function(_type) {
+   return "thing";
+};
+
 // Called when system state is required
 Thing.prototype.export = function(_exportObj) {
 

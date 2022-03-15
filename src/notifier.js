@@ -75,6 +75,11 @@ function Notifier(_config, _parent) {
 
 util.inherits(Notifier, Thing);
 
+// Used to classify the type and understand where to load the javascript module
+Notifier.prototype.superType = function(_type) {
+   return "notifier";
+};
+
 // Called when system state is required
 Notifier.prototype.export = function(_exportObj) {
 

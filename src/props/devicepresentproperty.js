@@ -16,7 +16,7 @@ util.inherits(DevicePresentProperty, Property);
 DevicePresentProperty.prototype.export = function(_exportObj) {
 
    if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
+      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.expiration() : -1;
       return true;
    }
 

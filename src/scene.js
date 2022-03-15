@@ -60,6 +60,11 @@ function Scene(_config, _owner) {
 
 util.inherits(Scene, Thing);
 
+// Used to classify the type and understand where to load the javascript module
+Scene.prototype.superType = function(_type) {
+   return "scene";
+};
+
 // Called when system state is required
 Scene.prototype.export = function(_exportObj) {
 

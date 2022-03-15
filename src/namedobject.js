@@ -49,14 +49,18 @@ function NamedObject(_config, _owner) {
 
 util.inherits(NamedObject, AsyncEmitter);
 
+// Used to classify the type and understand where to load the javascript module
+NamedObject.prototype.superType = function(_type) {
+   return "namedobject";
+};
+
 // Called when current state required
 NamedObject.prototype.export = function(_exportObj) {
 
    if (!(this.hasOwnProperty("transient") && this.transient))  {
       _exportObj.config = this.config;
+      _exportObj.superType = this.superType(this.type);
       _exportObj.uName = this.uName;
-      _exportObj.name = this.name;
-      _exportObj.type = this.type;
       _exportObj.myNamedObjects = {};
 
       for (var namedObj in this.myNamedObjects) {
@@ -76,6 +80,9 @@ NamedObject.prototype.export = function(_exportObj) {
    return false;
 };
 
+// Called when current state required
+NamedObject.prototype.import = function(_importObj) {
+};
 
 
 NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {

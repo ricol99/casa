@@ -10,12 +10,11 @@ function Gang(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _
    this.version = _version;
    this._id = true;	// TDB!!!
 
-   this.users = [];
+   this.users = {};
    this.scenes = {};
    this.things = {};
-   this.topLevelThings = [];
    this.casa = null;
-   this.peerCasas = [];
+   this.peerCasas = {};
    this.services = {};
    this.systemServices = {};
    this.constructors = {};
