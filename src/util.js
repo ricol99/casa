@@ -311,6 +311,11 @@ Util.ensureExists = function(_obj, _name, _value) {
    }
 };
 
+Util.checkPath = function(_path) {
+   return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;
+}
+
+
 Util.setTimeout = function() {
    var timer = new Timer();
    Timer.prototype.setTimeout.apply(timer, arguments);
@@ -356,5 +361,6 @@ Timer.prototype.left = function() {
 Timer.prototype.expiration = function() {
    return this.active() ? this.duration + this.startTime : -1;
 };
+
 
 module.exports = exports = Util;

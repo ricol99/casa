@@ -17,25 +17,8 @@ function Source(_config, _owner) {
       this.mirrorSourceListener = new SourceListener({ uName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
    }
 
-   if (_config.props) {
-      var propLen = _config.props.length;
-
-      for (var i = 0; i < propLen; ++i) {
-         this.ensurePropertyExists(_config.props[i].name, (_config.props[i].hasOwnProperty("type")) ? _config.props[i].type : 'property', _config.props[i]); 
-      }
-   }
-
-   this.events = {};
-
-   if (_config.hasOwnProperty("events")) {
-
-      for (var index = 0; index < _config.events.length; ++index) {
-         var type = _config.events[index].hasOwnProperty("type") ? _config.events[index].type : "event";
-         var Event = this.gang.cleverRequire(type, 'events'); 
-         var eventObj = new Event(_config.events[index], this);
-         this.events[eventObj.name] = eventObj;
-      }
-   }
+   this.createChildren(_config.props, "prop", this);
+   this.createChildren(_config.events, "event", this);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
                              { "initialValue": 'auto', "takeControlOnTransition": true,

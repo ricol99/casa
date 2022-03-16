@@ -15,7 +15,6 @@ function Tester(_config, _parent) {
    this.expectedPosition = 0;
 
    this.sourceListeners = {};
-   this.noOfSources = 0;
 
    if (_config.hasOwnProperty('source')) {
       _config.sources = [_config.source];
@@ -31,7 +30,6 @@ function Tester(_config, _parent) {
 
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-         this.noOfSources++;
       }
 
       if (this.gang.casa) {

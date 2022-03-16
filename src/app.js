@@ -1,4 +1,5 @@
 var version = 1.047;
+var util = require('./util');
 var crypto = require('crypto');
 var commandLineArgs = require('command-line-args')
  
@@ -23,8 +24,8 @@ if (options.casa == undefined) {
 
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var secureMode = (options.secure == undefined) ? false : options.secure;
-var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : checkPath(options.certs);
-var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : checkPath(options.config);
+var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : util.checkPath(options.certs);
+var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : util.checkPath(options.config);
 var casaName = options.casa;
 
 var logs;
@@ -39,10 +40,7 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 
 var consoleRequired = (options.console) ? "global" : (options.localconsole) ? "local" : false;
 
-Gang = require('./gang');
-var gang = new Gang(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired);
-
-function checkPath(_path) {
-   return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;
-}
+Loader = require('./loader');
+var loader = new Loader(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired);
+loader.load();
 

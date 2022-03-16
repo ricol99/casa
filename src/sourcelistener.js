@@ -22,7 +22,6 @@ function SourceListener(_config, _owner) {
    }
 
    this.ignoreSourceUpdates = (_config.hasOwnProperty('ignoreSourceUpdates')) ? _config.ignoreSourceUpdates : false;
-   this.isTarget = (_config.hasOwnProperty('isTarget')) ? _config.isTarget : false;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
    this.outputValues = (_config.hasOwnProperty('outputValues')) ? util.copy(_config.outputValues) : {};
 
@@ -72,6 +71,11 @@ function SourceListener(_config, _owner) {
 
 util.inherits(SourceListener, NamedObject);
 
+// Used to classify the type and understand where to load the javascript module
+SourceListener.prototype.superType = function(_type) {
+   return "sourcelistener";
+};
+
 // Called when system state is required
 SourceListener.prototype.export = function(_exportObj) {
 
@@ -81,7 +85,6 @@ SourceListener.prototype.export = function(_exportObj) {
       _exportObj.transform = this.transform;
       _exportObj.transformMap = this.transformMap;
       _exportObj.ignoreSourceUpdates = this.ignoreSourceUpdates;
-      _exportObj.isTarget = this.isTarget;
       _exportObj.priority = this.priority;
       _exportObj.outputValues = this.outputValues;
       _exportObj.maskInvalid = this.maskInvalid;
@@ -246,13 +249,7 @@ SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
    }
 
    console.log(this.uName + ": processing source event raised, event=" + _data.name);
-
-   if (this.isTarget) {
-      this.owner.receivedEventFromTarget(util.copy(_data));
-   }
-   else {
-      this.owner.receivedEventFromSource(util.copy(_data));
-   }
+   this.owner.receivedEventFromSource(util.copy(_data));
 };
 
 SourceListener.prototype.isCold = function() {

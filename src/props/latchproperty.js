@@ -2,22 +2,11 @@ var util = require('../util');
 var Property = require('../property');
 
 function LatchProperty(_config, _owner) {
-
    this.minOutputTime = _config.minOutputTime;
-
-   if (_config.controller) {
-      _config.ignoreTargetUpdates = false;
-      _config.target = _config.controller.uName;
-      _config.targetProperty = _config.controller.property;
-      _config.transform = _config.controller.transform;
-      _config.transformMap = _config.controller.transformMap;
-  }
-
    Property.call(this, _config, _owner);
 
    this.minOutputTimeObj = null;
    this.sourceActive = false;
-   this.controllerActive = false;
    this.active = false;
    this.lastData = null;
 }
@@ -30,7 +19,6 @@ LatchProperty.prototype.export = function(_exportObj) {
    if (Property.prototype.export.call(this, _exportObj)) {
       _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.expiration() : -1;
       _exportObj.sourceActive = this.sourceActive;
-      _exportObj.controllerActive = this.controllerActive;
       _exportObj.active = this.active;
       _exportObj.lastData = util.copy(this.lastData);
       return true;
@@ -49,11 +37,6 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    
       if (this.minOutputTime != undefined) {
          this.restartTimer();
-         this.active = true;
-         this.updatePropertyInternal(propValue, _data);
-         return;
-      }
-      else if (this.controllerActive) {
          this.active = true;
          this.updatePropertyInternal(propValue, _data);
          return;
@@ -83,33 +66,6 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    }
 }
 
-LatchProperty.prototype.newPropertyValueReceivedFromTarget = function(_targetListener, _data) {
-   this.controllerActive = _data.value;
-
-   if (this.controllerActive) {
-      if (!this.active && this.sourceActive) {
-
-         if (this.lastData) {
-            this.active = true;
-            this.updatePropertyInternal(true, this.lastData);
-            this.lastData = null;
-            return;
-         }
-      }
-   }
-   else {
-      if (this.active) {
-
-         if (this.lastData) {
-            this.active = false;
-            this.updatePropertyInternal(false, this.lastData);
-            this.lastData = null;
-            return;
-         }
-      }
-   }
-}
-   
 // ====================
 // NON_EXPORTED METHODS
 // ====================

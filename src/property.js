@@ -25,7 +25,6 @@ function Property(_config, _owner) {
    this.hasSourceOutputValues = false;	// Sources can influence the final property value (source in charge)
 
    this.sourceListeners = {};
-   this.noOfSources = 0;
 
    if (_config.hasOwnProperty('source')) {
       _config.sources = [_config.source];
@@ -42,18 +41,6 @@ function Property(_config, _owner) {
       this.valid = true;
    }
 
-   if (_config.hasOwnProperty('target')) {
-      _config.target.uName = (_config.target.hasOwnProperty("uName")) ? _config.target.uName : this.owner.uName;
-      this.targetProperty = (_config.hasOwnProperty('targetProperty')) ? _config.targetProperty : "ACTIVE";
-      this.ignoreTargetUpdates = (_config.hasOwnProperty('ignoreTargetUpdates')) ? _config.ignoreTargetUpdates : true;
-
-      this.targetListener = new SourceListener({ uName: _config.target, property: this.targetProperty, isTarget: true,
-                                                 ignoreSourceUpdates: this.ignoreTargetUpdates, transform: _config.targetTransform,
-                                                 transformMap:_config.targetTransformMap}, this);
-
-      this.target = this.targetListener.source;
-   }
-
    if (this.owner.gang.casa) {
       this.owner.gang.casa.scheduleRefreshSourceListeners();
    }
@@ -63,7 +50,7 @@ util.inherits(Property, NamedObject);
 
 // Used to classify the type and understand where to load the javascript module
 Property.prototype.superType = function(_type) {
-   return "property";
+   return "prop";
 };
 
 // Called when system state is required
@@ -94,7 +81,6 @@ Property.prototype.getCasa = function() {
 Property.prototype.addNewSource = function(_config) {
    var sourceListener = new SourceListener(_config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-   this.noOfSources++;  
    sourceListener.refreshSource();
 };
 
@@ -214,7 +200,6 @@ Property.prototype.amIValid = function() {
 Property.prototype.sourceIsValid = function(_data) {
    var oldValid = this.valid;
    this.valid = this.amIValid();
-   this.target = (this.targetListener) ? this.targetListener.source : null;
 }
 
 //
@@ -247,7 +232,6 @@ Property.prototype.sourceIsInvalid = function(_data) {
 
    // Has the valid stated changed from true to false?
    if (oldValid && !this.valid) {
-      this.target = null;
       this.invalidate();
    }
 };
@@ -266,30 +250,12 @@ Property.prototype.receivedEventFromSource = function(_data) {
 };
 
 //
-// Called by SourceListener (Target) as the defined target has changed it property value
-//   -- only works if target config ignoreTargetUpdates is set to false (default is true)
-//
-Property.prototype.receivedEventFromTarget = function(_data) {
-
-   if (this.valid) {
-
-      if (this.targetListener && this.targetListener.sourceEventName == _data.sourceEventName) {
-         this.newEventReceivedFromTarget(this.targetListener, _data);
-      }
-   }
-};
-
-//
 // Derived Properties should override this to process property changes from defined sources
 // If the property wants to update its value, it should call this.updatePropertyInternal() method
 // Only then will the property value be set
 //
 Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyInternal(_data.value, _data);
-};
-
-Property.prototype.newEventReceivedFromTarget = function(_targetListener, _data) {
-   // DO NOTHING BY DEFAULT
 };
 
 // Override this if you listen to a source that is not "Source".
@@ -386,7 +352,6 @@ Property.prototype._addSource = function(_source) {
 
    var sourceListener = new SourceListener(_source, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-   this.noOfSources++;
 };
 
 Property.prototype._cleanUp = function() {
@@ -396,10 +361,6 @@ Property.prototype._cleanUp = function() {
       if (this.sourceListeners.hasOwnProperty(sl)) {
          this.sourceListeners[sl].stopListening();
       }
-   }
-
-   if (this.targetListener) {
-      this.targetListener.stopListening();
    }
 };
 

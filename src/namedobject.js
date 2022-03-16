@@ -1,6 +1,8 @@
 var util = require('./util');
 var AsyncEmitter = require('./asyncemitter');
 
+var constructors = {};
+
 function NamedObject(_config, _owner) {
    AsyncEmitter.call(this);
    this.config = _config;
@@ -51,7 +53,7 @@ util.inherits(NamedObject, AsyncEmitter);
 
 // Used to classify the type and understand where to load the javascript module
 NamedObject.prototype.superType = function(_type) {
-   return "namedobject";
+   return null;
 };
 
 // Called when current state required
@@ -340,12 +342,81 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
    }
 };
 
+NamedObject.prototype.require = function(_type, _superType) {
+   var path = '';
+   var module;
+
+   if ((_type === "property") || (_type === "prop")) {
+      module = "./property";
+   }
+   else if (_superType && (_superType !== _type)) {
+      module = './' + _superType + 's/' + _type;
+   }
+   else {
+     module = "./" + _type;
+   }
+
+   if (!constructors[module]) {
+      console.log('loading more code: ' + module);
+
+      try {
+         constructors[module] = require(module);
+      }
+      catch (_err) {
+         process.stderr.write(util.inspect(_err));
+         return null;
+      }
+   }
+   return constructors[module];
+};
+
+NamedObject.prototype.getSuperTypeCollection = function(_superType) {
+   return _superType ? this[_superType + "s"] : null;
+};
+
+NamedObject.prototype.findOrCreateSuperTypeCollection = function(_superType) {
+
+   if (!this[_superType + "s"]) {
+      this[_superType + "s"] = {};
+   }
+   return this[_superType + "s"];
+};
+
+NamedObject.prototype.createChild = function(_config, _superType, _owner) {
+
+   if (!_config) {
+      return null;
+   }
+   var Child = this.require(_config.type ? _config.type : (_superType === "prop") ? "property" : _superType, _superType);
+   return new Child(_config, _owner);
+};
+
+NamedObject.prototype.createChildren = function(_config, _superType, _owner) {
+   this.findOrCreateSuperTypeCollection(_superType);
+
+   if (_config) {
+
+      for (var i = 0; i < _config.length; ++i) {
+         var Child = this.require(_config[i].type ? _config[i].type : _superType, _superType);
+         new Child(_config[i], _owner);
+      }
+   }
+};
+
 NamedObject.prototype.addChildNamedObject = function(_namedObject) {
    this.myNamedObjects[_namedObject.name] = _namedObject;
+
+   if (_namedObject.superType()) {
+      this.findOrCreateSuperTypeCollection(_namedObject.superType())[_namedObject.name] = _namedObject;
+   }
 };
 
 NamedObject.prototype.removeChildNamedObject = function(_namedObject) {
    delete this.myNamedObjects[_namedObject.name];
+
+   if (_namedObject.superType()) {
+      delete this.findOrCreateSuperTypeCollection(_namedObject.superType())[_namedObject.name];
+   }
 };
 
 NamedObject.prototype.stripMyUName = function(_uName) {

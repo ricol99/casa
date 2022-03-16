@@ -27,11 +27,8 @@ function Thing(_config, _owner) {
    this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
    this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
-   this.things = {};
 
-   if (!this.topLevelThing) {
-      this.owner.addThing(this);
-   }
+   this.createChildren(_config.things, "thing", this);
 }
 
 util.inherits(Thing, Source);

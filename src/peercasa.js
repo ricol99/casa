@@ -61,6 +61,11 @@ function PeerCasa(_config, _owner) {
 
 util.inherits(PeerCasa, SourceBase);
 
+// Used to classify the type and understand where to load the javascript module
+PeerCass.prototype.superType = function(_type) {
+   return "peercasa";
+};
+
 PeerCasa.prototype.coldStart = function() {
    SourceBase.prototype.coldStart.call(this);
 

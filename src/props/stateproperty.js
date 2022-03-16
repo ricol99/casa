@@ -1,9 +1,9 @@
-var util = require('util');
-var NamedObject = require('./namedobject');
-var Property = require('./property');
-var SourceListener = require('./sourcelistener');
-var Gang = require('./gang');
-var State = require('./state');
+var util = require('../util');
+var NamedObject = require('../namedobject');
+var Property = require('../property');
+var SourceListener = require('../sourcelistener');
+var Gang = require('../gang');
+var State = require('../state');
 
 function StateProperty(_config, _owner) {
    Property.call(this, _config, _owner);

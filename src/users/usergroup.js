@@ -1,5 +1,5 @@
 var util = require('util');
-var User = require('./user');
+var User = require('../user');
 
 function UserGroup(_config, _owner) {
    User.call(this, _config, _owner);

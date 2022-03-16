@@ -8,7 +8,6 @@ var Gang = require('./gang');
 var NamedObject = require('./namedobject');
 
 function Casa(_config) {
-   this.gang = Gang.mainInstance();
    this._id = true;     // TDB!!!
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
@@ -16,6 +15,7 @@ function Casa(_config) {
    this.secureMode = _config.secureMode;
    this.certPath = _config.certPath;
    this.configPath = _config.configPath;
+   this.gang = this.owner;
 
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
    NamedObject.call(this, _config, this.gang);
@@ -24,9 +24,9 @@ function Casa(_config) {
    this.db = null;
 
    this.sources = {};
+   this.serviceTypes = {};
    this.topSources = {};
    this.sourceListeners = {};
-   this.services = {};
    this.bowingSources = {};
 
    this.uber = false;
@@ -35,6 +35,28 @@ function Casa(_config) {
 }
 
 util.inherits(Casa, NamedObject);
+
+// Used to classify the type and understand where to load the javascript module
+Casa.prototype.superType = function(_type) {
+   return "casa";
+};
+
+Casa.prototype.buildServices = function() {
+
+   this.createChildren(this.config.services, "service", this);
+
+   for (var service in this.services) {
+
+      if (this.services.hasOwnProperty(service)) {
+         this.addServiceByType(this.services[service]);
+      }
+   }
+};
+  
+Casa.prototype.buildTree = function() {
+   this.createChildren(this.config.scenes, "scene", this);
+   this.createChildren(this.config.things, "thing", this);
+};
 
 // Called when system state is required
 Casa.prototype.export = function(_exportObj) {
@@ -56,6 +78,30 @@ Casa.prototype.getCasa = function() {
 };
 
 Casa.prototype.interestInNewChild = function(_uName) {
+};
+
+Casa.prototype.coldStartServices = function() {
+   console.log(this.uName + ': Cold starting services...');
+
+   for (var serviceName in this.services) {
+
+      if (this.services.hasOwnProperty(serviceName)) {
+         console.log(this.uName + ': Cold starting service '+ this.services[serviceName].name);
+         this.services[serviceName].coldStart();
+      }
+   }
+};
+
+Casa.prototype.coldStart = function() {
+   console.log(this.uName + ': Cold starting services...');
+
+   for (var thingName in this.things) {
+
+      if (this.things.hasOwnProperty(thingName)) {
+         console.log(this.uName + ': Cold starting thing '+ this.things[thingName].name);
+         this.things[thingName].coldStart();
+      }
+   }
 };
 
 Casa.prototype.createServer = function() {
@@ -290,20 +336,19 @@ Casa.prototype.findListeners = function(_uName) {
    return listeners;
 };
 
-Casa.prototype.addService = function(_service) {
+Casa.prototype.addServiceByType = function(_service) {
    console.log(this.uName + ': Service '  + _service.name + ' added to casa ');
 
-   if (this.services[_service.type]) {
+   if (this.serviceTypes[_service.type]) {
       console.log("***********SERVICE CONFLICT - Only one localservice per type allowed***************" + _service.name);
       process.exit(1);
    }
 
-   this.addChildNamedObject(_service);
-   this.services[_service.type]  = _service;
+   this.serviceTypes[_service.type]  = _service;
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return (_serviceType.startsWith("::")) ? this.gang.findNamedObject(_serviceType) : this.services[_serviceType];
+   return (_serviceType.startsWith("::")) ? this.gang.findNamedObject(_serviceType) : this.serviceTypes[_serviceType];
 };
 
 Casa.prototype.findServiceName = function(_serviceType) {

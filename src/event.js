@@ -9,7 +9,6 @@ function Event(_config, _owner) {
    this.cold = true;
 
    this.sourceListeners = {};
-   this.noOfSources = 0;
 
    if (_config.hasOwnProperty('source')) {
       _config.sources = [_config.source];
@@ -74,7 +73,6 @@ Event.prototype.aboutToBeDeleted = function() {
 Event.prototype.addNewSource = function(_config) {
    var sourceListener = new SourceListener(_config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-   this.noOfSources++;
    sourceListener.refreshSource();
 };
 
@@ -121,7 +119,6 @@ Event.prototype._addSource = function(_source) {
 
    var sourceListener = new SourceListener(_source, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
-   this.noOfSources++;
 };
 
 module.exports = exports = Event;
