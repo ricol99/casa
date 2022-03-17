@@ -22,8 +22,19 @@ Gang.prototype.superType = function(_type) {
 };
 
 Gang.prototype.buildTree = function() {
+   this.casa.buildServices();
+
    this.createChildren(this.config.users, "user", this);
    this.createChildren(this.config.things, "thing", this);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].inheritChildProps();
+      }
+   }
+
+   this.casa.coldStartServices();
 
    this.casa.buildTree();
 
@@ -38,16 +49,6 @@ Gang.prototype.interestInNewChild = function(_uName) {
 };
 
 Gang.prototype.init = function() {
-
-   for (var thing in this.things) {
-
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].inheritChildProps();
-      }
-   }
-
-   this.casa.coldStartServices();
-
    // Make sure all listeners are refreshed now that all sources are available
    this.casa.refreshSourceListeners();
 

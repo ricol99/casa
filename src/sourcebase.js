@@ -187,7 +187,7 @@ SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _conf
 
    if (!this.props.hasOwnProperty(_propName)) {
       _config.name = _propName;
-      _config.type = _propType;
+      _config.type = _propType ? ((_propType === "property") ? "prop" : _propType) : "prop";
       this.createChild(_config, "prop", this);
 
       if (_mainConfig) {

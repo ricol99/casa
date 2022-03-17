@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 
 function DelayProperty(_config, _owner) {
    Property.call(this, _config, _owner);

@@ -1,12 +1,12 @@
 var util = require('../util');
 var NamedObject = require('../namedobject');
-var Property = require('../property');
+var Prop = require('../prop');
 var SourceListener = require('../sourcelistener');
 var Gang = require('../gang');
 var State = require('../state');
 
 function StateProperty(_config, _owner) {
-   Property.call(this, _config, _owner);
+   Prop.call(this, _config, _owner);
 
    this.gang = Gang.mainInstance();
    this.states = {};
@@ -44,12 +44,12 @@ function StateProperty(_config, _owner) {
    }
 }
 
-util.inherits(StateProperty, Property);
+util.inherits(StateProperty, Prop);
 
 // Called when system state is required
 StateProperty.prototype.export = function(_exportObj) {
 
-   if (Property.prototype.export.call(this, _exportObj)) {
+   if (Prop.prototype.export.call(this, _exportObj)) {
       _exportObj.controllingOwner = this.controllingOwner;
       _exportObj.currentPriority = this.currentPriority;
       _exportObj.currentState = this.currentState ? this.currentState.name : null;
@@ -68,7 +68,7 @@ StateProperty.prototype.coldStart = function(_data) {
       this.setState(this.value, false);
    }
 
-   Property.prototype.coldStart.call(this, _data);
+   Prop.prototype.coldStart.call(this, _data);
 };
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
@@ -117,7 +117,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       }
    }
    else {
-      Property.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+      Prop.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
    }
 };
 

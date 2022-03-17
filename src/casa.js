@@ -7,7 +7,7 @@ var io;
 var Gang = require('./gang');
 var NamedObject = require('./namedobject');
 
-function Casa(_config) {
+function Casa(_config, _owner) {
    this._id = true;     // TDB!!!
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
@@ -18,7 +18,7 @@ function Casa(_config) {
    this.gang = this.owner;
 
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
-   NamedObject.call(this, _config, this.gang);
+   NamedObject.call(this, _config, _owner);
 
    this.id = _config.id;
    this.db = null;
@@ -56,6 +56,13 @@ Casa.prototype.buildServices = function() {
 Casa.prototype.buildTree = function() {
    this.createChildren(this.config.scenes, "scene", this);
    this.createChildren(this.config.things, "thing", this);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].inheritChildProps();
+      }
+   }
 };
 
 // Called when system state is required

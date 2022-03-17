@@ -137,7 +137,7 @@ Thing.prototype.inheritChildProps = function() {
 
          if (childProps.hasOwnProperty(prop)) {
             var oSpec = { name: prop, initialValue: childProps[prop].value, local: childProps[prop].local };
-            this.ensurePropertyExists(prop, "property", oSpec, this.config);
+            this.ensurePropertyExists(prop, "prop", oSpec, this.config);
          }
       }
    }

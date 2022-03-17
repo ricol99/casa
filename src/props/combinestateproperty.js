@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 var StateProperty = require('./stateproperty');
 
 function CombineStateProperty(_config, _owner) {

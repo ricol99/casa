@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 var Gang = require('../gang');
 
 function ScheduleProperty(_config, _owner) {

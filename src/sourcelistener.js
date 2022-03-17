@@ -122,6 +122,7 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.gang.findNamedObject(this.sourceName);
+   //console.log(this.uName + ": AAAAAAA Source result=", this.source);
    this.valid = this.source ? true : false;
 
    if (this.valid) {

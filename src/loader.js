@@ -50,9 +50,13 @@ Loader.prototype.loadNode = function() {
                   process.exit(2);
                   return;
                }
+//console.log("AAAA config=", this.casaConfig);
+//console.log("AAAA gang config=", this.gangConfig);
 
                this.mergeConfigs();
                this.gangConfig.casa = this.casaConfig;
+//console.log("AAAA gang config=", this.gangConfig.casa);
+
                this.addSystemServices();
 
                this.gang = new Gang(this.gangConfig);
@@ -61,8 +65,11 @@ Loader.prototype.loadNode = function() {
                this.gangDb.setOwner(this.gang);
                this.gang.db = this.gangDb;
 
-               this.gang.casa.buildServices();
                this.gang.buildTree();
+//console.log("AAAA casa things=", this.gang.casa.myNamedObjects);
+for (var obj in this.gang.myNamedObjects) {
+console.log("AAAA gang namedobjects =", this.gang.myNamedObjects[obj].name);
+}
 
                if (this.localConsoleRequired) {
                   var LocalConsole = require('./localconsole');

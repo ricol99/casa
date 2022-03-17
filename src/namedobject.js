@@ -346,10 +346,7 @@ NamedObject.prototype.require = function(_type, _superType) {
    var path = '';
    var module;
 
-   if ((_type === "property") || (_type === "prop")) {
-      module = "./property";
-   }
-   else if (_superType && (_superType !== _type)) {
+   if (_superType && (_superType !== _type)) {
       module = './' + _superType + 's/' + _type;
    }
    else {
@@ -387,7 +384,8 @@ NamedObject.prototype.createChild = function(_config, _superType, _owner) {
    if (!_config) {
       return null;
    }
-   var Child = this.require(_config.type ? _config.type : (_superType === "prop") ? "property" : _superType, _superType);
+
+   var Child = this.require(_config.type ? _config.type : _superType, _superType);
    return new Child(_config, _owner);
 };
 

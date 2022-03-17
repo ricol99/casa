@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 
 function XorProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = false;

@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 var i2c = require('./ABElectronics_NodeJS_Libraries/lib/adcpi/adcpi');
 
 // I2C Device

@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../property');
+var Property = require('../prop');
 var ping = require('ping');
 
 function DevicePresentProperty(_config, _owner) {
