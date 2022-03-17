@@ -472,7 +472,7 @@ State.prototype.checkSourceProperties = function() {
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;
 
-            if (source && source.props.hasOwnProperty(this.sources[i].property) && (source.getProperty(this.sources[i].property) === this.sources[i].value)) {
+            if (source && source.properties.hasOwnProperty(this.sources[i].property) && (source.getProperty(this.sources[i].property) === this.sources[i].value)) {
 
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {

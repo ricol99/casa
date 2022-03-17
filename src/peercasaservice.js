@@ -23,13 +23,10 @@ function PeerCasaService(_config) {
    this.gang = Gang.mainInstance();
    this.queuedPeers = [];
 
-   this.name = this.gang.casaConfig.name;
-   this.id = this.gang.casaConfig.name
-   this.listeningPort = this.gang.casaConfig.listeningPort;
-   this.inFetchDbMode = _config.fetchDbMode;
+   this.name = this.gang.casa.name;
+   this.id = this.gang.casa.name
+   this.listeningPort = this.gang.casa.listeningPort;
    this.casasBeingEstablished = {};
-
-   this.dbService =  this.gang.casa.findService("dbservice");
 
    if (!process.env.INTERNETCASA) {
       try {
@@ -42,19 +39,13 @@ function PeerCasaService(_config) {
             console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
             if ((!((this.gang.name || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.name))) &&
-               (service.name != this.name && !this.gang.peerCasas[service.name])) {
+               (service.name != this.name && !this.gang.peercasas[service.name])) {
 
                // Found a peer
                // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-               if (!this.gang.peerCasas[service.name] && !this.casasBeingEstablished[service.name]) {
+               if (!this.gang.peercasas[service.name] && !this.casasBeingEstablished[service.name]) {
 
-                  if (this.inFetchDbMode) {
-                     this.dbService.updateGangDbFromPeer(service.host, service.port, (_err, _res) => {
-                        this.dbCallback(_err, _res);
-                        this.dbCallback = null;
-                     });
-                  }
-                  else if (service.name > this.name) {
+                  if (service.name > this.name) {
                      this.casasBeingEstablished[service.name] = true;
                      this.establishConnectionWithPeer(service);
                   }
@@ -73,24 +64,6 @@ function PeerCasaService(_config) {
       }
    }
 }
-
-PeerCasaService.prototype.setDbCallback = function(_dbCallback) {
-   this.dbCallback = _dbCallback;
-};
-
-PeerCasaService.prototype.exitFetchDbMode = function() {
-   this.inFetchDbMode = false;
-   this.dbCallback = null;
-   this.createAdvertisement(); 
-   this.dequeueMissedRequests();
-};
-
-PeerCasaService.prototype.dequeueMissedRequests = function() {
-
-   for (var i = 0; i < this.queuedPeers.length; ++i) {
-      this.createPeerCasa(this.queuedPeers[i]);
-   }
-};
 
 PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
 
@@ -136,7 +109,7 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
 PeerCasaService.prototype.createPeerCasa = function(_service) {
 
    if (!this.inFetchDbMode) {
-      var peerCasa = this.gang.createPeerCasa({name: _service.name});
+      var peerCasa = this.gang.createPeerCasa(_service.name);
       peerCasa.connectToPeerCasa({ address: { hostname: _service.host, port: _service.port }});
       this.casasBeingEstablished[_service.name] = null;
       delete this.casasBeingEstablished[_service.name];

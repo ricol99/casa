@@ -68,8 +68,8 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       if (!this.ignoreParent) {
 
-         if (this.props.hasOwnProperty(_propName)) {
-            data.local = this.props[_propName].local;
+         if (this.properties.hasOwnProperty(_propName)) {
+            data.local = this.properties[_propName].local;
          }
 
          Source.prototype.updateProperty.call(this, _propName, _propValue, data);
@@ -87,12 +87,12 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
 
-      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.props.hasOwnProperty(_propName) && (_propValue === this.props[_propName].value)) {
+      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.properties.hasOwnProperty(_propName) && (_propValue === this.properties[_propName].value)) {
          return true;
       }
 
-      if (this.props.hasOwnProperty(_propName)) {
-         data.propertyOldValue = this.props[_propName].value;
+      if (this.properties.hasOwnProperty(_propName)) {
+         data.propertyOldValue = this.properties[_propName].value;
       }
 
       data.alignWithParent = true;
@@ -137,7 +137,7 @@ Thing.prototype.inheritChildProps = function() {
 
          if (childProps.hasOwnProperty(prop)) {
             var oSpec = { name: prop, initialValue: childProps[prop].value, local: childProps[prop].local };
-            this.ensurePropertyExists(prop, "prop", oSpec, this.config);
+            this.ensurePropertyExists(prop, "property", oSpec, this.config);
          }
       }
    }

@@ -62,7 +62,7 @@ function PeerCasa(_config, _owner) {
 util.inherits(PeerCasa, SourceBase);
 
 // Used to classify the type and understand where to load the javascript module
-PeerCass.prototype.superType = function(_type) {
+PeerCasa.prototype.superType = function(_type) {
    return "peercasa";
 };
 
@@ -164,7 +164,7 @@ PeerCasa.prototype.invalidate = function() {
    delete this.sources;
    this.sources = [];
 
-   this.props['ACTIVE'].invalidate(false);
+   this.properties['ACTIVE'].invalidate(false);
    this.gang.casa.refreshSourceListeners();
 }
 
@@ -703,17 +703,17 @@ PeerCasa.prototype.refreshSimpleConfig = function() {
 
    for (var j = 0; j < this.config.sources.length; ++j) {
       var allProps = {};
-      var props = this.sources[this.config.sources[j].uName].props;
+      var properties = this.sources[this.config.sources[j].uName].properties;
 
-      for (var name in props) {
+      for (var name in properties) {
 
-         if (props.hasOwnProperty(name)) {
-            allProps[name] = props[name].value;
+         if (properties.hasOwnProperty(name)) {
+            allProps[name] = properties[name].value;
          }
       }
 
       delete this.config.sources[j].properties;
-      this.config.sources[j].properies = util.copy(allProps);
+      this.config.sources[j].properties = util.copy(allProps);
    }
 
    return this.config;

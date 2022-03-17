@@ -26,7 +26,7 @@ SmeeSource.prototype.start = function(_property) {
 
 SmeeSource.prototype.newPropertyChangeReceived = function(_msg) {
 
-   if (_msg && _msg.hasOwnProperty("propName") && _msg.hasOwnProperty("propValue") && this.props.hasOwnProperty(_msg.propName)) {
+   if (_msg && _msg.hasOwnProperty("propName") && _msg.hasOwnProperty("propValue") && this.properties.hasOwnProperty(_msg.propName)) {
       this.alignPropertyValue(_msg.propName, _msg.propValue);
    }
 };

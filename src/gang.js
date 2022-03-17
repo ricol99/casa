@@ -64,11 +64,11 @@ Gang.prototype.connectToPeers = function() {
 
    if (this.casa.connectToPeers) {
 
-      setTimeout( (_dbCallback_) => {
+      setTimeout( () => {
          this.casa.startListening();
          var PeerCasaService = require('./peercasaservice');
          this.peerCasaService = new PeerCasaService({ gang: this.name, fetchDbMode: false });
-      }, 20000 + Math.floor(Math.random(20000)), _dbCallback);
+      }, 20000 + Math.floor(Math.random(20000)));
    }
 };
 
@@ -87,10 +87,11 @@ Gang.prototype.coldStart = function() {
    }
 }
 
-Gang.prototype.createPeerCasa = function(_config, _anonymous) {
-   console.log('Creating a peer casa for casa ' + _config.name);
+Gang.prototype.createPeerCasa = function(_name, _anonymous) {
+   console.log('Creating a peer casa for casa ' + _name);
 
-   var peerCasa = this.createChild(_config, "peercasa", this);
+   var config = { name: _name, type: "peercasa"};
+   var peerCasa = this.createChild(config, "peercasa", this);
 
    if (_anonymous) {
       delete this.peercasas[peerCasa.uName];
@@ -150,8 +151,7 @@ Gang.prototype.getDbs = function() {
 };
 
 Gang.prototype.getDb = function(_dbName, _meta, _callback) {
-
-   var dbName = (_dbName) ? _dbName : this.name;
+   var dbName = (_dbName) ? _dbName+"-db" : this.name+"-db";
 
    if (this.dbs.hasOwnProperty(dbName)) {
 

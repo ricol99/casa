@@ -7,7 +7,7 @@ function SourceBase(_config, _owner) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
    this.bowing = false;
-   this.props = {};
+   this.properties = {};
 
    this.setMaxListeners(0);
 }
@@ -37,7 +37,7 @@ SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
 
    if (_event === "property-changed") {
-      this.propertySubscribedTo(_subscription.prop, _subscription, this.props.hasOwnProperty(_subscription.prop));
+      this.propertySubscribedTo(_subscription.prop, _subscription, this.properties.hasOwnProperty(_subscription.prop));
    }
    else {
       this.eventSubscribedTo(_event, _subscription);
@@ -86,18 +86,18 @@ SourceBase.prototype.standUpFromBow = function() {
 
 SourceBase.prototype.coldStart = function() {
 
-   for (var prop in this.props) {
+   for (var prop in this.properties) {
 
-      if (this.props.hasOwnProperty(prop)) {
-         this.props[prop].coldStart();
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].coldStart();
       }
    }
 };
 
 SourceBase.prototype.isPropertyValid = function(_property) {
 
-   if (this.props.hasOwnProperty(_property)) {
-      return this.props[_property].valid;
+   if (this.properties.hasOwnProperty(_property)) {
+      return this.properties[_property].valid;
    }
    else {
       return true;
@@ -105,44 +105,44 @@ SourceBase.prototype.isPropertyValid = function(_property) {
 };
 
 SourceBase.prototype.hasProperty = function(_property) {
-   return this.props.hasOwnProperty(_property);
+   return this.properties.hasOwnProperty(_property);
 };
 
 SourceBase.prototype.getProperty = function(_property) {
 
-   if (!this.props.hasOwnProperty(_property)) {
+   if (!this.properties.hasOwnProperty(_property)) {
       console.error(this.uName + ": Asked for property " + _property + " that I don't have.");
    }
 
-   return (this.props.hasOwnProperty(_property)) ? this.props[_property].getValue() : undefined;
+   return (this.properties.hasOwnProperty(_property)) ? this.properties[_property].getValue() : undefined;
 };
 
 SourceBase.prototype.getAllProperties = function(_allProps) {
 
-   for (var prop in this.props) {
+   for (var prop in this.properties) {
 
-      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
-         _allProps[prop] = this.props[prop].value;
+      if (this.properties.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
+         _allProps[prop] = this.properties[prop].value;
       }
    }
 };
 
 SourceBase.prototype.findAllProperties = function(_allProps) {
 
-   for (var prop in this.props) {
+   for (var prop in this.properties) {
 
-      if (this.props.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
-         _allProps[prop] = { value: this.props[prop].value, local: this.props[prop].local };
+      if (this.properties.hasOwnProperty(prop) && !_allProps.hasOwnProperty(prop)) {
+         _allProps[prop] = { value: this.properties[prop].value, local: this.properties[prop].local };
       }
    }
 };
 
 SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
-   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.props[_propName].value);
+   console.log(this.uName + ": Property " + _propName + " going invalid! Previously active state=" + this.properties[_propName].value);
 
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.sourceName =  this.uName;
-   sendData.oldState = this.props[_propName].value;
+   sendData.oldState = this.properties[_propName].value;
    sendData.name = _propName;
    console.log(this.uName + ": Emitting invalid!");
 
@@ -150,7 +150,7 @@ SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
 }
 
 SourceBase.prototype.invalidate = function(_includeChildren) {
-   console.log(this.uName + ": Raising invalid on all props to drop source listeners");
+   console.log(this.uName + ": Raising invalid on all properties to drop source listeners");
 
    if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {
       this.clearAlignmentQueue();
@@ -180,23 +180,23 @@ SourceBase.prototype.alignPropertyValue = function(_propName, _nextPropValue) {
 };
 
 SourceBase.prototype.rejectPropertyUpdate = function(_propName) {
-   this.alignPropertyValue(_propName, this.props[_propName].value);
+   this.alignPropertyValue(_propName, this.properties[_propName].value);
 };
 
 SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
 
-   if (!this.props.hasOwnProperty(_propName)) {
+   if (!this.properties.hasOwnProperty(_propName)) {
       _config.name = _propName;
-      _config.type = _propType ? ((_propType === "property") ? "prop" : _propType) : "prop";
-      this.createChild(_config, "prop", this);
+      _config.type = _propType;
+      this.createChild(_config, "property", this);
 
       if (_mainConfig) {
 
-         if (!_mainConfig.hasOwnProperty("props")) {
-            _mainConfig.props = [ _config ];
+         if (!_mainConfig.hasOwnProperty("properties")) {
+            _mainConfig.properties = [ _config ];
          }
          else {
-            _mainConfig.props.push(_config);
+            _mainConfig.properties.push(_config);
          }
       }
       return true;
@@ -206,9 +206,9 @@ SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _conf
 
 SourceBase.prototype.overrideExistingProperty = function(_propName, _propType, _config, _mainConfig) {
 
-   if (this.props.hasOwnProperty(_propName)) {
-      this.props[_propName]._cleanUp();
-      delete this.props[_propName];
+   if (this.properties.hasOwnProperty(_propName)) {
+      this.properties[_propName]._cleanUp();
+      this.removeChildNamedObject(this.properties[_propName]);
    }
 
    this.ensurePropertyExists(_propName, _propType, _config, _mainConfig) ;
@@ -232,10 +232,10 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
 SourceBase.prototype.changeName = function(_newName) {
    this.setName(_newName);
 
-   for (var prop in this.props) {
+   for (var prop in this.properties) {
 
-      if (this.props.hasOwnProperty(prop)) {
-         this.props[prop].ownerHasNewName();
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].ownerHasNewName();
       }
    }
 };

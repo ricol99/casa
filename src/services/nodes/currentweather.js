@@ -79,15 +79,15 @@ CurrentWeather.prototype.fetchCurrentWeather = function(_callback) {
 }
 
 CurrentWeather.prototype.updateLocalProperties = function(_result) {
-   var props = [];
+   var properties = [];
    for (var prop in _result) {
 
       if (_result.hasOwnProperty(prop)) {
-         props.push( { property: prop, value: _result[prop] });
+         properties.push( { property: prop, value: _result[prop] });
       }
    }
 
-   this.alignProperties(props);
+   this.alignProperties(properties);
 };
 
 CurrentWeather.prototype.processPropertyChanged = function(_transaction, _callback) {

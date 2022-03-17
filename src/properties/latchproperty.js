@@ -1,5 +1,5 @@
 var util = require('../util');
-var Property = require('../prop');
+var Property = require('../property');
 
 function LatchProperty(_config, _owner) {
    this.minOutputTime = _config.minOutputTime;

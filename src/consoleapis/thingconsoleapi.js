@@ -88,7 +88,7 @@ ThingConsoleApi.prototype.createProperty = function(_session, _params, _callback
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
 
-   if (this.myObj().props.hasOwnProperty(config.name)) {
+   if (this.myObj().properties.hasOwnProperty(config.name)) {
       return _callback("Property already exists!");
    }
 
@@ -109,11 +109,11 @@ ThingConsoleApi.prototype.createProperty = function(_session, _params, _callback
             return _callback("Unable to persist new property!");
          }
 
-         if (myThingInConfig.hasOwnProperty("props")) {
-            myThingInConfig.props.push(config);
+         if (myThingInConfig.hasOwnProperty("properties")) {
+            myThingInConfig.properties.push(config);
          }
          else {
-            myThingInConfig.props = [ config ];
+            myThingInConfig.properties = [ config ];
          }
 
          this.db.update(_topThingConfig, (_err2, _result2) => {
@@ -125,7 +125,7 @@ ThingConsoleApi.prototype.createProperty = function(_session, _params, _callback
             this.myObj().createProperty(config);
             topThing.inheritChildProps();
             this.gang.casa.refreshSourceListeners();
-            this.myObj().props[config.name].coldStart();
+            this.myObj().properties[config.name].coldStart();
             return _callback(null, true);
          });
       });
@@ -134,7 +134,7 @@ ThingConsoleApi.prototype.createProperty = function(_session, _params, _callback
       this.myObj().createProperty(config);
       topThing.inheritChildProps();
       this.gang.casa.refreshSourceListeners();
-      this.myObj().props[config.name].coldStart();
+      this.myObj().properties[config.name].coldStart();
       _callback(null, true);
    }
 };

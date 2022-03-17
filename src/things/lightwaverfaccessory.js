@@ -97,7 +97,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             if (_propValue) {
 
                if (this.brightnessSupported) {
-                  this.lightwaveRfService.setDeviceDim(this.roomId, this.deviceId, this.props["brightness"].value, this.powerCallbackHandler);
+                  this.lightwaveRfService.setDeviceDim(this.roomId, this.deviceId, this.properties["brightness"].value, this.powerCallbackHandler);
                }
                else {
                   this.lightwaveRfService.turnDeviceOn(this.roomId, this.deviceId, this.powerCallbackHandler);
@@ -149,7 +149,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
          this.alignPropertyValue("mood", "off");
       }
       else {
-         var brightness = (_propName == "brightness") ? _propValue : this.props["brightness"].value;
+         var brightness = (_propName == "brightness") ? _propValue : this.properties["brightness"].value;
          var moodName = moodForBrightness(this.moods, brightness);
 
          if (moodName == "off") {

@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../prop');
+var Property = require('../property');
 
 function LinearTransformProperty(_config, _owner) {
    Property.call(this, _config, _owner);

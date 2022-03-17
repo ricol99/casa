@@ -22,6 +22,11 @@ function Db(_dbName, _dbPath, _newDb, _owner) {
 
 util.inherits(Db, NamedObject);
 
+// Used to classify the type and understand where to load the javascript module
+Db.prototype.superType = function(_type) {
+   return "db";
+};
+
 Db.prototype.getCasa = function() {
    return this.owner.getCasa();
 };

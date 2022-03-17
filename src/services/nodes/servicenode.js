@@ -39,7 +39,7 @@ ServiceNode.prototype.newSubscriptionAdded = function(_subscription) {
 ServiceNode.prototype.processSubscription = function(_subscription) {
 
    if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
-      this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, props: {}, events: {}, args: _subscription.args };
+      this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, properties: {}, events: {}, args: _subscription.args };
    }
 
    var sub = this.subscribers[_subscription.subscriber];
@@ -50,7 +50,7 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
    this.sync.write = this.sync.write || _subscription.sync.endsWith("write");
 
    if (_subscription.hasOwnProperty("serviceProperty")) {
-      sub.props[_subscription.serviceProperty] = _subscription.hasOwnProperty("subscriberProperty") ? _subscription.subscriberProperty : _subscription.serviceProperty;
+      sub.properties[_subscription.serviceProperty] = _subscription.hasOwnProperty("subscriberProperty") ? _subscription.subscriberProperty : _subscription.serviceProperty;
       this.createProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub);
    }
    else if (_subscription.hasOwnProperty("serviceEvent")) {
@@ -62,10 +62,10 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
 
 ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub) {
 
-   if (this.props.hasOwnProperty(_property)) {
+   if (this.properties.hasOwnProperty(_property)) {
 
       if (_sub.sync !== "read") {
-         this.props[_property].addNewSource({ uName: _sub.uName, property: _subscriberProp });
+         this.properties[_property].addNewSource({ uName: _sub.uName, property: _subscriberProp });
       }
    }
    else {
@@ -76,7 +76,7 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
       else {
          this.ensurePropertyExists(_property, 'property', { allSourcesRequiredForValidity: false,
                                                             source: { uName: _sub.uName, property: _subscriberProp }});
-         console.log(this.uName + ": AAAAAA ============= createProperty() property " + _property + " created with uName " + this.props[_property].uName + " and source " + _sub.uName + " and sub prop " + _subscriberProp);
+         console.log(this.uName + ": AAAAAA ============= createProperty() property " + _property + " created with uName " + this.properties[_property].uName + " and source " + _sub.uName + " and sub prop " + _subscriberProp);
       }
 
       this.serviceProps.push(_property);
@@ -118,12 +118,12 @@ ServiceNode.prototype.propertyAboutToChange = function(_propName, _propValue, _d
    }
 };
 
-ServiceNode.prototype.addMissingProperties = function(_props) {
+ServiceNode.prototype.addMissingProperties = function(_properties) {
 
    for (var i = 0; i < this.serviceProps.length; ++i) {
 
-      if (!_props.hasOwnProperty(this.serviceProps[i])) {
-         _props[this.serviceProps[i]] = this.getProperty(this.serviceProps[i]);
+      if (!_properties.hasOwnProperty(this.serviceProps[i])) {
+         _properties[this.serviceProps[i]] = this.getProperty(this.serviceProps[i]);
       }
    }
 };

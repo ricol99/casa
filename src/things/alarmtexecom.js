@@ -75,13 +75,13 @@ function AlarmTexecom(_config, _parent) {
    this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' }, _config);
 
-   this.alarmStateMap = [ { nineDIndex: 68, prop: this.props['away-armed'], state: STATE_AWAY_ARM, value: false },
+   this.alarmStateMap = [ { nineDIndex: 68, prop: this.properties['away-armed'], state: STATE_AWAY_ARM, value: false },
                           { nineDIndex: 42, value: false }, { nineDIndex: 44, value: false },
                           { nineDIndex: 46, value: false } ];
 
-   this.alarmStateMap[this.stayPartArmNumber].prop = this.props['stay-armed'];
+   this.alarmStateMap[this.stayPartArmNumber].prop = this.properties['stay-armed'];
    this.alarmStateMap[this.stayPartArmNumber].state = STATE_STAY_ARM;
-   this.alarmStateMap[this.nightPartArmNumber].prop = this.props['night-armed'];
+   this.alarmStateMap[this.nightPartArmNumber].prop = this.properties['night-armed'];
    this.alarmStateMap[this.nightPartArmNumber].state = STATE_NIGHT_ARM;
 
    this.pollingTolerance = 30000;   // ms

@@ -23,7 +23,7 @@ function HomekitLightSensorAccessory(_config, _parent) {
 util.inherits(HomekitLightSensorAccessory, HomekitAccessory);
 
 HomekitLightSensorAccessory.prototype.getCurrentLightLevel = function() {
-   return this.props["light-level"].value;
+   return this.properties["light-level"].value;
 };
 
 HomekitLightSensorAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

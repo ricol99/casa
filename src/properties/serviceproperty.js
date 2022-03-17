@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../prop');
+var Property = require('../property');
 
 function ServiceProperty(_config, _owner) {
    this.id = _config.id.toString().replace(/-/g, "");

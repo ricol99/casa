@@ -54,11 +54,11 @@ function HomekitSecuritySystem(_config, _parent) {
 util.inherits(HomekitSecuritySystem, HomekitAccessory);
 
 HomekitSecuritySystem.prototype.getCurrentState = function() {
-   return this.props["current-state"].value;
+   return this.properties["current-state"].value;
 };
 
 HomekitSecuritySystem.prototype.getTargetState = function() {
-   return this.props["target-state"].value;
+   return this.properties["target-state"].value;
 };
 
 HomekitSecuritySystem.prototype.setTargetState = function(_state) {
@@ -68,11 +68,11 @@ HomekitSecuritySystem.prototype.setTargetState = function(_state) {
 };
 
 HomekitSecuritySystem.prototype.getSystemFault = function() {
-   return this.props["system-fault"].value;
+   return this.properties["system-fault"].value;
 }
 
 HomekitSecuritySystem.prototype.getTamperState = function() {
-   return this.props["tamper-state"].value;
+   return this.properties["tamper-state"].value;
 }
 
 HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

@@ -54,14 +54,14 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
       }
    }
    else {
-      this.raiseEvent(this.eventName, { value: _status, oldValue: this.props[this.switchProp].value });
+      this.raiseEvent(this.eventName, { value: _status, oldValue: this.properties[this.switchProp].value });
       this.setManualMode();
       this.alignPropertyValue(this.switchProp, _status ? true : false);
    }
 };
 
 HomekitSwitchAccessory.prototype.getSwitch = function() {
-   return (this.stateless) ? false : this.props[this.switchProp].value ? 1 : 0;
+   return (this.stateless) ? false : this.properties[this.switchProp].value ? 1 : 0;
 };
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

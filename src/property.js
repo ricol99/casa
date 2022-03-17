@@ -2,7 +2,7 @@ var util = require('./util');
 var SourceListener = require('./sourcelistener');
 var NamedObject = require('./namedobject');
 
-function Prop(_config, _owner) {
+function Property(_config, _owner) {
    NamedObject.call(this, _config, _owner);
 
    this.owner = _owner;
@@ -46,15 +46,15 @@ function Prop(_config, _owner) {
    }
 }
 
-util.inherits(Prop, NamedObject);
+util.inherits(Property, NamedObject);
 
 // Used to classify the type and understand where to load the javascript module
-Prop.prototype.superType = function(_type) {
-   return "prop";
+Property.prototype.superType = function(_type) {
+   return "property";
 };
 
 // Called when system state is required
-Prop.prototype.export = function(_exportObj) {
+Property.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
       _exportObj.cold = this.cold;
@@ -73,12 +73,12 @@ Prop.prototype.export = function(_exportObj) {
    return false;
 };
 
-Prop.prototype.getCasa = function() {
+Property.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
 
 // Add a new source to the property - not persisted
-Prop.prototype.addNewSource = function(_config) {
+Property.prototype.addNewSource = function(_config) {
    var sourceListener = new SourceListener(_config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
@@ -87,12 +87,12 @@ Prop.prototype.addNewSource = function(_config) {
 //
 // Returns current property value 
 //
-Prop.prototype.getValue = function() {
+Property.prototype.getValue = function() {
    return this.value;
 };
 
 // Used internally by derived Property to set a new value for the property
-Prop.prototype.updatePropertyInternal = function(_newPropValue, _data) {
+Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    this.rawPropertyValue = _newPropValue;
    this.cancelCurrentRamp();
 
@@ -111,7 +111,7 @@ Prop.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 //
 // Used to set the property directly
 //
-Prop.prototype.set = function(_propValue, _data) {
+Property.prototype.set = function(_propValue, _data) {
    this.cancelCurrentRamp();
    this.setPropertyInternal(_propValue, _data);
    return true;
@@ -121,12 +121,12 @@ Prop.prototype.set = function(_propValue, _data) {
 // Used to set the property directly
 // Instead of specifying a value, specify a config for the ramp
 //
-Prop.prototype.setWithRamp = function(_config, _data) {
+Property.prototype.setWithRamp = function(_config, _data) {
    this.cancelCurrentRamp();
    this.createAndStartRamp(_config, _data);
 };
 
-Prop.prototype.createAndStartRamp = function(_config, _data) {
+Property.prototype.createAndStartRamp = function(_config, _data) {
    this.rampConfig = util.copy(_config);
 
    if (_config.hasOwnProperty("ramps")) {
@@ -137,7 +137,7 @@ Prop.prototype.createAndStartRamp = function(_config, _data) {
    this.ramp.start(this.value);
 };
 
-Prop.prototype.cancelCurrentRamp = function() {
+Property.prototype.cancelCurrentRamp = function() {
 
    if (this.ramp) {
       this.ramp.cancel();
@@ -149,12 +149,12 @@ Prop.prototype.cancelCurrentRamp = function() {
    }
 };
 
-Prop.prototype.newValueFromRamp = function(_ramp, _config, _value) {
+Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
    console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
    this.setPropertyInternal(_value, this.rampData);
 };
 
-Prop.prototype.rampComplete = function(_ramp, _config) {
+Property.prototype.rampComplete = function(_ramp, _config) {
    delete this.ramp;
    delete this.rampConfig;
    this.ramp = null;
@@ -167,7 +167,7 @@ Prop.prototype.rampComplete = function(_ramp, _config) {
 // Useful when synchronising an external device with a property value (e.g. gpio in)
 // You cannot stop the property changing or change the value, it is for information only
 //
-Prop.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
+Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
    // BY DEFAULT, DO NOTHING
 };
 
@@ -176,7 +176,7 @@ Prop.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
 // Simple policy based of validity of defined sources and config variable this.allSourcesRequiredForValidity
 // Override this to create a more complex policy
 //
-Prop.prototype.amIValid = function() {
+Property.prototype.amIValid = function() {
 
    if (this.allSourcesRequiredForValidity) {
 
@@ -197,7 +197,7 @@ Prop.prototype.amIValid = function() {
 // E.g. it may decide it needs all sources to be valid, or just one
 // Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
-Prop.prototype.sourceIsValid = function(_data) {
+Property.prototype.sourceIsValid = function(_data) {
    var oldValid = this.valid;
    this.valid = this.amIValid();
 }
@@ -208,14 +208,14 @@ Prop.prototype.sourceIsValid = function(_data) {
 // Some properties wish to delay or stop this and become responsible for calling this function
 // when they override Property.prototype.sourceIsInvalid()
 //
-Prop.prototype.invalidate = function (_includeChildren) {
+Property.prototype.invalidate = function (_includeChildren) {
    console.log(this.uName + ': INVALID');
    this.owner.propertyGoneInvalid(this.name);
    NamedObject.prototype.invalidate.call(this);
    this.cancelCurrentRamp();
 }
 
-Prop.prototype.goValid = function (_data) {
+Property.prototype.goValid = function (_data) {
 }
 
 //
@@ -224,7 +224,7 @@ Prop.prototype.goValid = function (_data) {
 // E.g. it may decide it needs all sources to be valid, or just one
 // Override amIValid() to change the standard simple policy based of the config variable this.allSourcesRequiredForValidity
 //
-Prop.prototype.sourceIsInvalid = function(_data) {
+Property.prototype.sourceIsInvalid = function(_data) {
    console.log(this.uName + ': Property.prototype.sourceIsInvalid');
 
    var oldValid = this.valid;
@@ -239,7 +239,7 @@ Prop.prototype.sourceIsInvalid = function(_data) {
 //
 // Called by SourceListener as a defined source has changed it property value
 //
-Prop.prototype.receivedEventFromSource = function(_data) {
+Property.prototype.receivedEventFromSource = function(_data) {
 
    if (this.valid) {
 
@@ -254,13 +254,13 @@ Prop.prototype.receivedEventFromSource = function(_data) {
 // If the property wants to update its value, it should call this.updatePropertyInternal() method
 // Only then will the property value be set
 //
-Prop.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyInternal(_data.value, _data);
 };
 
 // Override this if you listen to a source that is not "Source".
 // If you listen to a "Source" you will be fired by that Source cold starting
-Prop.prototype.coldStart = function(_data) {
+Property.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
       console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
@@ -274,7 +274,7 @@ Prop.prototype.coldStart = function(_data) {
 // ====================
 
 // Not to be called by anything other than owner (Thing or Source)
-Prop.prototype._actuallySetPropertyValue = function(_newValue) {
+Property.prototype._actuallySetPropertyValue = function(_newValue) {
 
    if ((this.value !== _newValue) || this.cold) {
 
@@ -287,7 +287,7 @@ Prop.prototype._actuallySetPropertyValue = function(_newValue) {
    }
 };
 
-Prop.prototype.setPropertyInternal = function(_newValue, _data) {
+Property.prototype.setPropertyInternal = function(_newValue, _data) {
    console.log(this.uName + ": setPropertyInternal value="+_newValue);
 
    if ((this.value !== _newValue) || this.cold) {
@@ -304,7 +304,7 @@ Prop.prototype.setPropertyInternal = function(_newValue, _data) {
    }
 };
 
-Prop.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
+Property.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    // Transform new property value based on source
    var actualOutputValue = _newPropValue;
 
@@ -336,14 +336,14 @@ Prop.prototype.transformNewPropertyValue = function(_newPropValue, _data) {
    return actualOutputValue;
 };
 
-Prop.prototype.checkData = function(_value, _data) {
+Property.prototype.checkData = function(_value, _data) {
 
    if (!_data.hasOwnProperty('sourceName')) _data.sourceName = this.owner.uName;
    if (!_data.hasOwnProperty('name')) _data.name = this.name;
    if (!_data.hasOwnProperty('value')) _data.value = _value;
 };
 
-Prop.prototype._addSource = function(_source) {
+Property.prototype._addSource = function(_source) {
    this.hasSourceOutputValues = this.hasSourceOutputValues || (_source.hasOwnProperty('outputValues'));
 
    if (!_source.hasOwnProperty("uName") || _source.uName == undefined) {
@@ -354,7 +354,7 @@ Prop.prototype._addSource = function(_source) {
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
 };
 
-Prop.prototype._cleanUp = function() {
+Property.prototype._cleanUp = function() {
 
    for (var sl in this.sourceListeners) {
 
@@ -364,4 +364,4 @@ Prop.prototype._cleanUp = function() {
    }
 };
 
-module.exports = exports = Prop;
+module.exports = exports = Property;

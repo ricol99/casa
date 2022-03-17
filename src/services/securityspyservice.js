@@ -63,14 +63,14 @@ SecuritySpyService.prototype.needToSync = function(_cameraId, _property, _value)
    return this.cameras[_cameraId.toString()][_property] !== _value;
 };
 
-SecuritySpyService.prototype.cameraPropUpdateReceivedFromServer = function(_cameraId, _props) {
+SecuritySpyService.prototype.cameraPropUpdateReceivedFromServer = function(_cameraId, _properties) {
 
    if (!this.cameras[_cameraId.toString()]) {
       this.cameras[_cameraId.toString()] = {};
    }
 
-   for (index in _props) {
-      this.cameras[_cameraId.toString()][index] = _props[index];
+   for (index in _properties) {
+      this.cameras[_cameraId.toString()][index] = _properties[index];
    }
 
    this.syncWithCameraObj(_cameraId);
@@ -84,7 +84,7 @@ SecuritySpyService.prototype.syncWithCameraObj = function(_cameraId) {
    }
 
    var cameraObj = this.cameras[_cameraId.toString()].cameraObj;
-   var props = [];
+   var properties = [];
 
    for (prop in this.cameras[_cameraId.toString()]) {
 
@@ -93,12 +93,12 @@ SecuritySpyService.prototype.syncWithCameraObj = function(_cameraId) {
       }
 
       if (this.cameras[_cameraId.toString()][prop] !== cameraObj.getProperty(prop)) {
-         props.push({ property: prop, value: this.cameras[_cameraId.toString()][prop] });
+         properties.push({ property: prop, value: this.cameras[_cameraId.toString()][prop] });
       }
    }
 
-   if (props.length > 0) {
-      cameraObj.alignProperties(props);
+   if (properties.length > 0) {
+      cameraObj.alignProperties(properties);
    }
 };
 
@@ -316,9 +316,9 @@ LiveStreamListener.prototype.processLine = function(_line) {
    }
 
    if (change[changeParam].hasOwnProperty("property")) {
-      var props = {};
-      props[change[changeParam].property] = change[changeParam].value;
-      this.owner.cameraPropUpdateReceivedFromServer(cameraId, props);
+      var properties = {};
+      properties[change[changeParam].property] = change[changeParam].value;
+      this.owner.cameraPropUpdateReceivedFromServer(cameraId, properties);
    }
    else {
       this.owner.newEventFromServer(cameraId, change[changeParam].event);
@@ -377,12 +377,12 @@ SystemInfo.prototype.processAllData = function(_callback) {
 
       for (index in _result.system.cameralist[0].camera) {
 
-         var props = { "ACTIVE": _result.system.cameralist[0].camera[index].connected == "yes",
+         var properties = { "ACTIVE": _result.system.cameralist[0].camera[index].connected == "yes",
                        "continuous-capture": _result.system.cameralist[0].camera[index]["mode-c"] == "armed",
                        "motion-capture": _result.system.cameralist[0].camera[index]["mode-m"] == "armed",
                        "actions": _result.system.cameralist[0].camera[index]["mode-a"] == "armed" };
 
-         this.owner.cameraPropUpdateReceivedFromServer(_result.system.cameralist[0].camera[index].number, props);
+         this.owner.cameraPropUpdateReceivedFromServer(_result.system.cameralist[0].camera[index].number, properties);
       }
 
       this.initialInfoReceived = true;

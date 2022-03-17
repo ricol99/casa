@@ -2,7 +2,7 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_uName, _name, _priority, _props, _peerCasa) {
+function PeerSource(_uName, _name, _priority, _properties, _peerCasa) {
    var gang = Gang.mainInstance();
    var bowingOwner = _peerCasa.getBowingSource(_uName.replace(":"+_name));
 
@@ -29,9 +29,9 @@ function PeerSource(_uName, _name, _priority, _props, _peerCasa) {
       }
    }
 
-   for (var prop in _props) {
+   for (var prop in _properties) {
       this.ensurePropertyExists(prop, 'property', { name: prop });
-      this.props[prop].set(_props[prop], {});
+      this.properties[prop].set(_properties[prop], {});
    }
 
    this.casa.addSource(this);
@@ -58,15 +58,15 @@ PeerSource.prototype.interestInNewChild = function(_uName) {
 // INTERNAL METHOD AND FOR USE BY PROPERTIES
 PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.props.hasOwnProperty(_propName)) {
+   if (this.properties.hasOwnProperty(_propName)) {
 
-      if ((!(_data && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
+      if ((!(_data && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
          return true;
       }
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
-      var oldValue = this.props[_propName].value;
+      var oldValue = this.properties[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
       sendData.sourceName = this.uName;
       sendData.name = _propName;
@@ -75,11 +75,11 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.local = true;
 
       // Call the final hooks
-      this.props[_propName].propertyAboutToChange(_propValue, sendData);
+      this.properties[_propName].propertyAboutToChange(_propValue, sendData);
 
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
-      this.props[_propName].value = _propValue;
-      this.props[_propName].previousValue = oldValue;
+      this.properties[_propName].value = _propValue;
+      this.properties[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
       this.asyncEmit('property-changed', sendData);
       return true;
@@ -105,9 +105,9 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
 
    if (newPropAdded) {
-      this.props[_data.name].coldStart();
+      this.properties[_data.name].coldStart();
    }
-   this.props[_data.name].set(_data.value, _data);
+   this.properties[_data.name].set(_data.value, _data);
 };
 
 PeerSource.prototype.sourceHasRaisedEvent = function(_data) {

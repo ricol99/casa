@@ -6,7 +6,7 @@ var SourceListener = require('./sourcelistener');
 {
    "name": "scene:on-holiday",
    "displayName": "On Holiday Scene",
-   "props": [
+   "properties": [
       {
          "name": "ACTIVE",
          "type": "scheduleproperty",

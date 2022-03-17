@@ -23,7 +23,7 @@ function HomekitTempSensorAccessory(_config, _parent) {
 util.inherits(HomekitTempSensorAccessory, HomekitAccessory);
 
 HomekitTempSensorAccessory.prototype.getCurrentTemperature = function() {
-   return this.props["temperature"].value;
+   return this.properties["temperature"].value;
 };
 
 HomekitTempSensorAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

@@ -124,7 +124,7 @@ SourceConsoleApi.prototype.createProperty = function(_session, _params, _callbac
    var result = this.myObj().createProperty(propertyConfig);
 
    if (result && persist) {
-      this.persistUpdatedSource("props", propertyConfig, "add", _callback);
+      this.persistUpdatedSource("properties", propertyConfig, "add", _callback);
    }
    else {
       _callback(null, result);

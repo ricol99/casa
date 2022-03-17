@@ -9,7 +9,7 @@ var SourceListener = require('./sourcelistener');
    "displayName": "On Holiday Agent",
    "eventProp": "receivedEvent",
    "stateProp": "currentState",
-   "props": [
+   "properties": [
       {
          "name": "receivedEvent",
          "initialValue": "none"

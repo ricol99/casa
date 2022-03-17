@@ -26,7 +26,7 @@ PusherSource.prototype.start = function(_property) {
          channel.bind("property-changed", (_data) => {
             console.log(this.uName + ": Property Change: name: " + _data.propName + ", value: " + _data.propValue);
 
-            if (_data && _data.hasOwnProperty("propName") && _data.hasOwnProperty("propValue") && this.props.hasOwnProperty(_data.propName)) {
+            if (_data && _data.hasOwnProperty("propName") && _data.hasOwnProperty("propValue") && this.properties.hasOwnProperty(_data.propName)) {
                this.alignPropertyValue(_data.propName, _data.propValue);
             }
          }, this);

@@ -85,7 +85,7 @@ HomekitLightAccessory.prototype.setPower = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getPower = function() {
-   return this.props[this.powerProp].value ? 1 : 0;
+   return this.properties[this.powerProp].value ? 1 : 0;
 };
 
 HomekitLightAccessory.prototype.setBrightness = function(_status) {
@@ -95,7 +95,7 @@ HomekitLightAccessory.prototype.setBrightness = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getBrightness = function() {
-   return this.props["brightness"].value;
+   return this.properties["brightness"].value;
 }
 
 HomekitLightAccessory.prototype.setSaturation = function(_status) {
@@ -105,7 +105,7 @@ HomekitLightAccessory.prototype.setSaturation = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getSaturation = function() {
-   return this.props["saturation"].value;
+   return this.properties["saturation"].value;
 }
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
@@ -115,7 +115,7 @@ HomekitLightAccessory.prototype.setHue = function(_status) {
 };
 
 HomekitLightAccessory.prototype.getHue = function() {
-   return this.props["hue"].value;
+   return this.properties["hue"].value;
 }
 
 HomekitLightAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

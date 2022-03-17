@@ -24,10 +24,10 @@ SourceBaseConsoleApi.prototype.export = function(_session, _params, _callback) {
 SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
    var output = [];
 
-   for (var prop in this.myObj().props) {
+   for (var prop in this.myObj().properties) {
 
-      if (this.myObj().props.hasOwnProperty(prop)) {
-         output.push(this.myObj().props[prop].name+"="+this.myObj().props[prop].getValue());
+      if (this.myObj().properties.hasOwnProperty(prop)) {
+         output.push(this.myObj().properties[prop].name+"="+this.myObj().properties[prop].getValue());
       }
    }
    _callback(null, output);
@@ -88,7 +88,7 @@ SourceBaseConsoleApi.prototype.watch = function(_session, _params, _callback) {
    if (watchList.hasOwnProperty(_params[0])) {
       return _callback("Already watching \""+_params[0]+"\"");
    }
-   else if (this.myObj() && this.myObj().props.hasOwnProperty(_params[0])) {
+   else if (this.myObj() && this.myObj().properties.hasOwnProperty(_params[0])) {
       watchList[_params[0]] = this.findOrCreateSourceListener(_params[0]);
       return _callback(null, "Watching \""+_params[0]+"\"");
    }

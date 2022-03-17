@@ -1,12 +1,12 @@
 var util = require('../util');
 var NamedObject = require('../namedobject');
-var Prop = require('../prop');
+var Property = require('../property');
 var SourceListener = require('../sourcelistener');
 var Gang = require('../gang');
 var State = require('../state');
 
 function StateProperty(_config, _owner) {
-   Prop.call(this, _config, _owner);
+   Property.call(this, _config, _owner);
 
    this.gang = Gang.mainInstance();
    this.states = {};
@@ -44,12 +44,12 @@ function StateProperty(_config, _owner) {
    }
 }
 
-util.inherits(StateProperty, Prop);
+util.inherits(StateProperty, Property);
 
 // Called when system state is required
 StateProperty.prototype.export = function(_exportObj) {
 
-   if (Prop.prototype.export.call(this, _exportObj)) {
+   if (Property.prototype.export.call(this, _exportObj)) {
       _exportObj.controllingOwner = this.controllingOwner;
       _exportObj.currentPriority = this.currentPriority;
       _exportObj.currentState = this.currentState ? this.currentState.name : null;
@@ -68,7 +68,7 @@ StateProperty.prototype.coldStart = function(_data) {
       this.setState(this.value, false);
    }
 
-   Prop.prototype.coldStart.call(this, _data);
+   Property.prototype.coldStart.call(this, _data);
 };
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
@@ -117,7 +117,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
       }
    }
    else {
-      Prop.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+      Property.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
    }
 };
 
@@ -354,34 +354,34 @@ StateProperty.prototype.alignProperties = function(_properties) {
 StateProperty.prototype.alignActions = function(_actions, _priority) {
 
    if (_actions && (this.ignoreControl || this.takeControl(_priority))) {
-      var props = [];
+      var properties = [];
       var events = [];
 
       for (var a = 0; a < _actions.length; ++a) {
-         var arr = (_actions[a].hasOwnProperty("property")) ? props : events;
+         var arr = (_actions[a].hasOwnProperty("property")) ? properties : events;
          arr.push(_actions[a]);
       }
 
-      if (props.length > 0) {
+      if (properties.length > 0) {
 
-         for (var z = 0; z < props.length; ++z) {
+         for (var z = 0; z < properties.length; ++z) {
 
-            if (props[z].hasOwnProperty("fromProperty")) {
-               props[z].value = this.owner.getProperty(props[z].fromProperty);
+            if (properties[z].hasOwnProperty("fromProperty")) {
+               properties[z].value = this.owner.getProperty(properties[z].fromProperty);
             }
-            else if (props[z].hasOwnProperty("source")) {
-               props[z].value = props[z].source.sourceListener.getPropertyValue();
+            else if (properties[z].hasOwnProperty("source")) {
+               properties[z].value = properties[z].source.sourceListener.getPropertyValue();
             }
-            else if (props[z].hasOwnProperty("apply")) {
-               var currentValue = this.owner.getProperty(props[z].property);
+            else if (properties[z].hasOwnProperty("apply")) {
+               var currentValue = this.owner.getProperty(properties[z].property);
                var output = false;
-               var exp = props[z].apply.replace(/\$value/g, "currentValue");
+               var exp = properties[z].apply.replace(/\$value/g, "currentValue");
                eval("output = " + exp);
-               props[z].value = output;
+               properties[z].value = output;
             }
          }
 
-         this.owner.alignProperties(props);
+         this.owner.alignProperties(properties);
       }
 
       for (var e = 0; e < events.length; ++e) {

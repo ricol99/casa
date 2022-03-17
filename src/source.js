@@ -17,7 +17,7 @@ function Source(_config, _owner) {
       this.mirrorSourceListener = new SourceListener({ uName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
    }
 
-   this.createChildren(_config.props, "prop", this);
+   this.createChildren(_config.properties, "property", this);
    this.createChildren(_config.events, "event", this);
 
    this.ensurePropertyExists('MODE', 'stateproperty',
@@ -54,7 +54,7 @@ Source.prototype.export = function(_exportObj) {
 
 Source.prototype.createProperty = function(_config) {
 
-   if (this.props.hasOwnProperty(_config.name)) {
+   if (this.properties.hasOwnProperty(_config.name)) {
       return false;
    }
 
@@ -124,9 +124,9 @@ Source.prototype.getRampService = function() {
 
 Source.prototype.setProperty = function(_propName, _propValue, _data) {
 
-   if (this.props.hasOwnProperty(_propName)) {
+   if (this.properties.hasOwnProperty(_propName)) {
       console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ' + _propValue);
-      return this.props[_propName].set(_propValue, _data);
+      return this.properties[_propName].set(_propValue, _data);
    }
    else {
       return false;
@@ -135,9 +135,9 @@ Source.prototype.setProperty = function(_propName, _propValue, _data) {
 
 Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
 
-   if (this.props.hasOwnProperty(_propName)) {
+   if (this.properties.hasOwnProperty(_propName)) {
       console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
-      return this.props[_propName].setWithRamp(_ramp, _data);
+      return this.properties[_propName].setWithRamp(_ramp, _data);
    }
    else {
       return false;
@@ -158,16 +158,16 @@ Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
-   if (this.props.hasOwnProperty(_propName)) {
+   if (this.properties.hasOwnProperty(_propName)) {
       console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
-      if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.props[_propName].value)) {
+      if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
          return true;
       }
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
-      var oldValue = this.props[_propName].value;
+      var oldValue = this.properties[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
       sendData.sourceName =  this.uName;
       sendData.name = _propName;
@@ -179,11 +179,11 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       // Call the final hooks
-      this.props[_propName].propertyAboutToChange(_propValue, _data);
+      this.properties[_propName].propertyAboutToChange(_propValue, _data);
       this.propertyAboutToChange(_propName, _propValue, _data);
 
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
-      this.props[_propName]._actuallySetPropertyValue(_propValue);
+      this.properties[_propName]._actuallySetPropertyValue(_propValue);
 
       if (sendData.hasOwnProperty("priority")) {
          _data.priority = sendData.priority;
@@ -372,11 +372,11 @@ Source.prototype.addSecondaryController = function(_controller, _priority) {
 };
 
 Source.prototype.getMode = function() {
-   return this.props['MODE'].value;
+   return this.properties['MODE'].value;
 };
 
 Source.prototype.getManualMode = function() {
-   return this.props['MODE'].value === 'manual';
+   return this.properties['MODE'].value === 'manual';
 };
 
 Source.prototype.setManualMode = function() {
@@ -384,7 +384,7 @@ Source.prototype.setManualMode = function() {
 };
 
 Source.prototype.getAutoMode = function() {
-   return this.props['MODE'].value === 'auto';
+   return this.properties['MODE'].value === 'auto';
 };
 
 Source.prototype.setAutoMode = function() {

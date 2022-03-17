@@ -152,7 +152,6 @@ NamedObject.prototype.create = function(_uName, _replace, _copyChildren, _constr
    }
 
    var spr = nextObjName.split(":");
-   //process.stdout.write("AAAAA NamedObject.prototype.create() _uName="+_uName+", this.uName="+this.uName+"\n");
 
    if (this.myNamedObjects.hasOwnProperty(spr[0])) {
 
@@ -347,7 +346,7 @@ NamedObject.prototype.require = function(_type, _superType) {
    var module;
 
    if (_superType && (_superType !== _type)) {
-      module = './' + _superType + 's/' + _type;
+      module = _superType.endsWith("y") ? './' + _superType.slice(0, -1) + 'ies/' + _type : './' + _superType + 's/' + _type;
    }
    else {
      module = "./" + _type;
@@ -368,15 +367,16 @@ NamedObject.prototype.require = function(_type, _superType) {
 };
 
 NamedObject.prototype.getSuperTypeCollection = function(_superType) {
-   return _superType ? this[_superType + "s"] : null;
+   return _superType ? this[_superType.endsWith("y") ? _superType.slice(0, -1) + 'ies' : _superType + "s"] : null;
 };
 
 NamedObject.prototype.findOrCreateSuperTypeCollection = function(_superType) {
+   var collectionName = _superType.endsWith("y") ? _superType.slice(0, -1) + 'ies' : _superType + "s";
 
-   if (!this[_superType + "s"]) {
-      this[_superType + "s"] = {};
+   if (!this[collectionName]) {
+      this[collectionName] = {};
    }
-   return this[_superType + "s"];
+   return this[collectionName];
 };
 
 NamedObject.prototype.createChild = function(_config, _superType, _owner) {

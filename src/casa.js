@@ -12,10 +12,11 @@ function Casa(_config, _owner) {
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
    this.ports = {};
+   this.connectToPeers = _config.connectToPeers;
    this.secureMode = _config.secureMode;
    this.certPath = _config.certPath;
    this.configPath = _config.configPath;
-   this.gang = this.owner;
+   this.gang = _owner;
 
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
    NamedObject.call(this, _config, _owner);
@@ -162,7 +163,7 @@ Casa.prototype.createServer = function() {
      .on('connection', (_socket) => {
 
       console.log('a casa has joined');
-      var peerCasa = this.gang.createPeerCasa({ name: "anonymous-"+Date.now(), type: "casa"}, true);
+      var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
       peerCasa.serveClient(_socket);
    });
 

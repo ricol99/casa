@@ -50,12 +50,9 @@ Loader.prototype.loadNode = function() {
                   process.exit(2);
                   return;
                }
-//console.log("AAAA config=", this.casaConfig);
-//console.log("AAAA gang config=", this.gangConfig);
 
                this.mergeConfigs();
                this.gangConfig.casa = this.casaConfig;
-//console.log("AAAA gang config=", this.gangConfig.casa);
 
                this.addSystemServices();
 
@@ -63,13 +60,9 @@ Loader.prototype.loadNode = function() {
                this.casaDb.setOwner(this.gang);
                this.gang.casa.db = this.casaDb;
                this.gangDb.setOwner(this.gang);
-               this.gang.db = this.gangDb;
+               this.gang.gangDb = this.gangDb;
 
                this.gang.buildTree();
-//console.log("AAAA casa things=", this.gang.casa.myNamedObjects);
-for (var obj in this.gang.myNamedObjects) {
-console.log("AAAA gang namedobjects =", this.gang.myNamedObjects[obj].name);
-}
 
                if (this.localConsoleRequired) {
                   var LocalConsole = require('./localconsole');
@@ -242,31 +235,31 @@ Loader.prototype.addSystemServices = function() {
 
 Loader.prototype.mergeThing = function(_sourceThing, _destThing, _override) {
 
-   if (!_sourceThing.hasOwnProperty("props")) {
+   if (!_sourceThing.hasOwnProperty("properties")) {
       return;
    }
 
-   if (!_destThing.hasOwnProperty("props")) {
-      _destThing.props = _sourceThing.props;
+   if (!_destThing.hasOwnProperty("properties")) {
+      _destThing.properties = _sourceThing.properties;
       return;
    }
 
    var tempAssoc = {};
 
-   for (var j = 0; j < _destThing.props.length; ++j) {
-      tempAssoc[_destThing.props[j].name] = j;
+   for (var j = 0; j < _destThing.properties.length; ++j) {
+      tempAssoc[_destThing.properties[j].name] = j;
    }
 
-   for (var i = 0; i < _sourceThing.props.length; ++i) {
+   for (var i = 0; i < _sourceThing.properties.length; ++i) {
 
-      if (tempAssoc.hasOwnProperty(_sourceThing.props[i].name)) {
+      if (tempAssoc.hasOwnProperty(_sourceThing.properties[i].name)) {
 
          if (_override) {
-            _destThing.props[tempAssoc[_sourceThing.props[i].name]] = _sourceThing.props[i];
+            _destThing.properties[tempAssoc[_sourceThing.properties[i].name]] = _sourceThing.properties[i];
          }
       }
       else {
-         _destThing.props.push(_sourceThing.props[i]);
+         _destThing.properties.push(_sourceThing.properties[i]);
       }
    }
 

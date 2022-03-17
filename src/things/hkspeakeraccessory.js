@@ -52,7 +52,7 @@ HomekitSpeakerAccessory.prototype.setMuted = function(_status) {
 };
 
 HomekitSpeakerAccessory.prototype.getMuted = function() {
-   return this.props["muted"].value ? 1 : 0;
+   return this.properties["muted"].value ? 1 : 0;
 };
 
 HomekitSpeakerAccessory.prototype.setVolume = function(_status) {
@@ -62,7 +62,7 @@ HomekitSpeakerAccessory.prototype.setVolume = function(_status) {
 };
 
 HomekitSpeakerAccessory.prototype.getVolume = function() {
-   return this.props["volume"].value;
+   return this.properties["volume"].value;
 }
 
 HomekitSpeakerAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

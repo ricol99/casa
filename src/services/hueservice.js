@@ -162,28 +162,28 @@ HueService.prototype.getLightGroups = function(_callback) {
   this.queueTransaction(this, transaction);
 };
 
-HueService.prototype.convertProperties = function(_props) {
+HueService.prototype.convertProperties = function(_properties) {
    var config = {};
 
-   for (var prop in _props) {
+   for (var prop in _properties) {
 
-      if (_props.hasOwnProperty(prop)) {
+      if (_properties.hasOwnProperty(prop)) {
 
          switch (prop) {
             case "power":
-               config.on = _props[prop];
+               config.on = _properties[prop];
                break;
             case "brightness":
-               config.bri = Math.floor(parseFloat(_props[prop] * 255 / 100));
+               config.bri = Math.floor(parseFloat(_properties[prop] * 255 / 100));
                break;
             case "hue":
-               config.hue = Math.floor(parseFloat(_props[prop] * 65535 / 360));
+               config.hue = Math.floor(parseFloat(_properties[prop] * 65535 / 360));
                break;
             case "saturation":
-               config.sat = Math.floor(parseFloat(_props[prop] * 255 / 100));
+               config.sat = Math.floor(parseFloat(_properties[prop] * 255 / 100));
                break;
             case "colour-temp":
-               config.ct = _props[prop];
+               config.ct = _properties[prop];
                break;
          }
       }

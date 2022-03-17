@@ -1,5 +1,5 @@
 var util = require('util');
-var Property = require('../prop');
+var Property = require('../property');
 var http = require('http');
 
 function CameraProperty(_config, _owner) {

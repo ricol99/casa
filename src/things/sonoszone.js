@@ -266,9 +266,9 @@ SonosZone.prototype.stop = function() {
 };
 
 SonosZone.prototype.saveCurrentState = function(_property) {
-   this.savedStatus = { volume: this.props['volume'].value,
-                        muted: this.props['muted'].value,
-                        playing: this.props['playing'].value };
+   this.savedStatus = { volume: this.properties['volume'].value,
+                        muted: this.properties['muted'].value,
+                        playing: this.properties['playing'].value };
 
    if (this.getProperty("muted")) {
       this.alignPropertyValue("muted", false);
@@ -279,11 +279,11 @@ SonosZone.prototype.saveCurrentState = function(_property) {
 
 SonosZone.prototype.restoreSavedState = function() {
 
-   if (this.props['volume'].value !== this.savedStatus.volume) {
+   if (this.properties['volume'].value !== this.savedStatus.volume) {
       this.alignPropertyValue("volume", this.savedStatus.volume);
    }
 
-   if (this.props['muted'].value !== this.savedStatus.muted) {
+   if (this.properties['muted'].value !== this.savedStatus.muted) {
       this.alignPropertyValue("muted", this.savedStatus.muted);
    }
 

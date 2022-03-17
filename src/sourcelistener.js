@@ -36,7 +36,7 @@ function SourceListener(_config, _owner) {
 
    if (this.listeningToPropertyChange) {
       this.eventName = _config.property;
-      this.subscription.prop = this.eventName;
+      this.subscription.property = this.eventName;
    }
    else if (_config.hasOwnProperty("event")) {
       this.eventName = _config.event;
@@ -231,9 +231,9 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 SourceListener.prototype.goValid = function() {
    this.owner.sourceIsValid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 
-   if (this.subscription && this.subscription.hasOwnProperty("prop") && this.source.props.hasOwnProperty(this.eventName)) {
+   if (this.subscription && this.subscription.hasOwnProperty("property") && this.source.properties.hasOwnProperty(this.eventName)) {
 
-      if (!this.source.props[this.eventName].cold || this.source.props[this.eventName].initialValueSet) {
+      if (!this.source.properties[this.eventName].cold || this.source.properties[this.eventName].initialValueSet) {
          this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.source.getProperty(this.eventName), coldStart: true }));
       }
    }
