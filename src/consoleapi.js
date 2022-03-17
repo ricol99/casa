@@ -18,6 +18,11 @@ function ConsoleApi(_config, _owner) {
 
 util.inherits(ConsoleApi, NamedObject);
 
+// Used to classify the type and understand where to load the javascript module
+ConsoleApi.prototype.superType = function(_type) {
+   return "consoleapi";
+};
+
 ConsoleApi.prototype.coldStart = function() {
 };
 

@@ -11,8 +11,7 @@ function ConsoleApiService(_config, _owner) {
 util.inherits(ConsoleApiService, WebService);
 
 ConsoleApiService.prototype.coldStart = function() {
-   var GangConsoleApiObj = this.gang.cleverRequire("gangconsoleapi", "consoleapis");
-   this.gangConsoleApi = new GangConsoleApiObj({ name: this.gang.name }, null);
+   this.gangConsoleApi = this.createChild({ name: this.gang.name, type: "gangconsoleapi" }, "consoleapi", null);
 
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
@@ -110,7 +109,7 @@ ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
    let classList = util.getClassHierarchy(namedObject);
 
    for (var i = 0; i < classList.length; ++i) {
-      var ConsoleApiObj = this.gang.cleverRequire(classList[i]+"consoleapi", "consoleapis");
+      var ConsoleApiObj = this.require(classList[i]+"consoleapi", "consoleapi");
 
       if (ConsoleApiObj || (classList[i] === "namedobject")) {
          break;

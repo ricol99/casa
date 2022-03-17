@@ -221,10 +221,7 @@ Source.prototype.addEvent = function(_event) {
       return false;
    }
 
-   var type = _event.hasOwnProperty("type") ? _event.type : "event";
-   var Event = this.gang.cleverRequire(type, 'events');
-   var eventObj = new Event(_config.events[index], this);
-   this.events[eventObj.name] = eventObj;
+   var eventObj = this.createChild(_event, "event", this);
    eventObj.coldStart(null);
    return true;
 };
@@ -426,9 +423,7 @@ Source.prototype.ensureEventExists = function(_eventName, _eventType, _config) {
    if (!this.events.hasOwnProperty(_eventName)) {
       _config.name = _eventName;
       _config.type = _eventType;
-      var Event = this.gang.cleverRequire(_eventType, 'events');
-      var eventObj = new Event(_config, this);
-      this.events[eventObj.name] = eventObj;
+      this.createChild(_config, "event", this);
       return true;
    }
    return false;

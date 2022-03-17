@@ -1,5 +1,6 @@
 var util = require('util');
 var NamedObject = require('./namedobject');
+var Gang = require('./gang');
 
 function ConsoleCmd(_config, _owner, _console) {
    this.type = "consolecmd";
@@ -14,6 +15,11 @@ function ConsoleCmd(_config, _owner, _console) {
 }
 
 util.inherits(ConsoleCmd, NamedObject);
+
+// Used to classify the type and understand where to load the javascript module
+ConsoleCmd.prototype.superType = function(_type) {
+   return "consolecmd";
+};
 
 ConsoleCmd.prototype.coldStart = function() {
 };

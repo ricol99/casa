@@ -10,7 +10,6 @@ function Gang(_config) {
    NamedObject.call(this, _config);
    this.peercasas = {};
 
-   _mainInstance = this;
    this.casa = new Casa(_config.casa, this);
 };
 
@@ -22,6 +21,7 @@ Gang.prototype.superType = function(_type) {
 };
 
 Gang.prototype.buildTree = function() {
+   _mainInstance = this;
    this.casa.buildServices();
 
    this.createChildren(this.config.users, "user", this);

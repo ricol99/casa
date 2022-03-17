@@ -2,7 +2,7 @@ var util = require('./util');
 var Db = require('./db');
 var Gang = require('./gang');
 
-function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _console) {
+function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console) {
    this.casaName = _casaName;
    this.connectToPeers = _connectToPeers;
    this.secureMode = _secureMode;
@@ -66,7 +66,7 @@ Loader.prototype.loadNode = function() {
 
                if (this.localConsoleRequired) {
                   var LocalConsole = require('./localconsole');
-                  this.localConsole = new LocalConsole(this);
+                  this.localConsole = new LocalConsole(this.gang);
                   this.localConsole.coldStart();
                }
             });
@@ -80,8 +80,8 @@ Loader.prototype.loadNode = function() {
 };
 
 Loader.prototype.loadConsole = function() {
+   console.log("AAAAA AAAAAAA");
    this.gangName = this.casaName;
-   NamedObject.call(this, { name: this.gangName, type: "gang" });
    this.casaName = "casa-console";
 
    this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 };
@@ -96,8 +96,10 @@ Loader.prototype.loadConsole = function() {
    this.gangDb.setOwner(this.gang);
 
    this.gangDb.on('connected', (_data) => {
+      this.gang.buildTree();
+
       var Console = require('./console');
-      this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this);
+      this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
       this.console.coldStart();
    });
 
@@ -106,6 +108,8 @@ Loader.prototype.loadConsole = function() {
 
       this.gangDb.on('connected', (_data) => {
          this.gangDb.appendToCollection("gang", { name: this.gangName, type: "gang", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 });
+
+         this.gang.buildTree();
          var Console = require('./console');
          this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath });
          this.console.coldStart();
@@ -228,6 +232,7 @@ Loader.prototype.addSystemServices = function() {
       this.gangConfig.casa.services = [];
    }           
 
+   this.gangConfig.casa.services.unshift({ name: "console-api-service", type: "consoleapiservice" });
    this.gangConfig.casa.services.unshift({ name: "db-service", type: "dbservice"});
    this.gangConfig.casa.services.unshift({ name: "ramp-service", type: "rampservice"});
    this.gangConfig.casa.services.unshift({ name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" });

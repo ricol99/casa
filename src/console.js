@@ -35,12 +35,13 @@ function Console(_params, _owner) {
    }
 
    LocalConsole.call(this, _owner);
+
+   this.gang = this.owner;
 }
 
 util.inherits(Console, LocalConsole);
 
 Console.prototype.coldStart = function() {
-   this.gang = Gang.mainInstance();
 
    var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
    this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name }, null, this);
