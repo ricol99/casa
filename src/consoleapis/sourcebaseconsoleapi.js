@@ -14,6 +14,7 @@ SourceBaseConsoleApi.prototype.export = function(_session, _params, _callback) {
    var exportData = {};
 
    if (this.myObj().export(exportData)) {
+      console.info("AAAAAA export=", exportData);
       _callback(null, exportData);
    }
    else {

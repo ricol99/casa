@@ -106,12 +106,19 @@ ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
       return null;
    }
 
+   var type = "consoleapi";
+
    let classList = util.getClassHierarchy(namedObject);
 
    for (var i = 0; i < classList.length; ++i) {
       var ConsoleApiObj = this.require(classList[i]+"consoleapi", "consoleapi");
 
-      if (ConsoleApiObj || (classList[i] === "namedobject")) {
+      if (ConsoleApiObj) {
+         type = classList[i]+"consoleapi";
+         break;
+      }
+
+      if (classList[i] === "namedobject") {
          break;
       }
    }
@@ -120,8 +127,7 @@ ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
       ConsoleApiObj = require("../consoleapi");
    }
 
-   consoleObj = new ConsoleApiObj({ name: namedObject.name }, _owner);
-
+   consoleObj = new ConsoleApiObj({ name: namedObject.name, type: type }, _owner);
    return consoleObj;
 };
 
@@ -165,6 +171,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
+         console.info("AAAA Export=", _result);
          this.socket.emit('execute-output', { result: _result });
       });
    });

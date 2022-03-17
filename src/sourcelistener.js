@@ -80,24 +80,8 @@ SourceListener.prototype.superType = function(_type) {
 SourceListener.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.casa = this.casa.uName;
-      _exportObj.sourceName = this.sourceName;
-      _exportObj.transform = this.transform;
-      _exportObj.transformMap = this.transformMap;
-      _exportObj.ignoreSourceUpdates = this.ignoreSourceUpdates;
-      _exportObj.priority = this.priority;
-      _exportObj.outputValues = this.outputValues;
-      _exportObj.maskInvalid = this.maskInvalid;
-      _exportObj.maskInvalidValueDefined = this.maskInvalidValueDefined;
-      _exportObj.maskInvalidTimeout = this.maskInvalidTimeout;
-      _exportObj.maskInvalidValue = this.maskInvalidValue;
-      _exportObj.listeningToPropertyChange = this.listeningToPropertyChange;
-      _exportObj.eventName = this.eventName;
-      _exportObj.subscription = this.subscription;
-      _exportObj.capturingAllEvents = this.capturingAllEvents;
-      _exportObj.matchingValueDefined = this.matchingValueDefined;
-      _exportObj.matchingValue = this.matchingValue;
-      _exportObj.sourceEventName = this.sourceEventName;
+      _exportObj.sourceRawValue = this.sourceRawValue;
+      _exportObj.sourcePropertyValue = this.sourcePropertyValue;
 
       return true;
    }

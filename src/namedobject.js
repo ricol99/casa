@@ -60,8 +60,8 @@ NamedObject.prototype.superType = function(_type) {
 NamedObject.prototype.export = function(_exportObj) {
 
    if (!(this.hasOwnProperty("transient") && this.transient))  {
-      _exportObj.config = this.config;
-      _exportObj.superType = this.superType(this.type);
+      //_exportObj.config = this.config;
+      _exportObj.superType = this.superType();
       _exportObj.uName = this.uName;
       _exportObj.myNamedObjects = {};
 

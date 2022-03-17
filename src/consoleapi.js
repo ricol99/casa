@@ -3,7 +3,6 @@ var util = require('util');
 var NamedObject = require('./namedobject');
  
 function ConsoleApi(_config, _owner) {
-   this.type = "consoleapi";
    NamedObject.call(this, _config, _owner);
    this.sessions = {};
 

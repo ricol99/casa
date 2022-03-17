@@ -57,15 +57,8 @@ Property.prototype.superType = function(_type) {
 Property.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.cold = this.cold;
       _exportObj.value = this.value;
-      _exportObj.local = this.local;
-      _exportObj.allSourcesRequiredForValidity = this.allSourcesRequiredForValidity;
-      _exportObj.initialValueSet = this.initialValueSet;
       _exportObj.rawPropertyValue = this.rawPropertyValue;
-      _exportObj.transform = this.transform;
-      _exportObj.transfromMap = this.transformMap;
-      _exportObj.hasOutputValues = this.hasOutputValues;
 
       return true;
    }
