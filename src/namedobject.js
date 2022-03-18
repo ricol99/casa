@@ -341,11 +341,15 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
    }
 };
 
-NamedObject.prototype.require = function(_type, _superType) {
+NamedObject.prototype.require = function(_type, _superType, _loadPath) {
    var path = '';
    var module;
-
-   if (_superType && (_superType !== _type)) {
+   console.error(this.uName + ": AAAAAAA _loadpath = " + _loadPath);
+   console.error(this.uName + ": AAAAAAA _type = " + _type);
+   if (_loadPath) {
+      module = './' + _loadPath + 's/' + _type;
+   }
+   else if (_superType && (_superType !== _type)) {
       module = _superType.endsWith("y") ? './' + _superType.slice(0, -1) + 'ies/' + _type : './' + _superType + 's/' + _type;
    }
    else {
@@ -385,7 +389,7 @@ NamedObject.prototype.createChild = function(_config, _superType, _owner) {
       return null;
    }
 
-   var Child = this.require(_config.type ? _config.type : _superType, _superType);
+   var Child = this.require(_config.type ? _config.type : _superType, _superType, _config.loadPath);
    return new Child(_config, _owner);
 };
 
@@ -395,7 +399,7 @@ NamedObject.prototype.createChildren = function(_config, _superType, _owner) {
    if (_config) {
 
       for (var i = 0; i < _config.length; ++i) {
-         var Child = this.require(_config[i].type ? _config[i].type : _superType, _superType);
+         var Child = this.require(_config[i].type ? _config[i].type : _superType, _superType, _config[i].loadPath);
          new Child(_config[i], _owner);
       }
    }
