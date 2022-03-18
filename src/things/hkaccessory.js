@@ -44,6 +44,7 @@ function HomekitAccessory(_config, _parent) {
 util.inherits(HomekitAccessory, Thing);
 
 HomekitAccessory.prototype.coldStart = function() {
+   console.log(this.uName + ": AAAAAAAAAAA coldStart()");
 
    this.hkAccessory
      .getService(Service.AccessoryInformation)

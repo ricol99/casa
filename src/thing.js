@@ -55,6 +55,17 @@ Thing.prototype.export = function(_exportObj) {
    return false;
 };
 
+Thing.prototype.coldStart = function() {
+   Source.prototype.coldStart.call(this);
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].coldStart();
+      }
+   }
+}
+
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.name] = _thing;
 };
