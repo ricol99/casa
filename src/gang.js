@@ -9,6 +9,7 @@ var _mainInstance = null;
 function Gang(_config) {
    NamedObject.call(this, _config);
    this.dbCallbacks = {};
+   this.peercasas = {};
 
    this.casa = new Casa(_config.casa, this);
 };
