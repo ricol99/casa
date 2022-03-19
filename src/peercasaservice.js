@@ -39,11 +39,11 @@ function PeerCasaService(_config) {
             console.log('peercasaservice: service up, casa=' + service.name + ' hostname=' + service.host + ' port=' + service.port);
 
             if ((!((this.gang.name || service.txtRecord.gang) && (service.txtRecord.gang != this.gang.name))) &&
-               (service.name != this.name && !this.gang.peercasas[service.name])) {
+               (service.name != this.name && !this.gang.findPeerCasa(service.name))) {
 
                // Found a peer
                // Only try to connect if we don't have a session already AND it is our role to connect and not wait
-               if (!this.gang.peercasas[service.name] && !this.casasBeingEstablished[service.name]) {
+               if (!this.gang.findPeerCasa(service.name) && !this.casasBeingEstablished[service.name]) {
 
                   if (service.name > this.name) {
                      this.casasBeingEstablished[service.name] = true;

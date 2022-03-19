@@ -55,8 +55,6 @@ function PeerCasa(_config, _owner) {
    this.casa.on('source-removed', this.sourceRemovedCasaHandler);
 
    this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
-
-   this.gang.addPeerCasa(this);
 }
 
 util.inherits(PeerCasa, SourceBase);
@@ -220,7 +218,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    }
 
    this.config = util.copy(_config, true);
-   this.gang.changePeerCasaName(this, this.config.casaName);
+   console.error("AAAAAAAAAAAAAAAAAAAAA casaName="+this.config.casaName);
    this.changeName(this.config.casaName.substr(2));	// XXX HACK
    this.createSources(this.config, this);
    console.log(this.uName + ': AAAAA HERE 3: ');

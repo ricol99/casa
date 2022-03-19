@@ -344,8 +344,7 @@ NamedObject.prototype.invalidate = function(_includeChildren) {
 NamedObject.prototype.require = function(_type, _superType, _loadPath) {
    var path = '';
    var module;
-   console.error(this.uName + ": AAAAAAA _loadpath = " + _loadPath);
-   console.error(this.uName + ": AAAAAAA _type = " + _type);
+
    if (_loadPath) {
       module = './' + _loadPath + 's/' + _type;
    }

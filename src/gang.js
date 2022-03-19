@@ -88,35 +88,13 @@ Gang.prototype.coldStart = function() {
    }
 }
 
-Gang.prototype.createPeerCasa = function(_name, _anonymous) {
+Gang.prototype.createPeerCasa = function(_name) {
    console.log('Creating a peer casa for casa ' + _name);
 
    var config = { name: _name, type: "peercasa"};
    var peerCasa = this.createChild(config, "peercasa", this);
 
-   if (_anonymous) {
-      delete this.peercasas[peerCasa.uName];
-   }
-
    return peerCasa;
-};
-
-Gang.prototype.addPeerCasa = function(_peerCasa, _force) {
-
-   if (!_force && this.peercasas[_peerCasa.uName]) {
-      return false;
-   }
-
-   this.peercasas[_peerCasa.uName] = _peerCasa;
-   return true;
-};
-
-Gang.prototype.removePeerCasa = function(_peerCasa) {
-
-   if (this.peercasas[_peerCasa.uName]) {
-      delete this.peercasas[_peerCasa.uName];
-      this.peercasas[_peerCasa.uName] = null;
-   }
 };
 
 Gang.prototype.findUser = function (_userName) {
@@ -212,15 +190,8 @@ Gang.mainInstance = function() {
    return _mainInstance;
 };
 
-Gang.prototype.addPeerCasa = function(_peerCasa) {
-  this.peercasas[_peerCasa.uName] = _peerCasa;
-};
-
 Gang.prototype.removePeerCasa = function(_peerCasa) {
-
-  if (this.peercasas.hasOwnProperty(_peerCasa.uName)) {
-     delete this.peercasas[_peerCasa.uName];
-  }
+  this.removeChildNamedObject(_peerCasa);
 };
 
 Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
@@ -229,7 +200,7 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
 
    for (var peerCasaName in this.peercasas) {
 
-      if (this.peercasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.uName)) {
+      if (this.peercasas.hasOwnProperty(peerCasaName) && (peerCasaName !== _peerCasa.name)) {
          let newSource = this.peercasas[peerCasaName].getSource(_peerSourceFullName);
 
          if (newSource) {
@@ -242,14 +213,6 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
       }
    }
    return highestPrioritySource;
-};
-
-Gang.prototype.changePeerCasaName = function(_peerCasa, _newName) {
-
-   if (this.peercasas.hasOwnProperty(_peerCasa.uName)) {
-      delete this.peercasas[_peerCasa.uName];
-   }
-   this.peercasas[_newName] = _peerCasa;
 };
 
 Gang.prototype.uNameToLongForm = function(_name)  {
