@@ -37,7 +37,7 @@ SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
 
    if (_event === "property-changed") {
-      this.propertySubscribedTo(_subscription.prop, _subscription, this.properties.hasOwnProperty(_subscription.prop));
+      this.propertySubscribedTo(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property));
    }
    else {
       this.eventSubscribedTo(_event, _subscription);
