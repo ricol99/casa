@@ -1,9 +1,9 @@
 var util = require('util');
 var ServiceNode = require('./servicenode');
-var Gpio = require('onoff').Gpio;
 
 function MqttServiceTopic(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
+   this.listening = false;
 
    console.log(this.uName + ": New MQTT topic created");
 }
@@ -12,15 +12,16 @@ util.inherits(MqttServiceTopic, ServiceNode);
 
 MqttServiceTopic.prototype.newSubscriptionAdded = function(_subscription) {
    this.topic = _subscription.args.topic;
+   console.log(this.uName + ": newSubscriptionAdded() topic=" + this.topic);
 
-   if ((this.subscription.sync.startsWith("read") && !this.listening) {
+   if (_subscription.sync.startsWith("read") && !this.listening) {
       this.startListening();
    }
 };
 
 MqttServiceTopic.prototype.startListening = function() {
    this.listening = true;
-   this.owner.subscribeToTopic(this.topic);
+   this.owner.subscribeToTopic(this, this.topic);
 };
 
 MqttServiceTopic.prototype.setState = function(_properties, _callback) {
@@ -44,10 +45,10 @@ MqttServiceTopic.prototype.processSetState = function(_transaction, _callback) {
 
 MqttServiceTopic.prototype.newTopicUpdateReceived = function(_properties) {
 
-   for (var property = _properties) {
+   for (var property in _properties) {
 
       if (this.properties.hasOwnProperty(property)) {
-         this.alignPropertyValue(property, properties[property]);
+         this.alignPropertyValue(property, _properties[property]);
       }
    }
 };

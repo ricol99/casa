@@ -21,18 +21,19 @@ MqttService.prototype.coldStart = function() {
    this.mqttClient  = mqtt.connect(this.mqttServerAddress);
 
    this.mqttClient.on('message', (_topic, _message) => {
-      console.log(this.uName + ": Received topic update from MQTT server, topic=" + _topic);
+      console.log(this.uName + ": Received topic update from MQTT server, topic=" + _topic + " " + _message);
 
       if (this.topics.hasOwnProperty(_topic)) {
-         var properies = JSON.parse(_message);
+         var properties = JSON.parse(_message);
 
          for (var node in this.topics[_topic]) {
-            this.topics[_topic][node].newTopicUpdateReceived(_topic, properties);
+            this.topics[_topic][node].newTopicUpdateReceived(properties);
          }
       }
    });
 
    this.mqttClient.on('connect', () => {
+      console.log(this.uName + ": Connected MQTT server " + this.mqttServerAddress);
       this.connected = true;
 
       for (var topic in this.topics) {
@@ -54,13 +55,15 @@ MqttService.prototype.coldStart = function() {
 };
 
 MqttService.prototype.subscribeToTopic = function(_node, _topic) {
+   console.log(this.uName + ": subscribeToTopic() topic=" + _topic);
+
    var alreadySubscribed = this.topics.hasOwnProperty(_topic);
 
    if (!alreadySubscribed) {
       this.topics[_topic] = {};
    }
 
-   this.topics[_topic][_node.name] = node;
+   this.topics[_topic][_node.name] = _node;
 
    if (!alreadySubscribed && this.connected) {
       this.subscribe(_topic);
