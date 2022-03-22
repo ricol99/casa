@@ -9,13 +9,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-13",
+    "@abandonware/noble": "^1.9.2-15",
     "bt-presence": "^2.0.0",
     "cjson": "^0.5.0",
     "command-line-args": "^5.1.1",
     "cron-parser": "^0.7.0",
     "dateformat": "^1.0.11",
-    "eddystone-beacon": "^1.0.7",
     "eventsource": "^1.1.0",
     "express": "^4.16.3",
     "forecast.io": "0.0.11",
@@ -24,6 +23,7 @@
     "mcp-spi-adc": "^3.1.0",
     "md5": "^2.2.1",
     "mdns": "^2.7.2",
+    "mqtt": "^4.3.7",
     "nedb": "^1.8.0",
     "node-beacon-scanner": "^0.2.2",
     "node-hue-api": "^2.4.6",
@@ -47,5 +47,8 @@
     "suncalc": "~1.6.0",
     "tplink-smarthome-api": "^1.2.0",
     "xml2js": "^0.4.19"
+  },
+  "addForEddy": {
+    "eddystone-beacon": "^1.0.7"
   }
 }
