@@ -65,18 +65,6 @@ Scene.prototype.superType = function(_type) {
    return "scene";
 };
 
-// Called when system state is required
-Scene.prototype.export = function(_exportObj) {
-
-   if (Thing.prototype.export.call(this, _exportObj)) {
-      _exportObj.sceneProp = this.sceneProp;
-      _exportObj.sources = this.sources;
-      return true;
-   }
-
-   return false;
-};
-
 Scene.prototype.receivedEventFromSource = function(_data) {
    var changed = false;
 

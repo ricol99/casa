@@ -59,6 +59,21 @@ Property.prototype.export = function(_exportObj) {
    if (NamedObject.prototype.export.call(this, _exportObj)) {
       _exportObj.value = this.value;
       _exportObj.rawPropertyValue = this.rawPropertyValue;
+      _exportObj.cold = this.cold;
+
+      return true;
+   }
+
+   return false;
+};
+
+// Called before hotStart to restore system state
+Property.prototype.import = function(_importObj) {
+
+   if (NamedObject.prototype.import.call(this, _importObj)) {
+      this.value = _importObj.value;
+      this.rawPropertyValue = _importObj.rawPropertyValue;
+      this.cold = _importObj.cold;
 
       return true;
    }
@@ -260,6 +275,11 @@ Property.prototype.coldStart = function(_data) {
       this.cold = false;
       this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
+};
+
+// Override this if you listen to a source that is not "Source".
+// If you listen to a "Source" you will be fired by that Source cold starting
+Property.prototype.hotStart = function(_data) {
 };
 
 // ====================

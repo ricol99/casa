@@ -1,8 +1,14 @@
 var util = require('./util');
+var AsyncEmitter = require('./asyncemitter');
 var Db = require('./db');
 var Gang = require('./gang');
+const fs = require('fs');
+  
+var _mainInstance = null;
+_loadTime = Date.now();
 
 function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console) {
+   this.gang = null;
    this.casaName = _casaName;
    this.connectToPeers = _connectToPeers;
    this.secureMode = _secureMode;
@@ -13,14 +19,65 @@ function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath,
 };
 
 Loader.prototype.load = function() {
+   _mainInstance = this;
 
    if (this.globalConsoleRequired) {
       this.loadConsole();
    }
    else {
-      this.loadNode();
+      if (fs.existsSync(this.configPath + "/hotstate.json")) {
+         var importObj = require(this.configPath + "/hotstate.json");
+         fs.unlinkSync(this.configPath + "/hotstate.json");
+
+         if (importObj && importObj.timestamp && ((Date.now() - importObj.timestamp) < 30000)) {
+            this.restoreNode(importObj.tree);
+         }
+         else {
+            this.loadNode();
+         }
+      }
+      else {
+         this.loadNode();
+      }
    }
 };
+
+process.on('uncaughtException', (_err) => {
+
+   if ((Date.now() - _loadTime) < 20000) {
+      console.log("*LOADER*: Unable to attempt suspension because the excpetion occurred too early in the start up sequence!");
+      console.error("*LOADER*: There was an uncaught error ", _err)
+      process.exit(1);
+   }
+   else {
+      _loadTime = Date.now();
+
+      if (_mainInstance && !_mainInstance.globalConsoleRequired) {
+
+         if (util.suspensionAvailable() && AsyncEmitter.suspensionAvailable() ) {
+            console.log("*LOADER*: Attempting suspension");
+            var exportObj = { timestamp: Date.now(), tree: {}};
+            _mainInstance.gang.export(exportObj.tree);
+            fs.writeFileSync(_mainInstance.configPath + "/hotstate.json", JSON.stringify(exportObj));
+            console.log("*LOADER*: State persisted");
+            process.exit(2);
+         }
+         else {
+            console.log("*LOADER*: Unable to attempt suspension as uncaught exception was in casa code stack");
+            console.error("*LOADER*: There was an uncaught error ", _err)
+            process.exit(1);
+         }
+      }
+      else {
+         process.stderr.write("*LOADER*: There was an uncaught error " + util.inspect( _err) + "\n")
+         process.exit(1);
+      }
+   }
+});
+
+//setTimeout( () => {
+   //ia;
+//}, 25000);
 
 Loader.prototype.loadNode = function() {
    this.casaDb = new Db(this.casaName, this.configPath, false, null);
@@ -63,6 +120,7 @@ Loader.prototype.loadNode = function() {
                this.gang.gangDb = this.gangDb;
 
                this.gang.buildTree();
+               this.gang.coldStart();
 
                if (this.localConsoleRequired) {
                   var LocalConsole = require('./localconsole');
@@ -74,6 +132,39 @@ Loader.prototype.loadNode = function() {
 
          this.gangDb.connect();
       });
+   });
+
+   this.casaDb.connect();
+};
+
+Loader.prototype.restoreNode = function(_importObj) {
+   this.casaDb = new Db(_importObj.casa, this.configPath, false, null);
+
+   this.casaDb.on('connected', (_data) => {
+      this.gangDb = new Db(_importObj.name, this.configPath, false, null);
+
+      this.gangDb.on('connected', (_data) => {
+
+         _importObj.casa = _importObj.myNamedObjects[_importObj.casa].config;   // HACK!
+         this.gang = new Gang(_importObj.config);
+
+         this.casaDb.setOwner(this.gang);
+         this.gang.casa.db = this.casaDb;
+         this.gangDb.setOwner(this.gang);
+         this.gang.gangDb = this.gangDb;
+
+         this.gang.buildTree();
+         this.gang.import(_importObj);
+         this.gang.hotStart();
+
+         if (this.localConsoleRequired) {
+            var LocalConsole = require('./localconsole');
+            this.localConsole = new LocalConsole(this.gang);
+            this.localConsole.coldStart();
+         }
+      });
+
+      this.gangDb.connect();
    });
 
    this.casaDb.connect();
@@ -97,6 +188,7 @@ Loader.prototype.loadConsole = function() {
 
    this.gangDb.on('connected', (_data) => {
       this.gang.buildTree();
+      this.gang.coldStart();
 
       var Console = require('./console');
       this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
@@ -104,12 +196,13 @@ Loader.prototype.loadConsole = function() {
    });
 
    this.gangDb.on('connect-error', (_data) => {
-      this.gangDb = new Db(this.gangName, this.configPath, true, null);
+      gangDb = new Db(this.gangName, this.configPath, true, null);
 
       this.gangDb.on('connected', (_data) => {
          this.gangDb.appendToCollection("gang", { name: this.gangName, type: "gang", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 });
 
          this.gang.buildTree();
+         this.gang.coldStart();
          var Console = require('./console');
          this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath });
          this.console.coldStart();

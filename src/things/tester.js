@@ -5,7 +5,6 @@ var SourceListener = require('../sourcelistener');
 function Tester(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "testsequence";
-   this.config = _config;
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
    this.targetUnderTest = (_config.hasOwnProperty("targetUnderTest")) ? this.gang.uNameToLongForm(_config.targetUnderTest) : this.uName;
 
@@ -41,6 +40,38 @@ function Tester(_config, _parent) {
 }
 
 util.inherits(Tester, Thing);
+
+// Called when system state is required
+Tester.prototype.export = function(_exportObj) {
+
+   if (Thing.prototype.export.call(this, _exportObj)) {
+      _exportObj.currentTestCase = this.currentTestCase;
+      _exportObj.currentTestEvent = this.currentTestEvent;
+      _exportObj.expectedPosition = this.expectedPosition;
+      _exportObj.timeout = this.timeout ? this.timeout.expiration() : -1;
+      return true;
+   }
+
+   return false;
+};
+
+// Called before hotStart to restore system state
+Tester.prototype.import = function(_importObj) {
+
+   if (Thing.prototype.import.call(this, _importObj)) {
+      this.currentTestCase = _importObj.currentTestCase;
+      this.currentTestEvent = _importObj.currentTestEvent;
+      this.expectedPosition = _importObj.expectedPosition;
+      this.timeout = _importObj.timeout;
+      return true;
+   }
+
+   return false;
+};
+
+Tester.prototype.hotStart = function() {
+   this.initiateTestEvent(false, (this.timeout === -1) ? null : this.timeout);
+};
 
 Tester.prototype.coldStart = function() {
    this.initiateTestEvent();
@@ -238,11 +269,18 @@ Tester.prototype.addPreAmble = function(_preAmble, _testCase) {
     }
 };
 
-Tester.prototype.initiateTestEvent = function(_cold) {
+Tester.prototype.initiateTestEvent = function(_cold, _restoreTimeout) {
 
-   if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("wait")) {
+   if (_restoreTimeout) {
 
-      this.timeout = setTimeout( () => {
+      this.timeout = util.restoreTimeout( () => {
+         this.timeout = null;
+         this.runTestEvent();
+      }, _restoreTimeout, 500);
+   }
+   else if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("wait")) {
+
+      this.timeout = util.setTimeout( () => {
          this.timeout = null;
          this.runTestEvent();
       }, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].wait * 1000);

@@ -70,11 +70,16 @@ Casa.prototype.buildTree = function() {
 Casa.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.secureMode = this.secureMode;
-      _exportObj.certPath = this.certPath;
-      _exportObj.configPath = this.configPath;
-      _exportObj.listeningPort = this.listeningPort;
-      _exportObj.id = this.id;
+      return true;
+   }
+
+   return false;
+};
+
+// Called before hotStart to retsore system state
+Casa.prototype.import = function(_importObj) {
+
+   if (NamedObject.prototype.import.call(this, _importObj)) {
       return true;
    }
 
@@ -108,6 +113,30 @@ Casa.prototype.coldStart = function() {
       if (this.things.hasOwnProperty(thingName)) {
          console.log(this.uName + ': Cold starting thing '+ this.things[thingName].name);
          this.things[thingName].coldStart();
+      }
+   }
+};
+
+Casa.prototype.hotStartServices = function() {
+   console.log(this.uName + ': Hot starting services...');
+
+   for (var serviceName in this.services) {
+
+      if (this.services.hasOwnProperty(serviceName)) {
+         console.log(this.uName + ': Hot starting service '+ this.services[serviceName].name);
+         this.services[serviceName].hotStart();
+      }
+   }
+};
+
+Casa.prototype.hotStart = function() {
+   console.log(this.uName + ': Hot starting services...');
+
+   for (var thingName in this.things) {
+
+      if (this.things.hasOwnProperty(thingName)) {
+         console.log(this.uName + ': Hot starting thing '+ this.things[thingName].name);
+         this.things[thingName].hotStart();
       }
    }
 };

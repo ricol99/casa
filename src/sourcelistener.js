@@ -89,6 +89,19 @@ SourceListener.prototype.export = function(_exportObj) {
    return false;
 };
 
+// Called before hotStart to system state
+SourceListener.prototype.import = function(_importObj) {
+
+   if (NamedObject.prototype.import.call(this, _importObj)) {
+      this.sourceRawValue = _importObj.sourceRawValue;
+      this.sourcePropertyValue = _importObj.sourcePropertyValue;
+
+      return true;
+   }
+
+   return false;
+};
+
 SourceListener.prototype.establishListeners = function() {
 
    if (this.listeningToPropertyChange) {

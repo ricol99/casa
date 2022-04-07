@@ -62,6 +62,34 @@ StateProperty.prototype.export = function(_exportObj) {
    return false;
 };
 
+// Called before hotStart to restore system state
+StateProperty.prototype.import = function(_importObj) {
+
+   if (Property.prototype.import.call(this, _importObj)) {
+      this.controllingOwner = _importObj.controllingOwner;
+      this.currentPriority = _importObj.currentPriority;
+      this.currentState = _importObj.currentState ? this.states[_importObj.currentState] : null;
+      this.previousState = _importObj.previousState ? this.states[_importObj.previousState] : null;
+      this.stateTimer = _importObj.stateTimer;
+
+      return true;
+   }
+
+   return false;
+};
+
+StateProperty.prototype.hotStart = function(_data) {
+
+   if (this.currentState) {
+      var timeoutDuration = this.stateTimer;
+      var timeoutNextState = this.currentState.timeout.nextState;
+
+      if (timeoutNextState) {
+         this.stateTimer = util.restoreTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, 1000, timeoutNextState);
+      }
+   }
+};
+
 StateProperty.prototype.coldStart = function(_data) {
 
    if (this.initialValueSet) {
@@ -140,6 +168,8 @@ StateProperty.prototype.clearStateTimer = function() {
 };
 
 StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
+   var timeoutDuration;
+   var timeoutNextState = null;
 
    if (_state.hasOwnProperty('timeout')) {
 
@@ -148,14 +178,14 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          if (_timeoutDuration == undefined) {
 
             if (_state.timeout.hasOwnProperty('duration')) {
-               this.timeoutDuration = _state.timeout.duration * 1000;
+               timeoutDuration = _state.timeout.duration * 1000;
             }
             else {
                return;
             }
          }
          else if (_state.timeout.hasOwnProperty('duration')) {
-            this.timeoutDuration = (_timeoutDuration < _state.timeout.duration * 1000) ? _timeoutDuration : _state.timeout.duration * 1000;
+            timeoutDuration = (_timeoutDuration < _state.timeout.duration * 1000) ? _timeoutDuration : _state.timeout.duration * 1000;
          }
          else if (_state.timeout.hasOwnProperty('property')) {
             var value = this.owner.getProperty(_state.timeout.property);
@@ -171,19 +201,19 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                 }
             }
 
-            this.timeoutDuration = (_timeoutDuration < value * 1000) ? _timeoutDuration : value * 1000;
+            timeoutDuration = (_timeoutDuration < value * 1000) ? _timeoutDuration : value * 1000;
          }
          else {
-            this.timeoutDuration = _timeoutDuration;
+            timeoutDuration = _timeoutDuration;
          }
 
          if (_state.timeout.hasOwnProperty('nextState')) {
-            this.timeoutNextState = _state.timeout.nextState;
+            timeoutNextState = _state.timeout.nextState;
          }
       }
       else if (_state.timeout.hasOwnProperty('duration')) {
-         this.timeoutDuration = _state.timeout.duration * 1000;
-         this.timeoutNextState = _state.timeout.nextState;
+         timeoutDuration = _state.timeout.duration * 1000;
+         timeoutNextState = _state.timeout.nextState;
       }
       else if (_state.timeout.hasOwnProperty('property') || _state.timeout.hasOwnProperty('source')) {
          var value = _state.timeout.hasOwnProperty('property') ? this.owner.getProperty(_state.timeout.property) : _state.timeout.source.sourceListener.getPropertyValue();
@@ -199,14 +229,14 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
              }
          }
 
-         this.timeoutDuration = value * 1000;
-         this.timeoutNextState = _state.timeout.nextState;
+         timeoutDuration = value * 1000;
+         timeoutNextState = _state.timeout.nextState;
       }
       else {
          return;
       }
 
-      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.timeoutDuration, this.timeoutNextState);
+      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
    }
 };
 

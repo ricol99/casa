@@ -76,7 +76,7 @@ ScheduleService.prototype.coldStart = function() {
 };
 
 function Schedule(_requester, _config, _owner) {
-   NamedObject.call(this, { name: _requester.name, type: "schedule" }, _owner);
+   NamedObject.call(this, { name: _requester.name, type: "schedule", transient: true }, _owner);
    this.requester = _requester;
    this.scheduledEvents = [];
 
@@ -140,8 +140,6 @@ Schedule.prototype.createEventFromConfig = function(_eventConfig) {
    for (var i = 0; i < _eventConfig.rules.length; ++i) {
       event.rules.push(this.createRuleFromConfig(event, _eventConfig.rules[i]));
    }
-
-   //event.rules = util.copy(rules);
 
    if (_eventConfig.hasOwnProperty("value")) {
       event.value = _eventConfig.value;

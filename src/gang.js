@@ -21,9 +21,23 @@ Gang.prototype.superType = function(_type) {
    return "gang";
 };
 
+// Called when system state is required
+Gang.prototype.export = function(_exportObj) {
+
+   if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.casa = this.casa.name;
+      _exportObj.config = stripTransient(this.config);
+      return true;
+   }
+
+   return false;
+};
+
 Gang.prototype.buildTree = function() {
    _mainInstance = this;
    this.casa.buildServices();
+
+   var oldConfig = util.copy(this.config, true);
 
    this.createChildren(this.config.users, "user", this);
    this.createChildren(this.config.things, "thing", this);
@@ -35,11 +49,7 @@ Gang.prototype.buildTree = function() {
       }
    }
 
-   this.casa.coldStartServices();
-
    this.casa.buildTree();
-
-   this.init();
 };
 
 Gang.prototype.getCasa = function() {
@@ -49,12 +59,41 @@ Gang.prototype.getCasa = function() {
 Gang.prototype.interestInNewChild = function(_uName) {
 };
 
-Gang.prototype.init = function() {
+Gang.prototype.hotStart = function() {
+   // Hot start the services
+   this.casa.hotStartServices();
+
+   // Make sure all listeners are refreshed now that all sources are available
+   this.casa.refreshSourceListeners();
+
+   // Hot start all defined things now that everything has been created
+   for(var prop in this.things) {
+
+      if (this.things.hasOwnProperty(prop)){
+         console.log(this.uName + ': Hot starting thing ' + this.things[prop].uName);
+         this.things[prop].hotStart();
+      }
+   }
+
+   this.casa.hotStart();
+};
+
+Gang.prototype.coldStart = function() {
+   // Cold start the services
+   this.casa.coldStartServices();
+
    // Make sure all listeners are refreshed now that all sources are available
    this.casa.refreshSourceListeners();
 
    // Cold start all defined things now that everything has been created
-   this.coldStart();
+   for(var prop in this.things) {
+
+      if (this.things.hasOwnProperty(prop)){
+         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
+         this.things[prop].coldStart();
+      }
+   }
+
    this.casa.coldStart();
 
    // Start connecting to Peers
@@ -76,17 +115,6 @@ Gang.prototype.connectToPeers = function() {
 Gang.prototype.removeThing = function(_thing) {
    this.removeChildNamedObject(_thing);
 };
-
-Gang.prototype.coldStart = function() {
-
-   for(var prop in this.things) {
-
-      if (this.things.hasOwnProperty(prop)){
-         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
-         this.things[prop].coldStart();
-      }
-   }
-}
 
 Gang.prototype.createPeerCasa = function(_name) {
    console.log('Creating a peer casa for casa ' + _name);
@@ -233,6 +261,135 @@ Gang.prototype.findNamedObject = function(_uName)  {
 
    return namedObj;
 };
+
+function diffObj(_obj1, _obj2) {
+
+   if (_obj1 instanceof Array) {
+
+      if (_obj2 instanceof Array) {
+
+         if (_obj1.length === _obj2.length) {
+
+            for (var i = 0; i < _obj1.length; ++i) {
+               diffObj(_obj1[i], _obj2[i]);
+            }
+            return null;
+         }
+         else if (_obj1.length < _obj2.length) {
+
+            for (var i = 0; i < _obj1.length; ++i) {
+               diffObj(_obj1[i], _obj2[i]);
+            }
+
+            for (; i < _obj2.length; ++i) {
+
+               if (typeof _obj2[i] === 'object') {
+
+                  if (!(_obj2[i].hasOwnProperty("transient") && _obj2[i].transient)) {
+                     console.log(">> "+JSON.stringify(_obj2[i]));
+                  }
+               }
+               else {
+                  diffObj(_obj1[i], _obj2[i]);
+               }
+            }
+         }
+         else {
+
+            for (var i = 0; i < _obj2.length; ++i) {
+               diffObj(_obj1[i], _obj2[i]);
+            }
+
+            for (; i < _obj1.length; ++i) {
+
+               if (typeof _obj1[i] === 'object') {
+
+                  if (!(_obj1[i].hasOwnProperty("transient") && _obj1[i].transient)) {
+                     console.log("<< "+JSON.stringify(_obj1[i]));
+                  }
+               }
+               else {
+                  console.log("<< "+JSON.stringify(_obj1[i]));
+               }
+            }
+         }
+      }
+      else {
+         console.log("<< "+JSON.stringify(_obj1));
+         console.log(">> "+JSON.stringify(_obj2));
+      }
+   }
+   else if (typeof _obj1 === 'object') {
+
+      if (typeof _obj2 === 'object') {
+
+         if ((_obj1.hasOwnProperty("transient") && _obj1.transient) &&
+             (_obj2.hasOwnProperty("transient") && _obj2.transient)) {
+
+            return null;
+         }
+
+         for (var mem in _obj2) {
+
+            if (_obj1.hasOwnProperty(mem) && _obj2.hasOwnProperty(mem)) {
+               diffObj(_obj1[mem], _obj2[mem]);
+            }
+            else {
+               console.log("<< "+JSON.stringify(_obj1));
+               console.log(">> "+JSON.stringify(_obj2));
+            }
+         }
+         return null;
+      }
+      else {
+         console.log("<< "+JSON.stringify(_obj1));
+         console.log(">> "+JSON.stringify(_obj2));
+      }
+   }
+   else {
+      if (_obj1 !== _obj2) {
+         console.log("<< "+JSON.stringify(_obj1));
+         console.log(">> "+JSON.stringify(_obj2));
+      }
+   }
+}
+
+function stripTransient(_source) {
+   var dest;
+
+   if (typeof _source === 'object') {
+
+      if (_source.hasOwnProperty("transient") && _source.transient) {
+         return null;
+      }
+
+      dest = {};
+
+      for (var mem in _source) {
+         dest[mem] = stripTransient(_source[mem]);
+      }
+      return dest;
+   }
+   else if (_source instanceof Array) {
+      dest = [];
+
+      for (var i = 0; i < _source.length; ++i) {
+
+         if (_source[i] && (typeof _source[i] === 'object') && _source[i].hasOwnProperty("transient") && _source[i].transient) {
+            continue;
+         }
+
+         dest.push(stripTransient(_source[i]));
+      }
+
+      return dest;
+   }
+   else {
+      dest = _source;
+   }
+
+   return dest;
+}
 
 module.exports = exports = Gang;
 

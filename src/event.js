@@ -38,7 +38,19 @@ Event.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
       _exportObj.value = this.value;
-      _exportObj.local = this.local;
+      _exportObj.cold = this.cold;
+      return true;
+   }
+
+   return false;
+};
+
+// Called when system state is required
+Event.prototype.import = function(_importObj) {
+
+   if (NamedObject.prototype.import.call(this, _importObj)) {
+      this.value = _importObj.value;
+      this.cold = _importObj.cold;
       return true;
    }
 

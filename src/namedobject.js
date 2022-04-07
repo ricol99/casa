@@ -60,23 +60,26 @@ NamedObject.prototype.superType = function(_type) {
 NamedObject.prototype.export = function(_exportObj) {
 
    if (!(this.hasOwnProperty("transient") && this.transient))  {
-      //_exportObj.config = this.config;
-      _exportObj.superType = this.superType();
-      _exportObj.uName = this.uName;
-      _exportObj.myNamedObjects = {};
 
-      for (var namedObj in this.myNamedObjects) {
+      if (AsyncEmitter.prototype.export.call(this, _exportObj)) {
+         //_exportObj.config = this.config;
+         _exportObj.superType = this.superType();
+         _exportObj.name = this.name;
+         _exportObj.uName = this.uName;
+         _exportObj.myNamedObjects = {};
 
-         if (this.myNamedObjects.hasOwnProperty(namedObj)) {
-            var nextNamedObj = {};
+         for (var namedObj in this.myNamedObjects) {
 
-            if (this.myNamedObjects[namedObj].export(nextNamedObj)) {
-               _exportObj.myNamedObjects[namedObj] = nextNamedObj;
+            if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+               var nextNamedObj = {};
+
+               if (this.myNamedObjects[namedObj].export(nextNamedObj)) {
+                  _exportObj.myNamedObjects[namedObj] = nextNamedObj;
+               }
             }
          }
+         return true;
       }
-
-      return true;
    }
 
    return false;
@@ -84,8 +87,16 @@ NamedObject.prototype.export = function(_exportObj) {
 
 // Called when current state required
 NamedObject.prototype.import = function(_importObj) {
+   AsyncEmitter.prototype.import.call(this, _importObj);
 };
 
+NamedObject.prototype.coldStart = function() {
+   AsyncEmitter.prototype.coldStart.call(this);
+};
+
+NamedObject.prototype.hotStart = function() {
+   AsyncEmitter.prototype.hotStart.call(this);
+};
 
 NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {
    var nextObjName = this.stripMyUName(_uName);
@@ -409,6 +420,22 @@ NamedObject.prototype.addChildNamedObject = function(_namedObject) {
 
    if (_namedObject.superType()) {
       this.findOrCreateSuperTypeCollection(_namedObject.superType())[_namedObject.name] = _namedObject;
+      let collectionName = this.getSuperTypeCollection(_namedObject.superType());
+
+      if (this.config.hasOwnProperty(collectionName) && this.config[collectionName]) {
+         var found = false;
+
+         for (var i = 0; i < this.config[collectionName].length; ++i) {
+
+            if (this.config[collectionName][i].name === _namedObject.name) {
+               found = true;
+            }
+         }
+
+         if (!found) {
+            this.config[collectionName].push(_namedObject.config);
+         }
+      }
    }
 };
 

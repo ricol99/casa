@@ -16,13 +16,12 @@ util.inherits(SourceBase, NamedObject);
 
 // Called when system state is required
 SourceBase.prototype.export = function(_exportObj) {
+   return NamedObject.prototype.export.call(this, _exportObj);
+};
 
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.casa = this.casa.uName;
-      return true;
-   }
-
-   return false;
+// Called when system state is required
+SourceBase.prototype.import = function(_importObj) {
+   return NamedObject.prototype.import.call(this, _importObj);
 };
 
 SourceBase.prototype.getCasa = function() {
@@ -85,11 +84,23 @@ SourceBase.prototype.standUpFromBow = function() {
 }
 
 SourceBase.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
 
    for (var prop in this.properties) {
 
       if (this.properties.hasOwnProperty(prop)) {
          this.properties[prop].coldStart();
+      }
+   }
+};
+
+SourceBase.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
+
+   for (var prop in this.properties) {
+
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].hotStart();
       }
    }
 };
@@ -188,6 +199,7 @@ SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _conf
    if (!this.properties.hasOwnProperty(_propName)) {
       _config.name = _propName;
       _config.type = _propType;
+      _config.transient = true;
       this.createChild(_config, "property", this);
 
       if (_mainConfig) {

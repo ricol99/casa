@@ -1,5 +1,11 @@
 var Util = require('util');
 
+var _suspensionAvailable = true;
+
+Util.suspensionAvailable = function() {
+   return _suspensionAvailable;
+};
+
 Util.memberCount = function(_obj) {
    var count = 0;
 
@@ -316,6 +322,34 @@ Util.checkPath = function(_path) {
 }
 
 
+Util.restoreTimeout = function(_func, _expiration, _minLength) {
+
+   if (_expiration === -1) {
+      return null;
+   }
+
+   var timeLeft = _expiration - Date.now();
+
+   if (_minLength && (timeLeft < _minLength)) {
+      timeLeft = _minLength;
+   }
+
+   if (_timeLeft <= 0) {
+      return null;
+   }
+
+   var timer = new Timer();
+   let args = [...arguments];
+   args[1] = timeLeft;
+
+   if (args.length > 2) {
+      args.splice(2, 1);
+   }
+
+   Timer.prototype.setTimeout.apply(timer, args);
+   return timer;
+};
+
 Util.setTimeout = function() {
    var timer = new Timer();
    Timer.prototype.setTimeout.apply(timer, arguments);
@@ -338,13 +372,26 @@ Timer.prototype.setTimeout = function(_callback, _duration) {
 
    this.startTime = Date.now();
    this.duration = _duration;
-   this.timeout = setTimeout.apply(null, arguments);
+   this.callback = _callback;
+
+   let args = [...arguments];
+   args[0] = Timer.prototype.callbackFunc.bind(this);
+
+   this.timeout = setTimeout.apply(null, args);
 };
 
 Timer.prototype.clearTimeout = function() {
    clearTimeout(this.timeout);
    this.timeout = null;
 };
+
+Timer.prototype.callbackFunc = function() {
+
+   // Do not attempt a suspension/restore cycle if in casa code and exception raised
+   _suspensionAvailable = false;
+   this.callback.apply(this, arguments);
+   _suspensionAvailable = true;
+}
 
 Timer.prototype.active = function() {
    return this.timeout ? (Date.now() - this.startTime) < this.duration : false;
@@ -361,6 +408,5 @@ Timer.prototype.left = function() {
 Timer.prototype.expiration = function() {
    return this.active() ? this.duration + this.startTime : -1;
 };
-
 
 module.exports = exports = Util;

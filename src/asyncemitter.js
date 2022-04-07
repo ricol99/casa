@@ -1,6 +1,8 @@
 var util = require('./util');
 var events = require('events');
 
+var _suspensionAvailable = true;
+
 function AsyncEmitter() {
    this.eventQueue = [];
 
@@ -8,6 +10,38 @@ function AsyncEmitter() {
 }
 
 util.inherits(AsyncEmitter, events.EventEmitter);
+
+AsyncEmitter.suspensionAvailable = function() {
+   return _suspensionAvailable;
+};
+
+// Called when current state required
+AsyncEmitter.prototype.export = function(_exportObj) {
+
+   if (this.eventQueue.length > 0) {
+      _exportObj.asyncEventQueue = this.eventQueue;
+   }
+
+   return true;
+};
+
+// Called when current state required
+AsyncEmitter.prototype.import = function(_importObj) {
+
+   if (_importObj.hasOwnProperty("asyncEventQueue")) {
+      this.eventQueue = util.copy(_importObj.asyncEventQueue);
+   }
+};
+
+AsyncEmitter.prototype.coldStart = function() {
+};
+
+AsyncEmitter.prototype.hotStart = function() {
+
+   if (this.eventQueue.length > 0) {
+      this.setAsyncEmitTimer();
+   }
+};
 
 AsyncEmitter.prototype.asyncEmit = function(_eventName, _data) {
    this.eventQueue.push({ eventName: _eventName, data: util.copy(_data)});
@@ -20,7 +54,12 @@ AsyncEmitter.prototype.setAsyncEmitTimer = function() {
 
       this.asyncEmitTimer = setTimeout( () => {
          let event = this.eventQueue.shift();
+
+         // Do not attempt a suspension/restore cycle if in casa code and exception raised
+         _suspensionAvailable = false;
          this.emit(event.eventName, event.data);
+         _suspensionAvailable = true;
+
          this.asyncEmitTimer = null;
 
          if (this.eventQueue.length >= 1) {

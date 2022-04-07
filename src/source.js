@@ -37,15 +37,21 @@ Source.prototype.export = function(_exportObj) {
 
    if (SourceBase.prototype.export.call(this, _exportObj)) {
       _exportObj.priority = this.priority;
-      _exportObj.manualOverrideTimeout = this.manualOverrideTimeout;
       _exportObj.controllerPriority = this.controllerPriority;
       _exportObj.controller = this.controller ? this.controller.uName : null;
+      return true;
+   }
 
-      if (this.mirroring) {
-         _exportObj.mirroring = this.mirroring;
-         _exportObj.mirrorSourceListener.name;
-      }
-      
+   return false;
+};
+
+// Called before hotStart to restore system state 
+Source.prototype.import = function(_importObj) {
+
+   if (SourceBase.prototype.import.call(this, _importObj)) {
+      this.priority = _importObj.priority;
+      this.controllerPriority = _importObj.controllerPriority;
+      this.controller = _importObj.controller ? this.gang.findNamedObject(_importObj.controller) : null;
       return true;
    }
 
@@ -246,7 +252,18 @@ Source.prototype.coldStart = function() {
          this.events[event].coldStart();
       }
    }
-}
+};
+
+Source.prototype.hotStart = function() {
+   SourceBase.prototype.hotStart.call(this);
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].hotStart();
+      }
+   }
+};
 
 // Called by stateproperty to take control based on setting a action property
 Source.prototype.takeControl = function(_newController, _priority) {
@@ -423,6 +440,7 @@ Source.prototype.ensureEventExists = function(_eventName, _eventType, _config) {
    if (!this.events.hasOwnProperty(_eventName)) {
       _config.name = _eventName;
       _config.type = _eventType;
+      _config.transient = true;
       this.createChild(_config, "event", this);
       return true;
    }

@@ -38,25 +38,9 @@ Thing.prototype.superType = function(_type) {
    return "thing";
 };
 
-// Called when system state is required
-Thing.prototype.export = function(_exportObj) {
-
-   if (Source.prototype.export.call(this, _exportObj)) {
-      _exportObj.displayName = this.displayName;
-      _exportObj.ignoreParent = this.ignoreParent;
-      _exportObj.ignoreChildren = this.ignoreChildren;
-      _exportObj.propogateToParent = this.propogateToParent;
-      _exportObj.propogateToChildren = this.propogateToChildren;
-      _exportObj.topLevelThing = this.topLevelThing;
-      
-      return true;
-   }
-
-   return false;
-};
-
 Thing.prototype.coldStart = function() {
    Source.prototype.coldStart.call(this);
+   console.log(this.uName + ": Cold starting child things....");
 
    for (var thing in this.things) {
 
@@ -64,7 +48,19 @@ Thing.prototype.coldStart = function() {
          this.things[thing].coldStart();
       }
    }
-}
+};
+
+Thing.prototype.hotStart = function() {
+   Source.prototype.hotStart.call(this);
+   console.log(this.uName + ": Hot starting child things....");
+
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].hotStart();
+      }
+   }
+};
 
 Thing.prototype.addThing = function(_thing) {
    this.things[_thing.name] = _thing;

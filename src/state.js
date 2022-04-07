@@ -200,6 +200,7 @@ State.prototype.superType = function(_type) {
 State.prototype.export = function(_exportObj) {
 
    if (NamedObject.prototype.export.call(this, _exportObj)) {
+      _exportObj.priority = this.priority;
       _exportObj.activeGuardedSources = [];
 
       for (var i = 0; i < this.activeGuardedSources.length; ++i) {
@@ -208,22 +209,62 @@ State.prototype.export = function(_exportObj) {
 
       _exportObj.activeGuardedActions = [];
 
-      for (var i = 0; i < this.activeGuardedActions.length; ++i) {
-         _exportObj.activeGuardedActions.push(this.activeGuardedActions[i]);
+      for (var j = 0; j < this.activeGuardedActions.length; ++j) {
+         _exportObj.activeGuardedActions.push(this.activeGuardedActions[j]);
       }
 
       _exportObj.actionTimeouts = util.copyMatch(this.actionTimeouts, (_source, _prop) => {
          return (_prop === "timeout" ) ? { replace: _source.timeout ? _source.timeout.expiration() : -1 } : true;
       }); 
 
-      var matchFunc = function(_source, _prop) {
-         return (_prop === "sourceListener" ) ? { replace: _source.sourceListener ? _source.sourceListener.uName : null } : true;
+      return true;
+   }
+
+   return false;
+};
+
+// Called before hotStart to restore system state
+State.prototype.import = function(_importObj) {
+
+   if (NamedObject.prototype.import.call(this, _importObj)) {
+      this.priority = _importObj.priority;
+
+      for (var i = 0; i < _importObj.activeGuardedSources.length; ++i) {
+         this.activeGuardedSources.push(_importObj.activeGuardedSources[i]);
+      }
+
+      for (var j = 0; j < _importObj.activeGuardedActions.length; ++j) {
+         this.activeGuardedActions.push(_importObj.activeGuardedActions[j]);
+      }
+
+      for (var k = 0; k < _importObj.actionTimeouts.length; ++k) {
+         this.actionTimeouts.push(_importObj.actionTimeouts[k]);
       }
 
       return true;
    }
 
    return false;
+};
+
+State.prototype.hotStart = function() {
+
+   for (var i = 0; i < this.actionTimeouts.length; ++i) {
+
+      if (this.actionTimeouts[i]) {
+
+         this.actionTimeouts[i].timeout = util.restoreTimeout( (_index) => {
+
+            if (this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
+               this.launchActionHandlers([ this.actionTimeouts[_index].action]);
+            }
+
+            this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
+            this.actionTimeouts[_index] = null;
+
+         }, 1000, this.actionTimeouts[i].timeout, this.actionTimeouts.length-1);
+      }
+   }
 };
 
 State.prototype.getCasa = function() {
