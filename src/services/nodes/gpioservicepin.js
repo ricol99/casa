@@ -19,6 +19,24 @@ function GpioServicePin(_config, _owner) {
 
 util.inherits(GpioServicePin, ServiceNode);
 
+// Called when current state required
+GpioServicePin.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+GpioServicePin.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+GpioServicePin.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+GpioServicePin.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 GpioServicePin.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.ready) {

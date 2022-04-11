@@ -9,6 +9,24 @@ function BtNearbyDevice(_config, _owner) {
 
 util.inherits(BtNearbyDevice, ServiceNode);
 
+// Called when current state required
+BtNearbyDevice.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtNearbyDevice.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+BtNearbyDevice.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+BtNearbyDevice.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 BtNearbyDevice.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);
    this.macAddress = _subscription.args.macAddress.toLowerCase();

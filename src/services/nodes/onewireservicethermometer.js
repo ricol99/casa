@@ -12,6 +12,24 @@ function OneWireServiceThermometer(_config, _owner) {
 
 util.inherits(OneWireServiceThermometer, ServiceNode);
 
+// Called when current state required
+OneWireServiceThermometer.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+OneWireServiceThermometer.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+OneWireServiceThermometer.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+OneWireServiceThermometer.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 OneWireServiceThermometer.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (_subscription.args.hasOwnProperty("pollDuration")) {

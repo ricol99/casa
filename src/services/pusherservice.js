@@ -21,7 +21,27 @@ function PusherService(_config, _owner) {
 
 util.inherits(PusherService, Service);
 
+// Called when current state required
+PusherService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PusherService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 PusherService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+PusherService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+PusherService.prototype.start = function() {
 
    try {
       this.pusher = new Pusher(this.appKey, { cluster: this.appCluster });

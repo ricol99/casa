@@ -10,12 +10,27 @@ function RampService(_config, _owner) {
 
 util.inherits(RampService, Service);
 
-RampService.prototype.createRamp = function(_owner, _config) {
-   var ramps = new Ramps(_owner, _config, this);
-   return ramps;
+// Called when current state required
+RampService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+RampService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
 };
 
 RampService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
+};
+
+RampService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+};
+
+RampService.prototype.createRamp = function(_owner, _config) {
+   var ramps = new Ramps(_owner, _config, this);
+   return ramps;
 };
 
 function Ramps(_owner, _config, _service) {

@@ -8,6 +8,24 @@ function PushcutNotifier(_config, _owner) {
 
 util.inherits(PushcutNotifier, ServiceNode);
 
+// Called when current state required
+PushcutNotifier.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PushcutNotifier.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+PushcutNotifier.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+PushcutNotifier.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 PushcutNotifier.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() serviceProperty=" + _subscription.serviceProperty + ", args = ", _subscription.args);
 

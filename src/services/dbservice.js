@@ -25,8 +25,27 @@ function DbService(_config, _owner) {
 
 util.inherits(DbService, WebService);
 
-DbService.prototype.coldStart = function() {
+// Called when current state required
+DbService.prototype.export = function(_exportObj) {
+   WebService.prototype.export.call(this, _exportObj);
+};
 
+// Called when current state required
+DbService.prototype.import = function(_importObj) {
+   WebService.prototype.import.call(this, _importObj);
+};
+
+DbService.prototype.coldStart = function() {
+   this.start();
+   WebService.prototype.coldStart.call(this);
+};
+
+DbService.prototype.hotStart = function() {
+   this.start();
+   WebService.prototype.hotStart.call(this);
+};
+
+DbService.prototype.start = function() {
    this.addRoute('/db/:dbName', DbService.prototype.dbRequested.bind(this));
    this.addRoute('/dbhash/:dbName/:peerHash', DbService.prototype.dbHashRequested.bind(this));
    this.addRoute('/dbs', DbService.prototype.dbsRequested.bind(this));
@@ -39,8 +58,6 @@ DbService.prototype.coldStart = function() {
 
    this.addRoute('/thing/:thingName', DbService.prototype.thingRequested.bind(this));
    this.addRoute('/things', DbService.prototype.thingsRequested.bind(this));
-
-   WebService.prototype.coldStart.call(this);
 };
 
 DbService.prototype.dbRequested = function(_request, _response) {

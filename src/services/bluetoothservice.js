@@ -17,7 +17,27 @@ function BluetoothService(_config, _owner) {
 
 util.inherits(BluetoothService, Service);
 
+// Called when current state required
+BluetoothService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BluetoothService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 BluetoothService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+BluetoothService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+BluetoothService.prototype.start = function() {
    this.btpPresentHandler = BluetoothService.prototype.devicePresentCb.bind(this);
    this.btpNotPresentHandler = BluetoothService.prototype.deviceNotPresentCb.bind(this);
 

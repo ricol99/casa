@@ -8,6 +8,24 @@ function BtleIBeacon(_config, _owner) {
 
 util.inherits(BtleIBeacon, ServiceNode);
 
+// Called when current state required
+BtleBeacon.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleBeacon.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+BtleBeacon.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+BtleBeacon.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 BtleIBeacon.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() serviceProperty=" + _subscription.serviceProperty + ", args = ", _subscription.args);
    this.uuid = _subscription.args.uuid.toUpperCase();

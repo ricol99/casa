@@ -13,7 +13,27 @@ function SonosService(_config, _owner) {
  
 util.inherits(SonosService, Service);
 
+// Called when current state required
+SonosService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SonosService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 SonosService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+SonosService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+SonosService.prototype.start = function() {
 
    try {
       DeviceDiscovery((_device) => {

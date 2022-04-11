@@ -19,6 +19,24 @@ function CurrentWeather(_config, _owner) {
 
 util.inherits(CurrentWeather, ServiceNode);
 
+// Called when current state required
+CurrentWeather.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+CurrentWeather.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+CurrentWeather.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+CurrentWeather.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 CurrentWeather.prototype.newSubscriptionAdded = function(_subscription) {
 
    console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);

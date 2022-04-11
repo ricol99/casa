@@ -8,6 +8,24 @@ function BtleDevice(_config, _owner) {
 
 util.inherits(BtleDevice, ServiceNode);
 
+// Called when current state required
+BtleDevice.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleDevice.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+BtleDevice.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+BtleDevice.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 BtleDevice.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() args = ", _subscription.args);
    this.macAddress = _subscription.args.macAddress.toLowerCase();
@@ -43,6 +61,5 @@ BtleDevice.prototype.advertisementLost = function() {
 BtleDevice.prototype.processPropertyChanged = function(_transaction, _callback) {
    _callback(null, true);
 };
-
 
 module.exports = exports = BtleDevice;

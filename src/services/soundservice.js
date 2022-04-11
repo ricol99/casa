@@ -9,20 +9,27 @@ function SoundService(_config, _owner) {
 
 util.inherits(SoundService, Service);
 
-SoundService.prototype.startAnalysing = function() {
+// Called when current state required
+SoundService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
 
-   var Generator = require('audio-generator/stream');
-
-   var sinewaveGen = function(_time) {
-      return [ Math.sin(Math.PI * 2 * _time * 3000) ]
-   }
-
-   Generator(sinewaveGen, { duration: Infinity, period: Infinity })
-   .pipe(this.analyser);
-   //this.input.pipe(this.analyser);
+// Called when current state required
+SoundService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
 };
 
 SoundService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+SoundService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+SoundService.prototype.start = function() {
    this.input = new audio.Input();
 
    this.analyser = new AudioAnalyser({
@@ -63,6 +70,19 @@ SoundService.prototype.coldStart = function() {
       if (dataArray[68] > 150) 
          console.log(dataArray[68]);
    }, 500);
+};
+
+SoundService.prototype.startAnalysing = function() {
+
+   var Generator = require('audio-generator/stream');
+
+   var sinewaveGen = function(_time) {
+      return [ Math.sin(Math.PI * 2 * _time * 3000) ]
+   }
+
+   Generator(sinewaveGen, { duration: Infinity, period: Infinity })
+   .pipe(this.analyser);
+   //this.input.pipe(this.analyser);
 };
 
 module.exports = exports = SoundService;

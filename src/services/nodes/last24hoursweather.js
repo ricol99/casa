@@ -9,5 +9,23 @@ function Last24HoursWeather(_config, _owner) {
 
 util.inherits(Last24HoursWeather, LastPeriodWeather);
 
+// Called when current state required
+Last24HoursWeather.prototype.export = function(_exportObj) {
+   LastPeriodWeather.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Last24HoursWeather.prototype.import = function(_importObj) {
+   LastPeriodWeather.prototype.import.call(this, _importObj);
+};
+
+Last24HoursWeather.prototype.coldStart = function() {
+   LastPeriodWeather.prototype.coldStart.call(this);
+};
+
+Last24HoursWeather.prototype.hotStart = function() {
+   LastPeriodWeather.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Last24HoursWeather;
 

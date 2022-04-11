@@ -20,8 +20,23 @@ function SmeeService(_config, _owner) {
 
 util.inherits(SmeeService, Service);
 
+// Called when current state required
+SmeeService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SmeeService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 SmeeService.prototype.coldStart = function() {
    Service.prototype.coldStart.call(this);
+   this.start();
+};
+
+SmeeService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
    this.start();
 };
 

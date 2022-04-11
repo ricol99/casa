@@ -31,4 +31,22 @@ function PushcutNotifier(_config, _parent) {
 
 util.inherits(PushcutNotifier, Notifier);
 
+// Called when current state required
+PushcutNotifier.prototype.export = function(_exportObj) {
+   Notifier.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PushcutNotifier.prototype.import = function(_importObj) {
+   Notifier.prototype.import.call(this, _importObj);
+};
+
+PushcutNotifier.prototype.coldStart = function() {
+   Notifier.prototype.coldStart.call(this);
+};
+
+PushcutNotifier.prototype.hotStart = function() {
+   Notifier.prototype.hotStart.call(this);
+};
+
 module.exports = exports = PushcutNotifier;

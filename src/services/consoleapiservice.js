@@ -10,16 +10,33 @@ function ConsoleApiService(_config, _owner) {
 
 util.inherits(ConsoleApiService, WebService);
 
+// Called when current state required
+ConsoleApiService.prototype.export = function(_exportObj) {
+   WebService.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+ConsoleApiService.prototype.import = function(_importObj) {
+   WebService.prototype.import.call(this, _importObj);
+};
+
 ConsoleApiService.prototype.coldStart = function() {
+   this.start();
+   WebService.prototype.coldStart.call(this);
+};
+
+ConsoleApiService.prototype.hotStart = function() {
+   this.start();
+   WebService.prototype.hotStart.call(this);
+};
+
+ConsoleApiService.prototype.start = function() {
    this.gangConsoleApi = this.createChild({ name: this.gang.name, type: "gangconsoleapi" }, "consoleapi", null);
 
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:obj/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
-
-   WebService.prototype.coldStart.call(this);
-
 };
 
 ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {

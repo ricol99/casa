@@ -28,31 +28,44 @@ function HomekitService(_config, _owner) {
 
 util.inherits(HomekitService, Service);
 
-HomekitService.prototype.coldStart = function() {
-   console.log("AAAAAA AAAAAAAAAAAAA");
+// Called when current state required
+HomekitService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
 
+// Called when current state required
+HomekitService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+HomekitService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+HomekitService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+HomekitService.prototype.start = function() {
    // Start by creating our Bridge which will host all loaded Accessories
    this.bridge = new Bridge('Casa Homekit Bridge', uuid.generate('Casa Homekit Bridge'));
 
    // Listen for bridge identification event
-   this.bridge.on('identify', function(_paired, _callback) {
-     console.log("Node Bridge identify");
-     _callback(); // success
+   this.bridge.on('identify', (_paired, _callback) => {
+      console.log(this.name + ": Node Bridge identify");
+      _callback(); // success
    });
 
    // Publish the Bridge on the local network.
-   setTimeout(function(_this) {
-      _this.bridge.publish({
-         username: _this.username,
-         port: _this.port,
-         pincode: _this.pincode,
-         category: Accessory.Categories.BRIDGE
-      });
-   }, 15000, this);
+   setTimeout( () => {
+      this.bridge.publish({ username: this.username, port: this.port,
+                            pincode: this.pincode, category: Accessory.Categories.BRIDGE });
+   }, 15000);
 };
 
 HomekitService.prototype.addAccessory = function(_accessory) {
-  console.log(this.uName +": AAAAAAAAAAAAAAA addAccessory=", _accessory);
   this.bridge.addBridgedAccessory(_accessory);
 };
 

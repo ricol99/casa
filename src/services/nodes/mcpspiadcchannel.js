@@ -16,6 +16,24 @@ function McpSpiAdcChannel(_config, _owner) {
 
 util.inherits(McpSpiAdcChannel, ServiceNode);
 
+// Called when current state required
+McpSpiAdcChannel.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+McpSpiAdcChannel.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+McpSpiAdcChannel.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+McpSpiAdcChannel.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (_subscription.interval < this.getProperty("interval")) {

@@ -23,7 +23,27 @@ function SecuritySpyService(_config, _owner) {
 
 util.inherits(SecuritySpyService, Service);
 
+// Called when current state required
+SecuritySpyService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SecuritySpyService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 SecuritySpyService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+SecuritySpyService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+SecuritySpyService.prototype.start = function() {
    this.systemInfo = new SystemInfo(this);
 
    this.systemInfo.sync( (_err, _result) => {

@@ -18,6 +18,24 @@ function WeatherService(_config, _owner) {
 
 util.inherits(WeatherService, Service);
 
+// Called when current state required
+WeatherService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+WeatherService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+WeatherService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
+};
+
+WeatherService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+};
+
 WeatherService.prototype.fetchCurrentWeather = function(_serviceNode, _latitude, _longitude, _callback) {
    console.log(this.uName + ": Fetching current 3 hour forecast from the Met Office");
 

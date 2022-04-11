@@ -10,6 +10,24 @@ function HueServiceLight(_config, _owner) {
 
 util.inherits(HueServiceLight, ServiceNode);
 
+// Called when current state required
+HueServiceLight.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HueServiceLight.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+HueServiceLight.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+HueServiceLight.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 HueServiceLight.prototype.setState = function(_properties, _callback) {
    var transaction = { action: "setState", properties: util.copy(_properties), callback: _callback };
    this.owner.queueTransaction(this, transaction);

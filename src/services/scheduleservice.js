@@ -18,6 +18,24 @@ function ScheduleService(_config, _owner) {
 
 util.inherits(ScheduleService, Service);
 
+// Called when current state required
+ScheduleService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+ScheduleService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+ScheduleService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
+};
+
+ScheduleService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+};
+
 ScheduleService.prototype.registerEvents = function(_owner, _config) {
    var sched = new Schedule(_owner, _config, this);
 
@@ -70,9 +88,6 @@ ScheduleService.prototype.refreshSunEvents = function() {
          this.schedules[index].refreshSunEvents(this.sunTimes);
       }
    }
-};
-
-ScheduleService.prototype.coldStart = function() {
 };
 
 function Schedule(_requester, _config, _owner) {

@@ -11,6 +11,24 @@ function PushoverServiceGroup(_config, _owner) {
 
 util.inherits(PushoverServiceGroup, ServiceNode);
 
+// Called when current state required
+PushoverServiceGroup.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PushoverServiceGroup.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+PushoverServiceGroup.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+PushoverServiceGroup.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 PushoverServiceGroup.prototype.newSubscriptionAdded = function(_subscription) {
 
    if (!this.userGroup) {

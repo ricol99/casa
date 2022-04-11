@@ -21,7 +21,27 @@ function LightwaveRfService(_config, _owner) {
 
 util.inherits(LightwaveRfService, Service);
 
+// Called when current state required
+LightwaveRfService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+LightwaveRfService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 LightwaveRfService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+LightwaveRfService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+LightwaveRfService.prototype.start = function() {
 
    this.receiveSocket.on("message", (_message, _info) => {
       this.messageReceived(_message, _info);
@@ -34,7 +54,6 @@ LightwaveRfService.prototype.coldStart = function() {
 
    //Bind to the receive port
    this.receiveSocket.bind(9761);
-
 };
 
 LightwaveRfService.prototype.messageReceived = function(_message, _info) {

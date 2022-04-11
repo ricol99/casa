@@ -10,6 +10,24 @@ function MqttServiceTopic(_config, _owner) {
 
 util.inherits(MqttServiceTopic, ServiceNode);
 
+// Called when current state required
+MqttServiceTopic.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+MqttServiceTopic.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+MqttServiceTopic.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+MqttServiceTopic.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 MqttServiceTopic.prototype.newSubscriptionAdded = function(_subscription) {
    this.topic = _subscription.args.topic;
    console.log(this.uName + ": newSubscriptionAdded() topic=" + this.topic);

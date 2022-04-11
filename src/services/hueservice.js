@@ -17,7 +17,27 @@ function HueService(_config, _owner) {
 
 util.inherits(HueService, Service);
 
+// Called when current state required
+HueService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HueService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 HueService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+HueService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+HueService.prototype.start = function() {
 
    if (this.userId) {
 

@@ -19,6 +19,24 @@ function WidgetLordService(_config, _owner) {
 
 util.inherits(WidgetLordService, Service);
 
+// Called when current state required
+WidgetLordService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+WidgetLordService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+WidgetLordService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
+};
+
+WidgetLordService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+};
+
 WidgetLordService.prototype.fetchReading = function(_id, _callback) {
    var serviceNode = this.findOrCreateNode("channel", _id);
    serviceNode.fetchReading(_callback);

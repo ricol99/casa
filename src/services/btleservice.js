@@ -19,6 +19,121 @@ function BtleService(_config, _owner) {
 
 util.inherits(BtleService, Service);
 
+// Called when current state required
+BtleService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+BtleService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+BtleService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+BtleService.prototype.start = function() {
+
+   this.scanner.onadvertisement = (_advert) => {
+
+      for (var field in this.scanFieldList) {
+
+         if (this.scanFieldList.hasOwnProperty(field)) {
+            this.scanFieldList[field].processAdvert(_advert);
+         }
+      }
+   };
+};
+
+BtleService.prototype.addAdvertisementToScan = function(_serviceNode, _field, _match, _interval) {
+   console.log(this.uName + ": Requested to scan for bluetooth advertisement with field=" + _field + " and match=" + _match);
+   var newlyCreated = false;
+
+   if (!this.scanFieldList.hasOwnProperty(_field)) {
+      this.scanFieldList[_field] = new ScanField(this, _field);
+      this.scanFieldListLength = this.scanFieldListLength + 1;
+      newlyCreated = true;
+   }
+
+   this.scanFieldList[_field].addAdvertisementWatcher(_serviceNode, _match);
+
+   if ((this.scanFieldListLength === 1) && newlyCreated) {
+ 
+      // Start scanning
+      this.scanner.startScan().then(() => {
+         console.log(this.uName + ": Starting to scan for bluetooth LE advertisements");
+      }).catch((_error) => {
+        console.error(this.uName + ": An error has occurred while trying to start scanning: " + _error);
+      });
+   }
+
+   return true;
+};
+
+BtleService.prototype.removeAdvertisementFromScan = function(_serviceNode, _field, _match) {
+   console.log(this.uName + ": Requested to stop scanning for bluetooth advertisement with field=" + _field + " and match=" + _match);
+
+   if (!this.scanFieldList.hasOwnProperty(_field)) {
+      return false;
+   }
+
+   this.scanFieldList[_field].removeAdvertisementWatcher(_serviceNode, _match);
+
+   if (this.scanFieldList[_field].noOfAdvertismentWatchers === 0) {
+      delete this.scanFieldList[_field];
+      this.scanFieldListLength = this.scanFieldListLength - 1;
+   }
+
+   if (this.scanFieldListLength === 0) {
+      // Stop scanning
+      this.scanner.stopScan();
+      console.log(this.uName + ": Stopped scanning for bluetooth LE advertisements");
+   }
+
+   return true;
+};
+
+BtleService.prototype.scanOnce = function(_duration, _callback) {
+
+   if (this.tempScanning) {
+      _callback("Currently scanning for another client");
+      return;
+   }
+   else {
+      this.tempScanning = true;
+   }
+
+   var scanDuration = _duration ? _duration : 10;
+   var tempScanner = new BeaconScanner();
+
+   tempScanner.onadvertisement = (_advert) => {
+      clearTimeout(this.scanOnceTimeout);
+      tempScanner.stopScan();
+      this.tempScanning = false;
+      _callback(null, _advert);
+   };
+
+   tempScanner.startScan().then(() => {
+
+      this.scanOnceTimeout = setTimeout( () => {
+         tempScanner.stopScan();
+         this.tempScanning = false;
+         _callback(null, []);
+      }, scanDuration * 1000);
+
+   }).catch((_error) => {
+      this.tempScanning = false;
+      _callback("Unable to start scan. Error: " + _error);
+   });
+};
+
 function AdvertisementWatcher(_owner, _serviceNode, _match) {
    this.owner = _owner;
    this.serviceNode = _serviceNode;
@@ -194,101 +309,6 @@ ScanField.prototype.createMatchString = function(_match) {
    }
 
    return String(_match);
-};
-
-BtleService.prototype.coldStart = function() {
-
-   this.scanner.onadvertisement = (_advert) => {
-
-      for (var field in this.scanFieldList) {
-
-         if (this.scanFieldList.hasOwnProperty(field)) {
-            this.scanFieldList[field].processAdvert(_advert);
-         }
-      }
-    };
-};
-
-BtleService.prototype.addAdvertisementToScan = function(_serviceNode, _field, _match, _interval) {
-   console.log(this.uName + ": Requested to scan for bluetooth advertisement with field=" + _field + " and match=" + _match);
-   var newlyCreated = false;
-
-   if (!this.scanFieldList.hasOwnProperty(_field)) {
-      this.scanFieldList[_field] = new ScanField(this, _field);
-      this.scanFieldListLength = this.scanFieldListLength + 1;
-      newlyCreated = true;
-   }
-
-   this.scanFieldList[_field].addAdvertisementWatcher(_serviceNode, _match);
-
-   if ((this.scanFieldListLength === 1) && newlyCreated) {
- 
-      // Start scanning
-      this.scanner.startScan().then(() => {
-         console.log(this.uName + ": Starting to scan for bluetooth LE advertisements");
-      }).catch((_error) => {
-        console.error(this.uName + ": An error has occurred while trying to start scanning: " + _error);
-      });
-   }
-
-   return true;
-};
-
-BtleService.prototype.removeAdvertisementFromScan = function(_serviceNode, _field, _match) {
-   console.log(this.uName + ": Requested to stop scanning for bluetooth advertisement with field=" + _field + " and match=" + _match);
-
-   if (!this.scanFieldList.hasOwnProperty(_field)) {
-      return false;
-   }
-
-   this.scanFieldList[_field].removeAdvertisementWatcher(_serviceNode, _match);
-
-   if (this.scanFieldList[_field].noOfAdvertismentWatchers === 0) {
-      delete this.scanFieldList[_field];
-      this.scanFieldListLength = this.scanFieldListLength - 1;
-   }
-
-   if (this.scanFieldListLength === 0) {
-      // Stop scanning
-      this.scanner.stopScan();
-      console.log(this.uName + ": Stopped scanning for bluetooth LE advertisements");
-   }
-
-   return true;
-};
-
-BtleService.prototype.scanOnce = function(_duration, _callback) {
-
-   if (this.tempScanning) {
-      _callback("Currently scanning for another client");
-      return;
-   }
-   else {
-      this.tempScanning = true;
-   }
-
-   var scanDuration = _duration ? _duration : 10;
-   var tempScanner = new BeaconScanner();
-
-   tempScanner.onadvertisement = (_advert) => {
-      clearTimeout(this.scanOnceTimeout);
-      tempScanner.stopScan();
-      this.tempScanning = false;
-      _callback(null, _advert);
-   };
-
-   tempScanner.startScan().then(() => {
-
-      this.scanOnceTimeout = setTimeout( () => {
-         tempScanner.stopScan();
-         this.tempScanning = false;
-         _callback(null, []);
-      }, scanDuration * 1000);
-
-   }).catch((_error) => {
-      this.tempScanning = false;
-      _callback("Unable to start scan. Error: " + _error);
-   });
 };
 
 module.exports = exports = BtleService;

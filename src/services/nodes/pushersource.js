@@ -9,6 +9,24 @@ function PusherSource(_config, _owner) {
 
 util.inherits(PusherSource, ServiceNode);
 
+// Called when current state required
+PusherSource.prototype.export = function(_exportObj) {
+   ServiceNode.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PusherSource.prototype.import = function(_importObj) {
+   ServiceNode.prototype.import.call(this, _importObj);
+};
+
+PusherSource.prototype.coldStart = function() {
+   ServiceNode.prototype.coldStart.call(this);
+};
+
+PusherSource.prototype.hotStart = function() {
+   ServiceNode.prototype.hotStart.call(this);
+};
+
 PusherSource.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() serviceProperty=" + _subscription.serviceProperty + ", args = ", _subscription.args);
    this.pusherSource = _subscription.args.pusherSource;

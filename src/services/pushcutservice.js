@@ -13,6 +13,24 @@ function PushcutService(_config, _owner) {
 
 util.inherits(PushcutService, Service);
 
+// Called when current state required
+PushcutService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+PushcutService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
+PushcutService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
+};
+
+PushcutService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+};
+
 PushcutService.prototype.notifyUser = function(_userOrGroup, _notification, _node) {
 
    var userOrGroup = this.gang.findNamedObject(_userOrGroup);

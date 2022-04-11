@@ -15,9 +15,27 @@ function MqttService(_config, _owner) {
 
 util.inherits(MqttService, Service);
 
+// Called when current state required
+MqttService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+MqttService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 MqttService.prototype.coldStart = function() {
    Service.prototype.coldStart.call(this);
+   this.start();
+};
 
+MqttService.prototype.hotStart = function() {
+   Service.prototype.hotStart.call(this);
+   this.start();
+};
+
+MqttService.prototype.start = function() {
    this.mqttClient  = mqtt.connect(this.mqttServerAddress);
 
    this.mqttClient.on('message', (_topic, _message) => {

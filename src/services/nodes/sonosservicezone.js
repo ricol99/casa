@@ -17,5 +17,23 @@ function SonosServiceZone(_config, _owner) {
 
 util.inherits(SonosServiceZone, Thing);
 
+// Called when current state required
+SonosServiceZone.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SonosServiceZone.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+SonosServiceZone.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+SonosServiceZone.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = SonosServiceZone;
 

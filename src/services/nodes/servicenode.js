@@ -17,7 +17,22 @@ function ServiceNode(_config, _owner) {
 
 util.inherits(ServiceNode, Thing);
 
+// Called when current state required
+ServiceNode.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+ServiceNode.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
 ServiceNode.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+ServiceNode.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
 };
 
 // Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener

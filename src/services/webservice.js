@@ -73,7 +73,27 @@ function WebService(_config, _owner) {
 
 util.inherits(WebService, Service);
 
+// Called when current state required
+WebService.prototype.export = function(_exportObj) {
+   Service.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+WebService.prototype.import = function(_importObj) {
+   Service.prototype.import.call(this, _importObj);
+};
+
 WebService.prototype.coldStart = function() {
+   this.start();
+   Service.prototype.coldStart.call(this);
+};
+
+WebService.prototype.hotStart = function() {
+   this.start();
+   Service.prototype.hotStart.call(this);
+};
+
+WebService.prototype.start = function() {
 
    if (this.hangingOffMainServer) {
 
