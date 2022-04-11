@@ -59,6 +59,7 @@ Property.prototype.export = function(_exportObj) {
    _exportObj.value = this.value;
    _exportObj.rawPropertyValue = this.rawPropertyValue;
    _exportObj.cold = this.cold;
+   _exportObj.valid = this.valid;
 };
 
 // Called before hotStart to restore system state
@@ -67,6 +68,7 @@ Property.prototype.import = function(_importObj) {
    this.value = _importObj.value;
    this.rawPropertyValue = _importObj.rawPropertyValue;
    this.cold = _importObj.cold;
+   this.valid = _importObj.valid;
 };
 
 // Override this if you listen to a source that is not "Source".

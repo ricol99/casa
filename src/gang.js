@@ -34,10 +34,6 @@ Gang.prototype.import = function(_importObj) {
 };
 
 Gang.prototype.hotStart = function() {
-
-   // Make sure all listeners are refreshed now that all sources are available
-   this.casa.refreshSourceListeners();
-
    NamedObject.prototype.hotStart.call(this);
 
    // Start connecting to Peers

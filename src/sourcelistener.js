@@ -81,6 +81,7 @@ SourceListener.prototype.export = function(_exportObj) {
    NamedObject.prototype.export.call(this, _exportObj);
    _exportObj.sourceRawValue = this.sourceRawValue;
    _exportObj.sourcePropertyValue = this.sourcePropertyValue;
+   _exportObj.valid = this.valid;
 };
 
 // Called before hotStart to system state
@@ -88,6 +89,7 @@ SourceListener.prototype.import = function(_importObj) {
    NamedObject.prototype.import.call(this, _importObj);
    this.sourceRawValue = _importObj.sourceRawValue;
    this.sourcePropertyValue = _importObj.sourcePropertyValue;
+   this.valid = _importObj.valid;
 };
 
 SourceListener.prototype.coldStart = function() {
@@ -97,7 +99,7 @@ SourceListener.prototype.coldStart = function() {
 
 SourceListener.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
-   // AAAAA - TODO
+   this.establishListeners();
 };
 
 SourceListener.prototype.establishListeners = function() {
