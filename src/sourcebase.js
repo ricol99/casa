@@ -16,12 +16,27 @@ util.inherits(SourceBase, NamedObject);
 
 // Called when system state is required
 SourceBase.prototype.export = function(_exportObj) {
-   return NamedObject.prototype.export.call(this, _exportObj);
+   NamedObject.prototype.export.call(this, _exportObj);
 };
 
 // Called when system state is required
 SourceBase.prototype.import = function(_importObj) {
-   return NamedObject.prototype.import.call(this, _importObj);
+   NamedObject.prototype.import.call(this, _importObj);
+};
+
+SourceBase.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+
+   for (var prop in this.properties) {
+
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].coldStart();
+      }
+   }
+};
+
+SourceBase.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
 };
 
 SourceBase.prototype.getCasa = function() {
@@ -82,28 +97,6 @@ SourceBase.prototype.standUpFromBow = function() {
    }
    this.casa.standUpSourceFromBow(this);
 }
-
-SourceBase.prototype.coldStart = function() {
-   NamedObject.prototype.coldStart.call(this);
-
-   for (var prop in this.properties) {
-
-      if (this.properties.hasOwnProperty(prop)) {
-         this.properties[prop].coldStart();
-      }
-   }
-};
-
-SourceBase.prototype.hotStart = function() {
-   NamedObject.prototype.hotStart.call(this);
-
-   for (var prop in this.properties) {
-
-      if (this.properties.hasOwnProperty(prop)) {
-         this.properties[prop].hotStart();
-      }
-   }
-};
 
 SourceBase.prototype.isPropertyValid = function(_property) {
 

@@ -19,4 +19,22 @@ function BtleNearbyDevice(_config, _parent) {
 
 util.inherits(BtleNearbyDevice, Thing);
 
+// Called when current state required
+BtleNearbyDevice.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleNearbyDevice.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BtleNearbyDevice.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BtleNearbyDevice.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = BtleNearbyDevice;

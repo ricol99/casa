@@ -59,6 +59,24 @@ function SonosZone(_config, _parent) {
 
 util.inherits(SonosZone, Thing);
 
+// Called when current state required
+SonosZone.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SonosZone.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+SonosZone.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+SonosZone.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 SonosZone.prototype.closeConnectionToDevice = function() {
 
    if (this.connected) {

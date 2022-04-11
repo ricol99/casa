@@ -18,21 +18,39 @@ function LocalConsole(_owner) {
 
 util.inherits(LocalConsole, NamedObject);
 
+// Called when current state required
+LocalConsole.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+LocalConsole.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+};
+
+LocalConsole.prototype.hotStart = function() {
+   this.gang = Gang.mainInstance();
+   this.casa = this.gang.casa;
+
+   NamedObject.prototype.hotStart.call(this);
+   this.start("::" + this.casa.name);
+};
+
 LocalConsole.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
 
+   NamedObject.prototype.coldStart.call(this);
+   this.start("::" + this.casa.name);
+};
+
+LocalConsole.prototype.start = function(_startScope) {
    var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
    this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name, sourceCasa: this.casa.name, casaName: this.casa.name }, null, this);
 
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
    this.sourceCasa = null;
-
-   this.start("::" + this.casa.name);
-};
-
-LocalConsole.prototype.start = function(_startScope) {
    this.currentScope = _startScope;
    this.currentCmdObj = this.gangConsoleCmd;
    this.setPrompt(this.currentScope);

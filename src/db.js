@@ -27,6 +27,28 @@ Db.prototype.superType = function(_type) {
    return "db";
 };
 
+// Called when current state required
+Db.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+   // AAAAA - TODO
+};
+
+// Called when current state required
+Db.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+   // AAAAA - TODO
+}; 
+   
+Db.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+   // AAAAA - TODO
+};
+   
+Db.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
+   // AAAAA - TODO
+};
+
 Db.prototype.getCasa = function() {
    return this.owner.getCasa();
 };

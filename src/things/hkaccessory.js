@@ -43,8 +43,27 @@ function HomekitAccessory(_config, _parent) {
 
 util.inherits(HomekitAccessory, Thing);
 
+// Called when current state required
+HomekitAccessory.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitAccessory.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+HomekitAccessory.prototype.hotStart = function() {
+   this.start();
+   Thing.prototype.hotStart.call(this);
+};
+
 HomekitAccessory.prototype.coldStart = function() {
-   console.log(this.uName + ": AAAAAAAAAAA coldStart()");
+   this.start();
+   Thing.prototype.coldStart.call(this);
+};
+
+HomekitAccessory.prototype.start = function() {
 
    this.hkAccessory
      .getService(Service.AccessoryInformation)
@@ -73,8 +92,6 @@ HomekitAccessory.prototype.coldStart = function() {
          pincode: this.pincode
       });
    }
-
-  Thing.prototype.coldStart.call(this);
 };
 
 HomekitAccessory.prototype.identify = function() {

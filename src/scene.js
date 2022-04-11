@@ -65,6 +65,28 @@ Scene.prototype.superType = function(_type) {
    return "scene";
 };
 
+// Called when current state required
+Scene.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+   // AAAAA - TODO
+};
+
+// Called when current state required
+Scene.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+   // AAAAA - TODO
+};
+
+Scene.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+   // AAAAA - TODO
+};
+
+Scene.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+   // AAAAA - TODO
+};
+
 Scene.prototype.receivedEventFromSource = function(_data) {
    var changed = false;
 

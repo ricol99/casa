@@ -15,16 +15,29 @@ util.inherits(LatchProperty, Property);
 
 // Called when system state is required
 LatchProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.left() : -1;
+   _exportObj.sourceActive = this.sourceActive;
+   _exportObj.active = this.active;
+   _exportObj.lastData = util.copy(this.lastData);
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.minOutputTimeObj = this.minOutputTimeObj ? this.minOutputTimeObj.expiration() : -1;
-      _exportObj.sourceActive = this.sourceActive;
-      _exportObj.active = this.active;
-      _exportObj.lastData = util.copy(this.lastData);
-      return true;
+// Called to restore system state before hot start
+LatchProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj)) {
+   this.sourceActive = _importObj.sourceActive;
+   this.active = _importObj.active;
+   this.lastData = util.copy(_importObj.this.lastData);
+   this.minOutputTimeObj = _importObj.minOutputTimeObj;
+};
+
+// Called after system state has been restored
+LatchProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+
+   if (this.minOutputTimeObj !== -1) {
+      this.restartTimer(this.minOutputTimeObj);
    }
-
-   return false;
 };
 
 LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
@@ -70,9 +83,10 @@ LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 // NON_EXPORTED METHODS
 // ====================
 
-LatchProperty.prototype.restartTimer = function() {
+LatchProperty.prototype.restartTimer = function(_overrideTimeout) {
+   var timeout = _overrideTimeout ? _overrideTimeout : this.minOutputTime*1000;
 
-   if (this.minOutputTimeObj) {
+   if (!_overrideTimeout && this.minOutputTimeObj) {
       util.clearTimeout(this.minOutputTimeObj);
    }
 
@@ -88,7 +102,7 @@ LatchProperty.prototype.restartTimer = function() {
             return;
          }
       }
-   }, this.minOutputTime*1000, this);
+   }, timeout, this);
 }
 
 module.exports = exports = LatchProperty;

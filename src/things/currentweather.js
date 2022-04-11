@@ -62,4 +62,22 @@ function CurrentWeather(_config, _parent) {
 
 util.inherits(CurrentWeather, Thing);
 
+// Called when current state required
+CurrentWeather.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+CurrentWeather.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+CurrentWeather.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+CurrentWeather.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = CurrentWeather;

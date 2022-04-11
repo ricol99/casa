@@ -23,15 +23,49 @@ Gang.prototype.superType = function(_type) {
 
 // Called when system state is required
 Gang.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.casa = this.casa.name;
+   _exportObj.config = stripTransient(this.config);
+};
 
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.casa = this.casa.name;
-      _exportObj.config = stripTransient(this.config);
-      return true;
+// Called to import system state before hot start
+Gang.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+};
+
+Gang.prototype.hotStart = function() {
+
+   // Make sure all listeners are refreshed now that all sources are available
+   this.casa.refreshSourceListeners();
+
+   NamedObject.prototype.hotStart.call(this);
+
+   // Start connecting to Peers
+   this.connectToPeers();
+};
+
+Gang.prototype.coldStart = function() {
+
+   // Cold start the services
+   this.casa.coldStartServices();
+
+   // Make sure all listeners are refreshed now that all sources are available
+   this.casa.refreshSourceListeners();
+
+   // Cold start all defined things now that everything has been created
+   for(var prop in this.things) {
+
+      if (this.things.hasOwnProperty(prop)){
+         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
+         this.things[prop].coldStart();
+      }
    }
 
-   return false;
-};
+   this.casa.coldStart();
+
+   // Start connecting to Peers
+   this.connectToPeers();
+}
 
 Gang.prototype.buildTree = function() {
    _mainInstance = this;
@@ -58,48 +92,6 @@ Gang.prototype.getCasa = function() {
 
 Gang.prototype.interestInNewChild = function(_uName) {
 };
-
-Gang.prototype.hotStart = function() {
-   // Hot start the services
-   this.casa.hotStartServices();
-
-   // Make sure all listeners are refreshed now that all sources are available
-   this.casa.refreshSourceListeners();
-
-   // Hot start all defined things now that everything has been created
-   for(var prop in this.things) {
-
-      if (this.things.hasOwnProperty(prop)){
-         console.log(this.uName + ': Hot starting thing ' + this.things[prop].uName);
-         this.things[prop].hotStart();
-      }
-   }
-
-   this.casa.hotStart();
-};
-
-Gang.prototype.coldStart = function() {
-   // Cold start the services
-   this.casa.coldStartServices();
-
-   // Make sure all listeners are refreshed now that all sources are available
-   this.casa.refreshSourceListeners();
-
-   // Cold start all defined things now that everything has been created
-   for(var prop in this.things) {
-
-      if (this.things.hasOwnProperty(prop)){
-         console.log(this.uName + ': Cold starting thing ' + this.things[prop].uName);
-         this.things[prop].coldStart();
-      }
-   }
-
-   this.casa.coldStart();
-
-   // Start connecting to Peers
-   this.connectToPeers();
-}
-
 Gang.prototype.connectToPeers = function() {
 
    if (this.casa.connectToPeers) {
@@ -357,20 +349,7 @@ function diffObj(_obj1, _obj2) {
 function stripTransient(_source) {
    var dest;
 
-   if (typeof _source === 'object') {
-
-      if (_source.hasOwnProperty("transient") && _source.transient) {
-         return null;
-      }
-
-      dest = {};
-
-      for (var mem in _source) {
-         dest[mem] = stripTransient(_source[mem]);
-      }
-      return dest;
-   }
-   else if (_source instanceof Array) {
+   if (_source instanceof Array) {
       dest = [];
 
       for (var i = 0; i < _source.length; ++i) {
@@ -382,6 +361,19 @@ function stripTransient(_source) {
          dest.push(stripTransient(_source[i]));
       }
 
+      return dest;
+   }
+   else if (typeof _source === 'object') {
+      dest = {};
+
+      for (var mem in _source) {
+
+         if (_source[mem] && (typeof _source[mem] === 'object') && _source[mem].hasOwnProperty("transient") && _source[mem].transient) {
+            continue;
+         }
+
+         dest[mem] = stripTransient(_source[mem]);
+      }
       return dest;
    }
    else {

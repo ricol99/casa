@@ -48,44 +48,35 @@ util.inherits(StateProperty, Property);
 
 // Called when system state is required
 StateProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.controllingOwner = this.controllingOwner;
-      _exportObj.currentPriority = this.currentPriority;
-      _exportObj.currentState = this.currentState ? this.currentState.name : null;
-      _exportObj.previousState = this.previousState ? this.previousState.name : null;
-      _exportObj.stateTimer = this.stateTimer ? this.stateTimer.expiration() : -1;
-
-      return true;
-   }
-
-   return false;
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.controllingOwner = this.controllingOwner;
+   _exportObj.currentPriority = this.currentPriority;
+   _exportObj.currentState = this.currentState ? this.currentState.name : null;
+   _exportObj.previousState = this.previousState ? this.previousState.name : null;
+   _exportObj.stateTimer = this.stateTimer ? this.stateTimer.left() : -1;
 };
 
 // Called before hotStart to restore system state
 StateProperty.prototype.import = function(_importObj) {
-
-   if (Property.prototype.import.call(this, _importObj)) {
-      this.controllingOwner = _importObj.controllingOwner;
-      this.currentPriority = _importObj.currentPriority;
-      this.currentState = _importObj.currentState ? this.states[_importObj.currentState] : null;
-      this.previousState = _importObj.previousState ? this.states[_importObj.previousState] : null;
-      this.stateTimer = _importObj.stateTimer;
-
-      return true;
-   }
-
-   return false;
+   Property.prototype.import.call(this, _importObj);
+   this.controllingOwner = _importObj.controllingOwner;
+   this.currentPriority = _importObj.currentPriority;
+   this.currentState = _importObj.currentState ? this.states[_importObj.currentState] : null;
+   this.previousState = _importObj.previousState ? this.states[_importObj.previousState] : null;
+   this.stateTimer = (_importObj.stateTimer === -1) ? null : _importObj.stateTimer;
 };
 
-StateProperty.prototype.hotStart = function(_data) {
+StateProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
 
    if (this.currentState) {
       var timeoutDuration = this.stateTimer;
-      var timeoutNextState = this.currentState.timeout.nextState;
+
+      if (this.currentState.timeout) 
+      var timeoutNextState =  this.currentState.timeout ? this.currentState.timeout.nextState : null;
 
       if (timeoutNextState) {
-         this.stateTimer = util.restoreTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, 1000, timeoutNextState);
+         this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
       }
    }
 };

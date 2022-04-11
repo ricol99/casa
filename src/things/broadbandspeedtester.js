@@ -16,6 +16,24 @@ function BroadbandSpeedTester(_config, _parent) {
 
 util.inherits(BroadbandSpeedTester, Thing);
 
+// Called when current state required
+BroadbandSpeedTester.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BroadbandSpeedTester.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BroadbandSpeedTester.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BroadbandSpeedTester.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 BroadbandSpeedTester.prototype.testSpeed = function() {
    try {
       var test = speedTest({ maxTime: this.maxTime });

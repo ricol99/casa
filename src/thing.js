@@ -38,6 +38,16 @@ Thing.prototype.superType = function(_type) {
    return "thing";
 };
 
+// Called when system state is required
+Thing.prototype.export = function(_exportObj) {
+   Source.prototype.export.call(this, _exportObj);
+};   
+
+// Called when system state is required
+Thing.prototype.import = function(_importObj) {
+   Source.prototype.import.call(this, _importObj);
+};   
+
 Thing.prototype.coldStart = function() {
    Source.prototype.coldStart.call(this);
    console.log(this.uName + ": Cold starting child things....");
@@ -52,14 +62,7 @@ Thing.prototype.coldStart = function() {
 
 Thing.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
-   console.log(this.uName + ": Hot starting child things....");
-
-   for (var thing in this.things) {
-
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].hotStart();
-      }
-   }
+   // AAAAAAAA - TODO
 };
 
 Thing.prototype.addThing = function(_thing) {

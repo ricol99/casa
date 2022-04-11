@@ -21,4 +21,22 @@ function BtNearbyDevice(_config, _parent) {
 
 util.inherits(BtNearbyDevice, Thing);
 
+// Called when current state required
+BtNearbyDevice.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtNearbyDevice.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BtNearbyDevice.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BtNearbyDevice.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = BtNearbyDevice;

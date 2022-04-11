@@ -20,4 +20,22 @@ function WidgetLordChannel(_config, _parent) {
 
 util.inherits(WidgetLordChannel, Thing);
 
+// Called when current state required
+WidgetLordChannel.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+WidgetLordChannel.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+WidgetLordChannel.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+WidgetLordChannel.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = WidgetLordChannel;

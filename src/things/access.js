@@ -262,4 +262,22 @@ function Access(_config, _parent) {
 
 util.inherits(Access, Thing);
 
+// Called when current state required
+Access.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Access.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Access.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+Access.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Access;

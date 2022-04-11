@@ -36,6 +36,24 @@ function HomekitSwitchAccessory(_config, _parent) {
 
 util.inherits(HomekitSwitchAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitSwitchAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitSwitchAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitSwitchAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitSwitchAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
 
    if (this.stateless) {

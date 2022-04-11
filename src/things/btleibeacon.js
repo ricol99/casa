@@ -20,4 +20,22 @@ function BtleIBeacon(_config, _parent) {
 
 util.inherits(BtleIBeacon, Thing);
 
+// Called when current state required
+BtleIBeacon.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleIBeacon.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BtleIBeacon.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BtleIBeacon.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = BtleIBeacon;

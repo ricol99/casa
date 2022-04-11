@@ -30,6 +30,7 @@ Loader.prototype.load = function() {
          fs.unlinkSync(this.configPath + "/hotstate.json");
 
          if (importObj && importObj.timestamp && ((Date.now() - importObj.timestamp) < 30000)) {
+            console.log(util.inspect(importObj.tree));
             this.restoreNode(importObj.tree);
          }
          else {
@@ -75,9 +76,9 @@ process.on('uncaughtException', (_err) => {
    }
 });
 
-//setTimeout( () => {
-   //ia;
-//}, 25000);
+setTimeout( () => {
+   ia;
+}, 22000);
 
 Loader.prototype.loadNode = function() {
    this.casaDb = new Db(this.casaName, this.configPath, false, null);
@@ -145,7 +146,6 @@ Loader.prototype.restoreNode = function(_importObj) {
 
       this.gangDb.on('connected', (_data) => {
 
-         _importObj.casa = _importObj.myNamedObjects[_importObj.casa].config;   // HACK!
          this.gang = new Gang(_importObj.config);
 
          this.casaDb.setOwner(this.gang);

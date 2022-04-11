@@ -119,4 +119,22 @@ function Car(_config, _parent) {
 
 util.inherits(Car, Thing);
 
+// Called when current state required
+Car.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Car.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Car.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+Car.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Car;

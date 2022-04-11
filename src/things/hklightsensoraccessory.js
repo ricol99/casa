@@ -22,6 +22,24 @@ function HomekitLightSensorAccessory(_config, _parent) {
 
 util.inherits(HomekitLightSensorAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitLightSensorAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitLightSensorAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitLightSensorAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitLightSensorAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitLightSensorAccessory.prototype.getCurrentLightLevel = function() {
    return this.properties["light-level"].value;
 };

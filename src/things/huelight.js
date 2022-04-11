@@ -40,4 +40,22 @@ function HueLight(_config, _parent) {
 
 util.inherits(HueLight, Thing);
 
+// Called when current state required
+HueLight.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HueLight.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+HueLight.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+HueLight.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = HueLight;

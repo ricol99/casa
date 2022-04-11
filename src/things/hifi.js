@@ -17,6 +17,24 @@ function Hifi(_config, _parent) {
 
 util.inherits(Hifi, Thing);
 
+// Called when current state required
+Hifi.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Hifi.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Hifi.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+Hifi.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 Hifi.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (!_data.coldStart) {

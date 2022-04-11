@@ -53,6 +53,24 @@ function HomekitSecuritySystem(_config, _parent) {
 
 util.inherits(HomekitSecuritySystem, HomekitAccessory);
 
+// Called when current state required
+HomekitSecuritySystem.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitSecuritySystem.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitSecuritySystem.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitSecuritySystem.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitSecuritySystem.prototype.getCurrentState = function() {
    return this.properties["current-state"].value;
 };

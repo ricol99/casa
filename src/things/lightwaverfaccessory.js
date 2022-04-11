@@ -45,6 +45,24 @@ function LightwaveRfAccessory(_config, _parent) {
 
 util.inherits(LightwaveRfAccessory, Thing);
 
+// Called when current state required
+LightwaveRfAccessory.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+LightwaveRfAccessory.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+LightwaveRfAccessory.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+LightwaveRfAccessory.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 function copyObject(_sourceObject) {
    var newObject = {};
 

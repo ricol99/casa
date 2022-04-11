@@ -21,8 +21,6 @@ AsyncEmitter.prototype.export = function(_exportObj) {
    if (this.eventQueue.length > 0) {
       _exportObj.asyncEventQueue = this.eventQueue;
    }
-
-   return true;
 };
 
 // Called when current state required

@@ -35,12 +35,31 @@ function SevenSegmentDisplay(_config, _parent) {
 
 util.inherits(SevenSegmentDisplay, Thing);
 
-SevenSegmentDisplay.prototype.coldStart = function() {
+// Called when current state required
+SevenSegmentDisplay.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SevenSegmentDisplay.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+SevenSegmentDisplay.prototype.coldStart = function() { 
+   this.start();
+   Thing.prototype.coldStart.call(this);
+};
+
+SevenSegmentDisplay.prototype.hotStart = function() {
+   this.start();
+   Thing.prototype.hotStart.call(this);
+};
+
+SevenSegmentDisplay.prototype.start = function() {
 
    if (this.getProperty("display-clock")) {
       this.startDisplayingClock();
    }
-   Thing.prototype.coldStart.call(this);
 };
 
 SevenSegmentDisplay.prototype.startDisplayingClock = function(_resolution) {

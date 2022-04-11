@@ -54,6 +54,24 @@ function HomekitHumidifierDehumidifierAccessory(_config, _parent) {
 
 util.inherits(HomekitHumidifierDehumidifierAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitHumidifierDehumidifierAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitHumidifierDehumidifierAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitHumidifierDehumidifierAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitHumidifierDehumidifierAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitHumidifierDehumidifierAccessory.prototype.setActiveState = function(_value) {
    this.alignPropertyValue("active-state", _value);
 

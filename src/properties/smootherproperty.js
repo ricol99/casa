@@ -17,20 +17,35 @@ util.inherits(SmootherProperty, Property);
 
 // Called when system state is required
 SmootherProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.calculatedResolution = this.calculatedResolution;
-      _exportObj.targetValue = this.targetValue;
-      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.expiration() : -1;
-      return true;
-   }
-
-   return false;
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.calculatedResolution = this.calculatedResolution;
+   _exportObj.targetValue = this.targetValue;
+   _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
 };
 
-SmootherProperty.prototype.restartTimer = function() {
+// Called to restore system state before hot start
+SmootherProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj)) {
+   this.calculatedResolution = _importObj.calculatedResolution;
+   this.targetValue = _importObj.targetValue;
 
-   if (this.timeoutObj) {
+   this.timeoutObj = _importObj.minOutputTimeObj;
+};
+
+// Called after system state has been restored
+SmootherProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+
+   if (this.timeoutObj !== -1) {
+      this.restartTimer(this.timeoutObj);
+   }
+};
+
+
+SmootherProperty.prototype.restartTimer = function(_overrideTimeout) {
+   var timeout = _overrideTimeout ? _overrideTimeout : this.calculatedResolution * 1000;
+
+   if (!_overrideTimeout && this.timeoutObj) {
       util.clearTimeout(this.timeoutObj);
    }
 
@@ -49,7 +64,7 @@ SmootherProperty.prototype.restartTimer = function() {
             this.restartTimer();
          }
       }
-   }, this.calculatedResolution * 1000);
+   }, timeout);
 }
 
 SmootherProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

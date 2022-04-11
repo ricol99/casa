@@ -25,6 +25,27 @@ function Clock(_config, _parent) {
 
 util.inherits(Clock, Thing);
 
+// Called when current state required
+Clock.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Clock.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Clock.prototype.hotStart = function() {
+   this.updateAllProperties();
+
+   if (this.resolution === "seconds") {
+      this.secondTimerRequired = true;
+      this.startSecondTimer();
+   }
+
+   Thing.prototype.hotStart.call(this);
+};
+
 Clock.prototype.coldStart = function() {
    this.updateAllProperties();
 

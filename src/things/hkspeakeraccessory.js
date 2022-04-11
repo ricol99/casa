@@ -47,6 +47,24 @@ function HomekitSpeakerAccessory(_config, _parent) {
 
 util.inherits(HomekitSpeakerAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitSpeakerAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitSpeakerAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitSpeakerAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitSpeakerAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitSpeakerAccessory.prototype.setMuted = function(_status) {
    this.alignPropertyValue("muted", _status ? true : false);
 };

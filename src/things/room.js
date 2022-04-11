@@ -172,6 +172,24 @@ function Room(_config, _parent) {
 
 util.inherits(Room, Thing);
 
+// Called when current state required
+Room.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Room.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Room.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+Room.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 function nameExists(_objArray, _name) {
 
    for (var i = 0; i < _objArray.length; ++i) {

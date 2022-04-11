@@ -78,28 +78,26 @@ SourceListener.prototype.superType = function(_type) {
 
 // Called when system state is required
 SourceListener.prototype.export = function(_exportObj) {
-
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.sourceRawValue = this.sourceRawValue;
-      _exportObj.sourcePropertyValue = this.sourcePropertyValue;
-
-      return true;
-   }
-
-   return false;
+   NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.sourceRawValue = this.sourceRawValue;
+   _exportObj.sourcePropertyValue = this.sourcePropertyValue;
 };
 
 // Called before hotStart to system state
 SourceListener.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+   this.sourceRawValue = _importObj.sourceRawValue;
+   this.sourcePropertyValue = _importObj.sourcePropertyValue;
+};
 
-   if (NamedObject.prototype.import.call(this, _importObj)) {
-      this.sourceRawValue = _importObj.sourceRawValue;
-      this.sourcePropertyValue = _importObj.sourcePropertyValue;
+SourceListener.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+   // AAAAA - TODO
+};
 
-      return true;
-   }
-
-   return false;
+SourceListener.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
+   // AAAAA - TODO
 };
 
 SourceListener.prototype.establishListeners = function() {

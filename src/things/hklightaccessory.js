@@ -78,6 +78,24 @@ function HomekitLightAccessory(_config, _parent) {
 
 util.inherits(HomekitLightAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitLightAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitLightAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitLightAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitLightAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitLightAccessory.prototype.setPower = function(_status) {
    console.log(this.uName + ": Changing " + this.powerProp + " to " + _status);
    this.setManualMode();

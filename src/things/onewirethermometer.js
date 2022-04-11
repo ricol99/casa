@@ -19,4 +19,22 @@ function OneWireThermometer(_config, _parent) {
 
 util.inherits(OneWireThermometer, Thing);
 
+// Called when current state required
+OneWireThermometer.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+OneWireThermometer.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+OneWireThermometer.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+OneWireThermometer.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = OneWireThermometer;

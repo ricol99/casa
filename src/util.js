@@ -334,7 +334,7 @@ Util.restoreTimeout = function(_func, _expiration, _minLength) {
       timeLeft = _minLength;
    }
 
-   if (_timeLeft <= 0) {
+   if (timeLeft <= 0) {
       return null;
    }
 

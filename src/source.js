@@ -34,28 +34,40 @@ util.inherits(Source, SourceBase);
 
 // Called when system state is required
 Source.prototype.export = function(_exportObj) {
-
-   if (SourceBase.prototype.export.call(this, _exportObj)) {
-      _exportObj.priority = this.priority;
-      _exportObj.controllerPriority = this.controllerPriority;
-      _exportObj.controller = this.controller ? this.controller.uName : null;
-      return true;
-   }
-
-   return false;
+   SourceBase.prototype.export.call(this, _exportObj);
+   _exportObj.priority = this.priority;
+   _exportObj.controllerPriority = this.controllerPriority;
+   _exportObj.controller = this.controller ? this.controller.uName : null;
 };
 
 // Called before hotStart to restore system state 
 Source.prototype.import = function(_importObj) {
+   SourceBase.prototype.import.call(this, _importObj);
+   this.priority = _importObj.priority;
+   this.controllerPriority = _importObj.controllerPriority;
+   this.controller = _importObj.controller ? this.gang.findNamedObject(_importObj.controller) : null;
+};
 
-   if (SourceBase.prototype.import.call(this, _importObj)) {
-      this.priority = _importObj.priority;
-      this.controllerPriority = _importObj.controllerPriority;
-      this.controller = _importObj.controller ? this.gang.findNamedObject(_importObj.controller) : null;
-      return true;
+Source.prototype.coldStart = function() {
+   SourceBase.prototype.coldStart.call(this);
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].coldStart();
+      }
    }
+};
 
-   return false;
+Source.prototype.hotStart = function() {
+   SourceBase.prototype.hotStart.call(this);
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].hotStart();
+      }
+   }
 };
 
 Source.prototype.createProperty = function(_config) {
@@ -241,28 +253,6 @@ Source.prototype.deleteEvent = function(_eventName) {
    this.events[_eventName].aboutToBeDeleted();
    delete this.events[_eventName];
    return true;
-};
-
-Source.prototype.coldStart = function() {
-   SourceBase.prototype.coldStart.call(this);
-
-   for (var event in this.events) {
-
-      if (this.events.hasOwnProperty(event)) {
-         this.events[event].coldStart();
-      }
-   }
-};
-
-Source.prototype.hotStart = function() {
-   SourceBase.prototype.hotStart.call(this);
-
-   for (var event in this.events) {
-
-      if (this.events.hasOwnProperty(event)) {
-         this.events[event].hotStart();
-      }
-   }
 };
 
 // Called by stateproperty to take control based on setting a action property

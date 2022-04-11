@@ -112,6 +112,24 @@ function Agent(_config, _parent) {
 
 util.inherits(Agent, Thing);
 
+// Called when current state required
+Agent.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Agent.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Agent.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+Agent.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 Agent.prototype.propertyAboutToChange = function(_propertyName, _propertyValue, _data) {
 
    if ((_propertyName === this.eventProp)) {

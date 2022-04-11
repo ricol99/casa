@@ -269,4 +269,22 @@ function Building(_config, _parent) {
 
 util.inherits(Building, Location);
 
+// Called when current state required
+Building.prototype.export = function(_exportObj) {
+   Location.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Building.prototype.import = function(_importObj) {
+   Location.prototype.import.call(this, _importObj);
+};
+
+Building.prototype.coldStart = function() {
+   Location.prototype.coldStart.call(this);
+};
+
+Building.prototype.hotStart = function() {
+   Location.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Building;

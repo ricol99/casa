@@ -34,6 +34,28 @@ Service.prototype.superType = function(_type) {
    return "service";
 };
 
+// Called when system state is required
+Service.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+   // AAAAA - TODO
+};
+
+// Called before hotStart to restore system state
+Service.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+   // AAAAA - TODO
+};
+
+Service.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+   // AAAAA - TODO
+};
+
+Service.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+   // AAAAA - TODO
+};
+
 // Create a service node, if needed
 Service.prototype.interestInNewChild = function(_uName) {
    var splitUName = _uName.split(":");
@@ -160,7 +182,7 @@ Service.prototype.pokeQueue = function() {
 
    if (!this.queueTimer && this.queue.length > 0) {
 
-      this.queueTimer = setTimeout( () => {
+      this.queueTimer = util.setTimeout( () => {
 
          if (this.queue.length > 0) {
             var transaction = this.queue.shift();

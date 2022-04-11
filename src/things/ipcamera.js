@@ -21,4 +21,22 @@ function IpCamera(_config, _parent) {
 
 util.inherits(IpCamera, Thing);
 
+// Called when current state required
+IpCamera.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+IpCamera.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+IpCamera.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+IpCamera.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = IpCamera;

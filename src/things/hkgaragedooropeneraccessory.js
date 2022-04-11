@@ -39,6 +39,24 @@ function HomekitGarageDoorOpenerAccessory(_config, _parent) {
 
 util.inherits(HomekitGarageDoorOpenerAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitGarageDoorOpenerAccessory.prototype.export = function(_exportObj) {
+   HomkitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitGarageDoorOpenerAccessory.prototype.import = function(_importObj) {
+   HomkitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitGarageDoorOpenerAccessory.prototype.coldStart = function() {
+   HomkitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitGarageDoorOpenerAccessory.prototype.hotStart = function() {
+   HomkitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitGarageDoorOpenerAccessory.prototype.setTargetState = function(_value) {
    this.alignPropertyValue("target-state", _value);
 

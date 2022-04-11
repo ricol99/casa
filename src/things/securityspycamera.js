@@ -30,6 +30,24 @@ function SecuritySpyCamera(_config, _parent) {
 
 util.inherits(SecuritySpyCamera, Thing);
 
+// Called when current state required
+SecuritySpyCamera.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SecuritySpyCamera.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+SecuritySpyCamera.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+SecuritySpyCamera.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 SecuritySpyCamera.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
    console.log(this.uName + ': received property change, property='+ _data.sourceEventName + ' value=' + _data.value);
 

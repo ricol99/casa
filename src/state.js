@@ -198,62 +198,52 @@ State.prototype.superType = function(_type) {
 
 // Called when system state is required
 State.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.priority = this.priority;
+   _exportObj.activeGuardedSources = [];
 
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.priority = this.priority;
-      _exportObj.activeGuardedSources = [];
-
-      for (var i = 0; i < this.activeGuardedSources.length; ++i) {
-         _exportObj.activeGuardedSources.push(this.activeGuardedSources[i]);
-      }
-
-      _exportObj.activeGuardedActions = [];
-
-      for (var j = 0; j < this.activeGuardedActions.length; ++j) {
-         _exportObj.activeGuardedActions.push(this.activeGuardedActions[j]);
-      }
-
-      _exportObj.actionTimeouts = util.copyMatch(this.actionTimeouts, (_source, _prop) => {
-         return (_prop === "timeout" ) ? { replace: _source.timeout ? _source.timeout.expiration() : -1 } : true;
-      }); 
-
-      return true;
+   for (var i = 0; i < this.activeGuardedSources.length; ++i) {
+      _exportObj.activeGuardedSources.push(this.activeGuardedSources[i]);
    }
 
-   return false;
+   _exportObj.activeGuardedActions = [];
+
+   for (var j = 0; j < this.activeGuardedActions.length; ++j) {
+      _exportObj.activeGuardedActions.push(this.activeGuardedActions[j]);
+   }
+
+   _exportObj.actionTimeouts = util.copyMatch(this.actionTimeouts, (_source, _prop) => {
+      return (_prop === "timeout" ) ? { replace: _source.timeout ? _source.timeout.left() : -1 } : true;
+   }); 
+
 };
 
 // Called before hotStart to restore system state
 State.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+   this.priority = _importObj.priority;
 
-   if (NamedObject.prototype.import.call(this, _importObj)) {
-      this.priority = _importObj.priority;
-
-      for (var i = 0; i < _importObj.activeGuardedSources.length; ++i) {
-         this.activeGuardedSources.push(_importObj.activeGuardedSources[i]);
-      }
-
-      for (var j = 0; j < _importObj.activeGuardedActions.length; ++j) {
-         this.activeGuardedActions.push(_importObj.activeGuardedActions[j]);
-      }
-
-      for (var k = 0; k < _importObj.actionTimeouts.length; ++k) {
-         this.actionTimeouts.push(_importObj.actionTimeouts[k]);
-      }
-
-      return true;
+   for (var i = 0; i < _importObj.activeGuardedSources.length; ++i) {
+      this.activeGuardedSources.push(_importObj.activeGuardedSources[i]);
    }
 
-   return false;
+   for (var j = 0; j < _importObj.activeGuardedActions.length; ++j) {
+      this.activeGuardedActions.push(_importObj.activeGuardedActions[j]);
+   }
+
+   for (var k = 0; k < _importObj.actionTimeouts.length; ++k) {
+      this.actionTimeouts.push(_importObj.actionTimeouts[k]);
+   }
 };
 
 State.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
 
    for (var i = 0; i < this.actionTimeouts.length; ++i) {
 
       if (this.actionTimeouts[i]) {
 
-         this.actionTimeouts[i].timeout = util.restoreTimeout( (_index) => {
+         this.actionTimeouts[i].timeout = util.setTimeout( (_index) => {
 
             if (this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
                this.launchActionHandlers([ this.actionTimeouts[_index].action]);
@@ -262,9 +252,14 @@ State.prototype.hotStart = function() {
             this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
             this.actionTimeouts[_index] = null;
 
-         }, 1000, this.actionTimeouts[i].timeout, this.actionTimeouts.length-1);
+         }, this.actionTimeouts[i].timeout, this.actionTimeouts.length-1);
       }
    }
+};
+
+State.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+   /// AAAAAA - TODO
 };
 
 State.prototype.getCasa = function() {

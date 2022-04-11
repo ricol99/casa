@@ -35,35 +35,31 @@ Event.prototype.superType = function(_type) {
 
 // Called when system state is required
 Event.prototype.export = function(_exportObj) {
-
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.value = this.value;
-      _exportObj.cold = this.cold;
-      return true;
-   }
-
-   return false;
+   NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.value = this.value;
+   _exportObj.cold = this.cold;
 };
 
 // Called when system state is required
 Event.prototype.import = function(_importObj) {
-
-   if (NamedObject.prototype.import.call(this, _importObj)) {
-      this.value = _importObj.value;
-      this.cold = _importObj.cold;
-      return true;
-   }
-
-   return false;
-};
-
-Event.prototype.getCasa = function() {
-   return this.owner.getCasa();
+   NamedObject.prototype.import.call(this, _importObj);
+   this.value = _importObj.value;
+   this.cold = _importObj.cold;
 };
 
 // Derived Events should override this for start-up code
 Event.prototype.coldStart = function() {
+   NamedObject.prototype.coldStsrt.call(this);
    this.cold = false;
+};
+
+// Derived Events should override this for hot start-up code
+Event.prototype.hotStart = function() {
+   NamedObject.prototype.hotStsrt.call(this);
+};
+
+Event.prototype.getCasa = function() {
+   return this.owner.getCasa();
 };
 
 //

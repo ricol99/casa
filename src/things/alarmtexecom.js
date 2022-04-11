@@ -185,17 +185,41 @@ util.inherits(AlarmTexecom, Thing);
 
 // Called when system state is required
 AlarmTexecom.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+   _exportObj.transactionTarget = this.transactionTarget;
+   _exportObj.pollsMissed = this.pollsMissed;
+   _exportObj.acknowledgementTimer = this.acknowledgementTimer ? this.acknowledgementTimer.expiration() : -1;
+   _exportObj.watchdog = this.watchdog ? this.watchdog.expiration() : -1;
+};
 
-   if (Thing.prototype.export.call(this, _exportObj)) {
-      _exportObj.transactionTarget = this.transactionTarget;
-      _exportObj.pollsMissed = this.pollsMissed;
-      _exportObj.acknowledgementTimer = this.acknowledgementTimer ? this.acknowledgementTimer.expiration() : -1;
-      _exportObj.watchdog = this.watchdog ? this.watchdog.expiration() : -1;
+// Called when current state required
+AlarmTexecom.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+   this.transactionTarget = _importObj.transactionTarget;
+   this.pollsMissed = _importObj.pollsMissed;
+   this.acknowledgementTimer = (_importObj.acknowledgementTimer === -1) ? null : _importObj.acknowledgementTimer;
+   this.watchdog = (_importObj.watchdog === -1) ? null : _importObj.watchdog;
+};
 
-      return true;
-   }
+AlarmTexecom.prototype.coldStart = function() {
 
-   return false;
+   this.server = net.createServer( (_socket) => {
+      this.newConnection(_socket);
+   });
+
+   this.server.listen(this.serverPort);
+   Thing.prototype.coldStart.call(this); 
+};
+
+AlarmTexecom.prototype.hotStart = function() {
+   this.setAcknowledgementTimer(this.acknowledgementTimer);
+   this.restartWatchdog(this.watchdog);
+
+   this.server = net.createServer( (_socket) => {
+      this.newConnection(_socket);
+   });
+
+   Thing.prototype.hotStart.call(this);
 };
 
 AlarmTexecom.prototype.newConnection = function(_socket) {
@@ -239,23 +263,6 @@ AlarmTexecom.prototype.newConnection = function(_socket) {
   _socket.on('disconnect', (_error) => {
      console.log(this.uName + ": Socket disconnected.");
   });
-};
-
-
-AlarmTexecom.prototype.coldStart = function() {
-
-   this.server = net.createServer( (_socket) => {
-
-      //if ((this.alarmAddress && _socket.remoteAddress === this.alarmAddress) || (!this.alarmAddress)) {
-         this.newConnection(_socket);
-      //}
-      //else {
-         //_socket.destroy();
-      //}
-   });
-
-   this.server.listen(this.serverPort);
-   Thing.prototype.coldStart.call(this); 
 };
 
 AlarmTexecom.prototype.handlePollEvent = function(_socket, _data) {
@@ -333,14 +340,25 @@ AlarmTexecom.prototype.handleMessage = function(_socket, _message, _data) {
    }, 1000);
 };
 
-AlarmTexecom.prototype.restartWatchdog = function() {
+AlarmTexecom.prototype.restartWatchdog = function(_overrideTimeout) {
+   var timeout, f;
 
-   if (this.watchdog) {
-      util.clearTimeout(this.watchdog);
-      this.pollsMissed = 0;
+   if (_overrideTimeout) {
+      f = util.restoreTimeout;
+      timeout = _overrideTimeout;
+   }
+   else {
+
+      if (this.watchdog) {
+         util.clearTimeout(this.watchdog);
+         this.pollsMissed = 0;
+      }
+
+      f = util.setTimeout;
+      timeout = this.pollingTimeout;
    }
 
-   this.watchdog = util.setTimeout( () => {
+   this.watchdog = f( () => {
       this.watchdog = null;
       this.pollsMissed++;
 
@@ -354,7 +372,7 @@ AlarmTexecom.prototype.restartWatchdog = function() {
          this.restartWatchdog();
       }
 
-   }, this.pollingTimeout);
+   }, timeout, 500);
 };
 
 AlarmTexecom.prototype.stopWatchdog = function() {
@@ -387,12 +405,23 @@ AlarmTexecom.prototype.propertyAboutToChange = function(_propName, _propValue, _
    }
 };
 
-AlarmTexecom.prototype.setAcknowledgementTimer = function() {
+AlarmTexecom.prototype.setAcknowledgementTimer = function(_overrideTimeout) {
 
-   this.acknowledgementTimer = util.setTimeout( () => {
-      console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
-      this.alignPropertyValue("target-state", this.getProperty("current-state"));
-   }, 60000);
+   if (_overrideTimeout) {
+
+      this.acknowledgementTimer = util.retoreTimeout( () => {
+         console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
+         this.alignPropertyValue("target-state", this.getProperty("current-state"));
+      }, _overrideTimeout, 500);
+   }
+   else {
+
+      this.acknowledgementTimer = util.setTimeout( () => {
+         console.error(this.uName + ": Alarm has not acknowledged order to arm, failing transaction");
+         this.alignPropertyValue("target-state", this.getProperty("current-state"));
+      }, 60000);
+   }
+   
 };
 
 AlarmTexecom.prototype.clearAcknowledgementTimer = function() {

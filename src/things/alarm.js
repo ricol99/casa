@@ -18,7 +18,22 @@ function Alarm(_config, _parent) {
 
 util.inherits(Alarm, Thing);
 
+// Called when current state required
+Alarm.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Alarm.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Alarm.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 Alarm.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
    this.alignProperty('ACTIVE', true);
 };
 

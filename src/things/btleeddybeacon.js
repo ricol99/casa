@@ -38,4 +38,22 @@ function BtleEddyBeacon(_config, _parent) {
 
 util.inherits(BtleEddyBeacon, Thing);
 
+// Called when current state required
+BtleEddyBeacon.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleEddyBeacon.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BtleEddyBeacon.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BtleEddyBeacon.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = BtleEddyBeacon;

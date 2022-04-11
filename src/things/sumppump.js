@@ -103,4 +103,22 @@ function SumpPump(_config, _parent) {
 
 util.inherits(SumpPump, Thing);
 
+// Called when current state required
+SumpPump.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+SumpPump.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+SumpPump.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+SumpPump.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = SumpPump;

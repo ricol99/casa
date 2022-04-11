@@ -60,6 +60,24 @@ function TouchSwitch(_config, _parent) {
 
 util.inherits(TouchSwitch, Thing);
 
+// Called when current state required
+TouchSwitch.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+TouchSwitch.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+TouchSwitch.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+TouchSwitch.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
    if (!_data.coldStart && (_propName === this.switchProp) && _propValue && this.invokeManualMode) {

@@ -221,4 +221,22 @@ function Bedroom(_config, _parent) {
 
 util.inherits(Bedroom, Room);
 
+// Called when current state required
+Bedroom.prototype.export = function(_exportObj) {
+   Room.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Bedroom.prototype.import = function(_importObj) {
+   Room.prototype.import.call(this, _importObj);
+};
+
+Bedroom.prototype.coldStart = function() {
+   Room.prototype.coldStart.call(this);
+};
+
+Bedroom.prototype.hotStart = function() {
+   Room.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Bedroom;

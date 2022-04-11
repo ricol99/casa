@@ -14,15 +14,24 @@ util.inherits(DevicePresentProperty, Property);
 
 // Called when system state is required
 DevicePresentProperty.prototype.export = function(_exportObj) {
-
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.expiration() : -1;
-      return true;
-   }
-
-   return false;
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
 };
 
+// Called to restore system state before hot start
+DevicePresentProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj)) {
+   this.timeoutObj = _importObj.timeoutObj;
+};
+
+// Called after system state has been restored
+DevicePresentProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+
+   if (this.timeoutObj !== -1) {
+      this.restartTimer(_importObj.timeoutObj);
+   }
+};
 
 DevicePresentProperty.prototype.coldStart = function(_event) {
    this.restartTimer();
@@ -32,9 +41,10 @@ DevicePresentProperty.prototype.coldStart = function(_event) {
 // NON-EXPORTED METHODS
 // ====================
 
-DevicePresentProperty.prototype.restartTimer = function() {
+DevicePresentProperty.prototype.restartTimer = function(_overrideTimeout) {
+   var timeout  = _overrideTimeout ? _overrideTimeout : this.interval * 1000;
 
-   if (this.timeoutObj) {
+   if (!_overrideTimeout && this.timeoutObj) {
       util.clearTimeout(this.timeoutObj);
    }
 
@@ -48,7 +58,7 @@ DevicePresentProperty.prototype.restartTimer = function() {
             this.restartTimer();
          });
       }
-   }, this.interval * 1000);
+   }, timeout);
 }
 
 module.exports = exports = DevicePresentProperty;

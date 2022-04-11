@@ -20,4 +20,22 @@ function McpSpiAdcChannel(_config, _parent) {
 
 util.inherits(McpSpiAdcChannel, Thing);
 
+// Called when current state required
+McpSpiAdcChannel.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+McpSpiAdcChannel.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+McpSpiAdcChannel.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+McpSpiAdcChannel.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = McpSpiAdcChannel;

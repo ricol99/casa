@@ -22,6 +22,24 @@ function HomekitTempSensorAccessory(_config, _parent) {
 
 util.inherits(HomekitTempSensorAccessory, HomekitAccessory);
 
+// Called when current state required
+HomekitTempSensorAccessory.prototype.export = function(_exportObj) {
+   HomekitAccessory.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+HomekitTempSensorAccessory.prototype.import = function(_importObj) {
+   HomekitAccessory.prototype.import.call(this, _importObj);
+};
+
+HomekitTempSensorAccessory.prototype.coldStart = function() {
+   HomekitAccessory.prototype.coldStart.call(this);
+};
+
+HomekitTempSensorAccessory.prototype.hotStart = function() {
+   HomekitAccessory.prototype.hotStart.call(this);
+};
+
 HomekitTempSensorAccessory.prototype.getCurrentTemperature = function() {
    return this.properties["temperature"].value;
 };

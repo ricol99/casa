@@ -24,4 +24,22 @@ function Location(_config, _parent) {
 
 util.inherits(Location, Thing);
 
+// Called when current state required
+Location.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+Location.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+Location.prototype.coldStart = function() { 
+   Thing.prototype.coldStart.call(this);
+};
+
+Location.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = Location;

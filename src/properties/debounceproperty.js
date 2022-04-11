@@ -17,15 +17,27 @@ util.inherits(DebounceProperty, Property);
 
 // Called when system state is required
 DebounceProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj)) {
+   _exportObj.sourceState = this.sourceState;
+   _exportObj.outputState = this.outputState;
+   _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.sourceState = this.sourceState;
-      _exportObj.outputState = this.outputState;
-      _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.expiration() : -1;
-      return true;
+// Called to restore system state before hot start
+DebounceProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj)) {
+   this.sourceState = _importObj.sourceState;
+   this.outputState = _importObj.outputState;
+   this.timeoutObj = _importObj.timeoutObj;
+};
+
+// Called after system state has been restored
+DebounceProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+
+   if (this.timeoutObj !== -1) {
+      this.startTimer(this.timeoutObj);
    }
-
-   return false;
 };
 
 DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
@@ -91,7 +103,8 @@ DebounceProperty.prototype.sourceIsValid = function(_data) {
 // NON-EXPORTED METHODS
 // ====================
 
-DebounceProperty.prototype.startTimer = function() {
+DebounceProperty.prototype.startTimer = function(_timeout) {
+   var timeout = _timeout ? _timeout : this.threshold*1000;
 
    this.timeoutObj = util.setTimeout( () => {
       console.log(this.uName + ": Timer expired!");
@@ -111,7 +124,7 @@ DebounceProperty.prototype.startTimer = function() {
 
          Property.prototype.sourceIsInvalid.call(this, this.invalidData);
       }
-   }, this.threshold*1000);
+   }, timeout);
 }
 
 module.exports = exports = DebounceProperty;

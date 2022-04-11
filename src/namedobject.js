@@ -58,44 +58,50 @@ NamedObject.prototype.superType = function(_type) {
 
 // Called when current state required
 NamedObject.prototype.export = function(_exportObj) {
+   AsyncEmitter.prototype.export.call(this, _exportObj);
+   _exportObj.superType = this.superType();
+   _exportObj.name = this.name;
+   _exportObj.uName = this.uName;
+   _exportObj.myNamedObjects = {};
 
-   if (!(this.hasOwnProperty("transient") && this.transient))  {
+   for (var namedObj in this.myNamedObjects) {
 
-      if (AsyncEmitter.prototype.export.call(this, _exportObj)) {
-         //_exportObj.config = this.config;
-         _exportObj.superType = this.superType();
-         _exportObj.name = this.name;
-         _exportObj.uName = this.uName;
-         _exportObj.myNamedObjects = {};
-
-         for (var namedObj in this.myNamedObjects) {
-
-            if (this.myNamedObjects.hasOwnProperty(namedObj)) {
-               var nextNamedObj = {};
-
-               if (this.myNamedObjects[namedObj].export(nextNamedObj)) {
-                  _exportObj.myNamedObjects[namedObj] = nextNamedObj;
-               }
-            }
-         }
-         return true;
+      if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+         _exportObj.myNamedObjects[namedObj]= {};
+         this.myNamedObjects[namedObj].export(_exportObj.myNamedObjects[namedObj]);
       }
    }
-
-   return false;
 };
 
 // Called when current state required
 NamedObject.prototype.import = function(_importObj) {
    AsyncEmitter.prototype.import.call(this, _importObj);
+   //this.superType = _importObj.superType;
+   //this.name = _importObj.name;
+   //this.uName = _importObj.uName;
+   //this.myNamedObjects = {};
+
+   for (var namedObj in _importObj.myNamedObjects) {
+
+      if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+         this.myNamedObjects[namedObj].import(_importObj.myNamedObjects[namedObj]);
+      }
+   }
 };
 
 NamedObject.prototype.coldStart = function() {
    AsyncEmitter.prototype.coldStart.call(this);
 };
 
-NamedObject.prototype.hotStart = function() {
+NamedObject.prototype.hotStart = function(_ignoreChildren) {
    AsyncEmitter.prototype.hotStart.call(this);
+
+   for (var namedObj in this.myNamedObjects) {
+
+      if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+         this.myNamedObjects[namedObj].hotStart();
+      }
+   }
 };
 
 NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {

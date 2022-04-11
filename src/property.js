@@ -55,30 +55,37 @@ Property.prototype.superType = function(_type) {
 
 // Called when system state is required
 Property.prototype.export = function(_exportObj) {
-
-   if (NamedObject.prototype.export.call(this, _exportObj)) {
-      _exportObj.value = this.value;
-      _exportObj.rawPropertyValue = this.rawPropertyValue;
-      _exportObj.cold = this.cold;
-
-      return true;
-   }
-
-   return false;
+   NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.value = this.value;
+   _exportObj.rawPropertyValue = this.rawPropertyValue;
+   _exportObj.cold = this.cold;
 };
 
 // Called before hotStart to restore system state
 Property.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+   this.value = _importObj.value;
+   this.rawPropertyValue = _importObj.rawPropertyValue;
+   this.cold = _importObj.cold;
+};
 
-   if (NamedObject.prototype.import.call(this, _importObj)) {
-      this.value = _importObj.value;
-      this.rawPropertyValue = _importObj.rawPropertyValue;
-      this.cold = _importObj.cold;
+// Override this if you listen to a source that is not "Source".
+// If you listen to a "Source" you will be fired by that Source cold starting
+Property.prototype.coldStart = function(_data) {
 
-      return true;
+   if (this.initialValueSet) {
+      console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
+      this.cold = false;
+      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
 
-   return false;
+   NamedObject.prototype.coldStart.call(this, _data);
+};
+
+// Override this if you listen to a source that is not "Source".
+// If you listen to a "Source" you will be fired by that Source cold starting
+Property.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
 };
 
 Property.prototype.getCasa = function() {
@@ -264,22 +271,6 @@ Property.prototype.receivedEventFromSource = function(_data) {
 //
 Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyInternal(_data.value, _data);
-};
-
-// Override this if you listen to a source that is not "Source".
-// If you listen to a "Source" you will be fired by that Source cold starting
-Property.prototype.coldStart = function(_data) {
-
-   if (this.initialValueSet) {
-      console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
-      this.cold = false;
-      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
-   }
-};
-
-// Override this if you listen to a source that is not "Source".
-// If you listen to a "Source" you will be fired by that Source cold starting
-Property.prototype.hotStart = function(_data) {
 };
 
 // ====================

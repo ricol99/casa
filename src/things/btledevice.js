@@ -19,4 +19,22 @@ function BtleDevice(_config, _parent) {
 
 util.inherits(BtleDevice, Thing);
 
+// Called when current state required
+BtleDevice.prototype.export = function(_exportObj) {
+   Thing.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+BtleDevice.prototype.import = function(_importObj) {
+   Thing.prototype.import.call(this, _importObj);
+};
+
+BtleDevice.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
+};
+
+BtleDevice.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
+};
+
 module.exports = exports = BtleDevice;

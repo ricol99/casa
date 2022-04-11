@@ -43,37 +43,29 @@ util.inherits(Tester, Thing);
 
 // Called when system state is required
 Tester.prototype.export = function(_exportObj) {
-
-   if (Thing.prototype.export.call(this, _exportObj)) {
-      _exportObj.currentTestCase = this.currentTestCase;
-      _exportObj.currentTestEvent = this.currentTestEvent;
-      _exportObj.expectedPosition = this.expectedPosition;
-      _exportObj.timeout = this.timeout ? this.timeout.expiration() : -1;
-      return true;
-   }
-
-   return false;
+   Thing.prototype.export.call(this, _exportObj);
+   _exportObj.currentTestCase = this.currentTestCase;
+   _exportObj.currentTestEvent = this.currentTestEvent;
+   _exportObj.expectedPosition = this.expectedPosition;
+   _exportObj.timeout = this.timeout ? this.timeout.left() : -1;
 };
 
 // Called before hotStart to restore system state
 Tester.prototype.import = function(_importObj) {
-
-   if (Thing.prototype.import.call(this, _importObj)) {
-      this.currentTestCase = _importObj.currentTestCase;
-      this.currentTestEvent = _importObj.currentTestEvent;
-      this.expectedPosition = _importObj.expectedPosition;
-      this.timeout = _importObj.timeout;
-      return true;
-   }
-
-   return false;
+   Thing.prototype.import.call(this, _importObj);
+   this.currentTestCase = _importObj.currentTestCase;
+   this.currentTestEvent = _importObj.currentTestEvent;
+   this.expectedPosition = _importObj.expectedPosition;
+   this.timeout = _importObj.timeout;
 };
 
 Tester.prototype.hotStart = function() {
+   Thing.prototype.hotStart.call(this);
    this.initiateTestEvent(false, (this.timeout === -1) ? null : this.timeout);
 };
 
 Tester.prototype.coldStart = function() {
+   Thing.prototype.coldStart.call(this);
    this.initiateTestEvent();
 };
 
@@ -273,10 +265,10 @@ Tester.prototype.initiateTestEvent = function(_cold, _restoreTimeout) {
 
    if (_restoreTimeout) {
 
-      this.timeout = util.restoreTimeout( () => {
+      this.timeout = util.setTimeout( () => {
          this.timeout = null;
          this.runTestEvent();
-      }, _restoreTimeout, 500);
+      }, _restoreTimeout);
    }
    else if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("wait")) {
 
