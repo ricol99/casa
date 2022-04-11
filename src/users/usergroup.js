@@ -26,11 +26,11 @@ UserGroup.prototype.import = function(_importObj) {
       this.users.push(this.gang.findNamedObject(_importObj.users[i].uName));
    }
 
-   Thing.prototype.import.call(this, _importObj);
+   User.prototype.import.call(this, _importObj);
 };
 
 UserGroup.prototype.hotStart = function() {
-   Thing.prototype.hotStart.call(this);
+   User.prototype.hotStart.call(this);
 };
 
 UserGroup.prototype.coldStart = function() {

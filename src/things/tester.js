@@ -36,7 +36,7 @@ function Tester(_config, _parent) {
       }
    }
 
-   this.buildTestCases(_config.testRun, _config.testCases);
+   this.buildTestCases(util.copy(_config.testRun, true), util.copy(_config.testCases, true));
 }
 
 util.inherits(Tester, Thing);
@@ -48,6 +48,19 @@ Tester.prototype.export = function(_exportObj) {
    _exportObj.currentTestEvent = this.currentTestEvent;
    _exportObj.expectedPosition = this.expectedPosition;
    _exportObj.timeout = this.timeout ? this.timeout.left() : -1;
+
+
+   _exportObj.currentExpectedSequenceFuss = [];
+
+   for (var j = 0; j < this.testCases[this.currentTestCase].expectedSequence.length; ++j) {
+
+      if (this.testCases[this.currentTestCase].expectedSequence[j].hasOwnProperty("fuzz")) {
+        _exportObj.currentExpectedSequenceFuss.push(this.testCases[this.currentTestCase].expectedSequence[j].fuzz);
+      }
+      else {
+        _exportObj.currentExpectedSequenceFuss.push(-1);
+      }
+   }
 };
 
 // Called before hotStart to restore system state
@@ -56,12 +69,19 @@ Tester.prototype.import = function(_importObj) {
    this.currentTestCase = _importObj.currentTestCase;
    this.currentTestEvent = _importObj.currentTestEvent;
    this.expectedPosition = _importObj.expectedPosition;
-   this.timeout = _importObj.timeout;
+   this.timeout = (_importObj.timeout === -1) ? null : _importObj.timeout;
+
+   for (var j = 0; j < _importObj.currentExpectedSequenceFuss.length; ++j) {
+      
+      if (_importObj.currentExpectedSequenceFuss[j] !== -1) {
+        this.testCases[this.currentTestCase].expectedSequence[j].fuzz = _importObj.currentExpectedSequenceFuss[j];
+      }
+   }
 };
 
 Tester.prototype.hotStart = function() {
    Thing.prototype.hotStart.call(this);
-   this.initiateTestEvent(false, (this.timeout === -1) ? null : this.timeout);
+   this.initiateTestEvent(false, this.timeout);
 };
 
 Tester.prototype.coldStart = function() {
@@ -379,12 +399,10 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         //console.info(this.uName + ": AAAAAA result found!");
          console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");
       }
       else {
-         //console.info(this.uName + ": AAAAAA not result found!");
          console.info("\x1b[31m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                        " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m");
          process.exit(5);

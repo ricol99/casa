@@ -25,9 +25,9 @@ Loader.prototype.load = function() {
       this.loadConsole();
    }
    else {
-      if (fs.existsSync(this.configPath + "/hotstate.json")) {
-         var importObj = require(this.configPath + "/hotstate.json");
-         fs.unlinkSync(this.configPath + "/hotstate.json");
+      if (fs.existsSync(this.configPath + "/hotstate-"+this.casaName+".json")) {
+         var importObj = require(this.configPath + "/hotstate-"+this.casaName+".json");
+         fs.unlinkSync(this.configPath + "/hotstate-"+this.casaName+".json");
 
          if (importObj && importObj.timestamp && ((Date.now() - importObj.timestamp) < 30000)) {
             console.log(util.inspect(importObj.tree));
@@ -59,7 +59,7 @@ process.on('uncaughtException', (_err) => {
             console.log("*LOADER*: Attempting suspension");
             var exportObj = { timestamp: Date.now(), tree: {}};
             _mainInstance.gang.export(exportObj.tree);
-            fs.writeFileSync(_mainInstance.configPath + "/hotstate.json", JSON.stringify(exportObj));
+            fs.writeFileSync(_mainInstance.configPath + "/hotstate-"+_mainInstance.gang.casa.name+".json", JSON.stringify(exportObj));
             console.log("*LOADER*: State persisted");
             process.exit(2);
          }
@@ -76,9 +76,9 @@ process.on('uncaughtException', (_err) => {
    }
 });
 
-setTimeout( () => {
-   ia;
-}, 22000);
+//setTimeout( () => {
+   //ia;
+//}, 22000);
 
 Loader.prototype.loadNode = function() {
    this.casaDb = new Db(this.casaName, this.configPath, false, null);

@@ -389,6 +389,7 @@ Timer.prototype.callbackFunc = function() {
 
    // Do not attempt a suspension/restore cycle if in casa code and exception raised
    _suspensionAvailable = false;
+   this.timeout = null;
    this.callback.apply(this, arguments);
    _suspensionAvailable = true;
 }

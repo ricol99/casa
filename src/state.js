@@ -22,7 +22,7 @@ function State(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("guards")) {
-      this.guards = _config.guards;
+      this.guards = util.copy(_config.guards, true);
    }
 
    if (_config.hasOwnProperty("source")) {
@@ -30,7 +30,7 @@ function State(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("sources")) {
-      this.sources = _config.sources;
+      this.sources = util.copy(_config.sources, true);
 
       for (var k = 0; k < this.sources.length; ++k) {
 
@@ -45,7 +45,7 @@ function State(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("actions")) {
-      this.actions = _config.actions;
+      this.actions = util.copy(_config.actions, true);
 
       for (var l = 0; l < this.actions.length; ++l) {
 
@@ -64,7 +64,7 @@ function State(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("schedules")) {
-      this.schedules = _config.schedules;
+      this.schedules = util.copy(_config.schedules, true);
 
       for (var x = 0; x < this.schedules.length; ++x) {
 
@@ -75,7 +75,7 @@ function State(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("timeout")) {
-      this.timeout = _config.timeout;
+      this.timeout = util.copy(_config.timeout, true);
       this.timeout.inheritsFrom = {};
 
       if (_config.timeout.hasOwnProperty('from')) {
@@ -200,17 +200,25 @@ State.prototype.superType = function(_type) {
 State.prototype.export = function(_exportObj) {
    NamedObject.prototype.export.call(this, _exportObj);
    _exportObj.priority = this.priority;
-   _exportObj.activeGuardedSources = [];
+   //_exportObj.activeGuardedSources = [];
 
-   for (var i = 0; i < this.activeGuardedSources.length; ++i) {
-      _exportObj.activeGuardedSources.push(this.activeGuardedSources[i]);
-   }
+   _exportObj.activeGuardedSources = util.copyMatch(this.activeGuardedSources, (_source, _prop) => {
+      return (_prop === "sourceListener") ? { replace: "RECREATE" } : true;
+   });
 
-   _exportObj.activeGuardedActions = [];
+   _exportObj.activeGuardedActions = util.copyMatch(this.activeGuardedActions, (_source, _prop) => {
+      return (_prop === "sourceListener") ? { replace: "RECREATE" } : true;
+   });
 
-   for (var j = 0; j < this.activeGuardedActions.length; ++j) {
-      _exportObj.activeGuardedActions.push(this.activeGuardedActions[j]);
-   }
+   //for (var i = 0; i < this.activeGuardedSources.length; ++i) {
+      //_exportObj.activeGuardedSources.push(this.activeGuardedSources[i]);
+   //}
+
+   //_exportObj.activeGuardedActions = [];
+
+   //for (var j = 0; j < this.activeGuardedActions.length; ++j) {
+      //_exportObj.activeGuardedActions.push(this.activeGuardedActions[j]);
+   //}
 
    _exportObj.actionTimeouts = util.copyMatch(this.actionTimeouts, (_source, _prop) => {
       return (_prop === "timeout" ) ? { replace: _source.timeout ? _source.timeout.left() : -1 } : true;
@@ -223,13 +231,21 @@ State.prototype.import = function(_importObj) {
    NamedObject.prototype.import.call(this, _importObj);
    this.priority = _importObj.priority;
 
-   for (var i = 0; i < _importObj.activeGuardedSources.length; ++i) {
-      this.activeGuardedSources.push(_importObj.activeGuardedSources[i]);
-   }
+   this.activeGuardedSources = util.copyMatch(_importObj.activeGuardedSources, (_source, _prop) => {
+      return (_prop === "sourceListener") ? { replace: this.owner.fetchOrCreateSourceListener(_source) } : true;
+   });
 
-   for (var j = 0; j < _importObj.activeGuardedActions.length; ++j) {
-      this.activeGuardedActions.push(_importObj.activeGuardedActions[j]);
-   }
+   this.activeGuardedActions = util.copyMatch(_importObj.activeGuardedActions, (_source, _prop) => {
+      return (_prop === "sourceListener") ? { replace: this.owner.fetchOrCreateSourceListener(_source) } : true;
+   });
+
+   //for (var i = 0; i < _importObj.activeGuardedSources.length; ++i) {
+      //this.activeGuardedSources.push(_importObj.activeGuardedSources[i]);
+   //}
+
+   //for (var j = 0; j < _importObj.activeGuardedActions.length; ++j) {
+      //this.activeGuardedActions.push(_importObj.activeGuardedActions[j]);
+   //}
 
    for (var k = 0; k < _importObj.actionTimeouts.length; ++k) {
       this.actionTimeouts.push(_importObj.actionTimeouts[k]);
