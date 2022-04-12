@@ -77,20 +77,20 @@ util.inherits(Notifier, Thing);
 
 // Called when current state required
 Notifier.prototype.export = function(_exportObj) {
-   NamedObject.prototype.export.call(this, _exportObj);
+   Thing.prototype.export.call(this, _exportObj);
 };
 
 // Called when current state required
 Notifier.prototype.import = function(_importObj) {
-   NamedObject.prototype.import.call(this, _importObj);
+   Thing.prototype.import.call(this, _importObj);
 };
 
 Notifier.prototype.coldStart = function() {
-   NamedObject.prototype.coldStart.call(this);
+   Thing.prototype.coldStart.call(this);
 };
 
 Notifier.prototype.hotStart = function() {
-   NamedObject.prototype.hotStart.call(this);
+   Thing.prototype.hotStart.call(this);
 };
 
 Notifier.prototype._formConfig = function(_baseConfig, _newConfig, _sync) {
