@@ -58,11 +58,14 @@ GangConsoleApi.prototype.reboot = function(_session, _params, _callback) {
 
 GangConsoleApi.prototype.restart = function(_session, _params, _callback) {
 
-   if ((_params && (_params.length > 0) && _params[0]) || (!this.gang.ignoreRestart)) {
+   if (this.gang.ignoreRestart) {
+      return _callback(this.gang.casa.uName + ": Ignoring restart!");
+   }
+   else if (_params && (_params.length > 0) && _params[0]) {
       process.exit(3);
    }
    else {
-      return _callback(this.gang.casa.uName + ": Ignoring restart!");
+      this.gang.suspend();
    }
 };
 
