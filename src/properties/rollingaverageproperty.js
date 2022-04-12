@@ -12,13 +12,24 @@ util.inherits(RollingAverageProperty, Property);
 
 // Called when system state is required
 RollingAverageProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.periodValues = util.copy(this.periodValues);
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.periodValues = this.periodValues;
-      return true;
-   }
+// Called to restore system state before hot start
+RollingAverageProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+   this.periodValues = util.copy(_importObj.periodValues);
+};
 
-   return false;
+// Called after system state has been restored
+RollingAverageProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+RollingAverageProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
 };
 
 RollingAverageProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

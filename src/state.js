@@ -275,7 +275,6 @@ State.prototype.hotStart = function() {
 
 State.prototype.coldStart = function() {
    NamedObject.prototype.coldStart.call(this);
-   /// AAAAAA - TODO
 };
 
 State.prototype.getCasa = function() {

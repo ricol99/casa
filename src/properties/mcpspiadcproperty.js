@@ -14,5 +14,26 @@ function McpSpiAdcProperty(_config, _owner) {
 
 util.inherits(McpSpiAdcProperty, ServiceProperty);
 
+// Called when system state is required
+McpSpiAdcProperty.prototype.export = function(_exportObj) {
+   ServiceProperty.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+McpSpiAdcProperty.prototype.import = function(_importObj) {
+   ServiceProperty.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+McpSpiAdcProperty.prototype.hotStart = function() {
+   ServiceProperty.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+McpSpiAdcProperty.prototype.coldStart = function () {
+   ServiceProperty.prototype.coldStart.call(this);
+};
+
+
 module.exports = exports = McpSpiAdcProperty;
  

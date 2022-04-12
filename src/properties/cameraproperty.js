@@ -11,6 +11,23 @@ function CameraProperty(_config, _owner) {
 
 util.inherits(CameraProperty, Property);
 
+// Called when current state required
+CameraProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to retsore current state
+CameraProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+CameraProperty.prototype.coldStart = function() {
+   Property.prototype.coldStart.call(this);
+};
+
+CameraProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
 CameraProperty.prototype.propertyAboutToChange = function(_newValue, _data) {
    console.log(this.uName + ': Property about to change to ' + _newValue);
 

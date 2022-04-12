@@ -9,6 +9,24 @@ function AndProperty(_config, _owner) {
 
 util.inherits(AndProperty, Property);
 
+// Called when current state required
+AndProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to retsore current state
+AndProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+AndProperty.prototype.coldStart = function() {
+   Property.prototype.coldStart.call(this);
+};
+
+AndProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
 AndProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

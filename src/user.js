@@ -16,23 +16,19 @@ User.prototype.superType = function(_type) {
 // Called when current state required
 User.prototype.export = function(_exportObj) {
    Source.prototype.export.call(this, _exportObj);
-   // AAAAA - TODO
 };
 
 // Called when current state required
 User.prototype.import = function(_importObj) {
    Source.prototype.import.call(this, _importObj);
-   // AAAAA - TODO
 };
 
 User.prototype.coldStart = function() {
    Source.prototype.coldStart.call(this);
-   // AAAAA - TODO
 };
 
 User.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
-   // AAAAA - TODO
 };
 
 module.exports = exports = User;

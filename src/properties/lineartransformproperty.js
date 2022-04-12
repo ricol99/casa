@@ -17,6 +17,26 @@ function LinearTransformProperty(_config, _owner) {
 
 util.inherits(LinearTransformProperty, Property);
 
+// Called when system state is required
+LinearTransformProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+LinearTransformProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+LinearTransformProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+LinearTransformProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 LinearTransformProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    console.log(this.uName + ': property ' + _data.name + ' has changed to ' + _data.value);
 

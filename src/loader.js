@@ -7,7 +7,7 @@ const fs = require('fs');
 var _mainInstance = null;
 _loadTime = Date.now();
 
-function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console) {
+function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _testUncaughtException) {
    this.gang = null;
    this.casaName = _casaName;
    this.connectToPeers = _connectToPeers;
@@ -16,6 +16,12 @@ function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath,
    this.configPath = _configPath;
    this.globalConsoleRequired = (_console) ? _console === "global" : false;
    this.localConsoleRequired = (_console) ? _console === "local" : false;
+
+   if (_testUncaughtException) {
+      setTimeout( () => {
+         crash; // Intentionally cause an exception as crash does not exist
+      }, _testUncaughtException * 1000);
+   }
 };
 
 Loader.prototype.load = function() {
@@ -30,7 +36,7 @@ Loader.prototype.load = function() {
          fs.unlinkSync(this.configPath + "/hotstate-"+this.casaName+".json");
 
          if (importObj && importObj.timestamp && ((Date.now() - importObj.timestamp) < 30000)) {
-            console.log(util.inspect(importObj.tree));
+            console.log("*LOADER*: Valid suspension state found, attempting restoration");
             this.restoreNode(importObj.tree);
          }
          else {
@@ -45,7 +51,7 @@ Loader.prototype.load = function() {
 
 process.on('uncaughtException', (_err) => {
 
-   if ((Date.now() - _loadTime) < 20000) {
+   if ((Date.now() - _loadTime) < 30000) {
       console.log("*LOADER*: Unable to attempt suspension because the excpetion occurred too early in the start up sequence!");
       console.error("*LOADER*: There was an uncaught error ", _err)
       process.exit(1);
@@ -76,9 +82,22 @@ process.on('uncaughtException', (_err) => {
    }
 });
 
-//setTimeout( () => {
-   //ia;
-//}, 22000);
+Loader.prototype.suspend = function() {
+   _loadTime = Date.now();
+
+   if (this.gang && !this.gang.globalConsoleRequired) {
+      console.log(this.uName +": Attempting suspension");
+      var exportObj = { timestamp: Date.now(), tree: {}};
+      _mainInstance.gang.export(exportObj.tree);
+      fs.writeFileSync(_mainInstance.configPath + "/hotstate-"+_mainInstance.gang.casa.name+".json", JSON.stringify(exportObj));
+      console.log("*LOADER*: State persisted");
+      process.exit(2);
+   }
+   else {
+      console.log(this.uName +": Unable to suspend!");
+      return false;
+   }
+};
 
 Loader.prototype.loadNode = function() {
    this.casaDb = new Db(this.casaName, this.configPath, false, null);
@@ -114,7 +133,7 @@ Loader.prototype.loadNode = function() {
 
                this.addSystemServices();
 
-               this.gang = new Gang(this.gangConfig);
+               this.gang = new Gang(this.gangConfig, this);
                this.casaDb.setOwner(this.gang);
                this.gang.casa.db = this.casaDb;
                this.gangDb.setOwner(this.gang);
@@ -146,7 +165,7 @@ Loader.prototype.restoreNode = function(_importObj) {
 
       this.gangDb.on('connected', (_data) => {
 
-         this.gang = new Gang(_importObj.config);
+         this.gang = new Gang(_importObj.config, this);
 
          this.casaDb.setOwner(this.gang);
          this.gang.casa.db = this.casaDb;
@@ -171,7 +190,6 @@ Loader.prototype.restoreNode = function(_importObj) {
 };
 
 Loader.prototype.loadConsole = function() {
-   console.log("AAAAA AAAAAAA");
    this.gangName = this.casaName;
    this.casaName = "casa-console";
 
@@ -181,7 +199,7 @@ Loader.prototype.loadConsole = function() {
 
    this.addSystemServices();
 
-   this.gang = new Gang(this.gangConfig);
+   this.gang = new Gang(this.gangConfig, this);
 
    this.gangDb = new Db(this.gangName, this.configPath, false, null);
    this.gangDb.setOwner(this.gang);

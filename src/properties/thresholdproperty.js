@@ -14,13 +14,24 @@ util.inherits(ThresholdProperty, Property);
 
 // Called when system state is required
 ThresholdProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.activeThreshold = this.activeThreshold;
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.activeThreshold = this.activeThreshold;
-      return true;
-   }
+// Called to restore system state before hot start
+ThresholdProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+   this.activeThreshold = _importObj.activeThreshold;
+};
 
-   return false;
+// Called after system state has been restored
+ThresholdProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+ThresholdProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
 };
 
 ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

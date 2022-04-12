@@ -11,13 +11,14 @@ var optionDefinitions = [
   { name: 'localconsole', type: Boolean },
   { name: 'console', type: Boolean },
   { name: 'logs', type: String },
-  { name: 'nopeer', type: Boolean }
+  { name: 'nopeer', type: Boolean },
+  { name: 'crash', type: String }
 ]
 
 var options = commandLineArgs(optionDefinitions)
 
 if (options.casa == undefined) {
-   console.log("Usage: casa [--secure] [--certs] [--config] [--nopeer] [--localconsole | --console] <casa-or-gang-name>");
+   console.log("Usage: casa [--secure] [--certs dir] [--config dir] [--nopeer] [--localconsole | --console] [--crash delay(s)] <casa-or-gang-name>");
    process.exit(1);
 }
 
@@ -27,6 +28,7 @@ var secureMode = (options.secure == undefined) ? false : options.secure;
 var certPath = (options.certs == undefined) ? process.env['HOME']+'/.casa-keys' : util.checkPath(options.certs);
 var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-keys/secure-config' : util.checkPath(options.config);
 var casaName = options.casa;
+var crash = options.crash;
 
 var logs;
 if (options.localconsole || options.console) {
@@ -41,6 +43,6 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 var consoleRequired = (options.console) ? "global" : (options.localconsole) ? "local" : false;
 
 Loader = require('./loader');
-var loader = new Loader(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired);
+var loader = new Loader(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired, crash);
 loader.load();
 

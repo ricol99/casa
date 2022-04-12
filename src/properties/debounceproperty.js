@@ -17,7 +17,7 @@ util.inherits(DebounceProperty, Property);
 
 // Called when system state is required
 DebounceProperty.prototype.export = function(_exportObj) {
-   Property.prototype.export.call(this, _exportObj)) {
+   Property.prototype.export.call(this, _exportObj);
    _exportObj.sourceState = this.sourceState;
    _exportObj.outputState = this.outputState;
    _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
@@ -25,7 +25,7 @@ DebounceProperty.prototype.export = function(_exportObj) {
 
 // Called to restore system state before hot start
 DebounceProperty.prototype.import = function(_importObj) {
-   Property.prototype.import.call(this, _importObj)) {
+   Property.prototype.import.call(this, _importObj);
    this.sourceState = _importObj.sourceState;
    this.outputState = _importObj.outputState;
    this.timeoutObj = _importObj.timeoutObj;
@@ -38,6 +38,14 @@ DebounceProperty.prototype.hotStart = function() {
    if (this.timeoutObj !== -1) {
       this.startTimer(this.timeoutObj);
    }
+   else {
+      this.startTimer = null;
+   }
+};
+
+// Called to start a cold system
+DebounceProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
 };
 
 DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

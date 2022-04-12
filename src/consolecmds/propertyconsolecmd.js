@@ -7,6 +7,24 @@ function PropertyConsoleCmd(_config, _owner, _console) {
 
 util.inherits(PropertyConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+PropertyConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+PropertyConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+PropertyConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+PropertyConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 PropertyConsoleCmd.prototype.set = function(_arguments, _callback) {
    this.checkArguments(1, _arguments);
    this.executeParsedCommand("set", _arguments, _callback);

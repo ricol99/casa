@@ -7,6 +7,24 @@ function PropertyConsoleApi(_config, _owner) {
 
 util.inherits(PropertyConsoleApi, ConsoleApi);
 
+// Called when current state required
+PropertyConsoleApi.prototype.export = function(_exportObj) {
+   ConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+PropertyConsoleApi.prototype.import = function(_importObj) {
+   ConsoleApi.prototype.import.call(this, _importObj);
+};
+
+PropertyConsoleApi.prototype.coldStart = function() {
+   ConsoleApi.prototype.coldStart.call(this);
+};
+
+PropertyConsoleApi.prototype.hotStart = function() {
+   ConsoleApi.prototype.hotStart.call(this);
+};
+
 PropertyConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, this.myObj().getValue());
 };

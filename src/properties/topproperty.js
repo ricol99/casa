@@ -20,6 +20,26 @@ function TopProperty(_config, _owner) {
 
 util.inherits(TopProperty, Property);
 
+// Called when system state is required
+TopProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+TopProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+TopProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+TopProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 TopProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

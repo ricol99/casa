@@ -3,6 +3,7 @@ var util = require('util');
 var NamedObject = require('./namedobject');
  
 function ConsoleApi(_config, _owner) {
+   _config.transient = true;
    NamedObject.call(this, _config, _owner);
    this.sessions = {};
 
@@ -22,7 +23,22 @@ ConsoleApi.prototype.superType = function(_type) {
    return "consoleapi";
 };
 
+// Called when current state required
+ConsoleApi.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+ConsoleApi.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+};
+
 ConsoleApi.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+};
+
+ConsoleApi.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
 };
 
 ConsoleApi.prototype.getCasa = function() {

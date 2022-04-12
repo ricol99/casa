@@ -13,5 +13,25 @@ function PusherProperty(_config, _owner) {
 
 util.inherits(PusherProperty, ServiceProperty);
 
+// Called when system state is required
+PusherProperty.prototype.export = function(_exportObj) {
+   ServiceProperty.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+PusherProperty.prototype.import = function(_importObj) {
+   ServiceProperty.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+PusherProperty.prototype.hotStart = function() {
+   ServiceProperty.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+PusherProperty.prototype.coldStart = function () {
+   ServiceProperty.prototype.coldStart.call(this);
+};
+
 module.exports = exports = PusherProperty;
  

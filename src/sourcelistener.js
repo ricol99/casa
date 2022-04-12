@@ -94,7 +94,6 @@ SourceListener.prototype.import = function(_importObj) {
 
 SourceListener.prototype.coldStart = function() {
    NamedObject.prototype.coldStart.call(this);
-   // AAAAA - TODO
 };
 
 SourceListener.prototype.hotStart = function() {

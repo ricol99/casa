@@ -1,5 +1,4 @@
 var util = require('util');
-var Property = require('../property');
 var StateProperty = require('./stateproperty');
 
 function CombineStateProperty(_config, _owner) {
@@ -13,7 +12,21 @@ function CombineStateProperty(_config, _owner) {
 
 util.inherits(CombineStateProperty, StateProperty);
 
-CombineStateProperty.prototype.coldStart = function(_data) {
+// Called when current state required
+CombineStateProperty.prototype.export = function(_exportObj) {
+   StateProperty.prototype.export.call(this, _exportObj);
+};
+
+// Called to retsore current state
+CombineStateProperty.prototype.import = function(_importObj) {
+   StateProperty.prototype.import.call(this, _importObj);
+};
+
+CombineStateProperty.prototype.hotStart = function() {
+   StateProperty.prototype.hotStart.call(this);
+};
+
+CombineStateProperty.prototype.coldStart = function() {
 
    if (!this.initialValueSet) {
       let newState = "";
@@ -47,7 +60,7 @@ CombineStateProperty.prototype.coldStart = function(_data) {
       }
    }
 
-   Property.prototype.coldStart.call(this, _data);
+   StateProperty.prototype.coldStart.call(this);
 };
 
 CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

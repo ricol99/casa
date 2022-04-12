@@ -24,7 +24,7 @@ LatchProperty.prototype.export = function(_exportObj) {
 
 // Called to restore system state before hot start
 LatchProperty.prototype.import = function(_importObj) {
-   Property.prototype.import.call(this, _importObj)) {
+   Property.prototype.import.call(this, _importObj);
    this.sourceActive = _importObj.sourceActive;
    this.active = _importObj.active;
    this.lastData = util.copy(_importObj.this.lastData);
@@ -38,7 +38,16 @@ LatchProperty.prototype.hotStart = function() {
    if (this.minOutputTimeObj !== -1) {
       this.restartTimer(this.minOutputTimeObj);
    }
+   else {
+      this.minOutputTimeObj = null;
+   }
 };
+
+// Called to start a cold system
+LatchProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 
 LatchProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var propValue = _data.value;

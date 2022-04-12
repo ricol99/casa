@@ -8,10 +8,28 @@ function CasaConsoleApi(_config, _owner) {
 
 util.inherits(CasaConsoleApi, ConsoleApi);
 
-CasaConsoleApi.prototype.export = function(_session, _params, _callback) {
+// Called when current state required
+CasaConsoleApi.prototype.export = function(_exportObj) {
+   ConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+CasaConsoleApi.prototype.import = function(_importObj) {
+   ConsoleApi.prototype.import.call(this, _importObj);
+};
+
+CasaConsoleApi.prototype.coldStart = function() {
+   ConsoleApi.prototype.coldStart.call(this);
+};
+
+CasaConsoleApi.prototype.hotStart = function() {
+   ConsoleApi.prototype.hotStart.call(this);
+};
+
+CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    var exportData = {};
 
-   if (this.gang.export(exportData)) {
+   if (this.gang.exportDb(exportData)) {
       _callback(null, exportData);
    }
    else {

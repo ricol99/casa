@@ -28,6 +28,26 @@ function ScheduleProperty(_config, _owner) {
 
 util.inherits(ScheduleProperty, Property);
 
+// Called when system state is required
+ScheduleProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+ScheduleProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+ScheduleProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+ScheduleProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
 
    if (_event.hasOwnProperty("value")) {

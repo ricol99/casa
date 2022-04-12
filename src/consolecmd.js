@@ -3,7 +3,7 @@ var NamedObject = require('./namedobject');
 var Gang = require('./gang');
 
 function ConsoleCmd(_config, _owner, _console) {
-   this.type = "consolecmd";
+   _config.transient = true;
    NamedObject.call(this, _config, _owner);
 
    this.casaName = _config.hasOwnProperty("casaName") ? _config.casaName : null;
@@ -21,7 +21,22 @@ ConsoleCmd.prototype.superType = function(_type) {
    return "consolecmd";
 };
 
+// Called when current state required
+ConsoleCmd.prototype.export = function(_exportObj) {
+   NamedObject.prototype.export.call(this, _exportObj);
+};
+
+// Called when current state required
+ConsoleCmd.prototype.import = function(_importObj) {
+   NamedObject.prototype.import.call(this, _importObj);
+};
+
 ConsoleCmd.prototype.coldStart = function() {
+   NamedObject.prototype.coldStart.call(this);
+};
+
+ConsoleCmd.prototype.hotStart = function() {
+   NamedObject.prototype.hotStart.call(this);
 };
 
 ConsoleCmd.prototype.checkArguments = function(_minLength, _arguments) {

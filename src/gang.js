@@ -6,10 +6,11 @@ var Casa = require('./casa');
 
 var _mainInstance = null;
 
-function Gang(_config) {
+function Gang(_config, _loader) {
    NamedObject.call(this, _config);
    this.dbCallbacks = {};
    this.peercasas = {};
+   this.loader = _loader;
 
    this.casa = new Casa(_config.casa, this);
 };
@@ -61,7 +62,11 @@ Gang.prototype.coldStart = function() {
 
    // Start connecting to Peers
    this.connectToPeers();
-}
+};
+
+Gang.prototype.suspend = function() {
+   return this.loader.suspend();
+};
 
 Gang.prototype.buildTree = function() {
    _mainInstance = this;

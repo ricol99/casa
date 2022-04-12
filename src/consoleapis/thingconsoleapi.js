@@ -7,6 +7,24 @@ function ThingConsoleApi(_config, _owner) {
 
 util.inherits(ThingConsoleApi, SourceConsoleApi);
 
+// Called when current state required
+ThingConsoleApi.prototype.export = function(_exportObj) {
+   SourceConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+ThingConsoleApi.prototype.import = function(_importObj) {
+   SourceConsoleApi.prototype.import.call(this, _importObj);
+};
+
+ThingConsoleApi.prototype.coldStart = function() {
+   SourceConsoleApi.prototype.coldStart.call(this);
+};
+
+ThingConsoleApi.prototype.hotStart = function() {
+   SourceConsoleApi.prototype.hotStart.call(this);
+};
+
 ThingConsoleApi.prototype.findMyThingInConfig = function(_thingConfig) {
 
    if (_thingConfig.name === this.uName) {

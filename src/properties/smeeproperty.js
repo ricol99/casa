@@ -15,5 +15,25 @@ function SmeeProperty(_config, _owner) {
 
 util.inherits(SmeeProperty, ServiceProperty);
 
+// Called when system state is required
+SmeeProperty.prototype.export = function(_exportObj) {
+   ServiceProperty.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+SmeeProperty.prototype.import = function(_importObj) {
+   ServiceProperty.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+SmeeProperty.prototype.hotStart = function() {
+   ServiceProperty.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+SmeeProperty.prototype.coldStart = function () {
+   ServiceProperty.prototype.coldStart.call(this);
+};
+
 module.exports = exports = SmeeProperty;
  

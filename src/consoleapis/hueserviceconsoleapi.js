@@ -9,6 +9,24 @@ function HueServiceConsoleApi(_config, _owner) {
 
 util.inherits(HueServiceConsoleApi, ServiceConsoleApi);
 
+// Called when current state required
+HueServiceConsoleApi.prototype.export = function(_exportObj) {
+   ServiceConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+HueServiceConsoleApi.prototype.import = function(_importObj) {
+   ServiceConsoleApi.prototype.import.call(this, _importObj);
+};
+
+HueServiceConsoleApi.prototype.coldStart = function() {
+   ServiceConsoleApi.prototype.coldStart.call(this);
+};
+
+HueServiceConsoleApi.prototype.hotStart = function() {
+   ServiceConsoleApi.prototype.hotStart.call(this);
+};
+
 HueServiceConsoleApi.prototype.findBridges = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    this.myObj().findBridges(_callback);

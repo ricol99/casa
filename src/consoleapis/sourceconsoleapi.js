@@ -7,6 +7,24 @@ function SourceConsoleApi(_config, _owner) {
 
 util.inherits(SourceConsoleApi, SourceBaseConsoleApi);
 
+// Called when current state required
+SourceConsoleApi.prototype.export = function(_exportObj) {
+   SourceBaseConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+SourceConsoleApi.prototype.import = function(_importObj) {
+   SourceBaseConsoleApi.prototype.import.call(this, _importObj);
+};
+
+SourceConsoleApi.prototype.coldStart = function() {
+   SourceBaseConsoleApi.prototype.coldStart.call(this);
+};
+
+SourceConsoleApi.prototype.hotStart = function() {
+   SourceBaseConsoleApi.prototype.hotStart.call(this);
+};
+
 SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, _action, _callback) {
    this.db = this.gang.getDb(this.gang.casa.name);
 

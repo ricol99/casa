@@ -13,13 +13,23 @@ util.inherits(TopValidProperty, Property);
 
 // Called when system state is required
 TopValidProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.highestValidSource = this.highestValidSource ? this.highestValidSource.uName : null;
-      return true;
-   }
+// Called to restore system state before hot start
+TopValidProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
 
-   return false;
+// Called after system state has been restored
+TopValidProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+   this.highestValidSource = findHighestPriorityValidSource(this);
+};
+
+// Called to start a cold system
+TopValidProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
 };
 
 function findHighestPriorityValidSource(_this) {

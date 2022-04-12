@@ -7,6 +7,24 @@ function PeerCasaConsoleApi(_config, _owner) {
 
 util.inherits(PeerCasaConsoleApi, ConsoleApi);
 
+// Called when current state required
+PeerCasaConsoleApi.prototype.export = function(_exportObj) {
+   ConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+PeerCasaConsoleApi.prototype.import = function(_importObj) {
+   ConsoleApi.prototype.import.call(this, _importObj);
+};
+
+PeerCasaConsoleApi.prototype.coldStart = function() {
+   ConsoleApi.prototype.coldStart.call(this);
+};
+
+PeerCasaConsoleApi.prototype.hotStart = function() {
+   ConsoleApi.prototype.hotStart.call(this);
+};
+
 PeerCasaConsoleApi.prototype.getCasa = function() {
    return this.myObj();
 };

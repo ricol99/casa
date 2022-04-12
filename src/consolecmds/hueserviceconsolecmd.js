@@ -8,6 +8,24 @@ function HueServiceConsoleCmd(_config, _owner, _console) {
 
 util.inherits(HueServiceConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+HueServiceConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+HueServiceConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+HueServiceConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+HueServiceConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 HueServiceConsoleCmd.prototype.findBridges = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    this.console.write("Scanning for bridges, this will take 20 seconds...");

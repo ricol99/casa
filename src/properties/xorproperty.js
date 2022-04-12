@@ -9,6 +9,26 @@ function XorProperty(_config, _owner) {
 
 util.inherits(XorProperty, Property);
 
+// Called when system state is required
+XorProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+XorProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+XorProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+XorProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 XorProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

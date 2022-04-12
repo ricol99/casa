@@ -10,6 +10,24 @@ function SourceBaseConsoleApi(_config, _owner) {
 
 util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
+// Called when current state required
+SourceBaseConsoleApi.prototype.export = function(_exportObj) {
+   ConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+SourceBaseConsoleApi.prototype.import = function(_importObj) {
+   ConsoleApi.prototype.import.call(this, _importObj);
+};
+
+SourceBaseConsoleApi.prototype.coldStart = function() {
+   ConsoleApi.prototype.coldStart.call(this);
+};
+
+SourceBaseConsoleApi.prototype.hotStart = function() {
+   ConsoleApi.prototype.hotStart.call(this);
+};
+
 SourceBaseConsoleApi.prototype.export = function(_session, _params, _callback) {
    var exportData = {};
 

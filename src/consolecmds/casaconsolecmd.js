@@ -7,6 +7,24 @@ function CasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(CasaConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+CasaConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+CasaConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+CasaConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+CasaConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 CasaConsoleCmd.prototype.reboot = function(_arguments, _callback)  {
 
    if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {

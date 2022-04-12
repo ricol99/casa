@@ -62,7 +62,6 @@ Thing.prototype.coldStart = function() {
 
 Thing.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
-   // AAAAAAAA - TODO
 };
 
 Thing.prototype.addThing = function(_thing) {

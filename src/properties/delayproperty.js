@@ -11,33 +11,27 @@ util.inherits(DelayProperty, Property);
 
 // Called when system state is required
 DelayProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
 
-   if (Property.prototype.export.call(this, _exportObj)) {
+   _exportObj.delayedEvents = util.copyMatch(this.delayedEvents, (_source, _prop) => {
 
-      _exportObj.delayedEvents = util.copyMatch(this.delayedEvents, (_source, _prop) => {
-
-         if (_prop === "owner") {
-            return false;
-         }
-         else if (_prop === "timeoutObj") {
-            return { replace: _source[_prop] ? _source[_prop].left() : -1 };
-         }
-         else if (_prop === "eventData") {
-            return { replace: _source[_prop] ? util.copy(_source[_prop]) : null };
-         }
-
-         return true;
-      });
+      if (_prop === "owner") {
+         return false;
+      }
+      else if (_prop === "timeoutObj") {
+         return { replace: _source[_prop] ? _source[_prop].left() : -1 };
+      }
+      else if (_prop === "eventData") {
+         return { replace: _source[_prop] ? util.copy(_source[_prop]) : null };
+      }
 
       return true;
-   }
-
-   return false;
+   });
 };
 
 // Called to restore system state before hot start
-DeleyProperty.prototype.import = function(_importObj) {
-   Property.prototype.import.call(this, _importObj)) {
+DelayProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
    
    for (var i = 0; i < _importObj.delayedEvents.length; ++i) {
       this.delayedEvents.push({ owner: this, timeoutObj: _importObj.delayedEvents[i].timeoutObj, eventData: util.copy(_importObj.delayedEvents[i].eventData) });
@@ -53,6 +47,10 @@ DelayProperty.prototype.hotStart = function() {
    }
 };
 
+// Called to start a cold system
+DelayProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
 
 DelayProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.delayedEvents.push(new DelayedEvent(_data.value, _data, this));

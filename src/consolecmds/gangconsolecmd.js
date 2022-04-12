@@ -7,6 +7,24 @@ function GangConsoleCmd(_config, _owner, _console) {
 
 util.inherits(GangConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+GangConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+GangConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+GangConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+GangConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 GangConsoleCmd.prototype.reboot = function(_arguments, _callback)  {
 
    if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {

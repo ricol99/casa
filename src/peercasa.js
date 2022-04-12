@@ -218,28 +218,22 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
    }
 
    this.config = util.copy(_config, true);
-   console.error("AAAAAAAAAAAAAAAAAAAAA casaName="+this.config.casaName);
    this.changeName(this.config.casaName.substr(2));	// XXX HACK
    this.createSources(this.config, this);
-   console.log(this.uName + ': AAAAA HERE 3: ');
 
    clearTimeout(this.loginTimer);
    this.loginTimer = null;
 
    var simpleConfig = this.casa.refreshSimpleConfig();
-   console.log(this.uName + ': AAAAA HERE 4: ');
 
    // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
-   console.log(this.uName + ': AAAAA HERE 5: ');
 
    this.ackMessage('login', { messageId: _config.messageId, gangHash: this.gang.gangDb.getHash(), casaName: this.casa.uName, casaConfig: simpleConfig });
    this.establishHeartbeat();
 
-   console.log(this.uName + ': AAAAA HERE 6: ');
    this.resendUnAckedMessages();
    this.alignPropertyValue('ACTIVE', true, { sourceName: this.uName });
-   console.log(this.uName + ': AAAAA HERE 7: ');
 };
 
 PeerCasa.prototype.connectToPeerCasa = function(_config) {

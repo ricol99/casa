@@ -7,6 +7,24 @@ function SourceBaseConsoleCmd(_config, _owner, _console) {
 
 util.inherits(SourceBaseConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+SourceBaseConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+SourceBaseConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+SourceBaseConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+SourceBaseConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 SourceBaseConsoleCmd.prototype.export = function(_arguments, _callback)  {
    this.executeParsedCommand("export", _arguments, _callback);
 };

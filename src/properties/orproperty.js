@@ -9,6 +9,26 @@ function OrProperty(_config, _owner) {
 
 util.inherits(OrProperty, Property);
 
+// Called when system state is required
+OrProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+OrProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+OrProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+OrProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 OrProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

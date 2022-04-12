@@ -7,6 +7,24 @@ function OfflineCasaConsoleCmd(_config, _owner, _console) {
 
 util.inherits(OfflineCasaConsoleCmd, ConsoleCmd);
 
+// Called when current state required
+OfflineCasaConsoleCmd.prototype.export = function(_exportObj) {
+   ConsoleCmd.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+OfflineCasaConsoleCmd.prototype.import = function(_importObj) {
+   ConsoleCmd.prototype.import.call(this, _importObj);
+};
+
+OfflineCasaConsoleCmd.prototype.coldStart = function() {
+   ConsoleCmd.prototype.coldStart.call(this);
+};
+
+OfflineCasaConsoleCmd.prototype.hotStart = function() {
+   ConsoleCmd.prototype.hotStart.call(this);
+};
+
 OfflineCasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;

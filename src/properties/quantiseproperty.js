@@ -17,6 +17,26 @@ function QuantiseProperty(_config, _owner) {
 
 util.inherits(QuantiseProperty, Property);
 
+// Called when system state is required
+QuantiseProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+QuantiseProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+QuantiseProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+QuantiseProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 QuantiseProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var name = this.boundaries[0].name;
 

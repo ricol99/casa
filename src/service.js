@@ -37,23 +37,19 @@ Service.prototype.superType = function(_type) {
 // Called when system state is required
 Service.prototype.export = function(_exportObj) {
    Thing.prototype.export.call(this, _exportObj);
-   // AAAAA - TODO
 };
 
 // Called before hotStart to restore system state
 Service.prototype.import = function(_importObj) {
    Thing.prototype.import.call(this, _importObj);
-   // AAAAA - TODO
 };
 
 Service.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this);
-   // AAAAA - TODO
 };
 
 Service.prototype.hotStart = function() {
    Thing.prototype.hotStart.call(this);
-   // AAAAA - TODO
 };
 
 // Create a service node, if needed

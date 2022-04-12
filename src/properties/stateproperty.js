@@ -81,13 +81,13 @@ StateProperty.prototype.hotStart = function() {
    }
 };
 
-StateProperty.prototype.coldStart = function(_data) {
+StateProperty.prototype.coldStart = function() {
 
    if (this.initialValueSet) {
       this.setState(this.value, false);
    }
 
-   Property.prototype.coldStart.call(this, _data);
+   Property.prototype.coldStart.call(this);
 };
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {

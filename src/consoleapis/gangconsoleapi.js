@@ -8,6 +8,24 @@ function GangConsoleApi(_config, _owner) {
 
 util.inherits(GangConsoleApi, ConsoleApi);
 
+// Called when current state required
+GangConsoleApi.prototype.export = function(_exportObj) {
+   ConsoleApi.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore current state
+GangConsoleApi.prototype.import = function(_importObj) {
+   ConsoleApi.prototype.import.call(this, _importObj);
+};
+
+GangConsoleApi.prototype.coldStart = function() {
+   ConsoleApi.prototype.coldStart.call(this);
+};
+
+GangConsoleApi.prototype.hotStart = function() {
+   ConsoleApi.prototype.hotStart.call(this);
+};
+
 GangConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
 };

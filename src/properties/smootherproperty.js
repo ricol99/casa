@@ -25,11 +25,10 @@ SmootherProperty.prototype.export = function(_exportObj) {
 
 // Called to restore system state before hot start
 SmootherProperty.prototype.import = function(_importObj) {
-   Property.prototype.import.call(this, _importObj)) {
+   Property.prototype.import.call(this, _importObj);
    this.calculatedResolution = _importObj.calculatedResolution;
    this.targetValue = _importObj.targetValue;
-
-   this.timeoutObj = _importObj.minOutputTimeObj;
+   this.timeoutObj = _importObj.timeoutObj;
 };
 
 // Called after system state has been restored
@@ -39,8 +38,15 @@ SmootherProperty.prototype.hotStart = function() {
    if (this.timeoutObj !== -1) {
       this.restartTimer(this.timeoutObj);
    }
+   else {
+      this.timeoutObj = null;
+   }
 };
 
+// Called to start a cold system
+SmootherProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
 
 SmootherProperty.prototype.restartTimer = function(_overrideTimeout) {
    var timeout = _overrideTimeout ? _overrideTimeout : this.calculatedResolution * 1000;

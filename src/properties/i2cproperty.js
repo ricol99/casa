@@ -43,14 +43,28 @@ util.inherits(I2CProperty, Property);
 
 // Called when system state is required
 I2CProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+   _exportObj.scanning = this.scanning;
+   _exportObj.ignoreCounter = this.ignoreCounter;
+};
 
-   if (Property.prototype.export.call(this, _exportObj)) {
-      _exportObj.scanning = this.scanning;
-      _exportObj.ignoreCounter = this.ignoreCounter;
-      return true;
-   }
+// Called to restore system state before hot start
+I2CProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+   this.scanning = _importObj.scanning;
+   this.ignoreCounter = _importObj.ignoreCounter;
+};
 
-   return false;
+// Called after system state has been restored
+I2CProperty.prototype.hotStart = function() {
+   this.start();
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+I2CProperty.prototype.coldStart = function () {
+   this.start();
+   Property.prototype.coldStart.call(this);
 };
 
 I2CProperty.prototype.set = function(_propValue, _data) {
@@ -58,11 +72,9 @@ I2CProperty.prototype.set = function(_propValue, _data) {
    return false;
 }
 
-I2CProperty.prototype.coldStart = function() {
+I2CProperty.prototype.start = function() {
    this.wire = new ADCPi(this.address1, this.address2, 18);
    this.startScanning();
-
-   Property.prototype.coldStart.call(this);
 }
 
 // ====================

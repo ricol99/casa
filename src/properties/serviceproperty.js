@@ -40,5 +40,25 @@ function ServiceProperty(_config, _owner) {
 
 util.inherits(ServiceProperty, Property);
 
+// Called when system state is required
+ServiceProperty.prototype.export = function(_exportObj) {
+   Property.prototype.export.call(this, _exportObj);
+};
+
+// Called to restore system state before hot start
+ServiceProperty.prototype.import = function(_importObj) {
+   Property.prototype.import.call(this, _importObj);
+};
+
+// Called after system state has been restored
+ServiceProperty.prototype.hotStart = function() {
+   Property.prototype.hotStart.call(this);
+};
+
+// Called to start a cold system
+ServiceProperty.prototype.coldStart = function () {
+   Property.prototype.coldStart.call(this);
+};
+
 module.exports = exports = ServiceProperty;
  

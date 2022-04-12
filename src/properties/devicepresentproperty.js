@@ -20,20 +20,21 @@ DevicePresentProperty.prototype.export = function(_exportObj) {
 
 // Called to restore system state before hot start
 DevicePresentProperty.prototype.import = function(_importObj) {
-   Property.prototype.import.call(this, _importObj)) {
-   this.timeoutObj = _importObj.timeoutObj;
+   Property.prototype.import.call(this, _importObj);
+   this.timeoutObj = (_importObj.timeoutObj === -1) ? null : _importObj.timeoutObj;
 };
 
 // Called after system state has been restored
 DevicePresentProperty.prototype.hotStart = function() {
    Property.prototype.hotStart.call(this);
 
-   if (this.timeoutObj !== -1) {
+   if (this.timeoutObj) {
       this.restartTimer(_importObj.timeoutObj);
    }
 };
 
 DevicePresentProperty.prototype.coldStart = function(_event) {
+   Property.prototype.coldStart.call(this);
    this.restartTimer();
 }
 
