@@ -65,7 +65,8 @@ GangConsoleApi.prototype.restart = function(_session, _params, _callback) {
       process.exit(3);
    }
    else {
-      this.gang.suspend();
+      //this.gang.suspend();
+      process.exit(3);
    }
 };
 
