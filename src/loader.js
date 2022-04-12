@@ -49,7 +49,7 @@ Loader.prototype.load = function() {
    }
 };
 
-process.on('uncaughtException', (_err) => {
+/*process.on('uncaughtException', (_err) => {
 
    if ((Date.now() - _loadTime) < 30000) {
       process.stdout.write("*LOADER*: Unable to attempt suspension because the excpetion occurred too early in the start up sequence!\n");
@@ -80,7 +80,7 @@ process.on('uncaughtException', (_err) => {
          process.exit(1);
       }
    }
-});
+});*/
 
 Loader.prototype.suspend = function() {
    _loadTime = Date.now();
