@@ -52,8 +52,8 @@ Loader.prototype.load = function() {
 process.on('uncaughtException', (_err) => {
 
    if ((Date.now() - _loadTime) < 30000) {
-      console.log("*LOADER*: Unable to attempt suspension because the excpetion occurred too early in the start up sequence!");
-      console.error("*LOADER*: There was an uncaught error ", _err)
+      process.stdout.write("*LOADER*: Unable to attempt suspension because the excpetion occurred too early in the start up sequence!\n");
+      process.stderr.write("*LOADER*: There was an uncaught error "+util.inspect(_err)+"\n")
       process.exit(1);
    }
    else {
@@ -70,8 +70,8 @@ process.on('uncaughtException', (_err) => {
             process.exit(2);
          }
          else {
-            console.log("*LOADER*: Unable to attempt suspension as uncaught exception was in casa code stack");
-            console.error("*LOADER*: There was an uncaught error ", _err)
+            process.stdout.write("*LOADER*: Unable to attempt suspension as uncaught exception was in casa code stack\n");
+            process.stderr.write("*LOADER*: There was an uncaught error "+util.inspect(_err)+"\n")
             process.exit(1);
          }
       }

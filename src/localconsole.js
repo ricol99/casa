@@ -31,6 +31,12 @@ LocalConsole.prototype.import = function(_importObj) {
 LocalConsole.prototype.hotStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
+   var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
+   this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name, sourceCasa: this.casa.name, casaName: this.casa.name }, null, this);
+ 
+   this.consoleApiService =  this.casa.findService("consoleapiservice");
+   this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
+   this.sourceCasa = null;
 
    NamedObject.prototype.hotStart.call(this);
    this.start("::" + this.casa.name);
@@ -39,18 +45,18 @@ LocalConsole.prototype.hotStart = function() {
 LocalConsole.prototype.coldStart = function() {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
-
-   NamedObject.prototype.coldStart.call(this);
-   this.start("::" + this.casa.name);
-};
-
-LocalConsole.prototype.start = function(_startScope) {
    var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
    this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name, sourceCasa: this.casa.name, casaName: this.casa.name }, null, this);
 
    this.consoleApiService =  this.casa.findService("consoleapiservice");
    this.consoleApiSession = this.consoleApiService.getSession(this.uName, this);
    this.sourceCasa = null;
+
+   NamedObject.prototype.coldStart.call(this);
+   this.start("::" + this.casa.name);
+};
+
+LocalConsole.prototype.start = function(_startScope) {
    this.currentScope = _startScope;
    this.currentCmdObj = this.gangConsoleCmd;
    this.setPrompt(this.currentScope);
