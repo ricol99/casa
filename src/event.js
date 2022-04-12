@@ -49,7 +49,7 @@ Event.prototype.import = function(_importObj) {
 
 // Derived Events should override this for start-up code
 Event.prototype.coldStart = function() {
-   NamedObject.prototype.coldStsrt.call(this);
+   NamedObject.prototype.coldStart.call(this);
    this.cold = false;
 };
 
