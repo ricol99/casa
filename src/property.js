@@ -280,12 +280,16 @@ Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data)
 // ====================
 
 // Not to be called by anything other than owner (Thing or Source)
-Property.prototype._actuallySetPropertyValue = function(_newValue) {
+Property.prototype._actuallySetPropertyValue = function(_newValue, _data) {
 
    if ((this.value !== _newValue) || this.cold) {
 
       if (this.cold) {
          this.cold = false;
+
+         if (!this.initialValueSet && _data.hasOwnProperty("coldStart")) {
+            delete _data.coldStart;
+         }
       }
 
       this.previousValue = this.value;

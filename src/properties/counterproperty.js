@@ -26,7 +26,11 @@ CounterProperty.prototype.hotStart = function() {
 };
 
 CounterProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   this.updatePropertyInternal(this.value+1, _data);
+
+   if (!_data.coldStart) {
+      console.log(this.uName + ": new event from source, stepping counter");
+      this.updatePropertyInternal(this.value+1, _data);
+   }
 }
 
 module.exports = exports = CounterProperty;

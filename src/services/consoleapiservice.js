@@ -188,7 +188,6 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         console.info("AAAA Export=", _result);
          this.socket.emit('execute-output', { result: _result });
       });
    });

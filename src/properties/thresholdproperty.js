@@ -39,7 +39,7 @@ ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListene
 
    if (!this.cold) {
 
-      if (this.activeThreshold == -1) {
+      if (this.activeThreshold === -1) {
 
          for (var index = 0; index < this.thresholds.length; ++index) {
 
@@ -52,7 +52,7 @@ ThresholdProperty.prototype.newEventReceivedFromSource = function(_sourceListene
          }
       }
 
-      if (this.activeThreshold != -1) {
+      if (this.activeThreshold !== -1) {
 
          // We are currently buffering
          if (Math.abs(newPropertyValue - this.thresholds[this.activeThreshold]) > this.buffer) {

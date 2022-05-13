@@ -67,13 +67,15 @@ function Access(_config, _parent) {
    this.movementTimeout = _config.hasOwnProperty("movementTimeout") ? _config.movementTimeout : 5;
 
    if (_config.simulateFullyOpen) {
-      this.ensurePropertyExists('fully-open', 'property', {}, _config);
+      this.ensurePropertyExists('fully-open', 'property', { initialValue: false }, _config);
       this.simulatedOpeningResponseTime = _config.hasOwnProperty("simulatedOpeningResponseTime") ? _config.simulatedOpeningResponseTime : 0.5;
       this.simulatedOpeningTime = _config.hasOwnProperty("simulatedOpeningTime") ? _config.simulatedOpeningTime : 10;
-      this.simulatedClosingTimeout = _config.hasOwnProperty("simulatedClosingTimeout") ? _config.simulatedClosingTimeout : 20;
+      //this.simulatedClosingTimeout = _config.hasOwnProperty("simulatedClosingTimeout") ? _config.simulatedClosingTimeout : 20;
+      this.simulatedClosingTimeout = this.operatingTimeouts.closing - 0.1;
 
       this.ensurePropertyExists('fully-open-state', 'stateproperty', { initialValue: "unknown", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
                                                                        states: [{ name: "unknown",
+                                                                                  timeout: { "duration": this.simulatedOpeningTime, nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed" },
                                                                                             { property: "fully-open", value: true, nextState: "fully-open" } ]},
                                                                                 { name: "fully-open", actions: [{ property: "fully-open", value: true }],
@@ -201,6 +203,8 @@ function Access(_config, _parent) {
                                                                                          timeout: { property: "response-timeout", nextState: "access-open-requested-timed-out" } },
                                                                                        { name: "access-opening-safety-alert",
                                                                                          timeout: { property: "opening-timeout", nextState: "access-opening-timed-out" } },
+                                                                                       { name: "access-closing-safety-alert",
+                                                                                         actions: [{ property: "fully-open-state", "value": "opening" }] },
                                                                                        { name: "access-closed-requested-safety-alert",
                                                                                          actions: [{ property: "target", "value": "open" },
                                                                                                    { property: "access-state", value: "access-open"}] },
