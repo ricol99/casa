@@ -7,6 +7,7 @@ function Property(_config, _owner) {
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
+   this.ignoreInvalid = _config.hasOwnProperty("ignoreInvalid") ? _config.ignoreInvalid : false;
    this.initialValueSet = _config.hasOwnProperty("initialValue");
    this.value = _config.initialValue;
    this.rawPropertyValue = _config.initialValue;
@@ -195,7 +196,10 @@ Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
 //
 Property.prototype.amIValid = function() {
 
-   if (this.allSourcesRequiredForValidity) {
+   if (this.ignoreInvalid) {
+      return true;
+   }
+   else if (this.allSourcesRequiredForValidity) {
 
       return (util.allAssocArrayElementsDo(this.sourceListeners, function(_sourceListener) {
             return _sourceListener.isValid();
