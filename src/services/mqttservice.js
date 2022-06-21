@@ -5,7 +5,12 @@ const mqtt = require('mqtt')
 function MqttService(_config, _owner) {
    Service.call(this, _config, _owner);
 
-   this.mqttServerAddress = _config.mqttServerAddress;
+   this.mqttServerAddress = _config.serverAddress;
+
+   if (_config.hasOwnProperty("serverOptions")) {
+      this.mqttServerOptions = util.copy(_config.serverOptions);
+   }
+
    this.topics = {};
 
    this.deviceTypes = {
@@ -36,7 +41,7 @@ MqttService.prototype.hotStart = function() {
 };
 
 MqttService.prototype.start = function() {
-   this.mqttClient  = mqtt.connect(this.mqttServerAddress);
+   this.mqttClient = mqtt.connect(this.mqttServerAddress, this.mqttServerOptions);
 
    this.mqttClient.on('message', (_topic, _message) => {
       console.log(this.uName + ": Received topic update from MQTT server, topic=" + _topic + " " + _message);
