@@ -152,6 +152,33 @@ Thing.prototype.inheritChildProps = function() {
    }
 };
 
+Thing.prototype.inheritParentProps = function(_parentProps) {
+
+   if (!this.ignoreParent) {
+
+      if (_parentProps) {
+
+         for (var prop in _parentProps) {
+  
+            if (_parentProps.hasOwnProperty(prop) && !this.props.hasOwnProperty(prop)) {
+               var oSpec = { name: prop, initialValue: _parentProps[prop].value, local: true };
+               this.ensurePropertyExists(prop, "property", oSpec, this.config);
+            }
+         }
+      }
+
+      if (this.propogateToChildren) {
+   
+         for (var thing in this.things) {
+
+            if (this.things.hasOwnProperty(thing)) {
+               this.things[thing].inheritParentProps(this.props);
+            }
+         }
+      }
+   }
+};
+
 Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
    if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propogateToParent))) {

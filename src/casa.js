@@ -62,6 +62,7 @@ Casa.prototype.buildTree = function() {
 
       if (this.things.hasOwnProperty(thing)) {
          this.things[thing].inheritChildProps();
+         this.things[thing].inheritParentProps();
       }
    }
 };
