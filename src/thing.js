@@ -160,7 +160,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
 
          for (var prop in _parentProps) {
   
-            if (_parentProps.hasOwnProperty(prop) && !this.props.hasOwnProperty(prop)) {
+            if (_parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
                var oSpec = { name: prop, initialValue: _parentProps[prop].value, local: true };
                this.ensurePropertyExists(prop, "property", oSpec, this.config);
             }
@@ -172,7 +172,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].inheritParentProps(this.props);
+               this.things[thing].inheritParentProps(this.properties);
             }
          }
       }
