@@ -13,6 +13,7 @@ function LightwaveRfAccessory(_config, _parent) {
       this.ensurePropertyExists('mood', 'property', { initialValue: false }, _config);
       this.brightnessSupported = true;
       this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
+      this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
 
       for (var index = 0; index < _config.moods.length; ++index) {
          this.moods[_config.moods[index].name] = copyObject(_config.moods[index]);	// name, id, low, high
@@ -130,7 +131,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             if (_propValue == 0) {
                this.lightwaveRfService.turnDeviceOff(this.roomId, this.deviceId, this.brightnessCallbackHandler);
             }
-            else {
+            else if (this.properties["power"].value) {
                this.lightwaveRfService.setDeviceDim(this.roomId, this.deviceId, _propValue, this.brightnessCallbackHandler);
             }
          }
@@ -178,7 +179,7 @@ LightwaveRfAccessory.prototype.propertyAboutToChange = function(_propName, _prop
             }
             this.alignPropertyValue("mood", "off");
          }
-         else {
+         else if (this.properties["power"].value) {
             console.log(this.uName + ": Attempting to apply mood " + _propValue + " change to LightwaveRf room Id=" + this.roomId);
 
             if (!_data.coldStart) {
