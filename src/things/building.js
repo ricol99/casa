@@ -10,6 +10,9 @@ var Location = require('./location');
 // low-light - true when light levels are low enough to switch on lights
 // <user>-present - property representing a user being present in the building
 
+// Please define events for automated functionality
+// enter-evening-event - when this event is fired, evening-possible will be set to true. Rooms enter evening mode, if low-light is true
+
 // Resulting properties
 
 // <user>-user-state (s)
@@ -44,8 +47,8 @@ function Building(_config, _parent) {
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
 
    this.ensurePropertyExists("evening-possible", 'scheduleproperty',
-                             { "initialValue": false, "events": [ { "rule": "sunset:-3600", "value": true }, { "rule": "5 2 * * *", "value": false } ]/*,
-                               "source": { "property": "night-time", "value": true, "transform": "!$value" } */}, _config);
+                             { "initialValue": false, "events": [ { "rule": "5 2 * * *", "value": false } ],
+                               "source": { "event": "enter-evening-event", "transform": "true" } }, _config);
 
    this.ensurePropertyExists("dark", 'property',
                              { "name": "dark", "initialValue": false, "writable": false,
