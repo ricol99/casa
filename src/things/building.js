@@ -74,7 +74,7 @@ function Building(_config, _parent) {
             {
                "name": "in-bed",
                "sources": [],
-               "action": { "event": "user-went-to-bed", "value": this.users[i].name }
+               "actions": [ { "event": "user-went-to-bed", "value": this.users[i].name }, { "property": this.users[i].name+"-present", "value": true } ]
             }
          ]
       };
