@@ -7,6 +7,7 @@ function Tester(_config, _parent) {
    this.thingType = "testsequence";
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
    this.targetUnderTest = (_config.hasOwnProperty("targetUnderTest")) ? this.gang.uNameToLongForm(_config.targetUnderTest) : this.uName;
+   this.lastLogTime = Date.now()-1000;
 
    this.currentTestCase = 0;
    this.currentTestEvent = 0;
@@ -14,6 +15,13 @@ function Tester(_config, _parent) {
    this.expectedPosition = 0;
 
    this.sourceListeners = {};
+
+   this.generatingExpectedOutput = _config.hasOwnProperty("generateExpectedOutput");
+
+   if (this.generatingExpectedOutput) {
+      _config.testRun.testCases = [ _config.generateExpectedOutput ];
+      this.preString = "";
+   }
 
    if (_config.hasOwnProperty('source')) {
       _config.sources = [_config.source];
@@ -303,7 +311,6 @@ Tester.prototype.initiateTestEvent = function(_cold, _restoreTimeout) {
 };
 
 Tester.prototype.initiateNextTestEvent = function() {
-
    console.log("initiateNextTestEvent(): called - tc="+(this.currentTestCase + 1)+" te="+this.currentTestEvent);
 
    if (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1) {
@@ -357,7 +364,6 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
 
    if (this.testCases[this.currentTestCase].expectedSequence[_index].hasOwnProperty('property')) {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].property;
-      //console.info(this.uName + ": AAAAAA " + this.testCases[this.currentTestCase].expectedSequence[_index].source + " " + name + " " + this.testCases[this.currentTestCase].expectedSequence[_index].value);
    }
    else {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
@@ -369,9 +375,70 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
        (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));
 };
 
+Tester.prototype.generateExpectedOutput = function(_data) {
+   this.logTime = Date.now();
+
+   if ((this.logTime - this.lastLogTime) > 100 ) {
+
+      if (this.delayedLog) {
+         process.stdout.write(this.preString+"\n   "+this.delayedLog);
+         this.preString = ",";
+         this.delayedLog = null;
+      }
+ 
+      if (this.loggingSimultaneous) {
+         this.loggingSimultaneous = false;
+         process.stdout.write("\n      ]\n   }");
+      }
+
+      if (_data) {
+         this.delayedLog = "{ \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }";
+      }
+   }
+   else if (_data) {
+
+      if (this.loggingSimultaneous) {
+         process.stdout.write(this.preString+"\n         { \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }");
+      }
+      else {
+         this.loggingSimultaneous = true;
+         process.stdout.write(this.preString+"\n   {\n      \"simultaneous\": [");
+         this.preString = "";
+
+         if (this.delayedLog) {
+            process.stdout.write(this.preString+"\n         "+this.delayedLog);
+            this.delayedLog = null;
+            this.preString = ",";
+         }
+
+         process.stdout.write(this.preString+"\n         { \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }");
+         this.preString = ",";
+      }
+   }
+
+   this.lastLogTime = this.logTime;
+};
+
 Tester.prototype.receivedEventFromSource = function(_data) {
 
    if (!_data.coldStart) {
+
+      if (this.generatingExpectedOutput) {
+
+         if (this.generatingTimeout) {
+            clearTimeout(this.generatingTimeout);
+         }
+
+         this.generatingTimeout = setTimeout( () => {
+             this.generateExpectedOutput(null);
+             process.stdout.write("\n");
+             process.exit(0);
+         }, 30000);
+
+         this.generateExpectedOutput(_data);
+         return;
+      }
+
       let result = false;
       let fuzzFactor = 0;
 
