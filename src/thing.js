@@ -22,7 +22,6 @@ function Thing(_config, _owner) {
 
    Source.call(this, _config, _owner);
 
-   this.displayName = _config.displayName;
    this.ignoreParent = (_config.hasOwnProperty('ignoreParent')) ? _config.ignoreParent : false;
    this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;

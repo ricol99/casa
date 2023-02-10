@@ -36,6 +36,10 @@ function NamedObject(_config, _owner) {
       this.type = _config.type;
    }
 
+   if (_config.hasOwnProperty('displayName')) {
+      this.displayName = _config.displayName;
+   }
+
    this.myNamedObjects = {};
    
    if (this.owner) {
@@ -548,6 +552,10 @@ NamedObject.prototype.filterName = function(_name)  {
    }
 
    return result;
+};
+
+NamedObject.prototype.getDisplayName = function() {
+   return this.hasOwnProperty("displayName") ? this.displayName : this.name;
 };
 
 module.exports = exports = NamedObject;
