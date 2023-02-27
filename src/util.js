@@ -319,8 +319,26 @@ Util.ensureExists = function(_obj, _name, _value) {
 
 Util.checkPath = function(_path) {
    return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;
-}
+};
 
+Util.stringForType = function(_value) {
+
+   if (typeof _value === 'string' || _value instanceof String) {
+      return "\""+_value+"\"";
+   }
+   else if (_value === false) {
+      return "false";
+   }
+   else if (_value === true) {
+      return "true";
+   }
+   else if (!isNaN(_value) && !isNaN(parseFloat(_value))) {
+      return parseFloat(_value).toString();
+   }
+   else {
+      return "\""+_value.toString()+"\"";
+   }
+};
 
 Util.restoreTimeout = function(_func, _expiration, _minLength) {
 

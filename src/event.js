@@ -55,7 +55,7 @@ Event.prototype.coldStart = function() {
 
 // Derived Events should override this for hot start-up code
 Event.prototype.hotStart = function() {
-   NamedObject.prototype.hotStsrt.call(this);
+   NamedObject.prototype.hotStart.call(this);
 };
 
 Event.prototype.getCasa = function() {
@@ -111,8 +111,15 @@ Event.prototype.sourceIsInvalid = function(_data) {
 Event.prototype.receivedEventFromSource = function(_data) {
 
    if (this.sourceListeners[_data.sourceEventName]) {
-      this.raise(_data);
+      this.newEventReceivedFromSource(this.sourceListeners[_data.sourceEventName], _data);
    }
+};
+
+//
+// Derived Events should override this to process property changes from defined sources
+//
+Event.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   this.raise(_data);
 };
 
 // ====================

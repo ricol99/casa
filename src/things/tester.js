@@ -378,7 +378,7 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
 Tester.prototype.generateExpectedOutput = function(_data) {
    this.logTime = Date.now();
 
-   if ((this.logTime - this.lastLogTime) > 100 ) {
+   if ((this.logTime - this.lastLogTime) > 80 ) {
 
       if (this.delayedLog) {
          process.stdout.write(this.preString+"\n   "+this.delayedLog);
@@ -392,13 +392,13 @@ Tester.prototype.generateExpectedOutput = function(_data) {
       }
 
       if (_data) {
-         this.delayedLog = "{ \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }";
+         this.delayedLog = "{ \"source\": \""+_data.sourceName+"\", \"property\": \""+_data.name+"\", \"value\": "+util.stringForType(_data.value)+" }";
       }
    }
    else if (_data) {
 
       if (this.loggingSimultaneous) {
-         process.stdout.write(this.preString+"\n         { \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }");
+         process.stdout.write(this.preString+"\n         { \"source\": \""+_data.sourceName+"\", \"property\": \""+_data.name+"\", \"value\": "+util.stringForType(_data.value)+" }");
       }
       else {
          this.loggingSimultaneous = true;
@@ -411,7 +411,7 @@ Tester.prototype.generateExpectedOutput = function(_data) {
             this.preString = ",";
          }
 
-         process.stdout.write(this.preString+"\n         { \"source\": "+_data.sourceName+", \"property\": "+_data.name+", \"value\": "+_data.value+" }");
+         process.stdout.write(this.preString+"\n         { \"source\": \""+_data.sourceName+"\", \"property\": \""+_data.name+"\", \"value\": "+util.stringForType(_data.value)+" }");
          this.preString = ",";
       }
    }

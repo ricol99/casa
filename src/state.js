@@ -37,6 +37,10 @@ function State(_config, _owner) {
          if (this.sources[k].hasOwnProperty('guard')) {
             this.sources[k].guards = [ this.sources[k].guard ];
          }
+
+         if (this.sources[k].hasOwnProperty('action')) {
+            this.sources[k].actions = [ this.sources[k].action ];
+         }
       }
    }
 
@@ -304,7 +308,14 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
 
    if (source) {
       console.log(this.uName+": processSourceEvent() active guard is now met");
-      return source;
+
+      if (source.hasOwnProperty("actions")) {
+         this.owner.alignActions(source.actions, this.priority);
+      }
+
+      if (source.hasOwnProperty("nextState") || source.hasOwnProperty("handler")) { 
+         return source;
+      }
    }
 
    if (this.sourceMap[_sourceEventName]) {
@@ -315,9 +326,13 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
       
       for (var i = 0; i < sources.length; ++i) {
          
-         if (sources[i].hasOwnProperty("nextState") || sources[i].hasOwnProperty("handler")) { 
-            
-            if (this.checkGuard(sources[i], this.activeGuardedSources)) {
+         if (this.checkGuard(sources[i], this.activeGuardedSources)) {
+
+            if (sources[i].hasOwnProperty("actions")) {
+               this.owner.alignActions(sources[i].actions, this.priority);
+            }
+
+            if (sources[i].hasOwnProperty("nextState") || sources[i].hasOwnProperty("handler")) { 
                return sources[i];
             }
          }
