@@ -57,7 +57,6 @@ Tester.prototype.export = function(_exportObj) {
    _exportObj.expectedPosition = this.expectedPosition;
    _exportObj.timeout = this.timeout ? this.timeout.left() : -1;
 
-
    _exportObj.currentExpectedSequenceFuss = [];
 
    for (var j = 0; j < this.testCases[this.currentTestCase].expectedSequence.length; ++j) {
@@ -109,7 +108,8 @@ Tester.prototype.findTestCaseStep = function(_name, _type) {
       }
    }
 
-   console.log("\x1b[31m" + _type + " " + _name + " not found! Exiting.\x1b[0m");
+   process.stdout.write("\x1b[31m" + _type + " " + _name + " not found! Exiting.\x1b[0m\n");
+   //console.log("\x1b[31m" + _type + " " + _name + " not found! Exiting.\x1b[0m");
    process.exit(2);
 };
 
@@ -324,8 +324,9 @@ Tester.prototype.runTestEvent = function() {
    var tc = this.currentTestCase;
    var target = this;
 
-   if (this.currentTestEvent === 0) {
-      console.info(this.uName + ": ========= TEST CASE "+(this.currentTestCase + 1)+" =========");
+   if ((this.currentTestEvent === 0) && (!this.generatingExpectedOutput)) {
+      process.stdout.write("========= TEST CASE "+(this.currentTestCase + 1)+" =========\n");
+      //console.info(this.uName + ": ========= TEST CASE "+(this.currentTestCase + 1)+" =========");
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
@@ -337,12 +338,18 @@ Tester.prototype.runTestEvent = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
-      console.info(this.uName+": TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
+      process.stdout.write("TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event+"\n");
+      //console.info(this.uName+": TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("property")) {
-      console.info(this.uName+": TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property + " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
+
+      if (!this.generatingExpectedOutput) {
+         process.stdout.write("TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property +
+                              " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value+"\n");
+      }
+
       target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
    }
 
@@ -369,10 +376,8 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
       name = this.testCases[this.currentTestCase].expectedSequence[_index].event;
    }
 
-   console.log(this.uName+": AAAA data.sourceName="+_data.sourceName+" test source="+this.testCases[this.currentTestCase].expectedSequence[_index].source);
-
    return ((_data.sourceName === this.testCases[this.currentTestCase].expectedSequence[_index].source) &&
-       (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));
+           (_data.name === name) && (_data.value === this.testCases[this.currentTestCase].expectedSequence[_index].value));
 };
 
 Tester.prototype.generateExpectedOutput = function(_data) {
@@ -466,23 +471,29 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
-                      " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");
+         process.stdout.write("\x1b[32m"+"TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                              " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m\n");
+         //console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                      //" - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");
       }
       else {
-         console.info("\x1b[31m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
-                       " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m");
+         process.stdout.write("\x1b[31m"+"TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                              " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m\n");
+         //console.info("\x1b[31m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+                       //" - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - FAILED\x1b[0m");
          process.exit(5);
       }
 
       if (++this.expectedPosition === this.testCases[this.currentTestCase].expectedSequence.length) {
 
          if ((this.timeout) || (this.currentTestEvent < this.testCases[this.currentTestCase].driveSequence.length - 1)) {
-            console.info("\x1b[31m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m");
+            process.stdout.write("\x1b[31m"+"TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m\n");
+            //console.info("\x1b[31m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " FAILED as all expected events have occurred but drive sequence not complete\x1b[0m");
             process.exit(5);
          }
 
-         console.info("\x1b[32m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m");
+         process.stdout.write("\x1b[32m"+"TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m\n");
+         //console.info("\x1b[32m"+this.uName + ": TEST CASE " + (this.currentTestCase + 1) + " PASSED\x1b[0m");
 
          if (++this.currentTestCase < this.testCases.length) {
             this.currentTestEvent = 0;
@@ -490,7 +501,8 @@ Tester.prototype.receivedEventFromSource = function(_data) {
             this.initiateTestEvent();
          }
          else {
-            console.info("\x1b[32m"+this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
+            process.stdout.write("\x1b[32m"+"ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m\n");
+            //console.info("\x1b[32m"+this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
             process.exit(0);
          }
       }

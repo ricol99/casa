@@ -4,39 +4,20 @@ var HouseAlarmBase = require('./housealarmbase');
 function HouseAlarm(_config, _parent) {
    HouseAlarmBase.call(this, _config, _parent);
 
-   this.armModeConfigs = {
-      "idle-disarmed": {
-         zoneConfig: {
-            name: "idle-disarmed", sources: [{ event: "idle-disarmed-confirm-event", action: { event: "zone-trigger-confirmed" }} ]},
-         entryEventConfig: {
-            name: "idle-disarmed-entry-event", sources: [], actions: [] },
-         confirmEventConfig: {
-            name: "idle-disarmed-confirm-event", confirmationInputs: 2, confirmationTimeout: 30,
-            sources: [ { event: "idle-disarmed-entry-event"}] }},
-      "stay-armed": {
-         zoneConfig: {
-            name: "stay-armed", sources: [{ event: "stay-armed-confirm-event", action: { event: "zone-trigger-confirmed" }} ]},
-         entryEventConfig: {
-            name: "stay-armed-entry-event", sources: [], actions: [] },
-         confirmEventConfig: {
-            name: "stay-armed-confirm-event", confirmationInputs: 2, confirmationTimeout: 30,
-            sources: [ { event: "stay-armed-entry-event"}] }},
-      "away-armed": {
-         zoneConfig: {
-            name: "away-armed", sources: [{ event: "away-armed-confirm-event", action: { event: "zone-trigger-confirmed" }} ]},
-         entryEventConfig: {
-             name: "away-armed-entry-event", sources: [], actions: [] },
-         confirmEventConfig: {
-            name: "away-armed-confirm-event", confirmationInputs: 2, confirmationTimeout: 30,
-            sources: [ { event: "away-armed-entry-event"} ] }},
-      "night-armed": {
-         zoneConfig: {
-            name: "night-armed", sources: [{ event: "night-armed-confirm-event", action: { event: "zone-trigger-confirmed" }} ]},
-         entryEventConfig: {
-            name: "night-armed-entry-event", sources: [], actions: [] },
-         confirmEventConfig: {
-            name: "night-armed-confirm-event", confirmationInputs: 2, confirmationTimeout: 30,
-            sources: [ { event: "night-armed-entry-event"}] }} };
+   var modeConfigs = {};
+
+   for (var i = 0; i < _config.modes.length; ++i) {
+      var mode = _config.modes[i];
+      modeConfigs[mode.name] = { guardConfig: { name: mode.name+"-armed-guard-zone-active", initialValue: false, sources: [] },
+                                 entryConfig: { name: mode.name+"-armed-entry-zone-active", initialValue: false, sources: [] },
+                                 confirmEventConfig: { name: mode.name+"-armed-confirm-event", type: "confirmEvent", confirmationInputs: 2, confirmationTimeout: 30,
+                                                       sources: [ { event: mode.name+"-armed-entry-event" }] } };
+   }
+
+   modeConfigs["disarmed"] = { guardConfig: { name: "idle-disarmed-guard-zone-active", initialValue: false, sources: [] },
+                               entryConfig: { name: "idle-disarmed-entry-zone-active", initialValue: false, sources: [] },
+                               confirmEventConfig: { name: "idle-disarmed-confirm-event", type: "confirmEvent", confirmationInputs: 2, confirmationTimeout: 30,
+                                                     sources: [ { event: "idle-disarmed-entry-event" }] } };
 
    // Zones                                                                  
    for (var i = 0; i < _config.zones.length; ++i) {                          
@@ -49,12 +30,12 @@ function HouseAlarm(_config, _parent) {
       if (_config.zones[i].hasOwnProperty("armRule")) {
 
          if (_config.zones[i].armRule.mode === "always") {
-            _config.zones[i].armRules = [ { mode: "idle-disarmed", role: _config.zones[i].armRule.role }, { mode: "stay-armed", role: _config.zones[i].armRule.role },
-                                          { mode: "away-armed", role: _config.zones[i].armRule.role }, { mode: "night-armed", role: _config.zones[i].armRule.role } ];
+            _config.zones[i].armRules = [ { mode: "disarmed", role: _config.zones[i].armRule.role }, { mode: "stay", role: _config.zones[i].armRule.role },
+                                          { mode: "away", role: _config.zones[i].armRule.role }, { mode: "night", role: _config.zones[i].armRule.role } ];
          }
          else if (_config.zones[i].armRule.mode === "all-armed") {
-            _config.zones[i].armRules = [ { mode: "stay-armed", role: _config.zones[i].armRule.role }, { mode: "away-armed", role: _config.zones[i].armRule.role },
-                                          { mode: "night-armed", role: _config.zones[i].armRule.role } ];
+            _config.zones[i].armRules = [ { mode: "stay", role: _config.zones[i].armRule.role }, { mode: "away", role: _config.zones[i].armRule.role },
+                                          { mode: "night", role: _config.zones[i].armRule.role } ];
          }
          else {
             _config.zones[i].armRules = [ _config.zones[i].armRule ];
@@ -65,37 +46,33 @@ function HouseAlarm(_config, _parent) {
 
       for (var j = 0; j < _config.zones[i].armRules.length; ++j) {                
                                                                                   
-         if (this.armModeConfigs.hasOwnProperty(_config.zones[i].armRules[j].mode)) {
-            var armModeConfig = this.armModeConfigs[_config.zones[i].armRules[j].mode];
-            var newSource = util.copy(_config.zones[i].activeSource);
-            newSource.action = { event: (_config.zones[i].armRules[j].role === "guard") ? "zone-triggered" : "zone-entered" };
-            armModeConfig.zoneConfig.sources.push(newSource);
+         if (modeConfigs.hasOwnProperty(_config.zones[i].armRules[j].mode)) {
+            var modeConfig = modeConfigs[_config.zones[i].armRules[j].mode];
 
             if (_config.zones[i].armRules[j].role === "entry") {
-               armModeConfig.entryEventConfig.sources.push(_config.zones[i].activeSource);
-               armModeConfig.entryEventConfig.sources[armModeConfig.entryEventConfig.sources.length - 1].value = true;
+               modeConfig.entryConfig.sources.push(_config.zones[i].activeSource);
             }
             else if (_config.zones[i].armRules[j].role === "guard") {
-               armModeConfig.confirmEventConfig.sources.push(_config.zones[i].activeSource);
-               armModeConfig.confirmEventConfig.sources[armModeConfig.confirmEventConfig.sources.length - 1].value = true;
+               modeConfig.guardConfig.sources.push(_config.zones[i].activeSource);
+
+               modeConfig.confirmEventConfig.sources.push(util.copy(_config.zones[i].activeSource, true));
+               modeConfig.confirmEventConfig.sources[modeConfig.confirmEventConfig.sources.length - 1].value = true;
             }
          }
       }
    }
 
-   this.ensurePropertyExists("alarm-state-zones", "stateproperty", { source: { property: "alarm-state" },
-                                                                     states: [ this.armModeConfigs["idle-disarmed"].zoneConfig, this.armModeConfigs["stay-armed"].zoneConfig,
-                                                                               this.armModeConfigs["away-armed"].zoneConfig, this.armModeConfigs["night-armed"].zoneConfig ] }, _config);
+   this.ensurePropertyExists("idle-disarmed-guard-zone-active", "orproperty", modeConfigs["disarmed"].guardConfig, _config);
+   this.ensurePropertyExists("idle-disarmed-entry-zone-active", "orproperty", modeConfigs["disarmed"].entryConfig, _config);
+   this.ensureEventExists("idle-disarmed-confirm-event", "confirmevent", modeConfigs["disarmed"].confirmEventConfig, _config);
 
-   this.ensureEventExists("idle-disarmed-entry-event", "event", this.armModeConfigs["idle-disarmed"].entryEventConfig, _config);
-   this.ensureEventExists("stay-armed-entry-event", "event", this.armModeConfigs["stay-armed"].entryEventConfig, _config);
-   this.ensureEventExists("away-armed-entry-event", "event", this.armModeConfigs["away-armed"].entryEventConfig, _config);
-   this.ensureEventExists("night-armed-entry-event", "event", this.armModeConfigs["night-armed"].entryEventConfig, _config);
+   for (i = 0; i < _config.modes.length; ++i) {
+      var mode = _config.modes[i];
 
-   this.ensureEventExists("idle-disarmed-confirm-event", "confirmevent", this.armModeConfigs["idle-disarmed"].confirmEventConfig, _config);
-   this.ensureEventExists("stay-sarmed-confirm-event", "confirmevent", this.armModeConfigs["stay-armed"].confirmEventConfig, _config);
-   this.ensureEventExists("away-sarmed-confirm-event", "confirmevent", this.armModeConfigs["away-armed"].confirmEventConfig, _config);
-   this.ensureEventExists("night-sarmed-confirm-event", "confirmevent", this.armModeConfigs["night-armed"].confirmEventConfig, _config);
+      this.ensurePropertyExists(mode.name+"-armed-guard-zone-active", "orproperty", modeConfigs[mode.name].guardConfig, _config);
+      this.ensurePropertyExists(mode.name+"-armed-entry-zone-active", "orproperty", modeConfigs[mode.name].entryConfig, _config);
+      this.ensureEventExists(mode.name+"-sarmed-confirm-event", "confirmevent", modeConfigs[mode.name].confirmEventConfig, _config);
+   }
 }
 
 util.inherits(HouseAlarm, HouseAlarmBase);

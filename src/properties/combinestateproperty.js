@@ -72,6 +72,10 @@ CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceList
       return;
    }
 
+   if (sourceListener.stateOwned) {
+      return StateProperty.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+   }
+
    let sourceName = sourceListener.getSourceName();
    let newState = "";
    let sourceFound = false;

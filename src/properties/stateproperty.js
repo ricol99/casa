@@ -123,7 +123,11 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
                var nextState = this.transformNextState(source.nextState);
 
                if ((source.nextState === this.currentState.name) || (nextState === this.currentState.name)) {
-                  this.resetStateTimer(this.currentState);
+                  nextState = this.resetStateTimer(this.currentState);
+
+                  if (nextState) {
+                     this.set(this.transformNextState(nextState, { sourceName: this.owner.uName }));
+                  }
                }
                else {
                   this.set(nextState, { sourceName: this.owner.uName });
@@ -142,7 +146,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
 StateProperty.prototype.resetStateTimer = function(_state) {
    var res = this.clearStateTimer();
-   this.setStateTimer(_state, res);
+   return this.setStateTimer(_state, res);
 };
 
 StateProperty.prototype.clearStateTimer = function() {
@@ -172,7 +176,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                timeoutDuration = _state.timeout.duration * 1000;
             }
             else {
-               return;
+               return null;
             }
          }
          else if (_state.timeout.hasOwnProperty('duration')) {
@@ -188,7 +192,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
                 }
                 else {
                    console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
-                   return;
+                   return null;
                 }
             }
 
@@ -216,7 +220,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
              }
              else {
                 console.error(this.uName + ": Unable to set timer from property " + _state.timeout.property + " as the property is not a number");
-                return;
+                return null;
              }
          }
 
@@ -224,11 +228,18 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          timeoutNextState = _state.timeout.nextState;
       }
       else {
-         return;
+         return null;
       }
 
-      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
+      if (timeoutDuration === 0) {
+         return timeoutNextState;
+      }
+      else {
+         this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
+      }
    }
+
+   return null;
 };
 
 StateProperty.prototype.timeoutInternal = function(_timeoutState) {
@@ -237,8 +248,12 @@ StateProperty.prototype.timeoutInternal = function(_timeoutState) {
    var nextState = this.transformNextState(_timeoutState);
 
    if (nextState === this.currentState.name) {
-      // Immediate next state is the same as the one we are in. Restart timer
-      this.resetStateTimer(this.currentState)
+      // Immediate next state is the same as the one we are in. Restart timer - if timer is immediate, change state
+      nextState = this.resetStateTimer(this.currentState);
+
+      if (nextState) {
+         this.set(this.transformNextState(nextState), { sourceName: this.owner.uName });
+      }
    }
    else {
       this.set(nextState, { sourceName: this.owner.uName });
@@ -342,7 +357,12 @@ StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPrior
             this.currentState = nextMatchedState;
          }
 
-         this.setStateTimer(nextMatchedState, clearTimerResult.timeLeft);
+         immediateNextState = this.setStateTimer(nextMatchedState, clearTimerResult.timeLeft);
+
+         if (immediateNextState) {
+            console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState + " due to zero timer");
+            this.owner.alignPropertyValue(this.name, this.transformNextState(immediateNextState));
+         }
       }
       else {
          console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
@@ -451,6 +471,9 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    if (!sourceListener) {
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
+      sourceListener.stateOwned = true;
+   }
+   else {
       sourceListener.stateOwned = true;
    }
 

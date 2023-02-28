@@ -318,6 +318,8 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
       }
    }
 
+   this.processActionsWithSources(_sourceEventName, _name, _value);
+
    if (this.sourceMap[_sourceEventName]) {
       sources = (this.sourceMap[_sourceEventName]);
    }
@@ -340,7 +342,6 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    }
    else {
       this.processActiveActionGuards(_name, _value);
-      this.processActionsWithSources(_sourceEventName, _name, _value);
       this.processTimeoutWithSource(_sourceEventName, _value);
    }
 
