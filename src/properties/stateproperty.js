@@ -347,7 +347,7 @@ StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPrior
       }
 
       if (nextMatchedState) {
-         var immediateNextState = nextMatchedState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority);
+         var immediateNextState = nextMatchedState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority, this.states[this.value]);
 
          if (immediateNextState) {
             console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
@@ -472,9 +472,11 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
       sourceListener.stateOwned = true;
+      sourceListener.counter = 0;
    }
    else {
       sourceListener.stateOwned = true;
+      sourceListener.counter = 0;
    }
 
    return sourceListener;

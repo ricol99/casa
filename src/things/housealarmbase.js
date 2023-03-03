@@ -28,7 +28,7 @@ function HouseAlarmBase(_config, _parent) {
       this.ensurePropertyExists(mode.name+"-armed", "property",
                                 { initialValue: false,
                                   source: { property: "alarm-state",
-                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || ($value === \""+mode.name+"-triggered\")" }}, _config);
+                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-confirmed\")" }}, _config);
    }
 
    // Internal - current timeouts based on arm state selected
@@ -50,7 +50,7 @@ function HouseAlarmBase(_config, _parent) {
    this.ensurePropertyExists("tamper-alarm", "property", { initialValue: false }, _config);
 
    this.ensurePropertyExists("in-exit-entry", "property", { initialValue: false, source: { property: "arm-state", transform: "($value === \"entry\") || ($value === \"exit\")" }}, _config);
-   this.ensurePropertyExists("zone-alarm", "property", { initialValue: false, source: { property: "arm-state", transform: "$value === \"triggered\"" }}, _config);
+   this.ensurePropertyExists("zone-alarm", "property", { initialValue: false, source: { property: "arm-state", transform: "($value === \"triggered\") || ($value === \"confirmed\")" }}, _config);
 
    this.ensurePropertyExists("confirmed-alarm", "property", { initialValue: false }, _config);
    this.ensurePropertyExists("alarm-error", "property", { initialValue: "" }, _config);
@@ -95,6 +95,7 @@ function HouseAlarmBase(_config, _parent) {
                                                              states: [{ name: "disarmed",
                                                                         sources: [{ property: "target-arm-state", value: "armed", nextState: "exit" }],
                                                                         actions: [{ property: "retry-count", value: 0 },
+                                                                                  { property: "confirmed-alarm", value: false },
                                                                                   { property: "arm-mode-state", value: "idle" },
                                                                                   { property: "current-state", value: "disarmed" }]},
                                                                       { name: "exit",
@@ -109,10 +110,17 @@ function HouseAlarmBase(_config, _parent) {
                                                                                   { property: "guard-zone-active", value: true, nextState: "triggered" }],
                                                                         timeout: { property: "entry-timeout", nextState: "triggered" }},
                                                                       { name: "triggered",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" }],
+                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                                                  { event: "confirm-event", nextState: "confirmed" },
+                                                                                  { property: "confirmed-alarm", value: true, nextState: "confirmed" }],
                                                                         actions: [{ property: "retry-count", apply: "++$value" },
                                                                                   { property: "current-state", value: "triggered" }],
                                                                         timeout: { property: "triggered-timeout", nextState: "triggered-timed-out" }},
+                                                                      { name: "confirmed",
+                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" }],
+                                                                        actions: [{ property: "confirmed-alarm", value: true },
+                                                                                  { property: "current-state", value: "confirmed" }],
+                                                                        timeout: { from: [ "triggered" ], nextState: "triggered-timed-out" }},
                                                                       { name: "reset-to-disarmed",
                                                                         actions: [{ property: "target-arm-state", value: "disarmed" },
                                                                                   { property: "entry-zone-active", fromProperty: "idle-disarmed-entry-zone-active" },

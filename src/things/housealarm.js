@@ -73,6 +73,29 @@ function HouseAlarm(_config, _parent) {
       this.ensurePropertyExists(mode.name+"-armed-entry-zone-active", "orproperty", modeConfigs[mode.name].entryConfig, _config);
       this.ensureEventExists(mode.name+"-sarmed-confirm-event", "confirmevent", modeConfigs[mode.name].confirmEventConfig, _config);
    }
+
+   var knockCounterConfig = { name: "knock-counter-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "idle",
+                              states: [{ name: "idle",
+                                         sources: [{ property: "arm-state", value: "armed", nextState: "counting" }]},
+                                       { name: "counting",
+                                         sources: [] },
+                                       { name: "exceeded",
+                                         sources: [{ property: "panic-alarm", value: false, nextState: "idle" }]}]};
+
+   for (var k = 0; k < _config.modes.length; ++k) {
+      var mode = _config.modes[k];
+      armModeConfig.states[0].sources.push({ property: "target-state", value: mode.name, nextState: "pre-"+mode.name });
+      armModeConfig.states.push({ name: "pre-"+mode.name,
+                                  actions: [{ property: "exit-timeout", fromProperty: mode.name+"-exit-timeout" },
+                                            { property: "entry-timeout", fromProperty: mode.name+"-entry-timeout" },
+                                            { property: "triggered-timeout", fromProperty: mode.name+"-triggered-timeout" },
+                                            { property: "entry-zone-active", fromProperty: mode.name+"-armed-entry-zone-active" },
+                                            { property: "guard-zone-active", fromProperty: mode.name+"-armed-guard-zone-active" }],
+                                  timeout: { duration: 0.1, nextState: mode.name }});
+
+      armModeConfig.states.push({ name: mode.name, actions: [{ property: "target-arm-state", value: "armed" }] });
+   }
+
 }
 
 util.inherits(HouseAlarm, HouseAlarmBase);

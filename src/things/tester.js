@@ -338,8 +338,10 @@ Tester.prototype.runTestEvent = function() {
    }
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("event")) {
-      process.stdout.write("TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event+"\n");
-      //console.info(this.uName+": TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
+
+      if (!this.generatingExpectedOutput) {
+         process.stdout.write("TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event+"\n");
+      }
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 

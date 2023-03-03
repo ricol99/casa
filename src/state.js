@@ -41,6 +41,12 @@ function State(_config, _owner) {
          if (this.sources[k].hasOwnProperty('action')) {
             this.sources[k].actions = [ this.sources[k].action ];
          }
+
+         util.ensureExists(this.sources[k], "count", false);
+
+         if (this.sources[k].count) {
+            this.sources[k].counter = { count: 0 };
+         }
       }
    }
 
@@ -91,6 +97,32 @@ function State(_config, _owner) {
       else if (this.timeout.hasOwnProperty("source")) {
          util.ensureExists(this.timeout.source, "uName", this.owner.owner.uName);
          this.timeout.source.sourceListener = this.owner.fetchOrCreateSourceListener(this.timeout.source);
+      }
+   }
+
+   if (_config.hasOwnProperty("counter")) {
+      this.counter = {};
+      this.counter.inheritsFrom = {};
+      this.counter.unique = _config.counter.hasOwnProperty("unique") ? _config.counter.unique : false;
+      this.counter.limit = _config.counter.limit;
+      this.counter.count = 0;
+
+      if (_config.counter.hasOwnProperty("nextState")) {
+         this.counter.nextState = _config.counter.nextState;
+      }
+
+      if (_config.counter.hasOwnProperty('from')) {
+   
+         for (var z = 0; z < _config.counter.from.length; ++z) {
+            this.counter.inheritsFrom[_config.counter.from[z]] = true;
+         }
+      }
+
+      if (_config.counter.hasOwnProperty('action')) {
+         this.counter.actions = [ _config.counter.action ];
+      }
+      else if (_config.hasOwnProperty("actions")) {
+         this.counter.actions = util.copy(_config.actions, true);
       }
    }
 
@@ -285,8 +317,8 @@ State.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
 
-State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority) {
-   var immediateState = this.checkStateGuards() || this.checkSourceProperties();
+State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority, _previousState) {
+   var immediateState = this.checkStateGuards() || this.checkSourceProperties() || this.initialiseCounter(_previousState);
 
    if (!immediateState) {
 
@@ -325,10 +357,22 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    }
    
    if (sources) {
-      
+
       for (var i = 0; i < sources.length; ++i) {
          
          if (this.checkGuard(sources[i], this.activeGuardedSources)) {
+            var newSource = this.checkCounter(sources[i]);
+
+            if (newSource) {
+
+               if (newSource.hasOwnProperty("actions")) {
+                  this.owner.alignActions(newSource.actions, this.priority);
+               }
+
+               if (newSource.hasOwnProperty("nextState") || newSource.hasOwnProperty("handler")) { 
+                  return newSource;
+               }
+            }
 
             if (sources[i].hasOwnProperty("actions")) {
                this.owner.alignActions(sources[i].actions, this.priority);
@@ -348,6 +392,28 @@ State.prototype.processSourceEvent = function(_sourceEventName, _name, _value) {
    return null;
 };
 
+State.prototype.checkCounter = function(_source) {
+
+   if (this.counter && _source.counter) {
+
+      if (this.counter.unique) {
+
+         if (_source.counter.count === 0) {
+            _source.counter.count = 1;
+            this.counter.count += 1;
+         }
+      }
+      else {
+         _source.counter.count += 1;
+         this.counter.count += 1;
+      }
+
+      return (this.counter.limit > this.counter.count) ? null : this.counter;
+   }
+
+   return null;
+};
+      
 State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 
    if (!_guardedObject) {
@@ -426,6 +492,70 @@ State.prototype.processTimeoutWithSource = function(_sourceEventName, _timeout) 
    if (this.timeout && this.timeout.hasOwnProperty("source") && (this.timeout.source.sourceListener.sourceEventName === _sourceEventName)) {
       this.owner.resetStateTimer(this);
    }
+};
+
+State.prototype.initialiseCounter = function(_previousState) {
+   var matched = false;
+
+   if (this.counter) {
+
+      if (_previousState && this.counter.inheritsFrom[_previousState.name] && _previousState.counter && (_previousState.counter.count > 0)) {
+         // Inherit from previous state
+         this.counter.count = 0;
+
+         for (var i = 0; i < this.sources.length; ++i) {
+
+            if (this.sources[i].count) {
+               var sources = _previousState.sourceMap[this.sources[i].sourceListener.sourceEventName];
+
+               if (sources) {
+                  matched = false;
+
+                  for (var j = 0; j < sources.length; ++j) {
+
+                     if (sources[j].count && JSON.stringify(this.sources[i].guards) === JSON.stringify(sources[j].guards)) {
+                        this.sources[i].counter.count = this.counter.unique ? ((sources[j].counter.count > 0) ? 1 : 0) : sources[j].counter.count;
+                        this.counter.count += this.sources[i].counter.count;
+                        matched = true;
+                        break;
+                     }
+                  }
+
+                  if (!matched) {
+                     this.sources[i].counter.count = 0;
+                  }
+               }
+               else {
+                  this.sources[i].counter.count = 0;
+               }
+            }
+         }
+      }
+      else {
+         // Reset counters
+         for (var i = 0; i < this.sources.length; ++i) {
+
+            if (this.sources[i].hasOwnProperty("counter")) {
+               this.sources[i].counter.count = 0;
+            }
+         }
+
+         this.counter.count = 0;
+      }
+
+      if (this.counter.count >= this.counter.limit) {
+
+         if (this.counter.hasOwnProperty("actions")) { 
+            this.owner.alignActions(this.counter.actions, this.priority);
+         }
+
+         if (this.counter.hasOwnProperty("nextState")) {
+            return this.counter.nextState;
+         }
+      }
+   }
+
+   return null;
 };
 
 State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
