@@ -130,13 +130,14 @@ function State(_config, _owner) {
 
       for (var i = 0; i < this.sources.length; i++) {
 
-         if (!this.sources[i].hasOwnProperty("uName")) {
-            this.sources[i].uName = this.owner.owner.uName;
+         util.ensureExists(this.sources[i], "uName", this.owner.owner.uName);
+
+         if (this.sources[i].hasOwnProperty("property")) {
+            util.ensureExists(this.sources[i], "value", true);
          }
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;
-         var val = (this.sources[i].hasOwnProperty('value')) ? this.sources[i].value : true;
 
          if (!this.sourceMap[sourceListener.sourceEventName]) {
             this.sourceMap[sourceListener.sourceEventName] = [];
@@ -670,6 +671,10 @@ State.prototype.checkSourceProperties = function() {
             var source = (sourceListener) ? sourceListener.getSource() : null;
 
             if (source && source.properties.hasOwnProperty(this.sources[i].property) && (source.getProperty(this.sources[i].property) === this.sources[i].value)) {
+
+               if (this.sources[i].hasOwnProperty("actions")) {
+                  this.owner.alignActions(this.sources[i].actions, this.priority);
+               }
 
                // Property already matches so move to next state immediately
                if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
