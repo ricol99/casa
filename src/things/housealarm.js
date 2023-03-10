@@ -91,6 +91,8 @@ function HouseAlarmBase(_config, _parent) {
                                                              states: [{ name: "disarmed",
                                                                         sources: [{ property: "target-arm-state", value: "armed", nextState: "exit" }],
                                                                         actions: [{ property: "retry-count", value: 0 },
+                                                                                  { property: "entry-zone-active", value: false },
+                                                                                  { property: "guard-zone-active", value: false },
                                                                                   { property: "confirmed-alarm", value: false },
                                                                                   { property: "arm-mode-state", value: "idle" },
                                                                                   { property: "current-state", value: "disarmed" }]},
