@@ -95,7 +95,8 @@ function HouseAlarmBase(_config, _parent) {
                                                                                   { property: "arm-mode-state", value: "idle" },
                                                                                   { property: "current-state", value: "disarmed" }]},
                                                                       { name: "exit",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" }],
+                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                                                  { property: "guard-zone-active", value: true, nextState: "triggered" }],
                                                                         timeout: { property: "exit-timeout", nextState: "armed" }},
                                                                       { name: "armed",
                                                                         sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
@@ -123,19 +124,20 @@ function HouseAlarmBase(_config, _parent) {
                                                                                   { property: "guard-zone-active", value: false }],
                                                                         timeout: { duration: 0.1, nextState: "disarmed" }},
                                                                       { name: "triggered-timed-out",
-                                                                        sources: [{ property: "retry-allowed", value: true, nextState: "armed" },
-                                                                                  { property: "retry-allowed", value: false,
-                                                                                    action: { property: "target-state", value: "disarmed" }, nextState: "reset-to-disarmed" }] }]}, _config);
+                                                                        action: { property: "guard-zone-active", value: false },
+                                                                        sources: [{ property: "retry-allowed", value: false,
+                                                                                    action: { property: "target-state", value: "disarmed" }, nextState: "reset-to-disarmed" }],
+                                                                        timeout: { duration: 0.1, nextState: "armed" }}]}, _config);
 
    // Bring in the zones with their desired arm modes
    var modeConfigs = {};
 
    for (var i = 0; i < _config.modes.length; ++i) {
       var mode = _config.modes[i];
-      modeConfigs[mode.name] = { sources: [] };
+      modeConfigs[mode.name] = { guardSources: [], entrySources: [] };
    }
 
-   modeConfigs["disarmed"] = { sources: [] };
+   modeConfigs["disarmed"] = { guardSources: [], entrySources: [] };
 
    // Zones
    for (var i = 0; i < _config.zones.length; ++i) {
@@ -167,35 +169,42 @@ function HouseAlarmBase(_config, _parent) {
          if (modeConfigs.hasOwnProperty(_config.zones[i].armRules[j].mode)) {
             var modeConfig = modeConfigs[_config.zones[i].armRules[j].mode];
             var source = util.copy(_config.zones[i].activeSource, true);
-            source.count = false;
-            source.value = true;
 
             if (_config.zones[i].armRules[j].role === "entry") {
-               source.action = { property: "entry-zone-active", value: true };
+               modeConfig.entrySources.push(source);
             }
             else if (_config.zones[i].armRules[j].role === "guard") {
                source.count = true;
+               source.value = true;
                source.action = { property: "guard-zone-active", value: true };
+               modeConfig.guardSources.push(source);
             }
-
-            modeConfig.sources.push(source);
          }
       }
    }
 
    var alarmConfig = { name: "alarm-state", type: "combinestateproperty", ignoreControl: true, takeControlOnTransition: true, separator: "-",
                        sources: [{ property: "arm-mode-state" }, { property: "arm-state" }],
-                       states: [{ name: "idle-disarmed", sources: modeConfigs["disarmed"].sources }] };
+                       states: [{ name: "idle-disarmed", sources: modeConfigs["disarmed"].guardSources }] };
 
    for (var l = 0; l < _config.modes.length; ++l) {
       mode = _config.modes[l];
-      alarmConfig.states.push({ name: mode.name+"-exit", sources: modeConfigs[mode.name].sources });
-      alarmConfig.states.push({ name: mode.name+"-entry", sources: modeConfigs[mode.name].sources });
-      alarmConfig.states.push({ name: mode.name+"-armed", sources: modeConfigs[mode.name].sources,
-                                actions: [{ property: "current-state", value: mode.name }] });
+      modeConfigs[mode.name].guardSources.push({ property: mode.name+"-entry-zone-active", count: false,
+                                                 action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" }});
 
-      alarmConfig.states.push({ name: mode.name+"-triggered", sources: modeConfigs[mode.name].sources,
+      alarmConfig.states.push({ name: mode.name+"-exit", sources: modeConfigs[mode.name].guardSources,
+                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } });
+      alarmConfig.states.push({ name: mode.name+"-entry", sources: modeConfigs[mode.name].guardSources,
+                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } });
+      alarmConfig.states.push({ name: mode.name+"-armed", sources: modeConfigs[mode.name].guardSources,
+                                actions: [{ property: "current-state", value: mode.name },
+                                          { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } ] });
+
+      alarmConfig.states.push({ name: mode.name+"-triggered", sources: modeConfigs[mode.name].guardSources,
+                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
                                 counter: { "unique": true, "from": [ mode.name+"-armed" ], "limit": 2, "action": { "event": "confirm-event" }} });
+
+      this.ensurePropertyExists(mode.name+"-entry-zone-active", "orproperty", { initialValue: false, sources: modeConfigs[mode.name].entrySources }, _config);
    }
 
    this.ensurePropertyExists("alarm-state", "combinestateproperty", alarmConfig, _config);

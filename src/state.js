@@ -98,6 +98,13 @@ function State(_config, _owner) {
          util.ensureExists(this.timeout.source, "uName", this.owner.owner.uName);
          this.timeout.source.sourceListener = this.owner.fetchOrCreateSourceListener(this.timeout.source);
       }
+
+      if (_config.timeout.hasOwnProperty('action')) {
+         this.timeout.actions = [ util.copy(_config.timeout.action, true) ];
+      }
+      else if (_config.hasOwnProperty("actions")) {
+         this.timeout.actions = util.copy(_config.timeout.actions, true);
+      }
    }
 
    if (_config.hasOwnProperty("counter")) {
@@ -119,10 +126,10 @@ function State(_config, _owner) {
       }
 
       if (_config.counter.hasOwnProperty('action')) {
-         this.counter.actions = [ _config.counter.action ];
+         this.counter.actions = [ util.copy(_config.counter.action, true) ];
       }
       else if (_config.hasOwnProperty("actions")) {
-         this.counter.actions = util.copy(_config.actions, true);
+         this.counter.actions = util.copy(_config.counter.actions, true);
       }
    }
 
@@ -131,10 +138,6 @@ function State(_config, _owner) {
       for (var i = 0; i < this.sources.length; i++) {
 
          util.ensureExists(this.sources[i], "uName", this.owner.owner.uName);
-
-         if (this.sources[i].hasOwnProperty("property")) {
-            util.ensureExists(this.sources[i], "value", true);
-         }
 
          var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
          this.sources[i].sourceListener = sourceListener;

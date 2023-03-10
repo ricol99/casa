@@ -69,15 +69,9 @@ StateProperty.prototype.import = function(_importObj) {
 StateProperty.prototype.hotStart = function() {
    Property.prototype.hotStart.call(this);
 
-   if (this.currentState) {
-      var timeoutDuration = this.stateTimer;
-
-      if (this.currentState.timeout) 
-      var timeoutNextState =  this.currentState.timeout ? this.currentState.timeout.nextState : null;
-
-      if (timeoutNextState) {
-         this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
-      }
+   if (this.currentState && (this.currentState.hasOwnProperty("timeout"))) {
+     this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.stateTimer,
+                                        { nextState: this.currentState.timeout.nextState, action: this.currentState.timeout.actions });
    }
 };
 
@@ -235,28 +229,35 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
          return timeoutNextState;
       }
       else {
-         this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration, timeoutNextState);
+         this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration,
+                                           { nextState: _state.timeout.nextState, actions: _state.timeout.actions });
       }
    }
 
    return null;
 };
 
-StateProperty.prototype.timeoutInternal = function(_timeoutState) {
+StateProperty.prototype.timeoutInternal = function(_timeout) {
    this.stateTimer = null;
 
-   var nextState = this.transformNextState(_timeoutState);
-
-   if (nextState === this.currentState.name) {
-      // Immediate next state is the same as the one we are in. Restart timer - if timer is immediate, change state
-      nextState = this.resetStateTimer(this.currentState);
-
-      if (nextState) {
-         this.set(this.transformNextState(nextState), { sourceName: this.owner.uName });
-      }
+   if (_timeout.hasOwnProperty("actions") && _timeout.actions) {
+      this.alignActions(_timeout.actions, this.currentState.priority);
    }
-   else {
-      this.set(nextState, { sourceName: this.owner.uName });
+
+   if (_timeout.hasOwnProperty("nextState")) {
+      var nextState = this.transformNextState(_timeout.nextState);
+
+      if (nextState === this.currentState.name) {
+         // Immediate next state is the same as the one we are in. Restart timer - if timer is immediate, change state
+         nextState = this.resetStateTimer(this.currentState);
+
+         if (nextState) {
+            this.set(this.transformNextState(nextState), { sourceName: this.owner.uName });
+         }
+      }
+      else {
+         this.set(nextState, { sourceName: this.owner.uName });
+      }
    }
 };
 
