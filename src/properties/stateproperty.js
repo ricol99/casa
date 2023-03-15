@@ -13,11 +13,13 @@ function StateProperty(_config, _owner) {
    this.regExStates = [];
    this.controllingOwner = false;
    this.priorityDefined = _config.hasOwnProperty('priority');
-   this.priority = (_config.hasOwnProperty("priority")) ? _config.priority : 0;
+   this.priority = _config.hasOwnProperty("priority") ? _config.priority : 0;
    this.currentPriority = this.priority;
-   this.ignoreControl = (_config.hasOwnProperty("ignoreControl")) ? _config.ignoreControl : false;
-   this.takeControlOnTransition = (_config.hasOwnProperty("takeControlOnTransition")) ? _config.takeControlOnTransition : false;
-   this.allSourcesRequiredForValidity = (_config.hasOwnProperty("allSourcesRequiredForValidity")) ? _config.allSourcesRequiredForValidity : false;
+   this.ignoreControl = _config.hasOwnProperty("ignoreControl") ? _config.ignoreControl : false;
+   this.takeControlOnTransition = _config.hasOwnProperty("takeControlOnTransition") ? _config.takeControlOnTransition : false;
+   this.allSourcesRequiredForValidity = _config.hasOwnProperty("allSourcesRequiredForValidity") ? _config.allSourcesRequiredForValidity : false;
+   this.removeDuplicates = _config.hasOwnProperty("removeDuplicates") ? _config.removeDuplicates : true;
+   this.bufferingActions = false;
 
    var regExIndex = 0;
 
@@ -78,7 +80,7 @@ StateProperty.prototype.hotStart = function() {
 StateProperty.prototype.coldStart = function() {
 
    if (this.initialValueSet) {
-      this.setState(this.value, false);
+      this.setState(null, this.value, false);
    }
 
    Property.prototype.coldStart.call(this);
@@ -86,10 +88,32 @@ StateProperty.prototype.coldStart = function() {
    
 StateProperty.prototype.propertyAboutToChange = function(_propertyValue, _data) {
    console.log(this.uName + ": state about to change to " + _propertyValue);
-   this.setState(_propertyValue, _data.hasOwnProperty("priority"), _data.priority);
+   var ret = this.setState(this.value, _propertyValue, _data.hasOwnProperty("priority"), _data.priority);
 
    if (this.currentState && this.currentState.priorityDefined) {
       _data.priority = this.currentState.priority;
+   }
+
+   return ret;
+};
+
+StateProperty.prototype.transformStateName = function(_nextStateName) {
+   return (_nextStateName === "PREVIOUS-STATE") ? (this.previousState ? this.previousState.name : "") : _nextStateName;
+};
+
+StateProperty.prototype.moveToNextState = function(_nextStateName) {
+
+   var nextStateName = this.transformStateName(_nextStateName);
+
+   if (nextStateName === this.currentState.name) {
+      nextStateName = this.resetStateTimer(this.currentState);
+      
+      if (nextStateName) {
+         this.set(this.trasnfromStateName(nextStateName), { sourceName: this.owner.uName });
+      }
+   }
+   else {
+      this.set(nextStateName, { sourceName: this.owner.uName });
    }
 };
 
@@ -113,19 +137,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
          if (source) {
 
             if (source.hasOwnProperty('nextState')) {
-
-               var nextState = this.transformNextState(source.nextState);
-
-               if ((source.nextState === this.currentState.name) || (nextState === this.currentState.name)) {
-                  nextState = this.resetStateTimer(this.currentState);
-
-                  if (nextState) {
-                     this.set(this.transformNextState(nextState, { sourceName: this.owner.uName }));
-                  }
-               }
-               else {
-                  this.set(nextState, { sourceName: this.owner.uName });
-               }
+               this.moveToNextState(source.nextState);
             }
             else if (source.hasOwnProperty('handler')) {
                this.owner[source.handler](this.currentState, _data);
@@ -140,7 +152,7 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
 
 StateProperty.prototype.resetStateTimer = function(_state) {
    var res = this.clearStateTimer();
-   return this.setStateTimer(_state, res);
+   return this.setStateTimer(_state, _state, res);
 };
 
 StateProperty.prototype.clearStateTimer = function() {
@@ -156,13 +168,13 @@ StateProperty.prototype.clearStateTimer = function() {
    return result;
 };
 
-StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
+StateProperty.prototype.setStateTimer = function(_previousState, _state, _timeoutDuration) {
    var timeoutDuration;
    var timeoutNextState = null;
 
    if (_state.hasOwnProperty('timeout')) {
 
-      if (this.states.hasOwnProperty(this.value) && _state.timeout.inheritsFrom[this.states[this.value].name]) {
+      if (_previousState && _state.timeout.inheritsFrom[_previousState.name]) {
 
          if (_timeoutDuration == undefined) {
 
@@ -228,7 +240,7 @@ StateProperty.prototype.setStateTimer = function(_state, _timeoutDuration) {
       if (timeoutDuration === 0) {
          return timeoutNextState;
       }
-      else {
+      else if (timeoutDuration > 0) {
          this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), timeoutDuration,
                                            { nextState: _state.timeout.nextState, actions: _state.timeout.actions });
       }
@@ -245,59 +257,9 @@ StateProperty.prototype.timeoutInternal = function(_timeout) {
    }
 
    if (_timeout.hasOwnProperty("nextState")) {
-      var nextState = this.transformNextState(_timeout.nextState);
-
-      if (nextState === this.currentState.name) {
-         // Immediate next state is the same as the one we are in. Restart timer - if timer is immediate, change state
-         nextState = this.resetStateTimer(this.currentState);
-
-         if (nextState) {
-            this.set(this.transformNextState(nextState), { sourceName: this.owner.uName });
-         }
-      }
-      else {
-         this.set(nextState, { sourceName: this.owner.uName });
-      }
+      this.moveToNextState(_timeout.nextState);
    }
 };
-
-StateProperty.prototype.transformNextState = function(_nextState) {
-   var nextState = _nextState;
-   var immediateState = null;
-
-   if (_nextState === "PREVIOUS-STATE") {
-      nextState = this.previousState;
-   }
-
-   if (this.states[nextState]) {
-
-      for (var i = 0; i < 10; ++i) {
-         immediateNextState = null;
-
-         if (this.states[nextState]) {
-            immediateNextState = this.states[nextState].checkSourceProperties();
-
-            if (!immediateNextState) {
-               break;
-            }
-            else {
-               nextState = immediateNextState;
-               console.log(this.uName+": Immediate State transition, nextState="+nextState);
-            }
-         }
-         else {
-            break;
-         }
-      }
-
-      if (immediateNextState) {
-         console.error(this.uName + ": State machine is broken as state model has gone through 10 immediate state transitions");
-         process.exit(3);
-      }
-   }
-
-   return nextState;
-}
 
 StateProperty.prototype.matchRegExState = function(_stateName) {
    var state = this.states["DEFAULT"];
@@ -325,44 +287,83 @@ StateProperty.prototype.matchState = function(_stateName) {
    return state;
 };
 
-StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPriorityDefined, _parentPropertyPriority) {
+StateProperty.prototype.setState = function(_previousStateName, _nextStateName, _parentPropertyPriorityDefined, _parentPropertyPriority, _immediateTransfer, _previousTimeLeft, _depth) {
    console.log(this.uName+": setState state="+_nextStateName);
-   this.previousState = this.value;
+   var depth = _depth ? _depth + 1 : 1;
 
-   var currentMatchedState = (this.cold) ? null : this.matchState(this.value);
+   if (depth > 10) {
+      console.error(this.uName + ": State machine is broken as state model has gone through 10 immediate state transitions");
+      process.exit(3);
+   }
+
+   this.startBufferingActionsInternal();
+
+   this.previousState = this.matchState(_previousStateName);
+   var currentMatchedState = (this.cold) ? null : this.matchState(_previousStateName);
    var nextMatchedState = this.matchState(_nextStateName);
    var clearTimerResult = {};
 
    if (currentMatchedState !== nextMatchedState) {
 
       if (currentMatchedState) {
-         clearTimerResult = this.clearStateTimer();
 
-         if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && this.states[this.value].hasOwnProperty('timeout')) {
-            // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
-            console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
-            clearTimerResult.timeLeft = 1;
+         if (_immediateTransfer) {
+
+            if (currentMatchedState && currentMatchedState.hasOwnProperty("timeout")) {
+
+               if (currentMatchedState.timeout.hasOwnProperty("duration")) {
+                  clearTimerResult = { timeLeft: currentMatchedState.timeout.duration * 1000 };
+               }
+               else if (currentMatchedState.timeout.hasOwnProperty("property") || currentMatchedState.timeout.hasOwnProperty("source")) {
+                  var value = currentMatchedState.timeout.hasOwnProperty('property') ? this.owner.getProperty(currentMatchedState.timeout.property)
+                                                                                     : currentMatchedState.timeout.source.sourceListener.getPropertyValue();
+                  if (typeof value !== 'number') {
+   
+                     if (typeof value === 'string') {
+                        clearTimerResult = { timeLeft: parseInt(value) * 1000 };
+                     }
+                     else {
+                        console.error(this.uName + ": Unable to set timer from property/source as the property/source is not a number");
+                        clearTimerResult = { timeLeft: 0 };
+                     }
+                  }
+                  else {
+                     clearTimerResult = { timeLeft: value * 1000 };
+                  }
+               }
+               else {
+                  clearTimerResult = { timeLeft: _previousTimeLeft };
+               }
+            }
          }
+         else {
+            clearTimerResult = this.clearStateTimer();
 
-         currentMatchedState.exiting();
+            if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && _previousStateName && this.states.hasOwnProperty(_previousStateName) &&
+                this.states[_previousState].hasOwnProperty('timeout')) {
+               // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
+               console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
+               clearTimerResult.timeLeft = 1;
+            }
+
+            currentMatchedState.exiting();
+         }
       }
 
       if (nextMatchedState) {
-         var immediateNextState = nextMatchedState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority, this.states[this.value]);
+         var immediateNextState = nextMatchedState.initialise(_parentPropertyPriorityDefined, _parentPropertyPriority, this.states[_previousStateName]);
 
          if (immediateNextState) {
             console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState);
-            this.owner.alignPropertyValue(this.name, this.transformNextState(immediateNextState));
-         }
-         else {
-            this.currentState = nextMatchedState;
+            return this.setState(nextMatchedState.name, this.transformStateName(immediateNextState), _parentPropertyPriorityDefined, _parentPropertyPriority, true, clearTimerResult.timeLeft, depth);
          }
 
-         immediateNextState = this.setStateTimer(nextMatchedState, clearTimerResult.timeLeft);
+         this.currentState = nextMatchedState;
+         immediateNextState = this.setStateTimer(currentMatchedState, nextMatchedState, clearTimerResult.timeLeft);
 
          if (immediateNextState) {
             console.log(this.uName + ": Initialise() ImmediateState state transfer to " + immediateNextState + " due to zero timer");
-            this.owner.alignPropertyValue(this.name, this.transformNextState(immediateNextState));
+            return this.setState(nextMatchedState.name, this.transformStateName(immediateNextState), _parentPropertyPriorityDefined, _parentPropertyPriority, true, clearTimerResult.timeLeft, depth);
          }
       }
       else {
@@ -372,6 +373,9 @@ StateProperty.prototype.setState = function(_nextStateName, _parentPropertyPrior
    else {
       console.log(this.uName + ": Not changing state as nextMatchedState= " + nextMatchedState.name + " is the same as the current matched state");
    }
+
+   this.flushBufferedActionsInternal();
+   return _nextStateName;
 };
 
 StateProperty.prototype.takeControl = function(_priority) {
@@ -395,6 +399,68 @@ StateProperty.prototype.alignProperties = function(_properties) {
 
 StateProperty.prototype.alignActions = function(_actions, _priority) {
 
+   if (_actions) {
+
+      if (this.bufferingActions) {
+         console.log(this.uName+": StateProperty.prototype.alignActions() Buffering actions...");
+
+         for (var a = 0; a < _actions.length; ++a) {
+            var actionDupType = (_actions[a].hasOwnProperty("property")) ? "propDup" : "eventDup";
+            var actionType = (_actions[a].hasOwnProperty("property")) ? "properties" : "events";
+            var name = (actionType === "properties") ? _actions[a].property : _actions[a].event;
+   
+            if (this.takeControl(_priority)) {
+              
+               if (this.actionBuffer[actionDupType].hasOwnProperty(name)) {
+                  this.actionBuffer[actionType][this.actionBuffer[actionDupType][name]] = _actions[a];
+               }
+               else {
+                  this.actionBuffer[actionDupType][name] = this.actionBuffer[actionType].length;
+                  this.actionBuffer[actionType].push(_actions[a]);
+               }
+            }
+         }
+      }
+      else {
+         this.alignActionsInternal(_actions, _priority);
+      }
+   }
+};
+
+StateProperty.prototype.alignPropertiesInternal = function(_properties) {
+
+   if (_properties.length > 0) {
+
+      for (var z = 0; z < _properties.length; ++z) {
+
+         if (_properties[z].hasOwnProperty("fromProperty")) {
+            _properties[z].value = this.owner.getProperty(_properties[z].fromProperty);
+         }
+         else if (_properties[z].hasOwnProperty("source")) {
+            _properties[z].value = _properties[z].source.sourceListener.getPropertyValue();
+         }
+         else if (_properties[z].hasOwnProperty("apply")) {
+            var currentValue = this.owner.getProperty(_properties[z].property);
+            var output = false;
+            var exp = _properties[z].apply.replace(/\$value/g, "currentValue");
+            eval("output = " + exp);
+            _properties[z].value = output;
+         }
+      }
+
+      this.owner.alignProperties(_properties);
+   }
+};
+
+StateProperty.prototype.alignEventsInternal = function(_events) {
+
+   for (var e = 0; e < _events.length; ++e) {
+      this.raiseEvent(_events[e].event, (_events[e].hasOwnProperty("value")) ? { value: _events[e].value } : undefined );
+   }
+};
+
+StateProperty.prototype.alignActionsInternal = function(_actions, _priority) {
+
    if (_actions && (this.ignoreControl || this.takeControl(_priority))) {
       var properties = [];
       var events = [];
@@ -404,34 +470,29 @@ StateProperty.prototype.alignActions = function(_actions, _priority) {
          arr.push(_actions[a]);
       }
 
-      if (properties.length > 0) {
-
-         for (var z = 0; z < properties.length; ++z) {
-
-            if (properties[z].hasOwnProperty("fromProperty")) {
-               properties[z].value = this.owner.getProperty(properties[z].fromProperty);
-            }
-            else if (properties[z].hasOwnProperty("source")) {
-               properties[z].value = properties[z].source.sourceListener.getPropertyValue();
-            }
-            else if (properties[z].hasOwnProperty("apply")) {
-               var currentValue = this.owner.getProperty(properties[z].property);
-               var output = false;
-               var exp = properties[z].apply.replace(/\$value/g, "currentValue");
-               eval("output = " + exp);
-               properties[z].value = output;
-            }
-         }
-
-         this.owner.alignProperties(properties);
-      }
-
-      for (var e = 0; e < events.length; ++e) {
-         this.raiseEvent(events[e].event, (events[e].hasOwnProperty("value")) ? { value: events[e].value } : undefined );
-      }
+      this.alignPropertiesInternal(properties, _priority);
+      this.alignEventsInternal(events, _priority);
    }
 };
 
+StateProperty.prototype.startBufferingActionsInternal = function() {
+
+   if (this.removeDuplicates && !this.bufferingActions) {
+      this.bufferingActions = true;
+      this.actionBuffer = { propDup: {}, eventDup: {}, properties: [], events: [] };
+   }
+};
+
+StateProperty.prototype.flushBufferedActionsInternal = function() {
+
+   if (this.removeDuplicates && this.bufferingActions) {
+      console.log(this.uName+": StateProperty.prototype.flushBufferedActionsInternal() Flushing buffered actions...");
+      this.alignPropertiesInternal(this.actionBuffer.properties);
+      this.alignEventsInternal(this.actionBuffer.events);
+      this.bufferingActions = false;
+      delete this.actionBuffer;
+   }
+};
 
 StateProperty.prototype.becomeController = function() {
    // I am now the controller

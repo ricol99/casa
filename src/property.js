@@ -185,8 +185,9 @@ Property.prototype.rampComplete = function(_ramp, _config) {
 // Useful when synchronising an external device with a property value (e.g. gpio in)
 // You cannot stop the property changing or change the value, it is for information only
 //
-Property.prototype.propertyAboutToChange = function(actualOutputValue, _data) {
-   // BY DEFAULT, DO NOTHING
+Property.prototype.propertyAboutToChange = function(_actualOutputValue, _data) {
+   // BY DEFAULT, Do nothing except the value unchanged
+   return _actualOutputValue;
 };
 
 //
@@ -311,7 +312,7 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
       }
 
       _data.local = this.local;
-      return this.owner.updateProperty(this.name, _newValue, _data);
+      return (_newValue === this.owner.updateProperty(this.name, _newValue, _data));
    }
    else {
       return false;

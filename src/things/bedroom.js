@@ -27,10 +27,11 @@ function Bedroom(_config, _parent) {
                                                        // { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "cancel-bedtime" }] },
                                             { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }},
-                                            { name: "may-need-to-cancel-bedtime", source: { event: "room-switch-event", nextState: "cancel-bedtime"},
-                                              timeout: { "duration": 1.4, "nextState": "not-active" }},
-                                            { name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
-                                              timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
+                                            { name: "may-need-to-cancel-bedtime", priority: 10,
+                                              source: { event: "room-switch-event", action: { event: "cancel-bedtime-event" }, nextState: "not-active"},
+                                              timeout: { "duration": 0.75, "nextState": "not-active" }} ]};
+                                            //{ name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
+                                              //timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
 
    _config.roomStates = [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 0},
                          { name: "no-users-present-dull-day", priority: 0}, { name: "users-present-dull-day", priority: 5},
@@ -60,7 +61,7 @@ function Bedroom(_config, _parent) {
 
    this.bedStatusConfig = { name: "bed-state", initialValue: "empty" };
    this.bedFullConfig = { initialValue: false, sources: [] };
-   this.userMonitorConfig = { initialValue: "idle", states: [{ "name": "idle", "priority": 0, sources: [] }] };
+   //this.userMonitorConfig = { initialValue: "idle", states: [{ "name": "idle", "priority": 0, sources: [] }] };
 
    for (var i = 0; i < _config.users.length; ++i) {
       this.userStateConfigs.push({});
@@ -118,7 +119,7 @@ function Bedroom(_config, _parent) {
                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}]
             },
             {
-               "name": "awake-in-bed", "priority": 0,
+               "name": "awake-in-bed", "priority": 10,
                "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
                "sources": [{ "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
                "actions": [{ "property": "night-time", "value": false }]
@@ -185,8 +186,8 @@ function Bedroom(_config, _parent) {
       this.usersInBuildingConfig.sources.push({ property: this.users[i].name+"-in-building" });
 
       this.bedFullConfig.sources.push({ property: this.users[i].name+"-in-bed" });
-      this.userMonitorConfig.states[0].sources.push({ "guards": [{ active: false, property: "night-time", value: false }, { active: false, property: "evening-possible", value: false }],
-                                                      "event": this.users[i].name+"-switch-event", "nextState": "room-switch-event-required" });
+      //this.userMonitorConfig.states[0].sources.push({ "guards": [{ active: false, property: "night-time", value: false }, { active: false, property: "evening-possible", value: false }],
+                                                      //"event": this.users[i].name+"-switch-event", "nextState": "room-switch-event-required" });
    }
 
    this.ensurePropertyExists("users-in-building", 'orproperty', this.usersInBuildingConfig, _config);
@@ -215,8 +216,8 @@ function Bedroom(_config, _parent) {
    this.ensurePropertyExists("users-sensitive", 'orproperty', { initialValue: false, sources: [{ property: "all-present-users-in-bed" },
                                                                                                { property: "some-present-users-asleep" }] }, _config);
 
-   this.userMonitorConfig.states.push({ name: "room-switch-event-required", priority: 15, action: { "event": "room-switch-event" }, "timeout": { "duration": 0.1, "nextState": "PREVIOUS-STATE" }}),
-   this.ensurePropertyExists("monitor-users", 'stateproperty', this.userMonitorConfig, _config);
+   //this.userMonitorConfig.states.push({ name: "room-switch-event-required", priority: 15, action: { "event": "room-switch-event" }, "timeout": { "duration": 0.1, "nextState": "PREVIOUS-STATE" }}),
+   //this.ensurePropertyExists("monitor-users", 'stateproperty', this.userMonitorConfig, _config);
 }
 
 util.inherits(Bedroom, Room);

@@ -45,6 +45,8 @@ CameraProperty.prototype.propertyAboutToChange = function(_newValue, _data) {
    }).on('error', (e) => {
       console.log(this.uName + ": Received error: " + e.message);
    });
+
+   return _newValue;
 }
 
 module.exports = exports = CameraProperty;

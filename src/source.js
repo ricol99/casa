@@ -180,28 +180,30 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
       if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
-         return true;
+         return _propValue;
       }
 
-      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
 
       var oldValue = this.properties[_propName].value;
       var sendData = (_data) ? util.copy(_data) : {};
       sendData.sourceName =  this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
-      sendData.value = _propValue;
 
       if (this.local) {
          sendData.local = true;
       }
 
       // Call the final hooks
-      this.properties[_propName].propertyAboutToChange(_propValue, _data);
-      this.propertyAboutToChange(_propName, _propValue, _data);
+      var newPropValue = this.properties[_propName].propertyAboutToChange(_propValue, _data);
+      sendData.value = newPropValue;;
 
-      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
-      this.properties[_propName]._actuallySetPropertyValue(_propValue, _data);
+      console.log(this.uName + ': Setting Property ' + _propName + ' to ' + newPropValue);
+
+      this.propertyAboutToChange(_propName, newPropValue, _data);
+
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue);
+      this.properties[_propName]._actuallySetPropertyValue(newPropValue, _data);
 
       if (sendData.hasOwnProperty("priority")) {
          _data.priority = sendData.priority;
@@ -211,10 +213,10 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       delete sendData.sourcePeerCasa;
 
       this.asyncEmit('property-changed', sendData);
-      return true;
+      return newPropValue;
    }
    else {
-      return false;
+      return _propValue;
    }
 }
 
@@ -253,6 +255,12 @@ Source.prototype.deleteEvent = function(_eventName) {
    this.events[_eventName].aboutToBeDeleted();
    delete this.events[_eventName];
    return true;
+};
+
+// Called by stateproperty to check whether it can take control based on setting a action property
+Source.prototype.checkControl = function(_newController, _priority) {
+   console.log(this.uName + ": Source.prototype.checkControl(): controller="+_newController.name+" priority="+_priority);
+   return this.controller ? ((_newController != this.controller) ? (_priority >= this.controllerPriority) : true) : true;
 };
 
 // Called by stateproperty to take control based on setting a action property
@@ -300,7 +308,7 @@ Source.prototype.takeControl = function(_newController, _priority) {
 // priotity as a secondary controller
 Source.prototype.updateControllerPriority = function(_controller, _newPriority) {
 
-   if (_controller == this.controller) {
+   if (_controller === this.controller) {
       this.reprioritiseCurrentController(_newPriority);
    }
    else if (_newPriority <= this.controllerPriority) {
@@ -325,7 +333,7 @@ Source.prototype.reprioritiseCurrentController = function(_newPriority) {
             this.controllerPriority = _newPriority;
          }
          else {
-            console.log(this.uName + ": Controller "+this.controller.name+" is losing control");
+            console.log(this.uName + ": Controller "+this.controller.name+" is losing control to "+this.secondaryControllers[0].controller.name);
             var losingController = this.controller;
             this.controllerPriority = this.secondaryControllers[0].priority;
             this.controller = this.secondaryControllers[0].controller;
@@ -356,7 +364,7 @@ Source.prototype.addSecondaryController = function(_controller, _priority) {
    // Make sure the controller is not already in the secondary controller list
    for (var i = 0; i < this.secondaryControllers.length; ++i) {
 
-      if (this.secondaryControllers[i].controller == _controller) {
+      if ((this.secondaryControllers[i].controller === _controller) || (this.secondaryControllers[i].controller === this.controller)) {
          this.secondaryControllers.splice(i, 1);
          break;
       }

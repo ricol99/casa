@@ -28,7 +28,7 @@ function HouseAlarmBase(_config, _parent) {
       this.ensurePropertyExists(mode.name+"-armed", "property",
                                 { initialValue: false,
                                   source: { property: "alarm-state",
-                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-confirmed\")" }}, _config);
+                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-triggered-timed-out\") || ($value === \""+mode.name+"-confirmed\")" }}, _config);
    }
 
    // Internal - current timeouts based on arm state selected
@@ -195,16 +195,22 @@ function HouseAlarmBase(_config, _parent) {
                                                  action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" }});
 
       alarmConfig.states.push({ name: mode.name+"-exit", sources: modeConfigs[mode.name].guardSources,
-                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } });
+                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
+                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
+
       alarmConfig.states.push({ name: mode.name+"-entry", sources: modeConfigs[mode.name].guardSources,
-                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } });
+                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
+                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
+
       alarmConfig.states.push({ name: mode.name+"-armed", sources: modeConfigs[mode.name].guardSources,
                                 actions: [{ property: "current-state", value: mode.name },
-                                          { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } ] });
+                                          { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } ],
+                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
 
       alarmConfig.states.push({ name: mode.name+"-triggered", sources: modeConfigs[mode.name].guardSources,
                                 action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
-                                counter: { "unique": true, "from": [ mode.name+"-armed" ], "limit": 2, "action": { "event": "confirm-event" }} });
+                                counter: { "unique": true, "from": [ mode.name+"-armed", mode.name+"-entry", mode.name+"-exit" ],
+                                           "limit": 2, "action": { "event": "confirm-event" }} });
 
       this.ensurePropertyExists(mode.name+"-entry-zone-active", "orproperty", { initialValue: false, sources: modeConfigs[mode.name].entrySources }, _config);
    }

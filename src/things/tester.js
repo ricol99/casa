@@ -332,7 +332,7 @@ Tester.prototype.runTestEvent = function() {
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
       target = this.gang.findNamedObject(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
       if (!target) {
-         console.log("AAAAAAA BROKEN! Target="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
+         console.error("BROKEN! Target="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
          process.exit(1);
       }
    }
@@ -440,7 +440,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
              this.generateExpectedOutput(null);
              process.stdout.write("\n");
              process.exit(0);
-         }, 30000);
+         }, 15000);
 
          this.generateExpectedOutput(_data);
          return;

@@ -61,7 +61,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
    if (this.properties.hasOwnProperty(_propName)) {
 
       if ((!(_data && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
-         return true;
+         return _propValue;
       }
 
       console.log(this.uName + ': Setting Property ' + _propName + ' to ' + _propValue);
@@ -75,17 +75,18 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.local = true;
 
       // Call the final hooks
-      this.properties[_propName].propertyAboutToChange(_propValue, sendData);
+      var newPropValue = this.properties[_propName].propertyAboutToChange(_propValue, sendData);
 
-      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
-      this.properties[_propName].value = _propValue;
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue);
+      this.properties[_propName].value = newPropValue;
+      sendData.value = newPropValue;
       this.properties[_propName].previousValue = oldValue;
       sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
       this.asyncEmit('property-changed', sendData);
-      return true;
+      return newPropValue;
    }
    else {
-      return false;
+      return _propValue;
    }
 }
 

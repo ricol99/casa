@@ -322,17 +322,22 @@ State.prototype.getCasa = function() {
 };
 
 State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority, _previousState) {
-   var immediateState = this.checkStateGuards() || this.checkSourceProperties() || this.initialiseCounter(_previousState);
 
-   if (!immediateState) {
+   if (_parentPropertyPriorityDefined && !this.priorityDefined) {
+      this.priority = _parentPropertyPriority
+   }
 
-      if (_parentPropertyPriorityDefined && !this.priorityDefined) {
-         this.priority = _parentPropertyPriority
-      }
+   var immediateStateGuards = this.checkStateGuards();
+   var immediateStateSources = this.checkSourceProperties();
+   var immediateStateCounter = this.initialiseCounter(_previousState);
 
-      if (!this.alignActions() && this.owner.takeControlOnTransition) {
-         this.owner.takeControl(this.priority);
-      }
+   var immediateState = immediateStateSources || immediateStateGuards || immediateStateCounter;
+
+   var noOfActions = this.alignActions();
+
+   //if ((!immediateState) && (noOfActions === 0) && this.owner.takeControlOnTransition) {
+   if (noOfActions === 0) {
+      this.owner.takeControl(this.owner.takeControlOnTransition ? this.priority : (_parentPropertyPriorityDefined ? _parentPropertyPriority : 0));
    }
 
    return immediateState;
@@ -438,7 +443,7 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
             ret = false;
             break;
          }
-         else if (_guardedObject.guards[i].hasOwnProperty("previousState") && this.owner.previousState && (this.owner.previousState !== _guardedObject.guards[i].previousState)) {
+         else if (_guardedObject.guards[i].hasOwnProperty("previousState") && this.owner.previousState && (this.owner.previousState.name !== _guardedObject.guards[i].previousState)) {
            ret = false;
            break;
          }

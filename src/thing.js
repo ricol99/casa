@@ -71,6 +71,7 @@ Thing.prototype.addThing = function(_thing) {
 // Also used to navigate down the composite thing tree to update a property shared by all
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    var data = (_data) ? _data : { sourceName: this.uName };
+   var newValue = _propValue;
 
    if (data.alignWithParent) {
 
@@ -80,14 +81,14 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
             data.local = this.properties[_propName].local;
          }
 
-         Source.prototype.updateProperty.call(this, _propName, _propValue, data);
+         newValue =  Source.prototype.updateProperty.call(this, _propName, newValue, data);
 
          if (this.propogateToChildren) {
 
             for (var thing in this.things) {
 
                if (this.things.hasOwnProperty(thing)) {
-                  this.things[thing].updateProperty(_propName, _propValue, data);
+                  newValue = this.things[thing].updateProperty(_propName, newValue, data);
                }
             }
          }
@@ -96,7 +97,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    else {
 
       if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.properties.hasOwnProperty(_propName) && (_propValue === this.properties[_propName].value)) {
-         return true;
+         return _propValue;
       }
 
       if (this.properties.hasOwnProperty(_propName)) {
@@ -109,11 +110,11 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          data.local = true;
       }
 
-      Source.prototype.updateProperty.call(this, _propName, _propValue, data);
+      newValue = Source.prototype.updateProperty.call(this, _propName, _propValue, data);
       var needToUpdateChildren = this.propogateToChildren;
 
       if (!this.topLevelThing && this.propogateToParent) {
-         needToUpdateChildren = !this.owner.childPropertyChanged(_propName, _propValue, this, data);
+         needToUpdateChildren = !this.owner.childPropertyChanged(_propName, newValue, this, data);
       }
 
       if (needToUpdateChildren) {
@@ -122,11 +123,13 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].updateProperty(_propName, _propValue, data);
+               this.things[thing].updateProperty(_propName, newValue, data);
             }
          }
       }
    }
+
+   return newValue;
 };
 
 Thing.prototype.inheritChildProps = function() {
@@ -224,7 +227,14 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
-      this.updateProperty(_propName, _propValue, _data);
+      var newValue = this.updateProperty(_propName, _propValue, _data);
+
+      if (newValue !== _propValue) {
+
+         if (this.updateProperty(_propName, newValue, _data) !== newValue) {
+            console.error(this.uName+": Unable aligned property "+_propName+" in composite object");
+         }
+      }
    }
 
    return ret;

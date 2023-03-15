@@ -34,7 +34,7 @@ EventProperty.prototype.coldStart = function () {
 EventProperty.prototype.propertyAboutToChange = function(_actualOutputValue, _data) {
 
    if (_data.coldStart) {
-      return;
+      return _actualOutputValue;
    }
 
    if (this.eventMap) {
@@ -46,6 +46,8 @@ EventProperty.prototype.propertyAboutToChange = function(_actualOutputValue, _da
    else {
       this.owner.raiseEvent(_actualOutputValue, _data);
    }
+
+   return _actualOutputValue;
 };
 
 
