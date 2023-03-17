@@ -10,10 +10,14 @@ function HomekitSecuritySystem(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-security-system-accessory";
 
-   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED }, _config);
-   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARM }, _config);
-   this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT }, _config);
-   this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED }, _config);
+   //this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.SecuritySystemCurrentState.DISARMED }, _config);
+   //this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARM }, _config);
+   //this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT }, _config);
+   //this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED }, _config);
+   this.ensurePropertyExists('current-state', 'property', { }, _config);
+   this.ensurePropertyExists('target-state', 'property', { }, _config);
+   this.ensurePropertyExists('system-fault', 'property', { }, _config);
+   this.ensurePropertyExists('tamper-state', 'property', { }, _config);
 
    this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
 
@@ -28,8 +32,8 @@ function HomekitSecuritySystem(_config, _parent) {
       .getService(Service.SecuritySystem) 
       .getCharacteristic(Characteristic.SecuritySystemTargetState)
       .on('set', (_value, _callback) => {
-         this.setTargetState(_value);
-         _callback();
+         _callback(this.setTargetState(_value) ? null : true);
+         //_callback();
       })
       .on('get', (_callback) => {
          _callback(null, this.getTargetState());
@@ -71,18 +75,43 @@ HomekitSecuritySystem.prototype.hotStart = function() {
    HomekitAccessory.prototype.hotStart.call(this);
 };
 
+HomekitSecuritySystem.prototype.mapCurrentStateFromPropToHk = function(_state) {
+   var map = { stay: 0, away: 1, night: 2, disarmed: 3, triggered:4 };
+   return isNumber(this.properties["current-state"].value) ? _state : map[_state];
+};
+
 HomekitSecuritySystem.prototype.getCurrentState = function() {
-   return this.properties["current-state"].value;
+   return this.mapCurrentStateFromPropToHk(this.properties["current-state"].value);
+};
+
+HomekitSecuritySystem.prototype.mapTargetStateFromPropToHk = function(_state) {
+   var map = { stay: 0, away: 1, night: 2, disarmed: 3, triggered:4 };
+   var prop = this.properties["target-state"].value;
+   return isNumber(prop) ? _state : map[_state];
 };
 
 HomekitSecuritySystem.prototype.getTargetState = function() {
-   return this.properties["target-state"].value;
+   return this.mapTargetStateFromPropToHk(this.properties["target-state"].value);
+};
+
+HomekitSecuritySystem.prototype.mapTargetStateFromHkToProp = function(_state) {
+   var map = { 0: "stay", 1: "away", 2: "night", 3: "disarmed", 4: "triggered" };
+   return isNumber(this.properties["target-state"].value) ? _state : map[_state];
 };
 
 HomekitSecuritySystem.prototype.setTargetState = function(_state) {
+
+   var comp = isNumber(this.properties["target-state"].value) ? Characteristic.SecuritySystemTargetState.DISARM : "disarm"
+   
+   if ((_state !== Characteristic.SecuritySystemTargetState.DISARM) &&
+       (Characteristic.SecuritySystemTargetState.DISARM !== this.mapTargetStateFromPropToHk(this.properties["target-state"].value))) {
+      return false;
+   }
+
    console.log(this.uName + ": Changing target state to " + _state);
    this.setManualMode('target-state');
-   this.alignPropertyValue("target-state", _state);
+   this.alignPropertyValue("target-state", this.mapTargetStateFromHkToProp(_state));
+   return true;
 };
 
 HomekitSecuritySystem.prototype.getSystemFault = function() {
@@ -102,13 +131,13 @@ HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _pro
       this.hkAccessory
         .getService(Service.SecuritySystem)
         .getCharacteristic(Characteristic.SecuritySystemCurrentState)
-        .updateValue(_propValue);
+        .updateValue(this.mapCurrentStateFromPropToHk(_propValue));
    }
    else if (_propName == "target-state") {
       this.hkAccessory
         .getService(Service.SecuritySystem)
         .getCharacteristic(Characteristic.SecuritySystemTargetState)
-        .updateValue(_propValue);
+        .updateValue(this.mapTargetStateFromPropToHk(_propValue));
    }
    else if (_propName == "tamper-state") {
       this.hkAccessory
@@ -123,5 +152,9 @@ HomekitSecuritySystem.prototype.propertyAboutToChange = function(_propName, _pro
         .updateValue(_propValue);
    }
 };
+
+function isNumber(_input) {
+   return (typeof _input === "number") ? true : ((typeof _input === "string") ? !isNaN(_input) && !isNaN(parseInt(_input)) : false);
+}
 
 module.exports = exports = HomekitSecuritySystem;

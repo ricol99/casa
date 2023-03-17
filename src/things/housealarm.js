@@ -1,241 +1,236 @@
 var util = require('util');
 var Thing = require('../thing');
 
-function HouseAlarmBase(_config, _parent) {
+function HouseAlarm(_config, _parent) {
    Thing.call(this, _config, _parent);
 
-   this.ensurePropertyExists("max-retries", "property", { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
-   this.ensurePropertyExists("retry-count", "property", { initialValue: 0 }, _config);
-   this.ensurePropertyExists("retry-allowed", "evalproperty", { initialValue: true,
-                                                                sources: [{ property: "retry-count" }, { property: "max-retries" }],
-                                                                expression: "($values[0] < $values[1])" }, _config);
+   this.mainSentry = _config.mainSentry;
 
-   var defaultTimeouts = { exit: 30, entry: 30, triggered: 120 };
-   this.modes = {};
+   this.ensurePropertyExists("alarm-error", "property", { source: { property: this.mainSentry+"-alarm-error" }}, _config);
+   this.ensurePropertyExists("current-state", "property", { source: { property: this.mainSentry+"-current-state", transform: "($value === \"confirmed\") ? \"triggered\" : $value" }}, _config);
+   this.ensurePropertyExists("target-state", "property", { initialValue: "disarmed" }, _config);
 
+   for (var i = 0; i < _config.sentries.length; ++i) {
+      this.createSentry(_config.sentries[i], _config, _config.sentries[i].name === this.mainSentry);
+   }
+}
+
+util.inherits(HouseAlarm, Thing);
+
+HouseAlarm.prototype.createSentry = function(_config, _mainConfig, _mainSentry) {
+   var defaultTimeouts = { exit: 0, entry: 0, triggered: 120 };
+   this.ensurePropertyExists(_config.name+"-max-retries", "property", { initialValue: _mainConfig.hasOwnProperty("maxRetries") ? _mainConfig.maxRetries : 2 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-retry-count", "property", { initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-retry-allowed", "evalproperty", { initialValue: true,
+                                                                              sources: [{ property: _config.name+"-retry-count" }, { property: _config.name+"-max-retries" }],
+                                                                              expression: "($values[0] < $values[1])" }, _mainConfig);
    // Set timeouts
-   for (var i = 0; i < _config.modes.length; ++i) {
-      var mode = _config.modes[i];
+   for (var i = 0; i < _config.armModes.length; ++i) {
+      var mode = _config.armModes[i];
 
       if (!mode.hasOwnProperty("exitTimeout")) mode.exitTimeout = defaultTimeouts.exit; 
       if (!mode.hasOwnProperty("entryTimeout")) mode.entryTimeout = defaultTimeouts.entry;
       if (!mode.hasOwnProperty("triggeredTimeout")) mode.triggeredTimeout = defaultTimeouts.triggered;
 
-      this.ensurePropertyExists(mode.name+"-exit-timeout", "property", { initialValue: mode.exitTimeout }, _config);
-      this.ensurePropertyExists(mode.name+"-entry-timeout", "property", { initialValue: mode.entryTimeout }, _config);
-      this.ensurePropertyExists(mode.name+"-triggered-timeout", "property", { initialValue: mode.triggeredTimeout }, _config);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-exit-timeout", "property", { initialValue: mode.exitTimeout }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-entry-timeout", "property", { initialValue: mode.entryTimeout }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-triggered-timeout", "property", { initialValue: mode.triggeredTimeout }, _mainConfig);
 
-      this.ensurePropertyExists(mode.name+"-armed", "property",
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-armed", "property",
                                 { initialValue: false,
-                                  source: { property: "alarm-state",
-                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-triggered-timed-out\") || ($value === \""+mode.name+"-confirmed\")" }}, _config);
+                                  source: { property: _config.name+"-alarm-state",
+                                            transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || \
+                                                        ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-triggered-timed-out\") || \
+                                                        ($value === \""+mode.name+"-confirmed\")" }}, _mainConfig);
    }
 
    // Internal - current timeouts based on arm state selected
-   this.ensurePropertyExists("exit-timeout", "property", { initialValue: 0 }, _config);
-   this.ensurePropertyExists("entry-timeout", "property", { initialValue: 0 }, _config);
-   this.ensurePropertyExists("triggered-timeout", "property", { initialValue: 120 }, _config);
-   this.ensurePropertyExists("last-active-zone", "property", { initialValue: "" }, _config);
+   this.ensurePropertyExists(_config.name+"-exit-timeout", "property", { initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-entry-timeout", "property", { initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-triggered-timeout", "property", { initialValue: 120 }, _mainConfig);
 
-   this.ensurePropertyExists("target-state", "property", { initialValue: "disarmed" }, _config);
-   this.ensurePropertyExists("current-state", "property", { initialValue: "disarmed" }, _config);
+   if (_mainSentry) {
+      this.ensurePropertyExists(_config.name+"-target-state", "property", { source: { property: "target-state" }}, _mainConfig);
+   }
+   else {
+      this.ensurePropertyExists(_config.name+"-target-state", "property", { initialValue: "disarmed" }, _mainConfig);
+   }
+
+   this.ensurePropertyExists(_config.name+"-current-state", "property", { initialValue: "disarmed" }, _mainConfig);
 
    // Alarm status properties
-   this.ensurePropertyExists("fire-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("medical-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("panic-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("duress-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("attack-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("carbon-monoxide-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("tamper-alarm", "property", { initialValue: false }, _config);
+   this.ensurePropertyExists(_config.name+"-alarm", "property", { initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-in-exit-entry", "property",
+                             { initialValue: false, source: { property: _config.name+"-"+"arm-state", transform: "($value === \"entry\") || ($value === \"exit\")" }}, _mainConfig);
 
-   this.ensurePropertyExists("in-exit-entry", "property", { initialValue: false, source: { property: "arm-state", transform: "($value === \"entry\") || ($value === \"exit\")" }}, _config);
-   this.ensurePropertyExists("zone-alarm", "property", { initialValue: false, source: { property: "arm-state", transform: "($value === \"triggered\") || ($value === \"confirmed\")" }}, _config);
+   this.ensurePropertyExists(_config.name+"-zone-alarm", "property",
+                             { initialValue: false,
+                               source: { property: _config.name+"-"+"arm-state",
+                                         transform: "($value === \"triggered\") || ($value === \"confirmed\") || ($value === \"triggered-timed-out\")" }}, _mainConfig);
 
-   this.ensurePropertyExists("confirmed-alarm", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("alarm-error", "property", { initialValue: "" }, _config);
-   this.ensurePropertyExists("entry-zone-active", "property", { initialValue: false }, _config);
-   this.ensurePropertyExists("guard-zone-active", "property", { initialValue: false }, _config);
-
+   this.ensurePropertyExists(_config.name+"-confirmed-alarm", "property", { initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-entry-zone-active", "property", { initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-guard-zone-active", "property", { initialValue: false }, _mainConfig);
 
    // Internal properties
-   this.ensurePropertyExists("target-arm-state", "property", { initialValue: "disarmed" }, _config);
+   this.ensurePropertyExists(_config.name+"-target-arm-state", "property", { initialValue: "disarmed" }, _mainConfig);
 
    // Core state machines
-   var armModeConfig = { name: "arm-mode-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "idle",
-                         states: [{ name: "idle",
-                                    sources: [{ property: "tamper-alarm", value: true, nextState: "tamper" },
-                                              { property: "panic-alarm", value: true, nextState: "panic" } ]},
-                                   { name: "tamper",
-                                     sources: [{ property: "tamper-alarm", value: false, nextState: "idle" }]},
-                                   { name: "panic",
-                                     sources: [{ property: "panic-alarm", value: false, nextState: "idle" }]}]};
+   var armModeConfig = { type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "idle",
+                         states: [{ name: "idle", sources: [] }] };
 
-   for (var k = 0; k < _config.modes.length; ++k) {
-      var mode = _config.modes[k];
-      armModeConfig.states[0].sources.push({ property: "target-state", value: mode.name, nextState: "pre-"+mode.name });
+   for (var k = 0; k < _config.armModes.length; ++k) {
+      var mode = _config.armModes[k];
+      armModeConfig.states[0].sources.push({ property: _config.name+"-target-state", value: mode.name, nextState: "pre-"+mode.name });
       armModeConfig.states.push({ name: "pre-"+mode.name, 
-                                  actions: [{ property: "exit-timeout", fromProperty: mode.name+"-exit-timeout" },
-                                            { property: "entry-timeout", fromProperty: mode.name+"-entry-timeout" },
-                                            { property: "triggered-timeout", fromProperty: mode.name+"-triggered-timeout" },
-                                            { property: "entry-zone-active", value: false },
-                                            { property: "guard-zone-active", value: false }],
+                                  actions: [{ property: _config.name+"-exit-timeout", fromProperty: _config.name+"-"+mode.name+"-exit-timeout" },
+                                            { property: _config.name+"-entry-timeout", fromProperty: _config.name+"-"+mode.name+"-entry-timeout" },
+                                            { property: _config.name+"-triggered-timeout", fromProperty: _config.name+"-"+mode.name+"-triggered-timeout" },
+                                            { property: _config.name+"-entry-zone-active", value: false },
+                                            { property: _config.name+"-guard-zone-active", value: false }],
                                   timeout: { duration: 0.1, nextState: mode.name }});
 
-      armModeConfig.states.push({ name: mode.name, actions: [{ property: "target-arm-state", value: "armed" }] });
+      armModeConfig.states.push({ name: mode.name, actions: [{ property: _config.name+"-target-arm-state", value: "armed" }] });
    }
 
-   this.ensurePropertyExists("arm-mode-state", "stateproperty", armModeConfig, _config);
+   this.ensurePropertyExists(_config.name+"-arm-mode-state", "stateproperty", armModeConfig, _mainConfig);
 
-   this.ensurePropertyExists("arm-state", "stateproperty", { name: "arm-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "disarmed",
-                                                             states: [{ name: "disarmed",
-                                                                        sources: [{ property: "target-arm-state", value: "armed", nextState: "exit" }],
-                                                                        actions: [{ property: "retry-count", value: 0 },
-                                                                                  { property: "entry-zone-active", value: false },
-                                                                                  { property: "guard-zone-active", value: false },
-                                                                                  { property: "confirmed-alarm", value: false },
-                                                                                  { property: "arm-mode-state", value: "idle" },
-                                                                                  { property: "current-state", value: "disarmed" }]},
-                                                                      { name: "exit",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
-                                                                                  { property: "guard-zone-active", value: true, nextState: "triggered" }],
-                                                                        timeout: { property: "exit-timeout", nextState: "armed" }},
-                                                                      { name: "armed",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
-                                                                                  { property: "entry-zone-active", value: true, nextState: "entry" },
-                                                                                  { property: "guard-zone-active", value: true, nextState: "triggered" }]},
-                                                                      { name: "entry",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
-                                                                                  { property: "guard-zone-active", value: true, nextState: "triggered" }],
-                                                                        timeout: { property: "entry-timeout", nextState: "triggered" }},
-                                                                      { name: "triggered",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" },
-                                                                                  { event: "confirm-event", nextState: "confirmed" },
-                                                                                  { property: "confirmed-alarm", value: true, nextState: "confirmed" }],
-                                                                        actions: [{ property: "retry-count", apply: "++$value" },
-                                                                                  { property: "current-state", value: "triggered" }],
-                                                                        timeout: { property: "triggered-timeout", nextState: "triggered-timed-out" }},
-                                                                      { name: "confirmed",
-                                                                        sources: [{ property: "target-state", value: "disarmed", nextState: "reset-to-disarmed" }],
-                                                                        actions: [{ property: "confirmed-alarm", value: true },
-                                                                                  { property: "current-state", value: "confirmed" }],
-                                                                        timeout: { from: [ "triggered" ], nextState: "triggered-timed-out" }},
-                                                                      { name: "reset-to-disarmed",
-                                                                        actions: [{ property: "target-arm-state", value: "disarmed" },
-                                                                                  { property: "entry-zone-active", value: false },
-                                                                                  { property: "guard-zone-active", value: false }],
-                                                                        timeout: { duration: 0.1, nextState: "disarmed" }},
-                                                                      { name: "triggered-timed-out",
-                                                                        action: { property: "guard-zone-active", value: false },
-                                                                        sources: [{ property: "retry-allowed", value: false,
-                                                                                    action: { property: "target-state", value: "disarmed" }, nextState: "reset-to-disarmed" }],
-                                                                        timeout: { duration: 0.1, nextState: "armed" }}]}, _config);
+   var armStateConfig = { name: "arm-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "disarmed",
+                          states: [{ name: "disarmed",
+                                     sources: [{ property: _config.name+"-target-arm-state", value: "armed", nextState: "exit" }],
+                                     actions: [{ property: _config.name+"-retry-count", value: 0 },
+                                               { property: _config.name+"-entry-zone-active", value: false },
+                                               { property: _config.name+"-guard-zone-active", value: false },
+                                               { property: _config.name+"-confirmed-alarm", value: false },
+                                               { property: _config.name+"-arm-mode-state", value: "idle" },
+                                               { property: _config.name+"-current-state", value: "disarmed" }]},
+                                    { name: "exit",
+                                      sources: [{ property: _config.name+"-target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                { property: _config.name+"-guard-zone-active", value: true, nextState: "triggered" }],
+                                                timeout: { property: _config.name+"-exit-timeout", nextState: "armed" }},
+                                    { name: "armed",
+                                      sources: [{ property: _config.name+"-target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                { property: _config.name+"-entry-zone-active", value: true, nextState: "entry" },
+                                                { property: _config.name+"-guard-zone-active", value: true, nextState: "triggered" }]},
+                                    { name: "entry",
+                                      sources: [{ property: _config.name+"-target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                { property: _config.name+"-guard-zone-active", value: true, nextState: "triggered" }],
+                                      timeout: { property: _config.name+"-entry-timeout", nextState: "triggered" }},
+                                    { name: "triggered",
+                                      sources: [{ property: _config.name+"-target-state", value: "disarmed", nextState: "reset-to-disarmed" },
+                                                { event: _config.name+"-confirm-event", nextState: "confirmed" },
+                                                { property: _config.name+"-confirmed-alarm", value: true, nextState: "confirmed" }],
+                                      actions: [{ property: _config.name+"-retry-count", apply: "++$value" },
+                                                { property: _config.name+"-current-state", value: "triggered" }],
+                                      timeout: { property: _config.name+"-triggered-timeout", nextState: "triggered-timed-out" }},
+                                    { name: "confirmed",
+                                      sources: [{ property: _config.name+"-target-state", value: "disarmed", nextState: "reset-to-disarmed" }],
+                                      actions: [{ property: _config.name+"-confirmed-alarm", value: true },
+                                                { property: _config.name+"-current-state", value: "confirmed" }],
+                                      timeout: { from: [ "triggered" ], nextState: "triggered-timed-out" }},
+                                    { name: "reset-to-disarmed",
+                                      actions: [{ property: _config.name+"-target-arm-state", value: "disarmed" },
+                                                { property: _config.name+"-entry-zone-active", value: false },
+                                                { property: _config.name+"-guard-zone-active", value: false }],
+                                      timeout: { duration: 0.1, nextState: "disarmed" }},
+                                    { name: "triggered-timed-out",
+                                      action: { property: _config.name+"-guard-zone-active", value: false },
+                                      sources: [{ property: _config.name+"-retry-allowed", value: false,
+                                                  action: { property: _config.name+"-target-state", value: "disarmed" }, nextState: "reset-to-disarmed" }],
+                                      timeout: { duration: 0.1, nextState: "armed" }}]};
 
-   // Bring in the zones with their desired arm modes
+   if (_config.hasOwnProperty("autoArmIn")) {
+      armStateConfig.states[0].sources.push({ property: _config.name+"-"+_config.autoArmIn+"-all-guards-passive", value: false,
+                                              action: { property: _config.name+"-target-state", value: _config.autoArmIn }});
+   }
+
+   this.ensurePropertyExists(_config.name+"-arm-state", "stateproperty", armStateConfig, _mainConfig);
+   
    var modeConfigs = {};
 
-   for (var i = 0; i < _config.modes.length; ++i) {
-      var mode = _config.modes[i];
-      modeConfigs[mode.name] = { guardSources: [], entrySources: [] };
-   }
+   for (var i = 0; i < _config.armModes.length; ++i) {
+      var mode = _config.armModes[i];
+      modeConfigs[mode.name] = { guardSources: [], entrySources: [], guardSources2: mode.guards };
 
-   modeConfigs["disarmed"] = { guardSources: [], entrySources: [] };
+      if (mode.hasOwnProperty("guards")) {
 
-   // Zones
-   for (var i = 0; i < _config.zones.length; ++i) {
-      this.ensurePropertyExists(_config.zones[i].name+"-zone-active", "property", { initialValue: false, source: _config.zones[i].activeSource }, _config);
-
-      if (_config.zones[i].hasOwnProperty("tamperSource")) {
-         this.ensurePropertyExists(_config.zones[i].name+"-zone-tamper", "property", { initialValue: false, source: _config.zones[i].tamperSource }, _config);
+         // Bring in the guards
+         for (var j = 0; j < mode.guards.length; ++j) {
+            var source = util.copy(mode.guards[j], true);
+            source.count = true;
+            source.value = true;
+            source.action = { property: _config.name+"-guard-zone-active", value: true };
+            modeConfigs[mode.name].guardSources.push(source);
+         }
       }
 
-      if (_config.zones[i].hasOwnProperty("armRule")) {
+      if (mode.hasOwnProperty("entries")) {
 
-         if (_config.zones[i].armRule.mode === "always") {
-            _config.zones[i].armRules = [ { mode: "disarmed", role: _config.zones[i].armRule.role }, { mode: "stay", role: _config.zones[i].armRule.role },
-                                          { mode: "away", role: _config.zones[i].armRule.role }, { mode: "night", role: _config.zones[i].armRule.role } ];
-         }
-         else if (_config.zones[i].armRule.mode === "all-armed") {
-            _config.zones[i].armRules = [ { mode: "stay", role: _config.zones[i].armRule.role }, { mode: "away", role: _config.zones[i].armRule.role },
-                                          { mode: "night", role: _config.zones[i].armRule.role } ];
-         }
-         else {
-            _config.zones[i].armRules = [ _config.zones[i].armRule ];
-         }
-
-         delete _config.zones[i].armRule;
-      }
-
-      for (var j = 0; j < _config.zones[i].armRules.length; ++j) {
-
-         if (modeConfigs.hasOwnProperty(_config.zones[i].armRules[j].mode)) {
-            var modeConfig = modeConfigs[_config.zones[i].armRules[j].mode];
-            var source = util.copy(_config.zones[i].activeSource, true);
-
-            if (_config.zones[i].armRules[j].role === "entry") {
-               modeConfig.entrySources.push(source);
-            }
-            else if (_config.zones[i].armRules[j].role === "guard") {
-               source.count = true;
-               source.value = true;
-               source.action = { property: "guard-zone-active", value: true };
-               modeConfig.guardSources.push(source);
-            }
+         // Bring in the entries
+         for (var k = 0; k < mode.entries.length; ++k) {
+            modeConfigs[mode.name].entrySources.push(mode.entries[k]);
          }
       }
    }
 
-   var alarmConfig = { name: "alarm-state", type: "combinestateproperty", ignoreControl: true, takeControlOnTransition: true, separator: "-",
-                       sources: [{ property: "arm-mode-state" }, { property: "arm-state" }],
-                       states: [{ name: "idle-disarmed", sources: modeConfigs["disarmed"].guardSources }] };
+   var alarmConfig = { type: "combinestateproperty", ignoreControl: true, takeControlOnTransition: true, separator: "-",
+                       sources: [{ property: _config.name+"-arm-mode-state" }, { property: _config.name+"-arm-state" }],
+                       states: [] };
 
-   for (var l = 0; l < _config.modes.length; ++l) {
-      mode = _config.modes[l];
-      modeConfigs[mode.name].guardSources.push({ property: mode.name+"-entry-zone-active", count: false,
-                                                 action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" }});
+   for (var l = 0; l < _config.armModes.length; ++l) {
+      mode = _config.armModes[l];
+      modeConfigs[mode.name].guardSources.push({ property: _config.name+"-"+mode.name+"-entry-zone-active", count: false,
+                                                 action: { property: _config.name+"-entry-zone-active", fromProperty: _config.name+"-"+mode.name+"-entry-zone-active" }});
 
       alarmConfig.states.push({ name: mode.name+"-exit", sources: modeConfigs[mode.name].guardSources,
-                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
-                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
+                                action: { property: _config.name+"-entry-zone-active", fromProperty: _config.name+"-"+mode.name+"-entry-zone-active" }});
+
 
       alarmConfig.states.push({ name: mode.name+"-entry", sources: modeConfigs[mode.name].guardSources,
-                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
-                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
+                                action: { property: _config.name+"-entry-zone-active", fromProperty: _config.name+"-"+mode.name+"-entry-zone-active" }});
 
       alarmConfig.states.push({ name: mode.name+"-armed", sources: modeConfigs[mode.name].guardSources,
-                                actions: [{ property: "current-state", value: mode.name },
-                                          { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" } ],
-                                counter: { "unique": true, "limit": 2, "action": { "event": "confirm-event" }} });
+                                actions: [{ property: _config.name+"-current-state", value: mode.name },
+                                          { property: _config.name+"-entry-zone-active", fromProperty: _config.name+"-"+mode.name+"-entry-zone-active" } ]});
 
       alarmConfig.states.push({ name: mode.name+"-triggered", sources: modeConfigs[mode.name].guardSources,
-                                action: { property: "entry-zone-active", fromProperty: mode.name+"-entry-zone-active" },
-                                counter: { "unique": true, "from": [ mode.name+"-armed", mode.name+"-entry", mode.name+"-exit" ],
-                                           "limit": 2, "action": { "event": "confirm-event" }} });
+                                action: { property: _config.name+"-entry-zone-active", fromProperty: _config.name+"-"+mode.name+"-entry-zone-active" } });
 
-      this.ensurePropertyExists(mode.name+"-entry-zone-active", "orproperty", { initialValue: false, sources: modeConfigs[mode.name].entrySources }, _config);
+      if (_config.hasOwnProperty("confirmCount")) {
+         var index = alarmConfig.states.length - 4;
+         alarmConfig.states[index].counter = { "unique": true, "limit": _config.confirmCount, "action": { "event": _config.name+"-confirm-event" }};
+         alarmConfig.states[index+1].counter = { "unique": true, "limit": _config.confirmCount, "action": { "event": _config.name+"-confirm-event" }};
+         alarmConfig.states[index+2].counter = { "unique": true, "limit": _config.confirmCount, "action": { "event": _config.name+"-confirm-event" }};
+         alarmConfig.states[index+3].counter = { "unique": true, "from": [ mode.name+"-armed", mode.name+"-entry", mode.name+"-exit" ],
+                                                 "limit": _config.confirmCount, "action": { "event": _config.name+"-confirm-event" }};
+      }
+
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-entry-zone-active", "orproperty", { initialValue: false, sources: modeConfigs[mode.name].entrySources }, _mainConfig);
+
+      if (modeConfigs[mode.name].guardSources2) {
+         this.ensurePropertyExists(_config.name+"-"+mode.name+"-all-guards-passive", "orproperty", { initialValue: false, sources: modeConfigs[mode.name].guardSources2 }, _mainConfig);
+      }
    }
 
-   this.ensurePropertyExists("alarm-state", "combinestateproperty", alarmConfig, _config);
+   this.ensurePropertyExists(_config.name+"-alarm-state", "combinestateproperty", alarmConfig, _mainConfig);
 }
 
-util.inherits(HouseAlarmBase, Thing);
-
 // Called when system state is required
-HouseAlarmBase.prototype.export = function(_exportObj) {
+HouseAlarm.prototype.export = function(_exportObj) {
    Thing.prototype.export.call(this, _exportObj);
 };
 
 // Called when current state required
-HouseAlarmBase.prototype.import = function(_importObj) {
+HouseAlarm.prototype.import = function(_importObj) {
    Thing.prototype.import.call(this, _importObj);
 };
 
-HouseAlarmBase.prototype.coldStart = function() {
+HouseAlarm.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this); 
 };
 
-HouseAlarmBase.prototype.hotStart = function() {
+HouseAlarm.prototype.hotStart = function() {
    Thing.prototype.hotStart.call(this);
 };
 
-module.exports = exports = HouseAlarmBase;
+module.exports = exports = HouseAlarm;
