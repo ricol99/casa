@@ -5,7 +5,7 @@ function CombineStateProperty(_config, _owner) {
    StateProperty.call(this, _config, _owner);
 
    this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";
-   this.allSourcesRequiredForValidity = true;
+   //this.allSourcesRequiredForValidity = true;
 
    this.sources = (_config.hasOwnProperty("sources")) ? _config.sources : [];
 }
