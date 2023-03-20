@@ -340,7 +340,7 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
             clearTimerResult = this.clearStateTimer();
 
             if (clearTimerResult.timerActive && (clearTimerResult.timeLeft <= 0) && _previousStateName && this.states.hasOwnProperty(_previousStateName) &&
-                this.states[_previousState].hasOwnProperty('timeout')) {
+                this.states[_previousStateName].hasOwnProperty('timeout')) {
                // Edge case where the timeout has already expired and waiting for the event loop to schedule. We have just cancelled it
                console.log(this.uName + ": Edge case - previous state timer has already expired and is waiting to be scheduled, manually modify the time left so that it expires in the next state");
                clearTimerResult.timeLeft = 1;

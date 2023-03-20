@@ -20,12 +20,16 @@ function Source(_config, _owner) {
    this.createChildren(_config.properties, "property", this);
    this.createChildren(_config.events, "event", this);
 
-   this.ensurePropertyExists('MODE', 'stateproperty',
-                             { "initialValue": 'auto', "takeControlOnTransition": true,
-                               "states": [ { name: "auto", priority: -100 },
-                                           { name: "manual", priority: 100, timeout: { "duration": this.manualOverrideTimeout, "nextState": "auto" }}]}, _config);
+   var modeConfig = _config.hasOwnProperty("modeConfig") ? _config.modeConfig
+                                                         : { initialValue: "auto", takeControlOnTransition: true,
+                                                             states: [ { name: "auto", priority: -100 },
+                                                                       { name: "manual", priority: 100,
+                                                                         timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]};
+
+   this.ensurePropertyExists("MODE", "stateproperty", modeConfig, _config);
+
    if (this.casa) {
-      console.log(this.uName + ': Source casa: ' + this.casa.uName);
+      console.log(this.uName + ": Source casa: " + this.casa.uName);
       this.casa.addSource(this);
    }
 }

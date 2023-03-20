@@ -62,14 +62,21 @@ var Thing = require('../thing');
 // <scene-name-n> - scene array element n active
 
 function Room(_config, _parent) {
+
+   if (!_config.hasOwnProperty("modeConfig")) {
+      _config.modeConfig = { initialValue: "auto", takeControlOnTransition: true,
+                             states: [{ name: "auto", priority: -100 },
+                                      { name: "manual", priority: 100, source: { event: "room-switch-event", nextState: "auto" } }] };
+   }
+
    Thing.call(this, _config, _parent);
    this.thingType = "room";
 
-   if (_config.hasOwnProperty('movementTimeouts')) {
+   if (_config.hasOwnProperty("movementTimeouts")) {
       this.movementTimeouts = _config.movementTimeouts;
    }
    else {
-      var value = (_config.hasOwnProperty('movementTimeout')) ? _config.movementTimeout : 600;
+      var value = (_config.hasOwnProperty("movementTimeout")) ? _config.movementTimeout : 600;
       this.movementTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
    }
 
