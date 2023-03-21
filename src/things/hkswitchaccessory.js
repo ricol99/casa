@@ -31,6 +31,10 @@ function HomekitSwitchAccessory(_config, _parent) {
    if (!this.stateless) {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
+
+      if (_config.hasOwnProperty("switchMap")) {
+         this.switchMap = util.copy(_config.switchMap);
+      }
    }
 }
 
@@ -55,6 +59,14 @@ HomekitSwitchAccessory.prototype.hotStart = function() {
 };
 
 HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
+   var status = _status;
+
+   if (this.switchMap) {
+      status = this.switchMap[_status ? "true" : "false"]; 
+   }
+   else {
+      status = _status ? true : false;
+   }
 
    if (this.stateless) {
 
@@ -72,14 +84,18 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
       }
    }
    else {
-      this.raiseEvent(this.eventName, { value: _status, oldValue: this.properties[this.switchProp].value });
+      this.raiseEvent(this.eventName, { value: status, oldValue: this.properties[this.switchProp].value });
       this.setManualMode();
-      this.alignPropertyValue(this.switchProp, _status ? true : false);
+      this.alignPropertyValue(this.switchProp, status);
    }
 };
 
+HomekitSwitchAccessory.prototype.mapOutput = function(_value) {
+   return (this.stateless) ? false : (this.switchMap ? ((_value == this.switchMap["true"]) ? 1 : 0) : (_value ? 1 : 0));
+};
+
 HomekitSwitchAccessory.prototype.getSwitch = function() {
-   return (this.stateless) ? false : this.properties[this.switchProp].value ? 1 : 0;
+   return (this.mapOutput(this.properties[this.switchProp].value);
 };
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
@@ -88,7 +104,7 @@ HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _pr
       this.hkAccessory
         .getService(Service.Switch)
         .getCharacteristic(Characteristic.On)
-        .updateValue(_propValue ? 1 : 0);
+        .updateValue(this.mapOutput(_propValue));
    }
 };
 
