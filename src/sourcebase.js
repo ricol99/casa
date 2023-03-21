@@ -163,6 +163,10 @@ SourceBase.prototype.invalidate = function(_includeChildren) {
    NamedObject.prototype.invalidate.call(this, _includeChildren);
 };
 
+SourceBase.prototype.updateProperty = function(_propName, _propValue, _data) {
+   this.emitPropertyChange(_propName, _propValue, _data);
+};
+
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
 SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data) {
    console.info(this.uName + ': Property Changed: ' + _propName + ': ' + _propValue);
