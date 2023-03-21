@@ -33,7 +33,6 @@ function HomekitSecuritySystem(_config, _parent) {
       .getCharacteristic(Characteristic.SecuritySystemTargetState)
       .on('set', (_value, _callback) => {
          _callback(this.setTargetState(_value) ? null : true);
-         //_callback();
       })
       .on('get', (_callback) => {
          _callback(null, this.getTargetState());

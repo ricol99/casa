@@ -79,7 +79,7 @@ Property.prototype.coldStart = function(_data) {
    if (this.initialValueSet) {
       console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
       this.cold = false;
-      this.owner.emitPropertyChange(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
+      this.owner.updateProperty(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
 
    NamedObject.prototype.coldStart.call(this, _data);
