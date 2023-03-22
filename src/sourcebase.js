@@ -165,6 +165,7 @@ SourceBase.prototype.invalidate = function(_includeChildren) {
 
 SourceBase.prototype.updateProperty = function(_propName, _propValue, _data) {
    this.emitPropertyChange(_propName, _propValue, _data);
+   return _propValue;
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
