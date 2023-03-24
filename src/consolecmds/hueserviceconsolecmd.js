@@ -127,7 +127,8 @@ HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
             argv.shift();
             const createGroupOptions = commandLineArgs(createGroupDefinitions, { argv, stopAtFirstUnknown: true })
             argv = createGroupOptions._unknown || [];
-            return _callback(null, util.inspect(createGroupOptions));
+            return this.executeParsedCommand("createGroup", createGroupOptions, _callback);
+            //return _callback(null, util.inspect(createGroupOptions));
          }
       }
    }

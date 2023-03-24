@@ -185,6 +185,7 @@ Console.prototype.identifyCasa = function(_line) {
 
 Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback) {
    var casa = this.identifyCasa(_line);
+   //process.stdout.write("AAAAA Console.prototype.identifyCasaAndSendCommand() _line="+util.inspect(_line)+", _func="+_func+"\n");
 
    if (casa) {
       this.sendCommandToCasa(casa, _line, _func, _callback);
@@ -195,6 +196,7 @@ Console.prototype.identifyCasaAndSendCommand = function(_line, _func, _callback)
 };
 
 Console.prototype.sendCommandToCasa = function(_casa, _line, _func, _callback) {
+   //process.stdout.write("AAAAA Console.prototype.sendCommandToCasa() _line="+util.inspect(_line)+", _func="+_func+"\n");
    return Object.getPrototypeOf(_casa)[_func].call(_casa, _line, _callback);
 };
 

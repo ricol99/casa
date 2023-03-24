@@ -13,6 +13,7 @@ function HomekitLightAccessory(_config, _parent) {
    this.brightnessSupported = _config.brightnessSupported;
    this.hueSupported = _config.hueSupported;
    this.saturationSupported = _config.saturationSupported;
+   this.colourTempSupported = _config.colourTempSupported;
    this.powerProp = _config.hasOwnProperty("powerProp") ? _config.powerProp : "power";
 
    this.ensurePropertyExists(this.powerProp, 'property', { initialValue: false }, _config);
@@ -74,6 +75,21 @@ function HomekitLightAccessory(_config, _parent) {
             _callback(null, this.getHue());
          });
    }
+
+   if (this.colourTempSupported) {
+      this.ensurePropertyExists('colour-temp', 'property', { initialValue: 0 }, _config);
+
+      this.hkAccessory
+         .getService(Service.Lightbulb)
+         .addCharacteristic(Characteristic.ColorTemperature)
+         .on('set', (_value, _callback) => {
+            this.setColourTemp(_value);
+            _callback();
+         })
+         .on('get', (_callback) => {
+            _callback(null, this.getColourTemp());
+         });
+   }
 }
 
 util.inherits(HomekitLightAccessory, HomekitAccessory);
@@ -124,7 +140,7 @@ HomekitLightAccessory.prototype.setSaturation = function(_status) {
 
 HomekitLightAccessory.prototype.getSaturation = function() {
    return this.properties["saturation"].value;
-}
+};
 
 HomekitLightAccessory.prototype.setHue = function(_status) {
    console.log(this.uName + ": Changing hue to " + _status);
@@ -134,7 +150,17 @@ HomekitLightAccessory.prototype.setHue = function(_status) {
 
 HomekitLightAccessory.prototype.getHue = function() {
    return this.properties["hue"].value;
-}
+};
+
+HomekitLightAccessory.prototype.getColourTemp = function() {
+   return this.properties["colour-temp"].value;
+};
+
+HomekitLightAccessory.prototype.setColourTemp = function(_status) {
+   console.log(this.uName + ": Changing colour temperature to " + _status);
+   this.setManualMode();
+   this.alignPropertyValue("colour-temp", _status);
+};
 
 HomekitLightAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
@@ -160,6 +186,12 @@ HomekitLightAccessory.prototype.propertyAboutToChange = function(_propName, _pro
       this.hkAccessory
         .getService(Service.Lightbulb)
         .getCharacteristic(Characteristic.Hue)
+        .updateValue(_propValue);
+   }
+   else if (_propName == "colour-temp") {
+      this.hkAccessory
+        .getService(Service.Lightbulb)
+        .getCharacteristic(Characteristic.ColorTemperature)
         .updateValue(_propValue);
    }
 };
