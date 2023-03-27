@@ -192,6 +192,24 @@ WhRelayService.prototype.sendMessage = function(_body, _callback) {
    req.end();
 };
 
+WhRelayService.prototype.addHttpInfoToResponses = function(_target, _responses) {
+
+   for (var i = 0; i < _responses.length; ++i) {
+      _responses[i].http = {};
+      _responses[i].http.method = "POST";
+      _responses[i].http.contentType = "application/json";
+      _responses[i].http.url = this.url;
+      _responses[i].http.header = null;
+   
+      if (_responses[i].hasOwnProperty("property")) {
+         _responses[i].http.body = { secret: this.apiSecret, uName: _target, propName: _responses[i].property, propValue: _responses[i].responseValue };
+      } 
+      else {
+         _responses[i].http.body = { secret: this.apiSecret, uName: _target, eventName: _responses[i].event };
+      }
+   }    
+}; 
+
 WhRelayService.prototype.restartWhRelayClient = function() {
 
    try {
