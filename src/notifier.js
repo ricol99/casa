@@ -16,7 +16,7 @@ var Thing = require('./thing');
 function Notifier(_config, _parent) {
    Thing.call(this, _config, _parent);
 
-   var responseServiceName = _config.hasOwnProperty("responseServiceName") ? _config.responseServiceName : this.gang.casa.findServiceName("smeeservice");
+   var responseServiceName = _config.hasOwnProperty("responseServiceName") ? _config.responseServiceName : this.gang.casa.findServiceName("whrelayservice");
    var responseService =  this.casa.findService(responseServiceName);
 
    if (!responseService) {
@@ -24,8 +24,8 @@ function Notifier(_config, _parent) {
       process.exit(3)
    }
 
-   var responseServicePropertyType = _config.hasOwnProperty("responseServicePropertyType") ? _config.responseServicePropertyType : "smeeproperty";
-   var responseServiceEventType = _config.hasOwnProperty("responseServiceEventType") ? _config.responseServiceEventType : "smeeevent";
+   var responseServicePropertyType = _config.hasOwnProperty("responseServicePropertyType") ? _config.responseServicePropertyType : "whrelayproperty";
+   var responseServiceEventType = _config.hasOwnProperty("responseServiceEventType") ? _config.responseServiceEventType : "whrelayevent";
 
    var serviceConfig = _config.serviceConfig;
    serviceConfig.id = this.uName.replace("::", "").replace(/:/g, "-");
