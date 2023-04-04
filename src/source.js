@@ -7,7 +7,6 @@ function Source(_config, _owner) {
 
    this.casa = this.gang.casa;
    this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
-   this.manualOverrideTimeout = (_config.hasOwnProperty('manualOverrideTimeout')) ? _config.manualOverrideTimeout : 3600;
    this.controllerPriority = -1;
    this.controller = null;
 
@@ -24,9 +23,11 @@ function Source(_config, _owner) {
                                                          : { initialValue: "auto", takeControlOnTransition: true,
                                                              states: [ { name: "auto", priority: -100 },
                                                                        { name: "manual", priority: 100,
-                                                                         timeout: { duration: this.manualOverrideTimeout, nextState: "auto" }}]};
-
+                                                                         timeout: { property: "MODE-MANUAL-DURATION", nextState: "auto" }}]};
+ 
    this.ensurePropertyExists("MODE", "stateproperty", modeConfig, _config);
+   this.ensurePropertyExists("MODE-MANUAL-TIMEOUT", "property",
+                            { initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
 
    if (this.casa) {
       console.log(this.uName + ": Source casa: " + this.casa.uName);
@@ -395,7 +396,12 @@ Source.prototype.getManualMode = function() {
    return this.properties['MODE'].value === 'manual';
 };
 
-Source.prototype.setManualMode = function() {
+Source.prototype.setManualMode = function(_duration) {
+
+   if (_duration !== undefined) {
+      this.alignPropertyValue("MODE-MANUAL-TIMEOUT", _duration);
+   }
+
    this.alignPropertyValue("MODE", "manual");
 };
 

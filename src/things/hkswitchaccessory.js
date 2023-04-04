@@ -30,6 +30,19 @@ function HomekitSwitchAccessory(_config, _parent) {
 
    if (!this.stateless) {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
+      this.switchMap = _config.hasOwnProperty("switchMap") ? util.copy(_config.switchMap, true) : { "false": false, "true": true };
+      var newObj = {};
+
+      for (var val in this.switchMap) {
+
+         if (this.switchMap.hasOwnProperty(val)) {
+            newObj[this.switchMap[String(val)]] = val;
+         }
+      }
+
+      this.switchMap["false"] = newObj["false"];
+      this.switchMap["true"] = newObj["true"];
+
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
    }
 }
@@ -74,12 +87,12 @@ HomekitSwitchAccessory.prototype.setSwitch = function(_status) {
    else {
       this.raiseEvent(this.eventName, { value: _status, oldValue: this.properties[this.switchProp].value });
       this.setManualMode();
-      this.alignPropertyValue(this.switchProp, _status ? true : false);
+      this.alignPropertyValue(this.switchProp, _status ? this.switchMap["true"] : this.switchMap["false"]);
    }
 };
 
 HomekitSwitchAccessory.prototype.getSwitch = function() {
-   return (this.stateless) ? false : this.properties[this.switchProp].value ? 1 : 0;
+   return (this.stateless) ? false : Boolean(this.switchMap[String(this.properties[this.switchProp].value)]) ? 1 : 0;
 };
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
@@ -88,7 +101,7 @@ HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _pr
       this.hkAccessory
         .getService(Service.Switch)
         .getCharacteristic(Characteristic.On)
-        .updateValue(_propValue ? 1 : 0);
+        .updateValue(Boolean(this.switchMap[String(_propValue)]) ? 1 : 0);
    }
 };
 
