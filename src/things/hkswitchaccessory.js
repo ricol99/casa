@@ -38,7 +38,7 @@ function HomekitSwitchAccessory(_config, _parent) {
          for (var val in this.switchMap) {
 
             if (this.switchMap.hasOwnProperty(val)) {
-               newObj[this.switchMap[String(val)]] = val;
+               newObj[String(this.switchMap[val])] = val;
             }
          }
 
@@ -103,7 +103,7 @@ HomekitSwitchAccessory.prototype.getSwitch = function() {
 
 HomekitSwitchAccessory.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
 
-   if (_propName == this.switchProp) {
+   if (_propName === this.switchProp) {
       this.hkAccessory
         .getService(Service.Switch)
         .getCharacteristic(Characteristic.On)
