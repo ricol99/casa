@@ -30,18 +30,24 @@ function HomekitSwitchAccessory(_config, _parent) {
 
    if (!this.stateless) {
       this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "ACTIVE";
-      this.switchMap = _config.hasOwnProperty("switchMap") ? util.copy(_config.switchMap, true) : { "false": false, "true": true };
-      var newObj = {};
 
-      for (var val in this.switchMap) {
+      if (_config.hasOwnProperty("switchMap")) {
+         this.switchMap = util.copy(_config.switchMap, true);
+         var newObj = {};
 
-         if (this.switchMap.hasOwnProperty(val)) {
-            newObj[this.switchMap[String(val)]] = val;
+         for (var val in this.switchMap) {
+
+            if (this.switchMap.hasOwnProperty(val)) {
+               newObj[this.switchMap[String(val)]] = val;
+            }
          }
-      }
 
-      this.switchMap["false"] = newObj["false"];
-      this.switchMap["true"] = newObj["true"];
+         this.switchMap["false"] = newObj["false"];
+         this.switchMap["true"] = newObj["true"];
+      }
+      else {
+         this.switchMap = { "false": false, "true": true };
+      }
 
       this.ensurePropertyExists(this.switchProp, 'property', { initialValue: false }, _config);
    }
