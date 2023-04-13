@@ -9,6 +9,9 @@ var Room = require('./room');
 // <username>-switch-event - let each user control their own readiness for bed
 // room-switch-event - room entrance switch
 // cancel-bedtime-event - cancel the bedtime sequence and return to normal motion sensing
+// pre-wake-up-duration - optional timer to automatically move from pre-wake-up to wake-up (wake-up-event not required when this is defined as > -1 i.e. infinate)
+// awake-in-bed-duration - optional timer to automatically move from awake-in-bed to not-present
+// reading-in-bed-duration - optional timer to automatically move from reading-in-bed to asleep
 
 // Resulting <username>-user-state (s)
 // not-present - user not present in the bedroom
@@ -40,14 +43,20 @@ function Bedroom(_config, _parent) {
 
    Room.call(this, _config, _parent);
 
+   this.ensurePropertyExists("pre-wake-up-duration", "property", { initialValue: -1 }, _config);
+
    if (_config.hasOwnProperty('user')) {
       _config.users = [ _config.user ];
    }
 
    this.users = [];
    this.userStateConfigs = [];
+
    this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*30;
+   this.ensurePropertyExists("awake-in-bed-duration", "property", { initialValue: this.awakeInBedTimeout }, _config);
+
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
+   this.ensurePropertyExists("reading-in-bed-duration", "property", { initialValue: this.readingInBedTimeout }, _config);
 
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.gang.findNamedObject(_config.users[u].uName));
@@ -61,7 +70,6 @@ function Bedroom(_config, _parent) {
 
    this.bedStatusConfig = { name: "bed-state", initialValue: "empty" };
    this.bedFullConfig = { initialValue: false, sources: [] };
-   //this.userMonitorConfig = { initialValue: "idle", states: [{ "name": "idle", "priority": 0, sources: [] }] };
 
    for (var i = 0; i < _config.users.length; ++i) {
       this.userStateConfigs.push({});
@@ -94,17 +102,20 @@ function Bedroom(_config, _parent) {
                "name": "initial-reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
                            { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
-               "actions": [{ "property": "night-time", "value": true }]
+               "actions": [{ "property": "night-time", "value": true }],
+               "timeout": { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
             },
             {
                "name": "reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
-                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}]
+                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+               "timeout": { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
             },
             {
                "name": "reading-in-bed-others-asleep", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
-                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}]
+                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+               "timeout": { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
             },
             {
                "name": "asleep-in-bed", "priority": 10,
@@ -116,11 +127,12 @@ function Bedroom(_config, _parent) {
             {
                "name": "waking-up-in-bed", "priority": 10,
                "sources": [{ "event": "wake-up-event", "nextState": "awake-in-bed" },
-                          { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}]
+                          { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+               "timeout": { "property": "pre-wake-up-duration", "nextState": "awake-in-bed" }
             },
             {
                "name": "awake-in-bed", "priority": 10,
-               "timeout": { "duration": this.awakeInBedTimeout, "nextState": "not-present" },
+               "timeout": { "property": "awake-in-bed-duration", "nextState": "not-present" },
                "sources": [{ "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
                "actions": [{ "property": "night-time", "value": false }]
             },
@@ -132,11 +144,11 @@ function Bedroom(_config, _parent) {
          ]
       };
 
-      if (this.readingInBedTimeout != -1) {
+      /*if (this.readingInBedTimeout != -1) {
          this.userStateConfigs[i].states[3].timeout = { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
          this.userStateConfigs[i].states[4].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
          this.userStateConfigs[i].states[5].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
-      }
+      }*/
 
       for (var j = 0; j < this.users.length; ++j) {
 
