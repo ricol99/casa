@@ -423,6 +423,10 @@ State.prototype.checkCounter = function(_source) {
    return null;
 };
       
+function comp(_var1, _var2, _invert) {
+   return _invert ? _var1 !== _var2 : _var1 === _var2;
+}
+
 State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
 
    if (!_guardedObject) {
@@ -434,16 +438,19 @@ State.prototype.checkGuard = function(_guardedObject, _activeQueue) {
    if (_guardedObject.hasOwnProperty("guards")) {
 
       for (var i = 0; i < _guardedObject.guards.length; ++i) {
+         var invert = _guardedObject.guards[i].hasOwnProperty("invert") ? _guardedObject.guards[i].invert : false;
 
          if (_activeQueue && _guardedObject.guards[i].active) {
             _activeQueue.push(_guardedObject);
          }
 
-         if ((_guardedObject.guards[i].hasOwnProperty("property")) && (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== _guardedObject.guards[i].value)) {
+         //if ((_guardedObject.guards[i].hasOwnProperty("property")) && (this.owner.owner.getProperty(_guardedObject.guards[i].property) !== _guardedObject.guards[i].value)) {
+         if ((_guardedObject.guards[i].hasOwnProperty("property")) && comp(this.owner.owner.getProperty(_guardedObject.guards[i].property), _guardedObject.guards[i].value, !invert)) {
             ret = false;
             break;
          }
-         else if (_guardedObject.guards[i].hasOwnProperty("previousState") && this.owner.previousState && (this.owner.previousState.name !== _guardedObject.guards[i].previousState)) {
+         //else if (_guardedObject.guards[i].hasOwnProperty("previousState") && this.owner.previousState && (this.owner.previousState.name !== _guardedObject.guards[i].previousState)) {
+         else if (_guardedObject.guards[i].hasOwnProperty("previousState") && this.owner.previousState && comp(this.owner.previousState.name, _guardedObject.guards[i].previousState, !invert)) {
            ret = false;
            break;
          }
@@ -462,8 +469,9 @@ State.prototype.processActiveActionGuards = function(_propName, _propValue) {
       for (var i = 0; i < this.activeGuardedActions[a].guards.length; ++i) {
 
          if (this.activeGuardedActions[a].guards[i].active && (this.activeGuardedActions[a].guards[i].property === _propName)) {
+            var invert = this.activeGuardedActions[a].guards[i].hasOwnProperty("invert") ? this.activeGuardedActions[a].guards[i].invert : false;
 
-            if ((_propValue === this.activeGuardedActions[a].guards[i].value) && this.checkGuard(this.activeGuardedActions[a])) {
+            if (comp(_propValue, this.activeGuardedActions[a].guards[i].value, invert) && this.checkGuard(this.activeGuardedActions[a])) {
                console.log(this.uName + ": checkActiveActionGuards() Found active guard! Property: "+_propName+" Value: "+_propValue);
                newActionsFound++;
                actionsMet.push(this.activeGuardedActions[a]);
@@ -574,8 +582,9 @@ State.prototype.checkActiveSourceGuards = function(_propName, _propValue) {
       for (var i = 0; i < this.activeGuardedSources[a].guards.length; ++i) {
 
          if (this.activeGuardedSources[a].guards[i].active && (this.activeGuardedSources[a].guards[i].property === _propName)) {
+            var invert = this.activeGuardedSources[a].guards[i].hasOwnProperty("invert") ? this.activeGuardedSources[a].guards[i].invert : false;
 
-            if ((_propValue === this.activeGuardedSources[a].guards[i].value) && this.checkGuard(this.activeGuardedSources[a])) {
+            if (comp(_propValue, this.activeGuardedSources[a].guards[i].value, invert) && this.checkGuard(this.activeGuardedSources[a])) {
                console.log(this.uName + ": checkActiveSourceGuards() Found active guard!");
                return this.activeGuardedSources[a];
             }
