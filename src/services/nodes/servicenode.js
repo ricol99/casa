@@ -53,6 +53,10 @@ ServiceNode.prototype.newSubscriptionAdded = function(_subscription) {
 
 ServiceNode.prototype.processSubscription = function(_subscription) {
 
+   if (!_subscription || !_subscription.hasOwnProperty("subscriber") || _subscription.subscriber === this.uName) {
+      return;
+   }
+
    if (!this.subscribers.hasOwnProperty(_subscription.subscriber)) {
       this.subscribers[_subscription.subscriber] = { uName: _subscription.subscriber, properties: {}, events: {}, args: _subscription.args };
    }
