@@ -22,7 +22,7 @@ function Source(_config, _owner) {
    var modeConfig = _config.hasOwnProperty("modeConfig") ? _config.modeConfig
                                                          : { initialValue: "auto", takeControlOnTransition: true, ignoreControl: true,
                                                              states: [ { name: "auto", priority: -100,
-                                                                         source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
+                                                                         /*source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }*/},
                                                                        { name: "manual", priority: 100,
                                                                          timeout: { property: "MANUAL-MODE-DURATION", action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
  
@@ -403,9 +403,8 @@ Source.prototype.setManualMode = function(_duration) {
    if (_duration !== undefined) {
       this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
    }
-   else {
-      this.alignPropertyValue("MODE", "manual");
-   }
+
+   this.alignPropertyValue("MODE", "manual");
 };
 
 Source.prototype.getAutoMode = function() {
