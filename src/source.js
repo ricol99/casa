@@ -24,7 +24,7 @@ function Source(_config, _owner) {
                                                              states: [ { name: "auto", priority: -100,
                                                                          source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
                                                                        { name: "manual", priority: 100,
-                                                                         timeout: { property: "MANUAL-MODE-DURATION", action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
+                                                                         timeout: { source: { property: "MANUAL-MODE-DURATION" }, action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
  
    this.ensurePropertyExists("MANUAL-MODE-DURATION", "property",
                             { initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
