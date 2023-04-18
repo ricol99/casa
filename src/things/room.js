@@ -62,13 +62,6 @@ var Thing = require('../thing');
 // <scene-name-n> - scene array element n active
 
 function Room(_config, _parent) {
-
-   if (!_config.hasOwnProperty("modeConfig")) {
-      _config.modeConfig = { initialValue: "auto", takeControlOnTransition: true,
-                             states: [{ name: "auto", priority: -100 },
-                                      { name: "manual", priority: 100, source: { event: "room-switch-event", nextState: "auto" } }] };
-   }
-
    Thing.call(this, _config, _parent);
    this.thingType = "room";
 
