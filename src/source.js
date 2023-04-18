@@ -403,8 +403,9 @@ Source.prototype.setManualMode = function(_duration) {
    if (_duration !== undefined) {
       this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
    }
-
-   this.alignPropertyValue("MODE", "manual");
+   else {
+      this.alignPropertyValue("MODE", "manual");
+   }
 };
 
 Source.prototype.getAutoMode = function() {
