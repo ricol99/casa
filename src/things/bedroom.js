@@ -122,7 +122,8 @@ function Bedroom(_config, _parent) {
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "reading-in-bed" },
                            { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                            { "event": "wake-up-event", "nextState": "awake-in-bed"},
-                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}]
+                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+               "schedule": { "name": "wake-up-event", "rules": [ "0 12 * * *" ]}
             },
             {
                "name": "waking-up-in-bed", "priority": 10,
