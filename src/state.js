@@ -322,6 +322,7 @@ State.prototype.getCasa = function() {
 };
 
 State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPropertyPriority, _previousState) {
+   console.log(this.uName + ": State.prototype.initialise()");
 
    if (_parentPropertyPriorityDefined && !this.priorityDefined) {
       this.priority = _parentPropertyPriority
@@ -333,10 +334,10 @@ State.prototype.initialise = function(_parentPropertyPriorityDefined, _parentPro
 
    var immediateState = immediateStateSources || immediateStateGuards || immediateStateCounter;
 
-   var noOfActions = this.alignActions();
+   var actionsSet = this.alignActions();
 
    //if ((!immediateState) && (noOfActions === 0) && this.owner.takeControlOnTransition) {
-   if (noOfActions === 0) {
+   if (!actionsSet) {
       this.owner.takeControl(this.owner.takeControlOnTransition ? this.priority : (_parentPropertyPriorityDefined ? _parentPropertyPriority : 0));
    }
 

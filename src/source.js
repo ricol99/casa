@@ -271,9 +271,10 @@ Source.prototype.checkControl = function(_newController, _priority) {
 };
 
 // Called by stateproperty to take control based on setting a action property
-Source.prototype.takeControl = function(_newController, _priority) {
+Source.prototype.takeControl = function(_newController, _priority, _override) {
    console.log(this.uName + ": Source.prototype.takeControl(): controller="+_newController.name+" priority="+_priority);
    var result = true;
+   var override = (_override === undefined) ? false : _override;
 
    if (this.controller === null) {
       console.log(this.uName + ": Controller "+_newController.name+" is taking control");
@@ -306,7 +307,7 @@ Source.prototype.takeControl = function(_newController, _priority) {
       result = this.reprioritiseCurrentController(_priority);
    }
 
-   return result;
+   return override || result;
 };
 
 // Called by stateproperty to realign control based on a state transition

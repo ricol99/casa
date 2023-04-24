@@ -380,7 +380,7 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
 
 StateProperty.prototype.takeControl = function(_priority) {
    this.currentPriority = _priority;
-   return this.owner.takeControl(this, this.currentPriority);
+   return this.owner.takeControl(this, this.currentPriority, this.ignoreControl);
 };
 
 StateProperty.prototype.raiseEvent = function(_eventName, _data) {
@@ -392,7 +392,7 @@ StateProperty.prototype.resolvePropertyValues = function(_properties) {
 
 StateProperty.prototype.alignProperties = function(_properties) {
 
-   if ((_properties && _properties.length > 0) && (this.ignoreControl || this.takeControl((this.currentState) ? this.currentState.priority : this.priority))) {
+   if ((_properties && _properties.length > 0) && (this.takeControl((this.currentState) ? this.currentState.priority : this.priority))) {
       this.owner.alignProperties(_properties);
    }
 };
@@ -461,7 +461,7 @@ StateProperty.prototype.alignEventsInternal = function(_events) {
 
 StateProperty.prototype.alignActionsInternal = function(_actions, _priority) {
 
-   if (_actions && (this.ignoreControl || this.takeControl(_priority))) {
+   if (_actions && this.takeControl(_priority)) {
       var properties = [];
       var events = [];
 
@@ -495,6 +495,7 @@ StateProperty.prototype.flushBufferedActionsInternal = function() {
 };
 
 StateProperty.prototype.becomeController = function() {
+   console.log(this.uName+": StateProperty.prototype.becomeController()");
    // I am now the controller
    this.controllingOwner = true;
 
@@ -546,7 +547,7 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
 
 StateProperty.prototype.launchActionFunction = function(_actionHandler, _priority) {
 
-   if (this.ignoreControl || this.takeControl(_priority)) {
+   if (this.takeControl(_priority)) {
        return this.owner[_actionHandler](this.currentState);
    }
 
