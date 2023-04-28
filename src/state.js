@@ -726,24 +726,24 @@ State.prototype.exiting = function(_event, _value) {
 State.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.uName + ": scheduledEventTriggered() event name=" + _event.name);
 
-   if (_event.hasOwnProperty("name") && (_event.name != undefined)) {
+   if (this.owner.iAmCurrent(this)) {
 
-      if (_event.hasOwnProperty("value")) {
-         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName, value: _event.value });
-      }
-      else {
-         this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName });
-      }
-   }
+      if (_event.hasOwnProperty("name") && (_event.name != undefined)) {
 
-   if (_event.config.hasOwnProperty("nextState")) {
-
-      if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
-         this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.uName });
+         if (_event.hasOwnProperty("value")) {
+            this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName, value: _event.value });
+         }
+         else {
+            this.owner.raiseEvent(_event.name, { sourceName: this.owner.owner.uName });
+         }
       }
-   }
-   else {
-      this.owner.set(this.name, { sourceName: this.owner.owner.uName });
+
+      if (_event.config.hasOwnProperty("nextState")) {
+
+         if ((this.owner.currentState === this) && this.checkGuard(_event.config, this.activeGuardedSources)) {
+            this.owner.set(_event.config.nextState, { sourceName: this.owner.owner.uName });
+         }
+      }
    }
 }
 

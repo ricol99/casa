@@ -565,4 +565,8 @@ StateProperty.prototype.ownerHasNewName = function() {
    }
 };
 
+StateProperty.prototype.iAmCurrent = function(_state) {
+   return this.currentState === _state;
+};
+
 module.exports = exports = StateProperty;
