@@ -21,7 +21,6 @@ ConsoleApiService.prototype.import = function(_importObj) {
 };
 
 ConsoleApiService.prototype.coldStart = function() {
-   this.start();
    WebService.prototype.coldStart.call(this);
 };
 
@@ -31,6 +30,8 @@ ConsoleApiService.prototype.hotStart = function() {
 };
 
 ConsoleApiService.prototype.start = function() {
+   WebService.prototype.start.call(this);
+
    this.gangConsoleApi = this.createChild({ name: this.gang.name, type: "gangconsoleapi" }, "consoleapi", null);
 
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));

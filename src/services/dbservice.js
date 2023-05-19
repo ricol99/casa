@@ -36,16 +36,16 @@ DbService.prototype.import = function(_importObj) {
 };
 
 DbService.prototype.coldStart = function() {
-   this.start();
    WebService.prototype.coldStart.call(this);
 };
 
 DbService.prototype.hotStart = function() {
-   this.start();
    WebService.prototype.hotStart.call(this);
 };
 
 DbService.prototype.start = function() {
+   WebService.prototype.start.call(this);
+
    this.addRoute('/db/:dbName', DbService.prototype.dbRequested.bind(this));
    this.addRoute('/dbhash/:dbName/:peerHash', DbService.prototype.dbHashRequested.bind(this));
    this.addRoute('/dbs', DbService.prototype.dbsRequested.bind(this));

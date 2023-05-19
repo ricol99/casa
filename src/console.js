@@ -100,6 +100,7 @@ Console.prototype.setSourceCasa = function(_casaName, _callback) {
 };
 
 Console.prototype.casaFound = function(_params) {
+   //process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() _params="+util.inspect(_params)+"\n");
 
    if (!this.remoteCasas.hasOwnProperty(_params.name)) {
       var remoteCasa = new RemoteCasa(_params, this);
@@ -436,6 +437,7 @@ RemoteCasa.prototype.start = function()  {
    });
 
    this.socket.on('execute-output', (_data) => {
+
       if (this.executeCallback) {
          this.executeCallback(null, _data.result);
       }
