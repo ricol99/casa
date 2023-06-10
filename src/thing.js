@@ -165,7 +165,9 @@ Thing.prototype.inheritChildProps = function() {
 
                   if (!this.properties.hasOwnProperty(prop)) {
                      console.log(this.uName + ": Adding new prop from child "+prop);
-                     var oSpec = { name: prop, initialValue: this.things[thing].properties[prop].value, local: this.things[thing].properties[prop].local };
+                     var oSpec = { name: prop, initialValue: this.things[thing].properties[prop].value,
+                                   local: this.things[thing].properties[prop].local, childInherited: true };
+
                      this.ensurePropertyExists(prop, "property", oSpec, this.config);
                   }
                }
@@ -187,7 +189,9 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
   
             if (_parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
                console.log(this.uName + ": Adding new prop from parent "+prop);
-               var oSpec = { name: prop, initialValue: _parentProps[prop].value, local: true };
+               var oSpec = { name: prop, initialValue: _parentProps[prop].value,
+                             local: true, parentInherited: true };
+
                this.ensurePropertyExists(prop, "property", oSpec, this.config);
             }
          }
@@ -339,6 +343,51 @@ Thing.prototype.ownerHasNewName = function() {
          this.things[thing].ownerHasNewName();
       }
    }
+};
+
+Thing.prototype.removeChildNamedObject = function(_child) {
+   console.log(this.uName + ": removeChildNamedObject() child="+_child.uName);
+   Source.prototype.removeChildNamedObject.call(this, _child);
+   this.getTopThing().refreshChildInheritedProperties();
+};
+
+Thing.prototype.refreshChildInheritedProperties = function() {
+   console.log(this.uName + ": refreshChildInheritedProperties()");
+
+   if (!this.ignoreChildren) {
+
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing) && this.things[thing].refreshChildInheritedProperties()) {
+
+            for (var prop in this.things[thing].properties) {
+
+               if (this.things[thing].properties.hasOwnProperty(prop)) {
+
+                  if (this.properties.hasOwnProperty(prop) && this.properties[prop].config.childInherited) {
+                     this.properties[prop].config.stillChildInherited = true;
+                  }
+               }
+            }
+         }
+      }
+
+      for (var prop2 in this.properties) {
+
+         if (this.properties.hasOwnProperty(prop2) && this.properties[prop2].config.childInherited) {
+
+            if (this.properties[prop2].config.stillChildInherited) {
+               delete this.properties[prop2].config.stillChildInherited;
+            }
+            else {
+               console.log(this.uName + ": Removing child inherited property "+prop2+" because it no longer exists in any child thing");
+               delete this.properties[prop2];
+            }
+         }
+      }
+   }
+
+   return this.propogateToParent;
 };
 
 module.exports = exports = Thing;
