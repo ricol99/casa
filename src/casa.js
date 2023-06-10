@@ -57,14 +57,6 @@ Casa.prototype.buildServices = function() {
 Casa.prototype.buildTree = function() {
    this.createChildren(this.config.scenes, "scene", this);
    this.createChildren(this.config.things, "thing", this);
-
-   for (var thing in this.things) {
-
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].inheritChildProps();
-         this.things[thing].inheritParentProps();
-      }
-   }
 };
 
 // Called when system state is required

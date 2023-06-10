@@ -67,6 +67,8 @@ function SourceListener(_config, _owner) {
    this.wasMaskingInvalid = false;
 
    this.casa.addSourceListener(this);
+
+   console.log(this.uName+": Sourcelistener created!");
 }
 
 util.inherits(SourceListener, NamedObject);
@@ -118,15 +120,16 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.gang.findNamedObject(this.sourceName);
-   //console.log(this.uName + ": AAAAAAA Source result=", this.source);
    this.valid = this.source ? true : false;
 
    if (this.valid) {
 
       if (this.listeningToPropertyChange) {
-         this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
 
-         if (!this.source.hasProperty(this.eventName)) {
+         if (this.source.hasProperty(this.eventName)) {
+            this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
+         }
+         else {
             console.log(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
             this.valid = false;
          }

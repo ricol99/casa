@@ -70,6 +70,7 @@ AsyncEmitter.prototype.setAsyncEmitTimer = function() {
 AsyncEmitter.prototype.on = function(_event, _callback, _subscription) {
 
    if (_subscription) {
+      console.log(this.uName+": Somebody asked to listen to event "+_subscription.property);
       this.subscriptionRegistered(_event, _subscription);
    }
 

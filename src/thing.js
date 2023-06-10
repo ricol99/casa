@@ -4,6 +4,8 @@ var Gang = require('./gang');
 
 function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
+   var topOfTransaction = _config.hasOwnProperty("notTopOfTransaction") ? false : !_config.notTopOfTransaction;
+   delete _config.notTopOfTransaction;
 
    if (_owner && (_owner !== gang) && (_owner !== gang.casa)) {
 
@@ -27,7 +29,19 @@ function Thing(_config, _owner) {
    this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
    this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
 
+   if (_config.hasOwnProperty("things") && _config.things.length > 0) {
+
+      for (var i = 0; i < _config.things.length; ++i) {
+         _config.things[i].notTopOfTransaction = true;
+      }
+
+   }
+
    this.createChildren(_config.things, "thing", this);
+
+   if (topOfTransaction) {
+      this.getTopThing().sortOutInheritedProperties();
+   }
 }
 
 util.inherits(Thing, Source);
@@ -63,8 +77,13 @@ Thing.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
 };
 
-Thing.prototype.addThing = function(_thing) {
-   this.things[_thing.name] = _thing;
+Thing.prototype.sortOutInheritedProperties = function() {
+   console.log(this.uName+": sortOutInheritedProperties()");
+
+   util.setTimeout( () => {
+      this.inheritChildProps();
+      this.inheritParentProps();
+   }, 0);
 };
 
 // Actually update the property value and let all interested parties know
@@ -135,23 +154,27 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 Thing.prototype.inheritChildProps = function() {
 
    if (!this.ignoreChildren) {
-      var childProps = {};
 
       for (var thing in this.things) {
 
-         if (this.things.hasOwnProperty(thing)) {
-            this.things[thing].findAllProperties(childProps);
-         }
-      }
+         if (this.things.hasOwnProperty(thing) && this.things[thing].inheritChildProps()) {
 
-      for (var prop in childProps) {
+            for (var prop in this.things[thing].properties) {
 
-         if (childProps.hasOwnProperty(prop)) {
-            var oSpec = { name: prop, initialValue: childProps[prop].value, local: childProps[prop].local };
-            this.ensurePropertyExists(prop, "property", oSpec, this.config);
+               if (this.things[thing].properties.hasOwnProperty(prop)) {
+
+                  if (!this.properties.hasOwnProperty(prop)) {
+                     console.log(this.uName + ": Adding new prop from child "+prop);
+                     var oSpec = { name: prop, initialValue: this.things[thing].properties[prop].value, local: this.things[thing].properties[prop].local };
+                     this.ensurePropertyExists(prop, "property", oSpec, this.config);
+                  }
+               }
+            }
          }
       }
    }
+
+   return this.propogateToParent;
 };
 
 Thing.prototype.inheritParentProps = function(_parentProps) {
@@ -163,6 +186,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
          for (var prop in _parentProps) {
   
             if (_parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
+               console.log(this.uName + ": Adding new prop from parent "+prop);
                var oSpec = { name: prop, initialValue: _parentProps[prop].value, local: true };
                this.ensurePropertyExists(prop, "property", oSpec, this.config);
             }
@@ -191,7 +215,7 @@ Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].getAllProperties(_allProps);
+               this.things[thing].getAllProperties(_allProps, _ignorePropogation);
             }
          }
       }
@@ -208,7 +232,7 @@ Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].findAllProperties(_allProps);
+               this.things[thing].findAllProperties(_allProps, _ignorePropogation);
             }
          }
       }
@@ -307,7 +331,7 @@ Thing.prototype.getTopThing = function() {
 };
 
 Thing.prototype.ownerHasNewName = function() {
-   NamedObject.prototype.ownerHasNewName.call(this);
+   Source.prototype.ownerHasNewName.call(this);
 
    for (var thing in this.things) {
 
