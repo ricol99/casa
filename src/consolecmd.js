@@ -9,7 +9,8 @@ function ConsoleCmd(_config, _owner, _console) {
    this.casaName = _config.hasOwnProperty("casaName") ? _config.casaName : null;
    this.console = _console;
    this.gang = Gang.mainInstance();
-   this.casa = this.console.getCasa(this.uName);
+   this.casa = this.console.getCasa(this.casaName);
+   this.dbService = this.gang.casa.findService("dbservice");
 
    this.sourceCasa = _config.hasOwnProperty("sourceCasa") ? _config.sourceCasa :  null;
 }

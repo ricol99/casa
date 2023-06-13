@@ -163,6 +163,10 @@ function ConsoleApiSession(_id, _console, _owner) {
 ConsoleApiSession.prototype.serveClient = function(_socket) {
    this.socket = _socket;
 
+   this.socket.on('getCasaInfo', (_data) => {
+      this.socket.emit('casa-info', { dbInfo: this.owner.gang.casa.getDb().getHash() });
+   });
+
    this.socket.on('scopeExists', (_data) => {
       this.scopeExists(_data, (_err, _result) => {
 

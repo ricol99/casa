@@ -144,7 +144,7 @@ Gang.prototype.getDbs = function() {
 };
 
 Gang.prototype.getDb = function(_dbName, _meta, _callback) {
-   var dbName = (_dbName) ? _dbName+"-db" : this.name+"-db";
+   var dbName = (_dbName) ? _dbName : this.name;
 
    if (this.dbs.hasOwnProperty(dbName)) {
 

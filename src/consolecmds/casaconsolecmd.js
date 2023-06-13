@@ -69,21 +69,14 @@ CasaConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
 };
 
 CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
-   /// TDB To be comnpleted!
    this.checkArguments(0, _arguments);
-   this.executeParsedCommand("pullDb", null, (_err, _result) => {
 
-      if (_err) {
-         return _callback(_err);
-      }
-      else if (localHash.hash !== _result.hash) {
-         this.dbService.getAndWritePeerDb(dbName, _params[0], _params[1], this.gang.configPath(), _callback);
-      }
-      else {
-         _callback(null, true);
-      }
-
-   });
+   if (this.casa.dbCompare() !== 0) {
+      this.dbService.getAndWritePeerDb(this.casa.name, this.casa.getHost(), this.casa.getListeningPort(), this.gang.configPath(), _callback);
+   }
+   else {
+      return _callback(null, true);
+   }
 };
 
 CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
