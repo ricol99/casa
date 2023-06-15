@@ -1,5 +1,5 @@
-var util = require('util');
-var Thing = require('../../thing');
+var util = require('../util');
+var Thing = require('../thing');
 
 function ServiceNode(_config, _owner) {
    _config.propogateToParent = false;

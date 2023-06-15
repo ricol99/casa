@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 var eddystoneBeacon = require('eddystone-beacon');
 
 function BtleEddyBeacon(_config, _owner) {

@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 
 function KasaServicePlug(_config, _owner) {
    ServiceNode.call(this, _config, _owner);

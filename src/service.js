@@ -79,12 +79,13 @@ Service.prototype.interestInNewChild = function(_uName) {
    }
 };
 
-Service.prototype.createNode = function(_config) {
+Service.prototype.createNode = function(_config, _loadPath) {
    var type = _config.type;
    _config.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : false;
    _config.local = (_config.hasOwnProperty("local")) ? _config.local : this.localThings;
 
-   var ServiceOwnedNode = require("./services/nodes/"+type);
+   var loadPath = _loadPath ? _loadPath : "services/nodes";
+   var ServiceOwnedNode = require("./" + loadPath + "/"+type);
    var thing = new ServiceOwnedNode(_config, this);
    return thing;
 };

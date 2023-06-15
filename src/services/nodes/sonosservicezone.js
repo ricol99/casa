@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('../../util');
 var Thing = require('../../thing');
 const { Sonos } = require('sonos');
 

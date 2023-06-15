@@ -1,4 +1,4 @@
-var util = require('util');
+var util = require('../../util');
 var CurrentWeather = require('./currentweather');
 
 function LastPeriodWeather(_config, _owner) {

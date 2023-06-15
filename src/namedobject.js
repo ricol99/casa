@@ -367,7 +367,7 @@ NamedObject.prototype.require = function(_type, _superType, _loadPath) {
    var module;
 
    if (_loadPath) {
-      module = './' + _loadPath + 's/' + _type;
+      module = './' + _loadPath + (_loadPath.endsWith("s") ? '/' : 's/') + _type;
    }
    else if (_superType && (_superType !== _type)) {
       module = _superType.endsWith("y") ? './' + _superType.slice(0, -1) + 'ies/' + _type : './' + _superType + 's/' + _type;

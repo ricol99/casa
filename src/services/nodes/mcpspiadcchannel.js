@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 var McpSpiAdc = require('mcp-spi-adc');
 
 function McpSpiAdcChannel(_config, _owner) {

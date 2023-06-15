@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 var Gpio = require('onoff').Gpio;
 
 function GpioServicePin(_config, _owner) {

@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 
 function WhRelaySource(_config, _owner) {
    _config.optimiseTransactions = false;  // Only allow one event and property per transaction

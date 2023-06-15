@@ -83,7 +83,7 @@ Thing.prototype.sortOutInheritedProperties = function() {
    util.setTimeout( () => {
       this.inheritChildProps();
       this.inheritParentProps();
-   }, 0);
+   }, 50);
 };
 
 // Actually update the property value and let all interested parties know

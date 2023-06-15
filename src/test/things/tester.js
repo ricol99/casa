@@ -1,6 +1,6 @@
-var util = require('util');
-var Thing = require('../thing');
-var SourceListener = require('../sourcelistener');
+var util = require('../../util');
+var Thing = require('../../thing');
+var SourceListener = require('../../sourcelistener');
 
 function Tester(_config, _parent) {
    Thing.call(this, _config, _parent);

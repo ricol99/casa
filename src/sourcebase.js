@@ -193,6 +193,14 @@ SourceBase.prototype.rejectPropertyUpdate = function(_propName) {
 };
 
 SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _config, _mainConfig) {
+   var addProperty = true;
+
+   if (!(_config.hasOwnProperty("childInherited") || _config.hasOwnProperty("parentInherited"))) {
+
+      if (this.properties.hasOwnProperty(_propName) && (this.properties[_propName].config.childInherited || this.properties[_propName].config.parentInherited)) {
+         delete this.properties[_propName];
+      }
+   }
 
    if (!this.properties.hasOwnProperty(_propName)) {
       _config.name = _propName;

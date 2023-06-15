@@ -1,5 +1,5 @@
-var util = require('util');
-var ServiceNode = require('./servicenode');
+var util = require('../../util');
+var ServiceNode = require('../../servicenode');
 
 function HueServiceLight(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
