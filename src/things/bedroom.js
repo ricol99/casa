@@ -26,20 +26,25 @@ function Bedroom(_config, _parent) {
    _config.userOverrideConfig =  { initialValue: 'not-active',
                                    states: [{ name: "not-active", priority: 0,
                                               sources: [{ guard: { active: false, property: "night-time", value: false }, event: "room-switch-event", nextState: "active" },
-                                                        { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "may-need-to-cancel-bedtime" }] },
-                                                       // { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "cancel-bedtime" }] },
-                                            { name: "active", priority: 8, source: { event: "room-switch-event", nextState: "not-active" },
+                                                        { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "cancel-bedtime" }] },
+                                                       // { guard: { active: false, property: "night-time", value: true }, event: "room-switch-event", nextState: "may-need-to-cancel-bedtime" }] },
+                                            { name: "active", priority: 8,
+                                              source: { event: "room-switch-event", nextState: "not-active" },
                                               timeout: { property: "override-timeout", "nextState": "not-active" }},
                                             { name: "may-need-to-cancel-bedtime", priority: 10,
                                               source: { event: "room-switch-event", action: { event: "cancel-bedtime-event" }, nextState: "not-active"},
-                                              timeout: { "duration": 0.75, "nextState": "not-active" }} ]};
-                                            //{ name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
-                                              //timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
+                                              timeout: { "duration": 0.75, "nextState": "not-active" }},
+                                            { name: "cancel-bedtime", priority: 16, action: { event: "cancel-bedtime-event" },
+                                              timeout: { "duration": 0.1, "nextState": "not-active" }} ]};
 
    _config.roomStates = [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 0},
                          { name: "no-users-present-dull-day", priority: 0}, { name: "users-present-dull-day", priority: 5},
                          { name: "no-users-present-evening", priority: 0}, { name: "users-present-evening", priority: 5},
                          { name: "no-users-present-night", priority: 0}, { name: "users-present-night", priority: 0}];
+
+   if (_config.hasOwnProperty("nightEntry") && _config.nightEntry) {
+      _config.userOverrideConfig.states[0].sources[1].nextState = "may-need-to-cancel-bedtime";
+   }
 
    Room.call(this, _config, _parent);
 
