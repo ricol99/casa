@@ -65,6 +65,7 @@ function SourceListener(_config, _owner) {
    this.valid = false;
    this.maskingInvalid = false;
    this.wasMaskingInvalid = false;
+   this.listening = false;
 
    this.casa.addSourceListener(this);
 
@@ -122,14 +123,13 @@ SourceListener.prototype.establishListeners = function() {
    this.source = this.gang.findNamedObject(this.sourceName);
    this.valid = this.source ? true : false;
 
-   if (this.valid) {
+   if (this.valid && !this.listening) {
 
       if (this.listeningToPropertyChange) {
 
-         if (this.source.hasProperty(this.eventName)) {
-            this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
-         }
-         else {
+         this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
+
+         if (!this.source.hasProperty(this.eventName)) {
             console.log(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
             this.valid = false;
          }
@@ -143,6 +143,7 @@ SourceListener.prototype.establishListeners = function() {
       }
 
       this.source.on('invalid', this.invalidHandler);
+      this.listening = true;
    }
 
    return this.valid;
@@ -150,14 +151,18 @@ SourceListener.prototype.establishListeners = function() {
 
 SourceListener.prototype.stopListening = function() {
 
-   if (this.listeningToPropertyChange) {
-      this.source.removeListener('property-changed', this.propertyChangedHandler);
-   }
-   else {
-      this.source.removeListener('event-raised', this.eventRaisedHandler);
+   if (this.listening) {
+
+      if (this.listeningToPropertyChange) {
+         this.source.removeListener('property-changed', this.propertyChangedHandler);
+      }
+      else {
+         this.source.removeListener('event-raised', this.eventRaisedHandler);
+      }
+
+      this.source.removeListener('invalid', this.invalidHandler);
    }
 
-   this.source.removeListener('invalid', this.invalidHandler);
    this.casa.removeSourceListener(this);
 };
 

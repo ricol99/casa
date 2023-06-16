@@ -198,10 +198,7 @@ SourceBase.prototype.ensurePropertyExists = function(_propName, _propType, _conf
    if (!(_config.hasOwnProperty("childInherited") || _config.hasOwnProperty("parentInherited"))) {
 
       if (this.properties.hasOwnProperty(_propName) && (this.properties[_propName].config.childInherited || this.properties[_propName].config.parentInherited)) {
-         delete this.properties[_propName];
-         this.invalidate();
-         this.validate();
-         this.casa.scheduleRefreshSourceListeners();
+         return this.overrideExistingProperty(_propName, _propType, _config, _mainConfig);
       }
    }
 
