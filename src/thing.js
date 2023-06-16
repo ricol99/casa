@@ -83,6 +83,7 @@ Thing.prototype.sortOutInheritedProperties = function() {
    util.setTimeout( () => {
       this.inheritChildProps();
       this.inheritParentProps();
+      this.casa.scheduleRefreshSourceListeners();
    }, 50);
 };
 
