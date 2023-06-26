@@ -26,6 +26,18 @@ CasaConsoleApi.prototype.hotStart = function() {
    ConsoleApi.prototype.hotStart.call(this);
 };
 
+CasaConsoleApi.prototype.exportData = function(_session, _params, _callback) {
+   var exportData = {};
+
+   if (this.myObj().export(exportData)) {
+      console.info("AAAAAA export=", exportData);
+      _callback(null, exportData);
+   }
+   else {
+      _callback("No objects to export!");
+   }
+};
+
 CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    var exportData = {};
 

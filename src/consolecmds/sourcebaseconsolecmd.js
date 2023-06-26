@@ -25,7 +25,7 @@ SourceBaseConsoleCmd.prototype.hotStart = function() {
    ConsoleCmd.prototype.hotStart.call(this);
 };
 
-SourceBaseConsoleCmd.prototype.export = function(_arguments, _callback)  {
+SourceBaseConsoleCmd.prototype.exportData = function(_arguments, _callback)  {
    this.executeParsedCommand("export", _arguments, _callback);
 };
 

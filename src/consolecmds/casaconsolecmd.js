@@ -45,8 +45,8 @@ CasaConsoleCmd.prototype.restart = function(_arguments, _callback)  {
    }
 };
 
-CasaConsoleCmd.prototype.export = function(_arguments, _callback)  {
-   this.executeParsedCommand("export", _arguments, _callback);
+CasaConsoleCmd.prototype.exportData = function(_arguments, _callback)  {
+   this.executeParsedCommand("exportData", _arguments, _callback);
 };
 
 
@@ -82,20 +82,34 @@ CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
 CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
-   this.executeParsedCommand("exportDb", null, (_err, _result) => {
+   this.pullDb([], (_err, _result) => {
 
       if (_err) {
          return _callback(_err);
       }
-     
-      Db = require('../db');
-      var output = Db.export(_result);
-      var fileName = this.gang.configPath() + "/configs/" + this.myObjName + ".json";
-      var fs = require('fs');
-      var content = JSON.stringify(output, null, 3);
 
-      fs.writeFile(fileName, content, (_err) => {
-         _callback(_err, true);
+      this.gang.getDb(this.name, undefined, (_err, _db) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         _db.readAll( (_err, _result) => {
+
+            if (_err) {
+               return _callback(_err);
+            }
+
+            Db = require('../db');
+            var output = Db.export(_result);
+            var fileName = this.gang.configPath() + "/configs/" + this.name + ".json";
+            var fs = require('fs');
+            var content = JSON.stringify(output, null, 3);
+
+            fs.writeFile(fileName, content, (_err) => {
+               return _callback(_err, true);
+            });
+         });
       });
    });
 };
@@ -104,52 +118,75 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var cjson = require('cjson');
-   var configFilename = this.gang.configPath() + "/configs/" + this.myObjName + ".json";
+   var configFilename = this.gang.configPath() + "/configs/" + this.name + ".json";
    var inputConfig = cjson.load(configFilename);
 
-   if (inputConfig.casa.name !== this.myObjName) {
+   if (inputConfig.casa.name !== this.name) {
       return _callback("Config file corrupt.");
    }
 
    var Db = require('../db');
-   var db = new Db(this.myObjName, undefined, true);
-  
+   var db = new Db(this.name, undefined, true);
+
    db.on('connected', () => {
-      var configs = {};
-      configs.casa = { "name": "", "type": "", "displayName": "", "location": {}, "gang": "", "listeningPort": 0 };
-      configs.users = [];
-      configs.services = [];
-      configs.scenes = [];
-      configs.things = [];
+      var collections = {};
+      var writeAdditionalGangDb = false;
 
-      for (var section in configs) {
+      collections.casa = { "name": "", "type": "", "displayName": "", "location": {}, "listeningPort": 0 };
 
-         if (configs.hasOwnProperty(section) && inputConfig.hasOwnProperty(section)) {
+      for (var param in collections.casa) {
 
-            if (configs[section] instanceof Array || (util.memberCount(configs[section]) === 0)) {
-
-               if (inputConfig.hasOwnProperty(section)) {
-                  configs[section] = inputConfig[section];
-                  db.appendToCollection(section, configs[section]);
-               }
-            }
-            else {
-               for (var param in configs[section]) {
-
-                  if (inputConfig.hasOwnProperty(section) && inputConfig[section].hasOwnProperty(param)) {
-                     configs[section][param] = inputConfig[section][param];
-                  }
-               }
-               db.appendToCollection(section, configs[section]);
-            }
+         if (inputConfig.casa.hasOwnProperty(param)) {
+            collections.casa[param] = inputConfig.casa[param];
          }
       }
 
-      db.close();
-      var myAddress = util.getLocalIpAddress();
-      var port = this.gang.mainListeningPort();
+      collections.casaServices = inputConfig.hasOwnProperty("casaServices") ? inputConfig.casaServices : inputConfig.casa.hasOwnProperty("services") ? inputConfig.casa.services : [];
+      collections.casaScenes = inputConfig.hasOwnProperty("casaScenes") ? inputConfig.casaScenes : inputConfig.casa.hasOwnProperty("scenes") ? inputConfig.casa.scenes : [];
+      collections.casaThings = inputConfig.hasOwnProperty("casaThings") ? inputConfig.casaThings : inputConfig.casa.hasOwnProperty("things") ? inputConfig.casa.things : [];
+      collections.casaUsers = inputConfig.hasOwnProperty("casaUsers") ? inputConfig.casaUsers : inputConfig.casa.hasOwnProperty("users") ? inputConfig.casa.users : [];
 
-      this.executeParsedCommand("pushDb", [ myAddress, port], _callback);
+      if (inputConfig.hasOwnProperty("gang")) {
+         collections.casa.gang = inputConfig.gang.name;
+         collections.gangThings = inputConfig.hasOwnProperty("gangThings") ? inputConfig.gangThings : inputConfig.gang.hasOwnProperty("things") ? inputConfig.gang.things : [];
+      }
+      else if (inputConfig.casa.hasOwnProperty("gang") && inputConfig.hasOwnProperty("gangThings")) {
+         collections.casa.gang = inputConfig.casa.gang;
+         collections.gangThings = inputConfig.gangThings;
+      }
+      else {
+         collections.casa.gang = collections.casa.name + "-gang";
+         collections.gangThings = [];
+         writeAdditionalGangDb = true;
+      }
+
+      for (var collection in collections) {
+
+         if (collections.hasOwnProperty(collection)) {
+            db.appendToCollection(collection, collections[collection]);
+         }
+      }
+
+      db.readCollection("gangThings", (_err, _res) => {
+         db.close();
+
+         if (_err) {
+            return _callback("Failed to create DB. Error="+_err);
+         }
+
+         var myAddress = util.getLocalIpAddress();
+         var port = this.gang.mainListeningPort();
+
+         this.executeParsedCommand("pushDb", [ myAddress, port], (_err, _res) => {
+            return _callback(_err, true);
+            // TBD
+            if (writeAdditionalGangDb) {
+               var gangConfig = { gang: { "name": collections.casa.name + "-gang", "type": "gang", "displayName": "Gang for " + collections.casa.name, "parentCasa": {} }};
+               //populateDbFromConfig(gangConfig, false); // TBD - call the gang importDB
+            }
+         }); 
+
+      });
    });
 
    db.on('error', (_data) => {

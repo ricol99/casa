@@ -398,10 +398,12 @@ RemoteCasa.prototype.start = function()  {
          this.remoteDbInfo.hash = { hash: _data.dbInfo.hash, lastModified: new Date(_data.dbInfo.lastModified) };
 
          if (this.db) {
+            this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
+            this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.hash.lastModified));
 
             if (this.remoteDbInfo.hash.hash !== this.db.getHash().hash) {
 
-               if ( this.remoteDbInfo.hash.lastModified > this.db.getHash().lastModified) {
+               if (this.remoteDbInfo.hash.lastModified > this.db.getHash().lastModified) {
                   this.owner.writeOutput("Casa "+this.name+" db is newer than local db. User pullDb to update local version");
                }
                else {

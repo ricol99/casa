@@ -28,7 +28,7 @@ SourceBaseConsoleApi.prototype.hotStart = function() {
    ConsoleApi.prototype.hotStart.call(this);
 };
 
-SourceBaseConsoleApi.prototype.export = function(_session, _params, _callback) {
+SourceBaseConsoleApi.prototype.exportData = function(_session, _params, _callback) {
    var exportData = {};
 
    if (this.myObj().export(exportData)) {

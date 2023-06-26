@@ -26,14 +26,18 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
             }
          }
 
-         collections.casaServices = _inputConfig.casa.hasOwnProperty("services") ? _inputConfig.casa.services : [];
-         collections.casaScenes = _inputConfig.casa.hasOwnProperty("scenes") ? _inputConfig.casa.scenes : [];
-         collections.casaThings = _inputConfig.casa.hasOwnProperty("things") ? _inputConfig.casa.things : [];
-         collections.casaUsers = _inputConfig.casa.hasOwnProperty("users") ? _inputConfig.casa.users : [];
+         collections.casaServices = _inputConfig.hasOwnProperty("casaServices") ? _inputConfig.casaServices : _inputConfig.casa.hasOwnProperty("services") ? _inputConfig.casa.services : [];
+         collections.casaScenes = _inputConfig.hasOwnProperty("casaScenes") ? _inputConfig.casaScenes : _inputConfig.casa.hasOwnProperty("scenes") ? _inputConfig.casa.scenes : [];
+         collections.casaThings = _inputConfig.hasOwnProperty("casaThings") ? _inputConfig.casaThings : _inputConfig.casa.hasOwnProperty("things") ? _inputConfig.casa.things : [];
+         collections.casaUsers = _inputConfig.hasOwnProperty("casaUsers") ? _inputConfig.casaUsers : _inputConfig.casa.hasOwnProperty("users") ? _inputConfig.casa.users : [];
 
          if (_inputConfig.hasOwnProperty("gang")) {
             collections.casa.gang = _inputConfig.gang.name;
-            collections.gangThings = _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+            collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+         }
+         else if (_inputConfig.casa.hasOwnProperty("gang") && _inputConfig.hasOwnProperty("gangThings")) {
+            collections.casa.gang = _inputConfig.casa.gang;
+            collections.gangThings = _inputConfig.gangThings;
          }
          else {
             collections.casa.gang = collections.casa.name + "-gang";
@@ -51,9 +55,9 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
             }
          }
 
-         collections.gangUsers = _inputConfig.gang.hasOwnProperty("users") ? _inputConfig.gang.users : [];
-         collections.gangScenes = _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
-         collections.gangThings = _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+         collections.gangUsers = _inputConfig.hasOwnProperty("gangUsers") ? _inputConfig.gangUsers : _inputConfig.gang.hasOwnProperty("users") ? _inputConfig.gang.users : [];
+         collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
+         collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
       }
 
       for (var collection in collections) {
