@@ -100,7 +100,7 @@ Loader.prototype.suspend = function() {
 };
 
 Loader.prototype.loadNode = function() {
-   this.casaDb = new Db(this.casaName, this.configPath, false, null);
+   this.casaDb = new Db(this.casaName+"-db", this.configPath, false, null);
 
    this.casaDb.on('connected', (_data) => {
 
@@ -116,7 +116,7 @@ Loader.prototype.loadNode = function() {
          this.casaConfig.certPath = this.certPath;
          this.casaConfig.configPath = this.configPath;
 
-         this.gangDb = new Db(this.casaConfig.gang, this.configPath, false, null);
+         this.gangDb = new Db(this.casaConfig.gang+"-db", this.configPath, false, null);
 
          this.gangDb.on('connected', (_data) => {
 
@@ -158,10 +158,10 @@ Loader.prototype.loadNode = function() {
 };
 
 Loader.prototype.restoreNode = function(_importObj) {
-   this.casaDb = new Db(_importObj.casa, this.configPath, false, null);
+   this.casaDb = new Db(_importObj.casa+"-db", this.configPath, false, null);
 
    this.casaDb.on('connected', (_data) => {
-      this.gangDb = new Db(_importObj.name, this.configPath, false, null);
+      this.gangDb = new Db(_importObj.name+"-db", this.configPath, false, null);
 
       this.gangDb.on('connected', (_data) => {
 
@@ -201,8 +201,9 @@ Loader.prototype.loadConsole = function() {
 
    this.gang = new Gang(this.gangConfig, this);
 
-   this.gangDb = new Db(this.gangName, this.configPath, false, null);
+   this.gangDb = new Db(this.gangName+"-db", this.configPath, false, null);
    this.gangDb.setOwner(this.gang);
+   this.gang.gangDb = this.gangDb;
 
    this.gangDb.on('connected', (_data) => {
       this.gang.buildTree();
@@ -214,7 +215,7 @@ Loader.prototype.loadConsole = function() {
    });
 
    this.gangDb.on('connect-error', (_data) => {
-      gangDb = new Db(this.gangName, this.configPath, true, null);
+      gangDb = new Db(this.gangName+"-db", this.configPath, true, null);
 
       this.gangDb.on('connected', (_data) => {
          this.gangDb.appendToCollection("gang", { name: this.gangName, type: "gang", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 });

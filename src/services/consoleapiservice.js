@@ -164,7 +164,13 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
    this.socket = _socket;
 
    this.socket.on('getCasaInfo', (_data) => {
-      this.socket.emit('casa-info', { dbInfo: this.owner.gang.casa.getDb().getHash() });
+      console.error(this.uName + ": AAAAAA this.owner.gang.name=", this.owner.gang.name);
+      console.error(this.uName + ": AAAAAA this.owner.gang.dbs=", this.owner.gang.dbs);
+      
+      this.socket.emit('casa-info', { dbInfo: { dbName: this.owner.gang.casa.getDb().name, hash: this.owner.gang.casa.getDb().getHash().hash,
+                                                lastModified: this.owner.gang.casa.getDb().getHash().lastModified },
+                                      gangDbInfo: { dbName: this.owner.gang.getDb().name, hash: this.owner.gang.getDb().getHash().hash,
+                                                    lastModified: this.owner.gang.getDb().getHash().lastModified }});
    });
 
    this.socket.on('scopeExists', (_data) => {

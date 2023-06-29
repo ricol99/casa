@@ -108,9 +108,5 @@ GangConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    this.gang.getDb().readAll(_callback);
 };
 
-GangConsoleApi.prototype.importDb = function(_session, _params, _callback) {
-   this.updateDb(_session, _params, _callback);
-};
-
 module.exports = exports = GangConsoleApi;
  

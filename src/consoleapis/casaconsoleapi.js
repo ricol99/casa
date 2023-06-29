@@ -185,7 +185,7 @@ CasaConsoleApi.prototype.restart = function(_session, _params, _callback) {
    }
 };
 
-CasaConsoleApi.prototype.pushDb = function(_session, _params, _callback) {
+CasaConsoleApi.prototype.updateDb = function(_session, _params, _callback) {
    this.checkParams(2, _params);
 
    var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.name;
@@ -205,26 +205,23 @@ CasaConsoleApi.prototype.pushDb = function(_session, _params, _callback) {
    });
 };
 
-CasaConsoleApi.prototype.pushDbs = function(_session, _params, _callback) {
+CasaConsoleApi.prototype.updateDbs = function(_session, _params, _callback) {
    this.checkParams(2, _params);
-   this.pushDb(_params, (_err, _result) => {
+
+   this.updateDb(_params, (_err, _result) => {
 
       if (_err)  {
          _callback(_err);
       }
       else {
          _params.push(this.gang.name);
-         this.pushDb(_params, _callback);
+         this.updateDb(_params, _callback);
       }
    });
 };
 
 CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    this.gang.casa.getDb().readAll(_callback);
-};
-
-CasaConsoleApi.prototype.importDb = function(_session, _params, _callback) {
-   this.pushDb(_params, _callback);
 };
 
 module.exports = exports = CasaConsoleApi;

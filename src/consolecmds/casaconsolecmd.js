@@ -56,7 +56,7 @@ CasaConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.executeParsedCommand("pushDbs", [ myAddress, port], _callback);
+   this.executeParsedCommand("updateDbs", [ myAddress, port], _callback);
 };
 
 CasaConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
@@ -65,14 +65,14 @@ CasaConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
    var myAddress = util.getLocalIpAddress();
    var port = this.gang.mainListeningPort();
 
-   this.executeParsedCommand("pushDb", [ myAddress, port], _callback);
+   this.executeParsedCommand("updateDb", [ myAddress, port], _callback);
 };
 
 CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    if (this.casa.dbCompare() !== 0) {
-      this.dbService.getAndWritePeerDb(this.casa.name, this.casa.getHost(), this.casa.getListeningPort(), this.gang.configPath(), _callback);
+      this.dbService.getAndWritePeerDb(this.casa.getDbName(), this.casa.getHost(), this.casa.getListeningPort(), this.gang.configPath(), _callback);
    }
    else {
       return _callback(null, true);
@@ -88,7 +88,7 @@ CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
          return _callback(_err);
       }
 
-      this.gang.getDb(this.name, undefined, (_err, _db) => {
+      this.gang.getDb(this.casa.getDbName(), undefined, (_err, _db) => {
 
          if (_err) {
             return _callback(_err);
@@ -102,7 +102,7 @@ CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
 
             Db = require('../db');
             var output = Db.export(_result);
-            var fileName = this.gang.configPath() + "/configs/" + this.name + ".json";
+            var fileName = this.gang.configPath() + "/configs/" + this.casa.getDbName() + ".json";
             var fs = require('fs');
             var content = JSON.stringify(output, null, 3);
 
@@ -118,7 +118,7 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
    var cjson = require('cjson');
-   var configFilename = this.gang.configPath() + "/configs/" + this.name + ".json";
+   var configFilename = this.gang.configPath() + "/configs/" + this.casa.getDbName() + ".json";
    var inputConfig = cjson.load(configFilename);
 
    if (inputConfig.casa.name !== this.name) {
@@ -126,7 +126,7 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    }
 
    var Db = require('../db');
-   var db = new Db(this.name, undefined, true);
+   var db = new Db(this.casa.getDbName(), undefined, true);
 
    db.on('connected', () => {
       var collections = {};
@@ -177,7 +177,7 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
          var myAddress = util.getLocalIpAddress();
          var port = this.gang.mainListeningPort();
 
-         this.executeParsedCommand("pushDb", [ myAddress, port], (_err, _res) => {
+         this.executeParsedCommand("updateDb", [ myAddress, port], (_err, _res) => {
             return _callback(_err, true);
             // TBD
             if (writeAdditionalGangDb) {

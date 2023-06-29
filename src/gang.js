@@ -140,11 +140,11 @@ Gang.prototype.certPath = function() {
 };
 
 Gang.prototype.getDbs = function() {
-   return [ this.name, this.casa.name ];
+   return [ this.name+"-db", this.casa.name+"-db" ];
 };
 
 Gang.prototype.getDb = function(_dbName, _meta, _callback) {
-   var dbName = (_dbName) ? _dbName : this.name;
+   var dbName = (_dbName) ? _dbName : this.name+"-db";
 
    if (this.dbs.hasOwnProperty(dbName)) {
 

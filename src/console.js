@@ -359,6 +359,22 @@ Console.prototype.getCasa = function(_name) {
    return this.remoteCasas[_name];
 };
 
+Console.prototype.getCurrentCasa = function() {
+   return this.sourceCasa;
+};
+
+Console.prototype.dbCompare = function() {
+
+   if (this.offline || !this.sourceCasa) {
+      return 0;
+   }
+
+   var db = this.gang.getDb();
+   var gangRemoteDbInfo = this.sourceCasa.gangRemoteDbInfo;
+
+   return db ? ((db.getHash().hash === gangRemoteDbInfo.hash) ? 0 : ((db.getHash().lastModified > gangRemoteDbInfo.lastModified) ? 1 : -1)) : -1;
+};
+
 function RemoteCasa(_config, _owner) {
    AsyncEmitter.call(this);
    this.owner = _owner;
@@ -366,7 +382,8 @@ function RemoteCasa(_config, _owner) {
    this.host = _config.host;
    this.port = _config.port;
    this.db = null;
-   this.remoteDbInfo = { hash: { hash: '', lastModified: new Date(0) } };
+   this.remoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
+   this.gangRemoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.connected = false;
 }
 
@@ -378,45 +395,45 @@ RemoteCasa.prototype.start = function()  {
    this.socket.on('connect', (_data) => {
       this.connected = true;
       this.emit('connected', { name: this.name });
-
-      this.owner.gang.getDb(this.name, undefined, (_err, _db, _data) => {
-
-         if (_err) {
-            //this.owner.writeOutput("Casa "+this.name+" has joined and console does not have a local db for it!");
-            this.socket.emit('getCasaInfo');
-         }
-         else {
-            this.db = _db;
-            this.socket.emit('getCasaInfo');
-         }
-      });
+      this.socket.emit('getCasaInfo');
    });
 
    this.socket.on('casa-info', (_data) => {
 
       if (_data.hasOwnProperty("dbInfo")) {
-         this.remoteDbInfo.hash = { hash: _data.dbInfo.hash, lastModified: new Date(_data.dbInfo.lastModified) };
+         this.dbName = _data.dbInfo.dbName;
+         this.remoteDbInfo = { dbName: _data.dbInfo.dbName, hash: _data.dbInfo.hash, lastModified: new Date(_data.dbInfo.lastModified) };
 
-         if (this.db) {
-            this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
-            this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.hash.lastModified));
+         this.owner.gang.getDb(this.dbName, undefined, (_err, _db, _data) => {
 
-            if (this.remoteDbInfo.hash.hash !== this.db.getHash().hash) {
+            if (_err) {
+               this.owner.writeOutput("Casa "+this.name+" db is not stored locally. User pullDb to update local version");
+            }
+            else {
+               this.db = _db;
+               this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
+               this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.lastModified));
 
-               if (this.remoteDbInfo.hash.lastModified > this.db.getHash().lastModified) {
-                  this.owner.writeOutput("Casa "+this.name+" db is newer than local db. User pullDb to update local version");
-               }
-               else {
-                  this.owner.writeOutput("Casa "+this.name+" db is older than local db. User pushDB push local version or pullDb to re-sync to current casa version");
+               if (this.remoteDbInfo.hash !== this.db.getHash().hash) {
+
+                  if (this.remoteDbInfo.lastModified > this.db.getHash().lastModified) {
+                     this.owner.writeOutput("Casa "+this.name+" db is newer than local db. User pullDb to update local version");
+                  }
+                  else {
+                     this.owner.writeOutput("Casa "+this.name+" db is older than local db. User pushDB push local version or pullDb to re-sync to current casa version");
+                  }
                }
             }
-         }
-         else {
-            this.owner.writeOutput("Casa "+this.name+" db is not stored locally. User pullDb to update local version");
-         }
+         });
       }
       else {
          this.owner.writeOutput("Casa "+this.name+" responded with a badly formatted information!");
+      }
+
+      if (_data.hasOwnProperty("gangDbInfo")) {
+         this.gangRemoteDbInfo = { dbName: _data.gangDbInfo.dbName, hash: _data.gangDbInfo.hash, lastModified: new Date(_data.gangDbInfo.lastModified) };
+         this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
+         this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
       }
    });
 
@@ -489,6 +506,10 @@ RemoteCasa.prototype.getHost = function() {
 
 RemoteCasa.prototype.getDb = function() {
    return this.db;
+};
+
+RemoteCasa.prototype.getDbName = function() {
+   return this.dbName;
 };
 
 RemoteCasa.prototype.getRemoteDbInfo = function() {

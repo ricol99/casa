@@ -10,7 +10,7 @@ var casaDb = inputConfig.hasOwnProperty("casa");
 populateDbFromConfig(inputConfig, casaDb);
 
 function populateDbFromConfig(_inputConfig, _casaDb) {
-   var db = new Db(_casaDb ? _inputConfig.casa.name : _inputConfig.gang.name, undefined, true);
+   var db = new Db(_casaDb ? _inputConfig.casa.name+"-db" : _inputConfig.gang.name+"-db", undefined, true);
 
    db.on('connected', () => {
       var collections = {};

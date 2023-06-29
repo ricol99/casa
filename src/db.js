@@ -17,7 +17,7 @@ function Db(_dbName, _dbPath, _newDb, _owner) {
 
    this.dbFullName = this.dbPath + "/" + _dbName + ".db";
    this.dbName = _dbName;
-   NamedObject.call(this, { name: this.dbName+"-db", type: "db" }, _owner);
+   NamedObject.call(this, { name: this.dbName, type: "db" }, _owner);
 }
 
 util.inherits(Db, NamedObject);
