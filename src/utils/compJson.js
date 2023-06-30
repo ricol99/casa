@@ -94,6 +94,9 @@ function sortArrays(_obj) {
                   if (_a.hasOwnProperty("name") && _b.hasOwnProperty("name")) {
                      return _a.name > _b.name;
                   }
+                  else if (_a.hasOwnProperty("uName") && _b.hasOwnProperty("uName")) {
+                     return _a.uName > _b.uName;
+                  }
                   else {
                      return _a - _b;
                   }
