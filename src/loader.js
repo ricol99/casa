@@ -292,7 +292,15 @@ Loader.prototype.loadCasaConfig = function(_db, _callback) {
                         this.markObjects(this.casaConfig.gangThings, "_db", this.casaConfig.name);
                      }
 
-                     _callback(null, true);
+                     _db.readCollection("gangScenes", (_err, _gangScenes) => {
+
+                        if (!_err) {
+                           this.casaConfig.gangScenes = _gangScenes;
+                           this.markObjects(this.casaConfig.gangScenes, "_db", this.casaConfig.name);
+                        }
+
+                        _callback(null, true);
+                     });
                   });
                });
             });

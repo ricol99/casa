@@ -34,14 +34,17 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
          if (_inputConfig.hasOwnProperty("gang")) {
             collections.casa.gang = _inputConfig.gang.name;
             collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+            collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
          }
-         else if (_inputConfig.casa.hasOwnProperty("gang") && _inputConfig.hasOwnProperty("gangThings")) {
+         else if (_inputConfig.casa.hasOwnProperty("gang")) { 
             collections.casa.gang = _inputConfig.casa.gang;
-            collections.gangThings = _inputConfig.gangThings;
+            collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : [];
+            collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : [];
          }
          else {
             collections.casa.gang = collections.casa.name + "-gang";
             collections.gangThings = [];
+            collections.gangScenes = [];
             writeAdditionalGangDb = true;
          }
       }
