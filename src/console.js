@@ -411,8 +411,8 @@ RemoteCasa.prototype.start = function()  {
             }
             else {
                this.db = _db;
-               this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
-               this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.lastModified));
+               //this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
+               //this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.lastModified));
 
                if (this.remoteDbInfo.hash !== this.db.getHash().hash) {
 
@@ -432,8 +432,8 @@ RemoteCasa.prototype.start = function()  {
 
       if (_data.hasOwnProperty("gangDbInfo")) {
          this.gangRemoteDbInfo = { dbName: _data.gangDbInfo.dbName, hash: _data.gangDbInfo.hash, lastModified: new Date(_data.gangDbInfo.lastModified) };
-         this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
-         this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
+         //this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
+         //this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
       }
    });
 
