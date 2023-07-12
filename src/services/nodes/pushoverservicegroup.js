@@ -59,36 +59,21 @@ PushoverServiceGroup.prototype.processPropertyChanged = function(_transaction, _
 
    if (!_transaction.coldStart) {
       var messagePriority = _transaction.propData.hasOwnProperty("messagePriority") ? _transaction.propData.messagePriority : (_transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0);
-      this.sendMessage(messagePriority, _transaction.properties.message, _callback);
+      this.owner.sendMessage(this.destinationAddress, messagePriority, _transaction.properties.message, _callback);
    }
    else {
       _callback(null, true);
    }
 };
 
+PushoverServiceGroup.prototype.processEventRaised = function(_transaction, _callback) {
+   console.log(this.uName + ": processEventRaised() transaction=", _transaction.events);
 
-PushoverServiceGroup.prototype.sendMessage = function(_messagePriority, _message, _callback) {
-   var title = 'Casa Collin' + ((_messagePriority > 0) ? ' Alarm' : ' Update');
-
-   if (_message !== "") {
-      var msg = {
-         user: this.destinationAddress,
-         message: _message,    // required
-         title: title,
-         retry: 60,
-         expire: 3600,
-         priority: _messagePriority
-      };
-
-      try {
-         this.owner.pushover.send(msg, _callback);
-      }
-      catch (_err) {
-         _callback("Error logging into Pushover: " + _err);
-      }
-   }
-   else {
-      _callback("Message empty - not sending!");
+   // Only one event as optimisedTransactions set to false
+   for (var first in _transaction.events) {
+      var messagePriority = _transaction.eventData.hasOwnProperty("messagePriority") ? _transaction.eventData.messagePriority : (_transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0);
+      this.owner.sendMessage(this.destinationAddress, messagePriority, _transaction.events[first], _callback);
+      break;
    }
 };
 

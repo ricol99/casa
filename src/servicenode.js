@@ -95,7 +95,6 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
       else {
          this.ensurePropertyExists(_property, 'property', { allSourcesRequiredForValidity: false,
                                                             source: { uName: _sub.uName, property: _subscriberProp }});
-         console.log(this.uName + ": AAAAAA ============= createProperty() property " + _property + " created with uName " + this.properties[_property].uName + " and source " + _sub.uName + " and sub prop " + _subscriberProp);
       }
 
       this.serviceProps.push(_property);

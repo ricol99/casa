@@ -7,6 +7,7 @@ var push = require( 'pushover-notifications' );
 function PushoverService(_config, _owner) {
    _config.queueQuant = 150;
    _config.deviceTypes = { "group": "pushoverservicegroup" };
+   _config.optimiseTransactions = false;  // Only allow one event and property per transaction
 
    Service.call(this, _config, _owner);
 
@@ -39,5 +40,31 @@ PushoverService.prototype.hotStart = function() {
 PushoverService.prototype.start = function() {
    this.pushover = new push( { user: this.userId, token: this.token });
 };
+
+PushoverService.prototype.sendMessage = function(_destinationAddress, _messagePriority, _message, _callback) {
+   var title = 'Casa Collin' + ((_messagePriority > 0) ? ' Alarm' : ' Update');
+
+   if (_message !== "") {
+      var msg = {
+         user: _destinationAddress,
+         message: _message,    // required
+         title: title,
+         retry: 60,
+         expire: 3600,
+         priority: _messagePriority
+      };
+
+      try {
+         this.pushover.send(msg, _callback);
+      }
+      catch (_err) {
+         _callback("Error logging into Pushover: " + _err);
+      }
+   }
+   else {
+      _callback("Message empty - not sending!");
+   }
+};
+
 
 module.exports = exports = PushoverService;

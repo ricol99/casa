@@ -135,7 +135,7 @@ Service.prototype.notifyEvent = function(_serviceNode, _eventName, _data, _subsc
    }
    else {
       var transaction = { "action": "eventRaised", events: {}, properties: {}, coldStart: _data.hasOwnProperty("coldStart") && _data.coldStart, subscriber: _subscriber };
-      transaction.events[_eventName] = true;
+      transaction.events[_eventName] = (_data.hasOwnProperty("value") && _data.value !== undefined) ? _data.value : true;
       transaction.eventData = util.copy(_data);
 
       if (_data.hasOwnProperty("transactionId")) {

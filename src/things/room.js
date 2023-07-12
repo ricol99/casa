@@ -106,14 +106,16 @@ function Room(_config, _parent) {
       var sceneConfig = { name: "scene-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "not-active",
                           states: [{ name: "not-active", priority: 0, sources: [{ event: "room-switch-event", nextState: _config.scenes[0].name }] }] };
 
-      _config.scenes.push({ name: "not-active" });
+      _config.scenes.push({ name: "not-active" });  // temporarily add state to config to create a loop
 
       for (var g = 0; g < (_config.scenes.length - 1); ++g) {
          var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 20, 
                              sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }, { property: "night-time", value: true, nextState: "not-active"}] };
 
          if (_config.scenes[g].hasOwnProperty("guard")) {
-            stateConfig.guard = { property: _config.scenes[g].guard.property, value: _config.scenes[g].guard.hasOwnProperty("value") ? _config.scenes[g].guard.value : true, nextState: _config.scenes[g + 1].name };
+            stateConfig.guard = { property: _config.scenes[g].guard.property,
+                                  value: _config.scenes[g].guard.hasOwnProperty("value") ? _config.scenes[g].guard.value : true,
+                                  nextState: _config.scenes[g + 1].name };
          }
 
          if (_config.scenes[g].hasOwnProperty("timeout")) {
@@ -122,6 +124,8 @@ function Room(_config, _parent) {
 
          sceneConfig.states.push(stateConfig);
       }
+
+      _config.scenes.pop();  // remove temporarily added state "not-active"
 
       this.ensurePropertyExists('scene-state', 'stateproperty', sceneConfig, _config);
    }
