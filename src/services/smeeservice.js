@@ -3,11 +3,10 @@ const EventSource = require("eventsource");
 var Service = require('../service');
 
 function SmeeService(_config, _owner) {
+   _config.optimiseTransactions = false;  // Only allow one event and property per transaction
+   _config.deviceTypes = { "source": "smeesource" };
    Service.call(this, _config, _owner);
 
-   this.deviceTypes = {
-      "source": "smeesource"
-   };
 
    this.channelName = _config.channel;
    this.smeeSources = {};
