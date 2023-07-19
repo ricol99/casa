@@ -401,6 +401,7 @@ StateProperty.prototype.alignProperties = function(_properties) {
 StateProperty.prototype.alignActions = function(_actions, _priority) {
 
    if (_actions) {
+      this.processActionsInternal(_actions);
 
       if (this.bufferingActions) {
          console.log(this.uName+": StateProperty.prototype.alignActions() Buffering actions...");
@@ -428,28 +429,33 @@ StateProperty.prototype.alignActions = function(_actions, _priority) {
    }
 };
 
+StateProperty.prototype.processActionsInternal = function(_actions) {
+   
+   for (var z = 0; z < _actions.length; ++z) {
+
+      if (_actions[z].hasOwnProperty("property")) {
+   
+         if (_actions[z].hasOwnProperty("fromProperty")) {
+            _actions[z].value = this.owner.getProperty(_actions[z].fromProperty);
+         }
+         else if (_actions[z].hasOwnProperty("source")) {
+            _actions[z].value = _actions[z].source.sourceListener.getPropertyValue();
+         }
+         else if (_actions[z].hasOwnProperty("apply")) {
+            var currentValue = this.owner.getProperty(_actions[z].property);
+            var output = false;
+            var exp = _actions[z].apply.replace(/\$value/g, "currentValue");
+            var exp2 = exp.replace(/\$stateDuration/g, "(Math.round((Date.now()-this.stateEntered)/100.0)/10.0)");
+            eval("output = " + exp2);
+            _actions[z].value = output;
+         }
+      }
+   }
+};
+
 StateProperty.prototype.alignPropertiesInternal = function(_properties) {
 
    if (_properties.length > 0) {
-
-      for (var z = 0; z < _properties.length; ++z) {
-
-         if (_properties[z].hasOwnProperty("fromProperty")) {
-            _properties[z].value = this.owner.getProperty(_properties[z].fromProperty);
-         }
-         else if (_properties[z].hasOwnProperty("source")) {
-            _properties[z].value = _properties[z].source.sourceListener.getPropertyValue();
-         }
-         else if (_properties[z].hasOwnProperty("apply")) {
-            var currentValue = this.owner.getProperty(_properties[z].property);
-            var output = false;
-            var exp = _properties[z].apply.replace(/\$value/g, "currentValue");
-            var exp2 = exp.replace(/\$stateDuration/g, "(Math.round((Date.now()-this.stateEntered)/100.0)/10.0)");
-            eval("output = " + exp2);
-            _properties[z].value = output;
-         }
-      }
-
       this.owner.alignProperties(_properties);
    }
 };

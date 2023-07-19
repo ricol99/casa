@@ -17,7 +17,8 @@ var Thing = require('../thing');
 
 // Config properties to define if simulating fully open
 // simulated-opening-time - on required when simulating fully-open - time taken for bollards to open in seconds (default 10)
-// simulated-opening-response-time - duration after open command for which the simulated open should respond
+// simulated-opening-response-time - duration after open command for which the simulated open should respond (default 0.5)
+// simulated-security-alert-response-time - duration after security alert during closing before open is reinitiated (default 1)
 
 // Events to control access
 // access-reset - clear a failure condition
@@ -76,21 +77,28 @@ function Access(_config, _parent) {
    if (_config.simulateFullyOpen) {
       this.ensurePropertyExists('fully-open', 'property', { initialValue: false }, _config);
       this.ensurePropertyExists('simulated-opening-time', 'property', { initialValue: 10 }, _config);
+      this.ensurePropertyExists('previous-simulated-opening-time', 'property', { initialValue: this.getProperty("simulated-opening-time"), source: { property: "simulated-opening-time" }}, _config);
       this.ensurePropertyExists('simulated-opening-response-time', 'property', { initialValue: 0.5 }, _config);
+      this.ensurePropertyExists('simulated-security-alert-response-time', 'property', { initialValue: 1 }, _config);
       this.ensurePropertyExists('simulated-closing-timeout', 'property', { initialValue: this.getProperty("closing-timeout")-0.1, source: { property: "closing-timeout", transform: "$value-0.1" }}, _config);
+      this.ensurePropertyExists('adjusted-simulated-opening-time', 'evalproperty', { local: true, initialValue: 0,
+                                                                                     sources: [{ property: "previous-simulated-opening-time" }, { property: "simulated-security-alert-response-time" }], expression: "$values[0] + $values[1]" }, _config);
+
 
       this.ensurePropertyExists('fully-open-state', 'stateproperty', { initialValue: "unknown", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
                                                                        states: [{ name: "unknown",
                                                                                   timeout: { "property": "simulated-opening-time", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed" },
                                                                                             { property: "fully-open", value: true, nextState: "fully-open" } ]},
-                                                                                { name: "fully-open", actions: [{ property: "fully-open", value: true }],
+                                                                                { name: "fully-open",
+                                                                                  actions: [{ property: "fully-open", value: true }, { property: "adjusted-simulated-opening-time", fromProperty: "simulated-opening-time" }],
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "access-alarm-state", value: "access-closed-requested-normal", nextState: "closed-requested" }] },
-                                                                                { name: "fully-closed", actions: [{ property: "fully-open", value: false }],
+                                                                                { name: "fully-closed",
+                                                                                  actions: [{ property: "fully-open", value: false }, { property: "adjusted-simulated-opening-time", fromProperty: "simulated-opening-time" }],
                                                                                   sources: [{ property: "fully-closed", value: false, nextState: "opening"}] },
                                                                                 { name: "opening", 
-                                                                                  timeout: { "property": "simulated-opening-time", nextState: "fully-open" },
+                                                                                  timeout: { "property": "adjusted-simulated-opening-time", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "access-alarm-state", value: "access-closed-requested-normal", nextState: "closing" }] },
                                                                                 { name: "closed-requested", 
@@ -101,9 +109,12 @@ function Access(_config, _parent) {
                                                                                   timeout: { "property": "simulated-closing-timeout", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "alarm-state", value: "timed-out", nextState: "closing" },
-                                                                                            { property: "alarm-state", value: "failure", nextState: "unknown" },
-                                                                                            { property: "alarm-state", value: "safety-alert", nextState: "unknown" },
-                                                                                            { property: "access-alarm-state", value: "access-open-requested-normal", nextState: "opening" }] } ]}, _config);
+                                                                                            { property: "alarm-state", value: "failure",
+                                                                                              action: { property: "adjusted-simulated-opening-time", fromProperty: "simulated-opening-time" }, nextState: "unknown" },
+                                                                                            { property: "alarm-state", value: "safety-alert",
+                                                                                              action: { property: "previous-simulated-opening-time", apply: "$stateDuration" }, nextState: "unknown" },
+                                                                                            { property: "access-alarm-state", value: "access-open-requested-normal",
+                                                                                              action: { property: "previous-simulated-opening-time", apply: "$stateDuration" }, nextState: "opening" }] } ]}, _config);
    }
 
    if (this.properties.hasOwnProperty("target")) {
