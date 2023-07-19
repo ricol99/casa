@@ -171,6 +171,7 @@ StateProperty.prototype.clearStateTimer = function() {
 StateProperty.prototype.setStateTimer = function(_previousState, _state, _timeoutDuration) {
    var timeoutDuration;
    var timeoutNextState = null;
+   this.stateEntered = Date.now();
 
    if (_state.hasOwnProperty('timeout')) {
 
@@ -443,7 +444,8 @@ StateProperty.prototype.alignPropertiesInternal = function(_properties) {
             var currentValue = this.owner.getProperty(_properties[z].property);
             var output = false;
             var exp = _properties[z].apply.replace(/\$value/g, "currentValue");
-            eval("output = " + exp);
+            var exp2 = exp.replace(/\$stateDuration/g, "(Math.round((Date.now()-this.stateEntered)/100.0)/10.0)");
+            eval("output = " + exp2);
             _properties[z].value = output;
          }
       }

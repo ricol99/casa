@@ -1,31 +1,37 @@
 var util = require('util');
 var Thing = require('../thing');
 
-// Config
-// *operatingTimeout - how many seconds the access is allowed to active for (default 20)
-//   or operatingTimeouts - object of timeouts for access { opening, closing } (default 20 for all)
-// *maxRetries - number of retries before entering failure (default 2)
-// *retryTimeout - How many secondss to wait until retry occurs (default 10)
-// *responseTimeout - ow long are the access allowed to take before responding to a commmand (open or close) (default 5)
-// startPulseLength - how long is start pulse for open and close (seconds) (default 1)
+// Config properties to define
+// opening-timeout - how many seconds the access is allowed to active for when opening (default 20)
+// closing-timeout - how many seconds the access is allowed to active for when closing (default 20)
+// auto-close - auto close after pause-time
+// pause-time - duration (seconds) of pause when fully open to initiate auto-close
+// max-retries - number of retries before entering failure (default 2)
+// retry-timeout - How many secondss to wait until retry occurs (default 10)
+// response-timeout - ow long are the access allowed to take before responding to a commmand (open or close) (default 5)
+// start-pulse-length - how long is start pulse for open and close (seconds) (default 1)
+// movement-timeout - timeout for using safety sensors as movement sensors - in seconds - default 5
+
+// Config 
 // simulateFullyOpen - used where bollards cannot indicate they are fully open
-// simulatedOpeningTime - on required when simulating fully-open - time taken for bollards to open in seconds (default 10)
-// simulatedClosingTiemout - on required when simulating fully-open - timeout to assume closure will not happen and bollards have returned to open state (default 20)
-// movementTimeout - timeout for using safety sensors as movement sensors - in seconds - default 5
+
+// Config properties to define if simulating fully open
+// simulated-opening-time - on required when simulating fully-open - time taken for bollards to open in seconds (default 10)
+// simulated-opening-response-time - duration after open command for which the simulated open should respond
 
 // Events to control access
 // access-reset - clear a failure condition
 // open-access - command access to open access(does nothing if already open)
 // close-access - command access to close access (does nothing if already closed)
 
-// Properties to define
+// Property to set for operation
+// target - "open" or "closed" - set to make the access move based on this property
+
+// Output properties to define
 // fully-closed - true when access is fully raised
 // fully-open - true when access is fully in the ground (not required if simulateFullyOpen is true)
 // safety-alert - true when a safety system has halted everything
 // movement-when-closed - true when safety systems detect any movement when the access is closed
-
-// Property to set
-// target - "open" or "closed" - set to make the access move based on this property
 
 // Resulting access-state
 // access-unknown - Initialisation - no clue what the state of the access is, waiting for fully-closed or fully-open to be set
@@ -56,26 +62,26 @@ function Access(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "access";
 
-   if (_config.hasOwnProperty('operatingTimeouts')) {
-      this.operatingTimeouts = _config.operatingTimeouts;
-   }
-   else {
-      var value = (_config.hasOwnProperty('operatingTimeout')) ? _config.operatingTimeout : 20;
-      this.operatingTimeouts = { "opening": value, "closing": value };
-   }
-
-   this.movementTimeout = _config.hasOwnProperty("movementTimeout") ? _config.movementTimeout : 5;
+   // Config properties
+   this.ensurePropertyExists('opening-timeout', 'property', { initialValue: 20 }, _config);
+   this.ensurePropertyExists('closing-timeout', 'property', { initialValue: 20 }, _config);
+   this.ensurePropertyExists('auto-close', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('pause-time', 'property', { initialValue: 120 }, _config);
+   this.ensurePropertyExists('max-retries', 'property', { initialValue: 2 }, _config);
+   this.ensurePropertyExists('retry-timeout', 'property', { initialValue: 10 }, _config);
+   this.ensurePropertyExists('response-timeout', 'property', { initialValue: 5 }, _config);
+   this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: 1 }, _config);
+   this.ensurePropertyExists('movement-timeout', 'property', { initialValue: 5 }, _config);
 
    if (_config.simulateFullyOpen) {
       this.ensurePropertyExists('fully-open', 'property', { initialValue: false }, _config);
-      this.simulatedOpeningResponseTime = _config.hasOwnProperty("simulatedOpeningResponseTime") ? _config.simulatedOpeningResponseTime : 0.5;
-      this.simulatedOpeningTime = _config.hasOwnProperty("simulatedOpeningTime") ? _config.simulatedOpeningTime : 10;
-      //this.simulatedClosingTimeout = _config.hasOwnProperty("simulatedClosingTimeout") ? _config.simulatedClosingTimeout : 20;
-      this.simulatedClosingTimeout = this.operatingTimeouts.closing - 0.1;
+      this.ensurePropertyExists('simulated-opening-time', 'property', { initialValue: 10 }, _config);
+      this.ensurePropertyExists('simulated-opening-response-time', 'property', { initialValue: 0.5 }, _config);
+      this.ensurePropertyExists('simulated-closing-timeout', 'property', { initialValue: this.getProperty("closing-timeout")-0.1, source: { property: "closing-timeout", transform: "$value-0.1" }}, _config);
 
       this.ensurePropertyExists('fully-open-state', 'stateproperty', { initialValue: "unknown", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
                                                                        states: [{ name: "unknown",
-                                                                                  timeout: { "duration": this.simulatedOpeningTime, nextState: "fully-open" },
+                                                                                  timeout: { "property": "simulated-opening-time", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed" },
                                                                                             { property: "fully-open", value: true, nextState: "fully-open" } ]},
                                                                                 { name: "fully-open", actions: [{ property: "fully-open", value: true }],
@@ -84,15 +90,15 @@ function Access(_config, _parent) {
                                                                                 { name: "fully-closed", actions: [{ property: "fully-open", value: false }],
                                                                                   sources: [{ property: "fully-closed", value: false, nextState: "opening"}] },
                                                                                 { name: "opening", 
-                                                                                  timeout: { "duration": this.simulatedOpeningTime, nextState: "fully-open" },
+                                                                                  timeout: { "property": "simulated-opening-time", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "access-alarm-state", value: "access-closed-requested-normal", nextState: "closing" }] },
                                                                                 { name: "closed-requested", 
-                                                                                  timeout: { "duration": this.simulatedOpeningResponseTime, nextState: "closing" },
+                                                                                  timeout: { "property": "simulated-opening-response-time", nextState: "closing" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "access-alarm-state", value: "access-open-requested-normal", nextState: "opening" }] },
                                                                                 { name: "closing", actions: [{ property: "fully-open", value: false }],
-                                                                                  timeout: { "duration": this.simulatedClosingTimeout, nextState: "fully-open" },
+                                                                                  timeout: { "property": "simulated-closing-timeout", nextState: "fully-open" },
                                                                                   sources: [{ property: "fully-closed", value: true, nextState: "fully-closed"},
                                                                                             { property: "alarm-state", value: "timed-out", nextState: "closing" },
                                                                                             { property: "alarm-state", value: "failure", nextState: "unknown" },
@@ -109,27 +115,18 @@ function Access(_config, _parent) {
    }
 
    this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: _config.hasOwnProperty("startPulseLength") ? _config.startPulseLength : 1 }, _config);
    this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
    this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
+                                                                sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
 
    this.ensurePropertyExists('movement-state', 'stateproperty', { initialValue: "no-movement", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
                                                                   states: [{ name: "no-movement", sources: [{ property: "safety-alert", value: true, nextState: "movement" }] },
-                                                                           { name: "movement", timeout: { duration: this.movementTimeout, nextState: "no-movement" } } ]}, _config);
+                                                                           { name: "movement", timeout: { property: "movement-timeout", nextState: "no-movement" } } ]}, _config);
 
    this.ensurePropertyExists('movement-access-state', 'combinestateproperty', { separator: "-", sources: [{ property: "movement-state" }, { property: "access-state" }] }, _config);
    this.ensurePropertyExists('movement-when-closed', 'property', { sources: [{ property: "movement-access-state", transform: "$value === \"movement-access-closed\"" }] }, _config);
-
-   this.ensurePropertyExists('auto-close', 'property', { initialValue: _config.hasOwnProperty("autoClose") ? _config.autoClose : false }, _config);
-   this.ensurePropertyExists('pause-time', 'property', { initialValue: _config.hasOwnProperty("pauseTime") ? _config.pauseTime : 120 }, _config);
-   this.ensurePropertyExists('response-timeout', 'property', { initialValue: _config.hasOwnProperty("responseTimeout") ? _config.responseTimeout : 5 }, _config);
-   this.ensurePropertyExists('opening-timeout', 'property', { initialValue: this.operatingTimeouts.opening }, _config);
-   this.ensurePropertyExists('closing-timeout', 'property', { initialValue: this.operatingTimeouts.closing }, _config);
-   this.ensurePropertyExists('max-retries', 'property', { initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
-   this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('retry-timeout', 'property', { initialValue: _config.hasOwnProperty("retryTimeout") ? _config.retryTimeout : 10 }, _config);
-   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
-                                                                sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                 states: [{ name: "access-unknown",
