@@ -26,15 +26,23 @@ function Thing(_config, _owner) {
 
    this.ignoreParent = (_config.hasOwnProperty('ignoreParent')) ? _config.ignoreParent : false;
    this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
-   this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
-   this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
+
+   if (_config.hasOwnProperty('propagation')) {
+      var parent = { public: true, protected: false, private: false };
+      this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
+      var child = { public: true, protected: true, private: false };
+      this.propogateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
+   }
+   else {
+      this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
+      this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
+   }
 
    if (_config.hasOwnProperty("things") && _config.things.length > 0) {
 
       for (var i = 0; i < _config.things.length; ++i) {
          _config.things[i].notTopOfTransaction = true;
       }
-
    }
 
    this.createChildren(_config.things, "thing", this);
