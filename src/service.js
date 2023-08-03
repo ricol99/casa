@@ -7,8 +7,8 @@ function Service(_config, _owner) {
       _config.local = true;
    }
 
-   if (!_config.hasOwnProperty("propogateToChildren")) {
-      _config.propogateToChildren = false;
+   if (!_config.hasOwnProperty("propagateToChildren")) {
+      _config.propagateToChildren = false;
    }
 
    if (!_config.hasOwnProperty("ignoreChildren")) {
@@ -81,7 +81,7 @@ Service.prototype.interestInNewChild = function(_uName) {
 
 Service.prototype.createNode = function(_config, _loadPath) {
    var type = _config.type;
-   _config.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : false;
+   _config.propagateToParent = (_config.hasOwnProperty('propagateToParent')) ? _config.propagateToParent : false;
    _config.local = (_config.hasOwnProperty("local")) ? _config.local : this.localThings;
 
    var loadPath = _loadPath ? _loadPath : "services/nodes";

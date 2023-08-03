@@ -2,7 +2,7 @@ var util = require('./util');
 var Thing = require('./thing');
 
 function ServiceNode(_config, _owner) {
-   _config.propogateToParent = false;
+   _config.propagateToParent = false;
 
    Thing.call(this, _config, _owner);
    this.subscribers = {};

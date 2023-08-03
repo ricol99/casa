@@ -31,11 +31,11 @@ function Thing(_config, _owner) {
       var parent = { public: true, protected: false, private: false };
       this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
       var child = { public: true, protected: true, private: false };
-      this.propogateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
+      this.propagateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
    }
    else {
-      this.propogateToParent = (_config.hasOwnProperty('propogateToParent')) ? _config.propogateToParent : true;
-      this.propogateToChildren = (_config.hasOwnProperty('propogateToChildren')) ? _config.propogateToChildren : true;
+      this.propagateToParent = (_config.hasOwnProperty('propagateToParent')) ? _config.propagateToParent : true;
+      this.propagateToChildren = (_config.hasOwnProperty('propagateToChildren')) ? _config.propagateToChildren : true;
    }
 
    if (_config.hasOwnProperty("things") && _config.things.length > 0) {
@@ -111,7 +111,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
          newValue =  Source.prototype.updateProperty.call(this, _propName, newValue, data);
 
-         if (this.propogateToChildren) {
+         if (this.propagateToChildren) {
 
             for (var thing in this.things) {
 
@@ -139,9 +139,9 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       newValue = Source.prototype.updateProperty.call(this, _propName, _propValue, data);
-      var needToUpdateChildren = this.propogateToChildren;
+      var needToUpdateChildren = this.propagateToChildren;
 
-      if (!this.topLevelThing && this.propogateToParent) {
+      if (!this.topLevelThing && this.propagateToParent) {
          needToUpdateChildren = !this.owner.childPropertyChanged(_propName, newValue, this, data);
       }
 
@@ -185,7 +185,7 @@ Thing.prototype.inheritChildProps = function() {
       }
    }
 
-   return this.propogateToParent;
+   return this.propagateToParent;
 };
 
 Thing.prototype.inheritParentProps = function(_parentProps) {
@@ -206,7 +206,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
          }
       }
 
-      if (this.propogateToChildren) {
+      if (this.propagateToChildren) {
    
          for (var thing in this.things) {
 
@@ -220,7 +220,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
 
 Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
-   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propogateToParent))) {
+   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propagateToParent))) {
       Source.prototype.getAllProperties.call(this, _allProps);
 
       if (!this.ignoreChildren) {
@@ -237,7 +237,7 @@ Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
 
 Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
 
-   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propogateToParent))) {
+   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propagateToParent))) {
       Source.prototype.findAllProperties.call(this, _allProps);
 
       if (!this.ignoreChildren) {
@@ -258,9 +258,9 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       return false;
    }
 
-   var ret = this.propogateToChildren;
+   var ret = this.propagateToChildren;
 
-   if (!this.topLevelThing && this.propogateToParent) {
+   if (!this.topLevelThing && this.propagateToParent) {
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
@@ -283,9 +283,9 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
       return false;
    }
 
-   var ret = this.propogateToChildren;
+   var ret = this.propagateToChildren;
 
-   if (!this.topLevelThing && this.propogateToParent) {
+   if (!this.topLevelThing && this.propagateToParent) {
       ret = ret && this.owner.childRaisedEvent(_eventName, this, _data);
    }
    else {
@@ -312,13 +312,13 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    }
    else {
 
-      if (this.topLevelThing || !this.propogateToParent) {
+      if (this.topLevelThing || !this.propagateToParent) {
          Source.prototype.raiseEvent.call(this, _eventName, data);
       }
 
-      var needToUpdateChildren = this.propogateToChildren;
+      var needToUpdateChildren = this.propagateToChildren;
 
-      if (!this.topLevelThing && this.propogateToParent) {
+      if (!this.topLevelThing && this.propagateToParent) {
          needToUpdateChildren = !this.owner.childRaisedEvent(_eventName, this, data);
       }
 
@@ -396,7 +396,7 @@ Thing.prototype.refreshChildInheritedProperties = function() {
       }
    }
 
-   return this.propogateToParent;
+   return this.propagateToParent;
 };
 
 module.exports = exports = Thing;
