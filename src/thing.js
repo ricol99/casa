@@ -24,13 +24,20 @@ function Thing(_config, _owner) {
 
    Source.call(this, _config, _owner);
 
-   this.ignoreParent = (_config.hasOwnProperty('ignoreParent')) ? _config.ignoreParent : false;
-   this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
+   var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
+   var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
+
+   if (_config.hasOwnProperty('ignorePropagation')) {
+      this.ignoreParent = parent.hasOwnProperty(_config.ignorePropagation) ? parent[_config.ignorePropagation] : false;
+      this.ignoreChildren = child.hasOwnProperty(_config.ignorePropagation) ? child[_config.ignorePropagation] : false;
+   }
+   else {
+      this.ignoreParent = (_config.hasOwnProperty('ignoreParent')) ? _config.ignoreParent : false;
+      this.ignoreChildren = (_config.hasOwnProperty('ignoreChildren')) ? _config.ignoreChildren : false;
+   }
 
    if (_config.hasOwnProperty('propagation')) {
-      var parent = { public: true, protected: false, private: false };
       this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
-      var child = { public: true, protected: true, private: false };
       this.propagateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
    }
    else {
