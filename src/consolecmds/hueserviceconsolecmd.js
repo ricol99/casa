@@ -130,6 +130,31 @@ HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
             return this.executeParsedCommand("createGroup", createGroupOptions, _callback);
             //return _callback(null, util.inspect(createGroupOptions));
          }
+         else {
+            return _callback("Currently only support creation of groups!");
+         }
+      }
+      else if (mainCommand.name === "delete") {
+
+         if (argv.length === 0) {
+            return _callback("Nothing to delete!");
+         }
+
+         if (argv[0] === "group") {
+  
+            const deleteGroupDefinitions = [
+               { name: 'id', alias: 'i', type: String, defaultOption: true }
+            ];
+
+            argv.shift();
+            const deleteGroupOptions = commandLineArgs(deleteGroupDefinitions, { argv, stopAtFirstUnknown: true })
+            argv = deleteGroupOptions._unknown || [];
+            return this.executeParsedCommand("deleteGroup", deleteGroupOptions, _callback);
+            //return _callback(null, util.inspect(deleteGroupOptions));
+         }
+         else {
+            return _callback("Currently only support deleting of groups!");
+         }
       }
    }
    return _callback("Subcommand not found!");
