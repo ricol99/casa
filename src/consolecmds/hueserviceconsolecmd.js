@@ -127,7 +127,7 @@ HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
             argv.shift();
             const createGroupOptions = commandLineArgs(createGroupDefinitions, { argv, stopAtFirstUnknown: true })
             argv = createGroupOptions._unknown || [];
-            return this.executeParsedCommand("createGroup", createGroupOptions, _callback);
+            return this.executeParsedCommand("createGroup", [ createGroupOptions.name, createGroupOptions.ids ], _callback);
             //return _callback(null, util.inspect(createGroupOptions));
          }
          else {
@@ -149,8 +149,8 @@ HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
             argv.shift();
             const deleteGroupOptions = commandLineArgs(deleteGroupDefinitions, { argv, stopAtFirstUnknown: true })
             argv = deleteGroupOptions._unknown || [];
-            //return this.executeParsedCommand("deleteGroup", deleteGroupOptions, _callback);
-            return _callback(null, util.inspect(deleteGroupOptions));
+            return this.executeParsedCommand("deleteGroup", [deleteGroupOptions.id], _callback);
+            //return _callback(null, util.inspect(deleteGroupOptions));
          }
          else {
             return _callback("Currently only support deleting of groups!");
