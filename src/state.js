@@ -610,11 +610,15 @@ State.prototype.filterActions = function(_actions) {
 
          this.actionTimeouts.push({ action: _actions[i], timeout: util.setTimeout( (_index) => {
 
-            if (this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
-               this.launchActionHandlers([ this.actionTimeouts[_index].action]);
+            if ((this.actionTimeouts.length > _index) && this.actionTimeouts[index]) {
+
+               if ( this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
+                  this.launchActionHandlers([ this.actionTimeouts[_index].action]);
+               }
+
+               this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
+               this.actionTimeouts[_index] = null;
             }
-            this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
-            this.actionTimeouts[_index] = null;
 
          }, _actions[i].delay*1000, this.actionTimeouts.length)});
       }
