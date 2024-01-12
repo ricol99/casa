@@ -21,7 +21,7 @@ function Source(_config, _owner) {
 
    var modeConfig = _config.hasOwnProperty("modeConfig") ? _config.modeConfig
                                                          : { initialValue: "auto", takeControlOnTransition: true, ignoreControl: true,
-                                                             states: [ { name: "auto", priority: -100,
+                                                             states: [ { name: "auto", priority: -100, action: { property: "MANUAL-MODE-DURATION", value: -1 },
                                                                          source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
                                                                        { name: "manual", priority: 100,
                                                                          timeout: { source: { property: "MANUAL-MODE-DURATION" }, action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
