@@ -106,6 +106,8 @@ function Bedroom(_config, _parent) {
             {
                "name": "initial-reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
+                           { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
+                           { "event": "wake-up-event", "nextState": "awake-in-bed"},
                            { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
                "actions": [{ "property": "night-time", "value": true }],
                "timeout": { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
@@ -113,12 +115,16 @@ function Bedroom(_config, _parent) {
             {
                "name": "reading-in-bed", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
+                           { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
+                           { "event": "wake-up-event", "nextState": "awake-in-bed"},
                            { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
                "timeout": { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
             },
             {
                "name": "reading-in-bed-others-asleep", "priority": 10,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "asleep-in-bed" },
+                           { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
+                           { "event": "wake-up-event", "nextState": "awake-in-bed"},
                            { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
                "timeout": { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "property": "reading-in-bed-duration", "nextState": "asleep-in-bed" }
             },
