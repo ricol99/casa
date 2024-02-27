@@ -6,6 +6,7 @@ function WeatherService(_config, _owner) {
    Service.call(this, _config, _owner);
    this.clientSecret = _config.clientSecret;
    this.clientId = _config.clientId;
+   this.apiKey = _config.apiKey;
 
    this.deviceTypes = {
       "current": "currentweather",
@@ -41,7 +42,7 @@ WeatherService.prototype.fetchCurrentWeather = function(_serviceNode, _latitude,
 
    const options = {
       method: 'GET',
-      url: 'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0/forecasts/point/three-hourly',
+      //url: 'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0/forecasts/point/three-hourly',
       qs: {
          excludeParameterMetadata: true,
          includeLocationName: true,
@@ -49,11 +50,21 @@ WeatherService.prototype.fetchCurrentWeather = function(_serviceNode, _latitude,
          longitude: _longitude
       },
       headers: {
-         'X-IBM-Client-Id': this.clientId,
-         'X-IBM-Client-Secret': this.clientSecret,
+         //'X-IBM-Client-Id': this.clientId,
+         //'X-IBM-Client-Secret': this.clientSecret,
          accept: 'application/json'
       }
    };
+
+   if (this.apiKey) {
+      options.url = 'https://data.hub.api.metoffice.gov.uk/sitespecific/v0/point/three-hourly';
+      options.headers.apikey = this.apiKey;
+   }
+   else {
+      options.url = 'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0/forecasts/point/three-hourly';
+      options.headers['X-IBM-Client-Id'] = this.clientId;
+      options.headers['X-IBM-Client-Secret'] = this.clientSecret;
+   }
 
    request(options, (_error, _response, _body) => {
 
