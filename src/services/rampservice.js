@@ -66,7 +66,7 @@ Ramps.prototype.cancel = function() {
 
    if (this.startTimeout) {
       clearTimeout(this.startTimeout);
-      _this.startTimeout = null;
+      this.startTimeout = null;
    }
    else {
       this.ramps[this.currentRamp].cancel();
@@ -108,7 +108,13 @@ function Ramp(_ramps, _config) {
 
    this.endValue = this.config.endValue;
    this.duration = this.config.duration;
-   this.step = this.config.step;
+
+   if (_config.hasOwnProperty("step")) {
+      this.step = this.config.step;
+   }
+   else {
+      this.interval = _config.interval;
+   }
 }
 
 Ramp.prototype.start = function(_currentValue) {
@@ -116,14 +122,27 @@ Ramp.prototype.start = function(_currentValue) {
    this.floorOutput = (this.config.hasOwnProperty("floorOutput")) ? this.config.floorOutput : true;
 
    var difference = Math.abs(this.endValue - this.value);
-   var noOfSteps = difference / Math.abs(this.step);
-   this.interval = this.duration / noOfSteps;
+
+   var noOfSteps;
+
+   if (this.hasOwnProperty("step")) {
+      noOfSteps = difference / Math.abs(this.step);
+      this.interval = this.duration / noOfSteps;
+
+      if ((this.value > this.endValue) && (this.step > 0)) {
+         this.step *= -1;
+      }
+   }
+   else {
+      noOfSteps = this.duration / this.interval;
+      this.step = (this.endValue - this.value) / noOfSteps;
+   }
 
    if (this.config.hasOwnProperty("startValue")) {
 
-      setTimeout(function(_this) {
-         _this.ramps.newValueFromRamp(_this, _this.value);
-      }, 1, this);
+      setTimeout( () => {
+         this.ramps.newValueFromRamp(this, (this.floorOutput) ? Math.floor(this.value) : this.value);
+      }, 1);
    }
 
    this.nextInterval();
@@ -135,22 +154,22 @@ Ramp.prototype.nextInterval = function() {
       clearTimeout(this.timer);
    }
 
-   this.timer = setTimeout(function(_this) {
-      _this.timer = null;
+   this.timer = setTimeout( () => {
+      this.timer = null;
 
-     var difference = Math.abs(_this.endValue - _this.value);
+      var difference = Math.abs(this.endValue - this.value);
 
-      if (difference <= Math.abs(_this.step)) {
-         _this.ramps.newValueFromRamp(_this, _this.endValue);
-         _this.ramps.rampComplete(_this);
-         delete _this;
+      if (difference <= Math.abs(this.step)) {
+         this.ramps.newValueFromRamp(this, this.endValue);
+         this.ramps.rampComplete(this);
+         delete this;
       }
       else {
-         _this.value += _this.step;
-         _this.ramps.newValueFromRamp(_this, (_this.floorOutput) ? Math.floor(_this.value) : _this.value);
-         _this.nextInterval();
+         this.value += this.step;
+         this.ramps.newValueFromRamp(this, (this.floorOutput) ? Math.floor(this.value) : this.value);
+         this.nextInterval();
       }
-   }, this.interval * 1000, this);
+   }, this.interval * 1000);
 };
 
 Ramp.prototype.cancel = function() {

@@ -348,11 +348,23 @@ Tester.prototype.runTestEvent = function() {
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("property")) {
 
       if (!this.generatingExpectedOutput) {
-         process.stdout.write("TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property +
-                              " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value+"\n");
+
+         if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("value")) {
+             process.stdout.write("TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property +
+                                  " value="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value+"\n");
+         }
+         else {
+             process.stdout.write("TC"+(this.currentTestCase+1)+" SETTING PROPERTY prop="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property +
+                                  " ramp="+JSON.stringify(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].ramp)+"\n");
+         }
       }
 
-      target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
+      if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("value")) {
+         target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
+      }
+      else if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("ramp")) {
+         target.alignPropertyRamp(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].ramp);
+      }
    }
 
    if (tc == this.currentTestCase) {
