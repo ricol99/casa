@@ -57,9 +57,22 @@ function Ramps(_owner, _config, _service) {
 }
 
 Ramps.prototype.start = function(_startValue) {
-   this.startValue = _startValue;
-   this.currentRamp = 0;
-   this.ramps[0].start(_startValue);
+
+   if (this.ramps[this.ramps.length - 1].endValue !== _startValue) {
+      this.startValue = _startValue;
+      this.currentRamp = 0;
+      this.ramps[0].start(_startValue);
+   }
+   else {
+
+      for (var i = 0; i < this.ramps.length; ++i) {
+         delete this.ramps[i];
+      }
+
+      setTimeout( () => {
+         this.owner.rampComplete(this, this.config);
+      }, 1);
+   }
 };
 
 Ramps.prototype.cancel = function() {
