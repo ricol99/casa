@@ -61,6 +61,12 @@ var Thing = require('../thing');
 // <scene-name-1> - scene array element 1 active
 // <scene-name-n> - scene array element n active
 
+// Resulting scene-day-state
+// not-active - no scene active
+// <scene-name-0>-<day-state> - scene array element 0 active combine with day state
+// <scene-name-1>-<day-state> - scene array element 1 active combined with day state
+// <scene-name-n>-<day-state> - scene array element n active combined with day state
+
 function Room(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "room";
@@ -128,6 +134,8 @@ function Room(_config, _parent) {
       _config.scenes.pop();  // remove temporarily added state "not-active"
 
       this.ensurePropertyExists('scene-state', 'stateproperty', sceneConfig, _config);
+      this.ensurePropertyExists('scene-day-state', 'combinestateproperty', { separator: "-", initialValue: "not-active-day",
+                                                                             sources: [{ property: "scene-state" }, { property: "day-state" }] }, _config);
    }
    else {
 
