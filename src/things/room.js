@@ -114,6 +114,8 @@ function Room(_config, _parent) {
 
       _config.scenes.push({ name: "not-active" });  // temporarily add state to config to create a loop
 
+      var sceneDayConfig = { separator: "-", initialValue: "not-active-day", sources: [{ property: "scene-state" }, { property: "day-state" }], states: [] };
+
       for (var g = 0; g < (_config.scenes.length - 1); ++g) {
          var stateConfig = { name: _config.scenes[g].name, priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 20, 
                              sources: [{ event: "room-switch-event", nextState: _config.scenes[g + 1].name }, { property: "night-time", value: true, nextState: "not-active"}] };
@@ -129,13 +131,20 @@ function Room(_config, _parent) {
          }
 
          sceneConfig.states.push(stateConfig);
+
+         if (_config.scenes[g].name !== "not-active") {
+
+            for (var d = 0; d < dayStateConfig.states.length; ++d) {
+               sceneDayConfig.states.push({ name: _config.scenes[g].name+"-"+dayStateConfig.states[d].name,
+                                            priority: _config.scenes[g].hasOwnProperty("priority") ? _config.scenes[g].priority : 20 });
+            }
+         }
       }
 
       _config.scenes.pop();  // remove temporarily added state "not-active"
 
       this.ensurePropertyExists('scene-state', 'stateproperty', sceneConfig, _config);
-      this.ensurePropertyExists('scene-day-state', 'combinestateproperty', { separator: "-", initialValue: "not-active-day",
-                                                                             sources: [{ property: "scene-state" }, { property: "day-state" }] }, _config);
+      this.ensurePropertyExists('scene-day-state', 'combinestateproperty', sceneDayConfig, _config);
    }
    else {
 

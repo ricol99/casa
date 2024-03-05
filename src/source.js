@@ -401,11 +401,14 @@ Source.prototype.getManualMode = function() {
 
 Source.prototype.setManualMode = function(_duration) {
 
-   if (_duration !== undefined) {
-      this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
-   }
-   else {
-      this.alignPropertyValue("MODE", "manual");
+   if (this.getProperty("MODE") !== "manual") {
+
+      if (_duration !== undefined) {
+         this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
+      }
+      else {
+         this.alignPropertyValue("MODE", "manual");
+      }
    }
 };
 
