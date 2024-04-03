@@ -58,7 +58,7 @@ function Ramps(_owner, _config, _service) {
 
 Ramps.prototype.start = function(_startValue) {
 
-   if (this.ramps[this.ramps.length - 1].endValue !== _startValue) {
+   if ((this.ramps[this.ramps.length - 1].endValue !== _startValue) || (this.ramps[0].config.hasOwnProperty("startValue"))) {
       this.startValue = _startValue;
       this.currentRamp = 0;
       this.ramps[0].start(_startValue);
