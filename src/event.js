@@ -8,6 +8,27 @@ function Event(_config, _owner) {
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
    this.cold = true;
 
+   var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
+   var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
+
+   if (_config.hasOwnProperty('ignorePropagation')) {
+      this.ignoreParent = parent.hasOwnProperty(_config.ignorePropagation) ? parent[_config.ignorePropagation] : false;
+      this.ignoreChildren = child.hasOwnProperty(_config.ignorePropagation) ? child[_config.ignorePropagation] : false;
+   }
+   else {
+      if (_config.hasOwnProperty('ignoreParent')) this.ignoreParent = _config.ignoreParent;
+      if (_config.hasOwnProperty('ignoreChildren')) this.ignoreChildren = _config.ignoreChildren;
+   }
+
+   if (_config.hasOwnProperty('propagation')) {
+      this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
+      this.propagateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
+   }
+   else {
+      if (_config.hasOwnProperty('propagateToParent')) this.propagateToParent = _config.propagateToParent;
+      if (_config.hasOwnProperty('propagateToChildren')) this.propagateToChildren = _config.propagateToChildren;
+   }
+
    this.sourceListeners = {};
 
    if (_config.hasOwnProperty('source')) {

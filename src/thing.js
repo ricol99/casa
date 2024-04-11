@@ -294,14 +294,18 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
 };
 
 Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
+   var event = this.events.hasOwnProperty(_eventName) ? this.events[_eventName] : null;
+   var ignoreChildren = (event && event.hasOwnProperty("ignoreChildren")) ? event.ignoreChildren : this.ignoreChildren;
+   var propagateToChildren = (event && event.hasOwnProperty("propagateToChildren")) ? event.propagateToChildren : this.propagateToChildren;
+   var propagateToParent = (event && event.hasOwnProperty("propagateToParent")) ? event.propagateToParent : this.propagateToParent;
 
-   if (this.ignoreChildren) {
+   if (ignoreChildren) {
       return false;
    }
 
-   var ret = this.propagateToChildren;
+   var ret = propagateToChildren;
 
-   if (!this.topLevelThing && this.propagateToParent) {
+   if (!this.topLevelThing && propagateToParent) {
       ret = ret && this.owner.childRaisedEvent(_eventName, this, _data);
    }
    else {
@@ -313,6 +317,10 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
 };
 
 Thing.prototype.raiseEvent = function(_eventName, _data) {
+   var event = this.events.hasOwnProperty(_eventName) ? this.events[_eventName] : null;
+   var ignoreChildren = (event && event.hasOwnProperty("ignoreChildren")) ? event.ignoreChildren : this.ignoreChildren;
+   var propagateToChildren = (event && event.hasOwnProperty("propagateToChildren")) ? event.propagateToChildren : this.propagateToChildren;
+   var propagateToParent = (event && event.hasOwnProperty("propagateToParent")) ? event.propagateToParent : this.propagateToParent;
 
    var data = (_data) ? _data : { sourceName: this.uName };
 
@@ -328,13 +336,13 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    }
    else {
 
-      if (this.topLevelThing || !this.propagateToParent) {
+      if (this.topLevelThing || !propagateToParent) {
          Source.prototype.raiseEvent.call(this, _eventName, data);
       }
 
-      var needToUpdateChildren = this.propagateToChildren;
+      var needToUpdateChildren = propagateToChildren;
 
-      if (!this.topLevelThing && this.propagateToParent) {
+      if (!this.topLevelThing && propagateToParent) {
          needToUpdateChildren = !this.owner.childRaisedEvent(_eventName, this, data);
       }
 
