@@ -55,7 +55,7 @@ Util.add = function(_collection, _obj, _name) {
    }
 };
 
-Util.filter = function(_collection, _func) {
+Util.filterNames = function(_collection, _func) {
    var dest = [];
 
    if (typeof _collection === 'object') {
@@ -67,7 +67,26 @@ Util.filter = function(_collection, _func) {
          }
       }
    }
+
+   return dest;
+};
+
+Util.filter = function(_collection, _func) {
+
+   if (typeof _collection === 'object') {
+      var dest = {};
+
+      for (var element in _collection) {
+
+         if (_collection.hasOwnProperty(element) && _func(element, _collection[element])) {
+            dest[element] = _collection[element];
+         }
+      }
+
+      return dest;
+   }
    else if (_collection instanceof Array) {
+      var dest = [];
 
       for (var i = 0; i < _collection.length; ++i) {
 
@@ -75,9 +94,11 @@ Util.filter = function(_collection, _func) {
             dest.push(_collection[i]);
          }
       }
+
+      return dest;
    }
 
-   return dest;
+   return null;
 };
 
 Util.iterate = function(_collection, _startIndex, _func) {

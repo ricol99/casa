@@ -107,18 +107,23 @@ Thing.prototype.sortOutInheritedProperties = function() {
 Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    var data = (_data) ? _data : { sourceName: this.uName };
    var newValue = _propValue;
+   var prop = this.properties.hasOwnProperty(_propName) ? this.properties[_propName] : null;
+
+   var ignoreParent = (prop && prop.hasOwnProperty("ignoreParent")) ? prop.ignoreParent : this.ignoreParent;
+   var propagateToChildren = (prop && prop.hasOwnProperty("propagateToChildren")) ? prop.propagateToChildren : this.propagateToChildren;
+   var propagateToParent = (prop && prop.hasOwnProperty("propagateToParent")) ? prop.propagateToParent : this.propagateToParent;
 
    if (data.alignWithParent) {
 
-      if (!this.ignoreParent) {
+      if (!ignoreParent) {
 
-         if (this.properties.hasOwnProperty(_propName)) {
-            data.local = this.properties[_propName].local;
+         if (prop) {
+            data.local = prop.local;
          }
 
          newValue =  Source.prototype.updateProperty.call(this, _propName, newValue, data);
 
-         if (this.propagateToChildren) {
+         if (propagateToChildren) {
 
             for (var thing in this.things) {
 
@@ -131,12 +136,12 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
 
-      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && this.properties.hasOwnProperty(_propName) && (_propValue === this.properties[_propName].value)) {
+      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && prop && (_propValue === prop.value)) {
          return _propValue;
       }
 
-      if (this.properties.hasOwnProperty(_propName)) {
-         data.propertyOldValue = this.properties[_propName].value;
+      if (prop) {
+         data.propertyOldValue = prop.value;
       }
 
       data.alignWithParent = true;
@@ -146,9 +151,9 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       newValue = Source.prototype.updateProperty.call(this, _propName, _propValue, data);
-      var needToUpdateChildren = this.propagateToChildren;
+      var needToUpdateChildren = propagateToChildren;
 
-      if (!this.topLevelThing && this.propagateToParent) {
+      if (!this.topLevelThing && propagateToParent) {
          needToUpdateChildren = !this.owner.childPropertyChanged(_propName, newValue, this, data);
       }
 
@@ -260,14 +265,18 @@ Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
 };
 
 Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _data) {
+   var prop = this.properties.hasOwnProperty(_propName) ? this.properties[_propName] : null;
+   var ignoreChildren = (prop && prop.hasOwnProperty("ignoreChildren")) ? prop.ignoreChildren : this.ignoreChildren;
+   var propagateToChildren = (prop && prop.hasOwnProperty("propagateToChildren")) ? prop.propagateToChildren : this.propagateToChildren;
+   var propagateToParent = (prop && prop.hasOwnProperty("propagateToParent")) ? prop.propagateToParent : this.propagateToParent;
 
-   if (this.ignoreChildren) {
+   if (ignoreChildren) {
       return false;
    }
 
-   var ret = this.propagateToChildren;
+   var ret = propagateToChildren;
 
-   if (!this.topLevelThing && this.propagateToParent) {
+   if (!this.topLevelThing && propagateToParent) {
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {

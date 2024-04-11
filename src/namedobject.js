@@ -523,7 +523,7 @@ NamedObject.prototype.filterName = function(_name)  {
    var filterArray = newName.split(":");
    var matchString = filterArray[0];
    var perfectMatch = -1;
-   var matches = util.filter(this.myNamedObjects, (_obj) => { return _obj.startsWith(matchString); });
+   var matches = util.filterNames(this.myNamedObjects, (_obj) => { return _obj.startsWith(matchString); });
 
    util.iterate(matches, 0, (_obj) => {
 

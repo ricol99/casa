@@ -20,14 +20,14 @@ function Source(_config, _owner) {
    this.createChildren(_config.events, "event", this);
 
    var modeConfig = _config.hasOwnProperty("modeConfig") ? _config.modeConfig
-                                                         : { initialValue: "auto", takeControlOnTransition: true, ignoreControl: true,
+                                                         : { initialValue: "auto", ignoreParent: false, propagateToParent: true, takeControlOnTransition: true, ignoreControl: true,
                                                              states: [ { name: "auto", priority: -100, action: { property: "MANUAL-MODE-DURATION", value: -1 },
                                                                          source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
                                                                        { name: "manual", priority: 100,
                                                                          timeout: { source: { property: "MANUAL-MODE-DURATION" }, action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
  
    this.ensurePropertyExists("MANUAL-MODE-DURATION", "property",
-                            { initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
+                            { ignoreParent: false, propagateToParent: true, initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
 
    this.ensurePropertyExists("MODE", "stateproperty", modeConfig, _config);
 
