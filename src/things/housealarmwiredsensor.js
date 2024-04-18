@@ -7,7 +7,7 @@ var HouseAlarmSensor = require('./housealarmsensor');
 // faultEolResistance - Fault EOL resistance
 // dividerResistance - Resistance of voltage divider resistor
 // supplyVoltage - Voltage across sensor
-// tolerance - tolerance (in %)
+// resistorTolerance - tolerance (in %)
 // activeTimeout - minimum seconds an active state will last  
 
 // Please define properties for automated functionality
@@ -24,39 +24,77 @@ function HouseAlarmWiredSensor(_config, _parent) {
    this.thingType = "house-alarm-wired-sensor";
 
    this.activeTimeout = (_config.hasOwnProperty("activeTimeout")) ? _config.activeTimeout : 600;
-   this.targetRatios = { inactive: _config.dividerResistance / (_config.mainEolResistance + _config.dividerResistance),
-                         active: _config.dividerResistance / (_config.mainEolResistance + _config.activeEolResistance + _config.dividerResistance) };
+   var tolerance = _config.hasOwnProperty("resistorTolerance") ? _config.resistorTolerance / 100.0 : 0.05;
+
+   this.minimumVoltages = { tamper: 0,
+                            inactive: (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)))) * _config.supplyVoltage,
+                            active: (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
+                                                                                  (_config.activeEolResistance * (1+tolerance)))) * _config.supplyVoltage };
 
    if (_config.hasOwnProperty("faultEolResistance")) {
-      this.targetRatios["fault"] = _config.dividerResistance / (_config.mainEolResistance + _config.faultEolResistance + _config.dividerResistance);
-      this.targetRatios["fault-active"] = _config.dividerResistance / (_config.mainEolResistance + _config.activeEolResistance + _config.faultEolResistance + _config.dividerResistance);
+      this.minimumVoltages["fault"] = (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
+                                                                                    (_config.faultEolResistance * (1+tolerance)))) * _config.supplyVoltage;
+      this.minimumVoltages["fault-active"] = (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
+                                                                                           (_config.activeEolResistance * (1+tolerance)) +
+                                                                                           (_config.faultEolResistance * (1+tolerance)))) * _config.supplyVoltage;
    }
 
-   this.targetVoltages = { tamper: 0 };
+   var maximumVoltages = { inactive: (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)))) * _config.supplyVoltage,
+                           active: (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
+                                                                                 (_config.activeEolResistance * (1-tolerance)))) * _config.supplyVoltage };
 
-   for (var resistance in this.targetRatios) {
-      this.targetVoltages[resistance] = _config.supplyVoltage * this.targetRatios[resistance];
+   if (_config.hasOwnProperty("faultEolResistance")) {
+      maximumVoltages["fault"] = (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
+                                                                               (_config.faultEolResistance * (1-tolerance)))) * _config.supplyVoltage;
+      maximumVoltages["fault-active"] = (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
+                                                                                      (_config.activeEolResistance * (1-tolerance)) +
+                                                                                      (_config.faultEolResistance * (1-tolerance)))) * _config.supplyVoltage;
    }
 
-   this.boundaries = { };
+   var testVoltages = [];
+   var faultyDevice = false;
+   
+   if (_config.hasOwnProperty("faultEolResistance")) {
+      testVoltages.push(this.minimumVoltages["fault-active"]);
+      testVoltages.push(maximumVoltages["fault-active"]);
+   }
 
-   for (var state in this.targetVoltages) {
+   testVoltages.push(this.minimumVoltages["active"]);
+   testVoltages.push(maximumVoltages["active"]);
 
-      if (this.targetVoltages.hasOwnProperty(state)) {
-         var value = this.targetVoltages[state] - (this.targetVoltages[state] * (_config.tolerance / 100.0));
-         this.boundaries[state] = (value > 0) ? value : 0;
+   if (_config.hasOwnProperty("faultEolResistance")) {
+      testVoltages.push(this.minimumVoltages["fault"]);
+      testVoltages.push(maximumVoltages["fault"]);
+   }
+
+   testVoltages.push(this.minimumVoltages["inactive"]);
+   testVoltages.push(maximumVoltages["inactive"]);
+
+   for (var i = 1; i < testVoltages.length-2; i+=2) {
+
+      if (testVoltages[i] > testVoltages[i+1]) {
+         console.error(this.uName + ": Overlapping voltages - device is in fault status");
+         faultyDevice = true;
       }
    }
 
-   this.boundaries["tamper"] = 1 * (_config.tolerance /100.0);
-   
-   this.ensurePropertyExists('sensor-state', 'quantiseproperty', { quanta: this.boundaries, source: { property: "sensor-voltage"} }, _config);
+   this.ensurePropertyExists('sensor-state', 'quantiseproperty', { quanta: this.minimumVoltages, source: { property: "sensor-voltage"} }, _config);
    this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", initialValue: false,
                                                          source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")" }}, _config);
-   this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: false,
-                                                         source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")" }}, _config);
+
+   if (_config.hasOwnProperty("faultEolResistance") || faultyDevice) {
+
+      if (faultyDevice) {
+         this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: true }, _config);
+      }
+      else {
+         this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: false,
+                                                          source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")" }}, _config);
+      }
+   }
+
    this.ensurePropertyExists('tamper', 'property', { name: "tamper", type: "property", initialValue: false,
-                                                         source: { property: "sensor-state", transform: "($value === \"tamper\")" }}, _config);
+                                                     source: { property: "sensor-state", transform: "($value === \"tamper\")" }}, _config);
 }
 
 util.inherits(HouseAlarmWiredSensor, HouseAlarmSensor);
