@@ -82,15 +82,12 @@ function HouseAlarmWiredSensor(_config, _parent) {
    this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", initialValue: false,
                                                          source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")" }}, _config);
 
-   if (_config.hasOwnProperty("faultEolResistance") || faultyDevice) {
-
-      if (faultyDevice) {
-         this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: true }, _config);
-      }
-      else {
-         this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: false,
-                                                          source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")" }}, _config);
-      }
+   if (faultyDevice) {
+      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: true }, _config);
+   }
+   else {
+      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: false,
+                                                       source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")" }}, _config);
    }
 
    this.ensurePropertyExists('tamper', 'property', { name: "tamper", type: "property", initialValue: false,
