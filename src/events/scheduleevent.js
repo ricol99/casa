@@ -29,6 +29,7 @@ ScheduleEvent.prototype.aboutToBeDeleted = function() {
 };
 
 ScheduleEvent.prototype.scheduledEventTriggered = function(_event) {
+   this.owner.newScheduledTransaction();
 
    if (_event.hasOwnProperty("value")) {
       this.value = _event.value;

@@ -90,7 +90,7 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
    else {
 
       if (_sub.sync === "read") {
-         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false });
+         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false, generateNewTransaction: true });
       }
       else {
          this.ensurePropertyExists(_property, 'property', { allSourcesRequiredForValidity: false,
@@ -112,7 +112,7 @@ ServiceNode.prototype.createEvent = function(_eventName, _subscriberEvent, _sub)
    else {
 
       if (_sub.sync === "read") {
-         this.ensureEventExists(_eventName, 'servicenodeevent', { serviceEventName: _eventName });
+         this.ensureEventExists(_eventName, 'servicenodeevent', { serviceEventName: _eventName, generateNewTransaction: true });
       }
       else {
          this.ensureEventExists(_eventName, 'servicenodeevent', { serviceEventName: _eventName, source: { uName: _sub.uName, event: _subscriberEvent }});

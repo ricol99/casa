@@ -731,6 +731,7 @@ State.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.uName + ": scheduledEventTriggered() event name=" + _event.name);
 
    if (this.owner.iAmCurrent(this)) {
+      this.owner.owner.newScheduledTransaction();
 
       if (_event.hasOwnProperty("name") && (_event.name != undefined)) {
 

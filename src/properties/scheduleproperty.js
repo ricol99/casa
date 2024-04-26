@@ -49,6 +49,7 @@ ScheduleProperty.prototype.coldStart = function () {
 };
 
 ScheduleProperty.prototype.scheduledEventTriggered = function(_event) {
+   this.owner.newScheduledTransaction();
 
    if (_event.hasOwnProperty("value")) {
       this.updatePropertyInternal(_event.value, { sourceName: this.owner.uName });

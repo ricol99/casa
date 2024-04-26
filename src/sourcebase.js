@@ -7,6 +7,7 @@ function SourceBase(_config, _owner) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
    this.bowing = false;
+   this.currentTransaction = null;
    this.properties = {};
 
    this.setMaxListeners(0);
@@ -37,6 +38,24 @@ SourceBase.prototype.coldStart = function() {
 
 SourceBase.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
+};
+
+SourceBase.prototype.newTransaction = function() {
+   this.currentTransaction = this.uName + "-" + Date.now();
+   return this.currentTransaction;
+};
+
+SourceBase.prototype.checkTransaction = function() {
+   if (!this.currentTransaction) console.log(this.uName + ": Created a new transaction as currentTransaction not defined");
+   return (!this.currentTransaction) ? this.newTransaction() : this.currentTransaction;
+};
+
+SourceBase.prototype.newTimeoutTransaction = function() {
+   this.currentTransaction = this.checkTransaction() + "T";
+};
+
+SourceBase.prototype.newScheduledTransaction = function() {
+   this.currentTransaction = this.checkTransaction() + "S";
 };
 
 SourceBase.prototype.getCasa = function() {
@@ -177,6 +196,7 @@ SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data)
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
+   sendData.transaction = this.checkTransaction();
    this.asyncEmit('property-changed', sendData);
 };
 
@@ -238,6 +258,7 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
    sendData.local = this.local;
    sendData.sourceName = this.uName;
    sendData.name = _eventName;
+   sendData.transaction = this.checkTransaction();
 
    if (!sendData.hasOwnProperty("value")) {
       sendData.value = true;

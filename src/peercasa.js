@@ -968,7 +968,7 @@ PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, 
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-source-property-req', data: { casaName: this.uName, sourceName: _source.uName,
                                                                   property: _propName, value: _propValue,
-                                                                  requestId: id, requestor: this.casa.uName } };
+                                                                  requestId: id, requestor: this.casa.uName, transaction: _data.transaction } };
 
       this.incompleteRequests[id] = new PeerCasaRequestor(id, (_err, _res) => {
          console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at peer casa ');
@@ -994,7 +994,7 @@ PeerCasa.prototype.setSourcePropertyWithRamp = function(_source, _propName, _ram
       this.reqId = (this.reqId +  1) % 10000;
       var message = { message: 'set-source-property-req', data: { casaName: this.uName, sourceName: _source.uName,
                                                                   property: _propName, ramp: _ramp,
-                                                                  requestId: id, requestor: this.casa.uName } };
+                                                                  requestId: id, requestor: this.casa.uName, transaction: _data.transaction } };
 
       this.incompleteRequests[id] = new PeerCasaRequestor(id, (_err, _res) => {
          console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at peer casa ');

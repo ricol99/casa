@@ -342,6 +342,7 @@ Tester.prototype.runTestEvent = function() {
       if (!this.generatingExpectedOutput) {
          process.stdout.write("TC"+(this.currentTestCase+1)+" >>>>>>>>>>>>>> SENDING EVENT >>>>>>>>>>>>> event="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event+"\n");
       }
+      target.newTransaction();
       target.raiseEvent(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].event);
    }
 
@@ -358,6 +359,8 @@ Tester.prototype.runTestEvent = function() {
                                   " ramp="+JSON.stringify(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].ramp)+"\n");
          }
       }
+
+      target.newTransaction();
 
       if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("value")) {
          target.alignPropertyValue(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].property, this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].value);
@@ -397,7 +400,8 @@ Tester.prototype.matchExpectedEvent = function(_data, _index) {
 Tester.prototype.generateExpectedOutput = function(_data) {
    this.logTime = Date.now();
 
-   if ((this.logTime - this.lastLogTime) > 80 ) {
+   if (_data && _data.transaction != this.lastTransaction) {
+   //if ((this.logTime - this.lastLogTime) > 80 ) {
 
       if (this.delayedLog) {
          process.stdout.write(this.preString+"\n   "+this.delayedLog);
@@ -410,7 +414,7 @@ Tester.prototype.generateExpectedOutput = function(_data) {
          process.stdout.write("\n      ]\n   }");
       }
 
-      if (_data) {
+      if (_data.transaction) {
          this.delayedLog = "{ \"source\": \""+_data.sourceName+"\", \"property\": \""+_data.name+"\", \"value\": "+util.stringForType(_data.value)+" }";
       }
    }
@@ -436,6 +440,7 @@ Tester.prototype.generateExpectedOutput = function(_data) {
    }
 
    this.lastLogTime = this.logTime;
+   this.lastTransaction = _data.transaction;
 };
 
 Tester.prototype.receivedEventFromSource = function(_data) {
@@ -449,7 +454,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          }
 
          this.generatingTimeout = setTimeout( () => {
-             this.generateExpectedOutput(null);
+             this.generateExpectedOutput({ transaction: null });
              process.stdout.write("\n");
              process.exit(0);
          }, 15000);
@@ -485,7 +490,7 @@ Tester.prototype.receivedEventFromSource = function(_data) {
       }
 
       if (result) {
-         process.stdout.write("\x1b[32m"+"TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
+         process.stdout.write("\x1b[32m"+"TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) + " - trans=" + _data.transaction +
                               " - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m\n");
          //console.info("\x1b[32m"+this.uName + ": TC"+ (this.currentTestCase + 1) + " RECEIVED EVENT " + (this.expectedPosition + 1) +
                       //" - source=" + _data.sourceName + " property=" + _data.name + " value=" + _data.value + " - PASSED\x1b[0m");

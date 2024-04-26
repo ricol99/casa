@@ -252,6 +252,7 @@ StateProperty.prototype.setStateTimer = function(_previousState, _state, _timeou
 
 StateProperty.prototype.timeoutInternal = function(_timeout) {
    this.stateTimer = null;
+   this.owner.newTimeoutTransaction();
 
    if (_timeout.hasOwnProperty("actions") && _timeout.actions) {
       this.alignActions(_timeout.actions, this.currentState.priority);

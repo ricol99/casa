@@ -119,6 +119,7 @@ Source.prototype.eventAboutToBeRaised = function(_eventName, _data) {
 
 Source.prototype.scheduledEventTriggered = function(_event) {
    console.log(this.uName + ": scheduledEventTriggered() event=" + _event.name);
+   this.newScheduledTransaction();
 
    if (_event.hasOwnProperty("ramp")) {
       console.error(this.uName + ": Ramps are not supported for this type of scheduled event");
@@ -197,6 +198,12 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
 
+      if (!this.currentTransaction) {
+         this.newTransaction();
+      }
+
+      sendData.transaction = this.currentTransaction;
+
       if (this.local) {
          sendData.local = true;
       }
@@ -218,6 +225,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       delete sendData.alignWithParent;	// This should never be emitted - only for composite management
       delete sendData.sourcePeerCasa;
+      //console.error(JSON.stringify(sendData));
 
       this.asyncEmit('property-changed', sendData);
       return newPropValue;

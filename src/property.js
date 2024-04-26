@@ -13,6 +13,10 @@ function Property(_config, _owner) {
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
 
+   if (_config.hasOwnProperty("generateNewTransaction")) {
+      this.generateNewTransaction = _config.generateNewTransaction;
+   }
+
    if (_config.hasOwnProperty('transform')) {
       this.transform = _config.transform;
    }
@@ -100,6 +104,7 @@ Property.prototype.coldStart = function(_data) {
    if (this.initialValueSet) {
       console.log(this.uName + ": Cold starting, emiting initialValue="+this.value);
       this.cold = false;
+      this.checkTransaction();
       this.owner.updateProperty(this.name, this.value, { sourceName: this.owner.uName, coldStart: true });
    }
 
@@ -110,6 +115,13 @@ Property.prototype.coldStart = function(_data) {
 // If you listen to a "Source" you will be fired by that Source cold starting
 Property.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
+};
+
+Property.prototype.checkTransaction = function() {
+
+   if (this.generateNewTransaction) {
+      this.owner.newTransaction();
+   }
 };
 
 Property.prototype.getCasa = function() {
@@ -144,6 +156,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
    var propValue = this.transformNewPropertyValue(_newPropValue, _data);
 
    _data.value = propValue;
+   this.checkTransaction();
    this.setPropertyInternal(propValue, _data);
 };
 
@@ -152,6 +165,7 @@ Property.prototype.updatePropertyInternal = function(_newPropValue, _data) {
 //
 Property.prototype.set = function(_propValue, _data) {
    this.cancelCurrentRamp();
+   this.checkTransaction();
    this.setPropertyInternal(_propValue, _data);
    return true;
 };
@@ -162,6 +176,7 @@ Property.prototype.set = function(_propValue, _data) {
 //
 Property.prototype.setWithRamp = function(_config, _data) {
    this.cancelCurrentRamp();
+   this.checkTransaction();
    this.createAndStartRamp(_config, _data);
 };
 
@@ -287,6 +302,7 @@ Property.prototype.receivedEventFromSource = function(_data) {
    if (this.valid) {
 
       if (this.sourceListeners[_data.sourceEventName]) {
+         this.owner.currentTransaction = _data.transaction;
          this.newEventReceivedFromSource(this.sourceListeners[_data.sourceEventName], _data);
       }
    }
@@ -333,6 +349,7 @@ Property.prototype.setPropertyInternal = function(_newValue, _data) {
       }
 
       _data.local = this.local;
+      this.checkTransaction();
       return (_newValue === this.owner.updateProperty(this.name, _newValue, _data));
    }
    else {

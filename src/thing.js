@@ -121,6 +121,10 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
             data.local = prop.local;
          }
 
+         if (data.transaction) {
+            this.currentTransaction = data.transaction;
+         }
+
          newValue =  Source.prototype.updateProperty.call(this, _propName, newValue, data);
 
          if (propagateToChildren) {
@@ -145,6 +149,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       data.alignWithParent = true;
+      data.transaction = this.checkTransaction();
 
       if (this.local) {
          data.local = true;
@@ -274,6 +279,10 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       return false;
    }
 
+   if (_data.transaction) {
+      this.currentTransaction = _data.transaction;
+   }
+
    var ret = propagateToChildren;
 
    if (!this.topLevelThing && propagateToParent) {
@@ -303,6 +312,10 @@ Thing.prototype.childRaisedEvent = function(_eventName, _child, _data) {
       return false;
    }
 
+   if (_data.transaction) {
+      this.currentTransaction = _data.transaction;
+   }
+
    var ret = propagateToChildren;
 
    if (!this.topLevelThing && propagateToParent) {
@@ -325,6 +338,11 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
    var data = (_data) ? _data : { sourceName: this.uName };
 
    if (data.alignWithParent) {
+
+      if (data.transaction) {
+         this.currentTransaction = data.transaction;
+      }
+
       Source.prototype.raiseEvent.call(this, _eventName, data);
 
       for (var thing in this.things) {
@@ -348,6 +366,7 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
 
       if (needToUpdateChildren) {
          data.alignWithParent = true;
+         data.transaction = this.checkTransaction();
 
          for (var thing in this.things) {
 

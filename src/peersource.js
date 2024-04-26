@@ -73,6 +73,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
       sendData.local = true;
+      sendData.transaction = this.checkTransaction();
 
       // Call the final hooks
       var newPropValue = this.properties[_propName].propertyAboutToChange(_propValue, sendData);
@@ -81,7 +82,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       this.properties[_propName].value = newPropValue;
       sendData.value = newPropValue;
       this.properties[_propName].previousValue = oldValue;
-      sendData.alignWithParent = undefined;     // This should never be emitted - only for composite management
+      delete sendData.alignWithParent;	// This should never be emitted - only for composite management
       this.asyncEmit('property-changed', sendData);
       return newPropValue;
    }
