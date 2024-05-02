@@ -7,7 +7,7 @@ const fs = require('fs');
 var _mainInstance = null;
 _loadTime = Date.now();
 
-function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _testUncaughtException) {
+function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _logEvents, _testUncaughtException) {
    this.gang = null;
    this.casaName = _casaName;
    this.connectToPeers = _connectToPeers;
@@ -16,6 +16,7 @@ function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath,
    this.configPath = _configPath;
    this.globalConsoleRequired = (_console) ? _console === "global" : false;
    this.localConsoleRequired = (_console) ? _console === "local" : false;
+   this.logEvents = _logEvents;
 
    if (_testUncaughtException) {
       setTimeout( () => {
@@ -115,6 +116,7 @@ Loader.prototype.loadNode = function() {
          this.casaConfig.secureMode = this.secureMode;
          this.casaConfig.certPath = this.certPath;
          this.casaConfig.configPath = this.configPath;
+         this.casaConfig.logEvents = this.logEvents;
 
          this.gangDb = new Db(this.casaConfig.gang+"-db", this.configPath, false, null);
 

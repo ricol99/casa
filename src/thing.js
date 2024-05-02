@@ -149,7 +149,10 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       data.alignWithParent = true;
-      data.transaction = this.checkTransaction();
+
+      if (!data.hasOwnProperty("transaction")) {
+         data.transaction = this.checkTransaction();
+      }
 
       if (this.local) {
          data.local = true;
@@ -366,7 +369,10 @@ Thing.prototype.raiseEvent = function(_eventName, _data) {
 
       if (needToUpdateChildren) {
          data.alignWithParent = true;
-         data.transaction = this.checkTransaction();
+
+         if (!data.hasOwnProperty("transaction")) {
+            data.transaction = this.checkTransaction();
+         }
 
          for (var thing in this.things) {
 

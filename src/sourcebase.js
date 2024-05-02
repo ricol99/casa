@@ -196,7 +196,11 @@ SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data)
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
-   sendData.transaction = this.checkTransaction();
+
+   if (!sendData.hasOwnProperty("transaction")) {
+      sendData.transaction = this.checkTransaction();
+   }
+
    this.asyncEmit('property-changed', sendData);
 };
 
@@ -258,7 +262,10 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
    sendData.local = this.local;
    sendData.sourceName = this.uName;
    sendData.name = _eventName;
-   sendData.transaction = this.checkTransaction();
+
+   if (!sendData.hasOwnProperty("transaction")) {
+      sendData.transaction = this.checkTransaction();
+   }
 
    if (!sendData.hasOwnProperty("value")) {
       sendData.value = true;
@@ -337,11 +344,11 @@ SourceBase.prototype.addPropertiesForAlignment = function(_properties) {
             ramp.ramps = util.copy(_properties[i].ramp.ramps, true);
          }
 
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp, transactionId: this.checkTransaction() });
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, ramp: ramp, transaction: this.checkTransaction() });
       }
       else {
          console.log(this.uName + ": addPropertyForAlignment() property=" + _properties[i].property + " value=" + _properties[i].value);
-         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value, transactionId: this.checkTransaction() });
+         this.propertyAlignmentQueue.push({ property: _properties[i].property, value: _properties[i].value, transaction: this.checkTransaction() });
       }
    }
 };
@@ -359,11 +366,11 @@ SourceBase.prototype.alignNextProperty = function() {
 
             if (prop.hasOwnProperty("ramp")) {
                console.log(this.uName + ": Setting property " + prop.property + " to ramp");
-               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName, transactionId: prop.transactionId, alignment: true });
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName, transaction: prop.transaction, alignment: true });
             }
             else {
                console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-               this.setProperty(prop.property, prop.value, { sourceName: this.uName, transactionId: prop.transactionId, alignment: true });
+               this.setProperty(prop.property, prop.value, { sourceName: this.uName, transaction: prop.transaction, alignment: true });
             }
             this.alignNextProperty();
          }

@@ -6,6 +6,7 @@ var io;
 
 var Gang = require('./gang');
 var NamedObject = require('./namedobject');
+var EventLogger = require('./eventlogger');
 
 function Casa(_config, _owner) {
    this._id = true;     // TDB!!!
@@ -16,6 +17,7 @@ function Casa(_config, _owner) {
    this.secureMode = _config.secureMode;
    this.certPath = _config.certPath;
    this.configPath = _config.configPath;
+   this.logEvents = _config.logEvents;
    this.gang = _owner;
 
    this.listeningPort = (process.env.PORT) ? process.env.PORT : _config.listeningPort;
@@ -31,6 +33,8 @@ function Casa(_config, _owner) {
    this.bowingSources = {};
 
    this.uber = false;
+
+   this.eventLogger = new EventLogger({ logging: this.logEvents, logFileName: this.name });
 
    this.createServer();
 }

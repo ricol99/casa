@@ -198,11 +198,9 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
 
-      if (!this.currentTransaction) {
-         this.newTransaction();
+      if (!sendData.hasOwnProperty("transaction")) {
+         sendData.transaction = this.checkTransaction();
       }
-
-      sendData.transaction = this.currentTransaction;
 
       if (this.local) {
          sendData.local = true;
@@ -226,6 +224,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       delete sendData.alignWithParent;	// This should never be emitted - only for composite management
       delete sendData.sourcePeerCasa;
       //console.error(JSON.stringify(sendData));
+      this.casa.eventLogger.logEvent(sendData);
 
       this.asyncEmit('property-changed', sendData);
       return newPropValue;
