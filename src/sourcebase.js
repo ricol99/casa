@@ -366,11 +366,11 @@ SourceBase.prototype.alignNextProperty = function() {
 
             if (prop.hasOwnProperty("ramp")) {
                console.log(this.uName + ": Setting property " + prop.property + " to ramp");
-               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName, transaction: prop.transaction, alignment: true });
+               this.setPropertyWithRamp(prop.property, prop.ramp, { sourceName: this.uName, transaction: prop.transaction });
             }
             else {
                console.log(this.uName + ": Setting property " + prop.property + " to value " + prop.value);
-               this.setProperty(prop.property, prop.value, { sourceName: this.uName, transaction: prop.transaction, alignment: true });
+               this.setProperty(prop.property, prop.value, { sourceName: this.uName, transaction: prop.transaction });
             }
             this.alignNextProperty();
          }
