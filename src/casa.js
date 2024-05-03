@@ -6,7 +6,6 @@ var io;
 
 var Gang = require('./gang');
 var NamedObject = require('./namedobject');
-var EventLogger = require('./eventlogger');
 
 function Casa(_config, _owner) {
    this._id = true;     // TDB!!!
@@ -34,7 +33,7 @@ function Casa(_config, _owner) {
 
    this.uber = false;
 
-   this.eventLogger = new EventLogger({ logging: this.logEvents, logFileName: this.name });
+   //this.eventLogger = new EventLogger({ logging: this.logEvents, logFileName: this.name });
 
    this.createServer();
 }
@@ -56,6 +55,8 @@ Casa.prototype.buildServices = function() {
          this.addServiceByType(this.services[service]);
       }
    }
+
+   this.eventLogger = this.findService("eventloggingservice");
 };
   
 Casa.prototype.buildTree = function() {

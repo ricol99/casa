@@ -352,12 +352,27 @@ Loader.prototype.addSystemServices = function() {
 
    if (!this.gangConfig.casa.services) {
       this.gangConfig.casa.services = [];
-   }           
+   }
 
-   this.gangConfig.casa.services.unshift({ name: "console-api-service", type: "consoleapiservice" });
-   this.gangConfig.casa.services.unshift({ name: "db-service", type: "dbservice"});
-   this.gangConfig.casa.services.unshift({ name: "ramp-service", type: "rampservice"});
-   this.gangConfig.casa.services.unshift({ name: "schedule-service", type: "scheduleservice",  latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" });
+   var serviceExists = {};
+
+   for (var i = 0; i < this.gangConfig.casa.services.length; ++i) {
+      serviceExists[this.gangConfig.casa.services[i].name] = true;
+   }
+
+   var systemServiceConfigs = { "console-api-service": { name: "console-api-service", type: "consoleapiservice" },
+                                "db-service": { name: "db-service", type: "dbservice" },
+                                "ramp-service": { name: "ramp-service", type: "rampservice" },
+                                "schedule-service": { name: "schedule-service", type: "scheduleservice", latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
+                                "event-logging-service": { name: "event-logging-service", type: "eventloggingservice" }};
+
+   for (var serviceName in systemServiceConfigs) {
+
+      if (systemServiceConfigs.hasOwnProperty(serviceName) && !serviceExists.hasOwnProperty(serviceName)) {
+         this.gangConfig.casa.services.unshift(systemServiceConfigs[serviceName]);
+      }
+   }
+
 };
 
 Loader.prototype.mergeThing = function(_sourceThing, _destThing, _override) {

@@ -254,6 +254,7 @@ SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
    }
 
    console.log(this.uName + ": processing source event raised, event=" + _data.name);
+   this.casa.eventLogger.logReceivedEvent(this.owner.uName, _data);
    this.owner.receivedEventFromSource(util.copy(_data));
 };
 
@@ -335,9 +336,10 @@ SourceListener.prototype.isValid = function() {
 SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 
    if (this.capturingAllEvents) {
-       var newData = util.copy(_data);
-       newData.propertyChange = true;
-       this.owner.receivedEventFromSource(newData);
+      var newData = util.copy(_data);
+      newData.propertyChange = true;
+      this.casa.eventLogger.logReceivedEvent(this.owner.uName, newData);
+      this.owner.receivedEventFromSource(newData);
    }
    else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);
@@ -356,7 +358,8 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 SourceListener.prototype.internalSourceEventRaised = function(_data) {
 
    if (this.capturingAllEvents) {
-       this.owner.receivedEventFromSource(util.copy(_data));
+      this.casa.eventLogger.logReceivedEvent(this.owner.uName, _data);
+      this.owner.receivedEventFromSource(util.copy(_data));
    }
    else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);

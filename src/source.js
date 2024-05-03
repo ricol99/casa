@@ -172,13 +172,6 @@ Source.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
 
 // Override this for last output hook - e.g. sync and external property with the final property value
 Source.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {
-
-   if (this.capturingAllEvents && this.mirrorSourceListener.isValid() && this.mirrorSourceListener.getSource().hasProperty(_propName)) {
-
-      if (this.mirrorSourceListener.getSource().getProperty(_propName) != _propValue) {
-         this.mirrorSourceListener.getSource().alignPropertyValue(_propName, _propValue);
-      }
-   }
 };
 
 // INTERNAL METHOD AND FOR USE BY PROPERTIES 
@@ -214,6 +207,13 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       this.propertyAboutToChange(_propName, newPropValue, _data);
 
+      if (this.capturingAllEvents && this.mirrorSourceListener.isValid() && this.mirrorSourceListener.getSource().hasProperty(_propName)) {
+
+         if (this.mirrorSourceListener.getSource().getProperty(_propName) != newPropValue) {
+            this.mirrorSourceListener.getSource().alignPropertyValue(_propName, newPropValue);
+         }
+      }
+
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue);
       this.properties[_propName]._actuallySetPropertyValue(newPropValue, _data);
 
@@ -224,7 +224,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       delete sendData.alignWithParent;	// This should never be emitted - only for composite management
       delete sendData.sourcePeerCasa;
       //console.error(JSON.stringify(sendData));
-      this.casa.eventLogger.logEvent(sendData);
+      this.casa.eventLogger.logRaisedEvent(sendData);
 
       this.asyncEmit('property-changed', sendData);
       return newPropValue;
