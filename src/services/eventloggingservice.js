@@ -28,28 +28,20 @@ util.inherits(EventLoggingService, Service);
 
 // Called when current state required
 EventLoggingService.prototype.export = function(_exportObj) {
-
-   if (this.eventQueue.length > 0) {
-      _exportObj.asyncEventQueue = this.eventQueue;
-   }
+   Service.prototype.export.call(this, _exportObj);
 };
 
 // Called when current state required
 EventLoggingService.prototype.import = function(_importObj) {
-
-   if (_importObj.hasOwnProperty("asyncEventQueue")) {
-      this.eventQueue = util.copy(_importObj.asyncEventQueue);
-   }
+   Service.prototype.import.call(this, _importObj);
 };
 
 EventLoggingService.prototype.coldStart = function() {
+   Service.prototype.coldStart.call(this);
 };
 
 EventLoggingService.prototype.hotStart = function() {
-
-   if (this.eventQueue.length > 0) {
-      this.setAsyncEmitTimer();
-   }
+   Service.prototype.hotStart.call(this);
 };
 
 EventLoggingService.prototype.propertyAboutToChange = function(_propName, _propValue, _data) {

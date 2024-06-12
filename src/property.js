@@ -187,6 +187,11 @@ Property.prototype.createAndStartRamp = function(_config, _data) {
       this.rampConfig.ramps = util.copy(_config.ramps, true);
    }
    this.rampData = util.copy(_data);
+
+   if (!this.rampData.hasOwnProperty("transaction")) {
+      this.rampData.transaction = this.owner.checkTransaction();
+   }
+
    this.ramp = this.owner.getRampService().createRamp(this, this.rampConfig);
    this.ramp.start(this.value);
 };
@@ -205,6 +210,15 @@ Property.prototype.cancelCurrentRamp = function() {
 
 Property.prototype.newValueFromRamp = function(_ramp, _config, _value) {
    console.log(this.uName + ": New value from ramp, property=" + this.name + ", value=" + _value);
+   var transaction = this.owner.modifyTransaction("R");
+
+   if (!this.rampData) {
+      this.rampData = { transaction: this.owner.modifyTransaction("R")};
+   }
+   else {
+      this.rampData.transaction = this.rampData.hasOwnProperty("transaction") ? this.rampData.transaction + "R" : this.owner.modifyTransaction("R");
+   }
+
    this.setPropertyInternal(_value, this.rampData);
 };
 

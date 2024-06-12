@@ -51,11 +51,16 @@ SourceBase.prototype.checkTransaction = function() {
 };
 
 SourceBase.prototype.newTimeoutTransaction = function() {
-   this.currentTransaction = this.checkTransaction() + "T";
+   return this.modifyTransaction("T");
 };
 
 SourceBase.prototype.newScheduledTransaction = function() {
-   this.currentTransaction = this.checkTransaction() + "S";
+   return this.modifyTransaction("S");
+};
+
+SourceBase.prototype.modifyTransaction = function(_strToAppend) {
+   this.currentTransaction = this.checkTransaction() + _strToAppend;
+   return this.currentTransaction;
 };
 
 SourceBase.prototype.getCasa = function() {

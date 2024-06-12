@@ -69,6 +69,14 @@ function DelayedEvent(_value, _eventData, _owner, _overrideTimeout) {
 
    this.timeoutObj = util.setTimeout( () => {
       this.timeoutObj = null;
+      var transaction = this.owner.owner.newTimeoutTransaction();
+      
+      if (!this.eventData) {
+         this.eventData = {};
+      }  
+      
+      this.eventData.transaction = transaction;
+
       this.owner.updatePropertyInternal(this.value, this.eventData);
       this.owner.deleteDelayedEvent();
    }, delay);
