@@ -140,7 +140,12 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
    }
    else {
 
-      if (!(data.hasOwnProperty("coldStart") && data.coldStart) && prop && (_propValue === prop.value)) {
+      var updateProp = (data.hasOwnProperty("coldStart") && data.coldStart) ||
+                       (prop && prop.alwaysUpdate()) ||
+                       (prop && (_propValue !== prop.value));
+
+      if (!updateProp) {
+      //if (!(data.hasOwnProperty("coldStart") && data.coldStart) && prop && (_propValue === prop.value)) {
          return _propValue;
       }
 

@@ -180,7 +180,12 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
    if (this.properties.hasOwnProperty(_propName)) {
       console.log(this.uName + ": updateProperty prop="+_propName+" value="+_propValue);
 
-      if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
+      var updateProp = (_data && _data.hasOwnProperty("coldStart") && _data.coldStart) ||
+                       (this.properties[_propName].alwaysUpdate()) ||
+                       (_propValue !== this.properties[_propName].value);
+
+      if (!updateProp) {
+      //if ((!(_data && _data.hasOwnProperty("coldStart") && _data.coldStart)) && (_propValue === this.properties[_propName].value)) {
          return _propValue;
       }
 

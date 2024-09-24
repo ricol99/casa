@@ -25,6 +25,10 @@ function Property(_config, _owner) {
       this.transformMap = util.copy(_config.transformMap);
    }
 
+   if (_config.hasOwnProperty("alwaysUpdate")) {
+      this.alwaysUpdate = _config.alwaysUpdate;
+   }
+
    var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
    var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
 
@@ -140,6 +144,13 @@ Property.prototype.addNewSource = function(_config) {
 //
 Property.prototype.getValue = function() {
    return this.value;
+};
+
+//
+// Should we update even though the values are the same?
+//
+Property.prototype.alwaysUpdate = function() {
+   return this.hasOwnProperty("alwaysUpdate") && this.alwaysUpdate;
 };
 
 // Used internally by derived Property to set a new value for the property
