@@ -283,6 +283,10 @@ Property.prototype.amIValid = function() {
 Property.prototype.sourceIsValid = function(_data) {
    var oldValid = this.valid;
    this.valid = this.amIValid();
+
+   if (this.valid && !oldValid) {
+      this.goValid(_data);
+   }
 }
 
 //
@@ -298,6 +302,8 @@ Property.prototype.invalidate = function (_includeChildren) {
    this.cancelCurrentRamp();
 }
 
+//
+// Internal function can be called by derived properties
 Property.prototype.goValid = function (_data) {
 }
 
@@ -340,6 +346,13 @@ Property.prototype.receivedEventFromSource = function(_data) {
 //
 Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    this.updatePropertyInternal(_data.value, _data);
+};
+
+// Create another property to exist alongside this property
+// Can be used to create a statemodel where the actions apply to this property
+//
+Property.prototype.createProperty = function(_config) {
+   return this.owner.createProperty(_config);
 };
 
 // ====================

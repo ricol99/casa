@@ -7,34 +7,35 @@ function HueLight(_config, _parent) {
    this.displayName = _config.displayName;
    this.deviceId = _config.deviceId;
    this.serviceName = (_config.hasOwnProperty("serviceName")) ? _config.serviceName :  this.gang.casa.findServiceName("hueservice");
+   this.sync = _config.hasOwnProperty("sync") ? (_config.sync ? "readwrite" : "write") : "write";
 
    if (!this.serviceName) {
       console.error(this.uName + ": ***** Hue service not found! *************");
       process.exit();
    }
 
-   this.ensurePropertyExists('power', 'serviceproperty', { initialValue: false, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: "write" }, _config);
+   this.ensurePropertyExists('power', 'serviceproperty', { initialValue: false, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: this.sync }, _config);
    this.brightnessSupported = _config.hasOwnProperty("brightnessSupported") ? _config.brightnessSupported : true;
 
    if (this.brightnessSupported)  {
-      this.ensurePropertyExists('brightness', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: "write" }, _config);
+      this.ensurePropertyExists('brightness', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: this.sync }, _config);
    }
 
    if (_config.hasOwnProperty("hueSupported")) {
 
       if (_config.hueSupported) {
          this.hueSupported = true;
-         this.ensurePropertyExists('hue', 'serviceproperty', { initialValue: 360, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: "write" }, _config);
+         this.ensurePropertyExists('hue', 'serviceproperty', { initialValue: 360, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: this.sync }, _config);
       }
 
       if (_config.saturationSupported) {
          this.saturationSupported = true;
-         this.ensurePropertyExists('saturation', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: "write" }, _config);
+         this.ensurePropertyExists('saturation', 'serviceproperty', { initialValue: 100, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: this.sync }, _config);
       }
    }
    else if (_config.colourTempSupported) {
       this.colourTempSupported = true;
-      this.ensurePropertyExists('colour-temp', 'serviceproperty', { initialValue: 153, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: "write" }, _config);
+      this.ensurePropertyExists('colour-temp', 'serviceproperty', { initialValue: 153, id: this.deviceId, serviceType: "light", serviceName: this.serviceName, sync: this.sync }, _config);
    }
 }
 

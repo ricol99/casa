@@ -13,6 +13,7 @@ function HueService(_config, _owner) {
    this.userId = _config.userId;
    this.username = _config.username;
    this.linkAddress = _config.linkAddress;
+   this.updateFrequency = _config.hasOwnProperty("updateFrequency") ? _config.updateFrequency : 30;
 }
 
 util.inherits(HueService, Service);

@@ -109,7 +109,7 @@ StateProperty.prototype.moveToNextState = function(_nextStateName) {
       nextStateName = this.resetStateTimer(this.currentState);
       
       if (nextStateName) {
-         this.set(this.trasnfromStateName(nextStateName), { sourceName: this.owner.uName });
+         this.set(this.transformStateName(nextStateName), { sourceName: this.owner.uName });
       }
    }
    else {
