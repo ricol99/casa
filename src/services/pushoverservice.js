@@ -2,7 +2,7 @@ var util = require('util');
 var Service = require('../service');
 var Hue = require("node-hue-api");
 
-var push = require( 'pushover-notifications' );
+var Push = require( 'pushover-notifications' );
 
 function PushoverService(_config, _owner) {
    _config.queueQuant = 150;
@@ -38,7 +38,7 @@ PushoverService.prototype.hotStart = function() {
 };
 
 PushoverService.prototype.start = function() {
-   this.pushover = new push( { user: this.userId, token: this.token });
+   this.pushover = new Push( { user: this.userId, token: this.token, onerror: function(_error) { console.error("Pushover received error: "+_error);} });
 };
 
 PushoverService.prototype.sendMessage = function(_destinationAddress, _messagePriority, _message, _callback) {
