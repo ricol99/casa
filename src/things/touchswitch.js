@@ -27,7 +27,7 @@ function TouchSwitch(_config, _parent) {
    this.switchPropRaw = this.switchProp + "-raw";
 
    this.ensurePropertyExists(this.switchPropRaw, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow }, _config);
-   this.ensurePropertyExists(this.switchProp, 'debounceproperty', { threshold: this.debounceThreshold, source: { property: this.switchPropRaw }}, _config);
+   this.ensurePropertyExists(this.switchProp, 'debounceproperty', { threshold: this.debounceThreshold, ignoreUnderThreshold: true, source: { property: this.switchPropRaw }}, _config);
 
    this.holdStartEventName =  _config.hasOwnProperty("holdStartEventName") ? _config.holdStartEventName : "touch-hold-start-event";
    this.holdConfirmEventName =  _config.hasOwnProperty("holdConfirmEventName") ? _config.holdConfirmEventName : "touch-hold-confirm-event";

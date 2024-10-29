@@ -1,38 +1,51 @@
 var util = require('../util');
 var Property = require('../property');
 
-function DebounceProperty(_config, _owner) {
-
+function Debounce2Property(_config, _owner) {
    this.threshold = _config.threshold;
+   this.ignoreUnderThreshold = _config.hasOwnProperty("ignoreUnderThreshold") ? _config.ignoreUnderThreshold : false;
    this.invalidValue = _config.invalidValue;
    this.timeoutObj = null;
-   this.sourceState = false;
-   this.outputState = false;
    this.sourceValid = false;
 
    Property.call(this, _config, _owner);
+
+   if (this.ignoreUnderThreshold) {
+      this.createProperty({ name: _config.name + "-model", type: "stateproperty", initialValue: "not-set", ignoreControl: true, 
+                            states: [ { name: "not-set", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: true, nextState: "not-set-holding" },
+                                                      action: { property: this.name, value: false }},
+                                      { name: "not-set-holding", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: false, nextState: "not-set" },
+                                                                timeout: { "duration": _config.threshold, nextState: "set" }},
+                                      { name: "set", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: false, nextState: "set-holding" },
+                                                     action: { property: this.name, value: true }},
+                                      { name: "set-holding", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: true, nextState: "set" },
+                                                             timeout: { "duration": _config.threshold, nextState: "not-set" }} ] }, _config);
+   }
+   else {
+      this.createProperty({ name: _config.name + "-model", type: "stateproperty", initialValue: "not-set", ignoreControl: true,
+                            states: [ { name: "not-set", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: true, nextState: "set-holding" }},
+                                      { name: "set-holding", action: { property: this.name, value: true }, timeout: { "duration": _config.threshold, nextState: "set" }},
+                                      { name: "set", source: { uName: _config.sources[0].uName, property: _config.sources[0].property, value: false, nextState: "not-set-holding" }},
+                                      { name: "not-set-holding", action: { property: this.name, value: false}, timeout: { "duration": _config.threshold, nextState: "not-set" }} ] }, _config);
+   }
 }
 
-util.inherits(DebounceProperty, Property);
+util.inherits(Debounce2Property, Property);
 
 // Called when system state is required
-DebounceProperty.prototype.export = function(_exportObj) {
+Debounce2Property.prototype.export = function(_exportObj) {
    Property.prototype.export.call(this, _exportObj);
-   _exportObj.sourceState = this.sourceState;
-   _exportObj.outputState = this.outputState;
    _exportObj.timeoutObj = this.timeoutObj ? this.timeoutObj.left() : -1;
 };
 
 // Called to restore system state before hot start
-DebounceProperty.prototype.import = function(_importObj) {
+Debounce2Property.prototype.import = function(_importObj) {
    Property.prototype.import.call(this, _importObj);
-   this.sourceState = _importObj.sourceState;
-   this.outputState = _importObj.outputState;
    this.timeoutObj = _importObj.timeoutObj;
 };
 
 // Called after system state has been restored
-DebounceProperty.prototype.hotStart = function() {
+Debounce2Property.prototype.hotStart = function() {
    Property.prototype.hotStart.call(this);
 
    if (this.timeoutObj !== -1) {
@@ -44,45 +57,30 @@ DebounceProperty.prototype.hotStart = function() {
 };
 
 // Called to start a cold system
-DebounceProperty.prototype.coldStart = function () {
+Debounce2Property.prototype.coldStart = function () {
    Property.prototype.coldStart.call(this);
 };
 
-DebounceProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
-   var propValue = _data.value;
-   console.log(this.uName + ':source ' + _data.sourceName + ' property ' + _data.name + ' has changed to ' + propValue + '!');
+Debounce2Property.prototype.startTimer = function(_timeout) {
+   var timeout = _timeout ? _timeout : this.threshold*1000;
 
-   if (_data.coldStart) {    // Cold start only once
-      this.sourceState = propValue;
-      this.outputState = propValue;
-      this.updatePropertyInternal(propValue, _data);
-      return;
-   }
+   this.timeoutObj = util.setTimeout( () => {
+      console.log(this.uName + ": Timer expired!");
+      this.timeoutObj = null;
 
-   if (this.outputState == propValue) {   // Current output is the same as new input, just update input
-      this.sourceState = propValue;
-   }
-   else if (this.sourceState != propValue) {   // Input has changed, start timer and ignore until timer expires
-      this.sourceState = propValue;
-      this.lastData = util.copy(_data);  // TODO: Should we cache positive and negative case?
+      if (!this.sourceValid) {
 
-      // If a timer is already running, ignore. ELSE create one
-      if (this.timeoutObj == null) {
-         this.startTimer();
+         if (this.invalidValue != undefined) {
+            this.updatePropertyInternal(this.invalidValue);
+         }
+
+         Property.prototype.sourceIsInvalid.call(this, this.invalidData);
       }
-   }
-};
 
+   }, timeout);
+}
 
-//DebounceProperty.prototype.goInvalid = function(_data) {
-
-  //if (this.readyToGoInvalid) {
-     //this.readyToGoInvalid = false;
-     //Property.prototype.goInvalid.call(this, _data);
-  //}
-//};
-
-DebounceProperty.prototype.sourceIsInvalid = function(_data) {
+Debounce2Property.prototype.sourceIsInvalid = function(_data) {
    console.log(this.uName + ': Source ' + _data.sourceName + ' property ' + _data.name + ' invalid!');
    this.invalidData = util.copy(_data);
 
@@ -95,44 +93,15 @@ DebounceProperty.prototype.sourceIsInvalid = function(_data) {
          this.startTimer();
       }
    }
-
-   //Property.prototype.sourceIsInvalid.call(this, _data);
 };
 
-DebounceProperty.prototype.sourceIsValid = function(_data) {
+Debounce2Property.prototype.sourceIsValid = function(_data) {
    this.sourceValid = true;
-   this.sourceState = false;
-   this.outputState = false;
-   this.lastData = null;
+   this.invalidData = null;
    Property.prototype.sourceIsValid.call(this, _data);
 };
 
-// ====================
-// NON-EXPORTED METHODS
-// ====================
+Debounce2Property.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+};
 
-DebounceProperty.prototype.startTimer = function(_timeout) {
-   var timeout = _timeout ? _timeout : this.threshold*1000;
-
-   this.timeoutObj = util.setTimeout( () => {
-      console.log(this.uName + ": Timer expired!");
-      this.timeoutObj = null;
-
-      if (this.lastData) {
-         this.outputState = this.sourceState;
-         this.updatePropertyInternal(this.sourceState, this.lastData);
-         this.lastData = null;
-      }
-
-      if (!this.sourceValid) {
-
-         if (this.invalidValue != undefined) {
-            this.updatePropertyInternal(this.invalidValue);
-         }
-
-         Property.prototype.sourceIsInvalid.call(this, this.invalidData);
-      }
-   }, timeout);
-}
-
-module.exports = exports = DebounceProperty;
+module.exports = exports = Debounce2Property;
