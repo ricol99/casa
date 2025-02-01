@@ -104,7 +104,7 @@ Thing.prototype.sortOutInheritedProperties = function() {
 
 // Actually update the property value and let all interested parties know
 // Also used to navigate down the composite thing tree to update a property shared by all
-Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
+Thing.prototype.updateProperty = function(_propName, _propValue, _data, _forceAlignment) {
    var data = (_data) ? _data : { sourceName: this.uName };
    var newValue = _propValue;
    var prop = this.properties.hasOwnProperty(_propName) ? this.properties[_propName] : null;
@@ -115,7 +115,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
 
    if (data.alignWithParent) {
 
-      if (!ignoreParent) {
+      if (!ignoreParent || _forceAlignment) {
 
          if (prop) {
             data.local = prop.local;
@@ -139,7 +139,6 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
    }
    else {
-
       var updateProp = (data.hasOwnProperty("coldStart") && data.coldStart) ||
                        (prop && prop.alwaysUpdate()) ||
                        (prop && (_propValue !== prop.value));
@@ -297,7 +296,7 @@ Thing.prototype.childPropertyChanged = function(_propName, _propValue, _child, _
       ret = ret && this.owner.childPropertyChanged(_propName, _propValue, this, _data);
    }
    else {
-      var newValue = this.updateProperty(_propName, _propValue, _data);
+      var newValue = this.updateProperty(_propName, _propValue, _data, true);
 
       if (newValue !== _propValue) {
 
