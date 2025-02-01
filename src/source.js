@@ -219,7 +219,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
          }
       }
 
-      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue);
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue, this.bowing ? "(BOWING)" : "");
       this.properties[_propName]._actuallySetPropertyValue(newPropValue, _data);
 
       if (sendData.hasOwnProperty("priority")) {

@@ -5,7 +5,6 @@ function PushoverServiceGroup(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
    console.log(this.uName + ": New Pushover Group Node created");
-   this.ensurePropertyExists("message", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
    this.userGroup = null;
 }
 
@@ -53,13 +52,14 @@ PushoverServiceGroup.prototype.transactionReadyForProcessing = function(_transac
 PushoverServiceGroup.prototype.processPropertyChanged = function(_transaction, _callback) {
    console.log(this.uName + ": processPropertyChanged() transaction=", _transaction.properties);
 
-   if (!_transaction.properties.hasOwnProperty("message") && (!_transaction.properties.message)) {
-      return _callback("No message passed to send!");
-   }
-
    if (!_transaction.coldStart) {
-      var messagePriority = _transaction.propData.hasOwnProperty("messagePriority") ? _transaction.propData.messagePriority : (_transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0);
-      this.owner.sendMessage(this.destinationAddress, messagePriority, _transaction.properties.message, _callback);
+
+      // Only one property as optimisedTransactions set to false
+      for (var first in _transaction.properties) {
+         var messagePriority = _transaction.propData.hasOwnProperty("messagePriority") ? _transaction.propData.messagePriority : (_transaction.subscriber ? _transaction.subscriber.args.messagePriority : 0);
+         this.owner.sendMessage(this.destinationAddress, messagePriority, _transaction.properties[first], _callback);
+         break;
+      }
    }
    else {
       _callback(null, true);

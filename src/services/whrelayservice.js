@@ -56,7 +56,9 @@ WhRelayService.prototype.start = function() {
 
       setTimeout( () => {
          this.ws = null;
+         this.heartbeat.stop();
          this.heartbeat = null;
+         this.heartbeat = new Heartbeat(this);
          this.start();
       }, 60000);
    }

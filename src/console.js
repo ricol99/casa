@@ -118,6 +118,7 @@ Console.prototype.casaFound = function(_params) {
       });
 
       remoteCasa.on("connect_error", (_data) => {
+         process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() error="+util.inspect(_data)+"\n");
       });
 
       remoteCasa.on("disconnected", (_data) => {

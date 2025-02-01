@@ -453,4 +453,18 @@ Thing.prototype.refreshChildInheritedProperties = function() {
    return this.propagateToParent;
 };
 
+Thing.prototype.loseListeners = function(_includeChildren) {
+   Source.prototype.loseListeners.call(this, _includeChildren);
+
+   if (_includeChildren) {
+
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].loseListeners(_includeChildren);
+         }
+      }
+   }
+};
+
 module.exports = exports = Thing;

@@ -332,36 +332,6 @@ NamedObject.prototype.ownerHasNewName = function() {
    }
 };
 
-NamedObject.prototype.validate = function(_includeChildren) {
-   var str =  _includeChildren ? " and all children" : "";
-   console.log(this.uName + ": Validating object" + str);
-
-   if (_includeChildren) {
-
-      for (var obj in this.myNamedObjects) {
-
-         if (this.myNamedObjects.hasOwnProperty(obj)) {
-            this.myNamedObjects[obj].validate(_includeChildren);
-         }
-      }
-   }
-};
-
-NamedObject.prototype.invalidate = function(_includeChildren) {
-   var str =  _includeChildren ? " and all children" : "";
-   console.log(this.uName + ": Invalidating object" +str);
-
-   if (_includeChildren) {
-
-      for (var obj in this.myNamedObjects) {
-
-         if (this.myNamedObjects.hasOwnProperty(obj)) {
-            this.myNamedObjects[obj].invalidate(_includeChildren);
-         }
-      }
-   }
-};
-
 NamedObject.prototype.require = function(_type, _superType, _loadPath) {
    var path = '';
    var module;

@@ -101,7 +101,7 @@ SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
    this.local = true;
 
    if (_currentlyActive) {
-      this.invalidate(true);
+      this.loseListeners(true);
    }
 
    if (_topOfTree) {
@@ -179,12 +179,27 @@ SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
 
 SourceBase.prototype.invalidate = function(_includeChildren) {
    console.log(this.uName + ": Raising invalid on all properties to drop source listeners");
-
+ 
    if (this.alignmentTimeout || (this.propertyAlignmentQueue && (this.propertyAlignmentQueue.length > 0))) {
       this.clearAlignmentQueue();
    }
 
-   NamedObject.prototype.invalidate.call(this, _includeChildren);
+   for (var prop in this.properties) {
+ 
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].invalidate();
+      }
+   }
+};
+
+SourceBase.prototype.loseListeners = function(_includeChildren) {
+
+   for (var prop in this.properties) {
+
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].loseListeners();
+      }
+   }
 };
 
 SourceBase.prototype.updateProperty = function(_propName, _propValue, _data) {

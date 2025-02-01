@@ -33,6 +33,9 @@ function Casa(_config, _owner) {
 
    this.uber = false;
 
+   this.sourcePropertyChangedCasaHandler = Casa.prototype.sourcePropertyChangedCasaCb.bind(this);
+   this.sourceEventRaisedCasaHandler = Casa.prototype.sourceEventRaisedCasaCb.bind(this);
+
    //this.eventLogger = new EventLogger({ logging: this.logEvents, logFileName: this.name });
 
    this.createServer();
@@ -43,6 +46,16 @@ util.inherits(Casa, NamedObject);
 // Used to classify the type and understand where to load the javascript module
 Casa.prototype.superType = function(_type) {
    return "casa";
+};
+
+Casa.prototype.sourcePropertyChangedCasaCb = function(_data) {
+   console.log(this.uName + ': ' + _data.sourceName + ' has had a property change, prop='+_data.name+" value="+_data.value);
+   this.emit('source-property-changed', _data);
+};
+
+Casa.prototype.sourceEventRaisedCasaCb = function(_data) {
+   console.log(this.uName + ': ' + _data.sourceName + ' has raised an event, prop='+_data.name);
+   this.emit('source-event-raised', _data);
 };
 
 Casa.prototype.buildServices = function() {
@@ -246,15 +259,8 @@ Casa.prototype.addSource = function(_source) {
    console.log(this.uName + ': Source '  + _source.uName + ' added to casa ');
    this.sources[_source.uName] = _source;
 
-   _source.on('property-changed', (_data) => {
-      console.log(this.uName + ': ' + _data.sourceName + ' has had a property change');
-      this.emit('source-property-changed', _data);
-   });
-
-   _source.on('event-raised', (_data) => {
-      console.log(this.uName + ': ' + _data.sourceName + ' has raised an event');
-      this.emit('source-event-raised', _data);
-   });
+   _source.on('property-changed', this.sourcePropertyChangedCasaHandler);
+   _source.on('event-raised', this.sourceEventRaisedCasaHandler);
 
    this.emit('source-added', { sourceName: _source.uName });
    console.log(this.uName + ': ' + _source.uName + ' associated!');
@@ -298,6 +304,16 @@ Casa.prototype.removeSource = function(_source) {
 
    this.gang.removeThing(_source);
    delete this.sources[_source.uName];
+};
+
+Casa.prototype.stopListeningToSource = function(_source) {
+   _source.removeListener('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   _source.removeListener('event-raised', this.sourceEventRaisedCasaHandler);
+};
+
+Casa.prototype.startListeningToSource = function(_source) {
+   _source.on('source-property-changed', this.sourcePropertyChangedCasaHandler);
+   _source.on('event-raised', this.sourceEventRaisedCasaHandler);
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
@@ -402,6 +418,7 @@ Casa.prototype.bowSource = function(_source, _currentlyActive) {
       _source.detach();
    }
    this.bowingSources[_source.uName] = _source;
+   this.stopListeningToSource(_source);
 };
 
 Casa.prototype.standUpSourceFromBow = function(_source) {
@@ -413,6 +430,7 @@ Casa.prototype.standUpSourceFromBow = function(_source) {
    }
 
    delete this.bowingSources[_source.uName];
+   this.startListeningToSource(_source);
 };
 
 Casa.prototype.getBowingSource = function(_sourceFullName) {

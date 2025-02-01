@@ -13,6 +13,11 @@ function SourceListener(_config, _owner) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
    }
 
+   // TBD: HACK!
+   if ((this.sourceName === _owner.uName) || (_owner.hasOwnProperty("owner") && (this.sourceName === _owner.owner.uName))) {
+      this.listeningToMyself = true;
+   }
+
    if (_config.hasOwnProperty('transform')) {
       this.transform = _config.transform;
    }
@@ -203,6 +208,10 @@ SourceListener.prototype.refreshSource = function() {
 
 SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
+   if (this.hasOwnProperty("listeningToMyself") && this.listeningToMyself) {
+      return;
+   }
+
    if ((_data.name === this.eventName) && this.valid) {
       console.log(this.uName + ': INVALID');
 
@@ -227,7 +236,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
          this.startMaskInvalidTimer();
       }
       else {
-         this.invalidate();
+         this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
       }
    }
 }
@@ -241,10 +250,6 @@ SourceListener.prototype.goValid = function() {
          this.internalSourcePropertyChanged(util.copy({ sourceName: this.sourceName, name: this.eventName, value: this.source.getProperty(this.eventName), coldStart: true }));
       }
    }
-}
-
-SourceListener.prototype.invalidate = function() {
-   this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
 }
 
 SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
@@ -278,7 +283,7 @@ SourceListener.prototype.startMaskInvalidTimer = function() {
          this.maskInvalidTimer = null;
 
          if (!this.valid) {
-            this.invalidate();
+            this.owner.sourceIsInvalid(util.copy({ sourceEventName: this.sourceEventName, sourceName: this.sourceName, name: this.eventName }));
          }
       }, this.maskInvalidTimeout*1000);
    }

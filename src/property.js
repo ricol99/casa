@@ -298,9 +298,17 @@ Property.prototype.sourceIsValid = function(_data) {
 Property.prototype.invalidate = function (_includeChildren) {
    console.log(this.uName + ': INVALID');
    this.owner.propertyGoneInvalid(this.name);
-   NamedObject.prototype.invalidate.call(this);
    this.cancelCurrentRamp();
-}
+};
+
+// 
+// Actual tell all listening parties that this property is not to be listened to anymore.
+// Pretend it is invalid but really the source is bowing and functioning silently
+//
+Property.prototype.loseListeners = function () {
+   console.log(this.uName + ': Losing Listeners due to source bowing'); 
+   this.owner.propertyGoneInvalid(this.name);
+};    
 
 //
 // Internal function can be called by derived properties

@@ -78,7 +78,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       // Call the final hooks
       var newPropValue = this.properties[_propName].propertyAboutToChange(_propValue, sendData);
 
-      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue);
+      console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue, this.bowing ? "(BOWING)" : "");
       this.properties[_propName].value = newPropValue;
       sendData.value = newPropValue;
       this.properties[_propName].previousValue = oldValue;
