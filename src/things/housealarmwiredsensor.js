@@ -26,49 +26,59 @@ function HouseAlarmWiredSensor(_config, _parent) {
    this.activeTimeout = (_config.hasOwnProperty("activeTimeout")) ? _config.activeTimeout : 600;
    var tolerance = _config.hasOwnProperty("resistorTolerance") ? _config.resistorTolerance / 100.0 : 0.05;
 
+   var mainEolResistanceMin = _config.mainEolResistance * (1-tolerance);
+   var activeEolResistanceMin = _config.activeEolResistance * (1-tolerance);
+   var dividerResistanceMin = _config.dividerResistance * (1-tolerance);
+
+   var mainEolResistanceMax = _config.mainEolResistance * (1+tolerance);
+   var activeEolResistanceMax = _config.activeEolResistance * (1+tolerance);
+   var dividerResistanceMax = _config.dividerResistance * (1+tolerance);
+
    this.minimumVoltages = { tamper: 0,
-                            inactive: (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)))) * _config.supplyVoltage,
-                            active: (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
-                                                                                  (_config.activeEolResistance * (1+tolerance)))) * _config.supplyVoltage };
+                            inactive: (mainEolResistanceMin / (dividerResistanceMax + mainEolResistanceMin)) * _config.supplyVoltage,
+                            active: ((mainEolResistanceMin + activeEolResistanceMin) / (dividerResistanceMax + mainEolResistanceMin + activeEolResistanceMin)) * _config.supplyVoltage };
 
    if (_config.hasOwnProperty("faultEolResistance")) {
-      this.minimumVoltages["fault"] = (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
-                                                                                    (_config.faultEolResistance * (1+tolerance)))) * _config.supplyVoltage;
-      this.minimumVoltages["fault-active"] = (_config.dividerResistance * (1-tolerance) / ((_config.dividerResistance * (1-tolerance)) + (_config.mainEolResistance * (1+tolerance)) +
-                                                                                           (_config.activeEolResistance * (1+tolerance)) +
-                                                                                           (_config.faultEolResistance * (1+tolerance)))) * _config.supplyVoltage;
+      var faultEolResistanceMin = _config.faultEolResistance * (1-tolerance);
+
+      this.minimumVoltages["fault"] = ((mainEolResistanceMin + faultEolResistanceMin ) / (dividerResistanceMax + mainEolResistanceMin + faultEolResistanceMin)) * _config.supplyVoltage;
+
+      this.minimumVoltages["fault-active"] = ((mainEolResistanceMin + activeEolResistanceMin + faultEolResistanceMin ) /
+                                              (dividerResistanceMax + mainEolResistanceMin +activeEolResistanceMin + faultEolResistanceMin)) * _config.supplyVoltage;
    }
 
-   var maximumVoltages = { inactive: (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)))) * _config.supplyVoltage,
-                           active: (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
-                                                                                 (_config.activeEolResistance * (1-tolerance)))) * _config.supplyVoltage };
+   var maximumVoltages = { inactive: (mainEolResistanceMax / (dividerResistanceMin + mainEolResistanceMax)) * _config.supplyVoltage,
+                           active: ((mainEolResistanceMax + activeEolResistanceMax) / (dividerResistanceMin + mainEolResistanceMax + activeEolResistanceMax)) * _config.supplyVoltage };
+
 
    if (_config.hasOwnProperty("faultEolResistance")) {
-      maximumVoltages["fault"] = (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
-                                                                               (_config.faultEolResistance * (1-tolerance)))) * _config.supplyVoltage;
-      maximumVoltages["fault-active"] = (_config.dividerResistance * (1+tolerance) / ((_config.dividerResistance * (1+tolerance)) + (_config.mainEolResistance * (1-tolerance)) +
-                                                                                      (_config.activeEolResistance * (1-tolerance)) +
-                                                                                      (_config.faultEolResistance * (1-tolerance)))) * _config.supplyVoltage;
+      var faultEolResistanceMax = _config.faultEolResistance * (1+tolerance);
+
+      maximumVoltages["fault"] = ((mainEolResistanceMax + faultEolResistanceMax) / (dividerResistanceMin + mainEolResistanceMax + faultEolResistanceMax)) * _config.supplyVoltage;
+      maximumVoltages["fault-active"] = ((mainEolResistanceMax + activeEolResistanceMax + faultEolResistanceMax) /
+                                         (dividerResistanceMin + mainEolResistanceMax + activeEolResistanceMax + faultEolResistanceMax)) * _config.supplyVoltage;
    }
+
+   this.minimumVoltages["tamper-high"] =  _config.supplyVoltage * 0.9
 
    var testVoltages = [];
    var faultyDevice = false;
-   
-   if (_config.hasOwnProperty("faultEolResistance")) {
-      testVoltages.push(this.minimumVoltages["fault-active"]);
-      testVoltages.push(maximumVoltages["fault-active"]);
-   }
 
-   testVoltages.push(this.minimumVoltages["active"]);
-   testVoltages.push(maximumVoltages["active"]);
+   testVoltages.push(this.minimumVoltages["inactive"]);
+   testVoltages.push(maximumVoltages["inactive"]);
 
    if (_config.hasOwnProperty("faultEolResistance")) {
       testVoltages.push(this.minimumVoltages["fault"]);
       testVoltages.push(maximumVoltages["fault"]);
    }
 
-   testVoltages.push(this.minimumVoltages["inactive"]);
-   testVoltages.push(maximumVoltages["inactive"]);
+   testVoltages.push(this.minimumVoltages["active"]);
+   testVoltages.push(maximumVoltages["active"]);
+
+   if (_config.hasOwnProperty("faultEolResistance")) {
+      testVoltages.push(this.minimumVoltages["fault-active"]);
+      testVoltages.push(maximumVoltages["fault-active"]);
+   }
 
    for (var i = 1; i < testVoltages.length-2; i+=2) {
 
@@ -91,7 +101,7 @@ function HouseAlarmWiredSensor(_config, _parent) {
    }
 
    this.ensurePropertyExists('tamper', 'property', { name: "tamper", type: "property", initialValue: false,
-                                                     source: { property: "sensor-state", transform: "($value === \"tamper\")" }}, _config);
+                                                     source: { property: "sensor-state", transform: "($value === \"tamper\") || ($value === \"tamper-high\")" }}, _config);
 }
 
 util.inherits(HouseAlarmWiredSensor, HouseAlarmSensor);
