@@ -6,7 +6,7 @@ function QuantiseProperty(_config, _owner) {
    this.quanta = _config.quanta;
    this.boundaries = [];
    this.boundariesMap = {};
-   this.bufferTimers = _config.hasOwnProperty("bufferTimers") ? _config.buffersTimers : {};
+   this.bufferTimers = _config.hasOwnProperty("bufferTimers") ? _config.bufferTimers : {};
    this.bufferName = null;
 
    for (var q in this.quanta) {
