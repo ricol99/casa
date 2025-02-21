@@ -5,9 +5,14 @@ function QuantiseProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.quanta = _config.quanta;
    this.boundaries = [];
+   this.boundariesMap = {};
+   this.bufferTimers = _config.hasOwnProperty("bufferTimers") ? _config.buffersTimers : {};
+   this.bufferName = null;
 
    for (var q in this.quanta) {
+      var bufferTimer = this.bufferTimers.hasOwnProperty(q) ? this.bufferTimers[q] : 0;
       this.boundaries.push({ name: q, value: this.quanta[q] });
+      this.boundariesMap[q] = { value: this.quanta[q], bufferTimer: bufferTimer };
    }
 
    this.boundaries.sort((_a, _b) => {
@@ -50,7 +55,39 @@ QuantiseProperty.prototype.newEventReceivedFromSource = function(_sourceListener
       }
    }
 
-   this.updatePropertyInternal(name, _data);
+   if (this.value != name) {
+
+      if (!this.bufferTimer) {
+         this.setWithBuffer(name, _data);
+      }
+      else if (this.bufferName !== name) {
+         util.clearTimeout(this.bufferTimer);
+         this.bufferTimer = null;
+         this.bufferName = null;
+         this.setWithBuffer(name, _data);
+      }
+   }
+   else if (this.bufferTimer) {
+      util.clearTimeout(this.bufferTimer);
+      this.bufferTimer = null;
+      this.bufferName = null;
+   }
 }
+
+QuantiseProperty.prototype.setWithBuffer = function(_name, _data) {
+
+   if (this.boundariesMap[_name].bufferTimer > 0) {
+      this.bufferName = _name;
+         
+      this.bufferTimer = util.setTimeout( () => {
+         this.bufferTimer = null;
+         this.bufferName = null;
+         this.updatePropertyInternal(_name, _data);
+      }, this.boundariesMap[_name].bufferTimer * 1000);
+   }
+   else {
+      this.updatePropertyInternal(_name, _data);
+   }
+};
 
 module.exports = exports = QuantiseProperty;

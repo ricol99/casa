@@ -88,7 +88,9 @@ function HouseAlarmWiredSensor(_config, _parent) {
       }
    }
 
-   this.ensurePropertyExists('sensor-state', 'quantiseproperty', { quanta: this.minimumVoltages, source: { property: "sensor-voltage"} }, _config);
+   this.ensurePropertyExists('sensor-state', 'quantiseproperty',
+                             { quanta: this.minimumVoltages, bufferTimers: { tamper: 2, fault: 2, "fault-acitve": 2, "tamper-high": 2 }, source: { property: "sensor-voltage"} }, _config);
+
    this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", initialValue: false,
                                                          source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")" }}, _config);
 
