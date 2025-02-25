@@ -9,6 +9,7 @@ var HouseAlarmSensor = require('./housealarmsensor');
 // supplyVoltage - Voltage across sensor
 // resistorTolerance - tolerance (in %)
 // activeTimeout - minimum seconds an active state will last  
+// stateBuffers - minimum time before entering state - used to remove noise. Default is { tamper: 2, "tamper-high": 3, fault: 4, "fault-active": 2, active: 0, inactive: 0 }
 
 // Please define properties for automated functionality
 // sensor-voltage - current voltage of the sensor
@@ -33,6 +34,7 @@ function HouseAlarmWiredSensor(_config, _parent) {
    var mainEolResistanceMax = _config.mainEolResistance * (1+tolerance);
    var activeEolResistanceMax = _config.activeEolResistance * (1+tolerance);
    var dividerResistanceMax = _config.dividerResistance * (1+tolerance);
+   this.stateBuffers = _config.hasOwnProperty("stateBuffers") ? utli.copy(_config.stateBuffers) : { tamper: 2, "tamper-high": 3, fault: 5, "fault-active": 2, active: 0, inactive: 0 };
 
    this.minimumVoltages = { tamper: 0,
                             inactive: (mainEolResistanceMin / (dividerResistanceMax + mainEolResistanceMin)) * _config.supplyVoltage,
@@ -89,7 +91,7 @@ function HouseAlarmWiredSensor(_config, _parent) {
    }
 
    this.ensurePropertyExists('sensor-state', 'quantiseproperty',
-                             { quanta: this.minimumVoltages, bufferTimers: { tamper: 2, fault: 2, "fault-acitve": 2, "tamper-high": 2 }, source: { property: "sensor-voltage"} }, _config);
+                             { quanta: this.minimumVoltages, bufferTimers: this.stateBuffers, source: { property: "sensor-voltage"} }, _config);
 
    this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", initialValue: false,
                                                          source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")" }}, _config);
