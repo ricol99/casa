@@ -45,10 +45,7 @@ function Building(_config, _parent) {
    var allUsersAwayConfig = { "name": "all-users-away", "type": "andproperty", "initialValue": true, "sources": [] };
    var someUsersInBedConfig = { "name": "some-users-in-bed", "type": "orproperty", "initialValue": false, "sources": [] };
    var allUsersInBedConfig = { "name": "all-users-in-bed", "type": "andproperty", "initialValue": false, "sources": [] };
-
-   this.ensurePropertyExists("evening-possible", 'scheduleproperty',
-                             { "initialValue": false, "events": [ { "rule": "5 2 * * *", "value": false } ],
-                               "source": { "event": "enter-evening-event", "transform": "true" } }, _config);
+   var userAwokenConfig = { "name": "user-awoken", "type": "event", "sources": [] };
 
    this.ensurePropertyExists("dark", 'property',
                              { "name": "dark", "initialValue": false, "writable": false,
@@ -88,6 +85,7 @@ function Building(_config, _parent) {
                this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
                this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
                this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": false, "nextState": "present" });
+               userAwokenConfig.sources.push({ "uName": _config.bedrooms[j].uName, "event": this.users[i].name+"-awoken" });
             }
          }
       }
@@ -101,6 +99,9 @@ function Building(_config, _parent) {
    }
 
    allUsersInBedConfig.sources.push({ "property": "some-users-in-bed" });
+
+   // user events
+   this.ensureEventExists("user-awoken", "event", userAwokenConfig);
 
    // user properties
    this.ensurePropertyExists("all-users-away", 'andproperty', allUsersAwayConfig, _config);
@@ -124,16 +125,18 @@ function Building(_config, _parent) {
                                          { name: "occupied-asleep",
                                            sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-may-be-waking-up" },
                                                      { event: "user-arrived", nextState: "user-arrived-while-others-asleep" },
+                                                     { event: "user-awoken", nextState: "occupied-waking-up" },
                                                      { property: "all-users-away", value: true, nextState: "empty" }] },
 
                                          { name: "user-arrived-while-others-asleep",
-                                           sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-going-to-bed" }],
+                                           sources: [{ property: "all-users-in-bed", value: false, nextState: "occupied-going-to-bed", "action": { "property": "evening-possible", "value": true }}],
                                            timeout: { duration: 1, nextState: "occupied-going-to-bed"} }, // Hack because all-users-in-bed not updated yet
 
                                          { name: "occupied-may-be-waking-up",
                                            sources: [{ event: "user-arrived", nextState: "occupied-going-to-bed" },
-                                                     { property: "some-users-in-bed", value: false, nextState: "occupied-waking-up" }],
-                                           timeout: { duration: 2, nextState: "occupied-waking-up" } },
+                                                     { event: "user-awoken", nextState: "occupied-waking-up" },
+                                                     { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }],
+                                           timeout: { duration: 2, nextState: "occupied-going-to-bed" } },
 
                                          { name: "occupied-waking-up",
                                            sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
@@ -143,13 +146,18 @@ function Building(_config, _parent) {
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };
    var anyUsersSensitiveConfig = { "name": "any-users-sensitive", "type": "orproperty", "initialValue": false, "sources": [] };
 
+   var eveningPossibleConfig = { "initialValue": false, "sources": [{ "event": "enter-evening-event", "transform": "true" },
+                                                                    { "property": "night-time", "value": true, "transform": "false" }]};
    if (_config.hasOwnProperty('bedrooms')) {
          
       for (var j = 0; j < _config.bedrooms.length; ++j) {
          movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement" });
          anyUsersSensitiveConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "users-sensitive" });
+         eveningPossibleConfig.sources.push({ "uName": _config.bedrooms[j].uName, "event": "cancel-bedtime-event", "transform": "true" });
       }
    }
+
+   this.ensurePropertyExists("evening-possible", 'property', eveningPossibleConfig, _config);
 
    if (_config.hasOwnProperty('rooms')) {
          
@@ -162,8 +170,7 @@ function Building(_config, _parent) {
    this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
    // night-time property
-   this.ensurePropertyExists("night-time", 'scheduleproperty', { intialValue: false, events: [ { rule: "05 03 * * *", value: true }, { rule: "05 13 * * *", value: false} ],
-                                                                 source: { property: "users-state", transform: "$value===\"occupied-asleep\"" }}, _config);
+   this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", transform: "$value===\"occupied-asleep\"" }}, _config);
 
    // Alarm state property definition
    this.allUsersLeftTimeout = _config.hasOwnProperty("allUsersLeftTimeout") ? _config.allUsersLeftTimeout : 240;

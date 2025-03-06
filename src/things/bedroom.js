@@ -93,10 +93,12 @@ function Bedroom(_config, _parent) {
             {
                "name": "not-present-evening", "priority": 0,
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
-                           //{ "guard": { active: false, property: "night-time", value: true }, "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" },
-                           { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": false }, "property": "evening-possible", "value": false, "nextState": "not-present" },
-                           { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": true }, "property": "evening-possible", "value": false, "nextState": "asleep-in-bed" }]
+                           { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": false },
+                             "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "not-present" },
+                           { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": true },
+                             "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "asleep-in-bed" }],
+               "schedule": {  "name": this.users[i].name+"-check-if-fallen-asleep", "rules": [ "5 3 * * *" ]}
             },
             {
                "name": "room-switch-touched", "priority": 10,
@@ -146,7 +148,7 @@ function Bedroom(_config, _parent) {
                "name": "awake-in-bed", "priority": 10,
                "timeout": { "property": "awake-in-bed-duration", "nextState": "not-present" },
                "sources": [{ "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
-               "actions": [{ "property": "night-time", "value": false }]
+               "actions": [{ "event": this.users[i].name+"-awoken" }, { "property": "night-time", "value": false }]
             },
             {
                "name": "cancelling-bedtime", "priority": 10,
