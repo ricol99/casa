@@ -304,6 +304,12 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
       this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
+      this.socket.removeListener('source-event-subscribed-to', this.socketSourceEventSubscribedToHandler);
+      this.socket.removeListener('source-event-subscribed-toAACCKK', this.socketSourceEventSubscribedToAckHandler);
+      this.socket.removeListener('source-property-subscription-removal', this.socketSourcePropertySubscriptionRemovalHandler);
+      this.socket.removeListener('source-property-subscription-removalAACCKK', this.socketSourcePropertySubscriptionRemovalAckHandler);
+      this.socket.removeListener('source-event-subscription-removal', this.socketSourceEventSubscriptionRemovalHandler);
+      this.socket.removeListener('source-event-subscription-removalAACCKK', this.socketSourceEventSubscriptionRemovalAckHandler);
       this.socket.removeListener('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
       this.socket.removeListener('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
@@ -316,6 +322,8 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('console-commandAACCKK', this.socketConsoleCommandAckHandler);
       this.socket.removeListener('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.removeListener('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
+      this.socket.removeListener('raise-source-event-req', this.socketRaiseSourceEventReqHandler);
+      this.socket.removeListener('raise-source-event-reqAACCKK', this.socketRaiseSourceEventReqAckHandler);
       this.socket.removeListener('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
       this.socket.removeListener('set-source-property-respAACCKK', this.socketSetSourcePropertyRespAckHandler);
       this.socket.removeListener('heartbeat', this.socketHeartbeatHandler);
@@ -367,8 +375,8 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
 
    this.messageHasBeenAcked(_data);
    this.resendUnAckedMessages();
-   this.createSources(_data, this);
    this.connected = true;
+   this.createSources(_data, this);
 
    // Cold start Peer Casa and all the peers sources now that everything has been created
    this.coldStart();
@@ -458,6 +466,51 @@ PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
 
 PeerCasa.prototype.socketSourcePropertySubscribedToAckCb = function(_data) {
    console.log(this.uName + ': Property-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourceEventSubscribedToCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: event-subscribed-to, source: ' + _data.sourceName);
+
+   if (this.casa.sources[_data.sourceName]) {
+      this.casa.sources[_data.sourceName].eventSubscribedTo(_data.eventName, _data.subscription, _data.exists);
+   }
+
+   this.ackMessage('source-event-subscribed-to', _data);
+};
+
+PeerCasa.prototype.socketSourceEventSubscribedToAckCb = function(_data) {
+   console.log(this.uName + ': Event-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourcePropertySubscriptionRemovalCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: property-subscription-removal, source: ' + _data.sourceName);
+
+   if (this.casa.sources[_data.sourceName]) {
+      this.casa.sources[_data.sourceName].propertySubscriptionRemoval(_data.property, _data.subscription, _data.exists);
+   }
+
+   this.ackMessage('source-property-subscription-removal', _data);
+};
+
+PeerCasa.prototype.socketSourcePropertySubscriptionRemovalAckCb = function(_data) {
+   console.log(this.uName + ': Property-subscription-removal Event ACKed by my peer. Source=' + _data.sourceName);
+   this.messageHasBeenAcked(_data);
+};
+
+PeerCasa.prototype.socketSourceEventSubscriptionRemovalCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: event-subscription-removal, source: ' + _data.sourceName);
+
+   if (this.casa.sources[_data.sourceName]) {
+      this.casa.sources[_data.sourceName].eventSubscriptionRemoval(_data.eventName, _data.subscription);
+   }
+
+   this.ackMessage('source-event-subscribed-to', _data);
+};
+
+PeerCasa.prototype.socketSourceEventSubscriptionRemovalAckCb = function(_data) {
+   console.log(this.uName + ': Event-subscription-removal Event ACKed by my peer. Source=' + _data.sourceName);
    this.messageHasBeenAcked(_data);
 };
 
@@ -559,7 +612,7 @@ PeerCasa.prototype.socketConsoleCommandAckCb = function(_data) {
 
 PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: set-source-property-req, source: ' + _data.sourceName);
-   var source = this.gang.findGlobalSource(_data.sourceName);
+   var source = this.gang.findNamedObject(_data.sourceName);
 
    if (source) {
       _data.acker = this.casa.uName;
@@ -569,12 +622,13 @@ PeerCasa.prototype.socketSetSourcePropertyReqCb = function(_data) {
 
       if (_data.hasOwnProperty('ramp')) {
          res = source.setPropertyWithRamp(_data.property, _data.ramp, _data);
+         this.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, property: _data.property, ramp: _data.ramp, requestor: _data.requestor });
       }
       else {
          res = source.setProperty(_data.property, _data.value, _data);
+         this.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, property: _data.property, value: _data.value, requestor: _data.requestor });
       }
 
-      this.socket.emit('set-source-property-resp', { sourceName: source.uName, requestId: _data.requestId, result: res, requestor: _data.requestor });
    } 
    else {
       // TBD Find the casa that ownes the source and work out how to foward the request
@@ -599,6 +653,38 @@ PeerCasa.prototype.socketSetSourcePropertyReqAckCb = function(_data) {
    }
 };
 
+PeerCasa.prototype.socketRaiseSourceEventReqCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: raise-source-event-req, source: ' + _data.sourceName);
+   var source = this.gang.findNamedObject(_data.sourceName);
+      
+   if (source) {
+      _data.acker = this.casa.uName;
+      this.ackMessage('raise-source-event-req', _data);
+      source.raiseEvent(_data.eventName, _data);
+   }  
+   else {
+      // TBD Find the casa that ownes the source and work out how to foward the request
+      this.emit('forward-request', { message: 'raise-source-event-req', data: _data, sourceCasa: this.uName });
+   }  
+};    
+      
+PeerCasa.prototype.socketRaiseSourceEventReqAckCb = function(_data) {
+   console.log(this.uName + ': raise source event request event ACKed by my peer. *Not confirmed*. Source=' + _data.sourceName);
+      
+   if (_data.requestor == this.casa.uName) {
+      // We made the request
+      this.messageHasBeenAcked(_data);
+
+      if (this.incompleteRequests[_data.requestId]) {
+         this.incompleteRequests[_data.requestId].ackRequest();
+      }
+   }
+   else {
+      // we didn't make the request, so forward the ACK
+      this.emit('forward-request', { message: 'raise-source-event-reqAACCKK', data: _data});
+   }
+};
+
 PeerCasa.prototype.socketSetSourcePropertyRespCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: set-source-property-resp, source: ' + _data.sourceName);
 
@@ -611,6 +697,17 @@ PeerCasa.prototype.socketSetSourcePropertyRespCb = function(_data) {
          this.incompleteRequests[_data.requestId].completeRequest(_data.result);
          delete this.incompleteRequests[_data.requestId];
       }
+
+      /*if (_data.result && _data.hasOwnProperty("sourceName") && _data.hasOwnProperty("property")) {
+
+         if (_data.hasOwnProperty("value")) {
+            var source = this.gang.findNamedObject(_data.sourceName);
+
+            if (source) {
+               source.updateProperty(_data.property, _data.value, { sourcePeerCasa: this.uName, local: true });
+            }
+         }
+      }*/
    }
    else {
       // Find the casa that ownes the original request and work out how to foward the response
@@ -765,6 +862,12 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
       this.socketSourcePropertySubscribedToHandler = PeerCasa.prototype.socketSourcePropertySubscribedToCb.bind(this);
       this.socketSourcePropertySubscribedToAckHandler = PeerCasa.prototype.socketSourcePropertySubscribedToAckCb.bind(this);
+      this.socketSourceEventSubscribedToHandler = PeerCasa.prototype.socketSourceEventSubscribedToCb.bind(this);
+      this.socketSourceEventSubscribedToAckHandler = PeerCasa.prototype.socketSourceEventSubscribedToAckCb.bind(this);
+      this.socketSourcePropertySubscriptionRemovalHandler = PeerCasa.prototype.socketSourcePropertySubscriptionRemovalCb.bind(this);
+      this.socketSourcePropertySubscriptionRemovalAckHandler = PeerCasa.prototype.socketSourcePropertySubscriptionRemovalAckCb.bind(this);
+      this.socketSourceEventSubscriptionRemovalHandler = PeerCasa.prototype.socketSourceEventSubscriptionRemovalCb.bind(this);
+      this.socketSourceEventSubscriptionRemovalAckHandler = PeerCasa.prototype.socketSourceEventSubscriptionRemovalAckCb.bind(this);
       this.socketSourceInterestInNewChildHandler = PeerCasa.prototype.socketSourceInterestInNewChildCb.bind(this);
       this.socketSourceInterestInNewChildAckHandler = PeerCasa.prototype.socketSourceInterestInNewChildAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
@@ -777,6 +880,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketConsoleCommandAckHandler = PeerCasa.prototype.socketConsoleCommandAckCb.bind(this);
       this.socketSetSourcePropertyReqHandler = PeerCasa.prototype.socketSetSourcePropertyReqCb.bind(this);
       this.socketSetSourcePropertyReqAckHandler = PeerCasa.prototype.socketSetSourcePropertyReqAckCb.bind(this);
+      this.socketRaiseSourceEventReqHandler = PeerCasa.prototype.socketRaiseSourceEventReqCb.bind(this);
+      this.socketRaiseSourceEventReqAckHandler = PeerCasa.prototype.socketRaiseSourceEventReqAckCb.bind(this);
       this.socketSetSourcePropertyRespHandler = PeerCasa.prototype.socketSetSourcePropertyRespCb.bind(this);
       this.socketSetSourcePropertyRespAckHandler = PeerCasa.prototype.socketSetSourcePropertyRespAckCb.bind(this);
       this.socketHeartbeatHandler = PeerCasa.prototype.socketHeartbeatCb.bind(this);
@@ -792,6 +897,12 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
       this.socket.on('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
       this.socket.on('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
+      this.socket.on('source-event-subscribed-to', this.socketSourceEventSubscribedToHandler);
+      this.socket.on('source-event-subscribed-toAACCKK', this.socketSourceEventSubscribedToAckHandler);
+      this.socket.on('source-property-subscription-removal', this.socketSourcePropertySubscriptionRemovalHandler);
+      this.socket.on('source-property-subscription-removalAACCKK', this.socketSourcePropertySubscriptionRemovalAckHandler);
+      this.socket.on('source-event-subscription-removal', this.socketSourceEventSubscriptionRemovalHandler);
+      this.socket.on('source-event-subscription-removalAACCKK', this.socketSourceEventSubscriptionRemovalAckHandler);
       this.socket.on('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
       this.socket.on('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
@@ -804,6 +915,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('console-commandAACCKK', this.socketConsoleCommandAckHandler);
       this.socket.on('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.socket.on('set-source-property-reqAACCKK', this.socketSetSourcePropertyReqAckHandler);
+      this.socket.on('raise-source-event-req', this.socketRaiseSourceEventReqHandler);
+      this.socket.on('raise-source-event-reqAACCKK', this.socketRaiseSourceEventReqAckHandler);
       this.socket.on('set-source-property-resp', this.socketSetSourcePropertyRespHandler);
       this.socket.on('set-source-property-respAACCKK', this.socketSetSourcePropertyRespAckHandler);
       this.socket.on('heartbeat', this.socketHeartbeatHandler);
@@ -900,7 +1013,7 @@ PeerCasaRequestor.prototype.sendRequest = function(_message, _deleteMe) {
    this.socket.emit(this.message.message, this.message.data);
 
    this.timeout = setTimeout( () => {
-      this.callback(false);
+      this.callback("timeout");
       _deleteMe(this.requestId);
    }, 30000);
 }
@@ -909,7 +1022,7 @@ PeerCasaRequestor.prototype.resendRequest = function(_deleteMe) {
 
    if (this.acked) {
       // peer casa has already received the request, we will never know the result :-)
-      this.callback(false);
+      this.callback(null, true);
       _deleteMe(this.requestId);
    }
    else {
@@ -921,7 +1034,7 @@ PeerCasaRequestor.prototype.resendRequest = function(_deleteMe) {
       this.socket.emit(this.message.message, this.message.data);
 
       this.timeout = setTimeout( () => {
-         this.callback(false);
+         this.callback("tiemout");
          _deleteMe(this.requestId);
       }, 30000);
    }
@@ -933,7 +1046,7 @@ PeerCasaRequestor.prototype.ackRequest = function() {
 
 PeerCasaRequestor.prototype.completeRequest = function(_result) {
    clearTimeout(this.timeout);
-   this.callback(_result);
+   this.callback(null, _result);
 }
 
 PeerCasa.prototype.propertySubscribedTo = function(_source, _property, _subscription, _exists) {
@@ -941,6 +1054,30 @@ PeerCasa.prototype.propertySubscribedTo = function(_source, _property, _subscrip
    if (this.connected) {
       console.log(this.uName + ': source ' + _source.uName + ' subscribed to');
       this.sendMessage('source-property-subscribed-to', { sourceName: _source.uName, property: _property, subscription: _subscription, exists: _exists });
+   }
+};
+
+PeerCasa.prototype.eventSubscribedTo = function(_source, _eventName, _subscription) {
+
+   if (this.connected) {
+      console.log(this.uName + ': source ' + _source.uName + ' event subscribed to');
+      this.sendMessage('source-event-subscribed-to', { sourceName: _source.uName, eventName: _eventName, subscription: _subscription });
+   }
+};
+
+PeerCasa.prototype.propertySubscriptionRemoval = function(_source, _property, _subscription, _exists) {
+
+   if (this.connected) {
+      console.log(this.uName + ': source ' + _source.uName + ' subscribed to');
+      this.sendMessage('source-property-subscription-removal', { sourceName: _source.uName, property: _property, subscription: _subscription, exists: _exists });
+   }
+};
+
+PeerCasa.prototype.eventSubscriptionRemoval = function(_source, _eventName, _subscription) {
+
+   if (this.connected) {
+      console.log(this.uName + ': source ' + _source.uName + ' event subscribed to');
+      this.sendMessage('source-event-subscription-removal', { sourceName: _source.uName, eventName: _eventName, subscription: _subscription });
    }
 };
 
@@ -971,7 +1108,13 @@ PeerCasa.prototype.setSourceProperty = function(_source, _propName, _propValue, 
                                                                   requestId: id, requestor: this.casa.uName, transaction: _data.transaction } };
 
       this.incompleteRequests[id] = new PeerCasaRequestor(id, (_err, _res) => {
-         console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at peer casa ');
+
+         if (_err) {
+            console.error(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at peer casa, error=' + _err);
+         }
+         else {
+            console.log(this.uName + ': SetProperty request to source ' + _source.uName + ' at peer casa, result=' + _res);
+         }
       }, this.socket);
 
       this.incompleteRequests[id].sendRequest(message, (_requestId) => {
@@ -1011,6 +1154,32 @@ PeerCasa.prototype.setSourcePropertyWithRamp = function(_source, _propName, _ram
       return false;
    }
 }
+
+PeerCasa.prototype.raiseSourceEvent = function(_source, _eventName, _data) {
+
+   if (this.connected) {
+      console.log(this.uName + ': requesting source raise event' + _eventName + ' from peer casa. Source ' + _source.uName);
+      var id = this.uName + ':raiseevent:' + this.reqId;
+      this.reqId = (this.reqId +  1) % 10000;
+      var message = { message: 'raise-source-event-req', data: { casaName: this.uName, sourceName: _source.uName,
+                                                                  eventName: _eventName, 
+                                                                  requestId: id, requestor: this.casa.uName, transaction: _data.transaction } };
+
+      this.incompleteRequests[id] = new PeerCasaRequestor(id, (_err, _res) => {
+         console.log(this.uName + ': Unable to send SetProperty request to source ' + _source.uName + ' at peer casa ');
+      }, this.socket);
+
+      this.incompleteRequests[id].sendRequest(message, (_requestId) => {
+         console.log(this.uName + ': Timeout occurred sending a changeProperty request for source ' + _source.uName);
+         delete this.incompleteRequests[_requestId];
+      });
+
+      return true;
+   }
+   else {
+      return false;
+   }
+};
 
 PeerCasa.prototype.addSource = function(_source) {
    // Peer source being added to peer casa

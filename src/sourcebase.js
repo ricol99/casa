@@ -82,6 +82,16 @@ SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    }
 };
 
+SourceBase.prototype.subscriptionRemoved = function(_event, _subscription) {
+
+   if (_event === "property-changed") {
+      this.propertySubscriptionRemoved(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property));
+   }
+   else {
+      this.eventSubscriptionRemoved(_event, _subscription);
+   }
+};
+
 // Override this to learn of new subscriptions to properties
 // _property - property name
 // _subscription - usually an object - provided by subscriber
@@ -93,6 +103,19 @@ SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _
 // _event - event name
 // _subscription - usually an object - provided by subscriber
 SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
+};
+
+// Override this to learn of of a removal of a subscription to a property
+// _property - property name
+// _subscription - usually an object - provided by subscriber
+// _exists - whether the property is currently defined in this source
+SourceBase.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists) {
+};
+
+// Override this to learn of a removal of a subscription to an event
+// _event - event name
+// _subscription - usually an object - provided by subscriber
+SourceBase.prototype.eventSubscriptionRemoved = function(_event, _subscription) {
 };
 
 SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
@@ -407,6 +430,38 @@ SourceBase.prototype.clearAlignmentQueue = function() {
    this.propertyAlignmentQueue = [];
 }
 
+SourceBase.prototype.generateDynamicSourceId = function(_config, _subscription) {
+   var config = this.generateDynamicSourceConfig(_config, _subscription);
+   return config.id;
+};
+
+SourceBase.prototype.generateDynamicSourceConfig = function(_config, _subscription) {
+   var config = {};
+   var config = { uName: _config.hasOwnProperty("uName") ? _config.uName : this.owner.uName };
+
+   if (_config.hasOwnProperty("property")) {
+      config.property = _config.property;
+   }
+      
+   if (_config.hasOwnProperty("event")) {
+      config.event = _config.event;
+   }
+
+   if (_config.hasOwnProperty("value")) {
+      config.value = _config.value;
+   }
+      
+   if (_config.hasOwnProperty("guard")) {
+      config.guard = _config.guard;
+   }
+   
+   if (_subscription && _subscription.hasOwnProperty("casaName")) {
+      config.casaName = _subscription.casaName;
+      config.id = JSON.stringify(config);
+   }
+
+   return config;
+};
 
 module.exports = exports = SourceBase;
  

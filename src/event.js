@@ -98,12 +98,32 @@ Event.prototype.eventAboutToBeRaised = function(_data) {
 Event.prototype.aboutToBeDeleted = function() {
 };
 
-// Add a new source to the property - not persisted
-Event.prototype.addNewSource = function(_config) {
-   var sourceListener = new SourceListener(_config, this);
+// Add a new source to the event - not persisted
+Event.prototype.addNewSource = function(_config, _subscription) {
+   var config = this.owner.generateDynamicSourceConfig(_config, _subscription);
+   var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
-};
+};    
+   
+// Remove an exisiting source to the event - not persisted
+Event.prototype.removeExistingSource = function(_config, _subscription) {
+   var sourceId = this.owner.generateDynamicSourceId(_config, _subscription);
+   
+   for (var listener in this.sourceListeners) {
+      
+      if (this.sourceListeners.hasOwnProperty(listener)) {
+         
+         let id = this.sourceListeners[listener].getId();
+         
+         if (id && (id === sourceId)) {
+            this.sourceListeners[listener].stopListening();
+            delete this.sourceListeners[listener];
+            break;
+         }
+      }
+   }
+}; 
 
 Event.prototype.raise = function(_data) {
    var data = (_data) ? util.copy(_data) : { sourceName: this.owner.uName };

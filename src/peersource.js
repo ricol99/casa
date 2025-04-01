@@ -30,7 +30,7 @@ function PeerSource(_uName, _name, _priority, _properties, _peerCasa) {
    }
 
    for (var prop in _properties) {
-      this.ensurePropertyExists(prop, 'property', { name: prop });
+      this.ensurePropertyExists(prop, 'property', { name: prop, cold: false });
       this.properties[prop].set(_properties[prop], {});
    }
 
@@ -47,8 +47,35 @@ PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _
    else {
       console.log(this.uName+": propertySubscribedTo() prop="+_property+", sub=",_subscription);
    }
+
    this.casa.propertySubscribedTo(this, _property, _subscription, _exists);
 };
+
+// Something wants to watch (and possibly raise towards) several events in this service node (read) - called from sourcelistener
+PeerSource.prototype.eventSubscribedTo = function(_eventName, _subscription) {
+   console.log(this.uName+": eventSubscribedTo() event="+_eventName+", sub=",_subscription);
+   this.casa.eventSubscribedTo(this, _eventName, _subscription);
+};
+
+// Something does not want to watch a property anymore - called from sourcelistener
+PeerSource.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists) {
+
+   if (_subscription.hasOwnProperty("mirror")) {
+      console.log(this.uName+": propertySubscriptionRemoval() mirror, sub=",_subscription);
+   }
+   else {
+      console.log(this.uName+": propertySubscriptionRemoval() prop="+_property+", sub=",_subscription);
+   }
+
+   this.casa.propertySubscriptionRemoval(this, _property, _subscription, _exists);
+};
+
+// Something does not want to watch an event anymore - called from sourcelistener
+PeerSource.prototype.eventSubscriptionRemoval = function(_eventName, _subscription) {
+   console.log(this.uName+": eventSubscriptionRemoval() event="+_eventName+", sub=",_subscription);
+   this.casa.eventSubscriptionRemoval(this, _eventName, _subscription);
+};
+
 
 PeerSource.prototype.interestInNewChild = function(_uName) {
    this.casa.interestInNewChild(this, _uName);
@@ -93,12 +120,37 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set source property');
-   return this.casa.setSourceProperty(this, _propName, _propValue, _data);
+
+   var data = _data ? util.copy(_data) : {};
+
+   if (!data.hasOwnProperty("transaction")) {
+      data.transaction = this.checkTransaction();
+   }
+   return this.casa.setSourceProperty(this, _propName, _propValue, data);
 };
 
 PeerSource.prototype.setPropertyWithRamp = function(_propName, _ramp, _data) {
    console.log(this.uName + ': Attempting to set Property ' + _propName + ' to ramp');
-   return this.casa.setSourcePropertyWithRamp(this, _propName, _ramp, _data);
+
+   var data = _data ? util.copy(_data) : {};
+
+   if (!data.hasOwnProperty("transaction")) {
+      data.transaction = this.checkTransaction();
+   }
+
+   return this.casa.setSourcePropertyWithRamp(this, _propName, _ramp, data);
+};
+
+PeerSource.prototype.raiseEvent = function(_eventName, _data) {
+   console.log(this.uName + ': Attempting to raise Event ' + _eventName);
+
+   var data = _data ? util.copy(_data) : {};
+
+   if (!data.hasOwnProperty("transaction")) {
+      data.transaction = this.checkTransaction();
+   }
+
+   return this.casa.raiseSourceEvent(this, _eventName, data);
 };
 
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {

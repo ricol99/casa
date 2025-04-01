@@ -13,6 +13,10 @@ function SourceListener(_config, _owner) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
    }
 
+   if (_config.hasOwnProperty("id")) {
+      this.id = _config.id;
+   }
+
    // TBD: HACK!
    if ((this.sourceName === _owner.uName) || (_owner.hasOwnProperty("owner") && (this.sourceName === _owner.owner.uName))) {
       this.listeningToMyself = true;
@@ -38,6 +42,11 @@ function SourceListener(_config, _owner) {
 
    this.listeningToPropertyChange = _config.hasOwnProperty("property");
    this.subscription = (_config.hasOwnProperty("subscription")) ? _config.subscription : {};
+   this.subscription.casaName = this.casa.name;
+
+   if (!this.subscription.hasOwnProperty("sourceName")) {
+      this.subscription.sourceName = this.sourceName;
+   }
 
    if (this.listeningToPropertyChange) {
       this.eventName = _config.property;
@@ -159,13 +168,13 @@ SourceListener.prototype.stopListening = function() {
    if (this.listening) {
 
       if (this.listeningToPropertyChange) {
-         this.source.removeListener('property-changed', this.propertyChangedHandler);
+         this.source.removeListener('property-changed', this.propertyChangedHandler, this.subscription);
       }
       else {
-         this.source.removeListener('event-raised', this.eventRaisedHandler);
+         this.source.removeListener('event-raised', this.eventRaisedHandler, this.subscription);
       }
 
-      this.source.removeListener('invalid', this.invalidHandler);
+      this.source.removeListener('invalid', this.invalidHandler, this.subscription);
    }
 
    this.casa.removeSourceListener(this);
@@ -218,13 +227,13 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       this.valid = false;
 
       if (this.listeningToPropertyChange) {
-         this.source.removeListener('property-changed', this.propertyChangedHandler);
+         this.source.removeListener('property-changed', this.propertyChangedHandler, this.subscription);
       }
       else {
-         this.source.removeListener('event-raised', this.eventRaisedHandler);
+         this.source.removeListener('event-raised', this.eventRaisedHandler, this.subscription);
       }
 
-      this.source.removeListener('invalid', this.invalidHandler);
+      this.source.removeListener('invalid', this.invalidHandler, this.subscription);
 
       if (this.maskInvalid) {
          this.maskingInvalid = true;
@@ -380,6 +389,10 @@ SourceListener.prototype.internalSourceEventRaised = function(_data) {
       this.sourceRawValue = this.lastData.value;
       this.makeClientAwareOfEvent(this.lastData);
    }
+};
+
+SourceListener.prototype.getId = function() {
+   return this.id;
 };
 
 module.exports = exports = SourceListener;

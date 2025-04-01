@@ -752,4 +752,83 @@ State.prototype.scheduledEventTriggered = function(_event) {
    }
 }
 
+// Add a new source - Not persisted
+State.prototype.addNewSource = function(_sourceConfig, _subscription) {
+   let i = this.sources.length;
+   this.sources.push(util.copy(_sourceConfig, true));
+   this.sources[i].dynamic = true;
+
+   if (this.sources[i].hasOwnProperty('guard')) {
+      this.sources[i].guards = [ this.sources[i].guard ];
+   }     
+               
+   if (this.sources[i].hasOwnProperty('action')) {
+      this.sources[i].actions = [ this.sources[i].action ];
+   }  
+         
+   util.ensureExists(this.sources[i], "count", false);
+  
+   if (this.sources[i].count) {
+      this.sources[i].counter = { count: 0 };
+   }
+
+   util.ensureExists(this.sources[i], "uName", this.owner.owner.uName);
+
+   if (_subscription) {
+      this.sources[i].id = this.owner.owner.generateDynamicSourceId(_sourceConfig, _subscription);
+   }  
+
+   var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
+   this.sources[i].sourceListener = sourceListener;
+
+   if (!this.sourceMap[sourceListener.sourceEventName]) {
+      this.sourceMap[sourceListener.sourceEventName] = [];
+   }
+
+   this.sourceMap[sourceListener.sourceEventName].push(this.sources[i]);
+
+   if (this.sources[i].hasOwnProperty("guards")) {
+
+      for (var k = 0; k < this.sources[i].guards.length; ++k) {
+
+         if (this.sources[i].guards[k].hasOwnProperty("property")) {
+            util.ensureExists(this.sources[i].guards[k], "value", true);
+            util.ensureExists(this.sources[i].guards[k], "active", true);
+
+            if (this.sources[i].guards[k].active) {
+               this.sources[i].guards[k].uName = this.owner.owner.uName;
+               this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
+            }
+         }
+         else {
+            this.sources[i].guards[k].active = false;
+         }
+      }
+   }
+};
+
+// Remove an existing source to the state - not persisted
+State.prototype.removeExistingSource = function(_config, _subscription) {
+   var sourceId = this.owner.owner.generateDynamicSourceId(_config, _subscription);
+
+   for (var i = this.sources.length-1; i >= 0 ; --i) {
+
+     if (this.sources[i].hasOwnProperty("id") && this.sources[i].id === sourceId) {
+        var mappedSources = this.sourceMap[this.sources[i].sourceListener.sourceEventName];
+
+        if (mappedSources && (mappedSource.length > 0)) {
+
+           if (mappedSources.length === 1) {
+              delete this.sourceMap[this.sources[i].sourceListener.sourceEventName];
+              this.owner.removeSourceListenerIfNecessary(this.sources[i].sourceListener.sourceEventName);
+           }
+           else {
+              mappedSources.splice(mappedSources.indexOf(this.sources[i]));
+           }
+        }
+        break;
+     }
+   }
+};
+
 module.exports = exports = State;

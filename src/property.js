@@ -51,8 +51,7 @@ function Property(_config, _owner) {
    }
 
    this.valid = false;
-   this.cold = true;
-   this.hasSourceOutputValues = false;	// Sources can influence the final property value (source in charge)
+   this.cold = _config.hasOwnProperty("cold") ? _config.cold : true;
 
    this.sourceListeners = {};
 
@@ -133,10 +132,30 @@ Property.prototype.getCasa = function() {
 };
 
 // Add a new source to the property - not persisted
-Property.prototype.addNewSource = function(_config) {
-   var sourceListener = new SourceListener(_config, this);
+Property.prototype.addNewSource = function(_config, _subscription) {
+   var config = this.owner.generateDynamicSourceConfig(_config, _subscription);
+   var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
+};
+
+// Remobve an exisiting source to the property - not persisted
+Property.prototype.removeExistingSource = function(_config, _subscription) {
+   var sourceId = this.owner.generateDynamicSourceId(_config, _subscription);
+
+   for (var listener in this.sourceListeners) {
+      
+      if (this.sourceListeners.hasOwnProperty(listener)) {
+         
+         let id = this.sourceListeners[listener].getId();
+         
+         if (id && (id === sourceId)) {
+            this.sourceListeners[listener].stopListening();
+            delete this.sourceListeners[listener];
+            break;
+         }
+      }
+   }
 };
 
 //
@@ -258,7 +277,7 @@ Property.prototype.propertyAboutToChange = function(_actualOutputValue, _data) {
 //
 Property.prototype.amIValid = function() {
 
-   if (this.ignoreInvalid) {
+   if (this.ignoreInvalid || (Object.keys(this.sourceListeners).length === 0)) {
       return true;
    }
    else if (this.allSourcesRequiredForValidity) {
@@ -443,7 +462,6 @@ Property.prototype.checkData = function(_value, _data) {
 };
 
 Property.prototype._addSource = function(_source) {
-   this.hasSourceOutputValues = this.hasSourceOutputValues || (_source.hasOwnProperty('outputValues'));
 
    if (!_source.hasOwnProperty("uName") || _source.uName == undefined) {
       _source.uName = this.owner.uName;

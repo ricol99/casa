@@ -13,6 +13,7 @@ function Tester(_config, _parent) {
    this.currentTestEvent = 0;
 
    this.expectedPosition = 0;
+   this.testRunStarted = false;
 
    this.sourceListeners = {};
 
@@ -42,6 +43,8 @@ function Tester(_config, _parent) {
       if (this.gang.casa) {
          this.gang.casa.scheduleRefreshSourceListeners();
       }
+
+      this.delayStart = _config.testRun.hasOwnProperty("delayStart") ? _config.testRun.delayStart * 1000 : 0;
    }
 
    this.buildTestCases(util.copy(_config.testRun, true), util.copy(_config.testCases, true));
@@ -93,7 +96,11 @@ Tester.prototype.hotStart = function() {
 
 Tester.prototype.coldStart = function() {
    Thing.prototype.coldStart.call(this);
-   this.initiateTestEvent();
+
+   util.setTimeout( () => {
+      this.testRunStarted = true;
+      this.initiateTestEvent();
+   }, this.delayStart);
 };
 
 Tester.prototype.findTestCaseStep = function(_name, _type) {
@@ -331,6 +338,7 @@ Tester.prototype.runTestEvent = function() {
 
    if (this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].hasOwnProperty("target")) {
       target = this.gang.findNamedObject(this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
+
       if (!target) {
          console.error("BROKEN! Target="+this.testCases[this.currentTestCase].driveSequence[this.currentTestEvent].target);
          process.exit(1);
@@ -376,8 +384,11 @@ Tester.prototype.runTestEvent = function() {
 };
 
 Tester.prototype.sourceIsInvalid = function(_data) {
-   console.error(this.uName + ': TEST FAILED - Source invalid');
-   process.exit(5);
+
+   if (this.testRunStarted) {
+      console.error(this.uName + ': TEST FAILED - Source invalid');
+      process.exit(5);
+   }
 };
 
 Tester.prototype.sourceIsValid = function(_data) {
@@ -476,7 +487,6 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          if (result) {
 
             if (i !== this.expectedPosition) {
-               //console.info(this.uName + ": AAAAAA not in expected position!");
                let temp = this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition];
                this.testCases[this.currentTestCase].expectedSequence[this.expectedPosition] = this.testCases[this.currentTestCase].expectedSequence[i];
                this.testCases[this.currentTestCase].expectedSequence[i] = temp;

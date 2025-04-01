@@ -35,7 +35,6 @@ var Location = require('./location');
 
 
 function Building(_config, _parent) {
-
    Location.call(this, _config, _parent);
    this.thingType = "building";
 
@@ -75,20 +74,6 @@ function Building(_config, _parent) {
             }
          ]
       };
-
-      if (_config.hasOwnProperty('bedrooms')) {
-
-         for (var j = 0; j < _config.bedrooms.length; ++j) {
-            var listen = _config.bedrooms[j].hasOwnProperty("users") ? _config.bedrooms[j].users.includes(this.users[i].uName) : true;
-
-            if (listen) {
-               this.userStateConfigs[i].states[0].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[1].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": true, "nextState": "in-bed" });
-               this.userStateConfigs[i].states[2].sources.push({ "uName": _config.bedrooms[j].uName, "property": this.users[i].name+"-in-bed", "value": false, "nextState": "present" });
-               userAwokenConfig.sources.push({ "uName": _config.bedrooms[j].uName, "event": this.users[i].name+"-awoken" });
-            }
-         }
-      }
 
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
       this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].name+"-user-state" }}, {});
@@ -148,24 +133,8 @@ function Building(_config, _parent) {
 
    var eveningPossibleConfig = { "initialValue": false, "sources": [{ "event": "enter-evening-event", "transform": "true" },
                                                                     { "property": "night-time", "value": true, "transform": "false" }]};
-   if (_config.hasOwnProperty('bedrooms')) {
-         
-      for (var j = 0; j < _config.bedrooms.length; ++j) {
-         movementConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "movement" });
-         anyUsersSensitiveConfig.sources.push({ "uName": _config.bedrooms[j].uName, "property": "users-sensitive" });
-         eveningPossibleConfig.sources.push({ "uName": _config.bedrooms[j].uName, "event": "cancel-bedtime-event", "transform": "true" });
-      }
-   }
 
    this.ensurePropertyExists("evening-possible", 'property', eveningPossibleConfig, _config);
-
-   if (_config.hasOwnProperty('rooms')) {
-         
-      for (var r = 0; r < _config.rooms.length; ++r) {
-         movementConfig.sources.push({ "uName": _config.rooms[r].uName, "property": "movement" });
-      }
-   }
-
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
    this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
@@ -295,6 +264,98 @@ Building.prototype.coldStart = function() {
 
 Building.prototype.hotStart = function() {
    Location.prototype.hotStart.call(this);
+};
+
+// Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
+Building.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+   console.log(this.uName + ": Property subscription() for " + _property);
+   this.processSubscription(_subscription);
+};
+
+// Something wants to watch (and possibly raise towards) several events in this service node (read) - called from sourcelistener
+Building.prototype.eventSubscribedTo = function(_eventName, _subscription) {
+   console.log(this.uName + ": Event subscription() for" + _eventName);
+   this.processSubscription(_subscription);
+};
+
+// Something does not want to watch a property anymore - called from sourcelistener
+Building.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists) {
+   console.log(this.uName + ": Property subscription() for " + _property);
+   this.processSubscriptionRemoval(_subscription);
+};
+
+// Something does not want to watch an event anymore - called from sourcelistener
+Building.prototype.eventSubscriptionRemoval = function(_eventName, _subscription) {
+   console.log(this.uName + ": Event subscription() for" + _eventName);
+   this.processSubscriptionRemoval(_subscription);
+};
+
+Building.prototype.processSubscription = function(_subscription) {
+
+   if (!_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("roomName")) {
+      return;
+   }
+
+   if (_subscription.roomType === "room") {
+      this.properties["movement"].addNewSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+   }
+   else if (_subscription.roomType === "bedroom") {
+
+      for (var i = 0; i < this.users.length; ++i) {
+         var listen = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
+
+         if (listen) {
+            this.properties[this.users[i].name+"-user-state"].getState("not-present").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                     "value": true, "nextState": "in-bed" }, _subscription);
+
+            this.properties[this.users[i].name+"-user-state"].getState("present").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                 "value": true, "nextState": "in-bed" }, _subscription);
+
+            this.properties[this.users[i].name+"-user-state"].getState("in-bed").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                "value": false, "nextState": "present" }, _subscription);
+
+            this.events["user-awoken"].addNewSource({ "uName": _subscription.roomName, "event": this.users[i].name+"-awoken" }, _subscription);
+         }
+      }
+
+      this.properties["movement"].addNewSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+      this.properties["any-users-sensitive"].addNewSource({ "uName": _subscription.roomName, "property": "users-sensitive" }, _subscription);
+      this.properties["evening-possible"].addNewSource({ "uName": _subscription.roomName, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
+   }
+};
+
+Building.prototype.processSubscriptionRemoval = function(_subscription) {
+
+   if (!_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("roomName")) {
+      return; 
+   }
+
+   if ((_subscription.roomType === "room")) {
+      this.properties["movement"].removeExistingSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+   }
+   else if (_subscription.roomType === "bedroom") {
+
+      for (var i = 0; i < this.users.length; ++i) {
+         var listening = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
+
+         if (listening) {
+            this.properties[this.users[i].name+"-user-state"].getState("not-present").removeExistingSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                           "value": true, "nextState": "in-bed" }, _subscription);
+
+            this.properties[this.users[i].name+"-user-state"].getState("present").removeExistingSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                         "value": true, "nextState": "in-bed" }, _subscription);
+
+            this.properties[this.users[i].name+"-user-state"].getState("in-bed").removeExistingSource({  "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+                                                                                                         "value": false, "nextState": "present" }, _subscription);
+
+            this.events["user-awoken"].removeExistingSource({ "uName": _subscription.roomName, "event": this.users[i].name+"-awoken" }, _subscription);
+         }
+      }
+   
+      this.properties["movement"].removeExistingSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+      this.properties["any-users-sensitive"].removeExistingSource({ "uName": _subscription.roomName, "property": "users-sensitive" }, _subscription);
+      this.properties["evening-possible"].removeExistingSource({ "uName": _subscription.roomName, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
+   }
 };
 
 module.exports = exports = Building;

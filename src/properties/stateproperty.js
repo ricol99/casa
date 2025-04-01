@@ -545,14 +545,32 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
       this.sourceListeners[sourceListenerName] = sourceListener;
       sourceListener.stateOwned = true;
       sourceListener.counter = 0;
+      sourceListener.referenceCount = 1;
    }
    else {
       sourceListener.stateOwned = true;
       sourceListener.counter = 0;
+      sourceListener.referenceCount = sourceListener.referenceCount + 1;
    }
 
    return sourceListener;
 };
+
+StateProperty.prototype.removeSourceListenerIfNecessary = function(_sourceListenerName) {
+   
+   var sourceListener = this.sourceListeners[_sourceListenerName];
+  
+   if (sourceListener) {
+      sourceListener.referenceCount = sourceListener.referenceCount - 1;
+
+      if (sourceListener.referenceCount <= 0) {
+         sourceListener.stopListening();
+         delete this.sourceListeners[_sourceListenerName];
+         delete sourceListener;
+      }
+   }
+};
+
 
 StateProperty.prototype.launchActionFunction = function(_actionHandler, _priority) {
 
@@ -576,6 +594,10 @@ StateProperty.prototype.ownerHasNewName = function() {
 
 StateProperty.prototype.iAmCurrent = function(_state) {
    return this.currentState === _state;
+};
+
+StateProperty.prototype.getState = function(_stateName) {
+   return this.states[_stateName];
 };
 
 module.exports = exports = StateProperty;

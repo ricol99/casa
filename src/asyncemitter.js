@@ -77,8 +77,22 @@ AsyncEmitter.prototype.on = function(_event, _callback, _subscription) {
    return events.EventEmitter.prototype.on.call(this, _event,  _callback);
 };
 
+AsyncEmitter.prototype.removeListener = function(_event, _handler, _subscription) {
+
+   if (_subscription) {
+      console.log(this.uName+": Somebody asked to remove a subscription "+_subscription.property);
+      this.subscriptionRemoval(_event, _subscription)
+   }
+
+   return events.EventEmitter.prototype.removeListener.call(this, _event, _handler);
+}
+
 // Override this to learn of new subscriptions
 AsyncEmitter.prototype.subscriptionRegistered = function(_event, _subscription) {
+};
+
+// Override this to learn of subscription removal
+AsyncEmitter.prototype.subscriptionRemoval = function(_event, _subscription) {
 };
 
 module.exports = exports = AsyncEmitter;

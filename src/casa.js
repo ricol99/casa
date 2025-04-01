@@ -161,7 +161,7 @@ Casa.prototype.createServer = function() {
 
    app.get('/source/:source', (req, res) => {
       var allProps = {};
-      var source = this.gang.findGlobalSource(req.params.source);
+      var source = this.gang.findNamedObject(req.params.source);
 
       if (source) {
          source.getAllProperties(allProps, true);
@@ -319,7 +319,7 @@ Casa.prototype.startListeningToSource = function(_source) {
 Casa.prototype.addSourceListener = function(_sourceListener) {
 
    if (this.sourceListeners[_sourceListener.uName]) {
-      console.log("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
+      console.error("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
       process.exit(1);
    }
 

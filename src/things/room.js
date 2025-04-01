@@ -80,6 +80,20 @@ function Room(_config, _parent) {
    }
 
    this.buildingName = _config.building;
+   this.roomType = _config.hasOwnProperty("roomType") ? _config.roomType : "room";
+   this.users = [];
+
+   if (_config.hasOwnProperty('user')) {
+      _config.users = [ _config.user ];
+   }
+
+   if (!_config.hasOwnProperty("users")) {
+      _config.users = [];
+   }
+
+   for (var u = 0; u < _config.users.length; ++u) {
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
+   }
 
    this.roomStates = _config.hasOwnProperty("roomStates") ? _config.roomStates : 
                                                             [{ name: "no-users-present-day", priority: 0}, { name: "users-present-day", priority: 5},
@@ -90,7 +104,14 @@ function Room(_config, _parent) {
    this.sensitivityStates = _config.hasOwnProperty("sensitivityStates") ? _config.sensitivityStates : [{ name: "no-users-present-normal", priority: -1 }, { name: "users-present-normal", priority: -1 },
                                                                                                        { name: "no-users-present-sensitive", priority: 15 }, { name: "users-present-sensitive", priority: 15 } ];
 
-   this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
+   if (this.roomType === "room") {
+      this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state",
+                                                             subscription: { roomType: this.roomType, roomName: this.uName, roomUsers: _config.users }}}, _config);
+   }
+   else {
+      this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state" }}, _config);
+   }
+
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
 

@@ -449,4 +449,34 @@ Timer.prototype.expiration = function() {
    return this.active() ? this.duration + this.startTime : -1;
 };
 
+Util.compare = function(_x, _y) {
+   let xkeys = Object.keys(_x).sort((a,b) => a > b ? 1 :(a === b ? 0 : -1));
+   let ykeys = Object.keys(_y).sort((a,b) => a > b ? 1 :(a === b ? 0 : -1));
+  
+   if (xkeys.length !==  ykeys.length) {
+     return false;
+   }
+
+   for( let i=0; i< xkeys.length; i++) {
+
+      if (xkeys[i] !== ykeys[i]) {
+         return false;
+      }
+
+      if (typeof xkeys[i] !== typeof ykeys[i]) {
+        return false;
+      }
+
+      if (typeof _x[xkeys[i]] == 'object' && typeof _x[xkeys[i]] =='object' ) {
+         ++i;
+         return compareObjects(_x[xkeys[i-1]], _y[ykeys[i-1]])
+      }  
+
+      if (_x[xkeys[i]] !== _y[ykeys[i]]) {
+         return false;
+      }
+   }
+   return true;
+}
+
 module.exports = exports = Util;
