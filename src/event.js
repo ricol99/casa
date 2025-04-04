@@ -79,8 +79,30 @@ Event.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
 };
 
+// 
+// Actual tell all listening parties that this property is not to be listened to anymore.
+// Pretend it is invalid but really the source is bowing and functioning silently
+//
+Event.prototype.loseListeners = function () {
+   console.log(this.uName + ': Losing Listeners due to source bowing'); 
+   this.owner.eventGoneInvalid(this.name);
+}; 
+
 Event.prototype.getCasa = function() {
    return this.owner.getCasa();
+};
+
+Event.prototype.refreshSourceListeners = function() {
+
+   if (this.hasOwnProperty("sourceListeners")) {
+
+      for (var sourceListenerName in this.sourceListeners) {
+
+         if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+            this.sourceListeners[sourceListenerName].refreshSource();
+         }
+      }
+   }
 };
 
 //
@@ -99,16 +121,17 @@ Event.prototype.aboutToBeDeleted = function() {
 };
 
 // Add a new source to the event - not persisted
-Event.prototype.addNewSource = function(_config, _subscription) {
-   var config = this.owner.generateDynamicSourceConfig(_config, _subscription);
+Event.prototype.addNewSource = function(_config) {
+   var config = this.owner.generateDynamicSourceConfig(_config);
+   config.listeningSource = this.owner.uName;
    var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
 };    
    
 // Remove an exisiting source to the event - not persisted
-Event.prototype.removeExistingSource = function(_config, _subscription) {
-   var sourceId = this.owner.generateDynamicSourceId(_config, _subscription);
+Event.prototype.removeExistingSource = function(_config) {
+   var sourceId = this.owner.generateDynamicSourceId(_config);
    
    for (var listener in this.sourceListeners) {
       
@@ -173,6 +196,7 @@ Event.prototype._addSource = function(_source) {
       _source.uName = this.owner.uName;
    }
 
+   _source.listeningSource = this.owner.uName;
    var sourceListener = new SourceListener(_source, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
 };

@@ -47,6 +47,7 @@ function Scene(_config, _owner) {
          _config.sources[i].uName = this.uName;
       }
 
+      _config.sources[i].listeningSource = this.uName;
       this.sources.push(_config.sources[i]);
       var sourceListenerName = _config.sources[i].uName + ":" + _config.sources[i].property;
       this.sources[this.sources.length-1].sourceListenerName = sourceListenerName;

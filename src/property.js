@@ -131,17 +131,30 @@ Property.prototype.getCasa = function() {
    return this.owner.getCasa();
 };
 
-// Add a new source to the property - not persisted
-Property.prototype.addNewSource = function(_config, _subscription) {
-   var config = this.owner.generateDynamicSourceConfig(_config, _subscription);
+Property.prototype.refreshSourceListeners = function() {
+
+   if (this.hasOwnProperty("sourceListeners")) {
+
+      for (var sourceListenerName in this.sourceListeners) {
+
+         if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+            this.sourceListeners[sourceListenerName].refreshSource();
+         }
+      }
+   }
+};
+
+Property.prototype.addNewSource = function(_config) {
+   var config = this.owner.generateDynamicSourceConfig(_config);
+   config.listeningSource = this.owner.uName;
    var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
 };
 
 // Remobve an exisiting source to the property - not persisted
-Property.prototype.removeExistingSource = function(_config, _subscription) {
-   var sourceId = this.owner.generateDynamicSourceId(_config, _subscription);
+Property.prototype.removeExistingSource = function(_config) {
+   var sourceId = this.owner.generateDynamicSourceId(_config);
 
    for (var listener in this.sourceListeners) {
       
@@ -467,6 +480,7 @@ Property.prototype._addSource = function(_source) {
       _source.uName = this.owner.uName;
    }
 
+   _source.listeningSource = this.owner.uName;
    var sourceListener = new SourceListener(_source, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
 };

@@ -39,43 +39,15 @@ function PeerSource(_uName, _name, _priority, _properties, _peerCasa) {
 
 util.inherits(PeerSource, SourceBase);
 
-PeerSource.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
-
-   if (_subscription.hasOwnProperty("mirror")) {
-      console.log(this.uName+": propertySubscribedTo() mirror, sub=",_subscription);
-   }
-   else {
-      console.log(this.uName+": propertySubscribedTo() prop="+_property+", sub=",_subscription);
-   }
-
-   this.casa.propertySubscribedTo(this, _property, _subscription, _exists);
+PeerSource.prototype.subscriptionRegistered = function(_event, _subscription) {
+   console.log(this.uName+": subscriptionRegistered() :" + _event);
+   this.casa.subscriptionRegistered(this, _event, _subscription);
 };
 
-// Something wants to watch (and possibly raise towards) several events in this service node (read) - called from sourcelistener
-PeerSource.prototype.eventSubscribedTo = function(_eventName, _subscription) {
-   console.log(this.uName+": eventSubscribedTo() event="+_eventName+", sub=",_subscription);
-   this.casa.eventSubscribedTo(this, _eventName, _subscription);
+PeerSource.prototype.subscriptionRemoved = function(_event, _subscription) {
+   console.log(this.uName+": subscriptionRemoved() :" + _event);
+   this.casa.subscriptionRemoved(this, _event, _subscription);
 };
-
-// Something does not want to watch a property anymore - called from sourcelistener
-PeerSource.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists) {
-
-   if (_subscription.hasOwnProperty("mirror")) {
-      console.log(this.uName+": propertySubscriptionRemoval() mirror, sub=",_subscription);
-   }
-   else {
-      console.log(this.uName+": propertySubscriptionRemoval() prop="+_property+", sub=",_subscription);
-   }
-
-   this.casa.propertySubscriptionRemoval(this, _property, _subscription, _exists);
-};
-
-// Something does not want to watch an event anymore - called from sourcelistener
-PeerSource.prototype.eventSubscriptionRemoval = function(_eventName, _subscription) {
-   console.log(this.uName+": eventSubscriptionRemoval() event="+_eventName+", sub=",_subscription);
-   this.casa.eventSubscriptionRemoval(this, _eventName, _subscription);
-};
-
 
 PeerSource.prototype.interestInNewChild = function(_uName) {
    this.casa.interestInNewChild(this, _uName);

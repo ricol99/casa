@@ -10,10 +10,22 @@ function Source(_config, _owner) {
    this.controllerPriority = -1;
    this.controller = null;
 
+   if (_config.hasOwnProperty("subscription")) {
+      _config.subscriptions = [ _config.subscription ];
+   }
+
+   if (_config.hasOwnProperty("subscriptions")) {
+
+      for (var i = 0; i < _config.subscriptions.length; ++i) {
+         this.ensurePropertyExists(_config.subscriptions[i].uName.substr(2).replace(/:/g, "-")+"-MODE", "property",
+                                   { source: { uName: _config.subscriptions[i].uName, property: "MODE", subscription: _config.subscriptions[i].subscription }}, _config);
+      }
+   }
+
    if (_config.hasOwnProperty("mirrorSource")) {
       this.mirroring = true;
       var SourceListener = require('./sourcelistener');
-      this.mirrorSourceListener = new SourceListener({ uName: _config.mirrorSource, subscription: _config.mirrorSourceSubscription }, this);
+      this.mirrorSourceListener = new SourceListener({ uName: _config.mirrorSource, listeningSource: this.uName, subscription: _config.mirrorSourceSubscription }, this);
    }
 
    this.createChildren(_config.properties, "property", this);
@@ -76,6 +88,34 @@ Source.prototype.hotStart = function() {
       }
    }
 };
+
+Source.prototype.refreshSourceListeners  = function() {
+         
+   if (this.hasOwnProperty("sourceListeners")) {
+   
+      for (var sourceListenerName in this.sourceListeners) {
+
+         if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
+            this.sourceListeners[sourceListenerName].refreshSource();
+         }
+      }
+   }
+   
+   for (var propertyName in this.properties) {
+
+      if (this.properties.hasOwnProperty(propertyName)) {
+         this.properties[propertyName].refreshSourceListeners();
+      }
+   }
+
+   for (var eventName in this.events) {
+
+      if (this.events.hasOwnProperty(eventName)) {
+         this.events[eventName].refreshSourceListeners();
+      }
+   }
+};
+
 
 Source.prototype.createProperty = function(_config) {
 

@@ -77,15 +77,15 @@ PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
          }
          else {
             if (_res.identical) {
-               console.log("AAAAAAAAAAAA THE SAME!", _res);
+               console.log("DATABASES ARE THE SAME!");
                this.createPeerCasa(_service);
             }
             else if (_res.localNewer) {
-               console.log("AAAAAAAAAAAA I AM NEWER!");
+               console.log("LOCAL DATABASE IS NEWER!");
                this.createPeerCasa(_service, true);
             }
             else {
-               console.log("AAAAAAAAAAAA I AM OLDER!");
+               console.log("LOCAL DATABASE IS OLDER!");
                this.dbService.updateGangDbFromPeer(_service.host, _service.port, (_err, _res) => {
 
                   if (_err) {

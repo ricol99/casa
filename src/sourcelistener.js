@@ -42,7 +42,7 @@ function SourceListener(_config, _owner) {
 
    this.listeningToPropertyChange = _config.hasOwnProperty("property");
    this.subscription = (_config.hasOwnProperty("subscription")) ? _config.subscription : {};
-   this.subscription.casaName = this.casa.name;
+   this.subscription.listeningSource = _config.listeningSource;
 
    if (!this.subscription.hasOwnProperty("sourceName")) {
       this.subscription.sourceName = this.sourceName;
@@ -135,7 +135,7 @@ SourceListener.prototype.establishListeners = function() {
 
    // refresh source
    this.source = this.gang.findNamedObject(this.sourceName);
-   this.valid = this.source ? true : false;
+   this.valid = this.source && !this.source.bowing;
 
    if (this.valid && !this.listening) {
 
@@ -178,6 +178,7 @@ SourceListener.prototype.stopListening = function() {
    }
 
    this.casa.removeSourceListener(this);
+   this.listening = false;
 };
 
 SourceListener.prototype.propertyChangedCb = function(_data) {
@@ -203,6 +204,7 @@ SourceListener.prototype.refreshSource = function() {
    var ret = true;
 
    if (!this.valid)  {
+
       ret = this.establishListeners();
       console.log(this.uName + ': Refreshed source listener. result=' + ret);
 
@@ -223,7 +225,6 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
 
    if ((_data.name === this.eventName) && this.valid) {
       console.log(this.uName + ': INVALID');
-
       this.valid = false;
 
       if (this.listeningToPropertyChange) {
@@ -234,6 +235,7 @@ SourceListener.prototype.internalSourceIsInvalid = function(_data) {
       }
 
       this.source.removeListener('invalid', this.invalidHandler, this.subscription);
+      this.listening = false;
 
       if (this.maskInvalid) {
          this.maskingInvalid = true;

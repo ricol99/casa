@@ -9,6 +9,7 @@ function SourceBase(_config, _owner) {
    this.bowing = false;
    this.currentTransaction = null;
    this.properties = {};
+   this.subscribedSources = {};
 
    this.setMaxListeners(0);
 }
@@ -73,22 +74,49 @@ SourceBase.prototype.interestInNewChild = function(_uName) {
 
 SourceBase.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);
+   var newSource = false;
+
+   if (_subscription.hasOwnProperty("listeningSource")) {
+
+      if (this.subscribedSources[_subscription.listeningSource]) {
+         this.subscribedSources[_subscription.listeningSource] = this.subscribedSources[_subscription.listeningSource] + 1;
+      }
+      else {
+         this.subscribedSources[_subscription.listeningSource] = 1;
+         newSource = true;
+      } 
+   }
 
    if (_event === "property-changed") {
-      this.propertySubscribedTo(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property));
+      this.propertySubscribedTo(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property), newSource);
    }
    else {
-      this.eventSubscribedTo(_event, _subscription);
+      this.eventSubscribedTo(_event, _subscription, newSource);
    }
 };
 
 SourceBase.prototype.subscriptionRemoved = function(_event, _subscription) {
+   console.log(this.uName+": subscriptionRemoved() :" + _event);
+
+   var lastSource = false;
+
+   if (_subscription.hasOwnProperty("listeningSource")) {
+
+      if (this.subscribedSources[_subscription.listeningSource]) {
+         this.subscribedSources[_subscription.listeningSource] = this.subscribedSources[_subscription.listeningSource] - 1;
+
+         if (this.subscribedSources[_subscription.listeningSource] === 0) {
+            delete this.subscribedSources[_subscription.listeningSource];
+            lastSource = true;
+         }
+      }
+   }
 
    if (_event === "property-changed") {
-      this.propertySubscriptionRemoved(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property));
+      this.propertySubscriptionRemoved(_subscription.property, _subscription, this.properties.hasOwnProperty(_subscription.property), lastSource);
    }
    else {
-      this.eventSubscriptionRemoved(_event, _subscription);
+      this.eventSubscriptionRemoved(_event, _subscription, lastSource);
    }
 };
 
@@ -96,26 +124,30 @@ SourceBase.prototype.subscriptionRemoved = function(_event, _subscription) {
 // _property - property name
 // _subscription - usually an object - provided by subscriber
 // _exists - whether the property is currently defined in this source
-SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+// _firstSource - true if the listener currently has no subscriptions with this source - i.e. this is the first one
+SourceBase.prototype.propertySubscribedTo = function(_property, _subscription, _exists, _firstSource) {
 };
 
 // Override this to learn of new subscriptions to events
 // _event - event name
 // _subscription - usually an object - provided by subscriber
-SourceBase.prototype.eventSubscribedTo = function(_event, _subscription) {
+// _firstSource - true if the listener currently has no subscriptions with this source - i.e. this is the first one
+SourceBase.prototype.eventSubscribedTo = function(_event, _subscription, _firstSource) {
 };
 
 // Override this to learn of of a removal of a subscription to a property
 // _property - property name
 // _subscription - usually an object - provided by subscriber
 // _exists - whether the property is currently defined in this source
-SourceBase.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists) {
+// _lastSource - true if the listener is about to remove itss last subscriptions from this source - i.e. this is the last one to go
+SourceBase.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists, _lastSource) {
 };
 
 // Override this to learn of a removal of a subscription to an event
 // _event - event name
 // _subscription - usually an object - provided by subscriber
-SourceBase.prototype.eventSubscriptionRemoved = function(_event, _subscription) {
+// _lastSource - true if the listener is about to remove itss last subscriptions from this source - i.e. this is the last one to go
+SourceBase.prototype.eventSubscriptionRemoved = function(_event, _subscription, _lastSource) {
 };
 
 SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
@@ -198,7 +230,18 @@ SourceBase.prototype.propertyGoneInvalid = function(_propName, _data) {
    console.log(this.uName + ": Emitting invalid!");
 
    this.emit('invalid', sendData);
-}
+};
+
+SourceBase.prototype.eventGoneInvalid = function(_eventName, _data) {
+   console.log(this.uName + ": Event " + _eventName + " going invalid!");
+
+   var sendData = (_data) ? util.copy(_data) : {};
+   sendData.sourceName =  this.uName;
+   sendData.name = _eventName;
+   console.log(this.uName + ": Emitting invalid!");
+
+   this.emit('invalid', sendData);
+};
 
 SourceBase.prototype.invalidate = function(_includeChildren) {
    console.log(this.uName + ": Raising invalid on all properties to drop source listeners");
@@ -221,6 +264,13 @@ SourceBase.prototype.loseListeners = function(_includeChildren) {
 
       if (this.properties.hasOwnProperty(prop)) {
          this.properties[prop].loseListeners();
+      }
+   }
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].loseListeners();
       }
    }
 };
@@ -430,12 +480,12 @@ SourceBase.prototype.clearAlignmentQueue = function() {
    this.propertyAlignmentQueue = [];
 }
 
-SourceBase.prototype.generateDynamicSourceId = function(_config, _subscription) {
-   var config = this.generateDynamicSourceConfig(_config, _subscription);
+SourceBase.prototype.generateDynamicSourceId = function(_config) {
+   var config = this.generateDynamicSourceConfig(_config);
    return config.id;
 };
 
-SourceBase.prototype.generateDynamicSourceConfig = function(_config, _subscription) {
+SourceBase.prototype.generateDynamicSourceConfig = function(_config) {
    var config = {};
    var config = { uName: _config.hasOwnProperty("uName") ? _config.uName : this.owner.uName };
 
@@ -455,11 +505,7 @@ SourceBase.prototype.generateDynamicSourceConfig = function(_config, _subscripti
       config.guard = _config.guard;
    }
    
-   if (_subscription && _subscription.hasOwnProperty("casaName")) {
-      config.casaName = _subscription.casaName;
-      config.id = JSON.stringify(config);
-   }
-
+   config.id = JSON.stringify(config);
    return config;
 };
 

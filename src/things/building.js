@@ -267,37 +267,49 @@ Building.prototype.hotStart = function() {
 };
 
 // Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
-Building.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
+Building.prototype.propertySubscribedTo = function(_property, _subscription, _exists, _firstSource) {
    console.log(this.uName + ": Property subscription() for " + _property);
-   this.processSubscription(_subscription);
+
+   if (_firstSource) {
+      this.processSubscription(_subscription);
+   }
 };
 
 // Something wants to watch (and possibly raise towards) several events in this service node (read) - called from sourcelistener
-Building.prototype.eventSubscribedTo = function(_eventName, _subscription) {
+Building.prototype.eventSubscribedTo = function(_eventName, _subscription, _firstSource) {
    console.log(this.uName + ": Event subscription() for" + _eventName);
-   this.processSubscription(_subscription);
+
+   if (_firstSource) {
+      this.processSubscription(_subscription);
+   }
 };
 
 // Something does not want to watch a property anymore - called from sourcelistener
-Building.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists) {
+Building.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists, _lastSource) {
    console.log(this.uName + ": Property subscription() for " + _property);
-   this.processSubscriptionRemoval(_subscription);
+
+   if (_lastSource) {
+      this.processSubscriptionRemoval(_subscription);
+   }
 };
 
 // Something does not want to watch an event anymore - called from sourcelistener
-Building.prototype.eventSubscriptionRemoval = function(_eventName, _subscription) {
+Building.prototype.eventSubscriptionRemoval = function(_eventName, _subscription, _lastSource) {
    console.log(this.uName + ": Event subscription() for" + _eventName);
-   this.processSubscriptionRemoval(_subscription);
+
+   if (_lastSource) {
+      this.processSubscriptionRemoval(_subscription);
+   }
 };
 
 Building.prototype.processSubscription = function(_subscription) {
 
-   if (!_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("roomName")) {
+   if (!_subscription.hasOwnProperty("roomType")) {
       return;
    }
 
    if (_subscription.roomType === "room") {
-      this.properties["movement"].addNewSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+      this.properties["movement"].addNewSource({ "uName": _subscription.listeningSource, "property": "movement" });
    }
    else if (_subscription.roomType === "bedroom") {
 
@@ -305,33 +317,34 @@ Building.prototype.processSubscription = function(_subscription) {
          var listen = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
 
          if (listen) {
-            this.properties[this.users[i].name+"-user-state"].getState("not-present").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
-                                                                                                     "value": true, "nextState": "in-bed" }, _subscription);
+            this.properties[this.users[i].name+"-user-state"].getState("not-present").addNewSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
+                                                                                                     "value": true, "nextState": "in-bed" });
 
-            this.properties[this.users[i].name+"-user-state"].getState("present").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
-                                                                                                 "value": true, "nextState": "in-bed" }, _subscription);
+            this.properties[this.users[i].name+"-user-state"].getState("present").addNewSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
+                                                                                                 "value": true, "nextState": "in-bed" });
 
-            this.properties[this.users[i].name+"-user-state"].getState("in-bed").addNewSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
-                                                                                                "value": false, "nextState": "present" }, _subscription);
+            this.properties[this.users[i].name+"-user-state"].getState("in-bed").addNewSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
+                                                                                                "value": false, "nextState": "present" });
 
-            this.events["user-awoken"].addNewSource({ "uName": _subscription.roomName, "event": this.users[i].name+"-awoken" }, _subscription);
+            this.events["user-awoken"].addNewSource({ "uName": _subscription.listeningSource, "event": this.users[i].name+"-awoken" });
          }
       }
 
-      this.properties["movement"].addNewSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
-      this.properties["any-users-sensitive"].addNewSource({ "uName": _subscription.roomName, "property": "users-sensitive" }, _subscription);
-      this.properties["evening-possible"].addNewSource({ "uName": _subscription.roomName, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
+      this.properties["movement"].addNewSource({ "uName": _subscription.listeningSource, "property": "movement" });
+      this.properties["any-users-sensitive"].addNewSource({ "uName": _subscription.listeningSource, "property": "users-sensitive" });
+      this.properties["evening-possible"].addNewSource({ "uName": _subscription.listeningSource, "event": "cancel-bedtime-event", "transform": "true" });
    }
+
 };
 
 Building.prototype.processSubscriptionRemoval = function(_subscription) {
 
-   if (!_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("roomName")) {
+   if (!_subscription.hasOwnProperty("roomType")) {
       return; 
    }
 
    if ((_subscription.roomType === "room")) {
-      this.properties["movement"].removeExistingSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
+      this.properties["movement"].removeExistingSource({ "uName": _subscription.listeningSource, "property": "movement" }, _subscription);
    }
    else if (_subscription.roomType === "bedroom") {
 
@@ -339,22 +352,22 @@ Building.prototype.processSubscriptionRemoval = function(_subscription) {
          var listening = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
 
          if (listening) {
-            this.properties[this.users[i].name+"-user-state"].getState("not-present").removeExistingSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+            this.properties[this.users[i].name+"-user-state"].getState("not-present").removeExistingSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
                                                                                                            "value": true, "nextState": "in-bed" }, _subscription);
 
-            this.properties[this.users[i].name+"-user-state"].getState("present").removeExistingSource({ "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+            this.properties[this.users[i].name+"-user-state"].getState("present").removeExistingSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
                                                                                                          "value": true, "nextState": "in-bed" }, _subscription);
 
-            this.properties[this.users[i].name+"-user-state"].getState("in-bed").removeExistingSource({  "uName": _subscription.roomName, "property": this.users[i].name+"-in-bed",
+            this.properties[this.users[i].name+"-user-state"].getState("in-bed").removeExistingSource({  "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
                                                                                                          "value": false, "nextState": "present" }, _subscription);
 
-            this.events["user-awoken"].removeExistingSource({ "uName": _subscription.roomName, "event": this.users[i].name+"-awoken" }, _subscription);
+            this.events["user-awoken"].removeExistingSource({ "uName": _subscription.listeningSource, "event": this.users[i].name+"-awoken" }, _subscription);
          }
       }
    
-      this.properties["movement"].removeExistingSource({ "uName": _subscription.roomName, "property": "movement" }, _subscription);
-      this.properties["any-users-sensitive"].removeExistingSource({ "uName": _subscription.roomName, "property": "users-sensitive" }, _subscription);
-      this.properties["evening-possible"].removeExistingSource({ "uName": _subscription.roomName, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
+      this.properties["movement"].removeExistingSource({ "uName": _subscription.listeningSource, "property": "movement" }, _subscription);
+      this.properties["any-users-sensitive"].removeExistingSource({ "uName": _subscription.listeningSource, "property": "users-sensitive" }, _subscription);
+      this.properties["evening-possible"].removeExistingSource({ "uName": _subscription.listeningSource, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
    }
 };
 

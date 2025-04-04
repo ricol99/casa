@@ -302,14 +302,10 @@ PeerCasa.prototype.deleteSocket = function() {
       this.socket.removeListener('casa-activeAACCKK', this.socketCasaActiveAckHandler);
       this.socket.removeListener('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.removeListener('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
-      this.socket.removeListener('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
-      this.socket.removeListener('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
-      this.socket.removeListener('source-event-subscribed-to', this.socketSourceEventSubscribedToHandler);
-      this.socket.removeListener('source-event-subscribed-toAACCKK', this.socketSourceEventSubscribedToAckHandler);
-      this.socket.removeListener('source-property-subscription-removal', this.socketSourcePropertySubscriptionRemovalHandler);
-      this.socket.removeListener('source-property-subscription-removalAACCKK', this.socketSourcePropertySubscriptionRemovalAckHandler);
-      this.socket.removeListener('source-event-subscription-removal', this.socketSourceEventSubscriptionRemovalHandler);
-      this.socket.removeListener('source-event-subscription-removalAACCKK', this.socketSourceEventSubscriptionRemovalAckHandler);
+      this.socket.removeListener('source-subscription-registered', this.socketSourceSubscriptionRegisteredHandler);
+      this.socket.removeListener('source-subscription-registeredAACCKK', this.socketSourceSubscriptionRegisteredAckHandler);
+      this.socket.removeListener('source-subscription-removed', this.socketSourceSubscriptionRemovedHandler);
+      this.socket.removeListener('source-subscription-removedAACCKK', this.socketSourceSubscriptionRemovedAckHandler);
       this.socket.removeListener('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
       this.socket.removeListener('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.removeListener('source-event-raised', this.socketSourceEventRaisedHandler);
@@ -454,63 +450,33 @@ PeerCasa.prototype.socketCasaInactiveCb = function(_data) {
    this.ackMessage('casa-inactive', _data);
 };
 
-PeerCasa.prototype.socketSourcePropertySubscribedToCb = function(_data) {
-   console.log(this.uName + ': Event received from my peer. Event name: property-subscribed-to, source: ' + _data.sourceName);
+PeerCasa.prototype.socketSourceSubscriptionRegisteredCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: subscription-registered, source: ' + _data.sourceName);
 
    if (this.casa.sources[_data.sourceName]) {
-      this.casa.sources[_data.sourceName].propertySubscribedTo(_data.property, _data.subscription, _data.exists);
+      this.casa.sources[_data.sourceName].subscriptionRegistered(_data.event, _data.subscription);
    }
 
-   this.ackMessage('source-property-subscribed-to', _data);
+   this.ackMessage('source-subscription-registered', _data);
 };
 
-PeerCasa.prototype.socketSourcePropertySubscribedToAckCb = function(_data) {
-   console.log(this.uName + ': Property-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
+PeerCasa.prototype.socketSourceSubscriptionRegisteredAckCb = function(_data) {
+   console.log(this.uName + ': Subscription-registered Event ACKed by my peer. Source=' + _data.sourceName);
    this.messageHasBeenAcked(_data);
 };
 
-PeerCasa.prototype.socketSourceEventSubscribedToCb = function(_data) {
-   console.log(this.uName + ': Event received from my peer. Event name: event-subscribed-to, source: ' + _data.sourceName);
+PeerCasa.prototype.socketSourceSubscriptionRemovedCb = function(_data) {
+   console.log(this.uName + ': Event received from my peer. Event name: subscription-removed, source: ' + _data.sourceName);
 
    if (this.casa.sources[_data.sourceName]) {
-      this.casa.sources[_data.sourceName].eventSubscribedTo(_data.eventName, _data.subscription, _data.exists);
+      this.casa.sources[_data.sourceName].subscriptionRemoved(_data.event, _data.subscription);
    }
 
-   this.ackMessage('source-event-subscribed-to', _data);
+   this.ackMessage('source-subscription-removed', _data);
 };
 
-PeerCasa.prototype.socketSourceEventSubscribedToAckCb = function(_data) {
-   console.log(this.uName + ': Event-subscribed-to Event ACKed by my peer. Source=' + _data.sourceName);
-   this.messageHasBeenAcked(_data);
-};
-
-PeerCasa.prototype.socketSourcePropertySubscriptionRemovalCb = function(_data) {
-   console.log(this.uName + ': Event received from my peer. Event name: property-subscription-removal, source: ' + _data.sourceName);
-
-   if (this.casa.sources[_data.sourceName]) {
-      this.casa.sources[_data.sourceName].propertySubscriptionRemoval(_data.property, _data.subscription, _data.exists);
-   }
-
-   this.ackMessage('source-property-subscription-removal', _data);
-};
-
-PeerCasa.prototype.socketSourcePropertySubscriptionRemovalAckCb = function(_data) {
-   console.log(this.uName + ': Property-subscription-removal Event ACKed by my peer. Source=' + _data.sourceName);
-   this.messageHasBeenAcked(_data);
-};
-
-PeerCasa.prototype.socketSourceEventSubscriptionRemovalCb = function(_data) {
-   console.log(this.uName + ': Event received from my peer. Event name: event-subscription-removal, source: ' + _data.sourceName);
-
-   if (this.casa.sources[_data.sourceName]) {
-      this.casa.sources[_data.sourceName].eventSubscriptionRemoval(_data.eventName, _data.subscription);
-   }
-
-   this.ackMessage('source-event-subscribed-to', _data);
-};
-
-PeerCasa.prototype.socketSourceEventSubscriptionRemovalAckCb = function(_data) {
-   console.log(this.uName + ': Event-subscription-removal Event ACKed by my peer. Source=' + _data.sourceName);
+PeerCasa.prototype.socketSourceSubscriptionRemovedAckCb = function(_data) {
+   console.log(this.uName + ': Subscription-removed Event ACKed by my peer. Source=' + _data.sourceName);
    this.messageHasBeenAcked(_data);
 };
 
@@ -860,14 +826,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socketCasaActiveAckHandler = PeerCasa.prototype.socketCasaActiveAckCb.bind(this);
       this.socketSourcePropertyChangedHandler = PeerCasa.prototype.socketSourcePropertyChangedCb.bind(this);
       this.socketSourcePropertyChangedAckHandler = PeerCasa.prototype.socketSourcePropertyChangedAckCb.bind(this);
-      this.socketSourcePropertySubscribedToHandler = PeerCasa.prototype.socketSourcePropertySubscribedToCb.bind(this);
-      this.socketSourcePropertySubscribedToAckHandler = PeerCasa.prototype.socketSourcePropertySubscribedToAckCb.bind(this);
-      this.socketSourceEventSubscribedToHandler = PeerCasa.prototype.socketSourceEventSubscribedToCb.bind(this);
-      this.socketSourceEventSubscribedToAckHandler = PeerCasa.prototype.socketSourceEventSubscribedToAckCb.bind(this);
-      this.socketSourcePropertySubscriptionRemovalHandler = PeerCasa.prototype.socketSourcePropertySubscriptionRemovalCb.bind(this);
-      this.socketSourcePropertySubscriptionRemovalAckHandler = PeerCasa.prototype.socketSourcePropertySubscriptionRemovalAckCb.bind(this);
-      this.socketSourceEventSubscriptionRemovalHandler = PeerCasa.prototype.socketSourceEventSubscriptionRemovalCb.bind(this);
-      this.socketSourceEventSubscriptionRemovalAckHandler = PeerCasa.prototype.socketSourceEventSubscriptionRemovalAckCb.bind(this);
+      this.socketSourceSubscriptionRegisteredHandler = PeerCasa.prototype.socketSourceSubscriptionRegisteredCb.bind(this);
+      this.socketSourceSubscriptionRegisteredAckHandler = PeerCasa.prototype.socketSourceSubscriptionRegisteredAckCb.bind(this);
+      this.socketSourceSubscriptionRemovedHandler = PeerCasa.prototype.socketSourceSubscriptionRemovedCb.bind(this);
+      this.socketSourceSubscriptionRemovedAckHandler = PeerCasa.prototype.socketSourceSubscriptionRemovedAckCb.bind(this);
       this.socketSourceInterestInNewChildHandler = PeerCasa.prototype.socketSourceInterestInNewChildCb.bind(this);
       this.socketSourceInterestInNewChildAckHandler = PeerCasa.prototype.socketSourceInterestInNewChildAckCb.bind(this);
       this.socketSourceEventRaisedHandler = PeerCasa.prototype.socketSourceEventRaisedCb.bind(this);
@@ -895,14 +857,10 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.socket.on('casa-activeAACCKK', this.socketCasaActiveAckHandler);
       this.socket.on('source-property-changed', this.socketSourcePropertyChangedHandler);
       this.socket.on('source-property-changedAACCKK', this.socketSourcePropertyChangedAckHandler);
-      this.socket.on('source-property-subscribed-to', this.socketSourcePropertySubscribedToHandler);
-      this.socket.on('source-property-subscribed-toAACCKK', this.socketSourcePropertySubscribedToAckHandler);
-      this.socket.on('source-event-subscribed-to', this.socketSourceEventSubscribedToHandler);
-      this.socket.on('source-event-subscribed-toAACCKK', this.socketSourceEventSubscribedToAckHandler);
-      this.socket.on('source-property-subscription-removal', this.socketSourcePropertySubscriptionRemovalHandler);
-      this.socket.on('source-property-subscription-removalAACCKK', this.socketSourcePropertySubscriptionRemovalAckHandler);
-      this.socket.on('source-event-subscription-removal', this.socketSourceEventSubscriptionRemovalHandler);
-      this.socket.on('source-event-subscription-removalAACCKK', this.socketSourceEventSubscriptionRemovalAckHandler);
+      this.socket.on('source-subscription-registered', this.socketSourceSubscriptionRegisteredHandler);
+      this.socket.on('source-subscription-registeredAACCKK', this.socketSourceSubscriptionRegisteredAckHandler);
+      this.socket.on('source-subscription-removed', this.socketSourceSubscriptionRemovedHandler);
+      this.socket.on('source-subscription-removedAACCKK', this.socketSourceSubscriptionRemovedAckHandler);
       this.socket.on('source-interest-in-new-child', this.socketSourceInterestInNewChildHandler);
       this.socket.on('source-interest-in-new-childAACCKK', this.socketSourceInterestInNewChildAckHandler);
       this.socket.on('source-event-raised', this.socketSourceEventRaisedHandler);
@@ -1049,35 +1007,19 @@ PeerCasaRequestor.prototype.completeRequest = function(_result) {
    this.callback(null, _result);
 }
 
-PeerCasa.prototype.propertySubscribedTo = function(_source, _property, _subscription, _exists) {
+PeerCasa.prototype.subscriptionRegistered = function(_source, _event, _subscription) {
 
    if (this.connected) {
       console.log(this.uName + ': source ' + _source.uName + ' subscribed to');
-      this.sendMessage('source-property-subscribed-to', { sourceName: _source.uName, property: _property, subscription: _subscription, exists: _exists });
+      this.sendMessage('source-subscription-registered', { sourceName: _source.uName, event: _event, subscription: _subscription });
    }
 };
 
-PeerCasa.prototype.eventSubscribedTo = function(_source, _eventName, _subscription) {
-
-   if (this.connected) {
-      console.log(this.uName + ': source ' + _source.uName + ' event subscribed to');
-      this.sendMessage('source-event-subscribed-to', { sourceName: _source.uName, eventName: _eventName, subscription: _subscription });
-   }
-};
-
-PeerCasa.prototype.propertySubscriptionRemoval = function(_source, _property, _subscription, _exists) {
+PeerCasa.prototype.subscriptionRemoved = function(_source, _event, _subscription) {
 
    if (this.connected) {
       console.log(this.uName + ': source ' + _source.uName + ' subscribed to');
-      this.sendMessage('source-property-subscription-removal', { sourceName: _source.uName, property: _property, subscription: _subscription, exists: _exists });
-   }
-};
-
-PeerCasa.prototype.eventSubscriptionRemoval = function(_source, _eventName, _subscription) {
-
-   if (this.connected) {
-      console.log(this.uName + ': source ' + _source.uName + ' event subscribed to');
-      this.sendMessage('source-event-subscription-removal', { sourceName: _source.uName, eventName: _eventName, subscription: _subscription });
+      this.sendMessage('source-subscription-removed', { sourceName: _source.uName, event: _event, subscription: _subscription });
    }
 };
 

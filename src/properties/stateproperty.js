@@ -524,7 +524,7 @@ StateProperty.prototype.ceasedToBeController = function(_newController) {
    this.controllingOwner = false;
 };
 
-StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
+StateProperty.prototype.fetchOrCreateSourceListener = function(_config, _refreshNewSource) {
    var sourceListenerName;
 
    if (!_config.hasOwnProperty("uName") || _config.uName == undefined) {
@@ -541,11 +541,16 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config) {
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
+      _config.listeningSource = this.owner.uName;
       sourceListener = new SourceListener(_config, this);
       this.sourceListeners[sourceListenerName] = sourceListener;
       sourceListener.stateOwned = true;
       sourceListener.counter = 0;
       sourceListener.referenceCount = 1;
+
+      if (_refreshNewSource) {
+         sourceListener.refreshSource();
+      }
    }
    else {
       sourceListener.stateOwned = true;

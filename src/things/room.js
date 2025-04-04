@@ -68,6 +68,11 @@ var Thing = require('../thing');
 // <scene-name-n>-<day-state> - scene array element n active combined with day state
 
 function Room(_config, _parent) {
+   this.roomType = _config.hasOwnProperty("roomType") ? _config.roomType : "room";
+   this.buildingName = _config.building;
+
+   _config.subscription = { uName: this.buildingName, subscription: { roomType: this.roomType, roomUsers: _config.hasOwnProperty("users") ? _config.users : {} }};
+
    Thing.call(this, _config, _parent);
    this.thingType = "room";
 
@@ -79,8 +84,6 @@ function Room(_config, _parent) {
       this.movementTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
    }
 
-   this.buildingName = _config.building;
-   this.roomType = _config.hasOwnProperty("roomType") ? _config.roomType : "room";
    this.users = [];
 
    if (_config.hasOwnProperty('user')) {
@@ -104,13 +107,9 @@ function Room(_config, _parent) {
    this.sensitivityStates = _config.hasOwnProperty("sensitivityStates") ? _config.sensitivityStates : [{ name: "no-users-present-normal", priority: -1 }, { name: "users-present-normal", priority: -1 },
                                                                                                        { name: "no-users-present-sensitive", priority: 15 }, { name: "users-present-sensitive", priority: 15 } ];
 
-   if (this.roomType === "room") {
-      this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state",
-                                                             subscription: { roomType: this.roomType, roomName: this.uName, roomUsers: _config.users }}}, _config);
-   }
-   else {
-      this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state" }}, _config);
-   }
+   this.ensureEventExists("room-switch-event", "event", {}, _config);
+   this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
+                                                          //subscription: { roomType: this.roomType, roomName: this.uName, roomUsers: _config.users }}}, _config);
 
    this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);

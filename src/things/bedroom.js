@@ -51,6 +51,9 @@ function Bedroom(_config, _parent) {
    }
 
    Room.call(this, _config, _parent);
+   this.ensureEventExists("cancel-bedtime-event", "event", {}, _config);
+   this.ensureEventExists("pre-wake-up-event", "event", {}, _config);
+   this.ensureEventExists("wake-up-event", "event", {}, _config);
 
    this.ensurePropertyExists("pre-wake-up-duration", "property", { initialValue: -1 }, _config);
    this.userStateConfigs = [];
@@ -71,6 +74,9 @@ function Bedroom(_config, _parent) {
    this.bedFullConfig = { initialValue: false, sources: [] };
 
    for (var i = 0; i < _config.users.length; ++i) {
+      this.ensureEventExists(this.users[i].name+"-awoken", "event", {}, _config);
+      this.ensureEventExists(this.users[i].name+"-switch-event", "event", {}, _config);
+      this.ensureEventExists(this.users[i].name+"-check-if-fallen-asleep", "event", {}, _config);
       this.userStateConfigs.push({});
       this.userStateConfigs[i] = {
          "name": this.users[i].name+"-user-state",
@@ -212,8 +218,8 @@ function Bedroom(_config, _parent) {
 
    this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
-   this.ensurePropertyExists("night-time", 'property', { initialValue: false, source: { uName: this.buildingName, property: "night-time",
-                                                                                        subscription: { roomType: "bedroom", roomName: this.uName } } }, _config);
+   this.ensurePropertyExists("night-time", 'property', { initialValue: false, source: { uName: this.buildingName, property: "night-time" }});
+                                                                                        //subscription: { roomType: "bedroom", roomName: this.uName } } }, _config);
 
    this.ensurePropertyExists("some-present-users-awake", 'orproperty', this.usersPresentAndAwakeConfig, _config);
    this.ensurePropertyExists("some-present-users-asleep", 'orproperty', this.usersPresentAndAsleepConfig, _config);

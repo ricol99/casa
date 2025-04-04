@@ -753,7 +753,7 @@ State.prototype.scheduledEventTriggered = function(_event) {
 }
 
 // Add a new source - Not persisted
-State.prototype.addNewSource = function(_sourceConfig, _subscription) {
+State.prototype.addNewSource = function(_sourceConfig) {
    let i = this.sources.length;
    this.sources.push(util.copy(_sourceConfig, true));
    this.sources[i].dynamic = true;
@@ -773,12 +773,9 @@ State.prototype.addNewSource = function(_sourceConfig, _subscription) {
    }
 
    util.ensureExists(this.sources[i], "uName", this.owner.owner.uName);
+   this.sources[i].id = this.owner.owner.generateDynamicSourceId(_sourceConfig);
 
-   if (_subscription) {
-      this.sources[i].id = this.owner.owner.generateDynamicSourceId(_sourceConfig, _subscription);
-   }  
-
-   var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i]);
+   var sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i], true);
    this.sources[i].sourceListener = sourceListener;
 
    if (!this.sourceMap[sourceListener.sourceEventName]) {
@@ -797,7 +794,7 @@ State.prototype.addNewSource = function(_sourceConfig, _subscription) {
 
             if (this.sources[i].guards[k].active) {
                this.sources[i].guards[k].uName = this.owner.owner.uName;
-               this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k]);
+               this.sources[i].guards[k].sourceListener = this.owner.fetchOrCreateSourceListener(this.sources[i].guards[k], true);
             }
          }
          else {
@@ -808,8 +805,8 @@ State.prototype.addNewSource = function(_sourceConfig, _subscription) {
 };
 
 // Remove an existing source to the state - not persisted
-State.prototype.removeExistingSource = function(_config, _subscription) {
-   var sourceId = this.owner.owner.generateDynamicSourceId(_config, _subscription);
+State.prototype.removeExistingSource = function(_config) {
+   var sourceId = this.owner.owner.generateDynamicSourceId(_config);
 
    for (var i = this.sources.length-1; i >= 0 ; --i) {
 

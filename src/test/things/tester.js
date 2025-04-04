@@ -36,6 +36,7 @@ function Tester(_config, _parent) {
             _config.sources[index].uName = this.targetUnderTest;
          }
 
+         _config.sources[index].listeningSource = this.uName;
          var sourceListener = new SourceListener(_config.sources[index], this);
          this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
       }
@@ -44,7 +45,7 @@ function Tester(_config, _parent) {
          this.gang.casa.scheduleRefreshSourceListeners();
       }
 
-      this.delayStart = _config.testRun.hasOwnProperty("delayStart") ? _config.testRun.delayStart * 1000 : 0;
+      this.delayStart = _config.testRun.hasOwnProperty("delayStart") ? _config.testRun.delayStart * 1000 : (this.gang.loader.connectToPeers ? 25000 : 0);
    }
 
    this.buildTestCases(util.copy(_config.testRun, true), util.copy(_config.testCases, true));
@@ -456,7 +457,7 @@ Tester.prototype.generateExpectedOutput = function(_data) {
 
 Tester.prototype.receivedEventFromSource = function(_data) {
 
-   if (!_data.coldStart) {
+   if (!_data.coldStart && this.testRunStarted) {
 
       if (this.generatingExpectedOutput) {
 

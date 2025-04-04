@@ -28,7 +28,7 @@ function Casa(_config, _owner) {
    this.sources = {};
    this.serviceTypes = {};
    this.topSources = {};
-   this.sourceListeners = {};
+   //this.sourceListeners = {};
    this.bowingSources = {};
 
    this.uber = false;
@@ -190,10 +190,17 @@ Casa.prototype.startListening = function () {
 Casa.prototype.refreshSourceListeners = function() {
    this.cancelScheduledRefreshSourceListeners();
 
-   for (var sourceListenerName in this.sourceListeners) {
+   for (var sourceName in this.sources) {
 
-      if (this.sourceListeners.hasOwnProperty(sourceListenerName)) {
-         this.sourceListeners[sourceListenerName].refreshSource();
+      if (this.sources.hasOwnProperty(sourceName)) {
+         this.sources[sourceName].refreshSourceListeners();
+      }
+   }
+
+   for (var bowingSourceName in this.bowingSources) {
+
+      if (this.bowingSources.hasOwnProperty(bowingSourceName)) {
+         this.bowingSources[bowingSourceName].refreshSourceListeners();
       }
    }
 };
@@ -318,44 +325,44 @@ Casa.prototype.startListeningToSource = function(_source) {
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
 
-   if (this.sourceListeners[_sourceListener.uName]) {
-      console.error("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
-      process.exit(1);
-   }
+   //if (this.sourceListeners[_sourceListener.uName]) {
+      //console.error("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
+      //process.exit(1);
+   //}
 
-   console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
-   this.sourceListeners[_sourceListener.uName] = _sourceListener;
+   //console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
+   //this.sourceListeners[_sourceListener.uName] = _sourceListener;
    this.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.removeSourceListener = function(_sourceListener) {
-   console.log(this.uName + ": Casa.prototype.removeSourceListener() " + _sourceListener.uName);
+   //console.log(this.uName + ": Casa.prototype.removeSourceListener() " + _sourceListener.uName);
    
-   if (this.sourceListeners[_sourceListener.uName]) {
-      delete this.sourceListeners[_sourceListener.uName];
-      return true;
-   }
-   else {
+   //if (this.sourceListeners[_sourceListener.uName]) {
+      //delete this.sourceListeners[_sourceListener.uName];
+      //return true;
+   //}
+   //else {
       return false;
-   }
+   //}
 
-   console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' removed from casa');
+   //console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' removed from casa');
 };
 
-Casa.prototype.findListeners = function(_uName) {
-   var listeners = [];
+//Casa.prototype.findListeners = function(_uName) {
+   //var listeners = [];
 
-   for (var listener in this.sourceListeners) {
+   //for (var listener in this.sourceListeners) {
 
-      if (this.sourceListeners.hasOwnProperty(listener)) {
+      //if (this.sourceListeners.hasOwnProperty(listener)) {
 
-         if (this.sourceListeners[listener].sourceName === _uName) {
-            listeners.push(this.sourceListeners[listener]);
-         }
-      }
-   }
-   return listeners;
-};
+         //if (this.sourceListeners[listener].sourceName === _uName) {
+            //listeners.push(this.sourceListeners[listener]);
+         //}
+      //}
+   //}
+   //return listeners;
+//};
 
 Casa.prototype.addServiceByType = function(_service) {
    console.log(this.uName + ': Service '  + _service.name + ' added to casa ');

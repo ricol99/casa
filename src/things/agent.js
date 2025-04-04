@@ -101,6 +101,7 @@ function Agent(_config, _parent) {
          for (var i = 0; i < _config.sourceMap[eventPropValue].length; i++) {
             this.sourceMap[eventPropValue].push(_config.sourceMap[eventPropValue][i]);
             this.sourceMap[eventPropValue][i].ignoreSourceUpdates = true;
+            this.sourceMap[eventPropValue][i].listeningSource = this.uName;
 
             if (!this.sourceListeners.hasOwnProperty(_config.sourceMap[eventPropValue][i].name)) {
                this.sourceListeners[_config.sourceMap[eventPropValue][i].name] = new SourceListener(this.sourceMap[eventPropValue][i], this);
