@@ -145,7 +145,8 @@ Property.prototype.refreshSourceListeners = function() {
 };
 
 Property.prototype.addNewSource = function(_config) {
-   var config = this.owner.generateDynamicSourceConfig(_config);
+   var config = util.copy(_config, true);
+   config.id = this.owner.generateDynamicSourceId(_config);
    config.listeningSource = this.owner.uName;
    var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;

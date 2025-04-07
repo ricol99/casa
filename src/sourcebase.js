@@ -481,11 +481,6 @@ SourceBase.prototype.clearAlignmentQueue = function() {
 }
 
 SourceBase.prototype.generateDynamicSourceId = function(_config) {
-   var config = this.generateDynamicSourceConfig(_config);
-   return config.id;
-};
-
-SourceBase.prototype.generateDynamicSourceConfig = function(_config) {
    var config = {};
    var config = { uName: _config.hasOwnProperty("uName") ? _config.uName : this.owner.uName };
 
@@ -505,8 +500,7 @@ SourceBase.prototype.generateDynamicSourceConfig = function(_config) {
       config.guard = _config.guard;
    }
    
-   config.id = JSON.stringify(config);
-   return config;
+   return JSON.stringify(config);
 };
 
 module.exports = exports = SourceBase;
