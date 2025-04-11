@@ -278,6 +278,7 @@ Property.prototype.rampComplete = function(_ramp, _config) {
 // @return object - { valueProvided, value }
 //   valueProvided - boolean
 Property.prototype.provideNextValueForRamp = function(_ramp, _rampConfig, _subRampConfig, _counter) {
+   return { providedValue: false };
 };
 
 //
