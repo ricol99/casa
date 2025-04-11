@@ -274,6 +274,12 @@ Property.prototype.rampComplete = function(_ramp, _config) {
    this.rampData = null;
 };
 
+// Override this to provide values in a ramp when using a rampFunction
+// @return object - { valueProvided, value }
+//   valueProvided - boolean
+Property.prototype.provideNextValueForRamp = function(_ramp, _rampConfig, _subRampConfig, _counter) {
+};
+
 //
 // Derived Properties can use this to be called just before the prooperty is changed
 // Useful when synchronising an external device with a property value (e.g. gpio in)
