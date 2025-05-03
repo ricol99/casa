@@ -39,7 +39,7 @@
     "reboot": "^0.1.0",
     "request": "^2.88.0",
     "rpio": "^2.1.1",
-    "socket.io": "^1.7.4",
+    "socket.io": "^4.5.3",
     "socket.io-client": "^1.7.4",
     "sonos": "^1.14.0",
     "speedtest-net": "^1.2.12",
