@@ -80,6 +80,17 @@ Event.prototype.hotStart = function() {
 };
 
 // 
+// Internal function can be called by derived events
+// Actual tell all listening parties that this event is now invalid
+// Some events wish to delay or stop this and become responsible for calling this function
+// when they override Event.prototype.sourceIsInvalid()
+//
+Event.prototype.invalidate = function (_includeChildren) {
+   console.log(this.uName + ': INVALID'); 
+   this.owner.eventGoneInvalid(this.name);
+};
+
+// 
 // Actual tell all listening parties that this property is not to be listened to anymore.
 // Pretend it is invalid but really the source is bowing and functioning silently
 //

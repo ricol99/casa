@@ -533,7 +533,10 @@ Tester.prototype.receivedEventFromSource = function(_data) {
          else {
             process.stdout.write("\x1b[32m"+"ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m\n");
             //console.info("\x1b[32m"+this.uName + ": ALL TEST CASES (" + this.testCases.length + ") PASSED\x1b[0m");
-            process.exit(0);
+
+            setTimeout( () => {
+               process.exit(0);
+            }, 2000);
          }
       }
    }

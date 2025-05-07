@@ -132,6 +132,11 @@ StateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _
    if (this.sourceListeners[_sourceListener.sourceEventName].stateOwned) {
 
       if (this.currentState) {
+
+         if (_data.hasOwnProperty("transaction")) {
+            this.owner.setTransaction(_data.transaction);
+         }
+
          source = this.currentState.processSourceEvent(_sourceListener.sourceEventName, name, value);
 
          if (source) {

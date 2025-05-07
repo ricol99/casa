@@ -86,7 +86,7 @@ function Building(_config, _parent) {
    allUsersInBedConfig.sources.push({ "property": "some-users-in-bed" });
 
    // user events
-   this.ensureEventExists("user-awoken", "event", userAwokenConfig);
+   this.ensureEventExists("user-awoken", "event", userAwokenConfig, _config);
 
    // user properties
    this.ensurePropertyExists("all-users-away", 'andproperty', allUsersAwayConfig, _config);
@@ -120,8 +120,9 @@ function Building(_config, _parent) {
                                          { name: "occupied-may-be-waking-up",
                                            sources: [{ event: "user-arrived", nextState: "occupied-going-to-bed" },
                                                      { event: "user-awoken", nextState: "occupied-waking-up" },
-                                                     { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" }],
-                                           timeout: { duration: 2, nextState: "occupied-going-to-bed" } },
+                                                     { property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
+                                                     { property: "some-users-in-bed", value: false, nextState: "occupied-awake" }],
+                                           timeout: { duration: 1, nextState: "occupied-going-to-bed" } },
 
                                          { name: "occupied-waking-up",
                                            sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },

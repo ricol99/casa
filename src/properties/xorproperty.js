@@ -30,8 +30,20 @@ XorProperty.prototype.coldStart = function () {
 };
 
 XorProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   this.calculateAndUpdate(_data);
+};
+
+XorProperty.prototype.sourceAdded = function(_config, _sourceListener) {
+   this.calculateAndUpdate(null);
+};
+
+XorProperty.prototype.sourceRemoved = function(_config) {
+   this.calculateAndUpdate(null);
+};
+
+XorProperty.prototype.calculateAndUpdate = function(_data) {
    var newValue = this.calculateOutputValue();
- 
+
    if (newValue !== this.value) {
       this.updatePropertyInternal(newValue, _data);
    }

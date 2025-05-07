@@ -69,24 +69,10 @@ Source.prototype.import = function(_importObj) {
 
 Source.prototype.coldStart = function() {
    SourceBase.prototype.coldStart.call(this);
-
-   for (var event in this.events) {
-
-      if (this.events.hasOwnProperty(event)) {
-         this.events[event].coldStart();
-      }
-   }
 };
 
 Source.prototype.hotStart = function() {
    SourceBase.prototype.hotStart.call(this);
-
-   for (var event in this.events) {
-
-      if (this.events.hasOwnProperty(event)) {
-         this.events[event].hotStart();
-      }
-   }
 };
 
 Source.prototype.refreshSourceListeners  = function() {
@@ -238,6 +224,9 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       if (!sendData.hasOwnProperty("transaction")) {
          sendData.transaction = this.checkTransaction();
+      }
+      else {
+         this.currentTransaction = sendData.transaction;
       }
 
       if (this.local) {
@@ -500,18 +489,6 @@ Source.prototype.receivedEventFromSource = function(_data) {
          this.raiseEvent(_data.name, _data);
       }
    }
-};
-
-Source.prototype.ensureEventExists = function(_eventName, _eventType, _config) {
-
-   if (!this.events.hasOwnProperty(_eventName)) {
-      _config.name = _eventName;
-      _config.type = _eventType;
-      _config.transient = true;
-      this.createChild(_config, "event", this);
-      return true;
-   }
-   return false;
 };
 
 module.exports = exports = Source;

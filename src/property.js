@@ -151,6 +151,7 @@ Property.prototype.addNewSource = function(_config) {
    var sourceListener = new SourceListener(config, this);
    this.sourceListeners[sourceListener.sourceEventName] = sourceListener;
    sourceListener.refreshSource();
+   this.sourceAdded(_config, sourceListener);
 };
 
 // Remobve an exisiting source to the property - not persisted
@@ -166,10 +167,19 @@ Property.prototype.removeExistingSource = function(_config) {
          if (id && (id === sourceId)) {
             this.sourceListeners[listener].stopListening();
             delete this.sourceListeners[listener];
+            this.sourceRemoved(_config);
             break;
          }
       }
    }
+};
+
+// Override this to become aware of new source
+Property.prototype.sourceAdded = function(_config, _sourceListener) {
+};
+
+// Override this to become aware of source removal
+Property.prototype.sourceRemoved = function(_config) {
 };
 
 //

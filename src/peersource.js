@@ -2,7 +2,7 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_uName, _name, _priority, _properties, _peerCasa) {
+function PeerSource(_uName, _name, _priority, _properties, _events, _peerCasa) {
    var gang = Gang.mainInstance();
    var bowingOwner = _peerCasa.getBowingSource(_uName.replace(":"+_name));
 
@@ -32,6 +32,10 @@ function PeerSource(_uName, _name, _priority, _properties, _peerCasa) {
    for (var prop in _properties) {
       this.ensurePropertyExists(prop, 'property', { name: prop, cold: false });
       this.properties[prop].set(_properties[prop], {});
+   }
+
+   for (var event in _events) {
+      this.ensureEventExists(event, 'event', { name: event, cold: false });
    }
 
    this.casa.addSource(this);
@@ -72,7 +76,13 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
       sendData.local = true;
-      sendData.transaction = this.checkTransaction();
+
+      if (sendData.hasOwnProperty("transaction")) {
+         this.setTransaction(sendData.transaction);
+      }
+      else {
+         sendData.transaction = this.checkTransaction();
+      }
 
       // Call the final hooks
       var newPropValue = this.properties[_propName].propertyAboutToChange(_propValue, sendData);
@@ -89,6 +99,13 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       return _propValue;
    }
 }
+
+PeerSource.prototype.newTransaction = function() {
+   SourceBase.prototype.newTransaction.call(this);
+
+   this.casa.setSourceTransaction(this, this.currentTransaction, { transaction: this.currentTransaction });
+   return this.currentTransaction;
+};
 
 PeerSource.prototype.setProperty = function(_propName, _propValue, _data) {
    console.log(this.uName + ': Attempting to set source property');

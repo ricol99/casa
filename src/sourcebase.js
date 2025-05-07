@@ -9,6 +9,7 @@ function SourceBase(_config, _owner) {
    this.bowing = false;
    this.currentTransaction = null;
    this.properties = {};
+   this.events = {};
    this.subscribedSources = {};
 
    this.setMaxListeners(0);
@@ -35,15 +36,40 @@ SourceBase.prototype.coldStart = function() {
          this.properties[prop].coldStart();
       }
    }
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].coldStart();
+      }
+   }
 };
 
 SourceBase.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
+
+   for (var prop in this.properties) {
+
+      if (this.properties.hasOwnProperty(prop)) {
+         this.properties[prop].hotStart();
+      }
+   }
+
+   for (var event in this.events) {
+
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].hotStart();
+      }
+   }
 };
 
 SourceBase.prototype.newTransaction = function() {
    this.currentTransaction = this.uName + "-" + Date.now();
    return this.currentTransaction;
+};
+
+SourceBase.prototype.setTransaction = function(_transaction) {
+   this.currentTransaction = _transaction;
 };
 
 SourceBase.prototype.checkTransaction = function() {
@@ -210,6 +236,16 @@ SourceBase.prototype.getAllProperties = function(_allProps) {
    }
 };
 
+SourceBase.prototype.getAllEvents = function(_allEvents) {
+   
+   for (var event in this.events) {
+      
+      if (this.events.hasOwnProperty(event) && !_allEvents.hasOwnProperty(event)) {
+         _allEvents[event] = true;
+      }
+   }
+}; 
+
 SourceBase.prototype.findAllProperties = function(_allProps) {
 
    for (var prop in this.properties) {
@@ -254,6 +290,13 @@ SourceBase.prototype.invalidate = function(_includeChildren) {
  
       if (this.properties.hasOwnProperty(prop)) {
          this.properties[prop].invalidate();
+      }
+   }
+
+   for (var event in this.events) {
+ 
+      if (this.events.hasOwnProperty(event)) {
+         this.events[event].invalidate();
       }
    }
 };
@@ -347,6 +390,29 @@ SourceBase.prototype.overrideExistingProperty = function(_propName, _propType, _
    }
 
    this.ensurePropertyExists(_propName, _propType, _config, _mainConfig) ;
+};
+
+SourceBase.prototype.ensureEventExists = function(_eventName, _eventType, _config, _mainConfig) {
+
+   if (!this.events.hasOwnProperty(_eventName)) {
+      _config.name = _eventName;
+      _config.type = _eventType;
+      _config.transient = true;
+      this.createChild(_config, "event", this);
+
+      if (_mainConfig) {
+   
+         if (!_mainConfig.hasOwnProperty("events")) {
+            _mainConfig.events = [ _config ];
+         }
+         else {
+            _mainConfig.events.push(_config);
+         }
+      }
+
+      return true;
+   }
+   return false;
 };
 
 SourceBase.prototype.raiseEvent = function(_eventName, _data) {
@@ -481,8 +547,7 @@ SourceBase.prototype.clearAlignmentQueue = function() {
 }
 
 SourceBase.prototype.generateDynamicSourceId = function(_config) {
-   var config = {};
-   var config = { uName: _config.hasOwnProperty("uName") ? _config.uName : this.owner.uName };
+   var config = { uName: _config.hasOwnProperty("uName") ? _config.uName : this.uName };
 
    if (_config.hasOwnProperty("property")) {
       config.property = _config.property;

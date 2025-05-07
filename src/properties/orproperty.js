@@ -30,8 +30,20 @@ OrProperty.prototype.coldStart = function () {
 };
 
 OrProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   this.calculateAndUpdate(_data);
+};
+
+OrProperty.prototype.sourceAdded = function(_config, _sourceListener) {
+   this.calculateAndUpdate(null);
+};
+
+OrProperty.prototype.sourceRemoved = function(_config) {
+   this.calculateAndUpdate(null);
+};
+
+OrProperty.prototype.calculateAndUpdate = function(_data) {
    var newValue = this.calculateOutputValue();
- 
+
    if (newValue !== this.value) {
       this.updatePropertyInternal(newValue, _data);
    }

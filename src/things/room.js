@@ -109,9 +109,9 @@ function Room(_config, _parent) {
 
    this.ensureEventExists("room-switch-event", "event", {}, _config);
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
-                                                          //subscription: { roomType: this.roomType, roomName: this.uName, roomUsers: _config.users }}}, _config);
 
-   this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
+   //this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
+   this.ensurePropertyExists('evening-possible', 'property', { source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
 
    var dayStateConfig = { name: "day-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "day", 

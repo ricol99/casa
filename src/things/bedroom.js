@@ -135,7 +135,8 @@ function Bedroom(_config, _parent) {
                "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "reading-in-bed" },
                            { "event": "pre-wake-up-event", "nextState": "waking-up-in-bed"},
                            { "event": "wake-up-event", "nextState": "awake-in-bed"},
-                           { "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+                           //{ "event": "cancel-bedtime-event", "nextState": "cancelling-bedtime"}],
+                           { "event": "cancel-bedtime-event", "nextState": "not-present", "action": { "property": "night-time", "value": false }}],
                "schedule": { "name": "wake-up-event", "rules": [ "0 12 * * *" ]}
             },
             {
@@ -152,7 +153,7 @@ function Bedroom(_config, _parent) {
             },
             {
                "name": "cancelling-bedtime", "priority": 10,
-               "timeout": { "duration": 0.5, "nextState": "not-present" },
+               "timeout": { "duration": 0.1, "nextState": "not-present" },
                "actions": [{ "property": "night-time", "value": false }]
             }
          ]

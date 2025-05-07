@@ -245,8 +245,11 @@ Casa.prototype.refreshSimpleConfig = function() {
 
          if (!source.local) {
             var allProps = {};
+            var allEvents = {};
             source.getAllProperties(allProps, true);
-            simpleConfig.sources.push({ name: source.name, uName: source.uName, priority: source.hasOwnProperty('priority') ? source.priority : 0, properties: util.copy(allProps) });
+            source.getAllEvents(allEvents, true);
+            simpleConfig.sources.push({ name: source.name, uName: source.uName, priority: source.hasOwnProperty('priority') ? source.priority : 0,
+                                        properties: util.copy(allProps), events: util.copy(allEvents) });
          }
       }
    }
