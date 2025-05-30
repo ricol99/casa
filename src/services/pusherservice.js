@@ -2,6 +2,7 @@ var util = require('util');
 var Service = require('../service');
 var Pusher = require("pusher-js");
 var PusherServer = require("pusher");
+var AsyncEmitter = require('../asyncemitter');
 
 function PusherService(_config, _owner) {
    Service.call(this, _config, _owner);
@@ -17,6 +18,7 @@ function PusherService(_config, _owner) {
    this.appCluster = _config.appCluster;
 
    this.subscribers = {};
+   this.routes = {};
 }
 
 util.inherits(PusherService, Service);
@@ -66,6 +68,43 @@ PusherService.prototype.start = function() {
          }
       }, this);
 
+      var peerCasaServiceName = this.gang.casa.findServiceName("peercasaservice");
+      this.peerCasaService = peerCasaServiceName ? this.gang.casa.findService(peerCasaServiceName) : null;
+
+      channel.bind("status-request", (_data) => {
+         console.log(this.uName + ": Status update requested: uName: " + _data.sourceName);
+
+         if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("sourceName") && (_data.sourceName !== this.gang.casa.uName)) { 
+
+            if (this.peerCasaService) {
+               this.peerCasaService.peerCasaStatusUpdate(_data.sourceName, _data.status, "pusher");
+            }
+
+            if (_data.status === "up") {
+               this.sendMessage("control-channel", "status-update", { sourceName: this.gang.casa.uName, status: "up" });
+            }
+         }
+      }, this);
+
+      channel.bind("status-update", (_data) => {
+         console.log(this.uName + ": Status update received/requested: uName: " + _data.sourceName);
+
+         if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("sourceName") && (_data.sourceName !== this.gang.casa.uName)) {
+
+            if (this.peerCasaService) {
+               this.peerCasaService.peerCasaStatusUpdate(_data.sourceName, _data.status, "pusher");
+            }
+         }
+      }, this);
+
+      var iomessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
+      this.ioMessageSocketService = iomessagesocketServiceName ? this.gang.casa.findService(iomessagesocketServiceName) : null;
+
+      if (this.ioMessageSocketService) {
+         this.pusherMessageTransport = new PusherMessageTransport(this, this.ioMessageSocketService);
+         this.pusherMessageTransport.start(this.pusher);
+      }
+
       this.pusherServer = new PusherServer({ appId: this.appId,
                                              key: this.appKey,
                                              secret: this.appSecret,
@@ -77,13 +116,23 @@ PusherService.prototype.start = function() {
    }
 };
 
+PusherService.prototype.serviceComingUp = function() {
+   console.log(this.uName + ": serviceComingUp()");
+   this.sendMessage("control-channel", "status-request", { sourceName: this.gang.casa.uName, status: "up" });
+};
+
+PusherService.prototype.serviceGoingDown = function() {
+   console.log(this.uName + ": serviceGoingDown()");
+   this.sendMessage("control-channel", "status-update", { sourceName: this.gang.casa.uName, status: "down" });
+};
+
 PusherService.prototype.sendMessage = function(_channel, _message, _body) {
 
    try {
       this.pusherServer.trigger(_channel, _message, _body);
    }
    catch (_error) {
-      console.error(this.uName + ": Unable to publish message on channel "+_channel);
+      console.error(this.uName + ": Unable to publish message on channel "+_channel +", error="+_error);
    }
 };
 
@@ -120,6 +169,50 @@ Subscriber.prototype.removeSubscription = function(_uName, _property) {
    if (this.noOfSubscriptions === 0) {
       delete this.owner.subscribers[this.sourceName];
    }
+};
+
+function PusherMessageTransport(_owner, _ioMessageSocketService) {
+   AsyncEmitter.call(this);
+   this.owner = _owner;
+   this.ioMessageSocketService = _ioMessageSocketService;
+}
+
+util.inherits(PusherMessageTransport, AsyncEmitter);
+
+PusherMessageTransport.prototype.start = function(_pusher) {
+   this.pusher = _pusher;
+
+   if (this.ioMessageSocketService) {
+      this.ioMessageSocketService.addMessageTransport("pusher", this);
+
+      var consoleApiServiceName = this.owner.gang.casa.findServiceName("consoleapiservice");
+      this.consoleApiService = consoleApiServiceName ? this.owner.gang.casa.findService(consoleApiServiceName) : null;
+
+      if (this.consoleApiService) {
+         this.consoleApiService.addIoTransport("pusher");
+      }
+   }
+
+   var messageChannel = this.pusher.subscribe("message-channel_" + this.owner.gang.casa.uName.replace(/:/g, ""));
+
+   messageChannel.bind("message", (_data) => {
+      console.log(this.owner.uName + ": Message received from " + _data.peerAddress + ", message=",_data.message);
+
+      if (_data && _data.hasOwnProperty("peerAddress") && (_data.peerAddress !== this.owner.gang.casa.uName) &&
+          _data.hasOwnProperty("route") && _data.hasOwnProperty("id") &&
+          _data.hasOwnProperty("destAddress") && _data.hasOwnProperty("message") &&  _data.hasOwnProperty("messageData")) { 
+
+          this.asyncEmit(_data.message, _data);
+      }
+      else {
+         console.error(this.uName + ": Receive malformed message on message channel");
+      }
+   }, this);
+};
+
+PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
+   _data.message = _message;
+   this.owner.sendMessage("message-channel_" + _data.peerAddress.replace(/:/g, ""), "message", _data);
 };
 
 module.exports = exports = PusherService;

@@ -294,14 +294,22 @@ Loader.prototype.loadCasaConfig = function(_db, _callback) {
                         this.markObjects(this.casaConfig.gangThings, "_db", this.casaConfig.name);
                      }
 
-                     _db.readCollection("gangScenes", (_err, _gangScenes) => {
+                     _db.readCollection("gangServices", (_err, _gangServices) => {
 
                         if (!_err) {
-                           this.casaConfig.gangScenes = _gangScenes;
-                           this.markObjects(this.casaConfig.gangScenes, "_db", this.casaConfig.name);
+                           this.casaConfig.gangServices = _gangServices;
+                           this.markObjects(this.casaConfig.gangServices, "_db", this.casaConfig.name);
                         }
 
-                        _callback(null, true);
+                        _db.readCollection("gangScenes", (_err, _gangScenes) => {
+
+                           if (!_err) {
+                              this.casaConfig.gangScenes = _gangScenes;
+                              this.markObjects(this.casaConfig.gangScenes, "_db", this.casaConfig.name);
+                           }
+
+                           _callback(null, true);
+                        });
                      });
                   });
                });
@@ -328,20 +336,28 @@ Loader.prototype.loadGangConfig = function(_db, _callback) {
             this.markObjects(this.gangConfig.users, "_db", this.gangConfig.name);
          }
 
-         _db.readCollection("gangScenes", (_err, _scenes) => {
+         _db.readCollection("gangServices", (_err, _services) => {
 
             if (!_err) {
-               this.gangConfig.scenes = _scenes;
-               this.markObjects(this.gangConfig.scenes, "_db", this.gangConfig.name);
+               this.gangConfig.services = _services;
+               this.markObjects(this.gangConfig.services, "_db", this.gangConfig.name);
             }
 
-            _db.readCollection("gangThings", (_err, _things) => {
+            _db.readCollection("gangScenes", (_err, _scenes) => {
 
                if (!_err) {
-                  this.gangConfig.things = _things;
-                  this.markObjects(_things, "_db", this.gangConfig.name);
+                  this.gangConfig.scenes = _scenes;
+                  this.markObjects(this.gangConfig.scenes, "_db", this.gangConfig.name);
                }
-               _callback(null, true);
+
+               _db.readCollection("gangThings", (_err, _things) => {
+
+                  if (!_err) {
+                     this.gangConfig.things = _things;
+                     this.markObjects(_things, "_db", this.gangConfig.name);
+                  }
+                  _callback(null, true);
+               });
             });
          });
       });
@@ -360,7 +376,18 @@ Loader.prototype.addSystemServices = function() {
       serviceExists[this.gangConfig.casa.services[i].name] = true;
    }
 
-   var systemServiceConfigs = { "console-api-service": { name: "console-api-service", type: "consoleapiservice" },
+   if (this.gangConfig.services) {
+
+      for (var l = 0; l < this.gangConfig.services.length; ++l) {
+
+         if (!serviceExists[this.gangConfig.services[l].name]) {
+            this.gangConfig.casa.services.push(this.gangConfig.services[l]);
+         }
+      }
+   }
+
+   var systemServiceConfigs = { "io-message-socket-service": { name: "io-message-socket-service", type: "iomessagesocketservice" },
+                                "console-api-service": { name: "console-api-service", type: "consoleapiservice" },
                                 "db-service": { name: "db-service", type: "dbservice" },
                                 "ramp-service": { name: "ramp-service", type: "rampservice" },
                                 "schedule-service": { name: "schedule-service", type: "scheduleservice", latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
@@ -434,6 +461,16 @@ Loader.prototype.mergeConfigs = function() {
       }
       else {
          this.gangConfig.things = this.casaConfig.gangThings;
+      }
+   }
+
+   if (this.gangConfig.hasOwnProperty("services")) {
+
+      if (this.casaConfig.hasOwnProperty("services")) {
+         this.mergeThings(this.casaConfig.gangServices, this.gangConfig.services, false);
+      }
+      else {
+         this.gangConfig.services = this.casaConfig.gangServices;
       }
    }
 };

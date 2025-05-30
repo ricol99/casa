@@ -34,16 +34,19 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
          if (_inputConfig.hasOwnProperty("gang")) {
             collections.casa.gang = _inputConfig.gang.name;
             collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
+            collections.gangServices = _inputConfig.hasOwnProperty("gangServices") ? _inputConfig.gangServices : _inputConfig.gang.hasOwnProperty("services") ? _inputConfig.gang.services : [];
             collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
          }
          else if (_inputConfig.casa.hasOwnProperty("gang")) { 
             collections.casa.gang = _inputConfig.casa.gang;
             collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : [];
+            collections.gangServices = _inputConfig.hasOwnProperty("gangServices") ? _inputConfig.gangServices : [];
             collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : [];
          }
          else {
             collections.casa.gang = collections.casa.name + "-gang";
             collections.gangThings = [];
+            collections.gangServices = [];
             collections.gangScenes = [];
             writeAdditionalGangDb = true;
          }
@@ -59,6 +62,7 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
          }
 
          collections.gangUsers = _inputConfig.hasOwnProperty("gangUsers") ? _inputConfig.gangUsers : _inputConfig.gang.hasOwnProperty("users") ? _inputConfig.gang.users : [];
+         collections.gangServices = _inputConfig.hasOwnProperty("gangServices") ? _inputConfig.gangServices : _inputConfig.gang.hasOwnProperty("services") ? _inputConfig.gang.services : [];
          collections.gangScenes = _inputConfig.hasOwnProperty("gangScenes") ? _inputConfig.gangScenes : _inputConfig.gang.hasOwnProperty("scenes") ? _inputConfig.gang.scenes : [];
          collections.gangThings = _inputConfig.hasOwnProperty("gangThings") ? _inputConfig.gangThings : _inputConfig.gang.hasOwnProperty("things") ? _inputConfig.gang.things : [];
       }

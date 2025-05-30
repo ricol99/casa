@@ -94,6 +94,8 @@ WebService.prototype.hotStart = function() {
 };
 
 WebService.prototype.start = function() {
+   var iomessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
+   this.ioMessageSocketService = iomessagesocketServiceName ? this.gang.casa.findService(iomessagesocketServiceName) : null;
 
    if (this.hangingOffMainServer) {
 
@@ -142,13 +144,18 @@ WebService.prototype.addRoute = function(_route, _callback) {
    return (this.hangingOffMainServer) ? this.gang.casa.addRouteToMainServer(_route, _callback) : app.get(_route, _callback);
 };
 
-WebService.prototype.addIoRoute = function(_route, _callback) {
+WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
 
    if (!this.socketIoSupported) {
       return false;
    }
 
-   return (this.hangingOffMainServer) ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback);
+   if (_transportName) {
+      return this.ioMessageSocketService ? this.ioMessageSocketService.addIoRoute(_route, _transportName, _callback) : false;
+   }
+   else {
+      return (this.hangingOffMainServer) ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback);
+   }
 };
 
 module.exports = exports = WebService;

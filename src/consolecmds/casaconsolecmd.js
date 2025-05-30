@@ -150,15 +150,18 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
          collections.casa.gang = inputConfig.gang.name;
          collections.gangThings = inputConfig.hasOwnProperty("gangThings") ? inputConfig.gangThings : inputConfig.gang.hasOwnProperty("things") ? inputConfig.gang.things : [];
          collections.gangScenes = inputConfig.hasOwnProperty("gangScenes") ? inputConfig.gangScenes : inputConfig.gang.hasOwnProperty("scenes") ? inputConfig.gang.scenes : [];
+         collections.gangServices = inputConfig.hasOwnProperty("gangServices") ? inputConfig.gangServices : inputConfig.gang.hasOwnProperty("services") ? inputConfig.gang.services : [];
       }
       else if (inputConfig.casa.hasOwnProperty("gang")) {
          collections.casa.gang = inputConfig.casa.gang;
          collections.gangThings = inputConfig.hasOwnProperty("gangThings") ? inputConfig.gangThings : [];
+         collections.gangServices = inputConfig.hasOwnProperty("gangServices") ? inputConfig.gangServices : [];
          collections.gangScenes = inputConfig.hasOwnProperty("gangScenes") ? inputConfig.gangScenes : [];
       }
       else {
          collections.casa.gang = collections.casa.name + "-gang";
          collections.gangThings = [];
+         collections.gangServices = [];
          collections.gangScenes = [];
          writeAdditionalGangDb = true;
       }

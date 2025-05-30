@@ -55,7 +55,7 @@ AsyncEmitter.prototype.setAsyncEmitTimer = function() {
 
          // Do not attempt a suspension/restore cycle if in casa code and exception raised
          _suspensionAvailable = false;
-         this.emit(event.eventName, event.data);
+         AsyncEmitter.prototype.emit.call(this, event.eventName, event.data);
          _suspensionAvailable = true;
 
          this.asyncEmitTimer = null;

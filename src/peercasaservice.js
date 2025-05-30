@@ -57,13 +57,27 @@ function PeerCasaService(_config) {
             console.log('peercasaservice: service down: casa=' + service.name);
          });
 
+         var pusherServiceName = this.gang.casa.findServiceName("pusherservice");
+         this.pusherService = pusherServiceName ? this.gang.casa.findService(pusherServiceName) : null;
+
+         if (this.pusherService) {
+
+            util.setTimeout(() => {
+               this.pusherService.serviceComingUp();
+            }, 1000);
+         }
+
          this.browser.start();
+
       } catch (_err) {
          // Not scheduled during time period
          console.log('peercasaservice: Error: ' + _err.message);
       }
    }
 }
+
+PeerCasaService.prototype.peerCasaStatusUpdate = function(_peerCasa, _status, _transport) {
+};
 
 PeerCasaService.prototype.establishConnectionWithPeer = function(_service) {
 

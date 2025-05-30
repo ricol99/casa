@@ -40,6 +40,10 @@ ConsoleApiService.prototype.start = function() {
    this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this));
 };
 
+ConsoleApiService.prototype.addIoTransport = function(_transportName) {
+   this.addIoRoute('/consoleapi/io', ConsoleApiService.prototype.socketIoConnection.bind(this), _transportName);
+};
+
 ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {
 
    if (!this.sessions.hasOwnProperty(_id)) {
@@ -212,6 +216,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
    });
 
    this.socket.on('error', (_data) => {
+      console.error(this.owner.uName + ": Socket error, error="+_data.error);
 
       if (!this.closed) {
          this.closed = true;
