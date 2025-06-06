@@ -68,41 +68,20 @@ PusherService.prototype.start = function() {
          }
       }, this);
 
-      var peerCasaServiceName = this.gang.casa.findServiceName("peercasaservice");
-      this.peerCasaService = peerCasaServiceName ? this.gang.casa.findService(peerCasaServiceName) : null;
-
-      channel.bind("status-request", (_data) => {
-         console.log(this.uName + ": Status update requested: uName: " + _data.sourceName);
-
-         if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("sourceName") && (_data.sourceName !== this.gang.casa.uName)) { 
-
-            if (this.peerCasaService) {
-               this.peerCasaService.peerCasaStatusUpdate(_data.sourceName, _data.status, "pusher");
-            }
-
-            if (_data.status === "up") {
-               this.sendMessage("control-channel", "status-update", { sourceName: this.gang.casa.uName, status: "up" });
-            }
-         }
-      }, this);
-
-      channel.bind("status-update", (_data) => {
-         console.log(this.uName + ": Status update received/requested: uName: " + _data.sourceName);
-
-         if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("sourceName") && (_data.sourceName !== this.gang.casa.uName)) {
-
-            if (this.peerCasaService) {
-               this.peerCasaService.peerCasaStatusUpdate(_data.sourceName, _data.status, "pusher");
-            }
-         }
-      }, this);
-
-      var iomessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
-      this.ioMessageSocketService = iomessagesocketServiceName ? this.gang.casa.findService(iomessagesocketServiceName) : null;
+      var ioMessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
+      this.ioMessageSocketService = ioMessagesocketServiceName ? this.gang.casa.findService(ioMessagesocketServiceName) : null;
 
       if (this.ioMessageSocketService) {
          this.pusherMessageTransport = new PusherMessageTransport(this, this.ioMessageSocketService);
          this.pusherMessageTransport.start(this.pusher);
+      }
+
+      var casaDiscoveryServiceName = this.gang.casa.findServiceName("casadiscoveryservice");
+      this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
+
+      if (this.casaDiscoveryService) {
+         this.pusherDiscoveryTransport = new PusherDiscoveryTransport(this, "pusher", this.casaDiscoverySocketService, "pusher", 2);
+         this.pusherDiscoveryTransport.start(this.pusher, channel);
       }
 
       this.pusherServer = new PusherServer({ appId: this.appId,
@@ -114,16 +93,6 @@ PusherService.prototype.start = function() {
    catch (_error) {
       console.error(this.uName + ": Unable to establish Pusher session, appId = " + this.appId + ", error = ", _error);
    }
-};
-
-PusherService.prototype.serviceComingUp = function() {
-   console.log(this.uName + ": serviceComingUp()");
-   this.sendMessage("control-channel", "status-request", { sourceName: this.gang.casa.uName, status: "up" });
-};
-
-PusherService.prototype.serviceGoingDown = function() {
-   console.log(this.uName + ": serviceGoingDown()");
-   this.sendMessage("control-channel", "status-update", { sourceName: this.gang.casa.uName, status: "down" });
 };
 
 PusherService.prototype.sendMessage = function(_channel, _message, _body) {
@@ -213,6 +182,70 @@ PusherMessageTransport.prototype.start = function(_pusher) {
 PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
    _data.message = _message;
    this.owner.sendMessage("message-channel_" + _data.peerAddress.replace(/:/g, ""), "message", _data);
+};
+
+function PusherDiscoveryTransport(_owner, _name, _casaDiscoveryService, _messageTransportName, _tier) {
+   AsyncEmitter.call(this);
+   this.owner = _owner;
+   this.name = _name;
+   this.casaDiscoveryService = _casaDiscoveryService;
+   this.messageTransportName = _messageTransportName;
+   this.tier = _tier;
+   this.searching = false;
+   this.broadcasting = false;
+
+   this.owner.casaDiscoveryService.addDiscoveryTransport(this.name, this);
+}
+            
+util.inherits(PusherDiscoveryTransport, AsyncEmitter);
+
+PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
+   this.pusher = _pusher;
+   this.controlChannel = _controlChannel;
+
+   this.controlChannel.bind("status-request", (_data) => {
+      console.log(this.owner.uName + ":" + this.name + ": Status update requested: name: " + _data.casaName);
+         
+      if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
+
+         if (this.searching) {
+            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
+         }
+   
+         if (this.broadcasting && (_data.status === "up")) {
+            this.pusher.sendMessage("control-channel", "status-update", { casaName: this.gang.casa.name, status: "up" });
+         }
+      }
+   }, this);
+   
+   this.controlChannel.bind("status-update", (_data) => {
+      console.log(this.owner.uName + ":" + this.name + ": Status update received/requested: uName: " + _data.casaName);
+
+      if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
+
+         if (this.searching) {
+            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _status, _data.casaName, this.name, this.messageTransportName, this.tier);
+         }
+      }
+   }, this);
+};
+
+PusherDiscoveryTransport.prototype.startSearching = function() {
+   this.searching = true;
+};
+
+PusherDiscoveryTransport.prototype.stopSearching = function() {
+   this.searching = false;
+};
+
+PusherDiscoveryTransport.prototype.startBroadcasting = function() {
+   this.owner.sendMessage("control-channel", "status-request",  { casaName: this.owner.gang.casa.name, status: "up" });
+   this.broadcasting = true;
+};
+
+PusherDiscoveryTransport.prototype.stopBroadcasting = function() {
+   this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "down" });
+   this.broadcasting = false;
 };
 
 module.exports = exports = PusherService;

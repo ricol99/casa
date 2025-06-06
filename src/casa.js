@@ -28,17 +28,13 @@ function Casa(_config, _owner) {
    this.sources = {};
    this.serviceTypes = {};
    this.topSources = {};
-   //this.sourceListeners = {};
    this.bowingSources = {};
+   this.queuePeerCasas = {};
 
    this.uber = false;
 
    this.sourcePropertyChangedCasaHandler = Casa.prototype.sourcePropertyChangedCasaCb.bind(this);
    this.sourceEventRaisedCasaHandler = Casa.prototype.sourceEventRaisedCasaCb.bind(this);
-
-   //this.eventLogger = new EventLogger({ logging: this.logEvents, logFileName: this.name });
-
-   this.createServer();
 }
 
 util.inherits(Casa, NamedObject);
@@ -59,6 +55,8 @@ Casa.prototype.sourceEventRaisedCasaCb = function(_data) {
 };
 
 Casa.prototype.buildServices = function() {
+   var mainServerConfig = { name: "main-web-service", type: "webservice", delayStartListening: true, mainServer: true, secure: this.secureMode, socketIoSupported: true, port: this.listeningPort };
+   this.createChild(mainServerConfig, "service", this);
 
    this.createChildren(this.config.services, "service", this);
 
@@ -70,6 +68,7 @@ Casa.prototype.buildServices = function() {
    }
 
    this.eventLogger = this.findService("eventloggingservice");
+   this.createServer();
 };
   
 Casa.prototype.buildTree = function() {
@@ -123,43 +122,44 @@ Casa.prototype.hotStart = function() {
    NamedObject.prototype.hotStart.call(this);
 };
 
+Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) {
+
+   // Should I reasch out or do I wait for it to contact me?
+   if (_name > this.name) {
+      var peerCasa = this.gang.findPeerCasa(_name);
+
+      if (!peerCasa) {
+         this.createPeerCasa(_name, _address, _messageTransportName, _tier);
+      }
+      else if (peerCasa.discoveryTier() < _tier) {
+         peerCasa.disconnectFromClient();
+         this.createPeerCasa(_name, _address, _messageTransportName, _tier);
+      }
+   }
+};
+
+Casa.prototype.casaDown = function(_name, _address, _messageTransportName, _tier) {
+};
+
+Casa.prototype.createPeerCasa = function(_name, _address, _messageTransportName, _tier) {
+   console.log(this.uName + ": New peer casa: " + _name);
+   var peerCasa = this.gang.createPeerCasa(_name);
+   peerCasa.connectToPeerCasa({ address: _address, _messageTransportName });
+};
+
 Casa.prototype.createServer = function() {
-   express = require('express');
-   app = express();
+   this.mainWebService = this.findService(this.uName+":"+"main-web-service");
 
-   if (this.secureMode) {
-      var fs = require('fs');
-
-      var serverOptions = {
-        key: fs.readFileSync(this.certPath+'/server.key'),
-        cert: fs.readFileSync(this.certPath+'/server.crt'),
-        ca: fs.readFileSync(this.certPath+'/ca.crt'),
-        requestCert: true,
-        rejectUnauthorized: true
-      };
-
-      http = require('https').Server(serverOptions, app);
-      io = require('socket.io')(http, { allowUpgrades: true });
-   }
-   else {
-      http = require('http').Server(app);
-
-      io = require('socket.io')(http, {
-         allowUpgrades: true,
-         transports: ['websocket']
-      });
-   }
-
-   app.get('/index.html', (req, res) => {
+   this.mainWebService.addRoute('/index.html', (req, res) => {
      res.sendFile(__dirname + '/index.html');
    });
 
-   app.get('/configfile/:filename', (req, res) => {
+   this.mainWebService.addRoute('/configfile/:filename', (req, res) => {
       console.log(this.uName + ": Serving file " + req.params.filename);
       res.sendFile(this.configPath + '/' + req.params.filename);
    });
 
-   app.get('/source/:source', (req, res) => {
+   this.mainWebService.addRoute('/source/:source', (req, res) => {
       var allProps = {};
       var source = this.gang.findNamedObject(req.params.source);
 
@@ -170,21 +170,19 @@ Casa.prototype.createServer = function() {
       res.json(allProps);
    });
 
-   io.of('/peercasa')
-     .on('connection', (_socket) => {
-
+   this.mainWebService.addIoRoute('/peercasa', (_socket) => {
       console.log('a casa has joined');
       var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
       peerCasa.serveClient(_socket);
-   });
+   }, "all");
 
+   var casaDiscoveryServiceName = this.gang.casa.findServiceName("casadiscoveryservice");
+   this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
 };
 
 Casa.prototype.startListening = function () {
-
-   http.listen(this.listeningPort, () => {
-      console.log('listening on *:' + this.listeningPort);
-   });
+   this.mainWebService.startListening();
+   this.casaDiscoveryService.startSearchingAndBroadcasting();
 };
 
 Casa.prototype.refreshSourceListeners = function() {
@@ -327,45 +325,12 @@ Casa.prototype.startListeningToSource = function(_source) {
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
-
-   //if (this.sourceListeners[_sourceListener.uName]) {
-      //console.error("***********SOURCELISTENER NAME CONFLICT***************" + _sourceListener.uName);
-      //process.exit(1);
-   //}
-
-   //console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' added to casa');
-   //this.sourceListeners[_sourceListener.uName] = _sourceListener;
    this.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.removeSourceListener = function(_sourceListener) {
-   //console.log(this.uName + ": Casa.prototype.removeSourceListener() " + _sourceListener.uName);
-   
-   //if (this.sourceListeners[_sourceListener.uName]) {
-      //delete this.sourceListeners[_sourceListener.uName];
-      //return true;
-   //}
-   //else {
-      return false;
-   //}
-
-   //console.log(this.uName + ': Source listener ' + _sourceListener.uName + ' removed from casa');
+   return false;
 };
-
-//Casa.prototype.findListeners = function(_uName) {
-   //var listeners = [];
-
-   //for (var listener in this.sourceListeners) {
-
-      //if (this.sourceListeners.hasOwnProperty(listener)) {
-
-         //if (this.sourceListeners[listener].sourceName === _uName) {
-            //listeners.push(this.sourceListeners[listener]);
-         //}
-      //}
-   //}
-   //return listeners;
-//};
 
 Casa.prototype.addServiceByType = function(_service) {
    console.log(this.uName + ': Service '  + _service.name + ' added to casa ');
@@ -406,11 +371,11 @@ Casa.prototype.getProperty = function(_property) {
 };
 
 Casa.prototype.addRouteToMainServer = function(_route, _callback) {
-   return app.get(_route, _callback);
+   return this.mainWebService.addRoute(_route, _callback);
 };
 
-Casa.prototype.addIoRouteToMainServer = function(_route, _callback) {
-   return io.of(_route).on('connection', _callback);
+Casa.prototype.addIoRouteToMainServer = function(_route, _callback, _transport) {
+   return this.mainWebService.addIoRoute(_route, _callback, _transport);
 };
 
 Casa.prototype.getListeningPort = function() {

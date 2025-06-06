@@ -9,7 +9,9 @@ function WebService(_config, _owner) {
    this.secure = _config.hasOwnProperty("secure") ? _config.secure : this.gang.inSecureMode();
    this.socketIoSupported = _config.hasOwnProperty("socketIoSupported") ? _config.socketIoSupported : false;
    this.localHost = _config.hasOwnProperty("localHost") ? _config.localHost : false;
-   this.hangingOffMainServer = !this.localHost;
+   this.mainServer = _config.hasOwnProperty("mainServer") ? _config.mainServer : false;
+   this.hangingOffMainServer = this.mainServer ? false : !this.localHost;
+   this.delayStartListening = _config.hasOwnProperty("delayStartListening") ? _config.delayStartListening : false;
 
    if (_config.hasOwnProperty("mediaRoute")) {
       this.mediaRoute = _config.mediaRoute;
@@ -19,7 +21,7 @@ function WebService(_config, _owner) {
       this.hangingOffMainServer = false;
    }
 
-   if (_config.hasOwnProperty("port") && (_config.port != this.gang.mainListeningPort())) {
+   if (this.mainServer || (_config.hasOwnProperty("port") && (_config.port != this.gang.mainListeningPort()))) {
       this.hangingOffMainServer = false;
       this.port = _config.port;
    }
@@ -27,7 +29,7 @@ function WebService(_config, _owner) {
       this.port = (this.hangingOffMainServer) ? this.gang.mainListeningPort() : ((this.secure) ? 443 : 80);
    }
 
-   if (!this.hangingOffMainServer && (this.port === this.gang.mainListeningPort())) {
+   if (!this.mainServer && (!this.hangingOffMainServer && (this.port === this.gang.mainListeningPort()))) {
       console.error(this.uName + ": Unable to create Webservice due to port clashed with main Server");
       process.exit(2);
    }
@@ -125,18 +127,25 @@ WebService.prototype.start = function() {
          });
       }
 
-      if (this.localHost) {
-
-         this.http.listen(this.port, 'localhost', () => {
-            console.log(this.uName + ': listening on (localhost) *: ' + this.port);
-         });
+      if (!this.delayStartListening) {
+         this.startListening();
       }
-      else {
+   }
+};
 
-         this.http.listen(this.port, () => {
-            console.log(this.uName + ': listening on *: ' + this.port);
-         });
-      }
+WebService.prototype.startListening = function() {
+
+   if (this.localHost) {
+
+      this.http.listen(this.port, 'localhost', () => {
+         console.log(this.uName + ': listening on (localhost) *: ' + this.port);
+      });
+   }
+   else {
+
+      this.http.listen(this.port, () => {
+         console.log(this.uName + ': listening on *: ' + this.port);
+      });
    }
 };
 
@@ -145,16 +154,25 @@ WebService.prototype.addRoute = function(_route, _callback) {
 };
 
 WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
+   var ret = false;
 
    if (!this.socketIoSupported) {
       return false;
    }
 
-   if (_transportName) {
-      return this.ioMessageSocketService ? this.ioMessageSocketService.addIoRoute(_route, _transportName, _callback) : false;
+   if (this.hangingOffMainServer) {
+      return this.gang.casa.addIoRouteToMainServer(_route, _callback, _transportName);
    }
    else {
-      return (this.hangingOffMainServer) ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback);
+
+      if (_transportName) {
+         ret = this.ioMessageSocketService ? this.ioMessageSocketService.addIoRoute(_route, _transportName, _callback) : false;
+      }
+
+      if (!_transportName || (_transportName && _transportName === "all")) {
+         ret = ret && (this.hangingOffMainServer ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback));
+      }
+      return ret;
    }
 };
 

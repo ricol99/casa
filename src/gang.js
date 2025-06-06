@@ -92,8 +92,8 @@ Gang.prototype.connectToPeers = function() {
 
       setTimeout( () => {
          this.casa.startListening();
-         var PeerCasaService = require('./peercasaservice');
-         this.peerCasaService = new PeerCasaService({ gang: this.name, fetchDbMode: false });
+         //var PeerCasaService = require('./peercasaservice');
+         //this.peerCasaService = new PeerCasaService({ gang: this.name, fetchDbMode: false });
       }, 20000 + Math.floor(Math.random(20000)));
    }
 };

@@ -387,6 +387,7 @@ Loader.prototype.addSystemServices = function() {
    }
 
    var systemServiceConfigs = { "io-message-socket-service": { name: "io-message-socket-service", type: "iomessagesocketservice" },
+                                "casa-discovery-service": { name: "casa-discovery-service", type: "casadiscoveryservice" },
                                 "console-api-service": { name: "console-api-service", type: "consoleapiservice" },
                                 "db-service": { name: "db-service", type: "dbservice" },
                                 "ramp-service": { name: "ramp-service", type: "rampservice" },

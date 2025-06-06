@@ -31,12 +31,23 @@ IoMessageSocketService.prototype.addMessageTransport = function(_transportName, 
 
 IoMessageSocketService.prototype.addIoRoute = function(_route, _transportName, _callback) {
 
-   if (!this.messageTransports.hasOwnProperty(_transportName)) {
+   if (_transportName === "all") {
+
+      for (var transportName in this.messageTransports) {
+
+         if (this.messageTransports.hasOwnProperty(transportName)) {
+            this.addIoRoute(_route, _transportName, _callback);
+         }
+      }
+      return true;
+   }
+   else if (this.messageTransports.hasOwnProperty(_transportName)) {
+      return this.messageTransports[_transportName].addIoRoute(_route, _callback);
+   }
+   else {
       console.error(this.uName + ": Unable to add IO route, tranport=" + _transportName + " not found!");
       return false;
    }
-
-   return this.messageTransports[_transportName].addIoRoute(_route, _callback);
 };
 
 IoMessageSocketService.prototype.of = function(_route, _transportName) {
