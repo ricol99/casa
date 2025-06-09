@@ -1,8 +1,9 @@
 var util = require('util');
 var Service = require('../service');
 var events = require('events');
-var express = require('express');
-var app = express();
+
+var express;
+var app;
 var http;
 var io;
 
@@ -50,26 +51,31 @@ function WebService(_config, _owner) {
    }
 
    if (!this.hangingOffMainServer) {
+      express = require('express');
+      app = express();
 
       if (this.secure) {
          var fs = require('fs');
 
          this.serverOptions = {
-            key: fs.readFileSync(this.gang.certPath()+'/client.key'),
-            cert: fs.readFileSync(this.gang.certPath()+'/client.crt'),
+            key: fs.readFileSync(this.gang.certPath()+'/server.key'),
+            cert: fs.readFileSync(this.gang.certPath()+'/server.crt'),
             ca: fs.readFileSync(this.gang.certPath()+'/ca.crt'),
             requestCert: true,
             rejectUnauthorized: true
          };
-      }
 
-      if (this.socketIoSupported)  {
+         http = require('https').Server(serverOptions, app);
 
-         if (this.secure) {
-            io = require('socket.io')(this.http, { allowUpgrades: true });
+         if (this.socketIoSupported)  {
+            io = require('socket.io')(http, { allowUpgrades: true });
          }
-         else {
-            io = require('socket.io')(this.http, { allowUpgrades: true, transports: ['websocket'] });
+      }
+      else {
+         http = require('http').Server(app);
+   
+         if (this.socketIoSupported)  {
+            io = require('socket.io')(http, { allowUpgrades: true, transports: ['websocket'] });
          }
       }
    }
