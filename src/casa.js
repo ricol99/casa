@@ -123,15 +123,21 @@ Casa.prototype.hotStart = function() {
 };
 
 Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) {
+   console.error(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
 
-   // Should I reasch out or do I wait for it to contact me?
+   // TBD AAA Hack to stop connection over pusher
+   if (_tier !== 1) {
+      return;
+   }
+
+   // Should I reach out or do I wait for it to contact me?
    if (_name > this.name) {
       var peerCasa = this.gang.findPeerCasa(_name);
 
       if (!peerCasa) {
          this.createPeerCasa(_name, _address, _messageTransportName, _tier);
       }
-      else if (peerCasa.discoveryTier() < _tier) {
+      else if (peerCasa.discoveryTier > _tier) {
          peerCasa.disconnectFromClient();
          this.createPeerCasa(_name, _address, _messageTransportName, _tier);
       }
@@ -139,12 +145,13 @@ Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) 
 };
 
 Casa.prototype.casaDown = function(_name, _address, _messageTransportName, _tier) {
+   console.error(this.uName+": casaDown() name="+_name+", tier="+_tier);
 };
 
 Casa.prototype.createPeerCasa = function(_name, _address, _messageTransportName, _tier) {
-   console.log(this.uName + ": New peer casa: " + _name);
+   console.error(this.uName + ": New peer casa: " + _name);
    var peerCasa = this.gang.createPeerCasa(_name);
-   peerCasa.connectToPeerCasa({ address: _address, _messageTransportName });
+   peerCasa.connectToPeerCasa({ address: _address, _messageTransportName, discoveryTier: _tier });
 };
 
 Casa.prototype.createServer = function() {
@@ -171,13 +178,16 @@ Casa.prototype.createServer = function() {
    });
 
    this.mainWebService.addIoRoute('/peercasa', (_socket) => {
-      console.log('a casa has joined');
+      console.error('a casa has joined');
       var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
       peerCasa.serveClient(_socket);
    }, "all");
 
    var casaDiscoveryServiceName = this.gang.casa.findServiceName("casadiscoveryservice");
    this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
+
+   this.casaDiscoveryService.on("casa-up", (_data) => { this.casaUp(_data.name, _data.address, _data.messageTransportName, _data.tier) });
+   this.casaDiscoveryService.on("casa-down", (_data) => { this.casaDown(_data.name, _data.address, _data.messageTransportName, _data.tier) });
 };
 
 Casa.prototype.startListening = function () {

@@ -338,6 +338,28 @@ Util.ensureExists = function(_obj, _name, _value) {
    }
 };
 
+Util.exists = function(_obj, _member_s) {
+
+   if (!_obj) {
+      return false;
+   }
+
+   if (_member_s instanceof Array) { 
+
+      for (let i = 0; i < _member_s.length; ++i) {
+
+         if (!_obj.hasOwnProperty(_member_s[i])) {
+            return false;
+         }
+      }
+      return true;
+   }
+   else {
+      return _obj.hasOwnProperty(_member_s);
+   }
+};
+
+
 Util.checkPath = function(_path) {
    return (_path) ? (((_path.charAt(0) !== '.') && (_path.charAt(0) !== '/')) ? "./" + _path : _path) : _path;
 };

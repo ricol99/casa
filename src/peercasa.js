@@ -232,6 +232,8 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
       this.loginAs = _config.hasOwnProperty('loginAs') ? _config.loginAs : 'peer';
       this.persistent = (_config.hasOwnProperty('persistent')) ? _config.persistent : false;
       this.address = _config.address;
+      this.messageTransport = _config.messageTransport;
+      this.discoveryTier = _config.discoveryTier;
 
       if (this.secureMode) {
          var fs = require('fs');
@@ -263,8 +265,8 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
       }
    }
 
-   console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.hostname + ':' + this.address.port);
-   this.socket = io(this.http + '://' + this.address.hostname + ':' + this.address.port + '/peercasa', this.socketOptions);
+   console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.host + ':' + this.address.port);
+   this.socket = io(this.http + '://' + this.address.host + ':' + this.address.port + '/peercasa', this.socketOptions);
    this.establishListeners();
 };
 

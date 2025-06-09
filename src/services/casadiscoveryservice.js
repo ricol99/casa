@@ -100,26 +100,23 @@ CasaDiscoveryService.prototype.removeDiscoveryTransport =  function(_name) {
    }
 };
 
-CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _address, _discoveryTansportName, _messageTransportName, _tier) {
+CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
    var statusChanged = true;
 
    if (this.casas.hasOwnProperty(_name)) {
 
-      if (this.casas[name].discoveryTransports.hasOwnProperty(_discoveryTansportName)) {
-         statusChanged = (this.casas[_name].discoveryTransports[_discoveryTansportName].status !== _status) ||
-                         (this.casas[_name].discoveryTransports[_discoveryTansportName].address !== _address);
-         
+      if (this.casas[_name].discoveryTransports.hasOwnProperty(_discoveryTransportName)) {
+         statusChanged = (this.casas[_name].discoveryTransports[_discoveryTransportName].status !== _status);
       }
-      this.casas[_name].discoveryTransports[_discoveryTansportName] = { status: _status, address: _address, messageTransportName: _messageTransportName };
    }
    else {
       this.casas[_name] = { discoveryTransports: {} };
    }
 
-   this.casas[_name].discoveryTransports[_discoveryTansportName] = { status: _status, address: _address, messageTransportName: _messageTransportName, tier: _tier };
+   this.casas[_name].discoveryTransports[_discoveryTransportName] = { name: _name, status: _status, address: _address, messageTransportName: _messageTransportName, tier: _tier };
 
    if (statusChanged && (!this.targetCasa || (this.targetCasa === _name))) {
-      this.emit(_status === "up" ? "casa-up" : "casa-down", this.casas[_name]);
+      this.emit(_status === "up" ? "casa-up" : "casa-down", this.casas[_name].discoveryTransports[_discoveryTransportName]);
    }
 };
 
@@ -154,15 +151,25 @@ MdnsDiscoveryTransport.prototype.coldStart = function() {
 
       this.browser.on('serviceUp', (_service) => {
 
-         if ((!((this.owner.gang.name || _service.txtRecord.gang) && (_service.txtRecord.gang !== this.gangId))) && (_service.name !== this.name)) {
+         if (!util.exists(_service, [ "txtRecord", "name", "host", "port" ])) {
+            console.error(this.owner.uName + ":" + this.name + ": service up - Malformed advert", _service);
+            return;
+         }
+
+         if ((_service.txtRecord.gang === this.owner.gang.name) && (_service.name !== this.name)) {
             this.owner.casaStatusUpdate(_service.name, "up", { host: _service.host, port: _service.port }, this.name, this.messageTransportName, this.tier);
          }  
       });      
             
       this.browser.on('serviceDown', (_service) => {
 
-         if ((!((this.owner.gang.name || _service.txtRecord.gang) && (_service.txtRecord.gang !== this.gangId))) && (_service.name !== this.name)) {
-            this.owner.casaStatusUpdate(_service.name, "down", { host: _service.host, port: _service.port }, this.name, this.messageTransportName, this.tier);
+         if (!util.exists(_service, "name")) {
+            console.error(this.owner.uName + ":" + this.name + ": service down - Malformed advert", _service);
+            return;
+         }
+
+         if (_service.name !== this.name) {
+            this.owner.casaStatusUpdate(_service.name, "down", null, this.name, this.messageTransportName, this.tier);
          }
       });
    

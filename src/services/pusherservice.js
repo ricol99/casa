@@ -80,7 +80,7 @@ PusherService.prototype.start = function() {
       this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
 
       if (this.casaDiscoveryService) {
-         this.pusherDiscoveryTransport = new PusherDiscoveryTransport(this, "pusher", this.casaDiscoverySocketService, "pusher", 2);
+         this.pusherDiscoveryTransport = new PusherDiscoveryTransport(this, "pusher", this.casaDiscoveryService, "pusher", 2);
          this.pusherDiscoveryTransport.start(this.pusher, channel);
       }
 
@@ -213,18 +213,18 @@ PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
          }
    
          if (this.broadcasting && (_data.status === "up")) {
-            this.pusher.sendMessage("control-channel", "status-update", { casaName: this.gang.casa.name, status: "up" });
+            this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "up" });
          }
       }
    }, this);
    
    this.controlChannel.bind("status-update", (_data) => {
-      console.log(this.owner.uName + ":" + this.name + ": Status update received/requested: uName: " + _data.casaName);
+      console.log(this.owner.uName + ":" + this.name + ": Status update received/requested: name: " + _data.casaName);
 
       if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
 
          if (this.searching) {
-            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _status, _data.casaName, this.name, this.messageTransportName, this.tier);
+            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, "up", _data.casaName, this.name, this.messageTransportName, this.tier);
          }
       }
    }, this);

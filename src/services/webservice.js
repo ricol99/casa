@@ -3,6 +3,8 @@ var Service = require('../service');
 var events = require('events');
 var express = require('express');
 var app = express();
+var http;
+var io;
 
 function WebService(_config, _owner) {
    Service.call(this, _config, _owner);
@@ -61,13 +63,13 @@ function WebService(_config, _owner) {
          };
       }
 
-      if (this.socketIoSuported)  {
+      if (this.socketIoSupported)  {
 
          if (this.secure) {
-            this.io = require('socket.io')(this.http, { allowUpgrades: true });
+            io = require('socket.io')(this.http, { allowUpgrades: true });
          }
          else {
-            this.io = require('socket.io')(this.http, { allowUpgrades: true, transports: ['websocket'] });
+            io = require('socket.io')(this.http, { allowUpgrades: true, transports: ['websocket'] });
          }
       }
    }
@@ -169,8 +171,8 @@ WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
          ret = this.ioMessageSocketService ? this.ioMessageSocketService.addIoRoute(_route, _transportName, _callback) : false;
       }
 
-      if (!_transportName || (_transportName && _transportName === "all")) {
-         ret = ret && (this.hangingOffMainServer ? this.gang.casa.addIoRouteToMainServer(_route, _callback) : this.io.of(_route).on('connection', _callback));
+      if (!_transportName || (_transportName && ((_transportName === "all") || (_transportName === "http")))) {
+         ret = ret || (io.of(_route).on('connection', _callback) != null);
       }
       return ret;
    }
