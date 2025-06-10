@@ -11,22 +11,26 @@ var _mainInstance = null;
 
 process.on('exit', () => {
    aboutToExit();
-});
 
-process.on('SIGINT', () => {
-   aboutToExit();
-   exiting = true;
    setTimeout(() => {
       process.exit();
    }, 2000);
 });
 
+process.on('SIGINT', () => {
+   aboutToExit();
+
+   //setTimeout(() => {
+      process.exit();
+   //}, 2000);
+});
+
 function aboutToExit() {
 
    if (!exiting) {
+      exiting = true;
 
       if (_mainInstance) {
-      process.stdout.write("2\n");
          _mainInstance.goingDown();
       }
    }
