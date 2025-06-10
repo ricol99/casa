@@ -20,9 +20,9 @@ process.on('exit', () => {
 process.on('SIGINT', () => {
    aboutToExit();
 
-   //setTimeout(() => {
+   setTimeout(() => {
       process.exit();
-   //}, 2000);
+   }, 2000);
 });
 
 function aboutToExit() {
