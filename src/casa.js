@@ -171,8 +171,8 @@ Casa.prototype.hotStart = function() {
 Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) {
    console.error(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
 
-   // TBD AAA Hack to stop connection over pusher
-   if (_tier === 1) {
+   // Don't allow peer casas to communicate over pusher etc.
+   if (_tier >= 1) {
       return;
    }
 

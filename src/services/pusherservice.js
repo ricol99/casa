@@ -100,7 +100,9 @@ PusherService.prototype.start = function() {
 PusherService.prototype.sendMessage = function(_channel, _message, _body) {
 
    try {
-      this.pusherServer.trigger(_channel, _message, _body);
+      this.pusherServer.trigger(_channel, _message, _body).catch( (_error) => {
+         console.error(this.uName + ": Unable to send message to pusher channel "+ _channel);
+      });
    }
    catch (_error) {
       console.error(this.uName + ": Unable to publish message on channel "+_channel +", error="+_error);

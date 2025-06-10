@@ -119,8 +119,6 @@ IoMessageSocket.prototype.serverRole = function(_data) {
 
    this.serverSocket = true;
    this.id = _data.id;
-   //this.peerAddress = _data.peerAddress;
-   //this.destAddress = this.owner.gang.casa.uName;
    this.peerAddress = this.owner.gang.casa.uName;
    this.destAddress = _data.peerAddress;
    this.processConnectConfig(_data.messageData.config);
@@ -219,18 +217,15 @@ IoMessageSocket.prototype.clearHeartbeatTimeouts = function() {
 
 IoMessageSocket.prototype.disconnect = function() {
 
-   if (this.state === "connected") {
+   if ((this.state === "connected") || (this.state === "connecting")) {
       this.clearHeartbeatTimeouts();
-      this.sendMessageOnTransport("disconnect", {});
       this.state = "disconnecting";
+      this.sendMessageOnTransport("disconnect", {});
 
       this.disconnectingTimeout = util.setTimeout( () => {
          this.disconnectingTimeout = null;
          this.error("Disconnection timed out!");
       }, this.connectConfig.disconnectingTimeout * 1000);
-   }
-   else {
-      this.error("Connection already in progress!");
    }
 };
 
@@ -299,7 +294,7 @@ IoMessageSocket.prototype.receivedConnectRespFromTransport = function(_data) {
 
 IoMessageSocket.prototype.receivedDisconnectFromTransport = function(_data) {
 
-   if (this.state !== "connected") {
+   if ((this.state !== "connected") && (this.state !== "connecting")) {
       this.error("Received disconnect when not connected!");
       return;
    }
@@ -312,8 +307,8 @@ IoMessageSocket.prototype.receivedDisconnectFromTransport = function(_data) {
 
 IoMessageSocket.prototype.receivedDisconnectRespFromTransport = function(_data) {
 
-   if (this.state !== "disconnect") {
-      this.error("Received disconnect response when not disconnecting!");
+   if (this.state !== "disconnecting") {
+      this.error("Received disconnect response when not disconnecting! State="+this.state+"\n");
       return;
    }
 
@@ -427,7 +422,7 @@ IoMessageTransport.prototype.receivedConnectRespFromTransportCb = function(_data
 IoMessageTransport.prototype.receivedDisconnectFromTransportCb = function(_data) {
 
    if (_data.hasOwnProperty("id") && this.sockets[_data.id]) {
-      this.sockets[_data.id].receivedDisconnectRespFromTransport(_data);
+      this.sockets[_data.id].receivedDisconnectFromTransport(_data);
    }
 };
 

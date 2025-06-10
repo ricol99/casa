@@ -105,15 +105,6 @@ Console.prototype.setSourceCasa = function(_casaName, _callback) {
 };
 
 Console.prototype.casaFound = function(_params) {
-   //process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() _params="+util.inspect(_params)+"\n");
-
-   if (_params.tier === 1) {
-      process.stdout.write("Found casa on another discovery channel!\n"+util.inspect(_params)+"\n");
-      return;
-   }
-   else {
-      process.stdout.write("Found casa!"+util.inspect(_params)+"\n");
-   }
 
    if (!this.remoteCasas.hasOwnProperty(_params.name)) {
       var remoteCasa = new RemoteCasa(_params, this);
@@ -127,7 +118,7 @@ Console.prototype.casaFound = function(_params) {
             this.offline = false;
          }
 
-         this.updatePromptMidLine();
+         this.updatePromptMidLine(_params.tier);
       });
 
       remoteCasa.on("connect_error", (_data) => {
@@ -145,7 +136,13 @@ Console.prototype.casaFound = function(_params) {
          }
 
          this.updatePrompt();
-         this.writeOutput("Casa "+_data.name+" disconnected");
+
+         if (!_data.upgrading) {
+            //this.writeOutput("Upgrading connectivity to casa "+_data.name+"...");
+         //}
+         //else {
+            this.writeOutput("Casa "+_data.name+" disconnected");
+         }
 
          if (this.connectedCasas >  0)  {
 
@@ -181,14 +178,6 @@ Console.prototype.casaFound = function(_params) {
 };
 
 Console.prototype.casaLost = function(_params) {
-
-   if (_params.tier > 1) {
-      process.stdout.write("Casa lost on another discovery channel!\n"+util.inspect(_params)+"\n");
-      return;
-   }
-   else {
-      process.stdout.write("Casa Lost!"+util.inspect(_params)+"\n");
-   }
 };
 
 Console.prototype.identifyCasa = function(_line) {
@@ -406,8 +395,7 @@ function RemoteCasa(_config, _owner) {
    this.name = _config.name;
    this.address = _config.address;
    this.messageTransportName = _config.messageTransportName;
-   this.host = _config.address.host;
-   this.port = _config.address.port;
+   this.discoveryTier = _config.tier;
    this.db = null;
    this.remoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.gangRemoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
@@ -417,11 +405,12 @@ function RemoteCasa(_config, _owner) {
 util.inherits(RemoteCasa, AsyncEmitter);
 
 RemoteCasa.prototype.start = function()  {
-   //this.socket = io(this.owner.http + '://' + this.host + ':' + this.port + '/consoleapi/io', this.owner.socketOptions);
+   this.connecting = true;
    this.socket = this.owner.gang.casa.mainWebService.newIoSocket(this.address, "/consoleapi/io", this.owner.secureMode, this.messageTransportName);
 
    this.socket.on('connect', (_data) => {
       this.connected = true;
+      this.connecting = false;
       this.emit('connected', { name: this.name });
       this.socket.emit('getCasaInfo');
    });
@@ -467,6 +456,7 @@ RemoteCasa.prototype.start = function()  {
 
    this.socket.on('connect_error', (_data) => {
       _data.name = this.name;
+      this.connecting = false;
       this.emit('connect_error', _data);
    });
 
@@ -497,6 +487,7 @@ RemoteCasa.prototype.start = function()  {
    });
 
    this.socket.on('disconnect', (_data) => {
+      this.connecting = false;
 
       if (this.connected) {
          _data.name = this.name;
@@ -506,6 +497,7 @@ RemoteCasa.prototype.start = function()  {
    });
 
    this.socket.on('error', (_data) => {
+      this.connecting = false;
 
       if (this.connected) {
          _data.name = this.name;
@@ -517,19 +509,33 @@ RemoteCasa.prototype.start = function()  {
 
 RemoteCasa.prototype.reconnect = function(_params) {
 
-   if (!this.connected) {
-      this.host = _params.address.host;
-      this.port = _params.address.port;
+   if ((this.connecting || this.connected) && (_params.tier < this.discoveryTier)) {
+      this.disconnect();
+
+      util.setTimeout( () => {
+         this.reconnect(_params);
+      }, 3000);
+   }
+   else if (!this.connecting && !this.connected) { 
+      this.address = _params.address;
+      this.messageTransportName = _params.messageTransportName;
+      this.discoveryTier = _params.tier;
       this.start();
    }
 };
 
-RemoteCasa.prototype.getListeningPort = function() {
-   return this.port;
+RemoteCasa.prototype.disconnect = function() {
+
+   if (this.connected || this.connecting) {
+      this.connected = false;
+      this.connecting = false;
+      this.socket.disconnect();
+      this.emit('disconnected', { name: this.name, upgrading: true, error: "Upgrading transport!" });
+   }
 };
 
-RemoteCasa.prototype.getHost = function() {
-   return this.host;
+RemoteCasa.prototype.getAddress = function() {
+   return this.address;
 };
 
 RemoteCasa.prototype.getDb = function() {
