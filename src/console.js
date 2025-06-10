@@ -107,7 +107,7 @@ Console.prototype.setSourceCasa = function(_casaName, _callback) {
 Console.prototype.casaFound = function(_params) {
    //process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() _params="+util.inspect(_params)+"\n");
 
-   if (_params.tier > 1) {
+   if (_params.tier === 1) {
       process.stdout.write("Found casa on another discovery channel!\n"+util.inspect(_params)+"\n");
       return;
    }
@@ -404,6 +404,8 @@ function RemoteCasa(_config, _owner) {
    AsyncEmitter.call(this);
    this.owner = _owner;
    this.name = _config.name;
+   this.address = _config.address;
+   this.messageTransportName = _config.messageTransportName;
    this.host = _config.address.host;
    this.port = _config.address.port;
    this.db = null;
@@ -415,7 +417,8 @@ function RemoteCasa(_config, _owner) {
 util.inherits(RemoteCasa, AsyncEmitter);
 
 RemoteCasa.prototype.start = function()  {
-   this.socket = io(this.owner.http + '://' + this.host + ':' + this.port + '/consoleapi/io', this.owner.socketOptions);
+   //this.socket = io(this.owner.http + '://' + this.host + ':' + this.port + '/consoleapi/io', this.owner.socketOptions);
+   this.socket = this.owner.gang.casa.mainWebService.newIoSocket(this.address, "/consoleapi/io", this.owner.secureMode, this.messageTransportName);
 
    this.socket.on('connect', (_data) => {
       this.connected = true;

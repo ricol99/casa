@@ -176,16 +176,19 @@ Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) 
       return;
    }
 
-   // Should I reach out or do I wait for it to contact me?
-   if (_name > this.name) {
-      var peerCasa = this.gang.findPeerCasa(_name);
+   if (this.connectToPeers) {
 
-      if (!peerCasa) {
-         this.createPeerCasa(_name, _address, _messageTransportName, _tier);
-      }
-      else if (peerCasa.discoveryTier > _tier) {
-         peerCasa.disconnectFromClient();
-         this.createPeerCasa(_name, _address, _messageTransportName, _tier);
+      // Should I reach out or do I wait for it to contact me?
+      if (_name > this.name) {
+         var peerCasa = this.gang.findPeerCasa(_name);
+
+         if (!peerCasa) {
+            this.createPeerCasa(_name, _address, _messageTransportName, _tier);
+         }
+         else if (peerCasa.discoveryTier > _tier) {
+            peerCasa.disconnectFromClient();
+            this.createPeerCasa(_name, _address, _messageTransportName, _tier);
+         }
       }
    }
 };
@@ -430,10 +433,6 @@ Casa.prototype.addPostRouteToMainServer = function(_route, _callback) {
 
 Casa.prototype.addIoRouteToMainServer = function(_route, _callback, _transport) {
    return this.mainWebService.addIoRoute(_route, _callback, _transport);
-};
-
-Casa.prototype.mainWebService = function () {
-   return this.mainWebService;
 };
 
 Casa.prototype.getListeningPort = function() {
