@@ -52,6 +52,10 @@ Service.prototype.hotStart = function() {
    Thing.prototype.hotStart.call(this);
 };
 
+// Override this to run soemthing just before process shutdown
+Service.prototype.goingDown = function(_err) {
+};
+
 // Create a service node, if needed
 Service.prototype.interestInNewChild = function(_uName) {
    var splitUName = _uName.split(":");

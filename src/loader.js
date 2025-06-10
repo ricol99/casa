@@ -195,25 +195,32 @@ Loader.prototype.loadConsole = function() {
    this.gangName = this.casaName;
    this.casaName = "casa-console";
 
-   this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 };
+   this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, connectToPeers: false, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 };
    this.gangConfig = { name: this.gangName, type: "gang", casa: this.casaConfig };
    this.gangConfig.casa = this.casaConfig;
 
-   this.addSystemServices();
 
    this.gang = new Gang(this.gangConfig, this);
-
    this.gangDb = new Db(this.gangName+"-db", this.configPath, false, null);
    this.gangDb.setOwner(this.gang);
    this.gang.gangDb = this.gangDb;
 
    this.gangDb.on('connected', (_data) => {
-      this.gang.buildTree();
-      this.gang.coldStart();
 
-      var Console = require('./console');
-      this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
-      this.console.coldStart();
+      this.gangDb.readCollection("gangServices", (_err, _services) => {
+         
+         if (!_err) {
+            this.gangConfig.services = _services;
+            this.addSystemServices();
+
+            this.gang.buildTree();
+            this.gang.coldStart();
+
+            var Console = require('./console');
+            this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
+            this.console.coldStart();
+         }
+      });
    });
 
    this.gangDb.on('connect-error', (_data) => {

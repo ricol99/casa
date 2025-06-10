@@ -9,7 +9,7 @@ function CasaDiscoveryService(_config, _owner) {
 
    this.gang = Gang.mainInstance();
    this.gangId = this.gang.name;
-   this.targetCasa = _config.targetCasa;
+   this.targetCasaName = _config.targetCasaName;
    this.casas = {};
    this.searching = false;
    this.mdnsDiscoveryTransport = new MdnsDiscoveryTransport(this, "mdns", "http", this.gang.casa.name, this.listeningPort, 1);
@@ -26,6 +26,10 @@ CasaDiscoveryService.prototype.coldStart =  function() {
       }
    }
 }
+
+CasaDiscoveryService.prototype.setTargetCasa =  function(_targetCasaName) {
+   this.targetCasaName = _targetCasaName;
+};
 
 CasaDiscoveryService.prototype.startSearchingAndBroadcasting =  function() {
    this.startSearching();
@@ -102,20 +106,23 @@ CasaDiscoveryService.prototype.removeDiscoveryTransport =  function(_name) {
 
 CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
    var statusChanged = true;
+   var previousStatus = "down";
 
    if (this.casas.hasOwnProperty(_name)) {
 
       if (this.casas[_name].discoveryTransports.hasOwnProperty(_discoveryTransportName)) {
          statusChanged = (this.casas[_name].discoveryTransports[_discoveryTransportName].status !== _status);
+         previousStatus = this.casas[_name].discoveryTransports[_discoveryTransportName].status;
       }
    }
    else {
       this.casas[_name] = { discoveryTransports: {} };
    }
 
-   this.casas[_name].discoveryTransports[_discoveryTransportName] = { name: _name, status: _status, address: _address, messageTransportName: _messageTransportName, tier: _tier };
+   this.casas[_name].discoveryTransports[_discoveryTransportName] = { name: _name, status: _status, previousStatus: previousStatus,
+                                                                      address: _address, messageTransportName: _messageTransportName, tier: _tier };
 
-   if (statusChanged && (!this.targetCasa || (this.targetCasa === _name))) {
+   if (statusChanged && (!this.targetCasaName || (this.targetCasaName === _name))) {
       this.emit(_status === "up" ? "casa-up" : "casa-down", this.casas[_name].discoveryTransports[_discoveryTransportName]);
    }
 };

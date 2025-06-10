@@ -118,14 +118,6 @@ WebService.prototype.start = function() {
       }
    }
    else {
-      var http;
-
-      if (this.secure) {
-         this.http = require('https').Server(this.serverOptions, app);
-      }
-      else {
-         this.http = require('http').Server(app);
-      }
 
       if (this.mediaPath) {
 
@@ -145,13 +137,13 @@ WebService.prototype.startListening = function() {
 
    if (this.localHost) {
 
-      this.http.listen(this.port, 'localhost', () => {
+      http.listen(this.port, 'localhost', () => {
          console.log(this.uName + ': listening on (localhost) *: ' + this.port);
       });
    }
    else {
 
-      this.http.listen(this.port, () => {
+      http.listen(this.port, () => {
          console.log(this.uName + ': listening on *: ' + this.port);
       });
    }
@@ -159,6 +151,10 @@ WebService.prototype.startListening = function() {
 
 WebService.prototype.addRoute = function(_route, _callback) {
    return (this.hangingOffMainServer) ? this.gang.casa.addRouteToMainServer(_route, _callback) : app.get(_route, _callback);
+};
+
+WebService.prototype.addPostRoute = function(_route, _callback) {
+   return (this.hangingOffMainServer) ? this.gang.casa.addPostRouteToMainServer(_route, _callback) : app.post(_route, _callback);
 };
 
 WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {

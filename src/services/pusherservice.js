@@ -43,6 +43,10 @@ PusherService.prototype.hotStart = function() {
    Service.prototype.hotStart.call(this);
 };
 
+PusherService.prototype.goingDown = function(_err) {
+   this.sendMessage("control-channel", "status-update", { casaName: this.gang.casa.name, status: "down" });
+};
+
 PusherService.prototype.start = function() {
 
    try {
@@ -84,10 +88,8 @@ PusherService.prototype.start = function() {
          this.pusherDiscoveryTransport.start(this.pusher, channel);
       }
 
-      this.pusherServer = new PusherServer({ appId: this.appId,
-                                             key: this.appKey,
-                                             secret: this.appSecret,
-                                             cluster: this.appCluster });
+      this.pusherServer = new PusherServer({ appId: this.appId, key: this.appKey,
+                                             secret: this.appSecret, cluster: this.appCluster, useTLS: true });
 
    }
    catch (_error) {
@@ -206,13 +208,16 @@ PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
    this.controlChannel.bind("status-request", (_data) => {
       console.log(this.owner.uName + ":" + this.name + ": Status update requested: name: " + _data.casaName);
          
-      if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
+      if (_data && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
 
-         if (this.searching) {
-            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
+         if (_data.hasOwnProperty("status")) {
+
+            if (this.searching) {
+               this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
+            }
          }
    
-         if (this.broadcasting && (_data.status === "up")) {
+         if (this.broadcasting && ((_data.hasOwnProperty("status") && (_data.status === "up")) || !_data.hasOwnProperty("status"))) {
             this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "up" });
          }
       }
@@ -224,13 +229,14 @@ PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
       if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
 
          if (this.searching) {
-            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, "up", _data.casaName, this.name, this.messageTransportName, this.tier);
+            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
          }
       }
    }, this);
 };
 
 PusherDiscoveryTransport.prototype.startSearching = function() {
+   this.owner.sendMessage("control-channel", "status-request",  { casaName: this.owner.gang.casa.name });
    this.searching = true;
 };
 

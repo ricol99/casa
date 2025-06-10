@@ -3,11 +3,37 @@ var express;
 var app;
 var http;
 var io;
+var exiting = false;
 
 var Gang = require('./gang');
 var NamedObject = require('./namedobject');
+var _mainInstance = null;
+
+process.on('exit', () => {
+   aboutToExit();
+});
+
+process.on('SIGINT', () => {
+   aboutToExit();
+   exiting = true;
+   setTimeout(() => {
+      process.exit();
+   }, 2000);
+});
+
+function aboutToExit() {
+
+   if (!exiting) {
+
+      if (_mainInstance) {
+      process.stdout.write("2\n");
+         _mainInstance.goingDown();
+      }
+   }
+}
 
 function Casa(_config, _owner) {
+   _mainInstance = this;
    this._id = true;     // TDB!!!
    this.portStart = 50000;
    this.nextPortToAllocate = this.portStart;
@@ -42,6 +68,16 @@ util.inherits(Casa, NamedObject);
 // Used to classify the type and understand where to load the javascript module
 Casa.prototype.superType = function(_type) {
    return "casa";
+};
+
+Casa.prototype.goingDown = function(_err) {
+
+   if (this.services) {
+
+      for (var serviceName in this.services) {
+         this.services[serviceName].goingDown(_err);
+      }
+   }
 };
 
 Casa.prototype.sourcePropertyChangedCasaCb = function(_data) {
@@ -178,7 +214,7 @@ Casa.prototype.createServer = function() {
    });
 
    this.mainWebService.addIoRoute('/peercasa', (_socket) => {
-      console.error('a casa has joined');
+      console.log('a casa has joined');
       var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
       peerCasa.serveClient(_socket);
    }, "all");
@@ -382,6 +418,10 @@ Casa.prototype.getProperty = function(_property) {
 
 Casa.prototype.addRouteToMainServer = function(_route, _callback) {
    return this.mainWebService.addRoute(_route, _callback);
+};
+
+Casa.prototype.addPostRouteToMainServer = function(_route, _callback) {
+   return this.mainWebService.addPostRoute(_route, _callback);
 };
 
 Casa.prototype.addIoRouteToMainServer = function(_route, _callback, _transport) {

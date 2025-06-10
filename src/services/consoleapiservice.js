@@ -168,8 +168,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
    this.socket = _socket;
 
    this.socket.on('getCasaInfo', (_data) => {
-      console.error(this.uName + ": AAAAAA this.owner.gang.name=", this.owner.gang.name);
-      console.error(this.uName + ": AAAAAA this.owner.gang.dbs=", this.owner.gang.dbs);
+      console.log(this.uName + ": AAAAAA this.owner.gang.name=", this.owner.gang.name);
       
       this.socket.emit('casa-info', { dbInfo: { dbName: this.owner.gang.casa.getDb().name, hash: this.owner.gang.casa.getDb().getHash().hash,
                                                 lastModified: this.owner.gang.casa.getDb().getHash().lastModified },

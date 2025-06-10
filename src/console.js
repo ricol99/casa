@@ -46,14 +46,26 @@ Console.prototype.coldStart = function() {
    var GangConsoleCmdObj = require("./consolecmds/gangconsolecmd");
    this.gangConsoleCmd = new GangConsoleCmdObj({ name: this.gang.name }, null, this);
 
-   var CasaFinder = require('./casafinder');
-   var casaFinder = new CasaFinder({ gang: this.gangName, casa: this.casaName });
+   var casaDiscoveryServiceName = this.gang.casa.findServiceName("casadiscoveryservice");
+   this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
+   this.casaDiscoveryService.setTargetCasa(this.casaName);
+
+   //var CasaFinder = require('./casafinder');
+   //var casaFinder = new CasaFinder({ gang: this.gangName, casa: this.casaName });
 
    this.casaFoundHandler = Console.prototype.casaFound.bind(this);
-   casaFinder.on("casa-found", this.casaFoundHandler);
+   this.casaDiscoveryService.on("casa-up", this.casaFoundHandler);
 
-   casaFinder.coldStart();
-   casaFinder.startSearching();
+   this.casaLostHandler = Console.prototype.casaLost.bind(this);
+   this.casaDiscoveryService.on("casa-down", this.casaLostHandler);
+   //casaFinder.on("casa-found", this.casaFoundHandler);
+
+   //casaFinder.coldStart();
+   //casaFinder.startSearching();
+
+   util.setTimeout(() => {
+      this.casaDiscoveryService.startSearching();
+   }, 2000);
 
    this.offlineCasa = new OfflineCasa({ name: "offlinecasa" }, this);
 
@@ -101,6 +113,14 @@ Console.prototype.setSourceCasa = function(_casaName, _callback) {
 
 Console.prototype.casaFound = function(_params) {
    //process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() _params="+util.inspect(_params)+"\n");
+
+   if (_params.tier > 1) {
+      process.stdout.write("Found casa on another discovery channel!\n"+util.inspect(_params)+"\n");
+      return;
+   }
+   else {
+      process.stdout.write("Found casa!"+util.inspect(_params)+"\n");
+   }
 
    if (!this.remoteCasas.hasOwnProperty(_params.name)) {
       var remoteCasa = new RemoteCasa(_params, this);
@@ -164,6 +184,17 @@ Console.prototype.casaFound = function(_params) {
    }
    else {
       this.remoteCasas[_params.name].reconnect(_params);
+   }
+};
+
+Console.prototype.casaLost = function(_params) {
+
+   if (_params.tier > 1) {
+      process.stdout.write("Casa lost on another discovery channel!\n"+util.inspect(_params)+"\n");
+      return;
+   }
+   else {
+      process.stdout.write("Casa Lost!"+util.inspect(_params)+"\n");
    }
 };
 
@@ -380,8 +411,8 @@ function RemoteCasa(_config, _owner) {
    AsyncEmitter.call(this);
    this.owner = _owner;
    this.name = _config.name;
-   this.host = _config.host;
-   this.port = _config.port;
+   this.host = _config.address.host;
+   this.port = _config.address.port;
    this.db = null;
    this.remoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.gangRemoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
@@ -491,8 +522,8 @@ RemoteCasa.prototype.start = function()  {
 RemoteCasa.prototype.reconnect = function(_params) {
 
    if (!this.connected) {
-      this.host = _params.host;
-      this.port = _params.port;
+      this.host = _params.address.host;
+      this.port = _params.address.port;
       this.start();
    }
 };
