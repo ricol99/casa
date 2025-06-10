@@ -5,11 +5,20 @@ var AsyncEmitter = require("../asyncemitter");
 function IoMessageSocketService(_config, _owner) {
    Service.call(this, _config, _owner);
    this.setMaxListeners(0);
-   this.state = "idle";
    this.messageTransports = {};
 }
 
 util.inherits(IoMessageSocketService, Service);
+
+IoMessageSocketService.prototype.goingDown = function(_err) {
+
+   for (var transportName in this.messageTransports) {
+
+      if (this.messageTransports.hasOwnProperty(transportName)) {
+         this.messageTransports[transportName].goingDown();
+      }
+   }
+};
 
 IoMessageSocketService.prototype.createSocket = function(_messageTransport) {
    let newSocket =  new IoMessageSocket(this, _messageTransport);
@@ -36,7 +45,7 @@ IoMessageSocketService.prototype.addIoRoute = function(_route, _transportName, _
       for (var transportName in this.messageTransports) {
 
          if (this.messageTransports.hasOwnProperty(transportName)) {
-            this.addIoRoute(_route, _transportName, _callback);
+            this.messageTransports[transportName].addIoRoute(_route, _callback);
          }
       }
       return true;
@@ -54,6 +63,19 @@ IoMessageSocketService.prototype.of = function(_route, _transportName) {
    return this.addIoRoute(route, _transportName) ? this.messageTransports[_transportName].getRoute(_route) : null;
 };
 
+IoMessageSocketService.prototype.newIoSocket = function(_address, _route, _secure, _messageTransportName) {
+
+   if (!this.messageTransports.hasOwnProperty(_messageTransportName)) {
+     console.error(this.uName + ": Request for new socket over transport that does not exist, name=" + _messageTransportName);
+     return null;
+   }
+
+   var messageTransport = this.messageTransports[_messageTransportName];
+   var socket = new IoMessageSocket(this, this.messageTransports[_messageTransportName]);
+   socket.connect(_address, _route);
+   return socket;
+};
+
 function IoMessageSocket(_owner, _messageTransport) {
    AsyncEmitter.call(this);
 
@@ -61,11 +83,20 @@ function IoMessageSocket(_owner, _messageTransport) {
    this.messageTransport = _messageTransport;
    this.route = "";
    this.serverSocket = false;
+   this.state = "idle";
    this.id = this.messageTransport.getName() + "/" + this.route + ":" + Date.now();
    this.connectConfig = {};
 };
 
 util.inherits(IoMessageSocket, AsyncEmitter);
+
+IoMessageSocket.prototype.goingDown = function(_err) {
+
+   if ((this.state === "connecting") || (this.state === "connected")) {
+      this.sendMessageOnTransport("disconnect", { error: "Service down!" });
+      this.state = "disconnecting";
+   }
+};
 
 IoMessageSocket.prototype.getId = function() {
    return this.id;
@@ -81,15 +112,17 @@ IoMessageSocket.prototype.getRoute = function() {
 
 IoMessageSocket.prototype.serverRole = function(_data) {
 
-   if (this.state === "idle") {
-      this.error(this.uName + ": Asked to serve socket when no idle!");
+   if (this.state !== "idle") {
+      this.error(this.uName + ": Asked to serve socket when not idle!");
       return;
    }
 
    this.serverSocket = true;
    this.id = _data.id;
-   this.peerAddress = _data.peerAddress;
-   this.destddress = this.owner.gang.casa.uName;
+   //this.peerAddress = _data.peerAddress;
+   //this.destAddress = this.owner.gang.casa.uName;
+   this.peerAddress = this.owner.gang.casa.uName;
+   this.destAddress = _data.peerAddress;
    this.processConnectConfig(_data.messageData.config);
    this.state = "connecting";
    this.route = _data.route;
@@ -109,15 +142,17 @@ IoMessageSocket.prototype.sendMessageOnTransport = function(_message, _data) {
    this.messageTransport.sendMessage(_message, data);
 };
 
-IoMessageSocket.prototype.connect = function(_peerAddress, _config) {
+IoMessageSocket.prototype.connect = function(_peerAddress, _route, _config) {
 
    if (this.state === "idle") {
       this.serverSocket = false;
       this.destAddress = _peerAddress;
       this.peerAddress = this.owner.gang.casa.uName;
+      this.route = _route;
       this.processConnectConfig(_config);
       this.sendMessageOnTransport("connect", { config: this.connectConfig });
       this.state = "connecting";
+      this.messageTransport.addSocket(this, this.route);
 
       this.connectingTimeout = util.setTimeout( () => {
          this.connectingTimeout = null;
@@ -206,7 +241,9 @@ IoMessageSocket.prototype.emit = function(_message, _data) {
       return;
    }
 
-   this.sendMessageOnTransport(_message, _data);
+   var data = { message: _message, messageData: _data };
+
+   this.sendMessageOnTransport("message", data);
 };
 
 IoMessageSocket.prototype.startHeartbeats = function() {
@@ -242,17 +279,17 @@ IoMessageSocket.prototype.receivedConnectRespFromTransport = function(_data) {
       return;
    }
 
-   if (!_data || !_data.hasOwnProperty("accept")) {
+   if (!_data || !_data.hasOwnProperty("messageData") || !_data.messageData.hasOwnProperty("accept")) {
       this.error("Received invalid connection response!");
       return;
    }
 
-   if (_data.accept) {
+   if (_data.messageData.accept) {
       this.state = "connected";
       this.clearConnectingTimeout();
       this.startHeartbeats();
       this.resetHeartbeatWatchdog();
-      this.asyncEmit("connected", {});
+      this.asyncEmit("connect", {});
    }
    else {
       this.state = "idle";
@@ -307,12 +344,12 @@ IoMessageSocket.prototype.receivedMessageFromTransport = function(_data) {
       return;
    }
 
-   if (!_data || (!((_data.hasOwnProperty("name") && _data.hasOwnProperty("data"))))) {
+   if (!_data || (!((_data.hasOwnProperty("message") && _data.hasOwnProperty("messageData")) && _data.messageData.hasOwnProperty("message")))) {
       console.error(this.id + ": Received invalid message from transport!");
       return;
    }
 
-   this.asyncEmit(_data.name, util.copy(_data.data, true));
+   this.asyncEmit(_data.messageData.message, util.copy(_data.messageData.messageData, true));
 };
 
 function IoMessageTransport(_owner, _transportName, _transport) {
@@ -337,6 +374,16 @@ function IoMessageTransport(_owner, _transportName, _transport) {
    this.transport.on("message", this.transportReceivedMessageHandler);
    this.transport.on("error", this.transportErrorHandler);
    this.transport.on("heartbeat", this.transportHeartbeatHandler);
+};
+
+IoMessageTransport.prototype.goingDown = function(_err) {
+   
+   for (var socketId in this.sockets) {
+
+      if (this.sockets.hasOwnProperty(socketId)) {
+         this.sockets[socketId].goingDown();
+      }
+   }
 };
 
 IoMessageTransport.prototype.getName = function() {

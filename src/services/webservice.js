@@ -104,8 +104,6 @@ WebService.prototype.hotStart = function() {
 };
 
 WebService.prototype.start = function() {
-   var iomessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
-   this.ioMessageSocketService = iomessagesocketServiceName ? this.gang.casa.findService(iomessagesocketServiceName) : null;
 
    if (this.hangingOffMainServer) {
 
@@ -170,7 +168,7 @@ WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
    else {
 
       if (_transportName) {
-         ret = this.ioMessageSocketService ? this.ioMessageSocketService.addIoRoute(_route, _transportName, _callback) : false;
+          ret = this.findIoMessageSocketService().addIoRoute(_route, _transportName, _callback);
       }
 
       if (!_transportName || (_transportName && ((_transportName === "all") || (_transportName === "http")))) {
@@ -178,6 +176,50 @@ WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
       }
       return ret;
    }
+};
+
+WebService.prototype.newIoSocket = function(_address, _route, _secure, _messageTransportName) {
+   var httpStr = "http";
+   var ioClient = require('socket.io-client');
+   var socketOptions = {};
+   
+   if (!_messageTransportName || _messageTransportName === "http") {
+
+      if (_secure) {
+         var fs = require('fs'); 
+         httpStr = "https";
+         socketOptions = {
+            secure: true,
+            rejectUnauthorized: false,
+            key: fs.readFileSync(this.gang.certPath()+'/client.key'),
+            cert: fs.readFileSync(this.gang.certPath()+'/client.crt'), 
+            ca: fs.readFileSync(this.gang.certPath()+'/ca.crt')
+         };
+      }
+      else {
+         socketOptions = { transports: ['websocket'] };
+      }
+      socketOptions.forceNew = true;
+      socketOptions.reconnection = false;
+
+      console.log(this.uName + ': Attempting to connect to ' + _address.host + ':' + _address.port + _route);
+      return ioClient(httpStr + '://' + _address.host + ':' + _address.port + _route, socketOptions);
+   }
+   else {
+      return this.findIoMessageSocketService().newIoSocket(_address, _route, _secure, _messageTransportName);
+   }
+
+};
+
+WebService.prototype.findIoMessageSocketService = function() {
+
+   if (this.ioMessageSocketService) {
+      return this.ioMessageSocketService;
+   }
+
+   var ioMessagesocketServiceName = this.gang.casa.findServiceName("iomessagesocketservice");
+   this.ioMessageSocketService = ioMessagesocketServiceName ? this.gang.casa.findService(ioMessagesocketServiceName) : null;
+   return this.ioMessageSocketService;
 };
 
 module.exports = exports = WebService;

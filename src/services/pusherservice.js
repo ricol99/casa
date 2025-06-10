@@ -183,7 +183,7 @@ PusherMessageTransport.prototype.start = function(_pusher) {
 
 PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
    _data.message = _message;
-   this.owner.sendMessage("message-channel_" + _data.peerAddress.replace(/:/g, ""), "message", _data);
+   this.owner.sendMessage("message-channel_" + _data.destAddress.replace(/:/g, ""), "message", _data);
 };
 
 function PusherDiscoveryTransport(_owner, _name, _casaDiscoveryService, _messageTransportName, _tier) {

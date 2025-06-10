@@ -155,6 +155,12 @@ Casa.prototype.coldStart = function() {
          this.things[thingName].coldStart();
       }
    }
+
+   this.mainWebService.addIoRoute('/peercasa', (_socket) => {
+      console.log('a casa has joined');
+      var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
+      peerCasa.serveClient(_socket);
+   }, "all");
 };
 
 Casa.prototype.hotStart = function() {
@@ -166,7 +172,7 @@ Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) 
    console.error(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
 
    // TBD AAA Hack to stop connection over pusher
-   if (_tier !== 1) {
+   if (_tier === 1) {
       return;
    }
 
@@ -191,7 +197,7 @@ Casa.prototype.casaDown = function(_name, _address, _messageTransportName, _tier
 Casa.prototype.createPeerCasa = function(_name, _address, _messageTransportName, _tier) {
    console.error(this.uName + ": New peer casa: " + _name);
    var peerCasa = this.gang.createPeerCasa(_name);
-   peerCasa.connectToPeerCasa({ address: _address, _messageTransportName, discoveryTier: _tier });
+   peerCasa.connectToPeerCasa({ address: _address, messageTransport: _messageTransportName, discoveryTier: _tier });
 };
 
 Casa.prototype.createServer = function() {
@@ -216,12 +222,6 @@ Casa.prototype.createServer = function() {
 
       res.json(allProps);
    });
-
-   this.mainWebService.addIoRoute('/peercasa', (_socket) => {
-      console.log('a casa has joined');
-      var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
-      peerCasa.serveClient(_socket);
-   }, "all");
 
    var casaDiscoveryServiceName = this.gang.casa.findServiceName("casadiscoveryservice");
    this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
@@ -430,6 +430,10 @@ Casa.prototype.addPostRouteToMainServer = function(_route, _callback) {
 
 Casa.prototype.addIoRouteToMainServer = function(_route, _callback, _transport) {
    return this.mainWebService.addIoRoute(_route, _callback, _transport);
+};
+
+Casa.prototype.mainWebService = function () {
+   return this.mainWebService;
 };
 
 Casa.prototype.getListeningPort = function() {

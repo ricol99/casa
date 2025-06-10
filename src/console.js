@@ -50,18 +50,11 @@ Console.prototype.coldStart = function() {
    this.casaDiscoveryService = casaDiscoveryServiceName ? this.gang.casa.findService(casaDiscoveryServiceName) : null;
    this.casaDiscoveryService.setTargetCasa(this.casaName);
 
-   //var CasaFinder = require('./casafinder');
-   //var casaFinder = new CasaFinder({ gang: this.gangName, casa: this.casaName });
-
    this.casaFoundHandler = Console.prototype.casaFound.bind(this);
    this.casaDiscoveryService.on("casa-up", this.casaFoundHandler);
 
    this.casaLostHandler = Console.prototype.casaLost.bind(this);
    this.casaDiscoveryService.on("casa-down", this.casaLostHandler);
-   //casaFinder.on("casa-found", this.casaFoundHandler);
-
-   //casaFinder.coldStart();
-   //casaFinder.startSearching();
 
    util.setTimeout(() => {
       this.casaDiscoveryService.startSearching();

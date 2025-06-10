@@ -207,6 +207,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
+   console.error("AAAAAAAAA PeerCasa.prototype.socketLoginCb() config=", _config);
    this.config = util.copy(_config, true);
    this.changeName(this.config.casaName.substr(2));	// XXX HACK
    this.createSources(this.config, this);
@@ -234,39 +235,12 @@ PeerCasa.prototype.connectToPeerCasa = function(_config) {
       this.address = _config.address;
       this.messageTransport = _config.messageTransport;
       this.discoveryTier = _config.discoveryTier;
-
-      if (this.secureMode) {
-         var fs = require('fs');
-         this.http = "https";
-         this.socketOptions = {
-            secure: true,
-            rejectUnauthorized: false,
-            key: fs.readFileSync(this.certPath+'/client.key'),
-            cert: fs.readFileSync(this.certPath+'/client.crt'),
-            ca: fs.readFileSync(this.certPath+'/ca.crt')
-         };
-      }
-      else {
-         this.http = "http";
-         this.socketOptions = { transports: ['websocket'] };
-      }
-
-      if (this.persistent && this.proActiveConnect) {
-         //this.socketOptions.reconnection = true;
-         //this.socketOptions.reconnectionDelay = 1000;
-         //this.socketOptions.reconnectionDelayMax = 5000;
-         //this.socketOptions.reconnectionAttempts = 99999;
-         this.socketOptions.forceNew = true;
-         this.socketOptions.reconnection = false;
-      }
-      else {
-         this.socketOptions.forceNew = true;
-         this.socketOptions.reconnection = false;
-      }
    }
-
-   console.log(this.uName + ': Attempting to connect to peer casa ' + this.address.host + ':' + this.address.port);
+/*
    this.socket = io(this.http + '://' + this.address.host + ':' + this.address.port + '/peercasa', this.socketOptions);
+*/
+   console.log(this.uName + ': Attempting to connect to peer casa at ' + util.inspect(this.address) + " over " + this.messageTransport);
+   this.socket = this.casa.mainWebService.newIoSocket(this.address, "/peercasa", this.secureMode, this.messageTransport);
    this.establishListeners();
 };
 
@@ -316,6 +290,7 @@ PeerCasa.prototype.deleteSocket = function() {
 //=================
 PeerCasa.prototype.socketConnectCb = function() {
    console.log(this.uName + ': Connected to my peer. Logging in...');
+   console.error("AAAAAAAAA CONNECTED!");
 
    var simpleConfig = this.casa.refreshSimpleConfig();
 
