@@ -167,7 +167,7 @@ WebService.prototype.addIoRoute = function(_route, _callback, _transportName) {
    }
    else {
 
-      if (_transportName) {
+      if (_transportName && (_transportName !== "all")) {
           ret = this.findIoMessageSocketService().addIoRoute(_route, _transportName, _callback);
       }
 
@@ -201,6 +201,7 @@ WebService.prototype.newIoSocket = function(_address, _route, _secure, _messageT
       }
       socketOptions.forceNew = true;
       socketOptions.reconnection = false;
+     
 
       console.log(this.uName + ': Attempting to connect to ' + _address.host + ':' + _address.port + _route);
       return ioClient(httpStr + '://' + _address.host + ':' + _address.port + _route, socketOptions);
