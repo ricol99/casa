@@ -198,7 +198,7 @@ Casa.prototype.casaDown = function(_name, _address, _messageTransportName, _tier
 };
 
 Casa.prototype.createPeerCasa = function(_name, _address, _messageTransportName, _tier) {
-   console.error(this.uName + ": New peer casa: " + _name);
+   console.info(this.uName + ": New peer casa: " + _name);
    var peerCasa = this.gang.createPeerCasa(_name);
    peerCasa.connectToPeerCasa({ address: _address, messageTransport: _messageTransportName, discoveryTier: _tier });
 };
