@@ -169,7 +169,7 @@ Casa.prototype.hotStart = function() {
 };
 
 Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) {
-   console.error(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
+   console.log(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
 
    // Don't allow peer casas to communicate over pusher etc.
    if (_tier > 1) {
@@ -194,7 +194,7 @@ Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) 
 };
 
 Casa.prototype.casaDown = function(_name, _address, _messageTransportName, _tier) {
-   console.error(this.uName+": casaDown() name="+_name+", tier="+_tier);
+   console.log(this.uName+": casaDown() name="+_name+", tier="+_tier);
 };
 
 Casa.prototype.createPeerCasa = function(_name, _address, _messageTransportName, _tier) {

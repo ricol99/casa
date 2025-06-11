@@ -207,7 +207,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
       return;
    }
 
-   console.error("AAAAAAAAA PeerCasa.prototype.socketLoginCb() config=", _config);
+   console.log("PeerCasa.prototype.socketLoginCb() config=", _config);
    this.config = util.copy(_config, true);
    this.changeName(this.config.casaName.substr(2));	// XXX HACK
    this.createSources(this.config, this);
@@ -290,7 +290,6 @@ PeerCasa.prototype.deleteSocket = function() {
 //=================
 PeerCasa.prototype.socketConnectCb = function() {
    console.log(this.uName + ': Connected to my peer. Logging in...');
-   console.error("AAAAAAAAA CONNECTED!");
 
    var simpleConfig = this.casa.refreshSimpleConfig();
 

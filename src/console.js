@@ -122,11 +122,14 @@ Console.prototype.casaFound = function(_params) {
       });
 
       remoteCasa.on("connect_error", (_data) => {
-         process.stdout.write("AAAAAAAAAA Console.prototype.casaFound() error="+util.inspect(_data)+"\n");
+         process.stdout.write("Console.prototype.casaFound() error="+util.inspect(_data)+"\n");
       });
 
       remoteCasa.on("disconnected", (_data) => {
-         this.connectedCasas = this.connectedCasas - 1;
+
+         if (remoteCasa.connected) {
+            this.connectedCasas = this.connectedCasas - 1;
+         }
 
          if (this.connectedCasas === 0) {
             this.offline = true;
