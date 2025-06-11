@@ -172,7 +172,7 @@ Casa.prototype.casaUp = function(_name, _address, _messageTransportName, _tier) 
    console.error(this.uName+": casaUp() name="+_name+", transport="+_messageTransportName+", tier="+_tier);
 
    // Don't allow peer casas to communicate over pusher etc.
-   if (_tier >= 1) {
+   if (_tier > 1) {
       return;
    }
 
