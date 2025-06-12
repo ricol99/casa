@@ -11,11 +11,11 @@ function TouchSwitch(_config, _parent) {
       this.gpioTouchPin = _config.gpioTouchPin;
       this.triggerLow = _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false;
       this.gpioFeedbackPin = _config.hasOwnProperty("gpioFeedbackPin") ? _config.gpioFeedbackPin : null;
+      this.debounceThreshold = _config.hasOwnProperty("debounceThreshold") ? _config.debounceThreshold : 0.2;
    }
 
    this.feedbackProp = _config.hasOwnProperty("feedbackProp") ? _config.feedbackProp : "ACTIVE";
    this.stateless = _config.hasOwnProperty("stateless") ? _config.stateless : false;
-   this.debounceThreshold = _config.hasOwnProperty("debounceThreshold") ? _config.debounceThreshold : 0.2;
 
    this.eventName = _config.hasOwnProperty("eventName") ? _config.eventName : "touch-event";
    this.invokeManualMode =  _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode : !this.stateless;
@@ -29,13 +29,11 @@ function TouchSwitch(_config, _parent) {
    }
 
    this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "switch-active";
-   this.switchPropRaw = this.switchProp + "-raw";
 
-   if (this.gpioIncluded) {  // HEREEEEEEE
+   if (this.gpioIncluded) {
+      this.switchPropRaw = this.switchProp + "-raw";
       this.ensurePropertyExists(this.switchPropRaw, 'gpioproperty', { initialValue: false, gpioPin: this.gpioTouchPin, triggerLow: this.triggerLow }, _config);
       this.ensurePropertyExists(this.switchProp, 'debounceproperty', { threshold: this.debounceThreshold, ignoreUnderThreshold: true, source: { property: this.switchPropRaw }}, _config);
-   }
-   else {
    }
 
    this.holdStartEventName =  _config.hasOwnProperty("holdStartEventName") ? _config.holdStartEventName : "touch-hold-start-event";
