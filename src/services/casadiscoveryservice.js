@@ -158,9 +158,8 @@ MdnsDiscoveryTransport.prototype.coldStart = function() {
 
          if ((_service.txt.gang === this.owner.gang.name) && (_service.name !== this.name)) {
             let hostnameArr = _service.host.split(' ');
-            let hostname = (hostnameArr.length > 1) ? hostnameArr[0]+".local" ? hostnameArr[0];
-            if (hostnameArr.length > 
-            this.owner.casaStatusUpdate(_service.name, "up", { host: _service.host.split(' ')[0], port: _service.port }, this.name, this.messageTransportName, this.tier);
+            let hostname = (hostnameArr.length > 1) ? hostnameArr[0]+".local" : hostnameArr[0];
+            this.owner.casaStatusUpdate(_service.name, "up", { host: hostname, port: _service.port }, this.name, this.messageTransportName, this.tier);
          }  
       });      
             
