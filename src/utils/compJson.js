@@ -1,8 +1,10 @@
 var util = require('../util');
-var cjson = require('cjson');
-
+const fs = require('fs');
+const json5 = require('json5');
 var file1 = process.argv[2];
-var file1Config = cjson.load(file1);
+const jsonStr = fs.readFileSync(file1, 'utf8');
+var file1Config = json5.parse(jsonStr);
+
 
 if (file1Config.hasOwnProperty("gangThings")) {
 

@@ -1,9 +1,13 @@
 var util = require('../util');
 var Db = require('../db');
-var cjson = require('cjson');
 
 var configFilename = process.argv[2];
-var inputConfig = cjson.load(configFilename);
+
+const fs = require('fs');
+const json5 = require('json5');
+const jsonStr = fs.readFileSync(configFilename, 'utf8');
+var inputConfig = json5.parse(jsonStr);
+
 parseConfigForSecureConfig(inputConfig);
 
 var casaDb = inputConfig.hasOwnProperty("casa");

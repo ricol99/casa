@@ -1,6 +1,9 @@
-var cjson = require('cjson');
+const fs = require('fs');
+const json5 = require('json5');
 var file = process.argv[2];
-var LOG = cjson.load(file);
+const jsonStr = fs.readFileSync(file, 'utf8'); 
+var LOG = json5.parse(jsonStr);
+
 
 var things = {};
 for (var i=0; i < LOG.length-1; i++ ) {
