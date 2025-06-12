@@ -157,7 +157,7 @@ MdnsDiscoveryTransport.prototype.coldStart = function() {
          }
 
          if ((_service.txt.gang === this.owner.gang.name) && (_service.name !== this.name)) {
-            this.owner.casaStatusUpdate(_service.name, "up", { host: _service.host, port: _service.port }, this.name, this.messageTransportName, this.tier);
+            this.owner.casaStatusUpdate(_service.name, "up", { host: _service.host.split(' ')[0], port: _service.port }, this.name, this.messageTransportName, this.tier);
          }  
       });      
             
@@ -200,6 +200,7 @@ MdnsDiscoveryTransport.prototype.stopSearching = function() {
 
 MdnsDiscoveryTransport.prototype.startBroadcasting = function() {
    console.log(this.owner.uName + ":" + this.name + ": startBroadcasting()");
+
 
    try {
       this.ad = new dnssd.Advertisement(dnssd.tcp('casa'), this.listeningPort, { name: this.casaName, txt: { id: this.casaName, gang: this.owner.gang.name }});
