@@ -4,6 +4,7 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 node_modules/*
+package-lock.json
 .casa:*
 backup*
 persist/*

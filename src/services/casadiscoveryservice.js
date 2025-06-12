@@ -127,6 +127,8 @@ CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _addr
    }
 };
 
+const dnssd = require('dnssd');
+
 function MdnsDiscoveryTransport(_owner, _name, _messageTransportName, _casaName, _listeningPort, _tier) {
    this.owner = _owner;
    this.name = _name;
@@ -134,36 +136,27 @@ function MdnsDiscoveryTransport(_owner, _name, _messageTransportName, _casaName,
    this.casaName = _casaName;
    this.listeningPort = _listeningPort;
    this.tier = _tier;
-   this.mdns = require('mdns');
    this.browser = null;
-
    this.name = this.owner.gang.casa.name;
    this.id = this.owner.gang.casa.name
    this.listeningPort = this.owner.gang.casa.listeningPort;
       
-   // workaround for raspberry pi
-   this.sequence = [
-       this.mdns.rst.DNSServiceResolve(),
-       'DNSServiceGetAddrInfo' in this.mdns.dns_sd ? this.mdns.rst.DNSServiceGetAddrInfo() : this.mdns.rst.getaddrinfo({families:[4]}),
-       this.mdns.rst.makeAddressesUnique()
-   ];
-
    this.owner.addDiscoveryTransport(this.name, this);
 };
 
 MdnsDiscoveryTransport.prototype.coldStart = function() {
 
    try {
-      this.browser = this.mdns.createBrowser(this.mdns.tcp('casa'), { resolverSequence: this.sequence });
+      this.browser = new dnssd.Browser(dnssd.tcp('casa'));
 
       this.browser.on('serviceUp', (_service) => {
 
-         if (!util.exists(_service, [ "txtRecord", "name", "host", "port" ])) {
+         if (!util.exists(_service, [ "txt", "name", "host", "port" ])) {
             console.error(this.owner.uName + ":" + this.name + ": service up - Malformed advert", _service);
             return;
          }
 
-         if ((_service.txtRecord.gang === this.owner.gang.name) && (_service.name !== this.name)) {
+         if ((_service.txt.gang === this.owner.gang.name) && (_service.name !== this.name)) {
             this.owner.casaStatusUpdate(_service.name, "up", { host: _service.host, port: _service.port }, this.name, this.messageTransportName, this.tier);
          }  
       });      
@@ -209,8 +202,8 @@ MdnsDiscoveryTransport.prototype.startBroadcasting = function() {
    console.log(this.owner.uName + ":" + this.name + ": startBroadcasting()");
 
    try {
-      this.ad = this.mdns.createAdvertisement(this.mdns.tcp('casa'), this.listeningPort, { name: this.casaName, txtRecord: { id: this.casaName, gang: this.owner.gang.name }});
-
+      this.ad = new dnssd.Advertisement(dnssd.tcp('casa'), this.listeningPort, { name: this.casaName, txt: { id: this.casaName, gang: this.owner.gang.name }});
+ 
       this.ad.on('error', (_err) => {
          console.error(this.owner.uName + ":" + this.name + ": Not advertising service! Error: " + _err);
       });
