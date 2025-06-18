@@ -3,10 +3,11 @@ var Location = require('./location');
 
 // Please provide inputs
 // users - users that will use the building
-// bedrooms - bedrooms the users will sleep in
 // daylight - daylight true (dark property is created as the inverse of daylight)
 
 // Please define properties for automated functionality
+// latitude - Location of the building
+// longitude - Location of the building
 // low-light - true when light levels are low enough to switch on lights
 // <user>-present - property representing a user being present in the building
 

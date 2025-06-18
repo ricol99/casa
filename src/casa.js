@@ -9,7 +9,7 @@ var Gang = require('./gang');
 var NamedObject = require('./namedobject');
 var _mainInstance = null;
 
-process.on('exit', () => {
+process.on('exit', (_err) => {
    aboutToExit();
 
    setTimeout(() => {

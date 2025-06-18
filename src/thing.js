@@ -95,11 +95,11 @@ Thing.prototype.hotStart = function() {
 Thing.prototype.sortOutInheritedProperties = function() {
    console.log(this.uName+": sortOutInheritedProperties()");
 
-   util.setTimeout( () => {
+   //util.setTimeout( () => {
       this.inheritChildProps();
       this.inheritParentProps();
       this.casa.scheduleRefreshSourceListeners();
-   }, 50);
+   //}, 50);
 };
 
 // Actually update the property value and let all interested parties know
@@ -186,11 +186,11 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data, _forceAl
 
 Thing.prototype.inheritChildProps = function() {
 
-   if (!this.ignoreChildren) {
+   for (var thing in this.things) {
 
-      for (var thing in this.things) {
+      if (this.things.hasOwnProperty(thing) && this.things[thing].inheritChildProps()) {
 
-         if (this.things.hasOwnProperty(thing) && this.things[thing].inheritChildProps()) {
+         if (!this.ignoreChildren) {
 
             for (var prop in this.things[thing].properties) {
 
@@ -213,31 +213,28 @@ Thing.prototype.inheritChildProps = function() {
 };
 
 Thing.prototype.inheritParentProps = function(_parentProps) {
+   var parentProps = this.ignoreParent ? null : _parentProps;
 
-   if (!this.ignoreParent) {
+   if (parentProps) {
 
-      if (_parentProps) {
-
-         for (var prop in _parentProps) {
+      for (var prop in parentProps) {
   
-            if (_parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
-               console.log(this.uName + ": Adding new prop from parent "+prop);
-               var oSpec = { name: prop, initialValue: _parentProps[prop].value,
-                             local: true, parentInherited: true };
+         if (parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
+            console.log(this.uName + ": Adding new prop from parent "+prop);
+            var oSpec = { name: prop, initialValue: parentProps[prop].value,
+                          local: true, parentInherited: true };
 
-               this.ensurePropertyExists(prop, "property", oSpec, this.config);
-            }
+            this.ensurePropertyExists(prop, "property", oSpec, this.config);
          }
       }
+   }
 
-      if (this.propagateToChildren) {
-   
-         for (var thing in this.things) {
+   let childProps = this.propagateToChildren ? this.properties : null;
 
-            if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].inheritParentProps(this.properties);
-            }
-         }
+   for (var thing in this.things) {
+
+      if (this.things.hasOwnProperty(thing)) {
+         this.things[thing].inheritParentProps(childProps);
       }
    }
 };

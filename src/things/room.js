@@ -76,6 +76,8 @@ function Room(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "room";
 
+   this.ensurePropertyExists("building-name", "property", { initialValue: this.buildingName }, _config);
+
    if (_config.hasOwnProperty("movementTimeouts")) {
       this.movementTimeouts = _config.movementTimeouts;
    }
