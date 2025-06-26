@@ -29,26 +29,7 @@ function Property(_config, _owner) {
       this.alwaysUpdate = _config.alwaysUpdate;
    }
 
-   var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
-   var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
-
-   if (_config.hasOwnProperty('ignorePropagation')) {
-      this.ignoreParent = parent.hasOwnProperty(_config.ignorePropagation) ? parent[_config.ignorePropagation] : false;
-      this.ignoreChildren = child.hasOwnProperty(_config.ignorePropagation) ? child[_config.ignorePropagation] : false;
-   }
-   else {
-      if (_config.hasOwnProperty('ignoreParent')) this.ignoreParent = _config.ignoreParent;
-      if (_config.hasOwnProperty('ignoreChildren')) this.ignoreChildren = _config.ignoreChildren;
-   }
-
-   if (_config.hasOwnProperty('propagation')) {
-      this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
-      this.propagateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
-   }
-   else {
-      if (_config.hasOwnProperty('propagateToParent')) this.propagateToParent = _config.propagateToParent;
-      if (_config.hasOwnProperty('propagateToChildren')) this.propagateToChildren = _config.propagateToChildren;
-   }
+   this.setPropagation(_config);
 
    this.valid = false;
    this.cold = _config.hasOwnProperty("cold") ? _config.cold : true;
@@ -80,6 +61,43 @@ util.inherits(Property, NamedObject);
 // Used to classify the type and understand where to load the javascript module
 Property.prototype.superType = function(_type) {
    return "property";
+};
+
+Property.prototype.setPropagation = function(_config) {
+   var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
+   var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
+
+   if (_config.hasOwnProperty('ignorePropagation')) {
+      this.ignoreParent = parent.hasOwnProperty(_config.ignorePropagation) ? parent[_config.ignorePropagation] : false;
+      this.ignoreChildren = child.hasOwnProperty(_config.ignorePropagation) ? child[_config.ignorePropagation] : false;
+   }
+   else {
+      if (_config.hasOwnProperty('ignoreParent')) this.ignoreParent = _config.ignoreParent;
+      if (_config.hasOwnProperty('ignoreChildren')) this.ignoreChildren = _config.ignoreChildren;
+   }
+
+   if (_config.hasOwnProperty('propagation')) {
+      this.propagateToParent = parent.hasOwnProperty(_config.propagation) ? parent[_config.propagation] : true;
+      this.propagateToChildren = child.hasOwnProperty(_config.propagation) ? child[_config.propagation] : true;
+   }
+   else {
+      if (_config.hasOwnProperty('propagateToParent')) this.propagateToParent = _config.propagateToParent;
+      if (_config.hasOwnProperty('propagateToChildren')) this.propagateToChildren = _config.propagateToChildren;
+   }
+};
+
+Property.prototype.hasPropagation = function() {
+   return this.hasOwnProperty("ignoreParent") || this.hasOwnProperty("ignoreChildren") || this.hasOwnProperty("propagateToParent") || this.hasOwnProperty("propagateToChildren");
+};
+
+Property.prototype.getPropagation = function() {
+   var propagation = this.hasOwnProperty("ignoreParent") ? { ignoreParent: this.ignoreParent } : {};
+
+   if (this.hasOwnProperty("ignoreChildren")) propagation.ignoreChildren = this.ignoreChildren;
+   if (this.hasOwnProperty("propagateToChildren")) propagation.propagateToChildren = this.propagateToChildren;
+   if (this.hasOwnProperty("propagateToParent")) propagation.propagateToParent = this.propagateToParent;
+
+   return propagation;
 };
 
 // Called when system state is required

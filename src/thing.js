@@ -4,7 +4,7 @@ var Gang = require('./gang');
 
 function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
-   var topOfTransaction = _config.hasOwnProperty("notTopOfTransaction") ? false : !_config.notTopOfTransaction;
+   var topOfTransaction = !_config.hasOwnProperty("notTopOfTransaction");
    delete _config.notTopOfTransaction;
 
    if (_owner && (_owner !== gang) && (_owner !== gang.casa)) {
@@ -188,60 +188,135 @@ Thing.prototype.inheritChildProps = function() {
 
    for (var thing in this.things) {
 
-      if (this.things.hasOwnProperty(thing) && this.things[thing].inheritChildProps()) {
+      if (this.things.hasOwnProperty(thing)) {
+         var childProps = this.things[thing].inheritChildProps();
 
-         if (!this.ignoreChildren) {
+         for (let prop in childProps) {
 
-            for (var prop in this.things[thing].properties) {
+            if (childProps.hasOwnProperty(prop)) {
+               let childProp = childProps[prop];
+               let ignoreChildProp = this.ignoreChildren;
 
-               if (this.things[thing].properties.hasOwnProperty(prop)) {
+               if (childProp.hasPropagation() && childProp.hasOwnProperty("propagateToParent") && childProp.propagateToParent) {
+                  ignoreChildProp = false;
+               }
 
-                  if (!this.properties.hasOwnProperty(prop)) {
-                     console.log(this.uName + ": Adding new prop from child "+prop);
-                     var oSpec = { name: prop, initialValue: this.things[thing].properties[prop].value,
-                                   local: this.things[thing].properties[prop].local, childInherited: true };
+               if (!ignoreChildProp && !this.properties.hasOwnProperty(prop)) {
+                  console.info(this.uName + ": Adding new prop from child "+prop);
+                  var oSpec = { name: prop, initialValue: childProp.value,
+                                local: childProp.local, childInherited: true };
 
-                     this.ensurePropertyExists(prop, "property", oSpec, this.config);
-                  }
+                  util.assign(oSpec, childProp.getPropagation());
+                  this.ensurePropertyExists(prop, "property", oSpec, this.config);
                }
             }
          }
       }
    }
 
-   return this.propagateToParent;
+   var publishProps = {};
+   
+   for (let prop in this.properties) {
+
+      if (this.properties.hasOwnProperty(prop)) {
+
+         if (this.properties[prop].hasPropagation() && this.properties[prop].hasOwnProperty("propagateToParent")) {
+
+            if (this.properties[prop].propagateToParent) {
+               publishProps[prop] = this.properties[prop];
+            }
+         }
+         else if (this.propagateToParent) {
+            publishProps[prop] = this.properties[prop];
+         }
+      }
+   }
+
+   return publishProps;
 };
 
 Thing.prototype.inheritParentProps = function(_parentProps) {
-   var parentProps = this.ignoreParent ? null : _parentProps;
+   let parentProps = _parentProps;
+
+   if (this.ignoreParent && _parentProps) {
+      parentProps = {};
+
+      for (let prop in _parentProps) {
+
+         if (_parentProps.hasOwnProperty(prop)) {
+
+            if (_parentProps[prop].hasPropagation()) {
+
+               if ((_parentProps[prop].hasOwnProperty("ignoreParent") && !_parentProps[prop].ignoreParent) || 
+                   (_parentProps[prop].hasOwnProperty("propogateToChildren") && _parentProps[prop].propogateToChildren)) {
+
+                  parentProps[prop] = _parentProp[prop];
+               }
+            }
+         }
+      }
+   }
 
    if (parentProps) {
 
-      for (var prop in parentProps) {
+      for (let prop in parentProps) {
   
          if (parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
             console.log(this.uName + ": Adding new prop from parent "+prop);
             var oSpec = { name: prop, initialValue: parentProps[prop].value,
                           local: true, parentInherited: true };
+            let propertyType = "property";
 
-            this.ensurePropertyExists(prop, "property", oSpec, this.config);
+            if (parentProps[prop].type === "stateproperty") {
+               propertyType = "stateproperty";
+               oSpec.states = [];
+
+               for (let i = 0; i < parentProps[prop].states.length; ++i) {
+                  oSpec.stattes.push({ name: parentProps[prop].states[i].name, priority: parentProps[prop].states[i].priority });
+               }
+            }
+
+            util.assign(oSpec, parentProps[prop].getPropagation());
+            this.ensurePropertyExists(prop, propertyType, oSpec, this.config);
          }
       }
    }
 
-   let childProps = this.propagateToChildren ? this.properties : null;
+   let propToChild = false;
+   let childProps = {};
 
-   for (var thing in this.things) {
+   for (let prop in this.properties) {
+      
+      if (this.properties.hasOwnProperty(prop)) {
 
-      if (this.things.hasOwnProperty(thing)) {
-         this.things[thing].inheritParentProps(childProps);
+         if (this.properties[prop].hasPropagation()) {
+
+            if (this.properties[prop].hasOwnProperty("propagateToChildren") && this.properties[prop].propagateToChildren) {
+               childProps[prop] = this.properties[prop];
+               propToChild = true;
+            }
+         }
+         else if (this.propagateToChildren && !(this.properties[prop].hasOwnProperty("childInherited") && this.properties[prop].childInherited)) {
+            childProps[prop] = this.properties[prop];
+            propToChild = true;
+         }
+      }
+   }  
+
+   if (propToChild) {
+
+      for (var thing in this.things) {
+
+         if (this.things.hasOwnProperty(thing)) {
+            this.things[thing].inheritParentProps(childProps);
+         }
       }
    }
 };
 
-Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
+Thing.prototype.getAllProperties = function(_allProps, _ignorePropagation) {
 
-   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propagateToParent))) {
+   if (!this.ignoreParent && (_ignorePropagation || (this.topLevelThing || this.propagateToParent))) {
       Source.prototype.getAllProperties.call(this, _allProps);
 
       if (!this.ignoreChildren) {
@@ -249,16 +324,16 @@ Thing.prototype.getAllProperties = function(_allProps, _ignorePropogation) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].getAllProperties(_allProps, _ignorePropogation);
+               this.things[thing].getAllProperties(_allProps, _ignorePropagation);
             }
          }
       }
    }
 };
 
-Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
+Thing.prototype.findAllProperties = function(_allProps, _ignorePropagation) {
 
-   if (!this.ignoreParent && (_ignorePropogation || (this.topLevelThing || this.propagateToParent))) {
+   if (!this.ignoreParent && (_ignorePropagation || (this.topLevelThing || this.propagateToParent))) {
       Source.prototype.findAllProperties.call(this, _allProps);
 
       if (!this.ignoreChildren) {
@@ -266,7 +341,7 @@ Thing.prototype.findAllProperties = function(_allProps, _ignorePropogation) {
          for (var thing in this.things) {
 
             if (this.things.hasOwnProperty(thing)) {
-               this.things[thing].findAllProperties(_allProps, _ignorePropogation);
+               this.things[thing].findAllProperties(_allProps, _ignorePropagation);
             }
          }
       }

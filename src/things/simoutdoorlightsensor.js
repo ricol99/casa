@@ -31,6 +31,15 @@ function SimOutdoorLightSensor(_config, _owner) {
    }
 
    this.ensurePropertyExists("light-level", "property", { initialValue: 0 }, _config);
+
+   if (_config.hasOwnProperty("latitude")) {
+      this.ensurePropertyExists("latitude", "property", { initialValue: _config.latitude }, _config);
+   }
+
+   if (_config.hasOwnProperty("longitude")) {
+      this.ensurePropertyExists("longitude", "property", { initialValue: _config.longitude }, _config);
+   }
+
    this.scheduleService.registerEvents(this, rules);
 }
 
