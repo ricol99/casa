@@ -92,6 +92,13 @@ Thing.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
 };
 
+Thing.prototype.createModeProperty = function(_config) {
+
+   if (this.topLevelThing) {
+      Source.prototype.createModeProperty.call(this, _config);
+   }
+};
+
 Thing.prototype.sortOutInheritedProperties = function() {
    console.log(this.uName+": sortOutInheritedProperties()");
 
@@ -248,7 +255,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
             if (_parentProps[prop].hasPropagation()) {
 
                if ((_parentProps[prop].hasOwnProperty("ignoreParent") && !_parentProps[prop].ignoreParent) || 
-                   (_parentProps[prop].hasOwnProperty("propogateToChildren") && _parentProps[prop].propogateToChildren)) {
+                   (_parentProps[prop].hasOwnProperty("propagateToChildren") && _parentProps[prop].propagateToChildren)) {
 
                   parentProps[prop] = _parentProp[prop];
                }

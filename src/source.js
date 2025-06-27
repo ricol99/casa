@@ -35,7 +35,7 @@ function Source(_config, _owner) {
       this.createModeProperty(_config);
    }
    else {
-      this.properties["MODE"].setPropagation({ ignoreParent: false, ignoreChildren: false, propagateToParent: true, propogateToChildren: true });
+      this.properties["MODE"].setPropagation({ ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true });
    }
 
    if (this.casa) {
@@ -71,7 +71,7 @@ Source.prototype.hotStart = function() {
 };
 
 Source.prototype.createModeProperty = function(_config) {
-   var modeConfig = { initialValue: "auto", ignoreParent: false, ignoreChildren: false, propagateToParent: true, propogateToChildren: true, takeControlOnTransition: true, ignoreControl: true,
+   var modeConfig = { initialValue: "auto", ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true, takeControlOnTransition: true, ignoreControl: true,
                       states: [ { name: "auto", priority: -100, action: { property: "MANUAL-MODE-DURATION", value: -1 },
                                   source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
                                 { name: "manual", priority: 100,
@@ -83,10 +83,9 @@ Source.prototype.createModeProperty = function(_config) {
          let mode = _config.modes[i];
          modeConfig.states.push({ name: mode.name, priority: mode.hasOwnProperty("priority") ? mode.priority : 100 });
 
-         if (mode.hasOwnProperty("timeout")) {
-            this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, propagateToParent: true, initialValue: mode.timeout }, _config);
-            modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" }, nextState: "auto" };
-         }
+         let timeout = mode.hasOwnProperty("timeout") ? mode.timeout : -1;
+         this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, propagateToParent: true, initialValue: timeout }, _config);
+         modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" }, nextState: "auto" };
 
          if (mode.hasOwnProperty("action")) {
             mode.actions = [ mode.action ];
