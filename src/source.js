@@ -84,7 +84,9 @@ Source.prototype.createModeProperty = function(_config) {
          modeConfig.states.push({ name: mode.name, priority: mode.hasOwnProperty("priority") ? mode.priority : 100 });
 
          let timeout = mode.hasOwnProperty("timeout") ? mode.timeout : -1;
-         this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, propagateToParent: true, initialValue: timeout }, _config);
+         this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, ignoreChildren: false, propagateToParent: true,
+                                                                                           propagateToChildren: true, initialValue: timeout }, _config);
+
          modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" }, nextState: "auto" };
 
          if (mode.hasOwnProperty("action")) {
