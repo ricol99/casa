@@ -360,6 +360,7 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
    else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
+      this.lastData.propertyChange = true;
       this.sourceRawValue = _data.value;
 
       if (this.transform || this.transformMap) {
@@ -374,12 +375,15 @@ SourceListener.prototype.internalSourcePropertyChanged = function(_data) {
 SourceListener.prototype.internalSourceEventRaised = function(_data) {
 
    if (this.capturingAllEvents) {
-      this.casa.eventLogger.logReceivedEvent(this.owner.uName, _data);
-      this.owner.receivedEventFromSource(util.copy(_data));
+      var newData = util.copy(_data);
+      newData.propertyChange = false;
+      this.casa.eventLogger.logReceivedEvent(this.owner.uName, newData);
+      this.owner.receivedEventFromSource(newdata);
    }
    else if (!this.ignoreSourceUpdates && _data.name == this.eventName) {
       this.lastData = util.copy(_data);
       this.lastData.sourceEventName = this.sourceEventName;
+      this.lastData.propertyChange = false;
 
       if (!this.lastData.hasOwnProperty("value")) {
          this.lastData.value = true;
