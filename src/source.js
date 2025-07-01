@@ -104,7 +104,8 @@ Source.prototype.createModeProperty = function(_config) {
    }
 
    this.ensurePropertyExists("MANUAL-MODE-DURATION", "property",
-                            { ignoreParent: false, propagateToParent: true, initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
+                            { ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true,
+                              initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
 
    this.ensurePropertyExists("MODE", "stateproperty", modeConfig, _config);
 };
