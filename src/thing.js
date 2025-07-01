@@ -102,11 +102,11 @@ Thing.prototype.createModeProperty = function(_config) {
 Thing.prototype.sortOutInheritedProperties = function() {
    console.log(this.uName+": sortOutInheritedProperties()");
 
-   //util.setTimeout( () => {
+   util.setTimeout( () => {
       this.inheritChildProps();
       this.inheritParentProps();
       this.casa.scheduleRefreshSourceListeners();
-   //}, 50);
+   }, 1);
 };
 
 // Actually update the property value and let all interested parties know
