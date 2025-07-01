@@ -39,6 +39,7 @@ if (options.localconsole || options.console) {
 }
 else {
    logs = (options.logs == undefined) ? { log: true, info: true, error: true} : { log: (options.logs == "log"), info: ((options.logs == "info") || (options.logs == "log")), error: true };
+   logs= { log: true, info: true, error: true};
 }
 
 require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);

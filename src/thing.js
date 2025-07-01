@@ -257,7 +257,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
                if ((_parentProps[prop].hasOwnProperty("ignoreParent") && !_parentProps[prop].ignoreParent) || 
                    (_parentProps[prop].hasOwnProperty("propagateToChildren") && _parentProps[prop].propagateToChildren)) {
 
-                  parentProps[prop] = _parentProp[prop];
+                  parentProps[prop] = _parentProps[prop];
                }
             }
          }
