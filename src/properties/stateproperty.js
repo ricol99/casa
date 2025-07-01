@@ -374,7 +374,14 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
          }
       }
       else {
-         console.error(this.uName + ": Unable to change state to " + _nextStateName + " as it is not defined! Staying in existing state.");
+
+         if (_parentPropertyPriorityDefined) {
+            console.log(this.uName + ": State " + _nextStateName + " is not defined. Using parent priority");
+            this.takeControl(_parentPropertyPriority);
+         }
+         else {
+            console.log(this.uName + ": State " + _nextStateName + " is not defined. No parent priority defined - doing nothng.");
+         }
       }
    }
    else {

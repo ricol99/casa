@@ -142,13 +142,17 @@ Loader.prototype.loadNode = function() {
                this.gang.gangDb = this.gangDb;
 
                this.gang.buildTree();
-               this.gang.coldStart();
 
-               if (this.localConsoleRequired) {
-                  var LocalConsole = require('./localconsole');
-                  this.localConsole = new LocalConsole(this.gang);
-                  this.localConsole.coldStart();
-               }
+               // Give tree time to perfrom async tasks
+               util.setTimeout( () => {
+                  this.gang.coldStart();
+
+                  if (this.localConsoleRequired) {
+                     var LocalConsole = require('./localconsole');
+                     this.localConsole = new LocalConsole(this.gang);
+                     this.localConsole.coldStart();
+                  }
+               }, 250);
             });
          });
 
@@ -214,11 +218,15 @@ Loader.prototype.loadConsole = function() {
             this.addSystemServices();
 
             this.gang.buildTree();
-            this.gang.coldStart();
 
-            var Console = require('./console');
-            this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
-            this.console.coldStart();
+            // Give tree time to perfrom async tasks
+            util.setTimeout( () => {
+               this.gang.coldStart();
+
+               var Console = require('./console');
+               this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
+               this.console.coldStart();
+            }, 250);
          }
       });
    });
@@ -230,10 +238,15 @@ Loader.prototype.loadConsole = function() {
          this.gangDb.appendToCollection("gang", { name: this.gangName, type: "gang", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 });
 
          this.gang.buildTree();
-         this.gang.coldStart();
-         var Console = require('./console');
-         this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath });
-         this.console.coldStart();
+
+         // Give tree time to perfrom async tasks
+         util.setTimeout( () => {
+            this.gang.coldStart();
+
+            var Console = require('./console');
+            this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath });
+            this.console.coldStart();
+         }, 250);
       });
 
       this.gangDb.on('connect-error', (_data) => {
