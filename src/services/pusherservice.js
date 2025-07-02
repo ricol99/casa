@@ -43,10 +43,6 @@ PusherService.prototype.hotStart = function() {
    Service.prototype.hotStart.call(this);
 };
 
-PusherService.prototype.goingDown = function(_err) {
-   this.sendMessage("control-channel", "status-update", { casaName: this.gang.casa.name, status: "down" });
-};
-
 PusherService.prototype.start = function() {
 
    try {
@@ -235,6 +231,10 @@ PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
          }
       }
    }, this);
+};
+
+PusherDiscoveryTransport.prototype.goingDown = function(_err) {
+   this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "down" });
 };
 
 PusherDiscoveryTransport.prototype.startSearching = function() {

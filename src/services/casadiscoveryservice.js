@@ -31,6 +31,16 @@ CasaDiscoveryService.prototype.setTargetCasa =  function(_targetCasaName) {
    this.targetCasaName = _targetCasaName;
 };
 
+CasaDiscoveryService.prototype.goingDown = function(_err) {
+
+   for (var transportName in this.discoveryTransports) {
+
+      if (this.discoveryTransports.hasOwnProperty(transportName)) {
+         this.discoveryTransports[transportName].goingDown();
+      }
+   }
+};
+
 CasaDiscoveryService.prototype.startSearchingAndBroadcasting =  function() {
    this.startSearching();
    this.startBroadcasting();
@@ -140,6 +150,8 @@ function MdnsDiscoveryTransport(_owner, _name, _messageTransportName, _casaName,
    this.name = this.owner.gang.casa.name;
    this.id = this.owner.gang.casa.name
    this.listeningPort = this.owner.gang.casa.listeningPort;
+   this.searching = false;
+   this.advertising = false;
       
    this.owner.addDiscoveryTransport(this.name, this);
 };
@@ -180,11 +192,23 @@ MdnsDiscoveryTransport.prototype.coldStart = function() {
    }
 }  
 
+MdnsDiscoveryTransport.prototype.goingDown = function() {
+
+   if (this.advertising) {
+      this.ad.stop();
+   }
+
+   if (this.searching) {
+      this.browser.stop();
+   }
+};
+
 MdnsDiscoveryTransport.prototype.startSearching = function() {
    console.log(this.owner.uName + ":" + this.name + ": startSearching()");
 
    try {
       this.browser.start();
+      this.searching = true;
    } catch (_err) {
       console.error(this.owner.uName + ":" + this.name + ": Error: " + _err.message + "\n");
    }
@@ -194,6 +218,7 @@ MdnsDiscoveryTransport.prototype.stopSearching = function() {
    console.log(this.owner.uName + ":" + this.name + ": stopSearching()");
 
    try { 
+      this.searching = false;
       this.browser.stop();
    } catch (_err) {
       console.error(this.owner.uName + ":" + this.name + ": Error: " + _err.message + "\n");
@@ -203,7 +228,6 @@ MdnsDiscoveryTransport.prototype.stopSearching = function() {
 MdnsDiscoveryTransport.prototype.startBroadcasting = function() {
    console.log(this.owner.uName + ":" + this.name + ": startBroadcasting()");
 
-
    try {
       this.ad = new dnssd.Advertisement(dnssd.tcp('casa'), this.listeningPort, { name: this.casaName, txt: { id: this.casaName, gang: this.owner.gang.name }});
  
@@ -212,6 +236,7 @@ MdnsDiscoveryTransport.prototype.startBroadcasting = function() {
       });
 
       this.ad.start();
+      this.advertising = true;
    }
    catch (_ex) {
      console.error(this.owner.uName + ":" + this.name + ": Not advertising service! Error: " + _ex);
@@ -226,7 +251,9 @@ MdnsDiscoveryTransport.prototype.stopBroadcasting = function() {
    }
 
    try {
+      this.advertising = false;
       this.ad.stop();
+      this.ad = null;
    }
    catch (_ex) {
      console.error(this.owner.uName + ":" + this.name + ": Not able to stop advertising service! Error: " + _ex);
