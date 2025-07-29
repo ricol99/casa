@@ -31,6 +31,7 @@ function SimOutdoorLightSensor(_config, _owner) {
    }
 
    this.ensurePropertyExists("light-level", "property", { initialValue: 0 }, _config);
+   this.ensurePropertyExists("cloud-cover", "property", { initialValue: 0 }, _config);
 
    if (_config.hasOwnProperty("latitude")) {
       this.ensurePropertyExists("latitude", "property", { initialValue: _config.latitude }, _config);
@@ -80,6 +81,7 @@ SimOutdoorLightSensor.prototype.scheduledEventTriggered = function(_event) {
          }
 
          console.log(this.uName + ": Cloud cover estimated at " + _cloudCover);
+         this.alignPropertyValue("cloud-cover", _cloudCover);
 
          const lightLevel = estimateLightLevel(lat, lon, new Date(), _cloudCover);
          this.alignPropertyValue("light-level", lightLevel);
@@ -96,7 +98,6 @@ function getCurrentCloudCover(_lat, _lon, _callback) {
   axios.get(url)
   .then( (_response) => {
      const cloudPercent = _response.data.current.cloud_cover;
-     console.log("AAAAAAAAAAAAAAAAAA cloudCoverPercen"+cloudPercent);
 
      if (typeof cloudPercent !== 'number') {
        _callback("Cloud cover not found in response.");
