@@ -320,7 +320,6 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    if (this.uName !== _data.casaName) {
       console.log(this.uName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
       this.gang.removePeerCasa(this);
-      this.gang.changePeerCasaName(this, _data.casaName);
       this.changeName(_data.casaName.substr(2));	// XXX HACK
       this.gang.addPeerCasa(this);
    }
