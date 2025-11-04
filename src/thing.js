@@ -279,7 +279,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
                oSpec.states = [];
 
                for (let i = 0; i < parentProps[prop].states.length; ++i) {
-                  oSpec.stattes.push({ name: parentProps[prop].states[i].name, priority: parentProps[prop].states[i].priority });
+                  oSpec.states.push({ name: parentProps[prop].states[i].name, priority: parentProps[prop].states[i].priority });
                }
             }
 
