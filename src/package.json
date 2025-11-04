@@ -19,6 +19,7 @@
     "forecast.io": "0.0.11",
     "hap-nodejs": "^0.4.53",
     "i2c-bus": "^5.2.3",
+    "jju": "^1.4.0",
     "json5": "^2.2.3",
     "lightwaverf": "0.0.1",
     "mcp-spi-adc": "^3.1.0",
