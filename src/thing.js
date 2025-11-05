@@ -274,12 +274,15 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
                           local: true, parentInherited: true };
             let propertyType = "property";
 
-            if (parentProps[prop].type === "stateproperty") {
+            if (parentProps[prop].type === "stateproperty" && parentProps[prop].globalPriority) {
                propertyType = "stateproperty";
                oSpec.states = [];
 
-               for (let i = 0; i < parentProps[prop].states.length; ++i) {
-                  oSpec.states.push({ name: parentProps[prop].states[i].name, priority: parentProps[prop].states[i].priority });
+               for (var state in parentProps[prop].states) {
+
+                  if (parentProps[prop].states.hasOwnProperty(state)) {
+                     oSpec.states.push({ name: state, priority: parentProps[prop].states[state].priority });
+                  }
                }
             }
 

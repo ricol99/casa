@@ -71,7 +71,8 @@ Source.prototype.hotStart = function() {
 };
 
 Source.prototype.createModeProperty = function(_config) {
-   var modeConfig = { initialValue: "auto", ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true, takeControlOnTransition: true, ignoreControl: true,
+   var modeConfig = { initialValue: "auto", ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true,
+                      takeControlOnTransition: true, ignoreControl: true, globalPriority: true,
                       states: [ { name: "auto", priority: -100, action: { property: "MANUAL-MODE-DURATION", value: -1 },
                                   source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
                                 { name: "manual", priority: 100,

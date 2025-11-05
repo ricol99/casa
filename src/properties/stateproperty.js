@@ -19,6 +19,7 @@ function StateProperty(_config, _owner) {
    this.takeControlOnTransition = _config.hasOwnProperty("takeControlOnTransition") ? _config.takeControlOnTransition : false;
    this.allSourcesRequiredForValidity = _config.hasOwnProperty("allSourcesRequiredForValidity") ? _config.allSourcesRequiredForValidity : false;
    this.removeDuplicates = _config.hasOwnProperty("removeDuplicates") ? _config.removeDuplicates : true;
+   this.globalPriority = _config.hasOwnProperty("globalPriority") ? _config.globalPriority : false;
    this.bufferingActions = false;
 
    var regExIndex = 0;
