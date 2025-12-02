@@ -77,6 +77,8 @@ function Room(_config, _parent) {
    this.thingType = "room";
 
    this.ensurePropertyExists("building-name", "property", { initialValue: this.buildingName }, _config);
+   this.ensurePropertyExists("low-light", "property", { source: { name: this.buildingName, property: "low-light" }}, _config);
+   this.ensurePropertyExists("night-time", "property", { source: { name: this.buildingName, property: "night-time" }}, _config);
 
    if (_config.hasOwnProperty("movementTimeouts")) {
       this.movementTimeouts = _config.movementTimeouts;
@@ -112,7 +114,6 @@ function Room(_config, _parent) {
    this.ensureEventExists("room-switch-event", "event", {}, _config);
    this.ensurePropertyExists('alarm-state', 'property', { source: { uName: this.buildingName, property: "alarm-state"}}, _config);
 
-   //this.ensurePropertyExists('evening-possible', 'property', { initialValue: false, source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('evening-possible', 'property', { source: { uName: this.buildingName, property: "evening-possible"}}, _config);
    this.ensurePropertyExists('movement-timeout', 'property', { initialValue: this.movementTimeouts.day }, _config);
 

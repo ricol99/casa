@@ -92,9 +92,13 @@ util.inherits(IoMessageSocket, AsyncEmitter);
 
 IoMessageSocket.prototype.goingDown = function(_err) {
 
-   if ((this.state === "connecting") || (this.state === "connected")) {
+   if (this.state === "connected") {
       this.sendMessageOnTransport("disconnect", { error: "Service down!" });
       this.state = "disconnecting";
+   }
+   else if (this.state === "connecting") {
+      this.sendMessageOnTransport("error", { error: "Service down!" });
+      this.state = "idle";
    }
 };
 

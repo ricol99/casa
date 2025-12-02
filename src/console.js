@@ -126,10 +126,7 @@ Console.prototype.casaFound = function(_params) {
       });
 
       remoteCasa.on("disconnected", (_data) => {
-
-         if (remoteCasa.connected) {
-            this.connectedCasas = this.connectedCasas - 1;
-         }
+         this.connectedCasas = this.connectedCasas - 1;
 
          if (this.connectedCasas === 0) {
             this.offline = true;
@@ -505,7 +502,7 @@ RemoteCasa.prototype.start = function()  {
       if (this.connected) {
          _data.name = this.name;
          this.connected = false;
-         this.emit('disconnected', _data);
+         this.emit('disconnected', { name: this.name });
       }
    });
 };
