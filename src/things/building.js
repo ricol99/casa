@@ -111,7 +111,7 @@ function Building(_config, _parent) {
 
                                          { name: "occupied-awake",
                                            sources: [{ property: "some-users-in-bed", value: true, nextState: "occupied-going-to-bed" },
-                                                     { property: "all-users-away", value: true, nextState: "empty", action: { property: "evening-possible", value: false }}]},
+                                                     { property: "all-users-away", value: true, nextState: "empty"}]},
 
                                          { name: "occupied-going-to-bed",
                                            sources: [{ property: "all-users-in-bed", value: true, nextState: "occupied-asleep" },
@@ -136,8 +136,9 @@ function Building(_config, _parent) {
                                            timeout: { duration: 1, nextState: "occupied-going-to-bed" } },
 
                                          { name: "occupied-waking-up",
-                                           sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake" },
-                                                     { property: "all-users-away", value: true, nextState: "empty", action: { property: "evening-possible", value: false }}] }] }, _config);
+                                           sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake"},
+                                                     { property: "all-users-away", value: true, nextState: "empty"}],
+                                           action: { property: "evening-possible", value: false }}] }, _config);
 
    // Movement property
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };
@@ -343,7 +344,6 @@ Building.prototype.processSubscription = function(_subscription) {
 
       this.properties["movement"].addNewSource({ "uName": _subscription.listeningSource, "property": "movement" });
       this.properties["any-users-sensitive"].addNewSource({ "uName": _subscription.listeningSource, "property": "users-sensitive" });
-      this.properties["evening-possible"].addNewSource({ "uName": _subscription.listeningSource, "event": "cancel-bedtime-event", "transform": "true" });
    }
 
 };
@@ -378,7 +378,6 @@ Building.prototype.processSubscriptionRemoval = function(_subscription) {
    
       this.properties["movement"].removeExistingSource({ "uName": _subscription.listeningSource, "property": "movement" }, _subscription);
       this.properties["any-users-sensitive"].removeExistingSource({ "uName": _subscription.listeningSource, "property": "users-sensitive" }, _subscription);
-      this.properties["evening-possible"].removeExistingSource({ "uName": _subscription.listeningSource, "event": "cancel-bedtime-event", "transform": "true" }, _subscription);
    }
 };
 
