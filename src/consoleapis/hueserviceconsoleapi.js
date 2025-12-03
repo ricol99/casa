@@ -189,6 +189,15 @@ HueServiceConsoleApi.prototype.createGroup = function(_session, _params, _callba
    this.hue.createGroup(name, lightIds, _callback);
 };
 
+HueServiceConsoleApi.prototype.updateGroup = function(_session, _params, _callback) {
+   this.checkParams(3, _params);
+   var id = _params[0];
+   var name = _params[1];
+   var lightIds = _params[2];
+
+   this.hue.updateGroup(id, name, lightIds, _callback);
+};
+
 HueServiceConsoleApi.prototype.deleteGroup = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var id = _params[0];
