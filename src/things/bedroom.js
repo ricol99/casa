@@ -87,13 +87,7 @@ function Bedroom(_config, _parent) {
          "states": [
             {
                "name": "not-present", "priority": 0,
-               "sources": [ { "property": "evening-possible", "value": true, "nextState": "not-present-evening" },
-                            { "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" }]
-            },
-            {
-               "name": "not-present-evening", "priority": 0,
-               "sources": [{ "property": "evening-possible", "value": false, "nextState": "not-present" },
-                           { "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
+               "sources": [{ "event": this.users[i].name+"-switch-event", "nextState": "initial-reading-in-bed" },
                            { "event": "room-switch-event", "nextState": "room-switch-touched" },
                            { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": false },
                              "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "not-present" },
@@ -161,18 +155,18 @@ function Bedroom(_config, _parent) {
       };
 
       /*if (this.readingInBedTimeout != -1) {
-         this.userStateConfigs[i].states[3].timeout = { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
-         this.userStateConfigs[i].states[4].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
-         this.userStateConfigs[i].states[5].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[2].timeout = { "from": [ "reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[3].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed-others-asleep" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
+         this.userStateConfigs[i].states[4].timeout = { "from": [ "initial-reading-in-bed", "reading-in-bed" ], "duration": this.readingInBedTimeout, "nextState": "asleep-in-bed" };
       }*/
 
       for (var j = 0; j < this.users.length; ++j) {
 
          if (i !== j) {
+            this.userStateConfigs[i].states[2].sources.push({ "property": this.users[j].name+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
             this.userStateConfigs[i].states[3].sources.push({ "property": this.users[j].name+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
-            this.userStateConfigs[i].states[4].sources.push({ "property": this.users[j].name+"-user-state", "value": "asleep-in-bed", "nextState": "reading-in-bed-others-asleep" });
-            this.userStateConfigs[i].states[5].sources.push({ "property": this.users[j].name+"-user-state", "value": "reading-in-bed", "nextState": "reading-in-bed" });
-            this.userStateConfigs[i].states[5].sources.push({ "property": this.users[j].name+"-user-state", "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[4].sources.push({ "property": this.users[j].name+"-user-state", "value": "reading-in-bed", "nextState": "reading-in-bed" });
+            this.userStateConfigs[i].states[4].sources.push({ "property": this.users[j].name+"-user-state", "value": "reading-in-bed-others-asleep", "nextState": "reading-in-bed" });
          }
       }
 
@@ -184,11 +178,11 @@ function Bedroom(_config, _parent) {
 
       this.ensurePropertyExists(this.users[i].name+"-present", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\") && ($value !== \"not-present-evening\")" }},  _config);
+                                                                     "transform": "($value !== \"not-present\")" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-in-bed", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\") && ($value !== \"not-present-evening\") && ($value !== \"awake-in-bed\")" }},  _config);
+                                                                     "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\")" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-present-and-awake", 'andproperty',
                                 { "initialValue": false, "sources": [{ "property": this.users[i].name+"-asleep", "transform": "!$value" },

@@ -14,7 +14,6 @@ function ScheduleProperty(_config, _owner) {
       process.exit(1);
    }
 
-   this.writable = false;
    this.events = [];
 
    this.scheduleService.registerEvents(this, _config.events);
@@ -22,6 +21,7 @@ function ScheduleProperty(_config, _owner) {
    var ret = this.scheduleService.getInitialValue(this);
 
    if (ret.initialValueFound) {
+      this.initialValueSet = true;
       this.value = ret.value;
    }
 }

@@ -126,7 +126,8 @@ function Room(_config, _parent) {
                                                                  { property: "evening-possible", "value": true, nextState: "evening" }],
                                                        actions: [{ property: "movement-timeout", value: this.movementTimeouts["dull-day"] }]},
                                    { name: "evening", sources: [{ property: "night-time", "value": true, nextState: "night" },
-                                                                { property: "low-light", "value": false, nextState: "day" }],
+                                                                { property: "low-light", "value": false, nextState: "day" },
+                                                                { property: "evening-possible", "value": false, nextState: "day" }],
                                                       actions: [{ property: "movement-timeout", value: this.movementTimeouts["evening"] }]},
                                    { name: "night", sources: [{ property: "night-time", "value": false, nextState: "day" }],
                                                     actions: [{ property: "movement-timeout", value: this.movementTimeouts["night"] }]} ] };

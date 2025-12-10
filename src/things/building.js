@@ -4,18 +4,16 @@ var Location = require('./location');
 // Please provide inputs
 // users - users that will use the building
 // daylight - daylight true (dark property is created as the inverse of daylight)
+// eveningPossibleConfig - schedule and value rules for evening-possible property (or define evening-possible property)
 
 // Please define properties for automated functionality
 // latitude - Location of the building
 // longitude - Location of the building
 // low-light - true when light levels are low enough to switch on lights
 // <user>-present - property representing a user being present in the building
-
-// Please define events for automated functionality
-// enter-evening-event - when this event is fired, evening-possible will be set to true. Rooms enter evening mode, if low-light is true
+// evening-possible - when evening is possible (combined with low-light to put lights on in the evening) - optional as you can just provide a cron config above via eveningPossibleConfig
 
 // Resulting properties
-
 // <user>-user-state (s)
 //   - not-present - user not in the building
 //   - present - user in the building
@@ -33,7 +31,6 @@ var Location = require('./location');
 // zone-alarm - zone has been triggered
 // confirmed-alarm - mulitple zones have been triggered
 // fire-alarm - fire detector has been triggered
-
 
 function Building(_config, _parent) {
    Location.call(this, _config, _parent);
@@ -105,7 +102,7 @@ function Building(_config, _parent) {
 
                                          { name: "empty-night-time",
                                            sources: [{ property: "all-users-away", value: false, nextState: "empty"},
-                                                     { event: "wake-up-empty-house-event", nextState: "empty", action: { property: "evening-possible", value: false }},
+                                                     { event: "wake-up-empty-house-event", nextState: "empty"},
                                                      { event: "user-arrived", nextState: "empty" }],
                                            schedule: { "name": "wake-up-empty-house-event", "rules": [ "50 7 * * *" ]}},
 
@@ -137,16 +134,15 @@ function Building(_config, _parent) {
 
                                          { name: "occupied-waking-up",
                                            sources: [{ property: "some-users-in-bed", value: false, nextState: "occupied-awake"},
-                                                     { property: "all-users-away", value: true, nextState: "empty"}],
-                                           action: { property: "evening-possible", value: false }}] }, _config);
+                                                     { property: "all-users-away", value: true, nextState: "empty"}]}] }, _config);
 
    // Movement property
    var movementConfig = { "name": "movement", "type": "orproperty", "initialValue": false, "sources": [] };
    var anyUsersSensitiveConfig = { "name": "any-users-sensitive", "type": "orproperty", "initialValue": false, "sources": [] };
-   var eveningPossibleConfig = { "initialValue": false, "sources": [{ "event": "enter-evening-event", "transform": "true" }]};
-                                                                    //{ "property": "night-time", "value": true, "transform": "false" }]};
 
-   this.ensurePropertyExists("evening-possible", 'property', eveningPossibleConfig, _config);
+   this.ensurePropertyExists("evening-possible", 'scheduleproperty',
+                             { "events": _config.hasOwnProperty("eveningPossibleConfig") ? _config.eveningPossibleConfig
+                                                                                       : [{ "rule": "00 5 * * *", "value": false}, { "rule": "00 19 * * *", "value": true }]}, _config);
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
    this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
