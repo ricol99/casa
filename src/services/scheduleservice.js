@@ -320,6 +320,10 @@ Schedule.prototype.getInitialValue = function() {
    var closestEventSchedule = null;
    var now = new Date();
 
+   if ((this.scheduledEvents.length === 1) && (this.scheduledEvents[0].rules.length === 1)) {
+      return { initialValueFound: true, value: this.scheduledEvents[0].value };
+   }
+
    for (var index = 0; index < this.scheduledEvents.length; ++index) {
       var tempClosestSchedule = this.determineClosestEvent(now, closestEventSchedule, this.scheduledEvents[index]);
 

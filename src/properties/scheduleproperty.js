@@ -24,6 +24,9 @@ function ScheduleProperty(_config, _owner) {
       this.initialValueSet = true;
       this.value = ret.value;
    }
+   else {
+      console.error(this.uName+": No initial value set for schedule property");
+   }
 }
 
 util.inherits(ScheduleProperty, Property);

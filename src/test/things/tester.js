@@ -415,7 +415,6 @@ Tester.prototype.generateExpectedOutput = function(_data) {
    var propOrEvent = _data.propertyChange ? "\"property\"" : "\"event\"";
 
    if (_data && _data.transaction != this.lastTransaction) {
-   //if ((this.logTime - this.lastLogTime) > 80 ) {
 
       if (this.delayedLog) {
          process.stdout.write(this.preString+"\n   "+this.delayedLog);
