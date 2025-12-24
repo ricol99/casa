@@ -1,5 +1,6 @@
 var util = require('util');
 var NamedObject = require('./namedobject');
+var SourceListener = require('./sourcelistener');
 
 function State(_config, _owner) {
    NamedObject.call(this, { name: _config.name, type: "state" }, _owner);
@@ -688,21 +689,26 @@ State.prototype.checkSourceProperties = function() {
 
          if (this.checkGuard(this.sources[i]) && this.sources[i].hasOwnProperty("value") && this.sources[i].hasOwnProperty("property")) {
             var sourceName = this.sources[i].hasOwnProperty("uName") ? this.sources[i].uName : this.owner.owner.uName;
-            var sourceEventName = sourceName + ":" + this.sources[i].property + ":" + this.sources[i].value.toString();
+            var sourceEventName = SourceListener.getSourceEventName(sourceName, this.sources[i]);
             var sourceListener = this.owner.sourceListeners[sourceEventName];
             var source = (sourceListener) ? sourceListener.getSource() : null;
 
-            if (source && source.properties.hasOwnProperty(this.sources[i].property) && (source.getProperty(this.sources[i].property) === this.sources[i].value)) {
+            if (source && source.properties.hasOwnProperty(this.sources[i].property)) {
+               let invert = this.sources[i].hasOwnProperty("invert") ? this.sources[i].invert : false;
 
-               if (this.sources[i].hasOwnProperty("actions")) {
-                  this.owner.alignActions(this.sources[i].actions, this.priority);
-               }
+               if ((invert && (source.getProperty(this.sources[i].property) !== this.sources[i].value)) ||
+                   (!invert && (source.getProperty(this.sources[i].property) === this.sources[i].value))) {
 
-               // Property already matches so move to next state immediately
-               if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
-                  immediateNextState = this.sources[i].nextState;
-                  console.log(this.uName+": Immediate state transition match! source="+this.sources[i].uName+" property="+this.sources[i].property+" value="+this.sources[i].value);
-                  break;
+                  if (this.sources[i].hasOwnProperty("actions")) {
+                     this.owner.alignActions(this.sources[i].actions, this.priority);
+                  }
+
+                  // Property already matches so move to next state immediately
+                  if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
+                     immediateNextState = this.sources[i].nextState;
+                     console.log(this.uName+": Immediate state transition match! source="+this.sources[i].uName+" property="+this.sources[i].property+" value="+this.sources[i].value+" invert="+invert);
+                     break;
+                  }
                }
             }
          }

@@ -92,7 +92,8 @@ function Bedroom(_config, _parent) {
                            { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": false },
                              "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "not-present" },
                            { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": true },
-                             "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "asleep-in-bed" }],
+                             "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "asleep-in-bed" },
+                           { "property": "MODE", "value": "manual", "nextState": "manual-override" }],
                "schedule": {  "name": this.users[i].name+"-check-if-fallen-asleep", "rules": [ "5 3 * * *" ]}
             },
             {
@@ -150,6 +151,10 @@ function Bedroom(_config, _parent) {
                "name": "cancelling-bedtime", "priority": 10,
                "timeout": { "duration": 0.1, "nextState": "not-present" },
                "actions": [{ "property": "night-time", "value": false }]
+            },
+            {
+               "name": "manual-override", "priority": 10,
+               "sources": [{ "property": "MODE", "value": "manual", "invert": true, "nextState": "not-present" }]
             }
          ]
       };

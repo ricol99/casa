@@ -465,6 +465,13 @@ RemoteCasa.prototype.start = function()  {
       this.emit('output', _data);
    });
 
+   this.socket.on('extract-tree-output', (_data) => {
+
+      if (this.extractTreeCallback) {
+         this.extractTreeCallback(null, _data);
+      }
+   });
+
    this.socket.on('scope-exists-output', (_data) => {
 
       if (this.scopeExistsCallback) {
@@ -554,6 +561,18 @@ RemoteCasa.prototype.dbCompare = function() {
    return this.db ? ((this.db.getHash().hash === this.remoteDbInfo.hash.hash) ? 0 : ((this.db.getHash().lastModified > this.remoteDbInfo.hash.lastModified) ? 1 : -1)) : -1;
 }
 
+RemoteCasa.prototype.extractTree = function(_callback) {
+   
+   if (this.connected) {
+      this.extractTreeCallback = _callback;
+      this.socket.emit('extractTree', { scope: this.owner.currentScope });
+      return true;
+   }
+   else {
+      return false;
+   }     
+};    
+   
 RemoteCasa.prototype.scopeExists = function(_line, _callback) {
 
    if (this.connected) {
@@ -599,6 +618,16 @@ function OfflineCasa(_config, _owner) {
    this.cmdObj = new ConsoleCmdObj({ name: "offlinecasa", casaName: "offlinecasa", sourceCasa: "offlinecasa" }, this.owner.gangConsoleCmd, this.owner);
    this.methods = Object.getPrototypeOf(this.cmdObj);
 }
+
+OfflineCasa.prototype.extractTree = function(_callback) {
+
+   if (_callback) {
+      return _callback("Tree empty!");
+   }
+   else {
+      return null;
+   }
+};
 
 OfflineCasa.prototype.scopeExists = function(_line, _callback) {
    var gScope = _line.startsWith("::");

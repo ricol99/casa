@@ -83,6 +83,12 @@ ConsoleCmd.prototype.ls = function(_arguments, _callback) {
    this.executeParsedCommand("ls", [], _callback);
 };
 
+ConsoleCmd.prototype.tree = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   var params = (_arguments && arguments.length > 0) ? _arguments : [];
+   this.executeParsedCommand("tree", params, _callback);
+};
+
 ConsoleCmd.prototype.filterArray = function(_array, _filter) {
 
    for (var i = 0; i < _array.length;) {
@@ -143,6 +149,7 @@ ConsoleCmd.prototype.filterMembers = function(_filter, _previousMatches, _fullSc
    members.push(fullScope+"cat");
    members.push(fullScope+"quit");
    members.push(fullScope+"exit");
+   members.push(fullScope+"tree");
 
    this.filterArray(members, fullScope+_filter);
    return members;

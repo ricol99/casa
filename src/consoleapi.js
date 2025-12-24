@@ -108,4 +108,23 @@ ConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
 };
 
+ConsoleApi.prototype.tree = function(_session, _params, _callback) {
+   this.checkParams(0, _params);
+   console.error("SKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK params="+_params);
+
+   let objName = (_params && _params.length > 0) ? _params[0] : this.uName;
+   var obj = this.gang;//(objName === "::") ? this.gang : this.gang.findNamedObject(objName);
+   console.error("SKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK objName="+objName);
+
+   if (!obj) {
+      _callback("Object not found!");
+      return;
+   }
+
+   var exportObj = {};
+   obj.export(exportObj);
+
+   _callback(null, exportObj);
+};
+
 module.exports = exports = ConsoleApi;

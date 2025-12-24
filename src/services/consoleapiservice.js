@@ -34,6 +34,7 @@ ConsoleApiService.prototype.start = function() {
 
    this.gangConsoleApi = this.createChild({ name: this.gang.name, type: "gangconsoleapi" }, "consoleapi", null);
 
+   this.addRoute('/consoleapi/extractTree/:scope', ConsoleApiService.prototype.extractTreeRequest.bind(this));
    this.addRoute('/consoleapi/scopeExists/:scope/:line', ConsoleApiService.prototype.scopeExistsRequest.bind(this));
    this.addRoute('/consoleapi/extractScope/:scope/:line', ConsoleApiService.prototype.extractScopeRequest.bind(this));
    this.addRoute('/consoleapi/executeCommand/:obj/:method/:arguments', ConsoleApiService.prototype.executeCommandRequest.bind(this));
@@ -52,6 +53,19 @@ ConsoleApiService.prototype.getSession = function(_id, _consoleApi) {
    }
 
    return this.sessions[_id];
+};
+
+ConsoleApiService.prototype.extractTreeRequest = function(_request, _response) {
+   console.log(this.uName+": extractTreeRequest() request=", _request.params);
+   
+   if (!_request.params.hasOwnProperty("scope")) {
+      this.sendFail(_request, _response);
+   }
+   else { 
+      var id = "oneshotconsoleapiesession-"+Date.now();
+      this.sessions[id] = new ConsoleApiSession(id, null, this);
+      this.sessions[id].performOneShotHttpRequest('extractTree', _request, _response);
+   }
 };
 
 ConsoleApiService.prototype.scopeExistsRequest = function(_request, _response) {
@@ -176,6 +190,16 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
                                                     lastModified: this.owner.gang.getDb().getHash().lastModified }});
    });
 
+   this.socket.on('extractTree', (_data) => {
+      this.extractTree(_data, (_err, _result) => {
+
+         if (_err) {
+            _result = _err;
+         }
+         this.socket.emit('extract-tree-output', _result);
+      });
+   });
+
    this.socket.on('scopeExists', (_data) => {
       this.scopeExists(_data, (_err, _result) => {
 
@@ -225,7 +249,8 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
 };
 
 ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _request, _response) {
-   var fTable = { scopeExists: ConsoleApiSession.prototype.scopeExists,
+   var fTable = { extractTree: ConsoleApiSession.prototype.extractTree,
+                  scopeExists: ConsoleApiSession.prototype.scopeExists,
                   extractScope: ConsoleApiSession.prototype.extractScope,
                   executeCommand: ConsoleApiSession.prototype.executeCommand };
 
@@ -266,6 +291,19 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
    }
 
    return scope;
+};
+
+ConsoleApiSession.prototype.extractTree = function(_params, _callback) {
+   var obj = this.owner.gang.findNamedObject(_params.scope);
+
+   if (!obj) {
+      return _callback(null, { exists: false, tree: null });
+   }
+
+   var exportObj = {};
+   obj.export(exportObj);
+
+   _callback(null, { exists: true, tree: exportObj });
 };
 
 ConsoleApiSession.prototype.scopeExists = function(_params, _callback) {

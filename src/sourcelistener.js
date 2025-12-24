@@ -63,13 +63,11 @@ function SourceListener(_config, _owner) {
    }
 
    this.matchingValueDefined = _config.hasOwnProperty('value');
+   this.sourceEventName = SourceListener.getSourceEventName(this.sourceName, _config);
 
    if (this.matchingValueDefined) {
       this.matchingValue = _config.value;
-      this.sourceEventName = this.sourceName + ":" + this.eventName + ":" + this.matchingValue.toString();
-   }
-   else {
-      this.sourceEventName = this.sourceName + ":" + this.eventName;
+      this.invertMatchingValue = _config.hasOwnProperty("invert") ? _config.invert : false;
    }
 
    NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, _owner);
@@ -87,6 +85,20 @@ function SourceListener(_config, _owner) {
 }
 
 util.inherits(SourceListener, NamedObject);
+
+SourceListener.getSourceEventName = function(_sourceUName, _sourceConfig) {
+   let eventName = _sourceConfig.hasOwnProperty("property") ? _sourceConfig.property : _sourceConfig.event;
+   var valueStr;
+
+   if (_sourceConfig.hasOwnProperty("value")) {
+       valueStr = (_sourceConfig.hasOwnProperty("invert") && _sourceConfig.invert) ? ":"+_sourceConfig.value.toString()+":inverse" : ":"+_sourceConfig.value.toString();
+   }
+   else {
+      valueStr = "";
+   }
+
+   return _sourceUName + ":" + eventName + valueStr;
+}; 
 
 // Used to classify the type and understand where to load the javascript module
 SourceListener.prototype.superType = function(_type) {
@@ -265,8 +277,14 @@ SourceListener.prototype.goValid = function() {
 
 SourceListener.prototype.makeClientAwareOfEvent = function(_data) {
 
-   if (this.matchingValueDefined && (this.sourceRawValue !== this.matchingValue)) {
-      return;
+   if (this.matchingValueDefined) {
+
+      if (this.invertMatchingValue && (this.sourceRawValue === this.matchingValue)) {
+         return;
+      }
+      else if (!this.invertMatchingValue && (this.sourceRawValue !== this.matchingValue)) {
+         return;
+      }
    }
 
    console.log(this.uName + ": processing source event raised, event=" + _data.name);

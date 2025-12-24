@@ -128,7 +128,72 @@ HueServiceConsoleCmd.prototype.hub = function(_arguments, _callback) {
             const createGroupOptions = commandLineArgs(createGroupDefinitions, { argv, stopAtFirstUnknown: true })
             argv = createGroupOptions._unknown || [];
             return this.executeParsedCommand("createGroup", [ createGroupOptions.name, createGroupOptions.ids ], _callback);
-            //return _callback(null, util.inspect(createGroupOptions));
+         }
+         else {
+            return _callback("Currently only support creation of groups!");
+         }
+      }
+      else if (mainCommand.name === "update") {
+
+         if (argv.length === 0) {
+            return _callback("Nothing to update!");
+         }
+
+         if (argv[0] === "group") {
+  
+            const updateGroupDefinitions = [
+               { name: 'id', alias: 'i', type: String },
+               { name: 'name', alias: 'n', type: String },
+               { name: 'add', alias: 'a', type: Boolean },
+               { name: 'remove', alias: 'r', type: Boolean },
+               { name: 'ids', multiple: true, type: String, defaultOption: true }
+            ];
+
+            argv.shift();
+            const updateGroupOptions = commandLineArgs(updateGroupDefinitions, { argv, stopAtFirstUnknown: true })
+            argv = updateGroupOptions._unknown || [];
+
+            if (updateGroupOptions.add || updateGroupOptions.remove) {
+
+               return this.executeParsedCommand("groups", [], (_result, _error) -> {
+
+                  if (_error) {
+                     return _callback(_error);
+                  }
+
+                  let groups = util.filter(_result, (_item) -> { return _item.id === updateGroupOptions.id; });
+
+                  if (!groups || groups.length < 1) {
+                     return _callback("Unable to find groub with id="+updateGroupOptions.id);
+                  }
+
+                  let existingIds = [];
+
+                  for (let y = 0; y < groups[0].lights.length; ++y) {
+
+                     if (updateGroupOptions.remove) {
+                        let removalFound = false;
+
+                        for (let z = 0; z < updateGroupOptions.ids.length; ++z) {
+
+                           if (groups[0].lights[y].id === updateGroupOptions.ids[z]) {
+                              removalFound = true;
+                           }
+                        }
+
+                        if (removalFound) continue;
+                     }
+                     existingIds.push(groups[0].lights[y].id);
+                  }
+
+                  let name = updateGroupOptions.name ? updateGroupOptions.name : groups[0].name;
+                  let newIds = updateGroupOptions.add ? existingIds.concat(updateGroupOptions.ids) : existingIds;
+                  return this.executeParsedCommand("updateGroup", [ updateGroupOptions.id, name, newIds ], _callback);
+               });
+            }
+            else {
+               return this.executeParsedCommand("updateGroup", [ updateGroupOptions.id, updateGroupOptions.name, updateGroupOptions.ids ], _callback);
+           a}
          }
          else {
             return _callback("Currently only support creation of groups!");

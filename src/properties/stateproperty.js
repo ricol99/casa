@@ -544,13 +544,7 @@ StateProperty.prototype.fetchOrCreateSourceListener = function(_config, _refresh
       _config.uName = this.owner.uName;
    }
 
-   if (_config.hasOwnProperty("value")) {
-      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event) + ":" + _config.value.toString();
-   }
-   else {
-      sourceListenerName = _config.uName + ":" + ((_config.hasOwnProperty("property")) ? _config.property : _config.event);
-   }
-
+   sourceListenerName = SourceListener.getSourceEventName(_config.uName, _config);
    var sourceListener = this.sourceListeners[sourceListenerName];
 
    if (!sourceListener) {
