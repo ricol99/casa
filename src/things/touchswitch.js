@@ -20,6 +20,9 @@ function TouchSwitch(_config, _parent) {
    this.eventName = _config.hasOwnProperty("eventName") ? _config.eventName : "touch-event";
    this.invokeManualMode =  _config.hasOwnProperty("invokeManualMode") ? _config.invokeManualMode : !this.stateless;
    this.displayName = _config.displayName;
+   this.doubleTapEventName = _config.hasOwnProperty("doubleTapEventName") ? _config.doubleTapEventName : null;
+   this.doubleTapWindow = _config.hasOwnProperty("doubleTapWindow") ? _config.doubleTapWindow : 0;
+   this.pendingSingleTapTimer = null;
 
    if (this.gpioIncluded && this.gpioFeedbackPin) {
       this.ensurePropertyExists(this.feedbackProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioFeedbackPin, direction: "out" }, _config);
@@ -93,6 +96,27 @@ TouchSwitch.prototype.propertyAboutToChange = function(_propName, _propValue, _d
    if (!_data.coldStart && (_propName === this.switchProp) && _propValue && this.invokeManualMode) {
       this.setManualMode();
    }
+};
+
+TouchSwitch.prototype.raiseEvent = function(_eventName, _data) {
+
+   if (this.doubleTapEventName && (this.doubleTapWindow > 0) && (_eventName === this.eventName)) {
+
+      if (this.pendingSingleTapTimer) {
+         util.clearTimeout(this.pendingSingleTapTimer);
+         this.pendingSingleTapTimer = null;
+         return Thing.prototype.raiseEvent.call(this, this.doubleTapEventName, _data);
+      }
+
+      this.pendingSingleTapTimer = util.setTimeout(() => {
+         this.pendingSingleTapTimer = null;
+         Thing.prototype.raiseEvent.call(this, this.eventName, _data);
+      }, this.doubleTapWindow * 1000);
+
+      return true;
+   }
+
+   return Thing.prototype.raiseEvent.call(this, _eventName, _data);
 };
 
 module.exports = exports = TouchSwitch;
