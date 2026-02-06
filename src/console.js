@@ -126,7 +126,16 @@ Console.prototype.casaFound = function(_params) {
       });
 
       remoteCasa.on("disconnected", (_data) => {
+
+         if (_data && _data.hasOwnProperty("wasConnected") && !_data.wasConnected) {
+            return;
+         }
+
          this.connectedCasas = this.connectedCasas - 1;
+
+         if (this.connectedCasas < 0) {
+            this.connectedCasas = 0;
+         }
 
          if (this.connectedCasas === 0) {
             this.offline = true;
@@ -497,9 +506,10 @@ RemoteCasa.prototype.start = function()  {
       this.connecting = false;
 
       if (this.connected) {
+         var wasConnected = this.connected;
          _data.name = this.name;
          this.connected = false;
-         this.emit('disconnected', { name: this.name });
+         this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
    });
 
@@ -507,9 +517,10 @@ RemoteCasa.prototype.start = function()  {
       this.connecting = false;
 
       if (this.connected) {
+         var wasConnected = this.connected;
          _data.name = this.name;
          this.connected = false;
-         this.emit('disconnected', { name: this.name });
+         this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
    });
 };
@@ -534,10 +545,11 @@ RemoteCasa.prototype.reconnect = function(_params) {
 RemoteCasa.prototype.disconnect = function() {
 
    if (this.connected || this.connecting) {
+      var wasConnected = this.connected;
       this.connected = false;
       this.connecting = false;
       this.socket.disconnect();
-      this.emit('disconnected', { name: this.name, upgrading: true, error: "Upgrading transport!" });
+      this.emit('disconnected', { name: this.name, upgrading: true, error: "Upgrading transport!", wasConnected: wasConnected });
    }
 };
 
@@ -682,4 +694,3 @@ OfflineCasa.prototype.getCasa = function(_name) {
 };
 
 module.exports = exports = Console;
-
