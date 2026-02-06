@@ -316,8 +316,11 @@ ConsoleApiSession.prototype.processMatches = function(_currentScope, _line, _mat
 
    for (var i = 0; i < _matches.length; ++i) {
 
-      if (!((_line.length > 1) && _line.startsWith("::"))) {
-         _matches[i] = (_currentScope === "::") ? _matches[i].replace(_currentScope, "") : _matches[i].replace(_currentScope, "").substr(1);
+      if (!(_line && _line.startsWith(":"))) {
+         if (_matches[i].startsWith(_currentScope)) {
+            var trimmed = _matches[i].substr(_currentScope.length);
+            _matches[i] = (trimmed[0] === ":") ? trimmed.substr(1) : trimmed;
+         }
       }
    }
 };
