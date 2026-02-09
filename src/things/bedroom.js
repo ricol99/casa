@@ -43,8 +43,7 @@ function Bedroom(_config, _parent) {
                          { name: "no-users-present-night", priority: 0}, { name: "users-present-night", priority: 0}];
 
    if (_config.hasOwnProperty("nightEntry") && _config.nightEntry) {
-      _config.userOverrideConfig.states[0].sources[1].event = "room-switch-doubletap-event";
-      _config.userOverrideConfig.states[0].sources[1].nextState = "cancel-bedtime";
+      _config.userOverrideConfig.states[0].sources[1].nextState = "may-need-to-cancel-bedtime";
    }
 
    if (!_config.hasOwnProperty("roomType")) {
@@ -55,7 +54,6 @@ function Bedroom(_config, _parent) {
    this.ensureEventExists("cancel-bedtime-event", "event", {}, _config);
    this.ensureEventExists("pre-wake-up-event", "event", {}, _config);
    this.ensureEventExists("wake-up-event", "event", {}, _config);
-   this.ensureEventExists("room-switch-doubletap-event", "event", {}, _config);
 
    this.ensurePropertyExists("pre-wake-up-duration", "property", { initialValue: -1 }, _config);
    this.userStateConfigs = [];
