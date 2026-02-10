@@ -7,6 +7,7 @@ function McpService(_config, _owner) {
 
    this.mcpRoute = _config.hasOwnProperty("mcpRoute") ? _config.mcpRoute : "/mcp";
    this.maxBodyBytes = _config.hasOwnProperty("maxBodyBytes") ? _config.maxBodyBytes : 1024 * 1024;
+   this.auth = _config.hasOwnProperty("auth") ? _config.auth : { mode: "none" };
 }
 
 util.inherits(McpService, WebService);
@@ -33,10 +34,15 @@ McpService.prototype.start = function() {
    WebService.prototype.start.call(this);
 
    this.addRoute(this.mcpRoute, McpService.prototype.handleGet.bind(this));
+   this.addRoute(this.mcpRoute + "/.well-known/oauth-authorization-server", McpService.prototype.handleOauthMetadata.bind(this));
+   this.addRoute(this.mcpRoute + "/oauth", McpService.prototype.handleOauthPlaceholder.bind(this));
    this.addPostRoute(this.mcpRoute, McpService.prototype.handlePost.bind(this));
 };
 
 McpService.prototype.handleGet = function(_request, _response) {
+   if (!this.isAuthorized(_request)) {
+      return this.sendJsonRpcError(_response, null, -32001, "Unauthorized");
+   }
 
    _response.status(200).json({
       name: "casa-mcp",
@@ -46,12 +52,47 @@ McpService.prototype.handleGet = function(_request, _response) {
 
 McpService.prototype.handlePost = function(_request, _response) {
 
+   if (!this.isAuthorized(_request)) {
+      return this.sendJsonRpcError(_response, null, -32001, "Unauthorized");
+   }
+
    this.collectJsonBody(_request, (_err, _body) => {
       if (_err) {
          return this.sendJsonRpcError(_response, null, -32700, "Invalid JSON");
       }
 
       return this.handleJsonRpc(_body, _response);
+   });
+};
+
+McpService.prototype.handleOauthMetadata = function(_request, _response) {
+   if (!this.isAuthorized(_request)) {
+      return this.sendJsonRpcError(_response, null, -32001, "Unauthorized");
+   }
+
+   var baseUrl = this.getBaseUrl(_request);
+   var issuer = this.auth && this.auth.issuer ? this.auth.issuer : baseUrl;
+
+   _response.status(200).json({
+      issuer: issuer,
+      authorization_endpoint: issuer + "/authorize",
+      token_endpoint: issuer + "/token",
+      jwks_uri: issuer + "/jwks",
+      response_types_supported: [ "code" ],
+      grant_types_supported: [ "authorization_code", "refresh_token" ],
+      token_endpoint_auth_methods_supported: [ "client_secret_post", "client_secret_basic" ],
+      scopes_supported: this.auth && this.auth.scopes ? this.auth.scopes : [ "mcp" ]
+   });
+};
+
+McpService.prototype.handleOauthPlaceholder = function(_request, _response) {
+   if (!this.isAuthorized(_request)) {
+      return this.sendJsonRpcError(_response, null, -32001, "Unauthorized");
+   }
+
+   _response.status(501).json({
+      error: "not_implemented",
+      message: "OAuth endpoints are placeholders. Configure auth.issuer and proxy to your OAuth provider."
    });
 };
 
@@ -84,6 +125,45 @@ McpService.prototype.collectJsonBody = function(_request, _callback) {
    });
 
    _request.on("error", (err) => _callback(err));
+};
+
+McpService.prototype.isAuthorized = function(_request) {
+   var mode = this.auth && this.auth.mode ? this.auth.mode : "none";
+
+   if (mode === "none") {
+      return true;
+   }
+
+   var header = _request.headers ? _request.headers.authorization : null;
+   var token = header ? header.replace(/^Bearer\s+/i, "") : null;
+
+   if (!token) {
+      return false;
+   }
+
+   if (mode === "bearer") {
+      return this.auth && this.auth.token && token === this.auth.token;
+   }
+
+   if (mode === "oauth") {
+      if (this.auth && this.auth.validator && typeof this.auth.validator === "function") {
+         return this.auth.validator(token, _request);
+      }
+
+      return false;
+   }
+
+   return false;
+};
+
+McpService.prototype.getBaseUrl = function(_request) {
+   var proto = _request.headers && _request.headers["x-forwarded-proto"]
+      ? _request.headers["x-forwarded-proto"]
+      : _request.protocol;
+   var host = _request.headers && _request.headers["x-forwarded-host"]
+      ? _request.headers["x-forwarded-host"]
+      : _request.headers.host;
+   return proto + "://" + host;
 };
 
 McpService.prototype.handleJsonRpc = function(_body, _response) {
