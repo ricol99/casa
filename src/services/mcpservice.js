@@ -1,5 +1,9 @@
 var util = require('util');
 var WebService = require('./webservice');
+var crypto = require('crypto');
+var https = require('https');
+var http = require('http');
+var url = require('url');
 
 var MCP_PROTOCOL_VERSION = "2025-06-18";
 
@@ -13,6 +17,8 @@ function McpService(_config, _owner) {
    this.supportedProtocolVersions = _config.hasOwnProperty("supportedProtocolVersions")
       ? _config.supportedProtocolVersions
       : [ MCP_PROTOCOL_VERSION ];
+   this.jwks = { keysByKid: {}, expiresAt: 0 };
+   this.jwksCacheTtl = this.auth && this.auth.jwksCacheTtl ? this.auth.jwksCacheTtl : 3600;
 }
 
 util.inherits(McpService, WebService);
@@ -52,28 +58,38 @@ McpService.prototype.start = function() {
 
 McpService.prototype.handleGet = function(_request, _response) {
 
-   if (!this.isAuthorized(_request) && !(this.auth && this.auth.publicGet)) {
-      return this.sendUnauthorized(_request, _response);
-   }
+   this.isAuthorized(_request, (ok) => {
+      if (!ok && !(this.auth && this.auth.publicGet)) {
+         console.log(this.uName + ": Unauthorized GET " + _request.url);
+         return this.sendUnauthorized(_request, _response);
+      }
 
-   _response.status(200).json({
-      name: "casa-mcp",
-      status: "ok"
+      console.log(this.uName + ": GET " + _request.url);
+      _response.status(200).json({
+         name: "casa-mcp",
+         status: "ok"
+      });
    });
 };
 
 McpService.prototype.handlePost = function(_request, _response) {
 
-   if (!this.isAuthorized(_request)) {
-      return this.sendUnauthorized(_request, _response);
-   }
+   this.isAuthorized(_request, (ok) => {
 
-   this.collectJsonBody(_request, (_err, _body) => {
-      if (_err) {
-         return this.sendJsonRpcError(_response, null, -32700, "Invalid JSON");
+      if (!ok) {
+         console.log(this.uName + ": Unauthorized POST " + _request.url);
+         return this.sendUnauthorized(_request, _response);
       }
 
-      return this.handleJsonRpc(_body, _request, _response);
+      this.collectJsonBody(_request, (_err, _body) => {
+         if (_err) {
+            console.log(this.uName + ": Invalid JSON body for POST " + _request.url);
+            return this.sendJsonRpcError(_response, null, -32700, "Invalid JSON");
+         }
+
+         console.log(this.uName + ": JSON-RPC " + (_body && _body.method ? _body.method : "unknown"));
+         return this.handleJsonRpc(_body, _request, _response);
+      });
    });
 };
 
@@ -81,6 +97,7 @@ McpService.prototype.handleOauthMetadata = function(_request, _response) {
    var baseUrl = this.getBaseUrl(_request);
    var issuer = this.auth && this.auth.issuer ? this.auth.issuer : baseUrl;
 
+   console.log(this.uName + ": OAuth metadata requested");
    _response.status(200).json({
       issuer: issuer,
       authorization_endpoint: issuer + "/authorize",
@@ -94,6 +111,8 @@ McpService.prototype.handleOauthMetadata = function(_request, _response) {
 };
 
 McpService.prototype.handleOauthPlaceholder = function(_request, _response) {
+
+   console.log(this.uName + ": OAuth placeholder requested");
    _response.status(501).json({
       error: "not_implemented",
       message: "OAuth endpoints are placeholders. Configure auth.issuer and proxy to your OAuth provider."
@@ -104,6 +123,7 @@ McpService.prototype.handleProtectedResourceMetadata = function(_request, _respo
    var issuer = this.auth && this.auth.issuer ? this.auth.issuer : this.getBaseUrl(_request);
    var resource = this.getBaseUrl(_request) + this.mcpRoute;
 
+   console.log(this.uName + ": Protected resource metadata requested");
    _response.status(200).json({
       resource: resource,
       authorization_servers: [ issuer ]
@@ -141,33 +161,45 @@ McpService.prototype.collectJsonBody = function(_request, _callback) {
    _request.on("error", (err) => _callback(err));
 };
 
-McpService.prototype.isAuthorized = function(_request) {
+McpService.prototype.isAuthorized = function(_request, _callback) {
    var mode = this.auth && this.auth.mode ? this.auth.mode : "none";
 
    if (mode === "none") {
-      return true;
+      console.log(this.uName + ": Auth mode none");
+      return _callback(true);
    }
 
    var header = _request.headers ? _request.headers.authorization : null;
    var token = header ? header.replace(/^Bearer\s+/i, "") : null;
 
-   if (!token) {
-      return false;
+   if (token) {
+      token = token.replace(/^\"|\"$/g, "").trim();
    }
 
+   if (!token) {
+      console.log(this.uName + ": Missing bearer token");
+      return _callback(false);
+   }
+
+   console.log(this.uName + ": Bearer token format " + (token.indexOf(".") === -1 ? "opaque" : "jwt") + " length=" + token.length);
+
    if (mode === "bearer") {
-      return this.auth && this.auth.token && token === this.auth.token;
+      console.log(this.uName + ": Bearer auth " + (this.auth && this.auth.token && token === this.auth.token ? "ok" : "failed"));
+      return _callback(!!(this.auth && this.auth.token && token === this.auth.token));
    }
 
    if (mode === "oauth") {
       if (this.auth && this.auth.validator && typeof this.auth.validator === "function") {
-         return this.auth.validator(token, _request);
+         console.log(this.uName + ": OAuth auth via validator");
+         return _callback(!!this.auth.validator(token, _request));
       }
 
-      return false;
+      console.log(this.uName + ": OAuth auth via JWKS");
+      return this.validateOAuthToken(token, _callback);
    }
 
-   return false;
+   console.log(this.uName + ": Unknown auth mode");
+   return _callback(false);
 };
 
 McpService.prototype.sendUnauthorized = function(_request, _response) {
@@ -177,6 +209,229 @@ McpService.prototype.sendUnauthorized = function(_request, _response) {
    _response.status(401).json({
       error: "unauthorized"
    });
+};
+
+McpService.prototype.validateOAuthToken = function(_token, _callback) {
+
+   var parsed = this.parseJwt(_token);
+
+   if (!parsed) {
+      console.log(this.uName + ": JWT parse failed");
+      return _callback(false);
+   }
+
+   console.log(this.uName + ": JWT header alg=" + parsed.header.alg + " kid=" + parsed.header.kid);
+
+   if (!this.validateJwtClaims(parsed.payload)) {
+      console.log(this.uName + ": JWT claims invalid");
+      return _callback(false);
+   }
+
+   this.getJwksKey(parsed.header.kid, (key) => {
+      if (!key) {
+         console.log(this.uName + ": JWKS key not found");
+         return _callback(false);
+      }
+
+      var verified = this.verifyJwtSignature(_token, key, parsed.header.alg);
+      console.log(this.uName + ": JWT signature " + (verified ? "ok" : "failed"));
+      return _callback(verified);
+   });
+};
+
+McpService.prototype.parseJwt = function(_token) {
+
+   var token = _token ? _token.trim() : "";
+   var parts = token.split(".");
+
+   if (parts.length !== 3) {
+      if (parts.length === 5) {
+         console.log(this.uName + ": JWE access tokens are not supported (expected JWS with 3 parts)");
+      }
+      return null;
+   }
+
+   var header = this.decodeJwtPart(parts[0]);
+   var payload = this.decodeJwtPart(parts[1]);
+
+   if (!header || !payload) {
+      return null;
+   }
+
+   return { header: header, payload: payload };
+};
+
+McpService.prototype.decodeJwtPart = function(_part) {
+
+   try {
+      var padded = _part.replace(/-/g, "+").replace(/_/g, "/");
+      var padLength = padded.length % 4;
+      if (padLength) {
+         padded += "====".slice(padLength);
+      }
+      var buf = Buffer.from(padded, "base64");
+      return JSON.parse(buf.toString("utf8"));
+   }
+   catch (_err) {
+      return null;
+   }
+};
+
+McpService.prototype.validateJwtClaims = function(_payload) {
+
+   var issuer = this.auth && this.auth.issuer ? this.auth.issuer : null;
+   var audience = this.auth && this.auth.audience ? this.auth.audience : null;
+   var now = Math.floor(Date.now() / 1000);
+   var skew = this.auth && this.auth.clockSkewSec ? this.auth.clockSkewSec : 60;
+
+   if (issuer && _payload.iss !== issuer) {
+      return false;
+   }
+
+   if (audience) {
+      if (Array.isArray(_payload.aud)) {
+         if (_payload.aud.indexOf(audience) === -1) {
+            return false;
+         }
+      }
+      else if (_payload.aud !== audience) {
+         return false;
+      }
+   }
+
+   if (_payload.nbf && (now + skew) < _payload.nbf) {
+      return false;
+   }
+
+   if (_payload.exp && (now - skew) >= _payload.exp) {
+      return false;
+   }
+
+   return true;
+};
+
+McpService.prototype.getJwksKey = function(_kid, _callback) {
+
+   if (!_kid) {
+      console.log(this.uName + ": JWT kid missing");
+      return _callback(null);
+   }
+
+   var now = Math.floor(Date.now() / 1000);
+   var cachedKey = this.jwks.keysByKid[_kid];
+
+   if (cachedKey && now < this.jwks.expiresAt) {
+      console.log(this.uName + ": JWKS cache hit for kid " + _kid);
+      return _callback(cachedKey);
+   }
+
+   this.fetchJwks((keys) => {
+      if (!keys || !keys.length) {
+         return _callback(null);
+      }
+
+      var found = null;
+
+      for (var i = 0; i < keys.length; ++i) {
+         if (keys[i].kid === _kid) {
+            found = keys[i];
+            break;
+         }
+      }
+
+      return _callback(found);
+   });
+};
+
+McpService.prototype.fetchJwks = function(_callback) {
+   var jwksUri = this.getJwksUri();
+
+   if (!jwksUri) {
+      console.log(this.uName + ": JWKS URI not configured");
+      return _callback(null);
+   }
+
+   var parsed = url.parse(jwksUri);
+   var client = parsed.protocol === "http:" ? http : https;
+
+   console.log(this.uName + ": Fetching JWKS from " + jwksUri);
+   var req = client.get(jwksUri, (res) => {
+      var data = "";
+
+      res.on("data", (chunk) => {
+         data += chunk;
+      });
+
+      res.on("end", () => {
+         try {
+            var body = JSON.parse(data);
+            var keys = body.keys || [];
+            var now = Math.floor(Date.now() / 1000);
+            this.jwks.keysByKid = {};
+
+            for (var i = 0; i < keys.length; ++i) {
+               if (keys[i].kid) {
+                  this.jwks.keysByKid[keys[i].kid] = keys[i];
+               }
+            }
+
+            this.jwks.expiresAt = now + this.jwksCacheTtl;
+            console.log(this.uName + ": JWKS cached, keys=" + keys.length);
+            return _callback(keys);
+         }
+         catch (_err) {
+            console.log(this.uName + ": JWKS parse failed");
+            return _callback(null);
+         }
+      });
+   });
+
+   req.on("error", () => {
+      console.log(this.uName + ": JWKS fetch failed");
+      _callback(null);
+   });
+};
+
+McpService.prototype.getJwksUri = function() {
+
+   if (this.auth && this.auth.jwksUri) {
+      return this.auth.jwksUri;
+   }
+
+   if (this.auth && this.auth.issuer) {
+      var issuer = this.auth.issuer;
+      var sep = issuer.endsWith("/") ? "" : "/";
+      return issuer + sep + ".well-known/jwks.json";
+   }
+
+   return null;
+};
+
+McpService.prototype.verifyJwtSignature = function(_token, _jwk, _alg) {
+
+   if (_alg && _alg !== "RS256") {
+      console.log(this.uName + ": Unsupported JWT alg " + _alg);
+      return false;
+   }
+
+   try {
+      var keyObject = crypto.createPublicKey({ key: _jwk, format: "jwk" });
+      var verify = crypto.createVerify("RSA-SHA256");
+      var parts = _token.split(".");
+
+      if (parts.length !== 3) {
+         return false;
+      }
+
+      verify.update(parts[0] + "." + parts[1]);
+      verify.end();
+
+      var signature = Buffer.from(parts[2].replace(/-/g, "+").replace(/_/g, "/"), "base64");
+      return verify.verify(keyObject, signature);
+   }
+   catch (_err) {
+      return false;
+   }
 };
 
 McpService.prototype.getBaseUrl = function(_request) {
@@ -360,6 +615,7 @@ McpService.prototype.hasProtocolHeader = function(_request) {
 };
 
 McpService.prototype.setProtocolHeader = function(_response, _version) {
+
    if (_version) {
       _response.set("MCP-Protocol-Version", _version);
    }
