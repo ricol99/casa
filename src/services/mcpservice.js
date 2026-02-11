@@ -527,6 +527,23 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                annotations: {
                   readOnlyHint: false
                }
+            },
+            {
+               name: "casa.set_property",
+               title: "Set Property",
+               description: "Set a property value on a named object",
+               inputSchema: {
+                  type: "object",
+                  properties: {
+                     uName: { type: "string" },
+                     property: { type: "string" },
+                     value: {}
+                  },
+                  required: [ "uName", "property", "value" ]
+               },
+               annotations: {
+                  readOnlyHint: false
+               }
             }
          ]
       });
@@ -576,6 +593,27 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
       }
       else {
          target.setManualMode();
+      }
+
+      return this.sendJsonRpcResult(_response, _id, {
+         content: [ { type: "text", text: "ok" } ],
+         structuredContent: { ok: true },
+         isError: false
+      });
+   }
+
+   if (_params.name === "casa.set_property") {
+      var args2 = _params.arguments || {};
+      var target2 = args2.uName ? this.gang.findNamedObject(args2.uName) : null;
+
+      if (!target2 || !target2.setProperty) {
+         return this.sendJsonRpcError(_response, _id, -32000, "Target does not support setProperty");
+      }
+
+      var result = target2.setProperty(args2.property, args2.value, { sourceName: "mcp" });
+
+      if (!result) {
+         return this.sendJsonRpcError(_response, _id, -32000, "Property not found or rejected");
       }
 
       return this.sendJsonRpcResult(_response, _id, {
