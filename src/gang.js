@@ -228,7 +228,16 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
 };
 
 Gang.prototype.uNameToLongForm = function(_name)  {
-   return ((_name.length === 1) && (_name[0] === ':')) ? this.casa.uName : ((_name.length > 1) && (_name[0] === ':') && (_name[1] !== ':')) ? this.casa.uName + _name : _name;
+   if (typeof _name !== "string") {
+      return _name;
+   }
+
+   // Phase 1 migration: single-colon casa shorthand (e.g. ":thing") is no longer allowed.
+   if ((_name.length > 1) && (_name[0] === ':') && (_name[1] !== ':')) {
+      throw new Error("Single-colon casa shortcut is no longer supported: " + _name + ". Use an absolute named object (\"::...\").");
+   }
+
+   return _name;
 };
 
 Gang.prototype.findNamedObject = function(_uName)  {
@@ -376,4 +385,3 @@ function stripTransient(_source) {
 }
 
 module.exports = exports = Gang;
-
