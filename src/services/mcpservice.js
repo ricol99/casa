@@ -563,7 +563,7 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
    }
 
    if (_params.name === "casa.get_named_object_tree") {
-      var uName = _params.arguments && _params.arguments.uName ? _params.arguments.uName : "::";
+      var uName = _params.arguments && _params.arguments.uName ? _params.arguments.uName : ":";
       var obj = this.gang.findNamedObject(uName);
 
       if (!obj) {

@@ -6,7 +6,7 @@ function Tester(_config, _parent) {
    Thing.call(this, _config, _parent);
    this.thingType = "testsequence";
    this.settleTime = _config.hasOwnProperty("settleTime") ? _config.settleTime : 3;
-   this.targetUnderTest = (_config.hasOwnProperty("targetUnderTest")) ? this.gang.uNameToLongForm(_config.targetUnderTest) : this.uName;
+   this.targetUnderTest = (_config.hasOwnProperty("targetUnderTest")) ? this.gang.validateUName(_config.targetUnderTest) : this.uName;
    this.lastLogTime = Date.now()-1000;
 
    this.currentTestCase = 0;
@@ -136,7 +136,7 @@ Tester.prototype.addTargetUnderTest = function(_testCase) {
          _testCase.expectedSequence[j].source = this.targetUnderTest;
       }
       else {
-         _testCase.expectedSequence[j].source = this.gang.uNameToLongForm(_testCase.expectedSequence[j].source);
+         _testCase.expectedSequence[j].source = this.gang.validateUName(_testCase.expectedSequence[j].source);
       }
    }
 };

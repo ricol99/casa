@@ -227,21 +227,21 @@ Gang.prototype.findNewPeerSource = function(_peerSourceFullName, _peerCasa) {
    return highestPrioritySource;
 };
 
-Gang.prototype.uNameToLongForm = function(_name)  {
+Gang.prototype.validateUName = function(_name)  {
    if (typeof _name !== "string") {
       return _name;
    }
 
-   // Phase 1 migration: single-colon casa shorthand (e.g. ":thing") is no longer allowed.
-   if ((_name.length > 1) && (_name[0] === ':') && (_name[1] !== ':')) {
-      throw new Error("Single-colon casa shortcut is no longer supported: " + _name + ". Use an absolute named object (\"::...\").");
+   // Phase 2 migration: global absolute names are now single-colon (e.g. ":thing").
+   if (_name.startsWith("::")) {
+      throw new Error("Double-colon global scope is no longer supported: " + _name + ". Use single-colon absolute names (\":...\").");
    }
 
    return _name;
 };
 
 Gang.prototype.findNamedObject = function(_uName)  {
-   var uName = this.uNameToLongForm(_uName);
+   var uName = this.validateUName(_uName);
    var namedObj = NamedObject.prototype.findNamedObject.call(this, uName);
 
    if (!namedObj) {

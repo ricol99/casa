@@ -1,6 +1,10 @@
 var util = require('util');
 var Thing = require('../thing');
 
+function uNameToLocationSuffix(_uName) {
+   return (typeof _uName === "string") ? _uName.replace(/^:+/, "").replace(/:/g, "-") : _uName;
+}
+
 // Please define properties for automated functionality
 // users - users who can occupy the car
 // <user>-aboard - true or false
@@ -77,7 +81,7 @@ function Car(_config, _parent) {
       };
 
       for (var z = 0; z < this.locations.length; ++z) {
-         var locName = this.locations[z].uName.replace(/:/g, "-").replace("--", "");
+         var locName = uNameToLocationSuffix(this.locations[z].uName);
          userStateConfigs[i].states[1].sources.push({ uName: this.locations[z].uName, property: this.users[i].name+"-present", value: true, nextState: "aboard-at-" + locName });
 
          var aboardAtConfig = { name: "aboard-at-" + locName,
@@ -103,7 +107,7 @@ function Car(_config, _parent) {
 
    for (var s = 0; s < this.locations.length; ++s) {
       var occupiedAtConfig = { initialValue: false, sources: [] };
-      var locName2 = this.locations[s].uName.replace(/:/g, "-").replace("--", "");
+      var locName2 = uNameToLocationSuffix(this.locations[s].uName);
 
       for (var t = 0; t < _config.users.length; ++t) {
          var userAboardAtConfig = { initialValue: false, sources: [] };

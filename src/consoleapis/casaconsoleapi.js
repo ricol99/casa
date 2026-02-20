@@ -127,8 +127,9 @@ CasaConsoleApi.prototype.createThing = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var newThingConfig = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
+   var thingUName = newThingConfig.name && newThingConfig.name.startsWith(":") ? newThingConfig.name : ":" + newThingConfig.name;
 
-   if (this.gang.findNamedObject("::"+newThingConfig.name)) {
+   if (this.gang.findNamedObject(thingUName)) {
       return _callback("Thing already exists!");
    }
 

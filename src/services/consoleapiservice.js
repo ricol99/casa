@@ -279,7 +279,7 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
    var scope;
    var line = _line;
 
-   if ((line !== ":") && (line !== "::") && (line[line.length-1] === ':')) {
+   if ((line !== ":") && (line[line.length-1] === ':')) {
       line = _line.substr(0, _line.length - 1);
    }
 
@@ -287,7 +287,7 @@ ConsoleApiSession.prototype.processScopeAndLine = function(_scope, _line) {
       scope = line;
    }
    else {
-      scope = (_scope === "::") ? "::" + line : _scope + ":" + line;
+      scope = (_scope === ":") ? ":" + line : _scope + ":" + line;
    }
 
    return scope;
@@ -334,7 +334,7 @@ ConsoleApiSession.prototype.extractScopeFromLine = function(_currentScope, _line
       trimmedString = _line.substr(sepIndex);
    }
 
-   var line = (shortenedLine[0] === ':') ? shortenedLine : (_currentScope === "::") ? "::"+ shortenedLine : _currentScope + ":" + shortenedLine;
+   var line = (shortenedLine[0] === ':') ? shortenedLine : (_currentScope === ":") ? ":" + shortenedLine : _currentScope + ":" + shortenedLine;
    var result = this.owner.gang.filterName(line);
 
    if ((result.hits.length === 0) && !result.namedObject) {
@@ -389,7 +389,7 @@ ConsoleApiSession.prototype.extractScope = function(_params, _callback) {
 
       if (result.remainingStr.length === 0) {
          var processedScopeAndLine = this.processScopeAndLine(_params.scope, line);
-         result.newScope = processedScopeAndLine.shortScope;
+         result.newScope = processedScopeAndLine;
       }
 
       result.consoleObjHierarchy = this.getClassHierarchy(result.consoleApiObj);

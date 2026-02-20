@@ -17,8 +17,16 @@ function Source(_config, _owner) {
    if (_config.hasOwnProperty("subscriptions")) {
 
       for (var i = 0; i < _config.subscriptions.length; ++i) {
-         this.ensurePropertyExists(_config.subscriptions[i].uName.substr(2).replace(/:/g, "-")+"-MODE", "property",
-                                   { source: { uName: _config.subscriptions[i].uName, property: "MODE", subscription: _config.subscriptions[i].subscription }}, _config);
+         var subscriptionUName = this.gang.validateUName(_config.subscriptions[i].uName);
+
+         if (typeof subscriptionUName !== "string") {
+            throw new Error(this.uName + ": Invalid subscription uName: " + subscriptionUName);
+         }
+
+         var modeSourceName = subscriptionUName.startsWith(":") ? subscriptionUName.substr(1) : subscriptionUName;
+
+         this.ensurePropertyExists(modeSourceName.replace(/:/g, "-")+"-MODE", "property",
+                                   { source: { uName: subscriptionUName, property: "MODE", subscription: _config.subscriptions[i].subscription }}, _config);
       }
    }
 

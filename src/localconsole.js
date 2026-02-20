@@ -39,7 +39,7 @@ LocalConsole.prototype.hotStart = function() {
    this.sourceCasa = null;
 
    NamedObject.prototype.hotStart.call(this);
-   this.start("::" + this.casa.name);
+   this.start(":" + this.casa.name);
 };
 
 LocalConsole.prototype.coldStart = function() {
@@ -53,7 +53,7 @@ LocalConsole.prototype.coldStart = function() {
    this.sourceCasa = null;
 
    NamedObject.prototype.coldStart.call(this);
-   this.start("::" + this.casa.name);
+   this.start(":" + this.casa.name);
 };
 
 LocalConsole.prototype.start = function(_startScope) {
@@ -88,11 +88,11 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
       //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
       var matches = _result.matchingScopes;
 
-      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", this.gang.name + ":");
-      var scope = (this.currentScope === "::") ? ":" : this.currentScope;
+      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace(":", this.gang.name + ":");
+      var scope = this.currentScope;
 
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() scope="+scope+"\n");
-      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace("::", ":");
+      //var scope = (_result.scope) ? _result.scope : this.currentScope.replace(":", ":");
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() _result="+util.inspect(_result)+"\n");
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
@@ -121,7 +121,7 @@ LocalConsole.prototype.lineReaderCb = function(_line) {
 
             if (!_err && _result.hasOwnProperty("consoleObjHierarchy") && _result.remainingStr === "") {
                //process.stdout.write("AAAA LocalConsole.prototype.lineReaderCb() _result="+util.inspect(_result)+"\n");
-               this.currentScope = (_result.consoleObjuName === ":") ? "::" : _result.consoleObjuName;
+               this.currentScope = _result.consoleObjuName;
                this.currentCmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
                this.setPrompt(this.currentScope);
             }

@@ -25,7 +25,7 @@ Alarm.prototype.connect = function() {
 
       if (that.storedBuffer) {
          setTimeout(function(_this) {
-            //console.log("Middle->Alarm: "+_this.storedBuffer.toString('ascii')+ " :: ", _this.storedBuffer);
+            //console.log("Middle->Alarm: "+_this.storedBuffer.toString('ascii')+ " raw=", _this.storedBuffer);
             console.log("Middle->Alarm: ", _this.storedBuffer);
             _this.socket.write(_this.storedBuffer);
          }, 1500, that);

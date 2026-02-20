@@ -28,7 +28,7 @@ function Notifier(_config, _parent) {
    var responseServiceEventType = _config.hasOwnProperty("responseServiceEventType") ? _config.responseServiceEventType : "whrelayevent";
 
    var serviceConfig = _config.serviceConfig;
-   serviceConfig.id = this.uName.replace("::", "").replace(/:/g, "-");
+   serviceConfig.id = this.uName.replace(/^:+/, "").replace(/:/g, "-");
    serviceConfig.serviceArgs.notifierUName = this.uName;
    serviceConfig.serviceArgs.user = _config.user.uName;
    serviceConfig.serviceArgs.responseServiceName = responseServiceName;

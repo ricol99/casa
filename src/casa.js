@@ -397,7 +397,7 @@ Casa.prototype.addServiceByType = function(_service) {
 };
 
 Casa.prototype.findService = function(_serviceType) {
-   return (_serviceType.startsWith("::")) ? this.gang.findNamedObject(_serviceType) : this.serviceTypes[_serviceType];
+   return (typeof _serviceType === "string" && _serviceType.startsWith(":")) ? this.gang.findNamedObject(_serviceType) : this.serviceTypes[_serviceType];
 };
 
 Casa.prototype.findServiceName = function(_serviceType) {

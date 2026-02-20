@@ -26,7 +26,7 @@ var SourceListener = require('./sourcelistener');
    ],
    "sources": [
       {
-         "name": "::dumgoyne",
+         "name": ":dumgoyne",
          "property": "target-state",
          "value": "armed-full"
       }

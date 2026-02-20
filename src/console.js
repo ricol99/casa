@@ -62,7 +62,7 @@ Console.prototype.coldStart = function() {
 
    this.offlineCasa = new OfflineCasa({ name: "offlinecasa" }, this);
 
-   this.start("::");
+   this.start(":");
 };
 
 Console.prototype.getCasas = function() {
@@ -139,7 +139,7 @@ Console.prototype.casaFound = function(_params) {
 
          if (this.connectedCasas === 0) {
             this.offline = true;
-            this.currentScope = "::";
+            this.currentScope = ":";
             this.currentCmdObj = this.gangConsoleCmd;
             this.sourceCasa = null;
          }
@@ -642,13 +642,13 @@ OfflineCasa.prototype.extractTree = function(_callback) {
 };
 
 OfflineCasa.prototype.scopeExists = function(_line, _callback) {
-   var gScope = _line.startsWith("::");
+   var gScope = _line.startsWith(":");
 
    if (_callback) {
-      _callback(null, gScope ? (_line.replace("::", "").split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1));
+      _callback(null, gScope ? (_line.substr(1).split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1));
    }
    else {
-      return gScope ? (_line.replace("::", "").split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1);
+      return gScope ? (_line.substr(1).split("(")[0].indexOf(':') === -1) : (_line.split("(")[0].indexOf(':') === -1);
    }
 };
 
@@ -665,10 +665,10 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    }
 
    if (_callback) {
-      _callback(null, { remainingStr: _line.replace("::", ""), consoleObjHierarchy: [ "offlinecasaconsole" ], scope: "::", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" });
+      _callback(null, { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" });
    }
    else {
-      return { remainingStr: line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: "::", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
+      return { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
    }
 };
 

@@ -49,8 +49,9 @@ ThingConsoleApi.prototype.createThing = function(_session, _params, _callback) {
    this.checkParams(1, _params);
    var config = _params[0];
    var persist = (_params.length > 1) ? _params[1] : false;
+   var thingUName = config.name && config.name.startsWith(":") ? config.name : ":" + config.name;
 
-   if (this.gang.findNamedObject("::"+config.name)) {
+   if (this.gang.findNamedObject(thingUName)) {
       return _callback("Thing already exists!");
    }
 

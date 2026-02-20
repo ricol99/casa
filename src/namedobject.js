@@ -2,6 +2,15 @@ var util = require('./util');
 var AsyncEmitter = require('./asyncemitter');
 
 var constructors = {};
+var ROOT_UNAME = ":";
+
+function childUName(_ownerUName, _childName) {
+   return (_ownerUName === ROOT_UNAME) ? ROOT_UNAME + _childName : _ownerUName + ":" + _childName;
+}
+
+function childPrefix(_ownerUName) {
+   return (_ownerUName === ROOT_UNAME) ? ROOT_UNAME : _ownerUName + ":";
+}
 
 function NamedObject(_config, _owner) {
    AsyncEmitter.call(this);
@@ -20,7 +29,7 @@ function NamedObject(_config, _owner) {
          this.owner = _owner.findOwner(_config.name);
 
          if (this.owner) {
-            this.name = _config.name.replace(this.owner.uName+":", ""); 
+            this.name = _config.name.replace(childPrefix(this.owner.uName), "");
          }
          else {
             console.error("namedobject:"+_config.name+ ": Owner not found!");
@@ -32,7 +41,7 @@ function NamedObject(_config, _owner) {
          this.name = _config.name;
       }
 
-      this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
+      this.uName = this.owner ? childUName(this.owner.uName, this.name) : ROOT_UNAME;
       this.type = _config.type;
    }
 
@@ -184,7 +193,7 @@ NamedObject.prototype.create = function(_uName, _replace, _copyChildren, _constr
       }
       else {
          var existingNamedObj = this.myNamedObjects[spr[0]];
-         var newNamedObj = _constructor(this.uName+":"+spr[0], this, _constructorParams);
+         var newNamedObj = _constructor(childUName(this.uName, spr[0]), this, _constructorParams);
 
          if (newNamedObj) {
 
@@ -206,7 +215,7 @@ NamedObject.prototype.create = function(_uName, _replace, _copyChildren, _constr
       }
    }
    else {
-      var nextObj = _constructor(this.uName+":"+spr[0], this, _constructorParams);
+      var nextObj = _constructor(childUName(this.uName, spr[0]), this, _constructorParams);
 
       if (nextObj) {
          return nextObj.create(_uName, _replace, _copyChildren, _constructor, _constructorParams);
@@ -225,7 +234,7 @@ NamedObject.prototype.setOwner = function(_owner) {
 
    this.owner = _owner;
    var oldUName = this.uName;
-   this.uName = this.owner ? this.owner.uName + ":" + this.name : this.name;
+   this.uName = this.owner ? childUName(this.owner.uName, this.name) : this.name;
    
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -244,18 +253,18 @@ NamedObject.prototype.setOwner = function(_owner) {
 
 NamedObject.prototype.findOwner = function(_uName) {
 
-   if (_uName.length < 2) {
+   if ((_uName.length < 2) || (_uName[0] !== ':')) {
       return null;
    }
 
-   var filterArray = _uName.substr(2).split(":");
+   var filterArray = _uName.substr(1).split(":");
 
-   if (filterArray.length <= 2) {
+   if (filterArray.length <= 1) {
       return this;
    }
 
    filterArray.pop();
-   var name = "::"+filterArray.join(":");
+   var name = ROOT_UNAME + filterArray.join(":");
    var owner = this.findNamedObject(name);
 
    if (owner) {
@@ -263,7 +272,7 @@ NamedObject.prototype.findOwner = function(_uName) {
    }
    else {
       filterArray.pop();
-      name = "::"+filterArray.join(":");
+      name = (filterArray.length > 0) ? ROOT_UNAME + filterArray.join(":") : ROOT_UNAME;
       return this.findNamedObject(name);
    }
 };
@@ -307,7 +316,7 @@ NamedObject.prototype.setName = function(_name) {
    }
 
    this.name = _name;
-   this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
+   this.uName = this.owner ? childUName(this.owner.uName, this.name) : ROOT_UNAME;
 
    if (this.owner) {
       this.owner.addChildNamedObject(this);
@@ -322,7 +331,7 @@ NamedObject.prototype.setName = function(_name) {
 };
 
 NamedObject.prototype.ownerHasNewName = function() {
-   this.uName = this.owner ? this.owner.uName + ":" + this.name : ":";
+   this.uName = this.owner ? childUName(this.owner.uName, this.name) : ROOT_UNAME;
 
    for (var child in this.myNamedObjects) {
 
@@ -428,11 +437,24 @@ NamedObject.prototype.removeChildNamedObject = function(_namedObject) {
 };
 
 NamedObject.prototype.stripMyUName = function(_uName) {
-   return (_uName.length > this.uName.length) ? _uName.replace(this.uName+":", "") : _uName.replace(this.uName, "");
+   return (_uName.length > this.uName.length) ? _uName.replace(childPrefix(this.uName), "") : _uName.replace(this.uName, "");
 };
 
 NamedObject.prototype.stripMyName = function(_name) {
-   var myName = this.owner ? this.name : ":";
+   if (!this.owner) {
+
+      if (_name === ROOT_UNAME) {
+         return "";
+      }
+      else if (_name.startsWith(ROOT_UNAME)) {
+         return _name.substr(1);
+      }
+      else {
+         return null;
+      }
+   }
+
+   var myName = this.name;
 
    if (_name.startsWith(myName)) {
       var newName = _name.replace(myName, "");
@@ -480,7 +502,7 @@ NamedObject.prototype.filterName = function(_name)  {
       return result;
    }
    //else if (newName === "") {
-      //var uName = (this.uName === ":") ? "::" : this.uName;
+      //var uName = this.uName;
       //result.hits.push(uName);
       //result.namedObject = this;
       //result.name = uName;
@@ -501,7 +523,7 @@ NamedObject.prototype.filterName = function(_name)  {
          perfectMatch = result.hits.length;
       }
 
-      result.hits.push(this.uName+":"+_obj+":");
+      result.hits.push(childUName(this.uName, _obj)+":");
    });
 
    if (perfectMatch !== -1) {

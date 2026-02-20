@@ -23,7 +23,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "uName": "::dumgoyne:alarm",
+               "uName": ":dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -33,7 +33,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "uName": "::dumgoyne:alarm",
+               "uName": ":dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"
@@ -51,7 +51,7 @@ var SourceListener = require('./sourcelistener');
    "initialValue": "off",
    "sources": [
       {
-         "uName": "::natalie",
+         "uName": ":natalie",
          "property": "in-bed-at-home",
          "states": {
             "off": {
@@ -65,7 +65,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-disarmed" : {
          "true" : [
             {
-               "uName": "::dumgoyne:alarm",
+               "uName": ":dumgoyne:alarm",
                "property": "target-state",
                "value": "armed-full",
                "exitState": "alarm-armed"
@@ -75,7 +75,7 @@ var SourceListener = require('./sourcelistener');
       "alarm-armed" : {
          "false" : [
             {
-               "uName": "::dumgoyne:alarm",
+               "uName": ":dumgoyne:alarm",
                "property": "target-state",
                "value": "disarmed",
                "exitState": "alarm-disarmed"

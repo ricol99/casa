@@ -3,7 +3,7 @@ var ServiceProperty = require('./serviceproperty');
 
 function SmeeProperty(_config, _owner) {
    var smeeSource = _config.hasOwnProperty("smeeSource") ? _config.smeeSource : _owner.uName;
-   _config.id = smeeSource.replace("::", "").replace(/:/g, "-");
+   _config.id = smeeSource.replace(/^:+/, "").replace(/:/g, "-");
    _config.serviceType = "source";
    _config.serviceName = _config.hasOwnProperty("serviceName") ? _config.serviceName : _owner.gang.casa.findServiceName("smeeservice");
    _config.serviceProperty = _config.hasOwnProperty("smeeProperty") ? _config.smeeProperty : _config.name;

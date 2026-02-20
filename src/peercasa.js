@@ -57,6 +57,11 @@ function PeerCasa(_config, _owner) {
 
 util.inherits(PeerCasa, SourceBase);
 
+PeerCasa.prototype.extractCasaName = function(_uName) {
+   var validatedUName = this.gang.validateUName(_uName);
+   return (typeof validatedUName === "string") && validatedUName.startsWith(":") ? validatedUName.substr(1) : validatedUName;
+};
+
 // Used to classify the type and understand where to load the javascript module
 PeerCasa.prototype.superType = function(_type) {
    return "peercasa";
@@ -209,7 +214,7 @@ PeerCasa.prototype.socketLoginCb = function(_config) {
 
    console.log("PeerCasa.prototype.socketLoginCb() config=", _config);
    this.config = util.copy(_config, true);
-   this.changeName(this.config.casaName.substr(2));	// XXX HACK
+   this.changeName(this.extractCasaName(this.config.casaName));	// XXX HACK
    this.createSources(this.config, this);
 
    clearTimeout(this.loginTimer);
@@ -320,7 +325,7 @@ PeerCasa.prototype.socketLoginSuccessCb = function(_data) {
    if (this.uName !== _data.casaName) {
       console.log(this.uName + ': Casa name mismatch! Aligning client peer casa name to server name ('+_data.casaName+')');
       this.gang.removePeerCasa(this);
-      this.changeName(_data.casaName.substr(2));	// XXX HACK
+      this.changeName(this.extractCasaName(_data.casaName));	// XXX HACK
       this.gang.addPeerCasa(this);
    }
 
@@ -1103,4 +1108,3 @@ PeerCasa.prototype.getBowingSource = function(_sourceFullName) {
 };
 
 module.exports = exports = PeerCasa;
-

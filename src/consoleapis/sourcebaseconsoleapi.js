@@ -55,7 +55,7 @@ SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {
-      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ uName: this.uName, listeningSource: "::", property: _name }, this) };
+      this.sourceListeners[_name] = { refCount: 1, sourceListener: new SourceListener({ uName: this.uName, listeningSource: ":", property: _name }, this) };
       this.sourceListeners[_name].sourceListener.establishListeners();
    }
    else {

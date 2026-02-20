@@ -7,7 +7,7 @@ function SourceListener(_config, _owner) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
 
-   this.sourceName = this.gang.uNameToLongForm(_config.uName);
+   this.sourceName = this.gang.validateUName(_config.uName);
 
    if (_config.uName == undefined) {
       console.log("sourcelistener: sourceName undefined = "+this.sourceName);
@@ -70,7 +70,8 @@ function SourceListener(_config, _owner) {
       this.invertMatchingValue = _config.hasOwnProperty("invert") ? _config.invert : false;
    }
 
-   NamedObject.call(this, { name: this.sourceEventName.substr(2).replace(/:/g, "-"), type: "sourcelistener" }, _owner);
+   var sourceEventName = this.sourceEventName.startsWith(":") ? this.sourceEventName.substr(1) : this.sourceEventName;
+   NamedObject.call(this, { name: sourceEventName.replace(/:/g, "-"), type: "sourcelistener" }, _owner);
 
    this._id = this.uName;   // *** TBD
 

@@ -8,6 +8,9 @@
     "name": "Richard Collin"
   },
   "license": "MIT",
+  "scripts": {
+    "test:namedobject": "node test/namedobject_phase2_test.js"
+  },
   "dependencies": {
     "bufferutil": "^4.0.8",
     "command-line-args": "^5.1.1",
