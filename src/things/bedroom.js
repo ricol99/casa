@@ -183,11 +183,11 @@ function Bedroom(_config, _parent) {
 
       this.ensurePropertyExists(this.users[i].name+"-present", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\")" }},  _config);
+                                                                     "transform": "($value !== \"not-present\") && ($value !== \"manual-override\") && ($value !== \"room-switch-touched\")" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-in-bed", 'property',
                                 { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\")" }},  _config);
+                                                                     "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\") && ($value !== \"manual-override\") && ($value !== \"room-switch-touched\")" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-present-and-awake", 'andproperty',
                                 { "initialValue": false, "sources": [{ "property": this.users[i].name+"-asleep", "transform": "!$value" },
