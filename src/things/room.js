@@ -77,8 +77,8 @@ function Room(_config, _parent) {
    this.thingType = "room";
 
    this.ensurePropertyExists("building-name", "property", { initialValue: this.buildingName }, _config);
-   this.ensurePropertyExists("low-light", "property", { source: { name: this.buildingName, property: "low-light" }}, _config);
-   this.ensurePropertyExists("night-time", "property", { source: { name: this.buildingName, property: "night-time" }}, _config);
+   this.ensurePropertyExists("low-light", "property", { source: { uName: this.buildingName, property: "low-light" }}, _config);
+   this.ensurePropertyExists("night-time", "property", { source: { uName: this.buildingName, property: "night-time" }}, _config);
 
    if (_config.hasOwnProperty("movementTimeouts")) {
       this.movementTimeouts = _config.movementTimeouts;

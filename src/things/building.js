@@ -293,20 +293,20 @@ Building.prototype.eventSubscribedTo = function(_eventName, _subscription, _firs
 };
 
 // Something does not want to watch a property anymore - called from sourcelistener
-Building.prototype.propertySubscriptionRemoval = function(_property, _subscription, _exists, _lastSource) {
+Building.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists, _lastSource) {
    console.log(this.uName + ": Property subscription() for " + _property);
 
    if (_lastSource) {
-      this.processSubscriptionRemoval(_subscription);
+      this.processSubscriptionRemoved(_subscription);
    }
 };
 
 // Something does not want to watch an event anymore - called from sourcelistener
-Building.prototype.eventSubscriptionRemoval = function(_eventName, _subscription, _lastSource) {
+Building.prototype.eventSubscriptionRemoved = function(_eventName, _subscription, _lastSource) {
    console.log(this.uName + ": Event subscription() for" + _eventName);
 
    if (_lastSource) {
-      this.processSubscriptionRemoval(_subscription);
+      this.processSubscriptionRemoved(_subscription);
    }
 };
 
@@ -344,7 +344,7 @@ Building.prototype.processSubscription = function(_subscription) {
 
 };
 
-Building.prototype.processSubscriptionRemoval = function(_subscription) {
+Building.prototype.processSubscriptionRemoved = function(_subscription) {
 
    if (!_subscription.hasOwnProperty("roomType")) {
       return; 
