@@ -281,29 +281,123 @@ Casa.prototype.getDb = function() {
    return this.db;
 };
 
+Casa.prototype.shouldExportChildInSharedConfig = function(_child, _owner) {
+
+   if (!_child) {
+      return false;
+   }
+
+   if (_child.superType && (_child.superType() === "sourcelistener")) {
+      return false;
+   }
+
+   if (_child.local) {
+      return false;
+   }
+
+   if (_child.config && _child.gang && _child.gang.name && (_child.config._db === _child.gang.name)) {
+      return false;
+   }
+
+   return true;
+};
+
+Casa.prototype.shouldShareSourceInSimpleConfig = function(_source) {
+
+   if (!_source) {
+      return false;
+   }
+
+   if (_source.local) {
+      return false;
+   }
+
+   if (_source.config && this.gang && this.gang.name && (_source.config._db === this.gang.name)) {
+      return false;
+   }
+
+   return true;
+};
+
+Casa.prototype.isSharedSourceExport = function(_exportObj) {
+   return _exportObj &&
+          _exportObj.hasOwnProperty("name") &&
+          _exportObj.hasOwnProperty("uName") &&
+          _exportObj.hasOwnProperty("priority") &&
+          _exportObj.hasOwnProperty("controllerPriority");
+};
+
+Casa.prototype.extractSharedSourceFromExport = function(_sourceExportObj) {
+   var sourceConfig = {
+      name: _sourceExportObj.name,
+      uName: _sourceExportObj.uName,
+      priority: _sourceExportObj.hasOwnProperty("priority") ? _sourceExportObj.priority : 0,
+      properties: {},
+      events: {}
+   };
+
+   if (_sourceExportObj.myNamedObjects) {
+
+      for (var namedObj in _sourceExportObj.myNamedObjects) {
+
+         if (_sourceExportObj.myNamedObjects.hasOwnProperty(namedObj)) {
+            var child = _sourceExportObj.myNamedObjects[namedObj];
+
+            if (child.superType === "property" && child.hasOwnProperty("value")) {
+               sourceConfig.properties[child.name] = child.value;
+            }
+            else if (child.superType === "event") {
+               sourceConfig.events[child.name] = true;
+            }
+         }
+      }
+   }
+
+   return sourceConfig;
+};
+
+Casa.prototype.extractSharedSourcesFromExport = function(_exportObj, _sources) {
+   if (!_exportObj || !_exportObj.myNamedObjects) {
+      return;
+   }
+
+   for (var namedObj in _exportObj.myNamedObjects) {
+
+      if (_exportObj.myNamedObjects.hasOwnProperty(namedObj)) {
+         var child = _exportObj.myNamedObjects[namedObj];
+
+         if (this.isSharedSourceExport(child)) {
+            _sources.push(this.extractSharedSourceFromExport(child));
+         }
+
+         this.extractSharedSourcesFromExport(child, _sources);
+      }
+   }
+};
+
 Casa.prototype.refreshSimpleConfig = function() {
    var simpleConfig = {};
-   simpleConfig = {};
    simpleConfig.name = this.name;
    simpleConfig.displayName = this.displayName;
    simpleConfig.gang = this.gang.uName;
    simpleConfig.sources = [];
 
-   for (sourceName in this.sources) {
+   for (var sourceName in this.sources) {
 
       if (this.sources.hasOwnProperty(sourceName)) {
          var source = this.sources[sourceName];
 
-         if (!source.local) {
-            var allProps = {};
-            var allEvents = {};
-            source.getAllProperties(allProps, true);
-            source.getAllEvents(allEvents, true);
-            simpleConfig.sources.push({ name: source.name, uName: source.uName, priority: source.hasOwnProperty('priority') ? source.priority : 0,
-                                        properties: util.copy(allProps), events: util.copy(allEvents) });
+         if (this.shouldShareSourceInSimpleConfig(source)) {
+            var sourceExportObj = {};
+            source.exportFiltered(sourceExportObj, this.shouldExportChildInSharedConfig.bind(this));
+            simpleConfig.sources.push(this.extractSharedSourceFromExport(sourceExportObj));
          }
       }
    }
+
+   simpleConfig.sources.sort( (_a, _b) => {
+      return (_a.uName > _b.uName) ? 1 : (_a.uName < _b.uName) ? -1 : 0;
+   });
 
    return simpleConfig;
 };

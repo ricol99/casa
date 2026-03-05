@@ -670,23 +670,101 @@ PeerCasa.prototype.refreshSimpleConfig = function() {
    return this.config;
 }
 
-PeerCasa.prototype.createSources = function(_data, _peerCasa) {
+PeerCasa.prototype.isSourceExportObject = function(_exportObj) {
+   return _exportObj &&
+          _exportObj.hasOwnProperty("name") &&
+          _exportObj.hasOwnProperty("uName") &&
+          _exportObj.hasOwnProperty("priority") &&
+          _exportObj.hasOwnProperty("controllerPriority");
+};
 
-   if (_data.casaConfig &&  _data.casaConfig.sources) {
-      var len = _data.casaConfig.sources.length;
+PeerCasa.prototype.extractSourceFromExportObject = function(_sourceExportObj) {
+   var sourceConfig = {
+      name: _sourceExportObj.name,
+      uName: _sourceExportObj.uName,
+      priority: _sourceExportObj.hasOwnProperty("priority") ? _sourceExportObj.priority : 0,
+      properties: {},
+      events: {}
+   };
+
+   if (_sourceExportObj.myNamedObjects) {
+
+      for (var namedObj in _sourceExportObj.myNamedObjects) {
+
+         if (_sourceExportObj.myNamedObjects.hasOwnProperty(namedObj)) {
+            var child = _sourceExportObj.myNamedObjects[namedObj];
+
+            if (child.superType === "property" && child.hasOwnProperty("value")) {
+               sourceConfig.properties[child.name] = child.value;
+            }
+            else if (child.superType === "event") {
+               sourceConfig.events[child.name] = true;
+            }
+         }
+      }
+   }
+
+   return sourceConfig;
+};
+
+PeerCasa.prototype.extractSourcesFromExportObject = function(_exportObj, _sources) {
+   if (!_exportObj || !_exportObj.myNamedObjects) {
+      return;
+   }
+
+   for (var namedObj in _exportObj.myNamedObjects) {
+
+      if (_exportObj.myNamedObjects.hasOwnProperty(namedObj)) {
+         var child = _exportObj.myNamedObjects[namedObj];
+
+         if (this.isSourceExportObject(child)) {
+            _sources.push(this.extractSourceFromExportObject(child));
+         }
+
+         this.extractSourcesFromExportObject(child, _sources);
+      }
+   }
+};
+
+PeerCasa.prototype.getConfigSources = function(_data) {
+   var sources = [];
+
+   if (!_data || !_data.casaConfig) {
+      return sources;
+   }
+
+   if (_data.casaConfig.sources) {
+      return util.copy(_data.casaConfig.sources, true);
+   }
+
+   var exportObj = _data.casaConfig.exportTree ? _data.casaConfig.exportTree :
+                   (_data.casaConfig.myNamedObjects ? _data.casaConfig : null);
+
+   if (exportObj) {
+      this.extractSourcesFromExportObject(exportObj, sources);
+   }
+
+   return sources;
+};
+
+PeerCasa.prototype.createSources = function(_data, _peerCasa) {
+   var sources = this.getConfigSources(_data);
+
+   if (sources.length > 0) {
+      var len = sources.length;
       console.log(_peerCasa.uName + ': New sources found = ' + len);
 
-      _data.casaConfig.sources.sort( (_a, _b) => {
+      sources.sort( (_a, _b) => {
           return (_a.uName > _b.uName) ? 1 : (_a.uName < _b.uName) ? -1 : 0;
       });
 
       var PeerSource = require('./peersource');
 
       for (var i = 0; i < len; ++i) {
-         console.log(_peerCasa.uName + ': Creating peer source named ' + _data.casaConfig.sources[i].uName + ' name = ' + _data.casaConfig.sources[i].name +
-                                          ' priority =' + _data.casaConfig.sources[i].priority);
-         var source = new PeerSource(_data.casaConfig.sources[i].uName, _data.casaConfig.sources[i].name, _data.casaConfig.sources[i].priority,
-                                     _data.casaConfig.sources[i].properties, _data.casaConfig.sources[i].events, _peerCasa);
+         console.log(_peerCasa.uName + ': Creating peer source named ' + sources[i].uName + ' name = ' + sources[i].name +
+                                          ' priority =' + sources[i].priority);
+         var source = new PeerSource(sources[i].uName, sources[i].name, sources[i].priority,
+                                     sources[i].properties, sources[i].events, _peerCasa);
       }
    }
 

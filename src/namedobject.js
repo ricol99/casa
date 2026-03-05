@@ -3,6 +3,7 @@ var AsyncEmitter = require('./asyncemitter');
 
 var constructors = {};
 var ROOT_UNAME = ":";
+var EXPORT_CONTEXT_FIELD = "__exportContext";
 
 function childUName(_ownerUName, _childName) {
    return (_ownerUName === ROOT_UNAME) ? ROOT_UNAME + _childName : _ownerUName + ":" + _childName;
@@ -76,14 +77,83 @@ NamedObject.prototype.export = function(_exportObj) {
    _exportObj.name = this.name;
    _exportObj.uName = this.uName;
    _exportObj.myNamedObjects = {};
+   var exportContext = NamedObject.getExportContext(_exportObj);
 
    for (var namedObj in this.myNamedObjects) {
 
       if (this.myNamedObjects.hasOwnProperty(namedObj)) {
+         var child = this.myNamedObjects[namedObj];
+
+         if (!NamedObject.shouldExportChild(exportContext, this, child)) {
+            continue;
+         }
+
          _exportObj.myNamedObjects[namedObj]= {};
-         this.myNamedObjects[namedObj].export(_exportObj.myNamedObjects[namedObj]);
+         NamedObject.setExportContext(_exportObj.myNamedObjects[namedObj], exportContext);
+         child.export(_exportObj.myNamedObjects[namedObj]);
       }
    }
+};
+
+// Called when current state required with child filtering
+NamedObject.prototype.exportFiltered = function(_exportObj, _filterCb) {
+   if (typeof _filterCb !== "function") {
+      return this.export(_exportObj);
+   }
+
+   var exportContext = { filterCb: _filterCb };
+   NamedObject.setExportContext(_exportObj, exportContext);
+
+   try {
+      this.export(_exportObj);
+   }
+   finally {
+      NamedObject.clearExportContext(_exportObj);
+   }
+};
+
+NamedObject.setExportContext = function(_exportObj, _exportContext) {
+   if (!_exportObj || !_exportContext) {
+      return;
+   }
+
+   Object.defineProperty(_exportObj, EXPORT_CONTEXT_FIELD, {
+      value: _exportContext,
+      enumerable: false,
+      configurable: true
+   });
+};
+
+NamedObject.getExportContext = function(_exportObj) {
+   return (_exportObj && _exportObj.hasOwnProperty(EXPORT_CONTEXT_FIELD)) ? _exportObj[EXPORT_CONTEXT_FIELD] : null;
+};
+
+NamedObject.clearExportContext = function(_exportObj) {
+   if (!_exportObj || (typeof _exportObj !== "object")) {
+      return;
+   }
+
+   if (_exportObj.hasOwnProperty(EXPORT_CONTEXT_FIELD)) {
+      delete _exportObj[EXPORT_CONTEXT_FIELD];
+   }
+
+   if (_exportObj.myNamedObjects && (typeof _exportObj.myNamedObjects === "object")) {
+
+      for (var namedObj in _exportObj.myNamedObjects) {
+
+         if (_exportObj.myNamedObjects.hasOwnProperty(namedObj)) {
+            NamedObject.clearExportContext(_exportObj.myNamedObjects[namedObj]);
+         }
+      }
+   }
+};
+
+NamedObject.shouldExportChild = function(_exportContext, _owner, _child) {
+   if (!_exportContext || !_exportContext.filterCb) {
+      return true;
+   }
+
+   return _exportContext.filterCb(_child, _owner);
 };
 
 // Called when current state required

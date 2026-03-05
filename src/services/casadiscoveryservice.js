@@ -132,6 +132,12 @@ CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _addr
    this.casas[_name].discoveryTransports[_discoveryTransportName] = { name: _name, status: _status, previousStatus: previousStatus,
                                                                       address: _address, messageTransportName: _messageTransportName, tier: _tier };
 
+   if ((_status === "up") && !statusChanged) {
+      // A service can come back without a prior serviceDown callback.
+      // Re-emitting "casa-up" allows clients to recover stale/disconnected sockets.
+      statusChanged = true;
+   }
+
    if (statusChanged && (!this.targetCasaName || (this.targetCasaName === _name))) {
       this.emit(_status === "up" ? "casa-up" : "casa-down", this.casas[_name].discoveryTransports[_discoveryTransportName]);
    }

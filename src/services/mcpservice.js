@@ -571,7 +571,7 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
       }
 
       var exportObj = {};
-      obj.export(exportObj);
+      this.exportNamedObject(obj, exportObj);
 
       return this.sendJsonRpcResult(_response, _id, {
          content: [ { type: "text", text: JSON.stringify(exportObj) } ],
@@ -656,6 +656,43 @@ McpService.prototype.setProtocolHeader = function(_response, _version) {
 
    if (_version) {
       _response.set("MCP-Protocol-Version", _version);
+   }
+};
+
+McpService.prototype.defaultExportFilter = function(_child, _owner) {
+
+   if (!_child) {
+      return false;
+   }
+
+   if (_child.superType && (_child.superType() === "sourcelistener")) {
+      return false;
+   }
+
+   if (_child.local) {
+      return false;
+   }
+
+   return true;
+};
+
+McpService.prototype.getExportFilter = function() {
+
+   if (this.gang && this.gang.casa && (typeof this.gang.casa.shouldExportChildInSharedConfig === "function")) {
+      return this.gang.casa.shouldExportChildInSharedConfig.bind(this.gang.casa);
+   }
+
+   return McpService.prototype.defaultExportFilter.bind(this);
+};
+
+McpService.prototype.exportNamedObject = function(_obj, _exportObj) {
+   var filterCb = this.getExportFilter();
+
+   if (_obj && (typeof _obj.exportFiltered === "function")) {
+      _obj.exportFiltered(_exportObj, filterCb);
+   }
+   else if (_obj && (typeof _obj.export === "function")) {
+      _obj.export(_exportObj);
    }
 };
 

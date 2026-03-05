@@ -15,6 +15,7 @@ function Console(_params, _owner) {
    this.connectedCasas = 0;
    this.defaultCasa = null;
    this.sourceCasa =  null;
+   this.reconnectLogEnabled = (process.env.CASA_RECONNECT_LOG === "1");
 
    if (this.secureMode) {
       var fs = require('fs');
@@ -119,10 +120,6 @@ Console.prototype.casaFound = function(_params) {
          }
 
          this.updatePromptMidLine(_params.tier);
-      });
-
-      remoteCasa.on("connect_error", (_data) => {
-         process.stdout.write("Console.prototype.casaFound() error="+util.inspect(_data)+"\n");
       });
 
       remoteCasa.on("disconnected", (_data) => {
@@ -409,17 +406,55 @@ function RemoteCasa(_config, _owner) {
    this.remoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.gangRemoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.connected = false;
+   this.connecting = false;
+   this.reconnectDelayMs = 5000;
+   this.reconnectTimer = null;
+   this.allowAutoReconnect = true;
+   this.lastConnectErrorKey = null;
+   this.lastConnectErrorTime = 0;
 }
 
 util.inherits(RemoteCasa, AsyncEmitter);
 
+RemoteCasa.prototype.clearReconnectTimer = function() {
+
+   if (this.reconnectTimer) {
+      util.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+   }
+};
+
+RemoteCasa.prototype.scheduleReconnect = function() {
+
+   if (!this.allowAutoReconnect || this.reconnectTimer || this.connected || this.connecting) {
+      return;
+   }
+
+   this.reconnectTimer = util.setTimeout(() => {
+      this.reconnectTimer = null;
+
+      if (this.allowAutoReconnect && !this.connected && !this.connecting) {
+         this.start();
+      }
+   }, this.reconnectDelayMs);
+};
+
 RemoteCasa.prototype.start = function()  {
+   if (this.connecting || this.connected) {
+      return;
+   }
+
+   this.clearReconnectTimer();
+   this.allowAutoReconnect = true;
    this.connecting = true;
    this.socket = this.owner.gang.casa.mainWebService.newIoSocket(this.address, "/consoleapi/io", this.owner.secureMode, this.messageTransportName);
 
    this.socket.on('connect', (_data) => {
       this.connected = true;
       this.connecting = false;
+      this.clearReconnectTimer();
+      this.lastConnectErrorKey = null;
+      this.lastConnectErrorTime = 0;
       this.emit('connected', { name: this.name });
       this.socket.emit('getCasaInfo');
    });
@@ -464,14 +499,32 @@ RemoteCasa.prototype.start = function()  {
    });
 
    this.socket.on('connect_error', (_data) => {
-      _data.name = this.name;
+      var data = (_data && (typeof _data === "object")) ? _data : { error: _data };
+      data.name = this.name;
+      var errDesc = data.description && (typeof data.description === "object") ? data.description : null;
+      var errCode = errDesc && errDesc.code ? errDesc.code : (data.code ? data.code : "connect_error");
+      var errAddress = errDesc && errDesc.address ? errDesc.address : (this.address ? this.address.host : "unknown-host");
+      var errPort = errDesc && errDesc.port ? errDesc.port : (this.address ? this.address.port : "unknown-port");
+      var errKey = errCode + ":" + errAddress + ":" + errPort;
+      var now = Date.now();
+
+      if ((this.lastConnectErrorKey !== errKey) || ((now - this.lastConnectErrorTime) >= 30000)) {
+         this.lastConnectErrorKey = errKey;
+         this.lastConnectErrorTime = now;
+         data.summary = errCode + " " + errAddress + ":" + errPort;
+         if (this.owner.reconnectLogEnabled) {
+            this.emit('connect_error', data);
+         }
+      }
+
       this.connecting = false;
-      this.emit('connect_error', _data);
+      this.scheduleReconnect();
    });
 
    this.socket.on('output', (_data) => {
-      _data.name = this.name;
-      this.emit('output', _data);
+      var data = (_data && (typeof _data === "object")) ? _data : { result: _data };
+      data.name = this.name;
+      this.emit('output', data);
    });
 
    this.socket.on('extract-tree-output', (_data) => {
@@ -507,10 +560,11 @@ RemoteCasa.prototype.start = function()  {
 
       if (this.connected) {
          var wasConnected = this.connected;
-         _data.name = this.name;
          this.connected = false;
          this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
+
+      this.scheduleReconnect();
    });
 
    this.socket.on('error', (_data) => {
@@ -518,19 +572,21 @@ RemoteCasa.prototype.start = function()  {
 
       if (this.connected) {
          var wasConnected = this.connected;
-         _data.name = this.name;
          this.connected = false;
          this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
+
+      this.scheduleReconnect();
    });
 };
 
 RemoteCasa.prototype.reconnect = function(_params) {
 
    if ((this.connecting || this.connected) && (_params.tier < this.discoveryTier)) {
-      this.disconnect();
+      this.disconnect({ disableAutoReconnect: true });
 
       util.setTimeout( () => {
+         this.allowAutoReconnect = true;
          this.reconnect(_params);
       }, 3000);
    }
@@ -538,13 +594,20 @@ RemoteCasa.prototype.reconnect = function(_params) {
       this.address = _params.address;
       this.messageTransportName = _params.messageTransportName;
       this.discoveryTier = _params.tier;
+      this.allowAutoReconnect = true;
       this.start();
    }
 };
 
-RemoteCasa.prototype.disconnect = function() {
+RemoteCasa.prototype.disconnect = function(_params) {
+   var disableAutoReconnect = _params && _params.disableAutoReconnect;
 
    if (this.connected || this.connecting) {
+      if (disableAutoReconnect) {
+         this.allowAutoReconnect = false;
+         this.clearReconnectTimer();
+      }
+
       var wasConnected = this.connected;
       this.connected = false;
       this.connecting = false;
