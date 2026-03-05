@@ -308,7 +308,7 @@ Casa.prototype.shouldShareSourceInSimpleConfig = function(_source) {
       return false;
    }
 
-   if (_source.local) {
+   if (_source.config && _source.config.local) {
       return false;
    }
 
