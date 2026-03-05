@@ -99,6 +99,21 @@ GangConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    });
 };
 
+GangConsoleCmd.prototype.topology = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   this.executeParsedCommand("topology", [], _callback);
+};
+
+GangConsoleCmd.prototype.resolveSource = function(_arguments, _callback) {
+   this.checkArguments(1, _arguments);
+   this.executeParsedCommand("resolveSource", _arguments, _callback);
+};
+
+GangConsoleCmd.prototype.resolveSources = function(_arguments, _callback) {
+   this.checkArguments(1, _arguments);
+   this.executeParsedCommand("resolveSources", _arguments, _callback);
+};
+
 GangConsoleCmd.prototype.importDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
