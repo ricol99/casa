@@ -82,11 +82,11 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
    this.extractScope(_line, (_err, _result) => {
 
       if (_err) {
-         return _callback(_err);
+         return _callback(null, [ [], _line ]);
       }
 
       //process.stdout.write("AAAA Result="+util.inspect(_result)+"\n");
-      var matches = _result.matchingScopes;
+      var matches = (_result && _result.matchingScopes instanceof Array) ? _result.matchingScopes : [];
 
       //var scope = (_result.scope) ? _result.scope : this.currentScope.replace(":", this.gang.name + ":");
       var scope = this.currentScope;
@@ -94,12 +94,16 @@ LocalConsole.prototype.autoCompleteCb = function(_line, _callback) {
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() scope="+scope+"\n");
       //var scope = (_result.scope) ? _result.scope : this.currentScope.replace(":", ":");
       //process.stdout.write("AAAAA LocalConsole.prototype.autoCompleteCb() _result="+util.inspect(_result)+"\n");
+      if (!_result) {
+         return _callback(null, [ [], _line ]);
+      }
+
       var methodResult = this.extractMethodAndArguments(_line, _result.remainingStr);
       var method = (methodResult.method) ? methodResult.method : "";
 
       if (_result.hasOwnProperty("consoleObjHierarchy")) {
-         methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
-         matches = methodMatches.concat(_result.matchingScopes);
+         var methodMatches = this.matchMethods(_line, method, scope, _result.consoleObjHierarchy, _result.consoleObjuName, _result.consoleObjCasaName, _result.sourceCasa);
+         matches = methodMatches.concat(matches);
       }
 
       if (_callback) {

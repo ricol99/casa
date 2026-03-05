@@ -728,10 +728,10 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    }
 
    if (_callback) {
-      _callback(null, { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" });
+      _callback(null, { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, matchingScopes: [], consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" });
    }
    else {
-      return { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
+      return { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, matchingScopes: [], consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
    }
 };
 

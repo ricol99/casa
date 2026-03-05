@@ -155,6 +155,23 @@ function appendContainerInstances(_instances, _container, _sourceUName) {
    appendSourcesFromMap(_instances, _container.bowingSources, _sourceUName, false, true);
 }
 
+function countSourceMapEntries(_sourceMap) {
+   var count = 0;
+
+   if (!_sourceMap) {
+      return count;
+   }
+
+   for (var sourceName in _sourceMap) {
+
+      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
+         ++count;
+      }
+   }
+
+   return count;
+}
+
 function collectSourceCounts(_container) {
    var counts = { total: 0, bowed: 0, active: 0 };
    var metas = [];
@@ -174,6 +191,15 @@ function collectSourceCounts(_container) {
          ++counts.active;
       }
    }
+
+   // In runtime, bowingSources is the authoritative bowing list.
+   var directBowingCount = countSourceMapEntries(_container.bowingSources);
+
+   if (counts.bowed < directBowingCount) {
+      counts.bowed = directBowingCount;
+   }
+
+   counts.total = counts.active + counts.bowed;
 
    return counts;
 }
