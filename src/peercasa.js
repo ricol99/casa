@@ -109,9 +109,10 @@ PeerCasa.prototype.sourceAddedCasaCb = function(_data) {
          console.log(this.uName + ': publishing source ' + _data.sourceName + ' added to peer casa');
          var source = this.casa.getSource(_data.sourceName);
          var allProps = {};
+         var allEvents = {};
          source.getAllProperties(allProps, true);
          source.getAllEvents(allEvents, true);
-         _data.sourceName = source.name;
+         _data.sourceName = source.uName;
          _data.sourcePriority = (source.hasOwnProperty('priority')) ? source.priority : 0;
          _data.sourceProperties = util.copy(allProps);
          _data.sourceEvents = util.copy(allEvents);
@@ -451,7 +452,7 @@ PeerCasa.prototype.socketSourceAddedCb = function(_data) {
 
    var PeerSource = require('./peersource');
    console.log(this.uName + ': Creating peer source named ' + _data.sourceName + ' priority =' + _data.sourcePriority);
-   var source = new PeerSource(_data.sourceName, _data.sourceName, _data.sourcePriority, _data.sourceProperties, _data.sourceEvents, this);
+   var source = new PeerSource(_data.sourceName, _data.sourcePriority, _data.sourceProperties, _data.sourceEvents, this);
 
    // Refresh all inactive sources
    this.gang.casa.refreshSourceListeners();
@@ -763,7 +764,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
       for (var i = 0; i < len; ++i) {
          console.log(_peerCasa.uName + ': Creating peer source named ' + sources[i].uName + ' name = ' + sources[i].name +
                                           ' priority =' + sources[i].priority);
-         var source = new PeerSource(sources[i].uName, sources[i].name, sources[i].priority,
+         var source = new PeerSource(sources[i].uName, sources[i].priority,
                                      sources[i].properties, sources[i].events, _peerCasa);
       }
    }

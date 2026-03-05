@@ -52,7 +52,14 @@ ConsoleCmd.prototype.executeParsedCommand = function(_method, _arguments, _callb
 };
 
 ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _arguments, _callback) {
-   this.console.executeParsedCommandOnAllCasas(this, _method, _arguments, _callback);
+
+   this.console.executeParsedCommandOnAllCasas(this, _method, _arguments, (_err, _result) => {
+
+      if (!_err && _result) {
+         this.console.updatePrompt();
+         return _callback(_err, _result);
+      }
+   });
 };
 
 ConsoleCmd.prototype.casas = function(_arguments, _callback) {

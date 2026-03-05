@@ -2,14 +2,17 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_uName, _name, _priority, _properties, _events, _peerCasa) {
+function PeerSource(_uName, _priority, _properties, _events, _peerCasa) {
    var gang = Gang.mainInstance();
-   var bowingOwner = _peerCasa.getBowingSource(_uName.replace(":"+_name));
+   var lastColon = _uName.lastIndexOf(":");
+   var name = (lastColon >= 0) ? _uName.substr(lastColon + 1) : _uName;
+   var parentUName = (lastColon > 0) ? _uName.substr(0, lastColon) : ":";
+   var bowingOwner = _peerCasa.getBowingSource(parentUName);
 
    var existingSource = gang.findNamedObject(_uName);
    var owner = bowingOwner ? bowingOwner : existingSource ? _uName : gang.findOwner(_uName);
 
-   SourceBase.call(this, { name: _name, type: "peersource", transient: true, local: true }, owner);
+   SourceBase.call(this, { name: name, type: "peersource", transient: true, local: true }, owner);
 
    this.priority = _priority;
    this.casa = _peerCasa;
@@ -169,4 +172,3 @@ PeerSource.prototype.findNewMainSource = function() {
 };
 
 module.exports = exports = PeerSource;
-

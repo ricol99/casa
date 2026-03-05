@@ -126,6 +126,27 @@ function appendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources, 
             _instances[existingIndex].inBowing = _instances[existingIndex].inBowing || !!_inBowing;
          }
       }
+
+      // Some maps are keyed by top-level source while requested uName is a descendant.
+      for (var topSourceName in _sourceMap) {
+
+         if (_sourceMap.hasOwnProperty(topSourceName) && _sourceMap[topSourceName] && (topSourceName !== _sourceUName) &&
+             (typeof _sourceMap[topSourceName].findNamedObject === "function")) {
+            var nestedSource = _sourceMap[topSourceName].findNamedObject(_sourceUName);
+
+            if (nestedSource) {
+               var existingNestedIndex = findInstanceMeta(_instances, nestedSource);
+
+               if (existingNestedIndex === -1) {
+                  _instances.push({ source: nestedSource, inSources: !!_inSources, inBowing: !!_inBowing });
+               }
+               else {
+                  _instances[existingNestedIndex].inSources = _instances[existingNestedIndex].inSources || !!_inSources;
+                  _instances[existingNestedIndex].inBowing = _instances[existingNestedIndex].inBowing || !!_inBowing;
+               }
+            }
+         }
+      }
    }
    else {
       for (var sourceName in _sourceMap) {
@@ -173,7 +194,7 @@ function countSourceMapEntries(_sourceMap) {
 }
 
 function collectSourceCounts(_container) {
-   var counts = { total: 0, bowed: 0, active: 0 };
+   var counts = { total: 0, bowed: 0, active: 0, sourcesMapEntries: 0, bowingMapEntries: 0 };
    var metas = [];
 
    if (!_container) {
@@ -182,6 +203,8 @@ function collectSourceCounts(_container) {
 
    appendContainerInstances(metas, _container);
    counts.total = metas.length;
+   counts.sourcesMapEntries = countSourceMapEntries(_container.sources);
+   counts.bowingMapEntries = countSourceMapEntries(_container.bowingSources);
 
    for (var i = 0; i < metas.length; ++i) {
       if (metas[i].inBowing) {
@@ -193,7 +216,7 @@ function collectSourceCounts(_container) {
    }
 
    // In runtime, bowingSources is the authoritative bowing list.
-   var directBowingCount = countSourceMapEntries(_container.bowingSources);
+   var directBowingCount = counts.bowingMapEntries;
 
    if (counts.bowed < directBowingCount) {
       counts.bowed = directBowingCount;
@@ -386,6 +409,8 @@ GangConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
          superType: (typeof source.superType === "function") ? source.superType() : null,
          priority: (source.priority !== undefined) ? source.priority : 0,
          state: state,
+         inSourcesMap: !!instanceMetas[i].inSources,
+         inBowingMap: !!instanceMetas[i].inBowing,
          connected: connected,
          scope: getSourceScope(source, this.gang.name, localCasaName)
       });
@@ -402,6 +427,8 @@ GangConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
          superType: (typeof activeSource.superType === "function") ? activeSource.superType() : null,
          priority: (activeSource.priority !== undefined) ? activeSource.priority : 0,
          state: "active",
+         inSourcesMap: true,
+         inBowingMap: false,
          connected: true,
          scope: getSourceScope(activeSource, this.gang.name, localCasaName)
       });
