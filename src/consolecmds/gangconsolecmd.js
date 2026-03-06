@@ -108,6 +108,8 @@ function parsePreviewConfigArgs(_arguments) {
       { name: 'usage', type: Boolean },
       { name: 'limit', alias: 'l', type: Number },
       { name: 'progress', type: Boolean },
+      { name: 'summaryOnly', type: Boolean },
+      { name: 'topChanged', type: Number },
       { name: 'casa', alias: 'c', type: String }
    ];
    var options;
@@ -120,7 +122,7 @@ function parsePreviewConfigArgs(_arguments) {
    }
 
    if (options._unknown && options._unknown.length > 0) {
-      return { error: "Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--progress] [--casa <name>]" };
+      return { error: "Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--progress] [--summaryOnly] [--topChanged <n>] [--casa <name>]" };
    }
 
    if (!options.patch && !options.file) {
@@ -166,6 +168,8 @@ function parsePreviewConfigArgs(_arguments) {
          includeUsage: includeUsage,
          limit: options.limit,
          progress: !!options.progress,
+         summaryOnly: !!options.summaryOnly,
+         topChanged: options.topChanged,
          targetCasaName: options.casa
       } ]
    };

@@ -294,6 +294,77 @@ runTest("targetCasaName applies default owner for scope=casa operations", functi
    assert.strictEqual(out.impactedSources[0].after.resolve.activeOwnerCasa, "casa-b");
 });
 
+runTest("summaryOnly returns summary without impacted source payload", function() {
+   var out = ConfigPreviewEngine.previewConfig({
+      patch: {
+         changes: [
+            { action: "upsert", sourceUName: ":a", scope: "casa", ownerCasa: "casa-a", patch: { priority: 1 } },
+            { action: "upsert", sourceUName: ":b", scope: "casa", ownerCasa: "casa-a", patch: { priority: 2 } }
+         ]
+      },
+      summaryOnly: true
+   }, createContext({}, {}));
+
+   assert.strictEqual(out.ok, true);
+   assert.ok(out.output);
+   assert.strictEqual(out.output.mode, "summary");
+   assert.strictEqual(out.output.impactedTotalCount, 2);
+   assert.strictEqual(out.output.impactedReturnedCount, 0);
+   assert.strictEqual(out.impactedSources.length, 0);
+   assert.strictEqual(out.summary.impactedSourceCount, 2);
+});
+
+runTest("topChanged returns only changed source details", function() {
+   var beforeResolve = {
+      ":a": {
+         sourceUName: ":a",
+         exists: true,
+         activeOwnerCasa: "casa-a",
+         activeProviderType: "casa",
+         instances: [
+            { ownerCasa: "casa-a", providerType: "casa", type: "bedroom", superType: "thing", priority: 1, state: "active", inSourcesMap: true, inBowingMap: false, connected: true, scope: "casa" }
+         ]
+      }
+   };
+   var out = ConfigPreviewEngine.previewConfig({
+      patch: {
+         changes: [
+            { action: "upsert", sourceUName: ":a", scope: "casa", ownerCasa: "casa-a", patch: { priority: 1, type: "bedroom" } },
+            { action: "upsert", sourceUName: ":b", scope: "casa", ownerCasa: "casa-a", patch: { priority: 2, type: "bedroom" } },
+            { action: "upsert", sourceUName: ":c", scope: "casa", ownerCasa: "casa-a", patch: { priority: 3, type: "bedroom" } }
+         ]
+      },
+      topChanged: 1
+   }, createContext(beforeResolve, {}));
+
+   assert.strictEqual(out.ok, true);
+   assert.ok(out.output);
+   assert.strictEqual(out.output.mode, "top-changed");
+   assert.strictEqual(out.summary.impactedSourceCount, 3);
+   assert.strictEqual(out.summary.changedSourceCount, 2);
+   assert.strictEqual(out.output.changedTotalCount, 2);
+   assert.strictEqual(out.output.changedReturnedCount, 1);
+   assert.strictEqual(out.impactedSources.length, 1);
+   assert.strictEqual(out.impactedSources[0].sourceUName, ":b");
+   assert.ok(out.warnings.some( (_warning) => _warning.indexOf("topChanged=1") !== -1 ));
+});
+
+runTest("previewConfig validates summaryOnly and topChanged option types", function() {
+   var out1 = ConfigPreviewEngine.previewConfig({
+      patch: { changes: [ { action: "upsert", sourceUName: ":a", scope: "casa" } ] },
+      summaryOnly: "yes"
+   }, createContext({}, {}));
+   var out2 = ConfigPreviewEngine.previewConfig({
+      patch: { changes: [ { action: "upsert", sourceUName: ":a", scope: "casa" } ] },
+      topChanged: -1
+   }, createContext({}, {}));
+
+   assert.strictEqual(out1.ok, false);
+   assert.ok(out1.errors.some( (_error) => String(_error).indexOf("summaryOnly must be a boolean") !== -1 ));
+   assert.strictEqual(out2.ok, false);
+   assert.ok(out2.errors.some( (_error) => String(_error).indexOf("topChanged must be a non-negative number") !== -1 ));
+});
+
 runAsyncTest("previewConfigAsync emits progress events and completes", function(_done) {
    var progressEvents = [];
 

@@ -8,3 +8,7 @@ npm install onoff
 npm install spi
 npm install rpio
 git clone git@github.com:abelectronicsuk/ABElectronics_NodeJS_Libraries.git
+
+# API docs
+# Console API contract for UI/MCP clients:
+# src/docs/console-api-contract.md

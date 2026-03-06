@@ -959,6 +959,21 @@ function toInt(_value, _default) {
    return (!n || (n < 0)) ? _default : n;
 }
 
+function toOptionalNonNegativeInt(_value, _defaultValue) {
+
+   if ((_value === undefined) || (_value === null)) {
+      return _defaultValue;
+   }
+
+   var n = parseInt(_value);
+
+   if (!isFinite(n) || (n < 0)) {
+      return null;
+   }
+
+   return n;
+}
+
 function preparePreview(_input, _context) {
    var errors = [];
    var warnings = [];
@@ -966,11 +981,12 @@ function preparePreview(_input, _context) {
    var options = isObject(_input) ? _input : {};
    var includeUsage = !!options.includeUsage;
    var limit = toInt(options.limit, 200);
+   var summaryOnly = !!options.summaryOnly;
+   var topChanged = toOptionalNonNegativeInt(options.topChanged, 0);
    var patch = parsePatchInput(options.patch, errors);
    var operations;
    var impactedSourceUNames;
    var allCasaNames = collectAllCasaNames(context);
-   var previewItems = [];
    var truncated = false;
 
    if (!context || (typeof context.resolveSourceFn !== "function") || (typeof context.sourceUsageFn !== "function")) {
@@ -989,8 +1005,22 @@ function preparePreview(_input, _context) {
       errors.push("targetCasaName must be a string");
    }
 
+   if (options.hasOwnProperty("summaryOnly") && (typeof options.summaryOnly !== "boolean")) {
+      errors.push("summaryOnly must be a boolean");
+   }
+
+   if ((topChanged === null) ||
+       (options.hasOwnProperty("topChanged") && (((typeof options.topChanged !== "number") || !isFinite(options.topChanged)) || (options.topChanged < 0)))) {
+      errors.push("topChanged must be a non-negative number");
+   }
+
    if (errors.length > 0) {
       return { ok: false, errors: errors, warnings: warnings };
+   }
+
+   if (summaryOnly && (topChanged > 0)) {
+      warnings.push("summaryOnly=true overrides topChanged");
+      topChanged = 0;
    }
 
    operations = collectOperations(patch, warnings, errors, {
@@ -1040,6 +1070,8 @@ function preparePreview(_input, _context) {
       options: options,
       includeUsage: includeUsage,
       limit: limit,
+      summaryOnly: summaryOnly,
+      topChanged: topChanged,
       truncated: truncated,
       allCasaNames: allCasaNames,
       impactedSourceUNames: impactedSourceUNames,
@@ -1056,16 +1088,69 @@ function preparePreview(_input, _context) {
    };
 }
 
+function selectImpactedSourcesForOutput(_prepared, _previewItems, _summary, _warnings) {
+   var mode = "full";
+   var impacted = _previewItems;
+   var changedReturnedCount = _summary.changedSourceCount;
+
+   if (_prepared.summaryOnly) {
+      mode = "summary";
+      impacted = [];
+      changedReturnedCount = 0;
+   }
+   else if (_prepared.topChanged > 0) {
+      mode = "top-changed";
+      impacted = [];
+      changedReturnedCount = 0;
+
+      for (var i = 0; i < _previewItems.length; ++i) {
+
+         if (_previewItems[i] && _previewItems[i].delta && _previewItems[i].delta.changed) {
+            ++changedReturnedCount;
+            impacted.push(_previewItems[i]);
+
+            if (impacted.length >= _prepared.topChanged) {
+               break;
+            }
+         }
+      }
+
+      if (_summary.changedSourceCount > impacted.length) {
+         _warnings.push("Changed source details truncated to topChanged=" + _prepared.topChanged);
+      }
+   }
+
+   return {
+      mode: mode,
+      impactedSources: impacted,
+      impactedReturnedCount: impacted.length,
+      impactedTotalCount: _previewItems.length,
+      changedReturnedCount: changedReturnedCount,
+      changedTotalCount: _summary.changedSourceCount
+   };
+}
+
 function buildPreviewResult(_prepared, _previewItems) {
+   var warnings = _prepared.warnings ? _prepared.warnings.slice(0) : [];
+   var summary = collectSummary(_previewItems, _prepared.truncated);
+   var selection = selectImpactedSourcesForOutput(_prepared, _previewItems, summary, warnings);
+
    return {
       ok: true,
       scope: {
          mode: _prepared.previewContext.mode ? _prepared.previewContext.mode : "casa",
          targetCasa: _prepared.previewContext.targetCasaName ? _prepared.previewContext.targetCasaName : _prepared.previewContext.defaultCasaName
       },
-      summary: collectSummary(_previewItems, _prepared.truncated),
-      impactedSources: _previewItems,
-      warnings: _prepared.warnings,
+      summary: summary,
+      output: {
+         mode: selection.mode,
+         impactedReturnedCount: selection.impactedReturnedCount,
+         impactedTotalCount: selection.impactedTotalCount,
+         changedReturnedCount: selection.changedReturnedCount,
+         changedTotalCount: selection.changedTotalCount
+      },
+      impactedSources: selection.impactedSources,
+      warnings: warnings,
       errors: []
    };
 }

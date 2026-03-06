@@ -123,7 +123,9 @@ CasaConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
       { name: 'include', alias: 'i', multiple: true, type: String },
       { name: 'usage', type: Boolean },
       { name: 'limit', alias: 'l', type: Number },
-      { name: 'progress', type: Boolean }
+      { name: 'progress', type: Boolean },
+      { name: 'summaryOnly', type: Boolean },
+      { name: 'topChanged', type: Number }
    ];
    var options;
 
@@ -135,7 +137,7 @@ CasaConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
    }
 
    if (options._unknown && options._unknown.length > 0) {
-      return _callback("Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--progress]");
+      return _callback("Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--progress] [--summaryOnly] [--topChanged <n>]");
    }
 
    if (!options.patch && !options.file) {
@@ -178,7 +180,9 @@ CasaConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
       patch: patchObj,
       includeUsage: includeUsage,
       limit: options.limit,
-      progress: !!options.progress
+      progress: !!options.progress,
+      summaryOnly: !!options.summaryOnly,
+      topChanged: options.topChanged
    } ], _callback);
 };
 
