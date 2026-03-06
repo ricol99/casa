@@ -432,7 +432,6 @@ NamedObject.prototype.require = function(_type, _superType, _loadPath) {
          constructors[module] = require(module);
       }
       catch (_err) {
-         process.stderr.write(util.inspect(_err));
          return null;
       }
    }

@@ -28,69 +28,6 @@ function normaliseSourceUName(_uName) {
    return uName;
 }
 
-function getSourceProviderType(_source) {
-
-   if (_source && _source.casa && (typeof _source.casa.superType === "function")) {
-      return _source.casa.superType();
-   }
-
-   return "unknown";
-}
-
-function getSourceOwnerCasa(_source, _fallbackCasa) {
-
-   if (_source && _source.casa && _source.casa.name) {
-      return _source.casa.name;
-   }
-
-   if (_source && (typeof _source.getCasa === "function")) {
-      var casa = _source.getCasa();
-
-      if (casa && casa.name) {
-         return casa.name;
-      }
-   }
-
-   return _fallbackCasa;
-}
-
-function getSourceScope(_source, _gangName, _localCasaName) {
-   var ownerDb = _source && _source.config ? _source.config._db : null;
-
-   if (ownerDb === _gangName) {
-      return "gang";
-   }
-   else if (ownerDb === _localCasaName) {
-      return "casa";
-   }
-   else if (ownerDb) {
-      return "external-casa";
-   }
-
-   return "runtime";
-}
-
-function getObjectType(_obj) {
-
-   if (!_obj) {
-      return "unknown";
-   }
-
-   if (_obj.type) {
-      return _obj.type;
-   }
-
-   if (_obj.config && _obj.config.type) {
-      return _obj.config.type;
-   }
-
-   if (typeof _obj.superType === "function") {
-      return _obj.superType();
-   }
-
-   return "unknown";
-}
-
 function findInstanceMeta(_instances, _source) {
 
    if (!_source) {
@@ -176,6 +113,31 @@ function appendContainerInstances(_instances, _container, _sourceUName) {
    appendSourcesFromMap(_instances, _container.bowingSources, _sourceUName, false, true);
 }
 
+function findSourceInMap(_sourceMap, _sourceUName) {
+
+   if (!_sourceMap || !_sourceUName) {
+      return null;
+   }
+
+   if (_sourceMap.hasOwnProperty(_sourceUName) && _sourceMap[_sourceUName]) {
+      return _sourceMap[_sourceUName];
+   }
+
+   for (var sourceName in _sourceMap) {
+
+      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName] &&
+          (typeof _sourceMap[sourceName].findNamedObject === "function")) {
+         var nestedSource = _sourceMap[sourceName].findNamedObject(_sourceUName);
+
+         if (nestedSource) {
+            return nestedSource;
+         }
+      }
+   }
+
+   return null;
+}
+
 function countSourceMapEntries(_sourceMap) {
    var count = 0;
 
@@ -225,6 +187,250 @@ function collectSourceCounts(_container) {
    counts.total = counts.active + counts.bowed;
 
    return counts;
+}
+
+function getSourceSuperType(_source) {
+   return (_source && (typeof _source.superType === "function")) ? _source.superType() : null;
+}
+
+function collectSourceUNamesFromObject(_obj, _uNameSet) {
+
+   if (!_obj || !_uNameSet) {
+      return;
+   }
+
+   if (_obj.uName && _obj.hasOwnProperty("properties") && _obj.hasOwnProperty("events")) {
+      _uNameSet[_obj.uName] = true;
+   }
+
+   if (!_obj.myNamedObjects) {
+      return;
+   }
+
+   for (var childName in _obj.myNamedObjects) {
+
+      if (_obj.myNamedObjects.hasOwnProperty(childName) && _obj.myNamedObjects[childName]) {
+         var child = _obj.myNamedObjects[childName];
+         var childSuperType = getSourceSuperType(child);
+
+         if ((childSuperType === "property") || (childSuperType === "event") || (childSuperType === "sourcelistener")) {
+            continue;
+         }
+
+         collectSourceUNamesFromObject(child, _uNameSet);
+      }
+   }
+}
+
+function collectSourceUNamesFromMap(_sourceMap, _uNameSet) {
+
+   if (!_sourceMap || !_uNameSet) {
+      return;
+   }
+
+   for (var sourceName in _sourceMap) {
+
+      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
+         _uNameSet[sourceName] = true;
+         collectSourceUNamesFromObject(_sourceMap[sourceName], _uNameSet);
+      }
+   }
+}
+
+function collectKnownSourceUNames(_container, _uNameSet) {
+
+   if (!_container || !_uNameSet) {
+      return;
+   }
+
+   collectSourceUNamesFromMap(_container.sources, _uNameSet);
+   collectSourceUNamesFromMap(_container.bowingSources, _uNameSet);
+}
+
+function parseListSourcesFilters(_params) {
+   var filters = {
+      prefix: null,
+      ownerCasa: null,
+      providerType: null,
+      type: null,
+      scope: null,
+      connected: null,
+      bowed: null,
+      activeOnly: false,
+      includeInstances: false,
+      limit: 0,
+      query: null
+   };
+
+   if (!_params || (_params.length === 0)) {
+      return filters;
+   }
+
+   if ((typeof _params[0] === "object") && !(_params[0] instanceof Array)) {
+      var input = _params[0];
+
+      if (input.hasOwnProperty("prefix")) filters.prefix = input.prefix;
+      if (input.hasOwnProperty("ownerCasa")) filters.ownerCasa = input.ownerCasa;
+      if (input.hasOwnProperty("providerType")) filters.providerType = input.providerType;
+      if (input.hasOwnProperty("type")) filters.type = input.type;
+      if (input.hasOwnProperty("scope")) filters.scope = input.scope;
+      if (input.hasOwnProperty("connected")) filters.connected = !!input.connected;
+      if (input.hasOwnProperty("bowed")) filters.bowed = !!input.bowed;
+      if (input.hasOwnProperty("activeOnly")) filters.activeOnly = !!input.activeOnly;
+      if (input.hasOwnProperty("includeInstances")) filters.includeInstances = !!input.includeInstances;
+      if (input.hasOwnProperty("limit")) filters.limit = parseInt(input.limit);
+      if (input.hasOwnProperty("query")) filters.query = input.query;
+      return filters;
+   }
+
+   for (var i = 0; i < _params.length; ++i) {
+      var token = _params[i];
+
+      if (typeof token !== "string") {
+         continue;
+      }
+
+      if (token[0] === ":") {
+         filters.prefix = token;
+      }
+      else if (token === "active") {
+         filters.activeOnly = true;
+      }
+      else if (token === "bowed") {
+         filters.bowed = true;
+      }
+      else if (token === "connected") {
+         filters.connected = true;
+      }
+      else if (token === "disconnected") {
+         filters.connected = false;
+      }
+      else if (token === "instances") {
+         filters.includeInstances = true;
+      }
+      else if (token.startsWith("owner=")) {
+         filters.ownerCasa = token.substr(6);
+      }
+      else if (token.startsWith("provider=")) {
+         filters.providerType = token.substr(9);
+      }
+      else if (token.startsWith("type=")) {
+         filters.type = token.substr(5);
+      }
+      else if (token.startsWith("scope=")) {
+         filters.scope = token.substr(6);
+      }
+      else if (token.startsWith("limit=")) {
+         filters.limit = parseInt(token.substr(6));
+      }
+      else {
+         filters.query = token;
+      }
+   }
+
+   return filters;
+}
+
+function findActiveInstance(_resolved) {
+
+   if (!_resolved || !_resolved.instances) {
+      return null;
+   }
+
+   for (var i = 0; i < _resolved.instances.length; ++i) {
+
+      if (_resolved.instances[i].state === "active") {
+         return _resolved.instances[i];
+      }
+   }
+
+   return null;
+}
+
+function resolvedMatchesFilters(_resolved, _filters) {
+
+   if (!_resolved || !_filters) {
+      return true;
+   }
+
+   if (_filters.prefix && !_resolved.sourceUName.startsWith(_filters.prefix)) {
+      return false;
+   }
+
+   var active = findActiveInstance(_resolved);
+
+   if (_filters.activeOnly && !active) {
+      return false;
+   }
+
+   if (_filters.ownerCasa && (!active || (active.ownerCasa !== _filters.ownerCasa))) {
+      return false;
+   }
+
+   if (_filters.providerType && (!active || (active.providerType !== _filters.providerType))) {
+      return false;
+   }
+
+   if (_filters.type && (!active || (active.type !== _filters.type))) {
+      return false;
+   }
+
+   if (_filters.scope && (!active || (active.scope !== _filters.scope))) {
+      return false;
+   }
+
+   var hasBowed = _resolved.instances.some( (_instance) => _instance.state === "bowed");
+
+   if ((_filters.bowed === true) && !hasBowed) {
+      return false;
+   }
+   else if ((_filters.bowed === false) && hasBowed) {
+      return false;
+   }
+
+   var hasConnected = _resolved.instances.some( (_instance) => !!_instance.connected);
+
+   if ((_filters.connected === true) && !hasConnected) {
+      return false;
+   }
+   else if ((_filters.connected === false) && hasConnected) {
+      return false;
+   }
+
+   if (_filters.query) {
+      var q = _filters.query.toLowerCase();
+      var qFound = _resolved.sourceUName.toLowerCase().indexOf(q) !== -1;
+
+      if (!qFound) {
+
+         for (var i = 0; i < _resolved.instances.length; ++i) {
+            var inst = _resolved.instances[i];
+
+            if ((inst.ownerCasa && (inst.ownerCasa.toLowerCase().indexOf(q) !== -1)) ||
+                (inst.type && (inst.type.toLowerCase().indexOf(q) !== -1)) ||
+                (inst.scope && (inst.scope.toLowerCase().indexOf(q) !== -1))) {
+               qFound = true;
+               break;
+            }
+         }
+      }
+
+      if (!qFound) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+function normaliseSourceListLimit(_limit) {
+   var limit = parseInt(_limit);
+
+   if (!limit || (limit < 0)) {
+      return 0;
+   }
+
+   return limit;
 }
 
 // Called when current state required
@@ -360,103 +566,65 @@ GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
    });
 };
 
-GangConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
-   var activeSource = null;
-   var instanceMetas = [];
-   var activeOwnerCasa = null;
-   var activeProviderType = null;
-   var localCasaName = this.gang.casa.name;
+GangConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
+   var sourceObj = this.gang.findNamedObject(_sourceUName);
 
-   appendContainerInstances(instanceMetas, this.gang.casa, _sourceUName);
+   if (sourceObj) {
+      return sourceObj;
+   }
+
+   sourceObj = findSourceInMap(this.gang.casa.sources, _sourceUName);
+
+   if (!sourceObj) {
+      sourceObj = findSourceInMap(this.gang.casa.bowingSources, _sourceUName);
+   }
+
+   if (sourceObj) {
+      return sourceObj;
+   }
 
    for (var peerName in this.gang.peercasas) {
 
       if (this.gang.peercasas.hasOwnProperty(peerName)) {
          var peerCasa = this.gang.peercasas[peerName];
-         appendContainerInstances(instanceMetas, peerCasa, _sourceUName);
+         sourceObj = findSourceInMap(peerCasa.sources, _sourceUName);
+
+         if (!sourceObj) {
+            sourceObj = findSourceInMap(peerCasa.bowingSources, _sourceUName);
+         }
+
+         if (sourceObj) {
+            return sourceObj;
+         }
       }
    }
 
-   if (instanceMetas.length > 0) {
-      activeSource = this.gang.findNamedObject(_sourceUName);
+   return null;
+};
+
+GangConsoleApi.prototype.getSourceConsoleApiForUName = function(_sourceUName) {
+   var sourceObj = this.getSourceObjectForUName(_sourceUName);
+
+   if (!sourceObj || !this.consoleApiService || (typeof this.consoleApiService.findOrCreateConsoleApiObject !== "function")) {
+      return null;
    }
 
-   var outputInstances = [];
+   return this.consoleApiService.findOrCreateConsoleApiObject(sourceObj);
+};
 
-   for (var i = 0; i < instanceMetas.length; ++i) {
-      var source = instanceMetas[i].source;
-      var ownerCasa = getSourceOwnerCasa(source, localCasaName);
-      var providerType = getSourceProviderType(source);
-      var connected = (providerType === "peercasa") ? !!(source.casa && source.casa.connected) : true;
-      var state = "standby";
+GangConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
+   var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
 
-      if (instanceMetas[i].inBowing) {
-         state = "bowed";
-      }
-      else if (activeSource && (source === activeSource) && !source.bowing) {
-         state = "active";
-         activeOwnerCasa = ownerCasa;
-         activeProviderType = providerType;
-      }
-      else if (!connected) {
-         state = "unavailable";
-      }
-
-      outputInstances.push({
-         ownerCasa: ownerCasa,
-         providerType: providerType,
-         type: getObjectType(source),
-         superType: (typeof source.superType === "function") ? source.superType() : null,
-         priority: (source.priority !== undefined) ? source.priority : 0,
-         state: state,
-         inSourcesMap: !!instanceMetas[i].inSources,
-         inBowingMap: !!instanceMetas[i].inBowing,
-         connected: connected,
-         scope: getSourceScope(source, this.gang.name, localCasaName)
-      });
+   if (sourceApi && (typeof sourceApi.resolveForUName === "function")) {
+      return sourceApi.resolveForUName(_sourceUName);
    }
-
-   if ((outputInstances.length === 0) && activeSource && (typeof activeSource.getCasa === "function")) {
-      activeOwnerCasa = getSourceOwnerCasa(activeSource, localCasaName);
-      activeProviderType = getSourceProviderType(activeSource);
-
-      outputInstances.push({
-         ownerCasa: activeOwnerCasa,
-         providerType: activeProviderType,
-         type: getObjectType(activeSource),
-         superType: (typeof activeSource.superType === "function") ? activeSource.superType() : null,
-         priority: (activeSource.priority !== undefined) ? activeSource.priority : 0,
-         state: "active",
-         inSourcesMap: true,
-         inBowingMap: false,
-         connected: true,
-         scope: getSourceScope(activeSource, this.gang.name, localCasaName)
-      });
-   }
-
-   outputInstances.sort( (_a, _b) => {
-      if (_a.priority > _b.priority) {
-         return -1;
-      }
-      else if (_a.priority < _b.priority) {
-         return 1;
-      }
-      else if (_a.ownerCasa > _b.ownerCasa) {
-         return 1;
-      }
-      else if (_a.ownerCasa < _b.ownerCasa) {
-         return -1;
-      }
-
-      return 0;
-   });
 
    return {
       sourceUName: _sourceUName,
-      exists: outputInstances.length > 0,
-      activeOwnerCasa: activeOwnerCasa,
-      activeProviderType: activeProviderType,
-      instances: outputInstances
+      exists: false,
+      activeOwnerCasa: null,
+      activeProviderType: null,
+      instances: []
    };
 };
 
@@ -470,6 +638,132 @@ GangConsoleApi.prototype.resolveSource = function(_session, _params, _callback) 
    }
 
    _callback(null, this.resolveSourceInternal(sourceUName));
+};
+
+GangConsoleApi.prototype.explainSourceInternal = function(_sourceUName) {
+   var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+
+   if (sourceApi && (typeof sourceApi.explainForUName === "function")) {
+      return sourceApi.explainForUName(_sourceUName);
+   }
+
+   return {
+      sourceUName: _sourceUName,
+      exists: false,
+      reason: "Source not found in active or bowing maps"
+   };
+};
+
+GangConsoleApi.prototype.explainSource = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   var sourceUName = normaliseSourceUName(_params[0]);
+
+   if (!sourceUName) {
+      return _callback("Invalid source uName");
+   }
+
+   _callback(null, this.explainSourceInternal(sourceUName));
+};
+
+GangConsoleApi.prototype.sourceUsageInternal = function(_sourceUName, _options) {
+   var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+
+   if (sourceApi && (typeof sourceApi.usageForUName === "function")) {
+      return sourceApi.usageForUName(_sourceUName, _options);
+   }
+
+   return {
+      sourceUName: _sourceUName,
+      exists: false,
+      reason: "Source not found in active or bowing maps",
+      instances: []
+   };
+};
+
+GangConsoleApi.prototype.sourceUsage = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   var sourceUName = normaliseSourceUName(_params[0]);
+   var options = (_params.length > 1) ? _params[1] : {};
+
+   if (!sourceUName) {
+      return _callback("Invalid source uName");
+   }
+
+   _callback(null, this.sourceUsageInternal(sourceUName, options));
+};
+
+GangConsoleApi.prototype.listSources = function(_session, _params, _callback) {
+   var filters = parseListSourcesFilters(_params);
+   var limit = normaliseSourceListLimit(filters.limit);
+   var sourceUNames = {};
+   var sortedUNames;
+   var sources = [];
+
+   collectKnownSourceUNames(this.gang.casa, sourceUNames);
+
+   for (var peerName in this.gang.peercasas) {
+
+      if (this.gang.peercasas.hasOwnProperty(peerName)) {
+         collectKnownSourceUNames(this.gang.peercasas[peerName], sourceUNames);
+      }
+   }
+
+   sortedUNames = Object.keys(sourceUNames).sort();
+
+   for (var i = 0; i < sortedUNames.length; ++i) {
+      var resolved = this.resolveSourceInternal(sortedUNames[i]);
+
+      if (!resolved.exists || !resolvedMatchesFilters(resolved, filters)) {
+         continue;
+      }
+
+      var active = findActiveInstance(resolved);
+      var bowedCount = resolved.instances.reduce( (_acc, _instance) => _acc + ((_instance.state === "bowed") ? 1 : 0), 0);
+      var disconnectedCount = resolved.instances.reduce( (_acc, _instance) => _acc + (!_instance.connected ? 1 : 0), 0);
+      var summary = {
+         sourceUName: resolved.sourceUName,
+         activeOwnerCasa: resolved.activeOwnerCasa,
+         activeProviderType: resolved.activeProviderType,
+         activePriority: active ? active.priority : null,
+         instanceCount: resolved.instances.length,
+         bowedCount: bowedCount,
+         disconnectedCount: disconnectedCount
+      };
+
+      if (filters.includeInstances) {
+         summary.instances = resolved.instances;
+      }
+
+      sources.push(summary);
+
+      if (limit && (sources.length >= limit)) {
+         break;
+      }
+   }
+
+   _callback(null, {
+      count: sources.length,
+      totalKnownSources: sortedUNames.length,
+      filters: filters,
+      sources: sources
+   });
+};
+
+GangConsoleApi.prototype.sourceInventory = function(_session, _params, _callback) {
+   var casaApi = null;
+   var options = (_params && (_params.length > 0)) ? _params[0] : {};
+
+   if (this.consoleApiService && (typeof this.consoleApiService.findOrCreateConsoleApiObject === "function")) {
+      casaApi = this.consoleApiService.findOrCreateConsoleApiObject(this.gang.casa);
+   }
+
+   if (!casaApi || (typeof casaApi.sourceInventoryInternal !== "function")) {
+      return _callback("Unable to build source inventory");
+   }
+
+   _callback(null, casaApi.sourceInventoryInternal(options));
 };
 
 GangConsoleApi.prototype.resolveSources = function(_session, _params, _callback) {
