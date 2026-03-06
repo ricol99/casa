@@ -1,6 +1,8 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 var commandLineArgs = require('command-line-args');
+var fs = require('fs');
+var JSON5 = require('json5');
 
 function CasaConsoleCmd(_config, _owner, _console) {
    ConsoleCmd.call(this, _config, _owner, _console);
@@ -112,6 +114,70 @@ CasaConsoleCmd.prototype.resolveSource = function(_arguments, _callback) {
 CasaConsoleCmd.prototype.explainSource = function(_arguments, _callback) {
    this.checkArguments(1, _arguments);
    this.executeParsedCommand("explainSource", _arguments, _callback);
+};
+
+CasaConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
+   var definitions = [
+      { name: 'patch', defaultOption: true, type: String },
+      { name: 'file', alias: 'f', type: String },
+      { name: 'include', alias: 'i', multiple: true, type: String },
+      { name: 'usage', type: Boolean },
+      { name: 'limit', alias: 'l', type: Number }
+   ];
+   var options;
+
+   try {
+      options = commandLineArgs(definitions, { argv: _arguments ? _arguments : [], stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return _callback(_err.message ? _err.message : "Unable to parse command arguments");
+   }
+
+   if (options._unknown && options._unknown.length > 0) {
+      return _callback("Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>]");
+   }
+
+   if (!options.patch && !options.file) {
+      return _callback("No patch provided. Use inline JSON patch or --file <path>.");
+   }
+
+   if (options.patch && options.file) {
+      return _callback("Specify either inline patch or --file, not both.");
+   }
+
+   var patchObj = null;
+
+   try {
+
+      if (options.file) {
+         patchObj = JSON5.parse(fs.readFileSync(options.file, 'utf8'));
+      }
+      else {
+         patchObj = JSON5.parse(options.patch);
+      }
+   }
+   catch (_err2) {
+      return _callback("Unable to parse patch: " + (_err2.message ? _err2.message : _err2));
+   }
+
+   var includeUsage = !!options.usage;
+
+   if (options.include instanceof Array) {
+
+      for (var i = 0; i < options.include.length; ++i) {
+         var token = String(options.include[i]).toLowerCase();
+
+         if ((token === "usage") || (token === "all")) {
+            includeUsage = true;
+         }
+      }
+   }
+
+   this.executeParsedCommand("previewConfig", [ {
+      patch: patchObj,
+      includeUsage: includeUsage,
+      limit: options.limit
+   } ], _callback);
 };
 
 

@@ -1,5 +1,6 @@
 var util = require('util');
 var ConsoleApi = require('../consoleapi');
+var ConfigPreviewEngine = require('./configpreviewengine');
 
 function CasaConsoleApi(_config, _owner) {
    ConsoleApi.call(this, _config, _owner);
@@ -414,6 +415,23 @@ CasaConsoleApi.prototype.sourceUsage = function(_session, _params, _callback) {
    }
 
    _callback(null, this.sourceUsageInternal(sourceUName, options));
+};
+
+CasaConsoleApi.prototype.previewConfigInternal = function(_options) {
+   return ConfigPreviewEngine.previewConfig(_options ? _options : {}, {
+      mode: "casa",
+      gang: this.gang,
+      gangName: this.gang.name,
+      defaultCasaName: this.gang.casa.name,
+      targetCasaName: this.gang.casa.name,
+      resolveSourceFn: this.resolveSourceInternal.bind(this),
+      sourceUsageFn: this.sourceUsageInternal.bind(this)
+   });
+};
+
+CasaConsoleApi.prototype.previewConfig = function(_session, _params, _callback) {
+   var options = (_params && (_params.length > 0)) ? _params[0] : {};
+   _callback(null, this.previewConfigInternal(options));
 };
 
 CasaConsoleApi.prototype.createService = function(_session, _params, _callback) {

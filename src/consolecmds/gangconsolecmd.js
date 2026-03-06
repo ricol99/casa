@@ -1,6 +1,8 @@
 var ConsoleCmd = require('../consolecmd');
 var util = require('util');
 var commandLineArgs = require('command-line-args');
+var fs = require('fs');
+var JSON5 = require('json5');
 
 function GangConsoleCmd(_config, _owner, _console) {
    ConsoleCmd.call(this, _config, _owner, _console);
@@ -95,6 +97,75 @@ function parseSourceInventoryArgs(_arguments) {
          mode: options.mode,
          prefix: options.prefix
       }
+   };
+}
+
+function parsePreviewConfigArgs(_arguments) {
+   var definitions = [
+      { name: 'patch', defaultOption: true, type: String },
+      { name: 'file', alias: 'f', type: String },
+      { name: 'include', alias: 'i', multiple: true, type: String },
+      { name: 'usage', type: Boolean },
+      { name: 'limit', alias: 'l', type: Number },
+      { name: 'casa', alias: 'c', type: String }
+   ];
+   var options;
+
+   try {
+      options = commandLineArgs(definitions, { argv: _arguments, stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse command arguments" };
+   }
+
+   if (options._unknown && options._unknown.length > 0) {
+      return { error: "Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--casa <name>]" };
+   }
+
+   if (!options.patch && !options.file) {
+      return { error: "No patch provided. Use inline JSON patch or --file <path>." };
+   }
+
+   if (options.patch && options.file) {
+      return { error: "Specify either inline patch or --file, not both." };
+   }
+
+   var patchObj = null;
+
+   try {
+
+      if (options.file) {
+         patchObj = JSON5.parse(fs.readFileSync(options.file, 'utf8'));
+      }
+      else {
+         patchObj = JSON5.parse(options.patch);
+      }
+   }
+   catch (_err2) {
+      return { error: "Unable to parse patch: " + (_err2.message ? _err2.message : _err2) };
+   }
+
+   var includeUsage = !!options.usage;
+
+   if (options.include instanceof Array) {
+
+      for (var i = 0; i < options.include.length; ++i) {
+         var token = String(options.include[i]).toLowerCase();
+
+         if ((token === "usage") || (token === "all")) {
+            includeUsage = true;
+         }
+      }
+   }
+
+   return {
+      casaName: options.casa,
+      params: [ {
+         patch: patchObj,
+         includeUsage: includeUsage,
+         limit: options.limit,
+         targetCasaName: options.casa
+      } ]
    };
 }
 
@@ -307,6 +378,17 @@ GangConsoleCmd.prototype.sourceInventory = function(_arguments, _callback) {
    }
 
    executeOnSpecificCasaWithParams(this, "sourceInventory", parsed.casaName, [ parsed.options ], _callback);
+};
+
+GangConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
+   this.checkArguments(1, _arguments);
+   var parsed = parsePreviewConfigArgs(_arguments);
+
+   if (parsed.error) {
+      return _callback(parsed.error);
+   }
+
+   executeOnSpecificCasaWithParams(this, "previewConfig", parsed.casaName, parsed.params, _callback);
 };
 
 GangConsoleCmd.prototype.importDb = function(_arguments, _callback) {

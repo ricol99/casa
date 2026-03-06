@@ -9,7 +9,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "test:namedobject": "node test/namedobject_phase2_test.js"
+    "test:namedobject": "node test/namedobject_phase2_test.js",
+    "test:previewconfig": "node test/previewconfigengine_test.js"
   },
   "dependencies": {
     "bufferutil": "^4.0.8",

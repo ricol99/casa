@@ -1,5 +1,6 @@
 var ConsoleApi = require('../consoleapi');
 var util = require('util');
+var ConfigPreviewEngine = require('./configpreviewengine');
 var MAX_RESOLVE_BATCH = 64;
 
 function GangConsoleApi(_config, _owner) {
@@ -764,6 +765,23 @@ GangConsoleApi.prototype.sourceInventory = function(_session, _params, _callback
    }
 
    _callback(null, casaApi.sourceInventoryInternal(options));
+};
+
+GangConsoleApi.prototype.previewConfigInternal = function(_options) {
+   return ConfigPreviewEngine.previewConfig(_options ? _options : {}, {
+      mode: "gang",
+      gang: this.gang,
+      gangName: this.gang.name,
+      defaultCasaName: this.gang.casa.name,
+      targetCasaName: (_options && _options.targetCasaName) ? _options.targetCasaName : null,
+      resolveSourceFn: this.resolveSourceInternal.bind(this),
+      sourceUsageFn: this.sourceUsageInternal.bind(this)
+   });
+};
+
+GangConsoleApi.prototype.previewConfig = function(_session, _params, _callback) {
+   var options = (_params && (_params.length > 0)) ? _params[0] : {};
+   _callback(null, this.previewConfigInternal(options));
 };
 
 GangConsoleApi.prototype.resolveSources = function(_session, _params, _callback) {
