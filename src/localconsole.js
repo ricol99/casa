@@ -364,10 +364,46 @@ LocalConsole.prototype.getCasa = function(_name) {
    return this.gang.casa;
 };
 
+function formatPreviewConfigProgress(_output) {
+
+   if (!_output || !_output.progress) {
+      return null;
+   }
+
+   var progress = _output.progress;
+   var scope = _output.scope ? _output.scope : "unknown";
+   var targetCasa = _output.targetCasa ? _output.targetCasa : "unknown";
+   var event = progress.event ? progress.event : "preview-progress";
+   var processed = progress.hasOwnProperty("processed") ? progress.processed : 0;
+   var total = progress.hasOwnProperty("total") ? progress.total : 0;
+   var percent = progress.hasOwnProperty("percent") ? progress.percent : 0;
+   var changed = progress.hasOwnProperty("changedSourceCount") ? progress.changedSourceCount : null;
+
+   if (event === "preview-started") {
+      return "[preview " + scope + "/" + targetCasa + "] started " + processed + "/" + total + " (" + percent + "%)";
+   }
+
+   if (event === "preview-complete") {
+      var changedStr = (changed === null) ? "" : (", changed=" + changed);
+      return "[preview " + scope + "/" + targetCasa + "] complete " + processed + "/" + total + " (" + percent + "%)" + changedStr;
+   }
+
+   return "[preview " + scope + "/" + targetCasa + "] progress " + processed + "/" + total + " (" + percent + "%)";
+}
+
 //
 LocalConsole.prototype.processOutput = function(_outputOfEvaluation) {
 
    if (_outputOfEvaluation !== undefined) {
+
+      if ((typeof _outputOfEvaluation === "object") &&
+          (_outputOfEvaluation.type === "previewConfigProgress")) {
+         var progressLine = formatPreviewConfigProgress(_outputOfEvaluation);
+
+         if (progressLine !== null) {
+            return progressLine;
+         }
+      }
 
       if (typeof _outputOfEvaluation === 'object' || _outputOfEvaluation instanceof Array) {
          return util.inspect(_outputOfEvaluation);

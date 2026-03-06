@@ -487,3 +487,6 @@ ConsoleApiSession.prototype.sessionClosed = function() {
 };
 
 module.exports = exports = ConsoleApiService;
+module.exports.__testExports = {
+   ConsoleApiSession: ConsoleApiSession
+};
