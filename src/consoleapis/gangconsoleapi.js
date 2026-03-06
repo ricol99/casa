@@ -332,6 +332,21 @@ function parseListSourcesFilters(_params) {
    return filters;
 }
 
+function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
+
+   if (!_event || !_api || !_session || !_session.name || !_api.consoleApiService ||
+       (typeof _api.consoleApiService.writeOutput !== "function")) {
+      return;
+   }
+
+   _api.consoleApiService.writeOutput(_session.name, {
+      type: "previewConfigProgress",
+      scope: _scope,
+      targetCasa: _targetCasa,
+      progress: _event
+   });
+}
+
 function findActiveInstance(_resolved) {
 
    if (!_resolved || !_resolved.instances) {
@@ -781,7 +796,32 @@ GangConsoleApi.prototype.previewConfigInternal = function(_options) {
 
 GangConsoleApi.prototype.previewConfig = function(_session, _params, _callback) {
    var options = (_params && (_params.length > 0)) ? _params[0] : {};
-   _callback(null, this.previewConfigInternal(options));
+
+   if (!options || ((typeof options !== "object") || (options instanceof Array))) {
+      options = {};
+   }
+
+   var emitProgress = !!(options.progress || options.emitProgress);
+
+   if (!emitProgress) {
+      return _callback(null, this.previewConfigInternal(options));
+   }
+
+   var targetCasaName = options.targetCasaName ? options.targetCasaName : this.gang.casa.name;
+
+   return ConfigPreviewEngine.previewConfigAsync(options, {
+      mode: "gang",
+      gang: this.gang,
+      gangName: this.gang.name,
+      defaultCasaName: this.gang.casa.name,
+      targetCasaName: options.targetCasaName ? options.targetCasaName : null,
+      resolveSourceFn: this.resolveSourceInternal.bind(this),
+      sourceUsageFn: this.sourceUsageInternal.bind(this)
+   }, (_event) => {
+      emitPreviewProgress(this, _session, "gang", targetCasaName, _event);
+   }, (_result) => {
+      _callback(null, _result);
+   });
 };
 
 GangConsoleApi.prototype.resolveSources = function(_session, _params, _callback) {

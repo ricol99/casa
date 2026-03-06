@@ -959,7 +959,7 @@ function toInt(_value, _default) {
    return (!n || (n < 0)) ? _default : n;
 }
 
-function previewConfig(_input, _context) {
+function preparePreview(_input, _context) {
    var errors = [];
    var warnings = [];
    var context = _context ? _context : {};
@@ -974,13 +974,7 @@ function previewConfig(_input, _context) {
    var truncated = false;
 
    if (!context || (typeof context.resolveSourceFn !== "function") || (typeof context.sourceUsageFn !== "function")) {
-      return {
-         ok: false,
-         errors: [ "Preview engine context is missing source resolver hooks" ],
-         warnings: warnings,
-         summary: null,
-         impactedSources: []
-      };
+      errors.push("Preview engine context is missing source resolver hooks");
    }
 
    if (options.hasOwnProperty("includeUsage") && (typeof options.includeUsage !== "boolean")) {
@@ -996,7 +990,7 @@ function previewConfig(_input, _context) {
    }
 
    if (errors.length > 0) {
-      return { ok: false, errors: errors, warnings: warnings, summary: null, impactedSources: [] };
+      return { ok: false, errors: errors, warnings: warnings };
    }
 
    operations = collectOperations(patch, warnings, errors, {
@@ -1006,7 +1000,7 @@ function previewConfig(_input, _context) {
    });
 
    if (errors.length > 0) {
-      return { ok: false, errors: errors, warnings: warnings, summary: null, impactedSources: [] };
+      return { ok: false, errors: errors, warnings: warnings };
    }
 
    ensureOperationDefaults(operations, {
@@ -1027,18 +1021,30 @@ function previewConfig(_input, _context) {
       warnings.push("Impacted source list truncated to limit=" + limit);
    }
 
-   for (var i = 0; i < impactedSourceUNames.length; ++i) {
-      var sourceUName = impactedSourceUNames[i];
-      var sourceOperations = [];
+   var operationsBySource = {};
 
-      for (var j = 0; j < operations.length; ++j) {
+   for (var i = 0; i < operations.length; ++i) {
+      var op = operations[i];
 
-         if (operations[j].sourceUName === sourceUName) {
-            sourceOperations.push(operations[j]);
-         }
+      if (!operationsBySource[op.sourceUName]) {
+         operationsBySource[op.sourceUName] = [];
       }
 
-      previewItems.push(previewSource(sourceUName, sourceOperations, {
+      operationsBySource[op.sourceUName].push(op);
+   }
+
+   return {
+      ok: true,
+      warnings: warnings,
+      errors: [],
+      options: options,
+      includeUsage: includeUsage,
+      limit: limit,
+      truncated: truncated,
+      allCasaNames: allCasaNames,
+      impactedSourceUNames: impactedSourceUNames,
+      operationsBySource: operationsBySource,
+      previewContext: {
          gang: context.gang,
          mode: context.mode,
          gangName: context.gangName,
@@ -1046,23 +1052,113 @@ function previewConfig(_input, _context) {
          targetCasaName: options.targetCasaName ? options.targetCasaName : context.targetCasaName,
          resolveSourceFn: context.resolveSourceFn,
          sourceUsageFn: context.sourceUsageFn
-      }, includeUsage, allCasaNames));
-   }
+      }
+   };
+}
 
+function buildPreviewResult(_prepared, _previewItems) {
    return {
       ok: true,
       scope: {
-         mode: context.mode ? context.mode : "casa",
-         targetCasa: options.targetCasaName ? options.targetCasaName :
-                     context.targetCasaName ? context.targetCasaName : context.defaultCasaName
+         mode: _prepared.previewContext.mode ? _prepared.previewContext.mode : "casa",
+         targetCasa: _prepared.previewContext.targetCasaName ? _prepared.previewContext.targetCasaName : _prepared.previewContext.defaultCasaName
       },
-      summary: collectSummary(previewItems, truncated),
-      impactedSources: previewItems,
-      warnings: warnings,
+      summary: collectSummary(_previewItems, _prepared.truncated),
+      impactedSources: _previewItems,
+      warnings: _prepared.warnings,
       errors: []
    };
 }
 
+function previewConfig(_input, _context) {
+   var prepared = preparePreview(_input, _context);
+   var previewItems = [];
+   var impactedSourceUNames = null;
+
+   if (!prepared.ok) {
+      return { ok: false, errors: prepared.errors, warnings: prepared.warnings, summary: null, impactedSources: [] };
+   }
+
+   impactedSourceUNames = prepared.impactedSourceUNames ? prepared.impactedSourceUNames : [];
+
+   for (var i = 0; i < impactedSourceUNames.length; ++i) {
+      var sourceUName = impactedSourceUNames[i];
+      var sourceOperations = prepared.operationsBySource[sourceUName] ? prepared.operationsBySource[sourceUName] : [];
+      previewItems.push(previewSource(sourceUName, sourceOperations, prepared.previewContext, prepared.includeUsage, prepared.allCasaNames));
+   }
+
+   return buildPreviewResult(prepared, previewItems);
+}
+
+function previewConfigAsync(_input, _context, _progressCb, _completeCb) {
+   var progressCb = (typeof _progressCb === "function") ? _progressCb : null;
+   var completeCb = (typeof _completeCb === "function") ? _completeCb : function() {};
+   var prepared = preparePreview(_input, _context);
+
+   if (!prepared.ok) {
+      return completeCb({ ok: false, errors: prepared.errors, warnings: prepared.warnings, summary: null, impactedSources: [] });
+   }
+
+   var previewItems = [];
+   var total = prepared.impactedSourceUNames.length;
+   var processed = 0;
+   var chunkSize = 25;
+
+   if (progressCb) {
+      progressCb({ event: "preview-started", total: total, processed: 0, percent: 0 });
+   }
+
+   if (total === 0) {
+      var emptyResult = buildPreviewResult(prepared, previewItems);
+
+      if (progressCb) {
+         progressCb({ event: "preview-complete", total: 0, processed: 0, percent: 100, changedSourceCount: 0 });
+      }
+
+      return completeCb(emptyResult);
+   }
+
+   var processChunk = function() {
+      var end = Math.min(processed + chunkSize, total);
+
+      for (; processed < end; ++processed) {
+         var sourceUName = prepared.impactedSourceUNames[processed];
+         var sourceOperations = prepared.operationsBySource[sourceUName] ? prepared.operationsBySource[sourceUName] : [];
+         previewItems.push(previewSource(sourceUName, sourceOperations, prepared.previewContext, prepared.includeUsage, prepared.allCasaNames));
+      }
+
+      if (progressCb) {
+         progressCb({
+            event: "preview-progress",
+            total: total,
+            processed: processed,
+            percent: Math.floor((processed * 100) / total)
+         });
+      }
+
+      if (processed < total) {
+         return setImmediate(processChunk);
+      }
+
+      var result = buildPreviewResult(prepared, previewItems);
+
+      if (progressCb) {
+         progressCb({
+            event: "preview-complete",
+            total: total,
+            processed: total,
+            percent: 100,
+            changedSourceCount: result.summary ? result.summary.changedSourceCount : 0
+         });
+      }
+
+      return completeCb(result);
+   };
+
+   setImmediate(processChunk);
+}
+
 module.exports = exports = {
-   previewConfig: previewConfig
+   previewConfig: previewConfig,
+   previewConfigAsync: previewConfigAsync
 };

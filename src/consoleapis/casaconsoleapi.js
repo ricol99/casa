@@ -119,6 +119,21 @@ function sourceInventoryScope(_source, _gangName, _localCasaName) {
    return "runtime";
 }
 
+function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
+
+   if (!_event || !_api || !_session || !_session.name || !_api.consoleApiService ||
+       (typeof _api.consoleApiService.writeOutput !== "function")) {
+      return;
+   }
+
+   _api.consoleApiService.writeOutput(_session.name, {
+      type: "previewConfigProgress",
+      scope: _scope,
+      targetCasa: _targetCasa,
+      progress: _event
+   });
+}
+
 function classifySourceInventoryShare(_casa, _source) {
    var localFlag = !!(_source && _source.config && _source.config.local);
    var fromGangDb = !!(_source && _source.config && _casa && _casa.gang && _casa.gang.name && (_source.config._db === _casa.gang.name));
@@ -431,7 +446,30 @@ CasaConsoleApi.prototype.previewConfigInternal = function(_options) {
 
 CasaConsoleApi.prototype.previewConfig = function(_session, _params, _callback) {
    var options = (_params && (_params.length > 0)) ? _params[0] : {};
-   _callback(null, this.previewConfigInternal(options));
+
+   if (!options || ((typeof options !== "object") || (options instanceof Array))) {
+      options = {};
+   }
+
+   var emitProgress = !!(options.progress || options.emitProgress);
+
+   if (!emitProgress) {
+      return _callback(null, this.previewConfigInternal(options));
+   }
+
+   return ConfigPreviewEngine.previewConfigAsync(options, {
+      mode: "casa",
+      gang: this.gang,
+      gangName: this.gang.name,
+      defaultCasaName: this.gang.casa.name,
+      targetCasaName: this.gang.casa.name,
+      resolveSourceFn: this.resolveSourceInternal.bind(this),
+      sourceUsageFn: this.sourceUsageInternal.bind(this)
+   }, (_event) => {
+      emitPreviewProgress(this, _session, "casa", this.gang.casa.name, _event);
+   }, (_result) => {
+      _callback(null, _result);
+   });
 };
 
 CasaConsoleApi.prototype.createService = function(_session, _params, _callback) {

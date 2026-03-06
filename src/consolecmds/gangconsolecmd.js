@@ -107,6 +107,7 @@ function parsePreviewConfigArgs(_arguments) {
       { name: 'include', alias: 'i', multiple: true, type: String },
       { name: 'usage', type: Boolean },
       { name: 'limit', alias: 'l', type: Number },
+      { name: 'progress', type: Boolean },
       { name: 'casa', alias: 'c', type: String }
    ];
    var options;
@@ -119,7 +120,7 @@ function parsePreviewConfigArgs(_arguments) {
    }
 
    if (options._unknown && options._unknown.length > 0) {
-      return { error: "Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--casa <name>]" };
+      return { error: "Too many arguments. Usage: previewConfig <jsonPatch> [--file <path>] [--include usage] [--limit <n>] [--progress] [--casa <name>]" };
    }
 
    if (!options.patch && !options.file) {
@@ -164,6 +165,7 @@ function parsePreviewConfigArgs(_arguments) {
          patch: patchObj,
          includeUsage: includeUsage,
          limit: options.limit,
+         progress: !!options.progress,
          targetCasaName: options.casa
       } ]
    };

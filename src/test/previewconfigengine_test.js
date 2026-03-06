@@ -13,6 +13,20 @@ function runTest(_name, _fn) {
    }
 }
 
+function runAsyncTest(_name, _fn) {
+   _fn(function(_err) {
+
+      if (_err) {
+         process.stderr.write("[FAIL] " + _name + "\n");
+         process.stderr.write((_err && _err.stack) ? _err.stack : (_err + "\n"));
+         process.exit(1);
+      }
+
+      process.stdout.write("[PASS] " + _name + "\n");
+      process.stdout.write("All preview config engine tests passed.\n");
+   });
+}
+
 function deepCopy(_obj) {
    return (_obj === undefined) ? _obj : JSON.parse(JSON.stringify(_obj));
 }
@@ -280,4 +294,32 @@ runTest("targetCasaName applies default owner for scope=casa operations", functi
    assert.strictEqual(out.impactedSources[0].after.resolve.activeOwnerCasa, "casa-b");
 });
 
-process.stdout.write("All preview config engine tests passed.\n");
+runAsyncTest("previewConfigAsync emits progress events and completes", function(_done) {
+   var progressEvents = [];
+
+   ConfigPreviewEngine.previewConfigAsync({
+      patch: {
+         changes: [
+            { action: "upsert", sourceUName: ":a", scope: "casa", ownerCasa: "casa-a", patch: { priority: 1 } },
+            { action: "upsert", sourceUName: ":b", scope: "casa", ownerCasa: "casa-a", patch: { priority: 2 } }
+         ]
+      }
+   }, createContext({}, {}), function(_event) {
+      progressEvents.push(_event);
+   }, function(_result) {
+
+      try {
+         assert.strictEqual(_result.ok, true);
+         assert.strictEqual(_result.summary.impactedSourceCount, 2);
+         assert.ok(progressEvents.length >= 2);
+         assert.strictEqual(progressEvents[0].event, "preview-started");
+         assert.strictEqual(progressEvents[progressEvents.length - 1].event, "preview-complete");
+         assert.strictEqual(progressEvents[progressEvents.length - 1].percent, 100);
+      }
+      catch (_err) {
+         return _done(_err);
+      }
+
+      _done();
+   });
+});
