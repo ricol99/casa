@@ -102,7 +102,7 @@ NamedObject.prototype.importTree = function(_importObj, _filterObjFunc, _process
       var ret = _source.import(_context);
 
       if (_processObjFunc) {
-         ret ||= _processObjFunc.call(this, _context, _source, _owner);
+         ret = ret || _processObjFunc.call(this, _context, _source, _owner);
       }
       return ret;
    }, false);
