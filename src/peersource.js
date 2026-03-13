@@ -2,49 +2,33 @@ var util = require('./util');
 var SourceBase = require('./sourcebase');
 var Gang = require('./gang');
 
-function PeerSource(_uName, _priority, _properties, _events, _peerCasa) {
-   var gang = Gang.mainInstance();
-   var lastColon = _uName.lastIndexOf(":");
-   var name = (lastColon >= 0) ? _uName.substr(lastColon + 1) : _uName;
-   var parentUName = (lastColon > 0) ? _uName.substr(0, lastColon) : ":";
-   var bowingOwner = _peerCasa.getBowingSource(parentUName);
+function PeerSource(_config, _owner) {
+   _config.transient = true;
+   _config.local = true;
+   SourceBase.call(this, _config, _owner);
 
-   var existingSource = gang.findNamedObject(_uName);
-   var owner = bowingOwner ? bowingOwner : existingSource ? _uName : gang.findOwner(_uName);
-
-   SourceBase.call(this, { name: name, type: "peersource", transient: true, local: true }, owner);
-
-   this.priority = _priority;
-   this.casa = _peerCasa;
-
-   this.local = true;
-
-   if (bowingOwner) {
-      this.bowToOtherSource(false, false);
-   }
-   else if (existingSource) {
-
-      if (existingSource.deferToPeer(this)) {
-         this.standUpFromBow();
-      }
-      else {
-         this.bowToOtherSource(false, true);
-      }
-   }
-
-   for (var prop in _properties) {
-      this.ensurePropertyExists(prop, 'property', { name: prop, cold: false });
-      this.properties[prop].set(_properties[prop], {});
-   }
-
-   for (var event in _events) {
-      this.ensureEventExists(event, 'event', { name: event, cold: false });
-   }
-
-   this.casa.addSource(this);
+   this.priority = _config.priority;
+   this.bowing = true;
 }
 
 util.inherits(PeerSource, SourceBase);
+
+PeerSource.prototype.addToMainTree = function() {
+   var existingSource = this.gang.findNamedObject(this.uName);
+
+   if (existingSource) {
+
+      if (existingSource.deferToPeer(this)) {
+         this.standUpFromBow();
+         return true;
+      }
+   }
+   else {
+      this.standUpFromBow();
+   }
+
+   return false;
+};
 
 PeerSource.prototype.subscriptionRegistered = function(_event, _subscription) {
    console.log(this.uName+": subscriptionRegistered() :" + _event);

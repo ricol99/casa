@@ -167,8 +167,9 @@ ConsoleApiService.prototype.createConsoleApiObject = function(_uName, _owner) {
    return consoleObj;
 };
 
-ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_namedObject) {
-   return this.gangConsoleApi.findOrCreate(_namedObject.uName, ConsoleApiService.prototype.createConsoleApiObject.bind(this));
+ConsoleApiService.prototype.findOrCreateConsoleApiObject = function(_nameOrNamedObject) {
+   let namedObject = (typeof _nameOrNamedObject === "string") ? this.gang.findNamedObject(_nameOrNamedObject) : _nameOrNamedObject;
+   return this.gangConsoleApi.findOrCreate(namedObject.uName, ConsoleApiService.prototype.createConsoleApiObject.bind(this));
 };
 
 function ConsoleApiSession(_id, _console, _owner) {
@@ -301,7 +302,7 @@ ConsoleApiSession.prototype.extractTree = function(_params, _callback) {
    }
 
    var exportObj = {};
-   obj.export(exportObj);
+   obj.exportTree(exportObj);
 
    _callback(null, { exists: true, tree: exportObj });
 };

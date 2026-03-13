@@ -58,7 +58,7 @@ function Casa(_config, _owner) {
    this.sources = {};
    this.serviceTypes = {};
    this.topSources = {};
-   this.bowingSources = {};
+   this.bowingRoot = new NamedObject({ name: "bow-root", type: "namedobject", displayName: "Bow Root", transient: true });
    this.queuePeerCasas = {};
 
    this.uber = false;
@@ -248,12 +248,12 @@ Casa.prototype.refreshSourceListeners = function() {
       }
    }
 
-   for (var bowingSourceName in this.bowingSources) {
+   /*for (var bowingSourceName in this.bowingSources) {
 
       if (this.bowingSources.hasOwnProperty(bowingSourceName)) {
          this.bowingSources[bowingSourceName].refreshSourceListeners();
       }
-   }
+   }*/
 };
 
 Casa.prototype.cancelScheduledRefreshSourceListeners = function() {
@@ -287,7 +287,7 @@ Casa.prototype.shouldExportChildInSharedConfig = function(_child, _owner) {
       return false;
    }
 
-   if (_child.superType && (_child.superType() === "sourcelistener")) {
+   if (_child.superType && ((_child.superType() !== "thing") && (_child.superType() !== "property") && (_child.superType() !== "event") && (_child.type !== "gang") )) {
       return false;
    }
 
@@ -357,6 +357,7 @@ Casa.prototype.extractSharedSourceFromExport = function(_sourceExportObj) {
 };
 
 Casa.prototype.extractSharedSourcesFromExport = function(_exportObj, _sources) {
+
    if (!_exportObj || !_exportObj.myNamedObjects) {
       return;
    }
@@ -380,23 +381,14 @@ Casa.prototype.refreshSimpleConfig = function() {
    simpleConfig.name = this.name;
    simpleConfig.displayName = this.displayName;
    simpleConfig.gang = this.gang.uName;
-   simpleConfig.sources = [];
 
-   for (var sourceName in this.sources) {
+   let mapperType = { thing: "peersource", gang: "peersource", property: "property", event: "event" };
 
-      if (this.sources.hasOwnProperty(sourceName)) {
-         var source = this.sources[sourceName];
-
-         if (this.shouldShareSourceInSimpleConfig(source)) {
-            var sourceExportObj = {};
-            source.exportFiltered(sourceExportObj, this.shouldExportChildInSharedConfig.bind(this));
-            simpleConfig.sources.push(this.extractSharedSourceFromExport(sourceExportObj));
-         }
-      }
-   }
-
-   simpleConfig.sources.sort( (_a, _b) => {
-      return (_a.uName > _b.uName) ? 1 : (_a.uName < _b.uName) ? -1 : 0;
+   simpleConfig.exportTree = { };
+   this.gang.exportTree(simpleConfig.exportTree, this.shouldExportChildInSharedConfig.bind(this), (_context, _source, _owner) => {
+      //console.error(this.uName + ": AAAAAA  Updating object " + _source.name);
+      _context.type = mapperType[_context.superType];
+      _context.superType = mapperType[_context.superType];
    });
 
    return simpleConfig;
@@ -543,37 +535,25 @@ Casa.prototype.bowSource = function(_source, _currentlyActive) {
    if (_currentlyActive) {
       _source.detach();
    }
-   this.bowingSources[_source.uName] = _source;
-   this.stopListeningToSource(_source);
+
+   this.bowingRoot.addNamedObject(_source);
+   //this.stopListeningToSource(_source);
 };
 
 Casa.prototype.standUpSourceFromBow = function(_source) {
    console.log(this.uName + ": standUpSourceFromBow() Making source " + _source.uName + " active");
+   _source.detach();
 
    if (!this.gang.addNamedObject(_source)) {
       console.error(this.uName + ": standUpSourceFromBow() Unable to find owner for source=" + _source.uName);
       return;
    }
 
-   delete this.bowingSources[_source.uName];
-   this.startListeningToSource(_source);
+   //this.startListeningToSource(_source);
 };
 
 Casa.prototype.getBowingSource = function(_sourceFullName) {
-   var bowingSource = null;
-
-   for (var source in this.bowingSources) {
-
-      if (this.bowingSources.hasOwnProperty(source) && source.startsWith(_sourceFullName)) {
-         bowingSource = this.bowingSources[source].findNamedObject(_sourceFullName);
-    
-         if (bowingSource) {
-            break;
-         }
-      }
-   }
-
-   return bowingSource;
+   return this.bowingRoot.findNamedObject(_sourceFullName);
 };
 
 module.exports = exports = Casa;

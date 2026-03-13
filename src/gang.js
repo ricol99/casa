@@ -86,13 +86,14 @@ Gang.prototype.getCasa = function() {
 
 Gang.prototype.interestInNewChild = function(_uName) {
 };
+
 Gang.prototype.connectToPeers = function() {
 
    if (this.casa.connectToPeers) {
 
       setTimeout( () => {
          this.casa.startListening();
-      }, 20000 + Math.floor(Math.random(20000)));
+      }, (this.loader.settleTime * 1000) + Math.floor(Math.random() * this.loader.settleTime * 0.25 * 1000));
    }
 };
 

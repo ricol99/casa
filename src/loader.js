@@ -7,7 +7,7 @@ const fs = require('fs');
 var _mainInstance = null;
 _loadTime = Date.now();
 
-function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _logEvents, _testUncaughtException) {
+function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _logEvents, _settleTime, _testUncaughtException) {
    this.gang = null;
    this.casaName = _casaName;
    this.connectToPeers = _connectToPeers;
@@ -16,6 +16,8 @@ function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath,
    this.configPath = _configPath;
    this.globalConsoleRequired = (_console) ? _console === "global" : false;
    this.localConsoleRequired = (_console) ? _console === "local" : false;
+   var settleTime = Number(_settleTime);
+   this.settleTime = Number.isFinite(settleTime) && (settleTime > 0) ? settleTime : 30;
    this.logEvents = _logEvents;
 
    if (_testUncaughtException) {
@@ -65,7 +67,7 @@ Loader.prototype.load = function() {
          if (util.suspensionAvailable() && AsyncEmitter.suspensionAvailable() ) {
             console.log("*LOADER*: Attempting suspension");
             var exportObj = { timestamp: Date.now(), tree: {}};
-            _mainInstance.gang.export(exportObj.tree);
+            _mainInstance.gang.exportTree(exportObj.tree);
             fs.writeFileSync(_mainInstance.configPath + "/hotstate-"+_mainInstance.gang.casa.name+".json", JSON.stringify(exportObj));
             console.log("*LOADER*: State persisted");
             process.exit(2);
@@ -89,7 +91,7 @@ Loader.prototype.suspend = function() {
    if (this.gang && !this.gang.globalConsoleRequired) {
       console.log(this.uName +": Attempting suspension");
       var exportObj = { timestamp: Date.now(), tree: {}};
-      _mainInstance.gang.export(exportObj.tree);
+      _mainInstance.gang.exportTree(exportObj.tree);
       fs.writeFileSync(_mainInstance.configPath + "/hotstate-"+_mainInstance.gang.casa.name+".json", JSON.stringify(exportObj));
       console.log("*LOADER*: State persisted");
       process.exit(2);
@@ -179,7 +181,7 @@ Loader.prototype.restoreNode = function(_importObj) {
          this.gang.gangDb = this.gangDb;
 
          this.gang.buildTree();
-         this.gang.import(_importObj);
+         this.gang.importTree(_importObj);
          this.gang.hotStart();
 
          if (this.localConsoleRequired) {
@@ -199,7 +201,8 @@ Loader.prototype.loadConsole = function() {
    this.gangName = this.casaName;
    this.casaName = "casa-console";
 
-   this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, connectToPeers: false, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 };
+   this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, connectToPeers: false, certPath: this.certPath,
+                       configPath: this.configPath, listeningPort: 8999, settleTime: this.settleTime };
    this.gangConfig = { name: this.gangName, type: "gang", casa: this.casaConfig };
    this.gangConfig.casa = this.casaConfig;
 

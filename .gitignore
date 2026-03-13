@@ -1,3 +1,7 @@
 *.xlsx
 *.pptx
 secure-config/*
+node_modules/
+ui/node_modules/
+ui/dist/
+ui/*.tsbuildinfo

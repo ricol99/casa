@@ -689,10 +689,10 @@ McpService.prototype.exportNamedObject = function(_obj, _exportObj) {
    var filterCb = this.getExportFilter();
 
    if (_obj && (typeof _obj.exportFiltered === "function")) {
-      _obj.exportFiltered(_exportObj, filterCb);
+      _obj.exportTree(_exportObj, filterCb);
    }
    else if (_obj && (typeof _obj.export === "function")) {
-      _obj.export(_exportObj);
+      _obj.exportTree(_exportObj);
    }
 };
 

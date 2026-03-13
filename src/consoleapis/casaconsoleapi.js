@@ -57,7 +57,7 @@ function normaliseSourceUName(_uName) {
    return uName;
 }
 
-function findSourceInMap(_sourceMap, _sourceUName) {
+/*function findSourceInMap(_sourceMap, _sourceUName) {
 
    if (!_sourceMap || !_sourceUName) {
       return null;
@@ -80,7 +80,7 @@ function findSourceInMap(_sourceMap, _sourceUName) {
    }
 
    return null;
-}
+}*/
 
 function sourceInventoryType(_source) {
 
@@ -175,7 +175,7 @@ CasaConsoleApi.prototype.hotStart = function() {
 CasaConsoleApi.prototype.exportData = function(_session, _params, _callback) {
    var exportData = {};
 
-   if (this.myObj().export(exportData)) {
+   if (this.myObj().exportTree(exportData)) {
       console.info("AAAAAA export=", exportData);
       _callback(null, exportData);
    }
@@ -305,7 +305,7 @@ CasaConsoleApi.prototype.sourceInventory = function(_session, _params, _callback
 };
 
 CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
-   var sourceObj = this.gang.findNamedObject(_sourceUName);
+   /*var sourceObj = this.gang.findNamedObject(_sourceUName);
 
    if (sourceObj) {
       return sourceObj;
@@ -337,11 +337,13 @@ CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
       }
    }
 
-   return null;
+   return null;*/
+   return this.gang.findNamedObject(_sourceUName);
 };
 
 CasaConsoleApi.prototype.getSourceConsoleApiForUName = function(_sourceUName) {
-   var sourceObj = this.getSourceObjectForUName(_sourceUName);
+   //var sourceObj = this.getSourceObjectForUName(_sourceUName);
+   var sourceObj = this.gang.findNamedObject(_sourceUName);
 
    if (!sourceObj || !this.consoleApiService || (typeof this.consoleApiService.findOrCreateConsoleApiObject !== "function")) {
       return null;
@@ -366,7 +368,8 @@ CasaConsoleApi.prototype.sourceUsageInternal = function(_sourceUName, _options) 
 };
 
 CasaConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
-   var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+   //var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+   var sourceApi = this.consoleApiService.findOrCreateConsoleApiObject(_sourceUName);
 
    if (sourceApi && (typeof sourceApi.resolveForUName === "function")) {
       return sourceApi.resolveForUName(_sourceUName);
@@ -394,7 +397,8 @@ CasaConsoleApi.prototype.resolveSource = function(_session, _params, _callback) 
 };
 
 CasaConsoleApi.prototype.explainSourceInternal = function(_sourceUName) {
-   var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+   //var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
+   var sourceApi = this.consoleApiService.findOrCreateConsoleApiObject(_sourceUName);
 
    if (sourceApi && (typeof sourceApi.explainForUName === "function")) {
       return sourceApi.explainForUName(_sourceUName);

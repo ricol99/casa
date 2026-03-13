@@ -120,7 +120,7 @@ ConsoleApi.prototype.tree = function(_session, _params, _callback) {
    }
 
    var exportObj = {};
-   obj.export(exportObj);
+   obj.exportTree(exportObj);
 
    _callback(null, exportObj);
 };

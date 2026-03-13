@@ -565,17 +565,30 @@ GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
             host: (peerCasa.address && (peerCasa.address.host || peerCasa.address.hostname)) ? (peerCasa.address.host || peerCasa.address.hostname) : null,
             port: (peerCasa.address && peerCasa.address.port) ? peerCasa.address.port : null,
             discoveryTier: (peerCasa.discoveryTier !== undefined) ? peerCasa.discoveryTier : null,
-            sourceCounts: peerCounts
+            sourceCounts: peerCounts,
+            sourceTotal: peerCounts.total,
+            sourceActive: peerCounts.active,
+            sourceBowed: peerCounts.bowed,
+            sourceDisconnected: Math.max(0, peerCounts.total - peerCounts.active - peerCounts.bowed),
+            sourceMapEntries: peerCounts.sourcesMapEntries,
+            bowingMapEntries: peerCounts.bowingMapEntries
          });
       }
    }
 
    peers.sort( (_a, _b) => (_a.casaName > _b.casaName) ? 1 : ((_a.casaName < _b.casaName) ? -1 : 0));
+   var localBowed = (localCounts && (typeof localCounts.bowed === "number")) ? localCounts.bowed : 0;
+   var peerBowed = peers.reduce( (_count, _peer) => {
+      return _count + ((_peer.sourceCounts && (typeof _peer.sourceCounts.bowed === "number")) ? _peer.sourceCounts.bowed : 0);
+   }, 0);
 
    _callback(null, {
       gangName: this.gang.name,
       localCasaName: this.gang.casa.name,
       localSourceCounts: localCounts,
+      localBowed: localBowed,
+      peerBowed: peerBowed,
+      totalBowed: localBowed + peerBowed,
       peerCount: peers.length,
       connectedPeerCount: peers.reduce( (_count, _peer) => _count + (_peer.connected ? 1 : 0), 0),
       peers: peers

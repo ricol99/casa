@@ -45,7 +45,7 @@ function Tester(_config, _parent) {
          this.gang.casa.scheduleRefreshSourceListeners();
       }
 
-      this.delayStart = _config.testRun.hasOwnProperty("delayStart") ? _config.testRun.delayStart * 1000 : (this.gang.loader.connectToPeers ? 25000 : 0);
+      this.delayStart = _config.testRun.hasOwnProperty("delayStart") ? _config.testRun.delayStart * 1000 : (this.gang.loader.connectToPeers ? this.gang.loader.settleTime*1000*1.5 : 0);
    }
 
    this.buildTestCases(util.copy(_config.testRun, true), util.copy(_config.testCases, true));

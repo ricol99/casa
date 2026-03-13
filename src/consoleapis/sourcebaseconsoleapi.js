@@ -251,7 +251,8 @@ function sbBuildUsageInstanceEntry(_source, _instanceMeta, _activeSource, _gangN
    var providerType = sbGetSourceProviderType(_source);
    var connected = (providerType === "peercasa") ? !!(_source.casa && _source.casa.connected) : true;
    var usage = sbCollectSubscribedSources(_source);
-   var state = "standby";
+   var state = "error";
+   var error = null;
 
    if (_instanceMeta && _instanceMeta.inBowing) {
       state = "bowed";
@@ -261,6 +262,9 @@ function sbBuildUsageInstanceEntry(_source, _instanceMeta, _activeSource, _gangN
    }
    else if (!connected) {
       state = "unavailable";
+   }
+   else {
+      error = "Invalid source state: connected instance is neither active nor bowed";
    }
 
    return {
@@ -274,6 +278,7 @@ function sbBuildUsageInstanceEntry(_source, _instanceMeta, _activeSource, _gangN
       scope: sbGetSourceScope(_source, _gangName, _localCasaName),
       inSourcesMap: _instanceMeta ? !!_instanceMeta.inSources : true,
       inBowingMap: _instanceMeta ? !!_instanceMeta.inBowing : false,
+      error: error,
       consumerCount: usage.consumerCount,
       subscriptionCount: usage.subscriptionCount,
       consumers: usage.consumers
@@ -288,6 +293,7 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
    var gang = this.gang;
    var localCasaName = (gang && gang.casa) ? gang.casa.name : null;
    var outputInstances = [];
+   var errors = [];
 
    if (!gang || !_sourceUName) {
       return {
@@ -295,6 +301,7 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
          exists: false,
          activeOwnerCasa: null,
          activeProviderType: null,
+         errors: [],
          instances: []
       };
    }
@@ -317,7 +324,7 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
       var ownerCasa = sbGetSourceOwnerCasa(source, localCasaName);
       var providerType = sbGetSourceProviderType(source);
       var connected = (providerType === "peercasa") ? !!(source.casa && source.casa.connected) : true;
-      var state = "standby";
+      var state = "error";
 
       if (instanceMetas[i].inBowing) {
          state = "bowed";
@@ -329,6 +336,9 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
       }
       else if (!connected) {
          state = "unavailable";
+      }
+      else {
+         errors.push(_sourceUName + ": instance owner=\"" + ownerCasa + "\" provider=\"" + providerType + "\" is connected but neither active nor bowed");
       }
 
       outputInstances.push({
@@ -385,6 +395,7 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
       exists: outputInstances.length > 0,
       activeOwnerCasa: activeOwnerCasa,
       activeProviderType: activeProviderType,
+      errors: errors,
       instances: outputInstances
    };
 };
@@ -418,6 +429,9 @@ SourceBaseConsoleApi.prototype.explainForUName = function(_sourceUName) {
 
          if (instance.state === "bowed") {
             reasons.push("bowed");
+         }
+         else if (instance.state === "error") {
+            reasons.push("invalid-state-non-active-non-bowed");
          }
 
          if (activeInstance) {
@@ -466,6 +480,7 @@ SourceBaseConsoleApi.prototype.explainForUName = function(_sourceUName) {
       activeProviderType: resolved.activeProviderType,
       activePriority: activeInstance ? activeInstance.priority : null,
       rule: "Highest priority connected instance wins; bowed instances are passive",
+      errors: resolved.errors ? resolved.errors : [],
       fallback: fallback,
       contenders: contenders
    };
@@ -482,6 +497,7 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
    var instances = [];
    var consumerSet = {};
    var totalSubscriptionCount = 0;
+   var errors = [];
 
    if (!sourceUName || !gang) {
       return {
@@ -493,6 +509,7 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
          consumerCount: 0,
          subscriptionCount: 0,
          filters: options,
+         errors: [],
          instances: []
       };
    }
@@ -510,8 +527,13 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
          subscriptionCount: 0,
          filters: options,
          reason: "Source not found in active or bowing maps",
+         errors: resolved.errors ? resolved.errors : [],
          instances: []
       };
+   }
+
+   if (resolved.errors && (resolved.errors.length > 0)) {
+      errors = resolved.errors.slice();
    }
 
    sbAppendContainerInstances(instanceMetas, gang.casa, sourceUName);
@@ -529,6 +551,10 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
 
    for (var i = 0; i < instanceMetas.length; ++i) {
       var instance = sbBuildUsageInstanceEntry(instanceMetas[i].source, instanceMetas[i], activeSource, gang.name, localCasaName);
+
+      if (instance.error) {
+         errors.push(sourceUName + ": " + instance.error + " (owner=\"" + instance.ownerCasa + "\", provider=\"" + instance.providerType + "\")");
+      }
 
       if (options.activeOnly && (instance.state !== "active")) {
          continue;
@@ -585,6 +611,7 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
       consumerCount: Object.keys(consumerSet).length,
       subscriptionCount: totalSubscriptionCount,
       filters: options,
+      errors: errors,
       instances: instances
    };
 };
@@ -610,7 +637,7 @@ SourceBaseConsoleApi.prototype.hotStart = function() {
 SourceBaseConsoleApi.prototype.exportData = function(_session, _params, _callback) {
    var exportData = {};
 
-   if (this.myObj().export(exportData)) {
+   if (this.myObj().exportTree(exportData)) {
       console.info("AAAAAA export=", exportData);
       _callback(null, exportData);
    }

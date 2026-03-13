@@ -187,7 +187,24 @@ SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
 
    if (_topOfTree) {
       this.casa.bowSource(this, _currentlyActive);
+
+      this.iterate(null, null, (_context, _source, _owner) => {
+
+         if (_source === this) {
+            return false;
+         }
+
+         if ((_source.type === "peersource") || (_source.superType() === "thing")) {
+            _source.bowToOtherSource(_currentlyActive, false);
+         }
+      }, false);
+
+      return false;
    }
+
+   //if (_topOfTree) {
+      //this.casa.bowSource(this, _currentlyActive);
+   //}
 };
 
 SourceBase.prototype.standUpFromBow = function() {

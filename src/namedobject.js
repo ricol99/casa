@@ -70,106 +70,50 @@ NamedObject.prototype.superType = function(_type) {
    return null;
 };
 
-// Called when current state required
+// Called when current state of the tree needs to be exported
+NamedObject.prototype.exportTree = function(_exportObj, _filterObjFunc, _processObjFunc) {
+
+   return this.iterate(_exportObj, _filterObjFunc, (_context, _source, _owner) => {
+      var ret = _source.export(_context);
+
+      if (_processObjFunc) {
+         ret ||= _processObjFunc.call(this, _context, _source, _owner);
+      }
+      return ret;
+   }, true);
+
+   /*return this.iterate(_exportObj, _filterObjFunc, (_context) => {
+             console.error("AAAAAAA BBBBBBB"+ this.name);
+             return this.export(_context);
+          }, true);*/
+};
+
+// Called when current state of the object needs to be exported
 NamedObject.prototype.export = function(_exportObj) {
    AsyncEmitter.prototype.export.call(this, _exportObj);
    _exportObj.superType = this.superType();
    _exportObj.name = this.name;
    _exportObj.uName = this.uName;
-   _exportObj.myNamedObjects = {};
-   var exportContext = NamedObject.getExportContext(_exportObj);
+};
 
-   for (var namedObj in this.myNamedObjects) {
+// Called when current state of tree needs to imported
+NamedObject.prototype.importTree = function(_importObj, _filterObjFunc, _processObjFunc) {
+   return this.iterate(_importObj, _filterObjFunc, (_context, _source, _owner) => {
+      var ret = _source.import(_context);
 
-      if (this.myNamedObjects.hasOwnProperty(namedObj)) {
-         var child = this.myNamedObjects[namedObj];
-
-         if (!NamedObject.shouldExportChild(exportContext, this, child)) {
-            continue;
-         }
-
-         _exportObj.myNamedObjects[namedObj]= {};
-         NamedObject.setExportContext(_exportObj.myNamedObjects[namedObj], exportContext);
-         child.export(_exportObj.myNamedObjects[namedObj]);
+      if (_processObjFunc) {
+         ret ||= _processObjFunc.call(this, _context, _source, _owner);
       }
-   }
+      return ret;
+   }, false);
 };
 
-// Called when current state required with child filtering
-NamedObject.prototype.exportFiltered = function(_exportObj, _filterCb) {
-   if (typeof _filterCb !== "function") {
-      return this.export(_exportObj);
-   }
-
-   var exportContext = { filterCb: _filterCb };
-   NamedObject.setExportContext(_exportObj, exportContext);
-
-   try {
-      this.export(_exportObj);
-   }
-   finally {
-      NamedObject.clearExportContext(_exportObj);
-   }
-};
-
-NamedObject.setExportContext = function(_exportObj, _exportContext) {
-   if (!_exportObj || !_exportContext) {
-      return;
-   }
-
-   Object.defineProperty(_exportObj, EXPORT_CONTEXT_FIELD, {
-      value: _exportContext,
-      enumerable: false,
-      configurable: true
-   });
-};
-
-NamedObject.getExportContext = function(_exportObj) {
-   return (_exportObj && _exportObj.hasOwnProperty(EXPORT_CONTEXT_FIELD)) ? _exportObj[EXPORT_CONTEXT_FIELD] : null;
-};
-
-NamedObject.clearExportContext = function(_exportObj) {
-   if (!_exportObj || (typeof _exportObj !== "object")) {
-      return;
-   }
-
-   if (_exportObj.hasOwnProperty(EXPORT_CONTEXT_FIELD)) {
-      delete _exportObj[EXPORT_CONTEXT_FIELD];
-   }
-
-   if (_exportObj.myNamedObjects && (typeof _exportObj.myNamedObjects === "object")) {
-
-      for (var namedObj in _exportObj.myNamedObjects) {
-
-         if (_exportObj.myNamedObjects.hasOwnProperty(namedObj)) {
-            NamedObject.clearExportContext(_exportObj.myNamedObjects[namedObj]);
-         }
-      }
-   }
-};
-
-NamedObject.shouldExportChild = function(_exportContext, _owner, _child) {
-   if (!_exportContext || !_exportContext.filterCb) {
-      return true;
-   }
-
-   return _exportContext.filterCb(_child, _owner);
-};
-
-// Called when current state required
+// Called when current state of the object needs to be imported
 NamedObject.prototype.import = function(_importObj) {
    AsyncEmitter.prototype.import.call(this, _importObj);
    //this.superType = _importObj.superType;
    //this.name = _importObj.name;
    //this.uName = _importObj.uName;
-   //this.myNamedObjects = {};
-
-   for (var namedObj in _importObj.myNamedObjects) {
-
-      if (this.myNamedObjects.hasOwnProperty(namedObj)) {
-         this.myNamedObjects[namedObj].import(_importObj.myNamedObjects[namedObj]);
-      }
-   }
 };
 
 NamedObject.prototype.coldStart = function() {
@@ -185,6 +129,47 @@ NamedObject.prototype.hotStart = function(_ignoreChildren) {
          this.myNamedObjects[namedObj].hotStart();
       }
    }
+};
+
+// Used to iterate throught the tree.
+// _context - obejct used across the tree (e.g. to export to or import from)
+// _filterObjFunc - used to decide if object should be processed
+// _processObjFunc - procees function to apply if filter object allows
+// _createChildren - should this function create a mirror child tree structure in the _context object (true for export, false for import as it already exists)
+NamedObject.prototype.iterate = function(_context, _filterObjFunc, _processObjFunc, _createChildren) {
+
+   if (_filterObjFunc && !_filterObjFunc.call(this, this, this.owner)) {
+      return false;
+   } 
+
+   if (_processObjFunc) {
+
+      if (_processObjFunc.call(this, _context, this, this.owner)) {
+         return true;
+      }
+   }
+
+   if (_createChildren && _context) {
+      _context.myNamedObjects = {};
+   }
+
+   for (var obj in this.myNamedObjects) {
+
+      if (this.myNamedObjects.hasOwnProperty(obj)) {
+
+         if (_createChildren && _context) {
+            _context.myNamedObjects[obj] = {};
+         }
+
+         var ret = this.myNamedObjects[obj].iterate(_context ? _context.myNamedObjects[obj] : null, _filterObjFunc, _processObjFunc, _createChildren);
+
+         if (!ret && _createChildren && _context) {
+            delete _context.myNamedObjects[obj];
+         }
+      }
+   }
+
+   return true;
 };
 
 NamedObject.prototype.findOrCreate = function(_uName, _constructor, _constructorParams) {
@@ -432,6 +417,7 @@ NamedObject.prototype.require = function(_type, _superType, _loadPath) {
          constructors[module] = require(module);
       }
       catch (_err) {
+         console.error(_err);
          return null;
       }
    }
@@ -443,6 +429,11 @@ NamedObject.prototype.getSuperTypeCollection = function(_superType) {
 };
 
 NamedObject.prototype.findOrCreateSuperTypeCollection = function(_superType) {
+
+   if (!_superType) {
+      return null;
+   }
+
    var collectionName = _superType.endsWith("y") ? _superType.slice(0, -1) + 'ies' : _superType + "s";
 
    if (!this[collectionName]) {
@@ -451,13 +442,26 @@ NamedObject.prototype.findOrCreateSuperTypeCollection = function(_superType) {
    return this[collectionName];
 };
 
+NamedObject.prototype.createChildTree = function(_exportedContext) {
+
+   for (var childName in _exportedContext) {
+
+      if (_exportedContext.hasOwnProperty(childName)) {
+         var child = this.createChild(_exportedContext[childName], null, this);
+         child.createChildTree(_exportedContext[childName].myNamedObjects);
+      }
+   }
+};
+
 NamedObject.prototype.createChild = function(_config, _superType, _owner) {
+   var superType = _superType ? _superType : (_config.hasOwnProperty("superType") ? _config.superType : null);
+   this.findOrCreateSuperTypeCollection(superType);
 
    if (!_config) {
       return null;
    }
 
-   var Child = this.require(_config.type ? _config.type : _superType, _superType, _config.loadPath);
+   var Child = this.require(_config.type ? _config.type : superType, superType, _config.loadPath);
    return new Child(_config, _owner);
 };
 

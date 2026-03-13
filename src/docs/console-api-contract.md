@@ -2,6 +2,9 @@
 
 This document defines the current command/API contract for source inspection and config preview used by UI and MCP clients.
 
+Related implementation guide:
+- `src/docs/ui-react-component-map.md`
+
 ## Transport
 
 ### Socket.IO namespace
@@ -115,8 +118,8 @@ Returns instance-level ownership and active/bowed state.
 State values:
 - `active`
 - `bowed`
-- `standby`
 - `unavailable`
+- `error` (invalid arbitration state: connected instance is neither active nor bowed)
 
 Scope values:
 - `gang`
