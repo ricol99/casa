@@ -77,7 +77,7 @@ NamedObject.prototype.exportTree = function(_exportObj, _filterObjFunc, _process
       var ret = _source.export(_context);
 
       if (_processObjFunc) {
-         ret ||= _processObjFunc.call(this, _context, _source, _owner);
+         ret = ret || _processObjFunc.call(this, _context, _source, _owner);
       }
       return ret;
    }, true);
