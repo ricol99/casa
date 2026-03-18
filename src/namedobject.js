@@ -3,7 +3,6 @@ var AsyncEmitter = require('./asyncemitter');
 
 var constructors = {};
 var ROOT_UNAME = ":";
-var EXPORT_CONTEXT_FIELD = "__exportContext";
 
 function childUName(_ownerUName, _childName) {
    return (_ownerUName === ROOT_UNAME) ? ROOT_UNAME + _childName : _ownerUName + ":" + _childName;
@@ -71,6 +70,23 @@ NamedObject.prototype.superType = function(_type) {
 };
 
 // Called when current state of the tree needs to be exported
+NamedObject.prototype.countTree = function(_filterObjFunc, _processObjFunc) {
+   var context = { counter: 0 };
+
+   this.iterate(context, _filterObjFunc, (_context, _source, _owner) => {
+      var ret = false;
+      context.counter  = context.counter + 1;
+
+      if (_processObjFunc) {
+         ret = _processObjFunc.call(this, _context, _source, _owner);
+      }
+      return ret;
+   }, true);
+
+   return context.counter;
+};
+
+// Called when current state of the tree needs to be exported
 NamedObject.prototype.exportTree = function(_exportObj, _filterObjFunc, _processObjFunc) {
 
    return this.iterate(_exportObj, _filterObjFunc, (_context, _source, _owner) => {
@@ -82,15 +98,12 @@ NamedObject.prototype.exportTree = function(_exportObj, _filterObjFunc, _process
       return ret;
    }, true);
 
-   /*return this.iterate(_exportObj, _filterObjFunc, (_context) => {
-             console.error("AAAAAAA BBBBBBB"+ this.name);
-             return this.export(_context);
-          }, true);*/
 };
 
 // Called when current state of the object needs to be exported
 NamedObject.prototype.export = function(_exportObj) {
    AsyncEmitter.prototype.export.call(this, _exportObj);
+   _exportObj.type = this.type;
    _exportObj.superType = this.superType();
    _exportObj.name = this.name;
    _exportObj.uName = this.uName;

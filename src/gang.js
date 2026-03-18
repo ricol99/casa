@@ -47,7 +47,7 @@ Gang.prototype.coldStart = function() {
    this.casa.coldStartServices();
 
    // Make sure all listeners are refreshed now that all sources are available
-   this.casa.refreshSourceListeners();
+   this.refreshSourceListeners();
 
    // Cold start all defined things now that everything has been created
    for(var prop in this.things) {
@@ -63,6 +63,40 @@ Gang.prototype.coldStart = function() {
    // Start connecting to Peers
    this.connectToPeers();
 };
+
+Gang.prototype.refreshSourceListeners = function() {
+   this.cancelScheduledRefreshSourceListeners();
+
+   this.iterate(null, null, (_context, _source, _owner) => {
+
+      if ((_source.superType() === "thing") || (_source.type === "source") || (_source.type === "casa") ) {
+         _source.refreshSourceListeners();
+      }
+
+      return false;
+   }, false);
+};
+
+Gang.prototype.cancelScheduledRefreshSourceListeners = function() {
+   this.sourceListenerRefreshRequired = false;
+   
+   if (this.refreshSourceListenersTimeout) {
+      clearTimeout(this.refreshSourceListenersTimeout);
+      this.refreshSourceListenersTimeout = null;
+   }
+}; 
+   
+Gang.prototype.scheduleRefreshSourceListeners = function() {
+   
+   if (!this.sourceListenerRefreshRequired) {
+      this.sourceListenerRefreshRequired = true;
+   
+      this.refreshSourceListenersTimeout = setTimeout( () => {
+         this.refreshSourceListenersTimeout = null;
+         this.refreshSourceListeners();
+      }, 500);
+   }
+}; 
 
 Gang.prototype.suspend = function() {
    return this.loader.suspend();

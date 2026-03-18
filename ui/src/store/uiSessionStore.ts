@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { ScopeMode } from "../types/consoleApi";
 
-export type SourceInventoryMode = "exports" | "local" | "both";
+export type SourceViewMode = "all" | "active" | "bowed";
 
 interface UiSessionState {
   scopeMode: ScopeMode;
@@ -14,7 +14,7 @@ interface UiSessionState {
     messageTransportName: string;
   }>;
   sourceFilters: {
-    mode: SourceInventoryMode;
+    mode: SourceViewMode;
     prefix: string;
     search: string;
   };
@@ -48,7 +48,7 @@ export const useUiSessionStore = create<UiSessionState>((set) => ({
   discoveredGangName: "",
   discoveredCasas: [],
   sourceFilters: {
-    mode: "both",
+    mode: "all",
     prefix: "",
     search: ""
   },

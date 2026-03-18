@@ -669,7 +669,7 @@ McpService.prototype.defaultExportFilter = function(_child, _owner) {
       return false;
    }
 
-   if (_child.local) {
+   if (_child.fromPeer || _child.local) {
       return false;
    }
 

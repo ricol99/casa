@@ -42,7 +42,7 @@ Children:
 Fields:
 1. `scopeMode: 'gang' | 'casa'`
 2. `selectedCasa: string | null`
-3. `sourceFilters: { mode: 'exports'|'local'|'both'; prefix: string; search: string }`
+3. `sourceFilters: { mode: 'all'|'active'|'bowed'; prefix: string; search: string }`
 4. `previewOptions: { includeUsage: boolean; progress: boolean; summaryOnly: boolean; topChanged: number; limit: number }`
 5. `activeSourceUName: string | null`
 
@@ -56,7 +56,7 @@ Actions:
 ## Query Keys
 
 1. `['topology', scopeMode, selectedCasa]`
-2. `['sourceInventory', scopeMode, selectedCasa, filters]`
+2. `['sourceTrees', scopeMode, selectedCasa]`
 3. `['resolveSource', scopeMode, selectedCasa, sourceUName]`
 4. `['explainSource', scopeMode, selectedCasa, sourceUName]`
 5. `['sourceUsage', scopeMode, selectedCasa, sourceUName, usageFilters]`
@@ -73,7 +73,7 @@ Core methods:
 
 Typed wrappers:
 1. `getTopology()`
-2. `getSourceInventory(options)`
+2. `getSourceTrees()`
 3. `resolveSource(sourceUName, casa?)`
 4. `explainSource(sourceUName, casa?)`
 5. `sourceUsage(sourceUName, options, casa?)`
@@ -125,12 +125,12 @@ Page:
 
 Components:
 1. `SourceFiltersBar`
-2. `SourceInventoryTable`
+2. `SourceTreeTable`
 3. `SourceListRow`
 4. `SourceDetailDrawer` (optional split pane)
 
 Data:
-1. Query `getSourceInventory({ mode, prefix })`
+1. Query `getSourceTrees()`
 2. Row click navigate `/sources/:sourceUName` or open drawer
 
 ## Source Detail Page
@@ -185,7 +185,7 @@ Core types:
 1. `ResolveResult`
 2. `ExplainResult`
 3. `UsageResult`
-4. `SourceInventoryResult`
+4. `SourceTreesResult`
 5. `PreviewResult`
 6. `PreviewProgressMessage`
 
@@ -210,7 +210,7 @@ Recommended placement:
 
 1. Build shell + socket connection + execute helper
 2. Implement `TopologyPage` read-only
-3. Implement `SourcesPage` with `sourceInventory` filters
+3. Implement `SourcesPage` with `sourceTrees` and tree-derived filters
 4. Implement `SourceDetailPage` (`resolve/explain/usage`)
 5. Implement `ChangesPage` preview-only with progress stream
 6. Add detail drill-down (`topChanged`) and diff drawer
@@ -218,7 +218,7 @@ Recommended placement:
 
 ## Acceptance Criteria (MVP)
 
-1. User can list sources and filter by mode/prefix/casa.
+1. User can list sources and filter by mode/prefix/casa from runtime trees.
 2. User can inspect one source and understand active/bowed rationale.
 3. User can submit preview and see progress without polling.
 4. User can run low-memory preview (`summaryOnly` / `topChanged`).

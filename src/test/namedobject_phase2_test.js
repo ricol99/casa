@@ -105,4 +105,16 @@ runTest("Gang validateUName accepts single-colon and rejects double-colon", func
    }, /Double-colon global scope is no longer supported/);
 });
 
+runTest("export includes concrete type as well as superType", function() {
+   var root = new NamedObject({ name: "root", type: "namedobject" });
+   var room = new NamedObject({ name: "room", type: "building" }, root);
+   var exported = {};
+
+   room.export(exported);
+
+   assert.strictEqual(exported.type, "building");
+   assert.strictEqual(exported.superType, null);
+   assert.strictEqual(exported.uName, ":room");
+});
+
 process.stdout.write("All namedobject phase 2 tests passed.\n");

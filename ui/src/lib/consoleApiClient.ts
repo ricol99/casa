@@ -4,7 +4,7 @@ import type {
   PreviewResult,
   ResolveResult,
   ScopeMode,
-  SourceInventoryResult,
+  SourceTreesResult,
   TopologyResult,
   UsageResult
 } from "../types/consoleApi";
@@ -17,11 +17,6 @@ export interface ScopeSelection {
 export interface SourceUsageOptions {
   activeOnly?: boolean;
   hasConsumers?: boolean;
-}
-
-export interface SourceInventoryOptions {
-  mode?: "exports" | "local" | "both";
-  prefix?: string;
 }
 
 export interface PreviewConfigOptions {
@@ -96,9 +91,9 @@ export class ConsoleApiClient {
     return executeAtObject<TopologyResult>(obj, "topology", []);
   }
 
-  async getSourceInventory(context: ScopeSelection, options: SourceInventoryOptions): Promise<SourceInventoryResult> {
+  async getSourceTrees(context: ScopeSelection): Promise<SourceTreesResult> {
     const obj = contextObject(context);
-    return executeAtObject<SourceInventoryResult>(obj, "sourceInventory", [options]);
+    return executeAtObject<SourceTreesResult>(obj, "sourceTrees", []);
   }
 
   async resolveSource(context: ScopeSelection, sourceUName: string): Promise<ResolveResult> {

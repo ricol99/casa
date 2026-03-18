@@ -89,6 +89,32 @@ function sbFindInstanceMeta(_instances, _source) {
    return -1;
 }
 
+function sbAppendInstanceMeta(_instances, _source, _inSources, _inBowing) {
+
+   if (!_source) {
+      return;
+   }
+
+   var existingIndex = sbFindInstanceMeta(_instances, _source);
+
+   if (existingIndex === -1) {
+      _instances.push({ source: _source, inSources: !!_inSources, inBowing: !!_inBowing });
+   }
+   else {
+      _instances[existingIndex].inSources = _instances[existingIndex].inSources || !!_inSources;
+      _instances[existingIndex].inBowing = _instances[existingIndex].inBowing || !!_inBowing;
+   }
+}
+
+function sbAppendSourceFromRoot(_instances, _root, _sourceUName, _inSources, _inBowing) {
+
+   if (!_root || !_sourceUName || (typeof _root.findNamedObject !== "function")) {
+      return;
+   }
+
+   sbAppendInstanceMeta(_instances, _root.findNamedObject(_sourceUName), _inSources, _inBowing);
+}
+
 function sbAppendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources, _inBowing) {
 
    if (!_sourceMap) {
@@ -98,15 +124,7 @@ function sbAppendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources
    if (_sourceUName) {
 
       if (_sourceMap.hasOwnProperty(_sourceUName) && _sourceMap[_sourceUName]) {
-         var existingIndex = sbFindInstanceMeta(_instances, _sourceMap[_sourceUName]);
-
-         if (existingIndex === -1) {
-            _instances.push({ source: _sourceMap[_sourceUName], inSources: !!_inSources, inBowing: !!_inBowing });
-         }
-         else {
-            _instances[existingIndex].inSources = _instances[existingIndex].inSources || !!_inSources;
-            _instances[existingIndex].inBowing = _instances[existingIndex].inBowing || !!_inBowing;
-         }
+         sbAppendInstanceMeta(_instances, _sourceMap[_sourceUName], _inSources, _inBowing);
       }
 
       for (var topSourceName in _sourceMap) {
@@ -116,15 +134,7 @@ function sbAppendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources
             var nestedSource = _sourceMap[topSourceName].findNamedObject(_sourceUName);
 
             if (nestedSource) {
-               var existingNestedIndex = sbFindInstanceMeta(_instances, nestedSource);
-
-               if (existingNestedIndex === -1) {
-                  _instances.push({ source: nestedSource, inSources: !!_inSources, inBowing: !!_inBowing });
-               }
-               else {
-                  _instances[existingNestedIndex].inSources = _instances[existingNestedIndex].inSources || !!_inSources;
-                  _instances[existingNestedIndex].inBowing = _instances[existingNestedIndex].inBowing || !!_inBowing;
-               }
+               sbAppendInstanceMeta(_instances, nestedSource, _inSources, _inBowing);
             }
          }
       }
@@ -133,23 +143,37 @@ function sbAppendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources
       for (var sourceName in _sourceMap) {
 
          if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
-            var existingIndex2 = sbFindInstanceMeta(_instances, _sourceMap[sourceName]);
-
-            if (existingIndex2 === -1) {
-               _instances.push({ source: _sourceMap[sourceName], inSources: !!_inSources, inBowing: !!_inBowing });
-            }
-            else {
-               _instances[existingIndex2].inSources = _instances[existingIndex2].inSources || !!_inSources;
-               _instances[existingIndex2].inBowing = _instances[existingIndex2].inBowing || !!_inBowing;
-            }
+            sbAppendInstanceMeta(_instances, _sourceMap[sourceName], _inSources, _inBowing);
          }
       }
    }
 }
 
-function sbAppendContainerInstances(_instances, _container, _sourceUName) {
+function sbAppendContainerInstances(_instances, _container, _sourceUName, _activeSource) {
 
    if (!_container) {
+      return;
+   }
+
+   var containerType = (typeof _container.superType === "function") ? _container.superType() : null;
+
+   if (containerType === "casa") {
+      if (_activeSource && (typeof _activeSource.getCasa === "function") && (_activeSource.getCasa() === _container) &&
+          (_activeSource.type !== "peersource")) {
+         sbAppendInstanceMeta(_instances, _activeSource, true, false);
+      }
+
+      sbAppendSourceFromRoot(_instances, _container.bowingRoot, _sourceUName, false, true);
+      return;
+   }
+
+   if (containerType === "peercasa") {
+      if (_activeSource && (typeof _activeSource.getCasa === "function") && (_activeSource.getCasa() === _container) &&
+          (_activeSource.type === "peersource")) {
+         sbAppendInstanceMeta(_instances, _activeSource, true, false);
+      }
+
+      sbAppendSourceFromRoot(_instances, _container.peerRoot, _sourceUName, false, true);
       return;
    }
 
@@ -306,17 +330,15 @@ SourceBaseConsoleApi.prototype.resolveForUName = function(_sourceUName) {
       };
    }
 
-   sbAppendContainerInstances(instanceMetas, gang.casa, _sourceUName);
+   activeSource = gang.findNamedObject(_sourceUName);
+
+   sbAppendContainerInstances(instanceMetas, gang.casa, _sourceUName, activeSource);
 
    for (var peerName in gang.peercasas) {
 
       if (gang.peercasas.hasOwnProperty(peerName)) {
-         sbAppendContainerInstances(instanceMetas, gang.peercasas[peerName], _sourceUName);
+         sbAppendContainerInstances(instanceMetas, gang.peercasas[peerName], _sourceUName, activeSource);
       }
-   }
-
-   if (instanceMetas.length > 0) {
-      activeSource = gang.findNamedObject(_sourceUName);
    }
 
    for (var i = 0; i < instanceMetas.length; ++i) {
@@ -410,7 +432,7 @@ SourceBaseConsoleApi.prototype.explainForUName = function(_sourceUName) {
       return {
          sourceUName: _sourceUName,
          exists: false,
-         reason: "Source not found in active or bowing maps"
+         reason: "Source not found in active tree or bowed trees"
       };
    }
 
@@ -526,7 +548,7 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
          consumerCount: 0,
          subscriptionCount: 0,
          filters: options,
-         reason: "Source not found in active or bowing maps",
+         reason: "Source not found in active tree or bowed trees",
          errors: resolved.errors ? resolved.errors : [],
          instances: []
       };
@@ -536,17 +558,15 @@ SourceBaseConsoleApi.prototype.usageForUName = function(_sourceUName, _options) 
       errors = resolved.errors.slice();
    }
 
-   sbAppendContainerInstances(instanceMetas, gang.casa, sourceUName);
+   activeSource = gang.findNamedObject(sourceUName);
+
+   sbAppendContainerInstances(instanceMetas, gang.casa, sourceUName, activeSource);
 
    for (var peerName in gang.peercasas) {
 
       if (gang.peercasas.hasOwnProperty(peerName)) {
-         sbAppendContainerInstances(instanceMetas, gang.peercasas[peerName], sourceUName);
+         sbAppendContainerInstances(instanceMetas, gang.peercasas[peerName], sourceUName, activeSource);
       }
-   }
-
-   if (instanceMetas.length > 0) {
-      activeSource = gang.findNamedObject(sourceUName);
    }
 
    for (var i = 0; i < instanceMetas.length; ++i) {

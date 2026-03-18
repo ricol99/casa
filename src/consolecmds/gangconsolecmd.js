@@ -66,40 +66,6 @@ function parseSourceUsageArgs(_arguments) {
    };
 }
 
-function parseSourceInventoryArgs(_arguments) {
-   var definitions = [
-      { name: 'mode', alias: 'm', type: String, defaultValue: "both" },
-      { name: 'prefix', alias: 'p', type: String },
-      { name: 'casa', alias: 'c', type: String }
-   ];
-   var options;
-
-   try {
-      options = commandLineArgs(definitions, { argv: _arguments, stopAtFirstUnknown: true });
-   }
-   catch (_err) {
-      return { error: _err.message ? _err.message : "Unable to parse command arguments" };
-   }
-
-   if (options._unknown && options._unknown.length > 0) {
-      return { error: "Too many arguments. Usage: sourceInventory [--mode exports|local|both] [--prefix <uNamePrefix>] [--casa <name>]" };
-   }
-
-   options.mode = (typeof options.mode === "string") ? options.mode.toLowerCase() : "both";
-
-   if ((options.mode !== "exports") && (options.mode !== "local") && (options.mode !== "both")) {
-      return { error: "Invalid mode \"" + options.mode + "\". Expected exports, local, or both." };
-   }
-
-   return {
-      casaName: options.casa,
-      options: {
-         mode: options.mode,
-         prefix: options.prefix
-      }
-   };
-}
-
 function parsePreviewConfigArgs(_arguments) {
    var definitions = [
       { name: 'patch', defaultOption: true, type: String },
@@ -173,6 +139,26 @@ function parsePreviewConfigArgs(_arguments) {
          targetCasaName: options.casa
       } ]
    };
+}
+
+function parseSourceTreesArgs(_arguments) {
+   var definitions = [
+      { name: 'casa', alias: 'c', type: String }
+   ];
+   var options;
+
+   try {
+      options = commandLineArgs(definitions, { argv: _arguments ? _arguments : [], stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse command arguments" };
+   }
+
+   if (options._unknown && options._unknown.length > 0) {
+      return { error: "Too many arguments. Usage: sourceTrees [--casa <name>]" };
+   }
+
+   return { casaName: options.casa };
 }
 
 function executeOnSpecificCasaWithParams(_self, _method, _casaName, _params, _callback) {
@@ -343,6 +329,17 @@ GangConsoleCmd.prototype.resolveSource = function(_arguments, _callback) {
    executeOnSpecificCasa(this, "resolveSource", parsed, _callback);
 };
 
+GangConsoleCmd.prototype.sourceTreeState = function(_arguments, _callback) {
+   this.checkArguments(1, _arguments);
+   var parsed = parseSourceCommandArgs(_arguments);
+
+   if (parsed.error) {
+      return _callback(parsed.error);
+   }
+
+   executeOnSpecificCasa(this, "sourceTreeState", parsed, _callback);
+};
+
 GangConsoleCmd.prototype.resolveSources = function(_arguments, _callback) {
    this.checkArguments(1, _arguments);
    this.executeParsedCommand("resolveSources", _arguments, _callback);
@@ -375,15 +372,15 @@ GangConsoleCmd.prototype.listSources = function(_arguments, _callback) {
    this.executeParsedCommand("listSources", _arguments ? _arguments : [], _callback);
 };
 
-GangConsoleCmd.prototype.sourceInventory = function(_arguments, _callback) {
+GangConsoleCmd.prototype.sourceTrees = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
-   var parsed = parseSourceInventoryArgs(_arguments ? _arguments : []);
+   var parsed = parseSourceTreesArgs(_arguments ? _arguments : []);
 
    if (parsed.error) {
       return _callback(parsed.error);
    }
 
-   executeOnSpecificCasaWithParams(this, "sourceInventory", parsed.casaName, [ parsed.options ], _callback);
+   executeOnSpecificCasaWithParams(this, "sourceTrees", parsed.casaName, [], _callback);
 };
 
 GangConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {

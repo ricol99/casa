@@ -43,7 +43,7 @@ function Event(_config, _owner) {
    }
 
    if (this.owner.gang.casa) {
-      this.owner.gang.casa.scheduleRefreshSourceListeners();
+      this.owner.gang.scheduleRefreshSourceListeners();
    }
 }
 

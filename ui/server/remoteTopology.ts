@@ -13,9 +13,13 @@ export interface TopologyTarget {
 export interface RemoteTopologyEntry {
   casaName: string;
   ok: boolean;
+  sourceTotal: number;
+  sourceActive: number;
   localBowed: number;
   peerBowed: number;
   totalBowed: number;
+  connectedPeerCount: number;
+  peerCount: number;
   error?: string;
 }
 
@@ -60,9 +64,13 @@ function queryCasaTopology(target: TopologyTarget, timeoutMs: number): Promise<R
       finish({
         casaName: target.name,
         ok: false,
+        sourceTotal: 0,
+        sourceActive: 0,
         localBowed: 0,
         peerBowed: 0,
         totalBowed: 0,
+        connectedPeerCount: 0,
+        peerCount: 0,
         error: "Topology request timed out"
       });
     }, Math.max(500, timeoutMs));
@@ -72,9 +80,13 @@ function queryCasaTopology(target: TopologyTarget, timeoutMs: number): Promise<R
       finish({
         casaName: target.name,
         ok: false,
+        sourceTotal: 0,
+        sourceActive: 0,
         localBowed: 0,
         peerBowed: 0,
         totalBowed: 0,
+        connectedPeerCount: 0,
+        peerCount: 0,
         error: `connect_error: ${message}`
       });
     });
@@ -84,9 +96,13 @@ function queryCasaTopology(target: TopologyTarget, timeoutMs: number): Promise<R
       finish({
         casaName: target.name,
         ok: false,
+        sourceTotal: 0,
+        sourceActive: 0,
         localBowed: 0,
         peerBowed: 0,
         totalBowed: 0,
+        connectedPeerCount: 0,
+        peerCount: 0,
         error: `socket_error: ${message}`
       });
     });
@@ -99,24 +115,36 @@ function queryCasaTopology(target: TopologyTarget, timeoutMs: number): Promise<R
           finish({
             casaName: target.name,
             ok: false,
+            sourceTotal: 0,
+            sourceActive: 0,
             localBowed: 0,
             peerBowed: 0,
             totalBowed: 0,
+            connectedPeerCount: 0,
+            peerCount: 0,
             error: typeof result === "string" ? result : "Malformed topology result"
           });
           return;
         }
 
+        const sourceTotal = asNumber(result?.localSourceCounts?.total, 0);
+        const sourceActive = asNumber(result?.localSourceCounts?.active, 0);
         const localBowed = asNumber(result.localBowed, asNumber(result?.localSourceCounts?.bowed, 0));
         const peerBowed = asNumber(result.peerBowed, 0);
         const totalBowed = asNumber(result.totalBowed, localBowed + peerBowed);
+        const connectedPeerCount = asNumber(result.connectedPeerCount, 0);
+        const peerCount = asNumber(result.peerCount, 0);
 
         finish({
           casaName: target.name,
           ok: true,
+          sourceTotal,
+          sourceActive,
           localBowed,
           peerBowed,
-          totalBowed
+          totalBowed,
+          connectedPeerCount,
+          peerCount
         });
       });
 

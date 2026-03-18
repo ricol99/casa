@@ -209,6 +209,12 @@ button {
   border-color: var(--border);
 }
 
+.discover-item-active {
+  background: linear-gradient(180deg, #0c8a87 0%, #0a7270 100%);
+  color: #f7fbfa;
+  border-color: #0a7270;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;

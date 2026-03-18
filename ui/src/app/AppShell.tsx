@@ -47,31 +47,6 @@ export function AppShell() {
       })
   });
 
-  const casaOptions = useMemo(() => {
-    const peers = Array.isArray((topologyQuery.data as any)?.peers) ? (topologyQuery.data as any).peers : [];
-    const local = typeof (topologyQuery.data as any)?.localCasaName === "string" ? (topologyQuery.data as any).localCasaName : null;
-    const names = new Set<string>();
-
-    if (local) {
-      names.add(local);
-    }
-
-    peers.forEach((p: any) => {
-      if (p && typeof p.casaName === "string") {
-        names.add(p.casaName);
-      }
-    });
-
-    return ["all", ...Array.from(names).sort()];
-  }, [topologyQuery.data]);
-
-  const visibleCasaOptions = useMemo(() => {
-    if (scopeMode === "casa") {
-      return casaOptions.filter((name) => name !== "all");
-    }
-
-    return casaOptions;
-  }, [casaOptions, scopeMode]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -82,18 +57,29 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
-    if (scopeMode !== "casa" || selectedCasa !== "all") {
+    if (selectedCasa !== "all") {
       return;
     }
 
-    const firstCasa = casaOptions.find((name) => name !== "all");
+    const localCasaName = typeof (topologyQuery.data as any)?.localCasaName === "string"
+      ? (topologyQuery.data as any).localCasaName
+      : null;
 
-    if (firstCasa) {
-      setSelectedCasa(firstCasa);
+    if (localCasaName) {
+      setSelectedCasa(localCasaName);
     }
-  }, [casaOptions, scopeMode, selectedCasa, setSelectedCasa]);
+  }, [topologyQuery.data, selectedCasa, setSelectedCasa]);
 
   const targetUrl = consoleApiClient.getTargetUrl();
+  const connectedCasaLabel = useMemo(() => {
+    const normalisedTarget = targetUrl.replace(/\/+$/, "");
+    const match = discoveredCasas.find((casa) => {
+      const transport = casa.messageTransportName === "https" ? "https" : "http";
+      return `${transport}://${casa.host}:${casa.port}` === normalisedTarget;
+    });
+
+    return match ? match.name : null;
+  }, [discoveredCasas, targetUrl]);
 
   const onDiscoverCasas = async () => {
     setDiscoverError(null);
@@ -167,26 +153,13 @@ export function AppShell() {
             </div>
           </label>
           <label className="control">
-            <span>Scope</span>
+            <span>View scope</span>
             <select
               value={scopeMode}
               onChange={(event) => setScopeMode(event.target.value as "gang" | "casa")}
             >
               <option value="gang">gang</option>
               <option value="casa">casa</option>
-            </select>
-          </label>
-          <label className="control">
-            <span>Casa</span>
-            <select
-              value={selectedCasa}
-              onChange={(event) => setSelectedCasa(event.target.value)}
-            >
-              {visibleCasaOptions.map((casaName) => (
-                <option key={casaName} value={casaName}>
-                  {casaName}
-                </option>
-              ))}
             </select>
           </label>
           <span className={connected ? "status connected" : "status disconnected"}>
@@ -198,9 +171,16 @@ export function AppShell() {
       <section className="card compact-card">
         <div className="card-header split">
           <h2 className="h3ish">Connection</h2>
-          <span className="chip">target: {targetUrl}</span>
+          <span className="chip">socket target: {targetUrl}</span>
         </div>
         {discoverError && <p className="error">{discoverError}</p>}
+        <p className="meta">
+          The buttons below choose which casa the browser connects to and set the current casa context. The header scope
+          selector changes whether commands run at gang level or casa level.
+        </p>
+        <p className="meta">
+          connected casa: {connectedCasaLabel ?? "unknown"} / command scope: {scopeMode} / current casa: {selectedCasa}
+        </p>
         {discoveryMeta && (
           <p className="meta">
             gang: {discoveryMeta.gangName}, seen: {discoveryMeta.seenCount}, matched-up: {discoveredCasas.length}, errors: {discoveryMeta.errorCount}
@@ -214,12 +194,14 @@ export function AppShell() {
           </div>
         )}
         {discoveredCasas.length > 0 ? (
-          <div className="discover-results">
+          <>
+            <p className="meta">Connect browser socket to:</p>
+            <div className="discover-results">
             {discoveredCasas.map((casa) => (
               <button
                 key={`${casa.name}-${casa.host}-${casa.port}`}
                 type="button"
-                className="discover-item"
+                className={connectedCasaLabel === casa.name ? "discover-item discover-item-active" : "discover-item"}
                 onClick={() => {
                   void connectToDiscoveredCasa(casa);
                 }}
@@ -227,7 +209,8 @@ export function AppShell() {
                 {casa.name} ({casa.host}:{casa.port})
               </button>
             ))}
-          </div>
+            </div>
+          </>
         ) : (
           <p className="meta">Enter gang name and click discover to list available casas.</p>
         )}

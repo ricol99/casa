@@ -51,8 +51,8 @@ function Property(_config, _owner) {
       this.valid = true;
    }
 
-   if (this.owner.gang.casa) {
-      this.owner.gang.casa.scheduleRefreshSourceListeners();
+   if (this.owner.gang) {
+      this.owner.gang.scheduleRefreshSourceListeners();
    }
 }
 

@@ -52,31 +52,9 @@ CasaConsoleCmd.prototype.exportData = function(_arguments, _callback)  {
    this.executeParsedCommand("exportData", _arguments, _callback);
 };
 
-CasaConsoleCmd.prototype.sourceInventory = function(_arguments, _callback) {
-   var definitions = [
-      { name: 'mode', alias: 'm', type: String, defaultValue: "both" },
-      { name: 'prefix', alias: 'p', type: String }
-   ];
-   var options;
-
-   try {
-      options = commandLineArgs(definitions, { argv: _arguments ? _arguments : [], stopAtFirstUnknown: true });
-   }
-   catch (_err) {
-      return _callback(_err.message ? _err.message : "Unable to parse command arguments");
-   }
-
-   if (options._unknown && options._unknown.length > 0) {
-      return _callback("Too many arguments. Usage: sourceInventory [--mode exports|local|both] [--prefix <uNamePrefix>]");
-   }
-
-   options.mode = (typeof options.mode === "string") ? options.mode.toLowerCase() : "both";
-
-   if ((options.mode !== "exports") && (options.mode !== "local") && (options.mode !== "both")) {
-      return _callback("Invalid mode \"" + options.mode + "\". Expected exports, local, or both.");
-   }
-
-   this.executeParsedCommand("sourceInventory", [ { mode: options.mode, prefix: options.prefix } ], _callback);
+CasaConsoleCmd.prototype.sourceTrees = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   this.executeParsedCommand("sourceTrees", [], _callback);
 };
 
 CasaConsoleCmd.prototype.sourceUsage = function(_arguments, _callback) {

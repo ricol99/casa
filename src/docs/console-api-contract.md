@@ -59,14 +59,14 @@ Notes:
 - `resolveSource(sourceUName)`
 - `explainSource(sourceUName)`
 - `sourceUsage(sourceUName, options?)`
-- `sourceInventory(options?)`
+- `sourceTrees()`
 - `previewConfig(options)`
 
 ## Casa context (`obj = ":<casaName>"`)
 - `resolveSource(sourceUName)`
 - `explainSource(sourceUName)`
 - `sourceUsage(sourceUName, options?)`
-- `sourceInventory(options?)`
+- `sourceTrees()`
 - `previewConfig(options)`
 
 ## Source context (`obj = ":<...sourceUName>"`)
@@ -82,7 +82,7 @@ Gang wrappers have two behaviors:
 - `resolveSource`, `explainSource`, `sourceUsage`:
   - Without `--casa`, they resolve source owner first and route to the active owner casa when connected.
   - With `--casa`, routing is forced to that casa.
-- `sourceInventory`, `previewConfig`:
+- `sourceTrees`, `previewConfig`:
   - Use current execution casa unless `--casa` is provided.
 
 For deterministic UI behavior, always pass explicit casa selection where applicable.
@@ -189,43 +189,39 @@ Returns per-instance consumer and subscription info.
 }
 ```
 
-## Inventory Contract
+## Source Trees Contract
 
-## `sourceInventory`
-Options:
-- `mode: "exports" | "local" | "both"` (default: `both`)
-- `prefix: string` (optional `:uNamePrefix` filter)
-
-Returns local source inventory classification.
+## `sourceTrees`
+Returns authoritative runtime trees for source browsing.
 
 ```json
 {
   "casaName": "casa-a",
-  "mode": "both",
-  "prefix": null,
-  "count": 21,
-  "summary": {
-    "totalSources": 21,
-    "matchedSources": 21,
-    "matchedExports": 17,
-    "matchedLocal": 4
+  "activeTree": {
+    "uName": ":",
+    "myNamedObjects": {}
   },
-  "sources": [
+  "localBowedTree": {
+    "uName": ":",
+    "myNamedObjects": {}
+  },
+  "peerTrees": [
     {
-      "sourceUName": ":richard",
-      "name": "richard",
-      "type": "user",
-      "superType": "thing",
-      "priority": 0,
-      "db": "gang-name",
-      "scope": "gang",
-      "shared": true,
-      "category": "exports",
-      "reason": "shareable"
+      "casaName": "casa-b",
+      "connected": true,
+      "tree": {
+        "uName": ":",
+        "myNamedObjects": {}
+      }
     }
   ]
 }
 ```
+
+Semantics:
+- `activeTree`: active local and peer sources from the live gang tree
+- `localBowedTree`: bowed local sources from `casa.bowingRoot`
+- `peerTrees[*].tree`: bowed remote peer sources from each `peercasa.peerRoot`
 
 ## Preview Contract
 
@@ -307,14 +303,14 @@ Gang:
 - `resolveSource :x [--casa <name>]`
 - `explainSource :x [--casa <name>]`
 - `sourceUsage :x [--activeOnly] [--hasConsumers] [--casa <name>]`
-- `sourceInventory [--mode exports|local|both] [--prefix :foo] [--casa <name>]`
+- `sourceTrees [--casa <name>]`
 - `previewConfig '<json>' [--file path] [--include usage] [--limit N] [--progress] [--summaryOnly] [--topChanged N] [--casa <name>]`
 
 Casa:
 - `resolveSource :x`
 - `explainSource :x`
 - `sourceUsage :x [--activeOnly] [--hasConsumers]`
-- `sourceInventory [--mode exports|local|both] [--prefix :foo]`
+- `sourceTrees`
 - `previewConfig '<json>' [--file path] [--include usage] [--limit N] [--progress] [--summaryOnly] [--topChanged N]`
 
 Source scope:
@@ -325,7 +321,7 @@ Source scope:
 ## Recommended UI Sequence
 
 1. Source browser list:
-- `sourceInventory` (or `listSources` if needed)
+- `sourceTrees`
 
 2. Source detail panel:
 - `resolveSource`

@@ -29,169 +29,81 @@ function normaliseSourceUName(_uName) {
    return uName;
 }
 
-function findInstanceMeta(_instances, _source) {
-
-   if (!_source) {
-      return -1;
-   }
-
-   for (var i = 0; i < _instances.length; ++i) {
-
-      if (_instances[i].source === _source) {
-         return i;
-      }
-   }
-
-   return -1;
-}
-
-function appendSourcesFromMap(_instances, _sourceMap, _sourceUName, _inSources, _inBowing) {
-
-   if (!_sourceMap) {
-      return;
-   }
-
-   if (_sourceUName) {
-
-      if (_sourceMap.hasOwnProperty(_sourceUName) && _sourceMap[_sourceUName]) {
-         var existingIndex = findInstanceMeta(_instances, _sourceMap[_sourceUName]);
-
-         if (existingIndex === -1) {
-            _instances.push({ source: _sourceMap[_sourceUName], inSources: !!_inSources, inBowing: !!_inBowing });
-         }
-         else {
-            _instances[existingIndex].inSources = _instances[existingIndex].inSources || !!_inSources;
-            _instances[existingIndex].inBowing = _instances[existingIndex].inBowing || !!_inBowing;
-         }
-      }
-
-      // Some maps are keyed by top-level source while requested uName is a descendant.
-      for (var topSourceName in _sourceMap) {
-
-         if (_sourceMap.hasOwnProperty(topSourceName) && _sourceMap[topSourceName] && (topSourceName !== _sourceUName) &&
-             (typeof _sourceMap[topSourceName].findNamedObject === "function")) {
-            var nestedSource = _sourceMap[topSourceName].findNamedObject(_sourceUName);
-
-            if (nestedSource) {
-               var existingNestedIndex = findInstanceMeta(_instances, nestedSource);
-
-               if (existingNestedIndex === -1) {
-                  _instances.push({ source: nestedSource, inSources: !!_inSources, inBowing: !!_inBowing });
-               }
-               else {
-                  _instances[existingNestedIndex].inSources = _instances[existingNestedIndex].inSources || !!_inSources;
-                  _instances[existingNestedIndex].inBowing = _instances[existingNestedIndex].inBowing || !!_inBowing;
-               }
-            }
-         }
-      }
-   }
-   else {
-      for (var sourceName in _sourceMap) {
-
-         if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
-            var existingIndex2 = findInstanceMeta(_instances, _sourceMap[sourceName]);
-
-            if (existingIndex2 === -1) {
-               _instances.push({ source: _sourceMap[sourceName], inSources: !!_inSources, inBowing: !!_inBowing });
-            }
-            else {
-               _instances[existingIndex2].inSources = _instances[existingIndex2].inSources || !!_inSources;
-               _instances[existingIndex2].inBowing = _instances[existingIndex2].inBowing || !!_inBowing;
-            }
-         }
-      }
-   }
-}
-
-function appendContainerInstances(_instances, _container, _sourceUName) {
-
-   if (!_container) {
-      return;
-   }
-
-   appendSourcesFromMap(_instances, _container.sources, _sourceUName, true, false);
-   appendSourcesFromMap(_instances, _container.bowingSources, _sourceUName, false, true);
-}
-
-function findSourceInMap(_sourceMap, _sourceUName) {
-
-   if (!_sourceMap || !_sourceUName) {
-      return null;
-   }
-
-   if (_sourceMap.hasOwnProperty(_sourceUName) && _sourceMap[_sourceUName]) {
-      return _sourceMap[_sourceUName];
-   }
-
-   for (var sourceName in _sourceMap) {
-
-      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName] &&
-          (typeof _sourceMap[sourceName].findNamedObject === "function")) {
-         var nestedSource = _sourceMap[sourceName].findNamedObject(_sourceUName);
-
-         if (nestedSource) {
-            return nestedSource;
-         }
-      }
-   }
-
-   return null;
-}
-
-function countSourceMapEntries(_sourceMap) {
-   var count = 0;
-
-   if (!_sourceMap) {
-      return count;
-   }
-
-   for (var sourceName in _sourceMap) {
-
-      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
-         ++count;
-      }
-   }
-
-   return count;
-}
-
-function collectSourceCounts(_container) {
-   var counts = { total: 0, bowed: 0, active: 0, sourcesMapEntries: 0, bowingMapEntries: 0 };
-   var metas = [];
-
-   if (!_container) {
-      return counts;
-   }
-
-   appendContainerInstances(metas, _container);
-   counts.total = metas.length;
-   counts.sourcesMapEntries = countSourceMapEntries(_container.sources);
-   counts.bowingMapEntries = countSourceMapEntries(_container.bowingSources);
-
-   for (var i = 0; i < metas.length; ++i) {
-      if (metas[i].inBowing) {
-         ++counts.bowed;
-      }
-      else if (metas[i].inSources) {
-         ++counts.active;
-      }
-   }
-
-   // In runtime, bowingSources is the authoritative bowing list.
-   var directBowingCount = counts.bowingMapEntries;
-
-   if (counts.bowed < directBowingCount) {
-      counts.bowed = directBowingCount;
-   }
-
-   counts.total = counts.active + counts.bowed;
-
-   return counts;
-}
-
 function getSourceSuperType(_source) {
    return (_source && (typeof _source.superType === "function")) ? _source.superType() : null;
+}
+
+function isTopologyCountableSource(_source) {
+
+   if (!_source) {
+      return false;
+   }
+
+   return (_source.superType() === "thing") || (_source.type === "peersource");
+}
+
+function countRootSources(_root, _includeSourceFn) {
+   if (!_root || (typeof _root.countTree !== "function")) {
+      return 0;
+   }
+
+   return _root.countTree((_source, _owner) => {
+      var superType = getSourceSuperType(_source);
+
+      if ((_source === _root) || (_owner === _root) || isTopologyCountableSource(_source)) {
+         return true;
+      }
+
+      return (superType !== "property") &&
+             (superType !== "event") &&
+             (superType !== "sourcelistener");
+   }, (_context, _source, _owner) => {
+      var shouldCount = (_source !== _root) &&
+                        (_owner === _root) &&
+                        isTopologyCountableSource(_source) &&
+                        (!_includeSourceFn || _includeSourceFn(_source));
+
+      if (!shouldCount) {
+         _context.counter = _context.counter - 1;
+      }
+
+      return shouldCount;
+   });
+}
+
+function collectLocalSourceCounts(_gang) {
+   var localCasa = (_gang && _gang.casa) ? _gang.casa : null;
+   var bowed = localCasa && localCasa.bowingRoot ? countRootSources(localCasa.bowingRoot, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
+             (getSourceSuperType(_source) !== "peersource");
+   }) : 0;
+   var active = _gang ? countRootSources(_gang, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
+             (getSourceSuperType(_source) !== "peersource") && !_source.bowing;
+   }) : 0;
+
+   return {
+      total: active + bowed,
+      bowed: bowed,
+      active: active
+   };
+}
+
+function collectPeerSourceCounts(_peerCasa) {
+   var bowed = (_peerCasa && _peerCasa.peerRoot) ? countRootSources(_peerCasa.peerRoot, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === _peerCasa) &&
+             (_source.type === "peersource") && !!_source.bowing;
+   }) : 0;
+   var active = (_peerCasa && _peerCasa.connected && _peerCasa.gang) ? countRootSources(_peerCasa.gang, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === _peerCasa) &&
+             (_source.type === "peersource") && !_source.bowing;
+   }) : 0;
+
+   return {
+      total: active + bowed,
+      bowed: bowed,
+      active: active
+   };
 }
 
 function collectSourceUNamesFromObject(_obj, _uNameSet) {
@@ -200,7 +112,7 @@ function collectSourceUNamesFromObject(_obj, _uNameSet) {
       return;
    }
 
-   if (_obj.uName && _obj.hasOwnProperty("properties") && _obj.hasOwnProperty("events")) {
+   if (_obj.uName && isTopologyCountableSource(_obj)) {
       _uNameSet[_obj.uName] = true;
    }
 
@@ -223,29 +135,25 @@ function collectSourceUNamesFromObject(_obj, _uNameSet) {
    }
 }
 
-function collectSourceUNamesFromMap(_sourceMap, _uNameSet) {
+function collectKnownSourceUNames(_gang, _uNameSet) {
 
-   if (!_sourceMap || !_uNameSet) {
+   if (!_gang || !_uNameSet) {
       return;
    }
 
-   for (var sourceName in _sourceMap) {
+   collectSourceUNamesFromObject(_gang, _uNameSet);
 
-      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName]) {
-         _uNameSet[sourceName] = true;
-         collectSourceUNamesFromObject(_sourceMap[sourceName], _uNameSet);
+   if (_gang.casa && _gang.casa.bowingRoot) {
+      collectSourceUNamesFromObject(_gang.casa.bowingRoot, _uNameSet);
+   }
+
+   for (var peerName in _gang.peercasas) {
+
+      if (_gang.peercasas.hasOwnProperty(peerName) && _gang.peercasas[peerName] &&
+          _gang.peercasas[peerName].peerRoot) {
+         collectSourceUNamesFromObject(_gang.peercasas[peerName].peerRoot, _uNameSet);
       }
    }
-}
-
-function collectKnownSourceUNames(_container, _uNameSet) {
-
-   if (!_container || !_uNameSet) {
-      return;
-   }
-
-   collectSourceUNamesFromMap(_container.sources, _uNameSet);
-   collectSourceUNamesFromMap(_container.bowingSources, _uNameSet);
 }
 
 function parseListSourcesFilters(_params) {
@@ -550,14 +458,14 @@ GangConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
 };
 
 GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
-   var localCounts = collectSourceCounts(this.gang.casa);
+   var localCounts = collectLocalSourceCounts(this.gang);
    var peers = [];
 
    for (var peerName in this.gang.peercasas) {
 
       if (this.gang.peercasas.hasOwnProperty(peerName)) {
          var peerCasa = this.gang.peercasas[peerName];
-         var peerCounts = collectSourceCounts(peerCasa);
+         var peerCounts = collectPeerSourceCounts(peerCasa);
 
          peers.push({
             casaName: peerCasa.name,
@@ -569,9 +477,7 @@ GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
             sourceTotal: peerCounts.total,
             sourceActive: peerCounts.active,
             sourceBowed: peerCounts.bowed,
-            sourceDisconnected: Math.max(0, peerCounts.total - peerCounts.active - peerCounts.bowed),
-            sourceMapEntries: peerCounts.sourcesMapEntries,
-            bowingMapEntries: peerCounts.bowingMapEntries
+            sourceDisconnected: Math.max(0, peerCounts.total - peerCounts.active - peerCounts.bowed)
          });
       }
    }
@@ -602,11 +508,7 @@ GangConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
       return sourceObj;
    }
 
-   sourceObj = findSourceInMap(this.gang.casa.sources, _sourceUName);
-
-   if (!sourceObj) {
-      sourceObj = findSourceInMap(this.gang.casa.bowingSources, _sourceUName);
-   }
+   sourceObj = this.gang.casa.bowingRoot ? this.gang.casa.bowingRoot.findNamedObject(_sourceUName) : null;
 
    if (sourceObj) {
       return sourceObj;
@@ -616,11 +518,7 @@ GangConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
 
       if (this.gang.peercasas.hasOwnProperty(peerName)) {
          var peerCasa = this.gang.peercasas[peerName];
-         sourceObj = findSourceInMap(peerCasa.sources, _sourceUName);
-
-         if (!sourceObj) {
-            sourceObj = findSourceInMap(peerCasa.bowingSources, _sourceUName);
-         }
+         sourceObj = peerCasa.peerRoot ? peerCasa.peerRoot.findNamedObject(_sourceUName) : null;
 
          if (sourceObj) {
             return sourceObj;
@@ -667,6 +565,64 @@ GangConsoleApi.prototype.resolveSource = function(_session, _params, _callback) 
    }
 
    _callback(null, this.resolveSourceInternal(sourceUName));
+};
+
+GangConsoleApi.prototype.sourceTreeState = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   var sourceUName = normaliseSourceUName(_params[0]);
+
+   if (!sourceUName) {
+      return _callback("Invalid source uName");
+   }
+
+   var activeSource = this.gang.findNamedObject(sourceUName);
+   var localBowSource = this.gang.casa.bowingRoot ? this.gang.casa.bowingRoot.findNamedObject(sourceUName) : null;
+   var peers = [];
+
+   for (var peerName in this.gang.peercasas) {
+
+      if (this.gang.peercasas.hasOwnProperty(peerName)) {
+         var peerCasa = this.gang.peercasas[peerName];
+         var peerRootSource = peerCasa.peerRoot ? peerCasa.peerRoot.findNamedObject(sourceUName) : null;
+
+         peers.push({
+            casaName: peerCasa.name,
+            connected: !!peerCasa.connected,
+            inPeerRoot: !!peerRootSource,
+            peerRootOwnerUName: peerRootSource && peerRootSource.owner ? peerRootSource.owner.uName : null,
+            peerRootType: peerRootSource ? peerRootSource.type : null,
+            peerRootSuperType: peerRootSource && (typeof peerRootSource.superType === "function") ? peerRootSource.superType() : null,
+            peerRootBowing: peerRootSource ? !!peerRootSource.bowing : null,
+            peerRootPriority: peerRootSource && (peerRootSource.priority !== undefined) ? peerRootSource.priority : null
+         });
+      }
+   }
+
+   peers.sort( (_a, _b) => (_a.casaName > _b.casaName) ? 1 : ((_a.casaName < _b.casaName) ? -1 : 0));
+
+   _callback(null, {
+      sourceUName: sourceUName,
+      active: {
+         exists: !!activeSource,
+         ownerUName: activeSource && activeSource.owner ? activeSource.owner.uName : null,
+         ownerCasa: activeSource && activeSource.casa ? activeSource.casa.name : null,
+         type: activeSource ? activeSource.type : null,
+         superType: activeSource && (typeof activeSource.superType === "function") ? activeSource.superType() : null,
+         bowing: activeSource ? !!activeSource.bowing : null,
+         priority: activeSource && (activeSource.priority !== undefined) ? activeSource.priority : null
+      },
+      localBow: {
+         exists: !!localBowSource,
+         ownerUName: localBowSource && localBowSource.owner ? localBowSource.owner.uName : null,
+         ownerCasa: localBowSource && localBowSource.casa ? localBowSource.casa.name : null,
+         type: localBowSource ? localBowSource.type : null,
+         superType: localBowSource && (typeof localBowSource.superType === "function") ? localBowSource.superType() : null,
+         bowing: localBowSource ? !!localBowSource.bowing : null,
+         priority: localBowSource && (localBowSource.priority !== undefined) ? localBowSource.priority : null
+      },
+      peers: peers
+   });
 };
 
 GangConsoleApi.prototype.explainSourceInternal = function(_sourceUName) {
@@ -730,14 +686,7 @@ GangConsoleApi.prototype.listSources = function(_session, _params, _callback) {
    var sortedUNames;
    var sources = [];
 
-   collectKnownSourceUNames(this.gang.casa, sourceUNames);
-
-   for (var peerName in this.gang.peercasas) {
-
-      if (this.gang.peercasas.hasOwnProperty(peerName)) {
-         collectKnownSourceUNames(this.gang.peercasas[peerName], sourceUNames);
-      }
-   }
+   collectKnownSourceUNames(this.gang, sourceUNames);
 
    sortedUNames = Object.keys(sourceUNames).sort();
 
@@ -780,19 +729,18 @@ GangConsoleApi.prototype.listSources = function(_session, _params, _callback) {
    });
 };
 
-GangConsoleApi.prototype.sourceInventory = function(_session, _params, _callback) {
+GangConsoleApi.prototype.sourceTrees = function(_session, _params, _callback) {
    var casaApi = null;
-   var options = (_params && (_params.length > 0)) ? _params[0] : {};
 
    if (this.consoleApiService && (typeof this.consoleApiService.findOrCreateConsoleApiObject === "function")) {
       casaApi = this.consoleApiService.findOrCreateConsoleApiObject(this.gang.casa);
    }
 
-   if (!casaApi || (typeof casaApi.sourceInventoryInternal !== "function")) {
-      return _callback("Unable to build source inventory");
+   if (!casaApi || (typeof casaApi.sourceTreesInternal !== "function")) {
+      return _callback("Unable to build source trees");
    }
 
-   _callback(null, casaApi.sourceInventoryInternal(options));
+   _callback(null, casaApi.sourceTreesInternal());
 };
 
 GangConsoleApi.prototype.previewConfigInternal = function(_options) {

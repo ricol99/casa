@@ -2,6 +2,17 @@ export type ScopeMode = "gang" | "casa";
 
 export type InstanceState = "active" | "bowed" | "unavailable" | "error";
 
+export interface ExportTreeNode {
+  name?: string;
+  uName?: string;
+  type?: string;
+  superType?: string | null;
+  priority?: number;
+  ownerCasa?: string;
+  providerType?: string;
+  myNamedObjects?: Record<string, ExportTreeNode>;
+}
+
 export interface SourceInstance {
   ownerCasa: string | null;
   providerType: string | null;
@@ -67,31 +78,15 @@ export interface UsageResult {
   instances: SourceInstance[];
 }
 
-export interface SourceInventoryEntry {
-  sourceUName: string;
-  name: string;
-  type: string;
-  superType: string | null;
-  priority: number;
-  db: string | null;
-  scope: string;
-  shared: boolean;
-  category: "exports" | "local";
-  reason: string;
-}
-
-export interface SourceInventoryResult {
+export interface SourceTreesResult {
   casaName: string;
-  mode: "exports" | "local" | "both";
-  prefix: string | null;
-  count: number;
-  summary: {
-    totalSources: number;
-    matchedSources: number;
-    matchedExports: number;
-    matchedLocal: number;
-  };
-  sources: SourceInventoryEntry[];
+  activeTree: ExportTreeNode | null;
+  localBowedTree: ExportTreeNode | null;
+  peerTrees: Array<{
+    casaName: string;
+    connected: boolean;
+    tree: ExportTreeNode | null;
+  }>;
 }
 
 export interface TopologyResult {
@@ -101,8 +96,6 @@ export interface TopologyResult {
     total: number;
     bowed: number;
     active: number;
-    sourcesMapEntries: number;
-    bowingMapEntries: number;
   };
   localBowed: number;
   peerBowed: number;
@@ -119,8 +112,6 @@ export interface TopologyResult {
       total: number;
       bowed: number;
       active: number;
-      sourcesMapEntries: number;
-      bowingMapEntries: number;
     };
   }>;
 }

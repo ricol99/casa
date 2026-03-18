@@ -4,14 +4,21 @@ var Gang = require('./gang');
 
 function PeerSource(_config, _owner) {
    _config.transient = true;
-   _config.local = true;
+   _config.fromPeer = true;
    SourceBase.call(this, _config, _owner);
 
-   this.priority = _config.priority;
+   this.priority = (_config.hasOwnProperty('priority')) ? _config.priority : 0;
    this.bowing = true;
 }
 
 util.inherits(PeerSource, SourceBase);
+
+PeerSource.prototype.export = function(_exportObj) {
+   SourceBase.prototype.export.call(this, _exportObj);
+   _exportObj.type = this.type;
+   _exportObj.priority = this.priority;
+   _exportObj.fromPeer = this.fromPeer;
+};
 
 PeerSource.prototype.addToMainTree = function() {
    var existingSource = this.gang.findNamedObject(this.uName);
@@ -62,7 +69,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
-      sendData.local = true;
+      sendData.fromPeer = true;
 
       if (sendData.hasOwnProperty("transaction")) {
          this.setTransaction(sendData.transaction);

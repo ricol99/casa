@@ -9,35 +9,6 @@ function CasaConsoleApi(_config, _owner) {
 
 util.inherits(CasaConsoleApi, ConsoleApi);
 
-function normaliseSourceInventoryMode(_mode) {
-   var mode = (typeof _mode === "string") ? _mode.trim().toLowerCase() : "both";
-
-   if ((mode !== "exports") && (mode !== "local") && (mode !== "both")) {
-      mode = "both";
-   }
-
-   return mode;
-}
-
-function normaliseSourceInventoryPrefix(_prefix) {
-
-   if (typeof _prefix !== "string") {
-      return null;
-   }
-
-   var prefix = _prefix.trim();
-
-   if (prefix.length === 0) {
-      return null;
-   }
-
-   if (prefix[0] !== ":") {
-      prefix = ":" + prefix;
-   }
-
-   return prefix;
-}
-
 function normaliseSourceUName(_uName) {
 
    if (typeof _uName !== "string") {
@@ -57,68 +28,6 @@ function normaliseSourceUName(_uName) {
    return uName;
 }
 
-/*function findSourceInMap(_sourceMap, _sourceUName) {
-
-   if (!_sourceMap || !_sourceUName) {
-      return null;
-   }
-
-   if (_sourceMap.hasOwnProperty(_sourceUName) && _sourceMap[_sourceUName]) {
-      return _sourceMap[_sourceUName];
-   }
-
-   for (var sourceName in _sourceMap) {
-
-      if (_sourceMap.hasOwnProperty(sourceName) && _sourceMap[sourceName] &&
-          (typeof _sourceMap[sourceName].findNamedObject === "function")) {
-         var nestedSource = _sourceMap[sourceName].findNamedObject(_sourceUName);
-
-         if (nestedSource) {
-            return nestedSource;
-         }
-      }
-   }
-
-   return null;
-}*/
-
-function sourceInventoryType(_source) {
-
-   if (!_source) {
-      return "unknown";
-   }
-
-   if (_source.type) {
-      return _source.type;
-   }
-
-   if (_source.config && _source.config.type) {
-      return _source.config.type;
-   }
-
-   if (typeof _source.superType === "function") {
-      return _source.superType();
-   }
-
-   return "unknown";
-}
-
-function sourceInventoryScope(_source, _gangName, _localCasaName) {
-   var ownerDb = _source && _source.config ? _source.config._db : null;
-
-   if (ownerDb === _gangName) {
-      return "gang";
-   }
-   else if (ownerDb === _localCasaName) {
-      return "casa";
-   }
-   else if (ownerDb) {
-      return "external-casa";
-   }
-
-   return "runtime";
-}
-
 function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
 
    if (!_event || !_api || !_session || !_session.name || !_api.consoleApiService ||
@@ -134,24 +43,14 @@ function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
    });
 }
 
-function classifySourceInventoryShare(_casa, _source) {
-   var localFlag = !!(_source && _source.config && _source.config.local);
-   var fromGangDb = !!(_source && _source.config && _casa && _casa.gang && _casa.gang.name && (_source.config._db === _casa.gang.name));
-   var shared = !!(_casa && (typeof _casa.shouldShareSourceInSimpleConfig === "function") && _casa.shouldShareSourceInSimpleConfig(_source));
-
-   if (shared) {
-      return { shared: true, category: "exports", reason: "shareable" };
+function exportNamedObjectTree(_root, _filter, _process) {
+   if (!_root) {
+      return null;
    }
 
-   if (localFlag) {
-      return { shared: false, category: "local", reason: "config.local=true" };
-   }
-
-   if (fromGangDb) {
-      return { shared: false, category: "local", reason: "owned-by-gang-db" };
-   }
-
-   return { shared: false, category: "local", reason: "excluded-by-share-rule" };
+   var exportObj = {};
+   _root.exportTree(exportObj, _filter ? _filter : null, _process ? _process : null);
+   return exportObj;
 }
 
 // Called when current state required
@@ -228,94 +127,80 @@ CasaConsoleApi.prototype.services = function(_session, _params, _callback) {
    _callback(null, services);
 };
 
-CasaConsoleApi.prototype.sourceInventoryInternal = function(_options) {
-   var options = ((typeof _options === "object") && !(_options instanceof Array) && _options) ? _options : {};
-   var mode = normaliseSourceInventoryMode(options.mode);
-   var prefix = normaliseSourceInventoryPrefix(options.prefix);
-   var sources = [];
-   var totalSources = 0;
-   var matchedSources = 0;
-   var matchedExports = 0;
-   var matchedLocal = 0;
+CasaConsoleApi.prototype.sourceTreesInternal = function() {
    var casa = this.gang.casa;
+   var sourceFilter = function(_child, _owner) {
 
-   for (var sourceUName in casa.sources) {
-
-      if (!casa.sources.hasOwnProperty(sourceUName) || !casa.sources[sourceUName]) {
-         continue;
+      if (!_child) {
+         return false;
       }
 
-      ++totalSources;
-
-      var source = casa.sources[sourceUName];
-
-      if (prefix && !source.uName.startsWith(prefix)) {
-         continue;
+      if (_child === casa.gang) {
+         return true;
       }
 
-      ++matchedSources;
-
-      var shareClass = classifySourceInventoryShare(casa, source);
-
-      if (shareClass.shared) {
-         ++matchedExports;
-      }
-      else {
-         ++matchedLocal;
+      if (_child.type === "namedobject") {
+         return true;
       }
 
-      if ((mode !== "both") && (shareClass.category !== mode)) {
-         continue;
+      if (_child.superType && ((_child.superType() === "thing") || (_child.superType() === "property") || (_child.superType() === "event"))) {
+         return true;
       }
 
-      sources.push({
-         sourceUName: source.uName,
-         name: source.name,
-         type: sourceInventoryType(source),
-         superType: (typeof source.superType === "function") ? source.superType() : null,
-         priority: (source.priority !== undefined) ? source.priority : 0,
-         db: (source.config && source.config._db) ? source.config._db : null,
-         scope: sourceInventoryScope(source, this.gang.name, casa.name),
-         shared: shareClass.shared,
-         category: shareClass.category,
-         reason: shareClass.reason
-      });
+      return (_child.type === "peersource");
+   };
+   var annotateSourceNode = function(_context, _source, _owner) {
+
+      if (!_source || !_context) {
+         return false;
+      }
+
+      if ((_source.type === "peersource") ||
+          (_source.superType && (_source.superType() === "thing"))) {
+         _context.ownerCasa = (_source.casa && _source.casa.name) ? _source.casa.name : casa.name;
+         _context.providerType = (_source.type === "peersource") ? "peercasa" : "casa";
+      }
+
+      return false;
+   };
+
+   var peerTrees = [];
+
+   for (var peerCasaName in this.gang.peercasas) {
+
+      if (this.gang.peercasas.hasOwnProperty(peerCasaName) && this.gang.peercasas[peerCasaName]) {
+         var peerCasa = this.gang.peercasas[peerCasaName];
+         var peerTree = exportNamedObjectTree(peerCasa.peerRoot, sourceFilter, annotateSourceNode);
+         peerTrees.push({
+            casaName: peerCasa.name,
+            connected: !!peerCasa.connected,
+            tree: peerTree
+         });
+      }
    }
 
-   sources.sort( (_a, _b) => (_a.sourceUName > _b.sourceUName) ? 1 : ((_a.sourceUName < _b.sourceUName) ? -1 : 0));
+   peerTrees.sort( (_a, _b) => (_a.casaName > _b.casaName) ? 1 : ((_a.casaName < _b.casaName) ? -1 : 0));
 
    return {
       casaName: casa.name,
-      mode: mode,
-      prefix: prefix,
-      count: sources.length,
-      summary: {
-         totalSources: totalSources,
-         matchedSources: matchedSources,
-         matchedExports: matchedExports,
-         matchedLocal: matchedLocal
-      },
-      sources: sources
+      activeTree: exportNamedObjectTree(this.gang, sourceFilter, annotateSourceNode),
+      localBowedTree: exportNamedObjectTree(casa.bowingRoot, sourceFilter, annotateSourceNode),
+      peerTrees: peerTrees
    };
 };
 
-CasaConsoleApi.prototype.sourceInventory = function(_session, _params, _callback) {
-   var options = (_params && (_params.length > 0)) ? _params[0] : {};
-   _callback(null, this.sourceInventoryInternal(options));
+CasaConsoleApi.prototype.sourceTrees = function(_session, _params, _callback) {
+   _callback(null, this.sourceTreesInternal());
 };
 
 CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
-   /*var sourceObj = this.gang.findNamedObject(_sourceUName);
+   var sourceObj = this.gang.findNamedObject(_sourceUName);
 
    if (sourceObj) {
       return sourceObj;
    }
 
-   sourceObj = findSourceInMap(this.gang.casa.sources, _sourceUName);
-
-   if (!sourceObj) {
-      sourceObj = findSourceInMap(this.gang.casa.bowingSources, _sourceUName);
-   }
+   sourceObj = this.gang.casa.bowingRoot ? this.gang.casa.bowingRoot.findNamedObject(_sourceUName) : null;
 
    if (sourceObj) {
       return sourceObj;
@@ -325,11 +210,7 @@ CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
 
       if (this.gang.peercasas.hasOwnProperty(peerName)) {
          var peerCasa = this.gang.peercasas[peerName];
-         sourceObj = findSourceInMap(peerCasa.sources, _sourceUName);
-
-         if (!sourceObj) {
-            sourceObj = findSourceInMap(peerCasa.bowingSources, _sourceUName);
-         }
+         sourceObj = peerCasa.peerRoot ? peerCasa.peerRoot.findNamedObject(_sourceUName) : null;
 
          if (sourceObj) {
             return sourceObj;
@@ -337,13 +218,11 @@ CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
       }
    }
 
-   return null;*/
-   return this.gang.findNamedObject(_sourceUName);
+   return null;
 };
 
 CasaConsoleApi.prototype.getSourceConsoleApiForUName = function(_sourceUName) {
-   //var sourceObj = this.getSourceObjectForUName(_sourceUName);
-   var sourceObj = this.gang.findNamedObject(_sourceUName);
+   var sourceObj = this.getSourceObjectForUName(_sourceUName);
 
    if (!sourceObj || !this.consoleApiService || (typeof this.consoleApiService.findOrCreateConsoleApiObject !== "function")) {
       return null;
@@ -362,13 +241,12 @@ CasaConsoleApi.prototype.sourceUsageInternal = function(_sourceUName, _options) 
    return {
       sourceUName: _sourceUName,
       exists: false,
-      reason: "Source not found in active or bowing maps",
+      reason: "Source not found in active tree or bowed trees",
       instances: []
    };
 };
 
 CasaConsoleApi.prototype.resolveSourceInternal = function(_sourceUName) {
-   //var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
    var sourceApi = this.consoleApiService.findOrCreateConsoleApiObject(_sourceUName);
 
    if (sourceApi && (typeof sourceApi.resolveForUName === "function")) {
@@ -397,7 +275,6 @@ CasaConsoleApi.prototype.resolveSource = function(_session, _params, _callback) 
 };
 
 CasaConsoleApi.prototype.explainSourceInternal = function(_sourceUName) {
-   //var sourceApi = this.getSourceConsoleApiForUName(_sourceUName);
    var sourceApi = this.consoleApiService.findOrCreateConsoleApiObject(_sourceUName);
 
    if (sourceApi && (typeof sourceApi.explainForUName === "function")) {
@@ -407,7 +284,7 @@ CasaConsoleApi.prototype.explainSourceInternal = function(_sourceUName) {
    return {
       sourceUName: _sourceUName,
       exists: false,
-      reason: "Source not found in active or bowing maps"
+      reason: "Source not found in active tree or bowed trees"
    };
 };
 

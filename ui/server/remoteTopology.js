@@ -72,9 +72,13 @@ function queryCasaTopology(target, timeoutMs) {
             finish({
                 casaName: target.name,
                 ok: false,
+                sourceTotal: 0,
+                sourceActive: 0,
                 localBowed: 0,
                 peerBowed: 0,
                 totalBowed: 0,
+                connectedPeerCount: 0,
+                peerCount: 0,
                 error: "Topology request timed out"
             });
         }, Math.max(500, timeoutMs));
@@ -83,9 +87,13 @@ function queryCasaTopology(target, timeoutMs) {
             finish({
                 casaName: target.name,
                 ok: false,
+                sourceTotal: 0,
+                sourceActive: 0,
                 localBowed: 0,
                 peerBowed: 0,
                 totalBowed: 0,
+                connectedPeerCount: 0,
+                peerCount: 0,
                 error: "connect_error: ".concat(message)
             });
         });
@@ -94,36 +102,52 @@ function queryCasaTopology(target, timeoutMs) {
             finish({
                 casaName: target.name,
                 ok: false,
+                sourceTotal: 0,
+                sourceActive: 0,
                 localBowed: 0,
                 peerBowed: 0,
                 totalBowed: 0,
+                connectedPeerCount: 0,
+                peerCount: 0,
                 error: "socket_error: ".concat(message)
             });
         });
         socket.on("connect", function () {
             socket.once("execute-output", function (payload) {
-                var _a;
+                var _a, _b, _c;
                 var result = payload ? payload.result : null;
                 if (!result || typeof result === "string") {
                     finish({
                         casaName: target.name,
                         ok: false,
+                        sourceTotal: 0,
+                        sourceActive: 0,
                         localBowed: 0,
                         peerBowed: 0,
                         totalBowed: 0,
+                        connectedPeerCount: 0,
+                        peerCount: 0,
                         error: typeof result === "string" ? result : "Malformed topology result"
                     });
                     return;
                 }
-                var localBowed = asNumber(result.localBowed, asNumber((_a = result === null || result === void 0 ? void 0 : result.localSourceCounts) === null || _a === void 0 ? void 0 : _a.bowed, 0));
+                var sourceTotal = asNumber((_a = result === null || result === void 0 ? void 0 : result.localSourceCounts) === null || _a === void 0 ? void 0 : _a.total, 0);
+                var sourceActive = asNumber((_b = result === null || result === void 0 ? void 0 : result.localSourceCounts) === null || _b === void 0 ? void 0 : _b.active, 0);
+                var localBowed = asNumber(result.localBowed, asNumber((_c = result === null || result === void 0 ? void 0 : result.localSourceCounts) === null || _c === void 0 ? void 0 : _c.bowed, 0));
                 var peerBowed = asNumber(result.peerBowed, 0);
                 var totalBowed = asNumber(result.totalBowed, localBowed + peerBowed);
+                var connectedPeerCount = asNumber(result.connectedPeerCount, 0);
+                var peerCount = asNumber(result.peerCount, 0);
                 finish({
                     casaName: target.name,
                     ok: true,
+                    sourceTotal: sourceTotal,
+                    sourceActive: sourceActive,
                     localBowed: localBowed,
                     peerBowed: peerBowed,
-                    totalBowed: totalBowed
+                    totalBowed: totalBowed,
+                    connectedPeerCount: connectedPeerCount,
+                    peerCount: peerCount
                 });
             });
             socket.emit("executeCommand", {

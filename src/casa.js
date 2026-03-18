@@ -84,6 +84,19 @@ Casa.prototype.goingDown = function(_err) {
    }
 };
 
+Casa.prototype.refreshSourceListeners = function() {
+
+   this.bowingRoot.iterate(null, null, (_context, _source, _owner) => {
+
+      if ((_source.superType() === "thing") || (_source.type === "source")) {
+         _source.refreshSourceListeners();
+      }
+
+      return false;
+   }, false);
+
+};
+
 Casa.prototype.sourcePropertyChangedCasaCb = function(_data) {
    console.log(this.uName + ': ' + _data.sourceName + ' has had a property change, prop='+_data.name+" value="+_data.value);
    this.emit('source-property-changed', _data);
@@ -238,45 +251,6 @@ Casa.prototype.startListening = function () {
    this.casaDiscoveryService.startSearchingAndBroadcasting();
 };
 
-Casa.prototype.refreshSourceListeners = function() {
-   this.cancelScheduledRefreshSourceListeners();
-
-   for (var sourceName in this.sources) {
-
-      if (this.sources.hasOwnProperty(sourceName)) {
-         this.sources[sourceName].refreshSourceListeners();
-      }
-   }
-
-   /*for (var bowingSourceName in this.bowingSources) {
-
-      if (this.bowingSources.hasOwnProperty(bowingSourceName)) {
-         this.bowingSources[bowingSourceName].refreshSourceListeners();
-      }
-   }*/
-};
-
-Casa.prototype.cancelScheduledRefreshSourceListeners = function() {
-   this.sourceListenerRefreshRequired = false;
-
-   if (this.refreshSourceListenersTimeout) {
-      clearTimeout(this.refreshSourceListenersTimeout);
-      this.refreshSourceListenersTimeout = null;
-   }
-};
-
-Casa.prototype.scheduleRefreshSourceListeners = function() {
-
-   if (!this.sourceListenerRefreshRequired) {
-      this.sourceListenerRefreshRequired = true;
-
-      this.refreshSourceListenersTimeout = setTimeout( () => {
-         this.refreshSourceListenersTimeout = null;
-         this.gang.casa.refreshSourceListeners();
-      }, 500);
-   }
-};
-
 Casa.prototype.getDb = function() {
    return this.db;
 };
@@ -288,6 +262,10 @@ Casa.prototype.shouldExportChildInSharedConfig = function(_child, _owner) {
    }
 
    if (_child.superType && ((_child.superType() !== "thing") && (_child.superType() !== "property") && (_child.superType() !== "event") && (_child.type !== "gang") )) {
+      return false;
+   }
+
+   if (_child.fromPeer) {
       return false;
    }
 
@@ -305,6 +283,10 @@ Casa.prototype.shouldExportChildInSharedConfig = function(_child, _owner) {
 Casa.prototype.shouldShareSourceInSimpleConfig = function(_source) {
 
    if (!_source) {
+      return false;
+   }
+
+   if (_source.fromPeer) {
       return false;
    }
 
@@ -383,13 +365,34 @@ Casa.prototype.refreshSimpleConfig = function() {
    simpleConfig.gang = this.gang.uName;
 
    let mapperType = { thing: "peersource", gang: "peersource", property: "property", event: "event" };
-
-   simpleConfig.exportTree = { };
-   this.gang.exportTree(simpleConfig.exportTree, this.shouldExportChildInSharedConfig.bind(this), (_context, _source, _owner) => {
-      //console.error(this.uName + ": AAAAAA  Updating object " + _source.name);
+   var exportProcess = (_context, _source, _owner) => {
       _context.type = mapperType[_context.superType];
       _context.superType = mapperType[_context.superType];
-   });
+   };
+
+   simpleConfig.exportTree = { };
+   this.gang.exportTree(simpleConfig.exportTree, this.shouldExportChildInSharedConfig.bind(this), exportProcess);
+
+   if (!simpleConfig.exportTree.myNamedObjects) {
+      simpleConfig.exportTree.myNamedObjects = {};
+   }
+
+   for (var childName in this.bowingRoot.myNamedObjects) {
+
+      if (this.bowingRoot.myNamedObjects.hasOwnProperty(childName)) {
+         simpleConfig.exportTree.myNamedObjects[childName] = {};
+
+         if (!this.bowingRoot.myNamedObjects[childName].iterate(simpleConfig.exportTree.myNamedObjects[childName],
+                                                                this.shouldExportChildInSharedConfig.bind(this),
+                                                                (_context, _source, _owner) => {
+            var ret = _source.export(_context);
+            exportProcess(_context, _source, _owner);
+            return ret;
+         }, true)) {
+            delete simpleConfig.exportTree.myNamedObjects[childName];
+         }
+      }
+   }
 
    return simpleConfig;
 };
@@ -435,7 +438,7 @@ Casa.prototype.addSource = function(_source) {
       this.topSources[_source.uName] = _source;
    }
 
-   this.scheduleRefreshSourceListeners();
+   this.gang.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.renameSource = function(_source, _newName) {
@@ -464,7 +467,7 @@ Casa.prototype.startListeningToSource = function(_source) {
 };
 
 Casa.prototype.addSourceListener = function(_sourceListener) {
-   this.scheduleRefreshSourceListeners();
+   this.gang.scheduleRefreshSourceListeners();
 };
 
 Casa.prototype.removeSourceListener = function(_sourceListener) {

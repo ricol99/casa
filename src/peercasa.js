@@ -39,7 +39,7 @@ function PeerCasa(_config, _owner) {
    this.waitingToConnect = false;
 
    this.topSources = {};
-   this.bowingRoot = new NamedObject({ name: "bow-root", type: "namedobject", displayName: "Bow Root", transient: true });
+   //this.bowingRoot = new NamedObject({ name: "bow-root", type: "namedobject", displayName: "Bow Root", transient: true });
 
    // Callbacks for listening to main casa
    this.sourcePropertyChangedCasaHandler = PeerCasa.prototype.sourcePropertyChangedCasaCb.bind(this);
@@ -84,7 +84,7 @@ PeerCasa.prototype.sourcePropertyChangedCasaCb = function(_data) {
 
    if (this.connected && (_data.sourcePeerCasa != this.uName)) {
 
-      if (!(_data.hasOwnProperty("local") && _data.local)) {
+      if (!((_data.hasOwnProperty("local") && _data.local) || (_data.hasOwnProperty("fromPeer") && _data.fromPeer))) {
          console.log(this.uName + ': publishing source ' + _data.sourceName + ' property-changed to peer casa');
          this.sendMessage('source-property-changed', _data);
       }
@@ -95,7 +95,7 @@ PeerCasa.prototype.sourceEventRaisedCasaCb = function(_data) {
 
    if (this.connected && (_data.sourcePeerCasa != this.uName)) {
 
-      if (!(_data.hasOwnProperty("local") && _data.local)) {
+      if (!((_data.hasOwnProperty("local") && _data.local) || (_data.hasOwnProperty("fromPeer") && _data.fromPeer))) {
          console.log(this.uName + ': publishing source ' + _data.sourceName + ' event-raised to peer casa');
          this.sendMessage('source-event-raised', _data);
       }
@@ -167,7 +167,7 @@ PeerCasa.prototype.invalidate = function() {
    this.sources = {};
 
    this.properties['ACTIVE'].invalidate(false);
-   this.gang.casa.refreshSourceListeners();
+   this.gang.refreshSourceListeners();
 }
 
 PeerCasa.prototype.getHostname = function() {
@@ -453,10 +453,21 @@ PeerCasa.prototype.socketSourceAddedCb = function(_data) {
 
    var PeerSource = require('./peersource');
    console.log(this.uName + ': Creating peer source named ' + _data.sourceName + ' priority =' + _data.sourcePriority);
-   var source = new PeerSource(_data.sourceName, _data.sourcePriority, _data.sourceProperties, _data.sourceEvents, this);
+   var source = new PeerSource({
+      name: _data.sourceName,
+      type: "peersource",
+      priority: _data.sourcePriority,
+      properties: _data.sourceProperties,
+      events: _data.sourceEvents
+   }, this.peerRoot);
+
+   source.casa = this;
+   this.addSource(source);
+   console.log(this.uName + ": About to attempt to place peer source " + source.uName + " to main tree");
+   source.addToMainTree();
 
    // Refresh all inactive sources
-   this.gang.casa.refreshSourceListeners();
+   this.gang.refreshSourceListeners();
 };
 
 PeerCasa.prototype.socketSourceRemovedCb = function(_data) {
@@ -706,7 +717,7 @@ PeerCasa.prototype.createSources = function(_data, _peerCasa) {
    }, false);
 
    // Refresh all inactive sources
-   this.gang.casa.refreshSourceListeners();
+   this.gang.refreshSourceListeners();
 };
 
 PeerCasa.prototype.isActive = function() {
@@ -1040,7 +1051,7 @@ PeerCasa.prototype.addSource = function(_source) {
       this.topSources[_source.uName] = _source;
    }
 
-   this.gang.casa.scheduleRefreshSourceListeners();
+   this.gang.scheduleRefreshSourceListeners();
 }
 
 PeerCasa.prototype.findNewMainSource = function(_oldPeerSourceName) {
@@ -1077,7 +1088,7 @@ PeerCasa.prototype.findNewMainSource = function(_oldPeerSourceName) {
 
    if (newMainSource) {
       newMainSource.becomeMainSource();
-      this.gang.casa.refreshSourceListeners();
+      this.gang.refreshSourceListeners();
    }
 };
 
@@ -1090,7 +1101,7 @@ PeerCasa.prototype.bowSource = function(_source, _currentlyActive) {
 
    if (_currentlyActive && (_source.bowing === false)) {
       _source.detach();
-      this.bowingRoot.addNamedObject(_source);
+      this.peerRoot.addNamedObject(_source);
    }
 }
 
@@ -1105,7 +1116,7 @@ PeerCasa.prototype.standUpSourceFromBow = function(_source) {
 };
 
 PeerCasa.prototype.getBowingSource = function(_sourceFullName) {
-   return this.bowingRoot.findNamedObject(_sourceFullName);
+   return this.peerRoot.findNamedObject(_sourceFullName);
 };
 
 module.exports = exports = PeerCasa;

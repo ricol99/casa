@@ -179,6 +179,7 @@ Source.prototype.raiseEvent = function(_eventName, _data) {
       this.events[_eventName].eventAboutToBeRaised(_eventName, _data);
    }
 
+   _data.fromPeer = false;
    this.eventAboutToBeRaised(_eventName, _data);
    SourceBase.prototype.raiseEvent.call(this, _eventName, _data);
 };
@@ -265,6 +266,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.sourceName =  this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
+      sendData.fromPeer = false;
 
       if (!sendData.hasOwnProperty("transaction")) {
          sendData.transaction = this.checkTransaction();

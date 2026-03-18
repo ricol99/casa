@@ -11,6 +11,7 @@ function SourceBase(_config, _owner) {
    this.properties = {};
    this.events = {};
    this.subscribedSources = {};
+   this.fromPeer = _config.hasOwnProperty("fromPeer") ? _config.fromPeer : false;
 
    this.setMaxListeners(0);
 }
@@ -61,6 +62,9 @@ SourceBase.prototype.hotStart = function() {
          this.events[event].hotStart();
       }
    }
+};
+
+SourceBase.prototype.refreshSourceListeners = function() {
 };
 
 SourceBase.prototype.newTransaction = function() {
@@ -179,7 +183,6 @@ SourceBase.prototype.eventSubscriptionRemoved = function(_event, _subscription, 
 SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
    console.log(this.uName+": Bowing to new source");
    this.bowing = true;
-   this.local = true;
 
    if (_currentlyActive) {
       this.loseListeners(true);
@@ -201,22 +204,31 @@ SourceBase.prototype.bowToOtherSource = function(_currentlyActive, _topOfTree) {
 
       return false;
    }
-
-   //if (_topOfTree) {
-      //this.casa.bowSource(this, _currentlyActive);
-   //}
 };
 
 SourceBase.prototype.standUpFromBow = function() {
    console.log(this.uName+": Standing up to lower priority source");
 
    this.bowing = false;
-   this.local = this.config.hasOwnProperty("local") ? this.config.local : false;
    var currentSource = this.gang.findNamedObject(this.uName);
 
    if (currentSource) {
       currentSource.bowToOtherSource(true, true);
    }
+
+   this.bowing = false;
+
+   this.iterate(null, null, (_context, _source, _owner) => {
+
+      if (_source === this) {
+         return false;
+      }
+
+      if ((_source.type === "peersource") || (_source.superType() === "thing")) {
+         this.bowing = false;
+      }
+   }, false);
+   
    this.casa.standUpSourceFromBow(this);
 }
 
@@ -349,6 +361,7 @@ SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data)
    sendData.name = _propName;
    sendData.value = _propValue;
    sendData.local = this.local;
+   sendData.fromPeer = this.fromPeer;
 
    if (!sendData.hasOwnProperty("transaction")) {
       sendData.transaction = this.checkTransaction();
@@ -436,6 +449,7 @@ SourceBase.prototype.raiseEvent = function(_eventName, _data) {
 
    var sendData = (_data) ? util.copy(_data) : {};
    sendData.local = this.local;
+   sendData.fromPeer = this.fromPeer;
    sendData.sourceName = this.uName;
    sendData.name = _eventName;
 

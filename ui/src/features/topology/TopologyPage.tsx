@@ -49,15 +49,27 @@ export function TopologyPage() {
     ? data.peerBowed
     : peers.reduce((count: number, peer: any) => count + (peer?.sourceCounts?.bowed ?? 0), 0);
   const totalBowed = typeof data?.totalBowed === "number" ? data.totalBowed : (localBowed + peerBowed);
-  const remoteByCasa = new Map<string, { localBowed: number; peerBowed: number; totalBowed: number }>();
+  const remoteByCasa = new Map<string, {
+    sourceTotal: number;
+    sourceActive: number;
+    localBowed: number;
+    peerBowed: number;
+    totalBowed: number;
+    connectedPeerCount: number;
+    peerCount: number;
+  }>();
 
   if (remoteTopologyQuery.data?.results) {
     remoteTopologyQuery.data.results.forEach((entry) => {
       if (entry && entry.ok) {
         remoteByCasa.set(entry.casaName, {
+          sourceTotal: entry.sourceTotal,
+          sourceActive: entry.sourceActive,
           localBowed: entry.localBowed,
           peerBowed: entry.peerBowed,
-          totalBowed: entry.totalBowed
+          totalBowed: entry.totalBowed,
+          connectedPeerCount: entry.connectedPeerCount,
+          peerCount: entry.peerCount
         });
       }
     });
@@ -67,6 +79,14 @@ export function TopologyPage() {
   const localRowLocalBowed = localSnapshot ? localSnapshot.localBowed : localBowed;
   const localRowRemoteBowed = localSnapshot ? localSnapshot.peerBowed : peerBowed;
   const localRowTotalBowed = localSnapshot ? localSnapshot.totalBowed : totalBowed;
+  const rowNames = Array.from(
+    new Set<string>([
+      localCasaName,
+      ...discoveredCasas.map((c) => c.name),
+      ...Array.from(remoteByCasa.keys()),
+      ...peers.map((peer: any) => peer.casaName)
+    ].filter((name) => typeof name === "string" && name.length > 0))
+  ).sort((a, b) => a.localeCompare(b));
 
   return (
     <section className="card">
@@ -98,32 +118,47 @@ export function TopologyPage() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>{localCasaName}</td>
-            <td>yes</td>
-            <td>{localSourceCounts.total ?? 0}</td>
-            <td>{localSourceCounts.active ?? 0}</td>
-            <td>{localRowLocalBowed}</td>
-            <td>{localRowRemoteBowed}</td>
-            <td>{localRowTotalBowed}</td>
-            <td>{Math.max(0, (localSourceCounts.total ?? 0) - (localSourceCounts.active ?? 0) - (localSourceCounts.bowed ?? 0))}</td>
-          </tr>
-          {peers.map((peer: any) => (
-            <tr key={peer.casaName}>
-              <td>{peer.casaName}</td>
-              <td>{peer.connected ? "yes" : "no"}</td>
-              <td>{peer.sourceCounts?.total ?? "-"}</td>
-              <td>{peer.sourceCounts?.active ?? "-"}</td>
-              <td>{remoteByCasa.get(peer.casaName)?.localBowed ?? (peer.sourceCounts?.bowed ?? 0)}</td>
-              <td>{remoteByCasa.get(peer.casaName)?.peerBowed ?? 0}</td>
-              <td>{remoteByCasa.get(peer.casaName)?.totalBowed ?? (peer.sourceCounts?.bowed ?? "-")}</td>
-              <td>
-                {peer.sourceCounts
-                  ? Math.max(0, peer.sourceCounts.total - peer.sourceCounts.active - peer.sourceCounts.bowed)
-                  : "-"}
-              </td>
-            </tr>
-          ))}
+          {rowNames.map((rowCasaName) => {
+            const snapshot = remoteByCasa.get(rowCasaName);
+            const peer = peers.find((entry: any) => entry.casaName === rowCasaName);
+            const isLocalRow = rowCasaName === localCasaName;
+            const sourceTotal = isLocalRow
+              ? (snapshot?.sourceTotal ?? localSourceCounts.total ?? 0)
+              : (snapshot?.sourceTotal ?? peer?.sourceCounts?.total ?? "-");
+            const sourceActive = isLocalRow
+              ? (snapshot?.sourceActive ?? localSourceCounts.active ?? 0)
+              : (snapshot?.sourceActive ?? peer?.sourceCounts?.active ?? "-");
+            const localRowBowed = isLocalRow
+              ? localRowLocalBowed
+              : (snapshot?.localBowed ?? peer?.sourceCounts?.bowed ?? 0);
+            const remoteRowBowed = isLocalRow
+              ? localRowRemoteBowed
+              : (snapshot?.peerBowed ?? 0);
+            const totalRowBowed = isLocalRow
+              ? localRowTotalBowed
+              : (snapshot?.totalBowed ?? peer?.sourceCounts?.bowed ?? "-");
+            const disconnected = (typeof sourceTotal === "number") && (typeof sourceActive === "number") && (typeof totalRowBowed === "number")
+              ? Math.max(0, sourceTotal - sourceActive - totalRowBowed)
+              : "-";
+            const connected = isLocalRow
+              ? "yes"
+              : (snapshot
+                  ? (snapshot.connectedPeerCount > 0 ? "yes" : "no")
+                  : (peer?.connected ? "yes" : "no"));
+
+            return (
+              <tr key={rowCasaName}>
+                <td>{rowCasaName}</td>
+                <td>{connected}</td>
+                <td>{sourceTotal}</td>
+                <td>{sourceActive}</td>
+                <td>{localRowBowed}</td>
+                <td>{remoteRowBowed}</td>
+                <td>{totalRowBowed}</td>
+                <td>{disconnected}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </section>
