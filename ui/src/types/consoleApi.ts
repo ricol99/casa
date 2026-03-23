@@ -89,6 +89,118 @@ export interface SourceTreesResult {
   }>;
 }
 
+export interface ThingDesignMember {
+  uName: string;
+  name: string;
+  type: string | null;
+  local: boolean;
+  valid: boolean | null;
+  cold: boolean | null;
+  value: unknown;
+  inherited: {
+    parent: boolean;
+    child: boolean;
+  };
+  propagation: {
+    raw: {
+      ignoreParent: boolean | null;
+      ignoreChildren: boolean | null;
+      propagateToParent: boolean | null;
+      propagateToChildren: boolean | null;
+    };
+    effective: {
+      ignoreParent: boolean;
+      ignoreChildren: boolean;
+      propagateToParent: boolean;
+      propagateToChildren: boolean;
+    };
+  };
+  sourceListenerCount: number;
+}
+
+export interface ThingDesignRelation {
+  object: {
+    uName: string;
+    name: string;
+    type: string | null;
+    superType: string | null;
+    ownerUName: string | null;
+    ownerCasa: string | null;
+  };
+  propagation: {
+    receivesFromParent: boolean;
+    sendsToParent: boolean;
+  };
+}
+
+export interface ThingDesignExternalMember {
+  name: string;
+  type: string | null;
+  uName: string | null;
+  viaThingUName: string | null;
+  viaThingName: string | null;
+}
+
+export interface ThingDesignResult {
+  thing: {
+    object: {
+      uName: string;
+      name: string;
+      type: string | null;
+      superType: string | null;
+      ownerUName: string | null;
+      ownerCasa: string | null;
+    };
+    topLevelThing: boolean;
+    local: boolean;
+    fromPeer: boolean;
+    bowing: boolean;
+    priority: number | null;
+  };
+  parent: ThingDesignRelation | null;
+  propagation: {
+    objectLevel: {
+      ignoreParent: boolean;
+      ignoreChildren: boolean;
+      propagateToParent: boolean;
+      propagateToChildren: boolean;
+    };
+    effective: {
+      hasParentThing: boolean;
+      receivesFromParent: boolean;
+      sendsToParent: boolean;
+      receivesFromChildren: boolean;
+      sendsToChildren: boolean;
+      topLevelThing: boolean;
+    };
+  };
+  children: ThingDesignRelation[];
+  properties: ThingDesignMember[];
+  events: ThingDesignMember[];
+  inheritance: {
+    properties: {
+      local: ThingDesignMember[];
+      parent: ThingDesignMember[];
+      child: ThingDesignMember[];
+    };
+    events: {
+      local: ThingDesignMember[];
+      parent: ThingDesignMember[];
+      child: ThingDesignMember[];
+    };
+    blocked: {
+      fromParent: {
+        properties: ThingDesignExternalMember[];
+        events: ThingDesignExternalMember[];
+      };
+      fromChildren: {
+        properties: ThingDesignExternalMember[];
+        events: ThingDesignExternalMember[];
+      };
+    };
+  };
+}
+
 export interface TopologyResult {
   gangName: string;
   localCasaName: string;

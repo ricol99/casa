@@ -219,6 +219,7 @@ export function AppShell() {
       <nav className="tab-nav">
         <TabLink to="/topology" label="Topology" />
         <TabLink to="/sources" label="Sources" />
+        <TabLink to="/designer" label="Designer" />
         <TabLink to="/changes" label="Changes" />
         <TabLink to="/jobs" label="Jobs" />
       </nav>

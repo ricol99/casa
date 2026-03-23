@@ -4,6 +4,7 @@ import { RootErrorPage } from "./RootErrorPage";
 import { TopologyPage } from "../features/topology/TopologyPage";
 import { SourcesPage } from "../features/sources/SourcesPage";
 import { SourceDetailPage } from "../features/sources/SourceDetailPage";
+import { DesignerPage } from "../features/designer/DesignerPage";
 import { ChangesPage } from "../features/changes/ChangesPage";
 import { JobsPage } from "../features/jobs/JobsPage";
 
@@ -28,6 +29,14 @@ export const router = createBrowserRouter([
       {
         path: "sources/:sourceUName",
         element: <SourceDetailPage />
+      },
+      {
+        path: "designer",
+        element: <DesignerPage />
+      },
+      {
+        path: "designer/:thingUName",
+        element: <DesignerPage />
       },
       {
         path: "changes",

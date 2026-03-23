@@ -4,6 +4,7 @@ import type {
   PreviewResult,
   ResolveResult,
   ScopeMode,
+  ThingDesignResult,
   SourceTreesResult,
   TopologyResult,
   UsageResult
@@ -94,6 +95,10 @@ export class ConsoleApiClient {
   async getSourceTrees(context: ScopeSelection): Promise<SourceTreesResult> {
     const obj = contextObject(context);
     return executeAtObject<SourceTreesResult>(obj, "sourceTrees", []);
+  }
+
+  async describeThing(_context: ScopeSelection, thingUName: string): Promise<ThingDesignResult> {
+    return executeAtObject<ThingDesignResult>(normaliseSourceUName(thingUName), "describeThing", []);
   }
 
   async resolveSource(context: ScopeSelection, sourceUName: string): Promise<ResolveResult> {

@@ -430,7 +430,7 @@ NamedObject.prototype.require = function(_type, _superType, _loadPath) {
          constructors[module] = require(module);
       }
       catch (_err) {
-         console.error(_err);
+         //console.error(_err);
          return null;
       }
    }

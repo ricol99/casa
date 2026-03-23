@@ -336,12 +336,157 @@ button:disabled {
   margin: 0.6rem 0;
 }
 
+.designer-layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.5fr) minmax(340px, 1fr);
+  gap: 0.9rem;
+}
+
+.designer-tree-panel,
+.designer-inspector {
+  min-width: 0;
+}
+
+.designer-tree-list {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.designer-tree-item {
+  display: grid;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  background: linear-gradient(180deg, #fff 0%, #f8f3e8 100%);
+}
+
+.designer-tree-item:hover {
+  background: #f4efe4;
+  border-color: var(--border);
+}
+
+.designer-tree-item-active {
+  background: linear-gradient(180deg, #0c8a87 0%, #0a7270 100%);
+  color: #f7fbfa;
+}
+
+.designer-tree-type,
+.designer-node-meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.designer-tree-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.designer-tree-flows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.designer-tree-item-active .designer-tree-type,
+.designer-tree-item-active .designer-node-meta {
+  color: rgba(247, 251, 250, 0.86);
+}
+
+.designer-flow-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.flow-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.22rem 0.58rem;
+  font-size: 0.76rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.flow-chip-open {
+  color: #0b5d56;
+  background: #e6f5ef;
+  border-color: #b6ddd2;
+}
+
+.flow-chip-blocked {
+  color: #7f5a2f;
+  background: #f8ecda;
+  border-color: #e7caa0;
+}
+
+.designer-tree-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.8rem;
+}
+
+.designer-kv {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) 1fr;
+  gap: 0.35rem 0.8rem;
+}
+
+.designer-kv dt {
+  color: var(--muted);
+}
+
+.designer-kv dd {
+  margin: 0;
+}
+
+.designer-flow-cell {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.designer-member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.designer-member-pill {
+  display: grid;
+  gap: 0.1rem;
+  background: linear-gradient(180deg, #fff 0%, #f5efe3 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem 0.65rem;
+  min-width: 120px;
+}
+
+.designer-member-pill span,
+.designer-member-pill em {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: normal;
+}
+
 @media (max-width: 1050px) {
   .detail-grid {
     grid-template-columns: 1fr;
   }
 
   .changes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .designer-layout {
     grid-template-columns: 1fr;
   }
 }
