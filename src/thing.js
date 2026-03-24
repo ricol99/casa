@@ -69,6 +69,11 @@ Thing.prototype.superType = function(_type) {
 // Called when system state is required
 Thing.prototype.export = function(_exportObj) {
    Source.prototype.export.call(this, _exportObj);
+   _exportObj.ignoreParent = !!this.ignoreParent;
+   _exportObj.ignoreChildren = !!this.ignoreChildren;
+   _exportObj.propagateToParent = !!this.propagateToParent;
+   _exportObj.propagateToChildren = !!this.propagateToChildren;
+   _exportObj.topLevelThing = !!this.topLevelThing;
 };   
 
 // Called when system state is required

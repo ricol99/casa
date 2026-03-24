@@ -100,6 +100,12 @@ function thingDescribeChild(_child, _thing) {
    return {
       object: thingDescribeNamedObject(_child),
       propagation: {
+         objectLevel: {
+            ignoreParent: !!_child.ignoreParent,
+            ignoreChildren: !!_child.ignoreChildren,
+            propagateToParent: !!_child.propagateToParent,
+            propagateToChildren: !!_child.propagateToChildren
+         },
          receivesFromParent: !_child.ignoreParent && !!_thing.propagateToChildren,
          sendsToParent: !!_child.propagateToParent && !_thing.ignoreChildren
       }
@@ -424,6 +430,12 @@ ThingConsoleApi.prototype.describeThing = function(_session, _params, _callback)
       parent: parentThing ? {
          object: thingDescribeNamedObject(parentThing),
          propagation: {
+            objectLevel: {
+               ignoreParent: !!parentThing.ignoreParent,
+               ignoreChildren: !!parentThing.ignoreChildren,
+               propagateToParent: !!parentThing.propagateToParent,
+               propagateToChildren: !!parentThing.propagateToChildren
+            },
             receivesFromParent: !thing.ignoreParent && (!!parentThing.topLevelThing || !!parentThing.propagateToChildren),
             sendsToParent: !!thing.propagateToParent && !parentThing.ignoreChildren
          }

@@ -7,6 +7,11 @@ export interface ExportTreeNode {
   uName?: string;
   type?: string;
   superType?: string | null;
+  ignoreParent?: boolean;
+  ignoreChildren?: boolean;
+  propagateToParent?: boolean;
+  propagateToChildren?: boolean;
+  topLevelThing?: boolean;
   priority?: number;
   ownerCasa?: string;
   providerType?: string;
@@ -128,6 +133,12 @@ export interface ThingDesignRelation {
     ownerCasa: string | null;
   };
   propagation: {
+    objectLevel: {
+      ignoreParent: boolean;
+      ignoreChildren: boolean;
+      propagateToParent: boolean;
+      propagateToChildren: boolean;
+    };
     receivesFromParent: boolean;
     sendsToParent: boolean;
   };
