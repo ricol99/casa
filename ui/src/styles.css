@@ -241,6 +241,30 @@ button {
   font-size: 0.9rem;
 }
 
+.data-table.compact {
+  table-layout: fixed;
+}
+
+.designer-member-col-name {
+  width: 19%;
+}
+
+.designer-member-col-type {
+  width: 29%;
+}
+
+.designer-member-col-inheritance {
+  width: 16%;
+}
+
+.designer-member-col-flow {
+  width: 18%;
+}
+
+.designer-member-col-listeners {
+  width: 8%;
+}
+
 .data-table a {
   color: var(--accent);
   text-decoration: none;
@@ -614,9 +638,10 @@ button:disabled {
 }
 
 .designer-flow-cell {
-  display: flex;
-  gap: 0.25rem;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 0.2rem;
+  justify-content: start;
+  min-width: 0;
 }
 
 .flow-glyph {

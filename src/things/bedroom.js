@@ -56,6 +56,7 @@ function Bedroom(_config, _parent) {
    this.ensureEventExists("wake-up-event", "event", {}, _config);
 
    this.ensurePropertyExists("pre-wake-up-duration", "property", { initialValue: -1 }, _config);
+   this.ensurePropertyExists("clean-mode", "property", { initialValue: false }, _config);
    this.userStateConfigs = [];
 
    this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*30;
@@ -93,7 +94,7 @@ function Bedroom(_config, _parent) {
                              "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "not-present" },
                            { "guard": { "active": false, "property": this.users[i].name+"-in-building", "value": true },
                              "event": this.users[i].name+"-check-if-fallen-asleep", "nextState": "asleep-in-bed" },
-                           { "property": "MODE", "value": "manual", "nextState": "manual-override" }],
+                           { "property": "clean-mode", "value": true, "nextState": "clean-mode-override" }],
                "schedule": {  "name": this.users[i].name+"-check-if-fallen-asleep", "rules": [ "5 3 * * *" ]}
             },
             {
@@ -153,8 +154,8 @@ function Bedroom(_config, _parent) {
                "actions": [{ "property": "night-time", "value": false }]
             },
             {
-               "name": "manual-override", "priority": 10,
-               "sources": [{ "property": "MODE", "value": "manual", "invert": true, "nextState": "not-present" }]
+               "name": "clean-mode-override", "priority": 10,
+               "sources": [{ "property": "clean-mode", "value": false, "nextState": "not-present" }]
             }
          ]
       };

@@ -336,6 +336,13 @@ function MemberTable({
         <p className="meta">none</p>
       ) : (
         <table className="data-table compact">
+          <colgroup>
+            <col className="designer-member-col-name" />
+            <col className="designer-member-col-type" />
+            <col className="designer-member-col-inheritance" />
+            <col className="designer-member-col-flow" />
+            <col className="designer-member-col-listeners" />
+          </colgroup>
           <thead>
             <tr>
               <th>name</th>
@@ -691,6 +698,19 @@ export function DesignerPage() {
                 </article>
               ) : null}
 
+              <MemberTable
+                title="Properties"
+                members={describeQuery.data.properties}
+                selectedMemberUName={selectedMember?.kind === "property" ? selectedMember.uName : null}
+                onSelect={selectProperty}
+              />
+              <MemberTable
+                title="Events"
+                members={describeQuery.data.events}
+                selectedMemberUName={selectedMember?.kind === "event" ? selectedMember.uName : null}
+                onSelect={selectEvent}
+              />
+
               <MemberNameList
                 title="Inherited properties"
                 members={[
@@ -729,19 +749,6 @@ export function DesignerPage() {
                   ...describeQuery.data.inheritance.blocked.fromChildren.events
                 ]}
                 empty="Nothing is currently blocked from children."
-              />
-
-              <MemberTable
-                title="Properties"
-                members={describeQuery.data.properties}
-                selectedMemberUName={selectedMember?.kind === "property" ? selectedMember.uName : null}
-                onSelect={selectProperty}
-              />
-              <MemberTable
-                title="Events"
-                members={describeQuery.data.events}
-                selectedMemberUName={selectedMember?.kind === "event" ? selectedMember.uName : null}
-                onSelect={selectEvent}
               />
             </>
           )}
