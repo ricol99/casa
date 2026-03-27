@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casa Web UI</title>
+  <link rel="stylesheet" href="/webui/styles.css">
+</head>
+<body>
+  <main class="webui-shell">
+    <header class="webui-header">
+      <div>
+        <p class="webui-kicker">Runtime Hosted</p>
+        <h1>Casa Web UI</h1>
+      </div>
+    </header>
+
+    <section class="webui-panel">
+      <div class="webui-panel-header">
+        <h2>Connected Casas</h2>
+        <div class="webui-selected-casa">
+          Selected:
+          <strong id="selected-casa-label">-</strong>
+        </div>
+      </div>
+      <div id="casa-list" class="webui-casa-list">
+        <span class="webui-empty">No connected casas yet.</span>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tabs-panel">
+      <div class="webui-tabs" role="tablist" aria-label="Runtime views">
+        <button type="button" class="webui-tab is-active" data-tab="console" role="tab" aria-selected="true">Console</button>
+        <button type="button" class="webui-tab" data-tab="topology" role="tab" aria-selected="false">Topology</button>
+        <button type="button" class="webui-tab" data-tab="sources" role="tab" aria-selected="false">Sources</button>
+        <button type="button" class="webui-tab" data-tab="designer" role="tab" aria-selected="false">Designer</button>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tab-panel is-active" data-tab-panel="console">
+      <div class="webui-panel-header">
+        <h2>Console</h2>
+        <div class="webui-selected-casa">
+          Scope:
+          <strong id="console-scope-label">:</strong>
+        </div>
+      </div>
+      <div class="webui-console-pane">
+        <div id="console-transcript" class="webui-console-transcript">
+          <div class="webui-console-line webui-console-line-system">Console is ready.</div>
+        </div>
+        <div class="webui-console-input-row">
+          <span id="console-prompt-label" class="webui-console-prompt-label">[-] : &gt;</span>
+          <input id="console-line" type="text" placeholder="Type a console line. Use Tab for completion.">
+          <button id="console-run-button" type="button">Run</button>
+        </div>
+        <div id="console-hints" class="webui-console-hints"></div>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tab-panel" data-tab-panel="topology">
+      <div class="webui-panel-header">
+        <h2>Topology</h2>
+        <button id="topology-refresh-button" type="button">Refresh Topology</button>
+      </div>
+      <div class="webui-chip-row">
+        <span class="webui-chip" id="topology-gang">gang: -</span>
+        <span class="webui-chip" id="topology-local">local: -</span>
+        <span class="webui-chip" id="topology-connected-peers">connected peers: 0/0</span>
+        <span class="webui-chip" id="topology-local-bowed">local bowed: 0</span>
+        <span class="webui-chip" id="topology-peer-bowed">peer bowed: 0</span>
+        <span class="webui-chip" id="topology-total-bowed">total bowed: 0</span>
+      </div>
+      <div class="webui-table-wrap">
+        <table class="webui-table">
+          <thead>
+            <tr>
+              <th>casa</th>
+              <th>connected</th>
+              <th>sources</th>
+              <th>active</th>
+              <th>local bowed</th>
+              <th>remote bowed</th>
+              <th>bowed</th>
+              <th>disconnected</th>
+            </tr>
+          </thead>
+          <tbody id="topology-body">
+            <tr>
+              <td colspan="8" class="webui-empty-cell">No topology loaded yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tab-panel" data-tab-panel="sources">
+      <div class="webui-panel-header">
+        <h2>Sources</h2>
+        <button id="sources-refresh-button" type="button">Refresh Sources</button>
+      </div>
+      <div class="webui-form-grid">
+        <label>
+          <span>Mode</span>
+          <select id="sources-mode">
+            <option value="all">all</option>
+            <option value="active">active</option>
+            <option value="bowed">bowed</option>
+          </select>
+        </label>
+        <label>
+          <span>Prefix</span>
+          <input id="sources-prefix" type="text" placeholder=":test">
+        </label>
+        <label class="webui-form-grid-wide">
+          <span>Search</span>
+          <input id="sources-search" type="text" placeholder="uName / owner / type / tree">
+        </label>
+      </div>
+      <div class="webui-chip-row">
+        <span class="webui-chip" id="sources-count">count: 0</span>
+        <span class="webui-chip" id="sources-active-count">active: 0</span>
+        <span class="webui-chip" id="sources-bowed-count">bowed: 0</span>
+        <span class="webui-chip" id="sources-peer-bowed-count">peer bowed: 0</span>
+      </div>
+      <div class="webui-table-wrap">
+        <table class="webui-table">
+          <thead>
+            <tr>
+              <th>sourceUName</th>
+              <th>owner</th>
+              <th>type</th>
+              <th>priority</th>
+              <th>state</th>
+              <th>tree</th>
+            </tr>
+          </thead>
+          <tbody id="sources-body">
+            <tr>
+              <td colspan="6" class="webui-empty-cell">No sources loaded yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tab-panel" data-tab-panel="designer">
+      <div class="webui-panel-header">
+        <h2>Designer</h2>
+        <button id="designer-refresh-button" type="button">Refresh Designer</button>
+      </div>
+      <div class="webui-designer-layout">
+        <div class="webui-designer-tree">
+          <h3>Thing tree</h3>
+          <div id="designer-tree" class="webui-designer-tree-list">
+            <div class="webui-empty">No thing tree loaded yet.</div>
+          </div>
+        </div>
+        <div class="webui-designer-detail">
+          <div class="webui-panel-header">
+            <h3>Thing detail</h3>
+            <div class="webui-selected-casa">
+              Selected:
+              <strong id="designer-selected-thing">-</strong>
+            </div>
+          </div>
+          <div id="designer-summary" class="webui-chip-row">
+            <span class="webui-chip">thing: -</span>
+          </div>
+          <div id="designer-detail">
+            <div class="webui-empty">Select a thing to inspect.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/webui/app.js"></script>
+</body>
+</html>

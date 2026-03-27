@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+var path = require('path');
 var readline = require('readline');
 var io = require('socket.io-client');
 var util = require('./util');
@@ -15,6 +16,9 @@ function Console(_params, _owner) {
    this.connectedCasas = 0;
    this.defaultCasa = null;
    this.sourceCasa =  null;
+   this.activeWebUiOutputSocket = null;
+   this.silentWebUiOutputCount = 0;
+   this.webUiSockets = new Set();
    this.reconnectLogEnabled = (process.env.CASA_RECONNECT_LOG === "1");
 
    if (this.secureMode) {
@@ -61,9 +65,369 @@ Console.prototype.coldStart = function() {
       this.casaDiscoveryService.startSearching();
    }, 2000);
 
+   this.registerWebUi();
+   this.gang.casa.mainWebService.startListening();
+
    this.offlineCasa = new OfflineCasa({ name: "offlinecasa" }, this);
 
    this.start(":");
+};
+
+Console.prototype.registerWebUi = function() {
+   var webUiPath = path.join(__dirname, 'webui');
+
+   this.gang.casa.mainWebService.addRoute('/webui', (req, res) => {
+      res.sendFile(path.join(webUiPath, 'index.html'));
+   });
+
+   this.gang.casa.mainWebService.addRoute('/webui/', (req, res) => {
+      res.sendFile(path.join(webUiPath, 'index.html'));
+   });
+
+   this.gang.casa.mainWebService.addRoute('/webui/:filename', (req, res) => {
+      res.sendFile(path.join(webUiPath, req.params.filename));
+   });
+
+   this.gang.casa.mainWebService.addIoRoute('/webuiapi/io', Console.prototype.webUiSocketConnected.bind(this));
+};
+
+Console.prototype.webUiSocketConnected = function(_socket) {
+   this.webUiSockets.add(_socket);
+
+   _socket.webUiState = {
+      selectedCasa: null,
+      currentScope: ":"
+   };
+
+   _socket.on('getWebUiStatus', (_data) => {
+      this.emitWebUiStatus(_socket);
+   });
+
+   _socket.on('setSelectedCasa', (_data) => {
+      var requestedCasa = (_data && _data.selectedCasa) ? _data.selectedCasa : null;
+
+      if (requestedCasa && this.remoteCasas.hasOwnProperty(requestedCasa) && this.remoteCasas[requestedCasa].connected) {
+         _socket.webUiState.selectedCasa = requestedCasa;
+      }
+      else if (!requestedCasa) {
+         _socket.webUiState.selectedCasa = null;
+      }
+
+      this.emitWebUiStatus(_socket);
+   });
+
+   _socket.on('setCurrentScope', (_data) => {
+      var requestedScope = (_data && _data.currentScope) ? _data.currentScope.trim() : ':';
+      requestedScope = requestedScope || ':';
+
+      this.extractScopeForWebUi(_socket.webUiState.currentScope, requestedScope + ':', _socket.webUiState.selectedCasa, (_err, _result) => {
+         _socket.webUiState.currentScope = requestedScope;
+
+         if (!_err && _result) {
+            this.updateWebUiSelectedCasaFromScopeResult(_socket.webUiState, _result);
+         }
+
+         this.emitWebUiStatus(_socket);
+      });
+   });
+
+   _socket.on('autoComplete', (_data) => {
+      this.autoCompleteWebUiLine(_data, _socket.webUiState, (_err, _result) => {
+         _socket.emit('auto-complete-output', {
+            id: _data && _data.id ? _data.id : null,
+            ok: !_err,
+            result: _result,
+            error: _err
+         });
+      });
+   });
+
+   _socket.on('executeConsoleLine', (_data) => {
+      this.executeWebUiConsoleLine(_data, _socket.webUiState, _socket, (_err, _result) => {
+         _socket.emit('console-line-output', {
+            id: _data && _data.id ? _data.id : null,
+            ok: !_err,
+            result: _result,
+            error: _err
+         });
+      });
+   });
+
+   _socket.on('executeCommand', (_data) => {
+      this.executeWebUiCommand(_data, _socket.webUiState.selectedCasa, (_err, _result) => {
+         _socket.emit('execute-output', {
+            id: _data && _data.id ? _data.id : null,
+            ok: !_err,
+            result: _result,
+            error: _err
+         });
+      });
+   });
+
+   _socket.on('disconnect', () => {
+      this.webUiSockets.delete(_socket);
+   });
+};
+
+Console.prototype.emitWebUiStatus = function(_socket) {
+   _socket.emit('webui-status', this.getWebUiStatus(_socket.webUiState.selectedCasa, _socket.webUiState.currentScope));
+};
+
+Console.prototype.emitWebUiStatusToAll = function() {
+   this.webUiSockets.forEach( (_socket) => {
+      this.emitWebUiStatus(_socket);
+   });
+};
+
+Console.prototype.getWebUiStatus = function(_selectedCasaName, _currentScope) {
+   var casaDb = this.gang.casa.getDb();
+   var gangDb = this.gang.getDb();
+   var selectedCasaName = _selectedCasaName;
+
+   if (!selectedCasaName || !this.remoteCasas.hasOwnProperty(selectedCasaName) || !this.remoteCasas[selectedCasaName].connected) {
+      selectedCasaName = this.defaultCasa ? this.defaultCasa.name : null;
+   }
+
+   return {
+      gangName: this.gang.name,
+      consoleCasaName: this.gang.casa.name,
+      connectedCasas: this.connectedCasas,
+      sourceCasa: this.sourceCasa ? this.sourceCasa.name : null,
+      defaultCasa: this.defaultCasa ? this.defaultCasa.name : null,
+      selectedCasa: selectedCasaName,
+      currentScope: _currentScope ? _currentScope : ':',
+      casas: this.getCasas(),
+      dbInfo: casaDb ? {
+         dbName: casaDb.name,
+         hash: casaDb.getHash().hash,
+         lastModified: casaDb.getHash().lastModified
+      } : null,
+      gangDbInfo: gangDb ? {
+         dbName: gangDb.name,
+         hash: gangDb.getHash().hash,
+         lastModified: gangDb.getHash().lastModified
+      } : null
+   };
+};
+
+Console.prototype.updateWebUiSelectedCasaFromScopeResult = function(_webUiState, _scopeResult) {
+   if (!_webUiState || !_scopeResult) {
+      return;
+   }
+
+   if (_scopeResult.sourceCasa &&
+       this.remoteCasas.hasOwnProperty(_scopeResult.sourceCasa) &&
+       this.remoteCasas[_scopeResult.sourceCasa].connected) {
+      _webUiState.selectedCasa = _scopeResult.sourceCasa;
+      return;
+   }
+
+   if (_scopeResult.consoleObjCasaName &&
+       this.remoteCasas.hasOwnProperty(_scopeResult.consoleObjCasaName) &&
+       this.remoteCasas[_scopeResult.consoleObjCasaName].connected) {
+      _webUiState.selectedCasa = _scopeResult.consoleObjCasaName;
+   }
+};
+
+Console.prototype.identifyCasaForWebUi = function(_selectedCasaName) {
+   if (this.offline) {
+      return this.offlineCasa;
+   }
+
+   if (_selectedCasaName && this.remoteCasas.hasOwnProperty(_selectedCasaName) && this.remoteCasas[_selectedCasaName].connected) {
+      return this.remoteCasas[_selectedCasaName];
+   }
+
+   return this.defaultCasa;
+};
+
+Console.prototype.extractScopeForWebUi = function(_currentScope, _line, _selectedCasaName, _callback) {
+   var casa = this.identifyCasaForWebUi(_selectedCasaName);
+
+   if (!casa) {
+      return _callback('No Casa connected!');
+   }
+
+   casa.extractScope(_line, (_err, _result) => {
+      if (_err) {
+         return _callback(_err);
+      }
+
+      if (!this.offline && _result && _result.consoleObjCasaName && (_result.consoleObjCasaName !== casa.name)) {
+         if (!this.remoteCasas.hasOwnProperty(_result.consoleObjCasaName) || !this.remoteCasas[_result.consoleObjCasaName].connected) {
+            return _callback('Object not available as not connected to owning casa!');
+         }
+
+         return this.remoteCasas[_result.consoleObjCasaName].extractScope(_line, _callback, _currentScope);
+      }
+
+      return _callback(null, _result);
+   }, _currentScope);
+};
+
+Console.prototype.autoCompleteWebUiLine = function(_data, _webUiState, _callback) {
+   var line = (_data && _data.line ? _data.line : '').trim();
+   var currentScope = (_webUiState && _webUiState.currentScope) ? _webUiState.currentScope : ':';
+   var selectedCasa = _webUiState ? _webUiState.selectedCasa : null;
+
+   this.extractScopeForWebUi(currentScope, line, selectedCasa, (_err, _result) => {
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var matches = (_result && _result.matchingScopes instanceof Array) ? _result.matchingScopes.slice() : [];
+      var methodResult = this.extractMethodAndArguments(line, _result.remainingStr);
+      var method = methodResult.method ? methodResult.method : '';
+
+      if (_result && _result.consoleObjHierarchy) {
+         matches = this.matchMethods(line,
+                                     method,
+                                     currentScope,
+                                     _result.consoleObjHierarchy,
+                                     _result.consoleObjuName,
+                                     _result.consoleObjCasaName,
+                                     _result.sourceCasa).concat(matches);
+      }
+
+      _callback(null, {
+         currentScope: currentScope,
+         matches: matches
+      });
+   });
+};
+
+Console.prototype.executeWebUiConsoleLine = function(_data, _webUiState, _socket, _callback) {
+   if (typeof _socket === 'function') {
+      _callback = _socket;
+      _socket = null;
+   }
+
+   var rawLine = (_data && _data.line ? _data.line : '');
+   var line = rawLine.trim();
+   var currentScope = (_webUiState && _webUiState.currentScope) ? _webUiState.currentScope : ':';
+   var selectedCasa = _webUiState ? _webUiState.selectedCasa : null;
+
+   if (!line) {
+      return _callback(null, { currentScope: currentScope, output: null });
+   }
+
+   if (line[line.length - 1] === ':') {
+      return this.extractScopeForWebUi(currentScope, line, selectedCasa, (_err, _result) => {
+         if (_err) {
+            return _callback(_err);
+         }
+
+         if (_result && _result.consoleObjuName && _result.remainingStr === '') {
+            _webUiState.currentScope = _result.consoleObjuName;
+            this.updateWebUiSelectedCasaFromScopeResult(_webUiState, _result);
+         }
+
+         if (_socket) {
+            this.emitWebUiStatus(_socket);
+         }
+
+         _callback(null, {
+            currentScope: _webUiState.currentScope,
+            selectedCasa: _webUiState.selectedCasa,
+            output: null,
+            scopeChanged: true
+         });
+      });
+   }
+
+   this.extractScopeForWebUi(currentScope, line, selectedCasa, (_err, _result) => {
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var methodResult = this.extractMethodAndArguments(line, _result.remainingStr);
+
+      if (methodResult.error) {
+         return _callback(methodResult.error);
+      }
+
+      if (methodResult.method === 'exit') {
+         return _callback('The browser console does not support exit.');
+      }
+
+      if (!methodResult.method || !_result.consoleObjHierarchy) {
+         return _callback('Object not found!');
+      }
+
+      var cmdObj = this.getConsoleCmdObj(_result.consoleObjHierarchy,
+                                         _result.consoleObjuName,
+                                         _result.consoleObjCasaName,
+                                         _result.sourceCasa);
+
+      if (!cmdObj) {
+         return _callback('Object not found!');
+      }
+
+      var cmdMethod = Object.getPrototypeOf(cmdObj)[methodResult.method];
+      var previousOutputSocket = this.activeWebUiOutputSocket;
+
+      if (!cmdMethod) {
+         return _callback('Command not found!');
+      }
+
+      try {
+         this.activeWebUiOutputSocket = _socket ? _socket : previousOutputSocket;
+         cmdMethod.call(cmdObj, methodResult.arguments, (_commandErr, _commandResult) => {
+            this.activeWebUiOutputSocket = previousOutputSocket;
+            _callback(_commandErr, {
+               currentScope: _webUiState.currentScope,
+               output: _commandResult,
+               scopeChanged: false
+            });
+         });
+      }
+      catch (_commandErr) {
+         this.activeWebUiOutputSocket = previousOutputSocket;
+         _callback(_commandErr);
+      }
+   });
+};
+
+Console.prototype.executeWebUiCommand = function(_params, _selectedCasaName, _callback) {
+   var targetCasaName = _params ? _params.targetCasa : null;
+   var obj = _params ? _params.obj : null;
+   var method = _params ? _params.method : null;
+   var arguments = (_params && _params.arguments instanceof Array) ? _params.arguments : [];
+
+   if (!obj || !method) {
+      return _callback("Malformed web UI command");
+   }
+
+   var casa = null;
+
+   if (targetCasaName) {
+      casa = this.remoteCasas.hasOwnProperty(targetCasaName) ? this.remoteCasas[targetCasaName] : null;
+
+      if (!casa || !casa.connected) {
+         return _callback("Target casa not connected");
+      }
+   }
+   else if (_selectedCasaName) {
+      casa = this.remoteCasas.hasOwnProperty(_selectedCasaName) ? this.remoteCasas[_selectedCasaName] : null;
+
+      if (!casa || !casa.connected) {
+         return _callback("Selected casa not connected");
+      }
+   }
+   else {
+      casa = this.defaultCasa;
+
+      if (!casa) {
+         return _callback("No default casa connected");
+      }
+   }
+
+   this.silentWebUiOutputCount = this.silentWebUiOutputCount + 1;
+
+   this.sendCommandToCasa(casa, [obj, method, arguments], "executeParsedCommand", (_err, _result) => {
+      this.silentWebUiOutputCount = Math.max(0, this.silentWebUiOutputCount - 1);
+      _callback(_err, _result);
+   });
 };
 
 Console.prototype.getCasas = function() {
@@ -120,6 +484,7 @@ Console.prototype.casaFound = function(_params) {
          }
 
          this.updatePromptMidLine(_params.tier);
+         this.emitWebUiStatusToAll();
       });
 
       remoteCasa.on("disconnected", (_data) => {
@@ -170,10 +535,18 @@ Console.prototype.casaFound = function(_params) {
             }
          }
 
+         this.emitWebUiStatusToAll();
       });
 
       remoteCasa.on("output", (_data) => {
-         this.writeOutput(this.processOutput(_data.result));
+         if (this.activeWebUiOutputSocket) {
+            this.activeWebUiOutputSocket.emit('output', { result: this.processOutput(_data.result) });
+         }
+         else if (this.silentWebUiOutputCount > 0) {
+         }
+         else {
+            this.writeOutput(this.processOutput(_data.result));
+         }
       });
 
       remoteCasa.start();
@@ -649,10 +1022,11 @@ RemoteCasa.prototype.extractTree = function(_callback) {
 };    
    
 RemoteCasa.prototype.scopeExists = function(_line, _callback) {
+   var scope = arguments.length > 2 ? arguments[2] : this.owner.currentScope;
 
    if (this.connected) {
       this.scopeExistsCallback = _callback;
-      this.socket.emit('scopeExists', { scope: this.owner.currentScope, line: _line });
+      this.socket.emit('scopeExists', { scope: scope, line: _line });
       return true;
    }
    else {
@@ -661,10 +1035,11 @@ RemoteCasa.prototype.scopeExists = function(_line, _callback) {
 };
 
 RemoteCasa.prototype.extractScope = function(_line, _callback) {
+   var scope = arguments.length > 2 ? arguments[2] : this.owner.currentScope;
 
    if (this.connected) {
       this.extractScopeCallback = _callback;
-      this.socket.emit('extractScope', { scope: this.owner.currentScope, line: _line });
+      this.socket.emit('extractScope', { scope: scope, line: _line });
       return true;
    }
    else {
@@ -677,6 +1052,18 @@ RemoteCasa.prototype.executeParsedCommand = function(_command, _callback) {
    if (this.connected) {
       this.executeCallback = _callback;
       this.socket.emit('executeCommand', { obj: _command[0], method: _command[1], arguments: _command[2] });
+      return true;
+   }
+   else {
+      return false;
+   }
+};
+
+RemoteCasa.prototype.executeCommandLine = function(_command, _callback) {
+
+   if (this.connected) {
+      this.executeCallback = _callback;
+      this.socket.emit('executeCommand', { scope: _command.scope, line: _command.line });
       return true;
    }
    else {
@@ -733,6 +1120,10 @@ OfflineCasa.prototype.extractScope = function(_line, _callback) {
    else {
       return { remainingStr: _line.startsWith(":") ? _line.substr(1) : _line, matchingScopes: [], consoleObjHierarchy: [ "offlinecasaconsole" ], scope: ":", consoleObjuName: ":", consoleObjCasaName: null, sourceCasa: "offlinecasa" };
    }
+};
+
+OfflineCasa.prototype.executeCommandLine = function(_command, _callback) {
+   _callback('Casa is offline!');
 };
 
 OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {

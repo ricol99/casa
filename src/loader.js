@@ -218,7 +218,7 @@ Loader.prototype.loadConsole = function() {
          
          if (!_err) {
             this.gangConfig.services = _services;
-            this.addSystemServices();
+            this.addSystemServices(true);
 
             this.gang.buildTree();
 
@@ -387,7 +387,7 @@ Loader.prototype.loadGangConfig = function(_db, _callback) {
    });
 };
 
-Loader.prototype.addSystemServices = function() {
+Loader.prototype.addSystemServices = function(_reducedServices) {
 
    if (!this.gangConfig.casa.services) {
       this.gangConfig.casa.services = [];
@@ -411,11 +411,16 @@ Loader.prototype.addSystemServices = function() {
 
    var systemServiceConfigs = { "io-message-socket-service": { name: "io-message-socket-service", type: "iomessagesocketservice" },
                                 "casa-discovery-service": { name: "casa-discovery-service", type: "casadiscoveryservice" },
-                                "console-api-service": { name: "console-api-service", type: "consoleapiservice" },
+                                //"console-api-service": { name: "console-api-service", type: "consoleapiservice" },
                                 "db-service": { name: "db-service", type: "dbservice" },
-                                "ramp-service": { name: "ramp-service", type: "rampservice" },
+                                //"ramp-service": { name: "ramp-service", type: "rampservice" },
                                 "schedule-service": { name: "schedule-service", type: "scheduleservice", latitude:  51.5, longitude: -0.1, forecastKey: "5d3be692ae5ea4f3b785973e1f9ea520" },
                                 "event-logging-service": { name: "event-logging-service", type: "eventloggingservice" }};
+
+   if (!_reducedServices) {
+      systemServiceConfigs["console-api-service"] = { name: "console-api-service", type: "consoleapiservice" };
+      systemServiceConfigs["ramp-service"] =  { name: "ramp-service", type: "rampservice" };
+   }
 
    for (var serviceName in systemServiceConfigs) {
 
