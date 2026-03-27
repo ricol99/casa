@@ -35,8 +35,15 @@ body {
 }
 
 .webui-header {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(546px, 728px);
+  gap: 1rem;
+  align-items: start;
   margin-bottom: 2rem;
+}
+
+.webui-header-main {
+  min-width: 0;
 }
 
 .webui-kicker {
@@ -68,6 +75,24 @@ body {
 .webui-panel {
   padding: 1rem 1.1rem;
   margin-bottom: 0.8rem;
+}
+
+.webui-header-casas {
+  margin-bottom: 0;
+  padding: 0.85rem 0.95rem;
+}
+
+.webui-header-casas .webui-panel-header {
+  align-items: baseline;
+}
+
+.webui-header-casas h2 {
+  margin: 0;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--webui-text-soft);
+  font-weight: 700;
 }
 
 .webui-tabs-panel {
@@ -701,6 +726,10 @@ button:hover {
 }
 
 @media (max-width: 860px) {
+  .webui-header {
+    grid-template-columns: 1fr;
+  }
+
   .webui-header h1 {
     font-size: 2.4rem;
   }

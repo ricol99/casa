@@ -9,24 +9,23 @@
 <body>
   <main class="webui-shell">
     <header class="webui-header">
-      <div>
+      <div class="webui-header-main">
         <p class="webui-kicker">Runtime Hosted</p>
         <h1>Casa Web UI</h1>
       </div>
-    </header>
-
-    <section class="webui-panel">
-      <div class="webui-panel-header">
-        <h2>Connected Casas</h2>
-        <div class="webui-selected-casa">
-          Selected:
-          <strong id="selected-casa-label">-</strong>
+      <section class="webui-panel webui-header-casas">
+        <div class="webui-panel-header">
+          <h2>Connected Casas</h2>
+          <div class="webui-selected-casa">
+            Selected:
+            <strong id="selected-casa-label">-</strong>
+          </div>
         </div>
-      </div>
-      <div id="casa-list" class="webui-casa-list">
-        <span class="webui-empty">No connected casas yet.</span>
-      </div>
-    </section>
+        <div id="casa-list" class="webui-casa-list">
+          <span class="webui-empty">No connected casas yet.</span>
+        </div>
+      </section>
+    </header>
 
     <section class="webui-panel webui-tabs-panel">
       <div class="webui-tabs" role="tablist" aria-label="Runtime views">
