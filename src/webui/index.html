@@ -30,31 +30,10 @@
 
     <section class="webui-panel webui-tabs-panel">
       <div class="webui-tabs" role="tablist" aria-label="Runtime views">
-        <button type="button" class="webui-tab is-active" data-tab="console" role="tab" aria-selected="true">Console</button>
-        <button type="button" class="webui-tab" data-tab="topology" role="tab" aria-selected="false">Topology</button>
+        <button type="button" class="webui-tab is-active" data-tab="topology" role="tab" aria-selected="true">Topology</button>
         <button type="button" class="webui-tab" data-tab="sources" role="tab" aria-selected="false">Sources</button>
         <button type="button" class="webui-tab" data-tab="designer" role="tab" aria-selected="false">Designer</button>
-      </div>
-    </section>
-
-    <section class="webui-panel webui-tab-panel is-active" data-tab-panel="console">
-      <div class="webui-panel-header">
-        <h2>Console</h2>
-        <div class="webui-selected-casa">
-          Scope:
-          <strong id="console-scope-label">:</strong>
-        </div>
-      </div>
-      <div class="webui-console-pane">
-        <div id="console-transcript" class="webui-console-transcript">
-          <div class="webui-console-line webui-console-line-system">Console is ready.</div>
-        </div>
-        <div class="webui-console-input-row">
-          <span id="console-prompt-label" class="webui-console-prompt-label">[-] : &gt;</span>
-          <input id="console-line" type="text" placeholder="Type a console line. Use Tab for completion.">
-          <button id="console-run-button" type="button">Run</button>
-        </div>
-        <div id="console-hints" class="webui-console-hints"></div>
+        <button type="button" class="webui-tab" data-tab="console" role="tab" aria-selected="false">Console</button>
       </div>
     </section>
 
@@ -171,6 +150,27 @@
             <div class="webui-empty">Select a thing to inspect.</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="webui-panel webui-tab-panel" data-tab-panel="console">
+      <div class="webui-panel-header">
+        <h2>Console</h2>
+        <div class="webui-selected-casa">
+          Scope:
+          <strong id="console-scope-label">:</strong>
+        </div>
+      </div>
+      <div class="webui-console-pane">
+        <div id="console-transcript" class="webui-console-transcript">
+          <div class="webui-console-line webui-console-line-system">Console is ready.</div>
+        </div>
+        <div class="webui-console-input-row">
+          <span id="console-prompt-label" class="webui-console-prompt-label">[-] : &gt;</span>
+          <input id="console-line" type="text" placeholder="Type a console line. Use Tab for completion.">
+          <button id="console-run-button" type="button">Run</button>
+        </div>
+        <div id="console-hints" class="webui-console-hints"></div>
       </div>
     </section>
   </main>

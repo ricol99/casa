@@ -40,7 +40,7 @@
   var pendingRequests = {};
   var currentScope = ':';
   var currentSelectedCasa = '-';
-  var activeTab = 'console';
+  var activeTab = 'topology';
   var consoleHistory = [];
   var consoleHistoryIndex = -1;
   var consoleDraftLine = '';
