@@ -103,6 +103,17 @@ Console.prototype.webUiSocketConnected = function(_socket) {
       this.emitWebUiStatus(_socket);
    });
 
+   _socket.on('getGangTopology', (_data) => {
+      this.getGangTopology( (_err, _result) => {
+         _socket.emit('gang-topology-output', {
+            id: _data && _data.id ? _data.id : null,
+            ok: !_err,
+            result: _result,
+            error: _err
+         });
+      });
+   });
+
    _socket.on('setSelectedCasa', (_data) => {
       var requestedCasa = (_data && _data.selectedCasa) ? _data.selectedCasa : null;
 
@@ -430,6 +441,42 @@ Console.prototype.executeWebUiCommand = function(_params, _selectedCasaName, _ca
    });
 };
 
+Console.prototype.getGangTopology = function(_callback) {
+   this.sendCommandToAllCasasDetailed([":", "topology", []], "executeParsedCommand", (_err, _aggregate) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var rows = (_aggregate && _aggregate.results ? _aggregate.results : []).map( (_entry) => {
+         var result = _entry.result ? _entry.result : null;
+         var localCounts = result && result.localSourceCounts ? result.localSourceCounts : { total: 0, active: 0, bowed: 0, private: 0 };
+         var localBowed = result && (typeof result.localBowed === "number") ? result.localBowed : (localCounts.bowed || 0);
+         var peerActive = result && (typeof result.peerActive === "number") ? result.peerActive : 0;
+         var peerBowed = result && (typeof result.peerBowed === "number") ? result.peerBowed : 0;
+
+         return {
+            casaName: _entry.casaName,
+            connected: !!_entry.connected,
+            active: _entry.ok ? ((localCounts.active || 0) + peerActive) : '-',
+            owned: _entry.ok ? (localCounts.total || 0) : '-',
+            ownedActive: _entry.ok ? (localCounts.active || 0) : '-',
+            ownedBowed: _entry.ok ? localBowed : '-',
+            peerActive: _entry.ok ? peerActive : '-',
+            peerBowed: _entry.ok ? peerBowed : '-',
+            privateCount: _entry.ok ? (localCounts.private || 0) : '-'
+         };
+      });
+
+      _callback(null, {
+         gangName: this.gang.name,
+         casaCount: rows.length,
+         connectedCasaCount: rows.reduce( (_count, _row) => _count + (_row.connected ? 1 : 0), 0),
+         rows: rows
+      });
+   });
+};
+
 Console.prototype.getCasas = function() {
    var casas = [];
 
@@ -594,11 +641,21 @@ Console.prototype.sendCommandToCasa = function(_casa, _line, _func, _callback) {
    return Object.getPrototypeOf(_casa)[_func].call(_casa, _line, _callback);
 };
 
-Console.prototype.sendCommandToAllCasas = function(_line, _func, _callback) {
-   //process.stdout.write("AAAAA Console.prototype.sendCommandToAllCasas() _line="+util.inspect(_line)+", _func="+_func+"\n");
+Console.prototype.sendCommandToAllCasasDetailed = function(_line, _func, _callback) {
+   //process.stdout.write("AAAAA Console.prototype.sendCommandToAllCasasDetailed() _line="+util.inspect(_line)+", _func="+_func+"\n");
 
    if (this.offline) {
-      return this.sendCommandToCasa(this.offlineCasa, _line, _func, _callback);
+      return this.sendCommandToCasa(this.offlineCasa, _line, _func, (_err, _result) => {
+         _callback(null, {
+            results: [ {
+               casaName: this.offlineCasa.name,
+               connected: true,
+               ok: !_err,
+               error: _err ? _err : null,
+               result: _err ? null : _result
+            } ]
+         });
+      });
    }
 
    if (this.allCasaCommandOngoing)  {
@@ -606,45 +663,86 @@ Console.prototype.sendCommandToAllCasas = function(_line, _func, _callback) {
    }
 
    this.allCasaCommandOngoing = true;
-   this.allCasaCommandError = null;
-   this.allCasaCommandResult = null;
-   this.allCasaCommandCallback  = _callback;
-   this.allCasaCommandRequiredResponses = 0;
-   this.allCasaCommandHandler = Console.prototype.allCommandCb.bind(this);
 
-   for (var remoteCasa in this.remoteCasas) {
+   var casaNames = Object.keys(this.remoteCasas).sort( (_a, _b) => _a.localeCompare(_b));
+   var results = casaNames.map( (_casaName) => {
+      var casa = this.remoteCasas[_casaName];
 
-      if (this.remoteCasas.hasOwnProperty(remoteCasa)) {
+      return {
+         casaName: _casaName,
+         connected: !!(casa && casa.connected),
+         ok: false,
+         error: null,
+         result: null
+      };
+   });
+   var pendingResponses = 0;
 
-         if (this.sendCommandToCasa(this.remoteCasas[remoteCasa], _line, _func, this.allCasaCommandHandler)) {
-            this.allCasaCommandRequiredResponses = this.allCasaCommandRequiredResponses + 1;
-         }
+   results.forEach( (_entry) => {
+      var casa = this.remoteCasas[_entry.casaName];
+
+      if (!casa || !_entry.connected) {
+         return;
       }
-   }
 
-   if (this.allCasaCommandRequiredResponses === 0) {
+      if (this.sendCommandToCasa(casa, _line, _func, (_err, _result) => {
+         _entry.ok = !_err;
+         _entry.error = _err ? _err : null;
+         _entry.result = _err ? null : _result;
+         pendingResponses = pendingResponses - 1;
+
+         if (pendingResponses === 0) {
+            this.allCasaCommandOngoing = false;
+            _callback(null, { results: results });
+         }
+      })) {
+         pendingResponses = pendingResponses + 1;
+      }
+   });
+
+   if (pendingResponses === 0) {
       this.allCasaCommandOngoing = false;
-      return false;
+      _callback(null, { results: results });
    }
 
    return true;
 };
 
-Console.prototype.allCommandCb = function(_err, _result) {
+Console.prototype.sendCommandToAllCasas = function(_line, _func, _callback) {
+   //process.stdout.write("AAAAA Console.prototype.sendCommandToAllCasas() _line="+util.inspect(_line)+", _func="+_func+"\n");
 
-   if (_err) {
-      this.allCommandError = _err;
-   }
-   else {
-      this.allCommandResult = _result;
-   }
+   return this.sendCommandToAllCasasDetailed(_line, _func, (_err, _aggregate) => {
 
-   this.allCasaCommandRequiredResponses = this.allCasaCommandRequiredResponses - 1;
+      if (_err) {
+         return _callback(_err);
+      }
 
-   if (this.allCasaCommandRequiredResponses === 0) {
-      this.allCasaCommandOngoing = false;
-      this.allCasaCommandCallback(this.allCommandError, this.allCommandResult);
-   }
+      var firstError = null;
+      var lastResult = null;
+      var hadConnectedTarget = false;
+
+      (_aggregate && _aggregate.results ? _aggregate.results : []).forEach( (_entry) => {
+
+         if (!_entry.connected) {
+            return;
+         }
+
+         hadConnectedTarget = true;
+
+         if (_entry.ok) {
+            lastResult = _entry.result;
+         }
+         else if (!firstError && _entry.error) {
+            firstError = _entry.error;
+         }
+      });
+
+      if (!hadConnectedTarget) {
+         return _callback("No Casa connected!");
+      }
+
+      _callback(firstError, lastResult);
+   });
 };
 
 Console.prototype.scopeExists = function(_line, _callback) {

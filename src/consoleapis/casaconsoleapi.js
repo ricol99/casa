@@ -159,6 +159,7 @@ CasaConsoleApi.prototype.sourceTreesInternal = function() {
           (_source.superType && (_source.superType() === "thing"))) {
          _context.ownerCasa = (_source.casa && _source.casa.name) ? _source.casa.name : casa.name;
          _context.providerType = (_source.type === "peersource") ? "peercasa" : "casa";
+         _context.local = !!_source.local;
       }
 
       return false;

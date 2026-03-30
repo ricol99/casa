@@ -109,9 +109,26 @@ body {
 .webui-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem;
+  gap: 1rem;
   align-items: end;
   padding: 0 0.1rem;
+}
+
+.webui-tab-group {
+  display: flex;
+  align-items: end;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.webui-tab-group-label {
+  align-self: center;
+  margin-right: 0.25rem;
+  color: var(--webui-text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
 .webui-tab {
@@ -446,6 +463,46 @@ button:hover {
   padding: 0.55rem 0.6rem;
 }
 
+.webui-table tbody tr {
+  cursor: pointer;
+}
+
+.webui-table tbody tr:hover td {
+  background: rgba(11, 126, 121, 0.05);
+}
+
+.webui-table-row-private td {
+  font-style: italic;
+}
+
+.webui-table-row-selected td {
+  background: rgba(11, 126, 121, 0.08);
+}
+
+.webui-sources-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(0, 0.92fr);
+  gap: 1.15rem;
+  margin-top: 1rem;
+  align-items: start;
+}
+
+.webui-sources-list,
+.webui-sources-detail {
+  min-width: 0;
+}
+
+.webui-sources-detail {
+  border: 1px solid rgba(106, 113, 118, 0.12);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(247, 245, 240, 0.72) 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(6px);
+  padding: 0.95rem 1rem 1rem;
+  position: sticky;
+  top: 1.1rem;
+}
+
 .webui-designer-layout {
   display: grid;
   grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.38fr);
@@ -748,6 +805,10 @@ button:hover {
   }
 
   .webui-designer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .webui-sources-layout {
     grid-template-columns: 1fr;
   }
 }

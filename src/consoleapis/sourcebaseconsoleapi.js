@@ -678,6 +678,43 @@ SourceBaseConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, output);
 };
 
+SourceBaseConsoleApi.prototype.describeSourceState = function(_session, _params, _callback) {
+   this.checkParams(0, _params);
+
+   this.cat(_session, [], (_catErr, _properties) => {
+
+      if (_catErr) {
+         return _callback(_catErr);
+      }
+
+      var events = this.myObj().events ? this.myObj().events : {};
+      var eventNames = [];
+
+      for (var eventName in events) {
+
+         if (events.hasOwnProperty(eventName)) {
+            eventNames.push(eventName);
+         }
+      }
+
+      eventNames.sort();
+
+      _callback(null, {
+         uName: this.myObj().uName,
+         name: this.myObj().name,
+         type: this.myObj().type,
+         superType: (typeof this.myObj().superType === "function") ? this.myObj().superType() : null,
+         ownerCasa: (this.myObj().casa && this.myObj().casa.name) ? this.myObj().casa.name : null,
+         priority: (this.myObj().priority !== undefined) ? this.myObj().priority : null,
+         local: !!this.myObj().local,
+         fromPeer: !!this.myObj().fromPeer,
+         bowed: !!this.myObj().bowing,
+         properties: _properties || [],
+         events: eventNames
+      });
+   });
+};
+
 SourceBaseConsoleApi.prototype.findOrCreateSourceListener = function(_name) {
 
    if (!this.sourceListeners.hasOwnProperty(_name)) {

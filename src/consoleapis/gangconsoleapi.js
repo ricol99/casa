@@ -42,15 +42,17 @@ function isTopologyCountableSource(_source) {
    return (_source.superType() === "thing") || (_source.type === "peersource");
 }
 
-function countRootSources(_root, _includeSourceFn) {
-   if (!_root || (typeof _root.countTree !== "function")) {
+function countSourcesInTree(_root, _includeSourceFn) {
+   if (!_root || (typeof _root.iterate !== "function")) {
       return 0;
    }
 
-   return _root.countTree((_source, _owner) => {
+   var counter = 0;
+
+   _root.iterate(null, (_source, _owner) => {
       var superType = getSourceSuperType(_source);
 
-      if ((_source === _root) || (_owner === _root) || isTopologyCountableSource(_source)) {
+      if ((_source === _root) || isTopologyCountableSource(_source)) {
          return true;
       }
 
@@ -58,26 +60,33 @@ function countRootSources(_root, _includeSourceFn) {
              (superType !== "event") &&
              (superType !== "sourcelistener");
    }, (_context, _source, _owner) => {
-      var shouldCount = (_source !== _root) &&
-                        (_owner === _root) &&
-                        isTopologyCountableSource(_source) &&
-                        (!_includeSourceFn || _includeSourceFn(_source));
-
-      if (!shouldCount) {
-         _context.counter = _context.counter - 1;
+      if ((_source !== _root) &&
+          isTopologyCountableSource(_source) &&
+          (!_includeSourceFn || _includeSourceFn(_source))) {
+         counter = counter + 1;
       }
 
-      return shouldCount;
-   });
+      return false;
+   }, false);
+
+   return counter;
 }
 
 function collectLocalSourceCounts(_gang) {
    var localCasa = (_gang && _gang.casa) ? _gang.casa : null;
-   var bowed = localCasa && localCasa.bowingRoot ? countRootSources(localCasa.bowingRoot, (_source) => {
+   var privateBowed = localCasa && localCasa.bowingRoot ? countSourcesInTree(localCasa.bowingRoot, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
+             (getSourceSuperType(_source) !== "peersource") && !!_source.local;
+   }) : 0;
+   var bowed = localCasa && localCasa.bowingRoot ? countSourcesInTree(localCasa.bowingRoot, (_source) => {
       return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
              (getSourceSuperType(_source) !== "peersource");
    }) : 0;
-   var active = _gang ? countRootSources(_gang, (_source) => {
+   var privateActive = _gang ? countSourcesInTree(_gang, (_source) => {
+      return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
+             (getSourceSuperType(_source) !== "peersource") && !_source.bowing && !!_source.local;
+   }) : 0;
+   var active = _gang ? countSourcesInTree(_gang, (_source) => {
       return (typeof _source.getCasa === "function") && (_source.getCasa() === localCasa) &&
              (getSourceSuperType(_source) !== "peersource") && !_source.bowing;
    }) : 0;
@@ -85,16 +94,17 @@ function collectLocalSourceCounts(_gang) {
    return {
       total: active + bowed,
       bowed: bowed,
-      active: active
+      active: active,
+      private: privateActive + privateBowed
    };
 }
 
 function collectPeerSourceCounts(_peerCasa) {
-   var bowed = (_peerCasa && _peerCasa.peerRoot) ? countRootSources(_peerCasa.peerRoot, (_source) => {
+   var bowed = (_peerCasa && _peerCasa.peerRoot) ? countSourcesInTree(_peerCasa.peerRoot, (_source) => {
       return (typeof _source.getCasa === "function") && (_source.getCasa() === _peerCasa) &&
              (_source.type === "peersource") && !!_source.bowing;
    }) : 0;
-   var active = (_peerCasa && _peerCasa.connected && _peerCasa.gang) ? countRootSources(_peerCasa.gang, (_source) => {
+   var active = (_peerCasa && _peerCasa.connected && _peerCasa.gang) ? countSourcesInTree(_peerCasa.gang, (_source) => {
       return (typeof _source.getCasa === "function") && (_source.getCasa() === _peerCasa) &&
              (_source.type === "peersource") && !_source.bowing;
    }) : 0;
@@ -484,6 +494,9 @@ GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
 
    peers.sort( (_a, _b) => (_a.casaName > _b.casaName) ? 1 : ((_a.casaName < _b.casaName) ? -1 : 0));
    var localBowed = (localCounts && (typeof localCounts.bowed === "number")) ? localCounts.bowed : 0;
+   var peerActive = peers.reduce( (_count, _peer) => {
+      return _count + ((_peer.sourceCounts && (typeof _peer.sourceCounts.active === "number")) ? _peer.sourceCounts.active : 0);
+   }, 0);
    var peerBowed = peers.reduce( (_count, _peer) => {
       return _count + ((_peer.sourceCounts && (typeof _peer.sourceCounts.bowed === "number")) ? _peer.sourceCounts.bowed : 0);
    }, 0);
@@ -493,6 +506,7 @@ GangConsoleApi.prototype.topology = function(_session, _params, _callback) {
       localCasaName: this.gang.casa.name,
       localSourceCounts: localCounts,
       localBowed: localBowed,
+      peerActive: peerActive,
       peerBowed: peerBowed,
       totalBowed: localBowed + peerBowed,
       peerCount: peers.length,

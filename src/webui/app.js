@@ -19,14 +19,16 @@
   var topologyTotalBowedEl = document.getElementById('topology-total-bowed');
   var topologyBodyEl = document.getElementById('topology-body');
   var sourcesRefreshButton = document.getElementById('sources-refresh-button');
-  var sourcesModeEl = document.getElementById('sources-mode');
   var sourcesPrefixEl = document.getElementById('sources-prefix');
+  var sourcesTypeEl = document.getElementById('sources-type');
   var sourcesSearchEl = document.getElementById('sources-search');
-  var sourcesCountEl = document.getElementById('sources-count');
   var sourcesActiveCountEl = document.getElementById('sources-active-count');
-  var sourcesBowedCountEl = document.getElementById('sources-bowed-count');
-  var sourcesPeerBowedCountEl = document.getElementById('sources-peer-bowed-count');
+  var sourcesOwnedActiveCountEl = document.getElementById('sources-owned-active-count');
+  var sourcesPeerActiveCountEl = document.getElementById('sources-peer-active-count');
   var sourcesBodyEl = document.getElementById('sources-body');
+  var sourcesSelectedSourceEl = document.getElementById('sources-selected-source');
+  var sourcesSummaryEl = document.getElementById('sources-summary');
+  var sourcesDetailEl = document.getElementById('sources-detail');
   var designerRefreshButton = document.getElementById('designer-refresh-button');
   var designerTreeEl = document.getElementById('designer-tree');
   var designerSelectedThingEl = document.getElementById('designer-selected-thing');
@@ -35,6 +37,7 @@
   var latestTopology = null;
   var latestSourceTrees = null;
   var latestThingNodes = [];
+  var selectedActiveSourceUName = '';
   var selectedThingUName = '';
   var expandedThingNodes = new Set();
   var pendingRequests = {};
@@ -48,6 +51,10 @@
     { kind: 'system', text: 'Console is ready.' }
   ];
   var activeConsoleEntryId = null;
+
+  function escapeHtmlAttr(value) {
+    return escapeHtml(value).replace(/"/g, '&quot;');
+  }
 
   function setActiveTab(tabName) {
     activeTab = tabName;
@@ -417,6 +424,74 @@
     });
   }
 
+  function renderSourceStateDetail(payload) {
+    if (!payload) {
+      sourcesSelectedSourceEl.textContent = '-';
+      sourcesSummaryEl.innerHTML = '<span class="webui-chip">source: -</span>';
+      sourcesDetailEl.innerHTML = '<div class="webui-empty">Select an active source to inspect.</div>';
+      return;
+    }
+
+    sourcesSelectedSourceEl.textContent = payload.uName || '-';
+    sourcesSummaryEl.innerHTML = [
+      'type: ' + (payload.type || payload.superType || '-'),
+      'owner: ' + (payload.ownerCasa || '-'),
+      'priority: ' + ((payload.priority === null || payload.priority === undefined) ? '-' : payload.priority),
+      payload.local ? 'private' : 'shared',
+      payload.fromPeer ? 'peer-backed' : 'owned here'
+    ].map(function (label) {
+      return '<span class="webui-chip">' + label + '</span>';
+    }).join('');
+
+    var propertyRows = (payload.properties || []).map(function (entry) {
+      var separatorIndex = entry.indexOf('=');
+      var name = separatorIndex === -1 ? entry : entry.slice(0, separatorIndex);
+      var value = separatorIndex === -1 ? '' : entry.slice(separatorIndex + 1);
+
+      return '<tr>' +
+        '<td>' + escapeHtml(name) + '</td>' +
+        '<td>' + escapeHtml(value) + '</td>' +
+      '</tr>';
+    }).join('');
+
+    var eventRows = (payload.events || []).map(function (eventName) {
+      return '<tr><td>' + escapeHtml(eventName) + '</td></tr>';
+    }).join('');
+
+    sourcesDetailEl.innerHTML =
+      '<section class="webui-designer-card">' +
+        '<h4>Runtime</h4>' +
+        '<dl class="webui-designer-kv">' +
+          '<dt>uName</dt><dd>' + escapeHtml(payload.uName || '-') + '</dd>' +
+          '<dt>Name</dt><dd>' + escapeHtml(payload.name || '-') + '</dd>' +
+          '<dt>Type</dt><dd>' + escapeHtml(payload.type || payload.superType || '-') + '</dd>' +
+          '<dt>Owner Casa</dt><dd>' + escapeHtml(payload.ownerCasa || '-') + '</dd>' +
+        '</dl>' +
+      '</section>' +
+      '<section class="webui-designer-card">' +
+        '<h4>Properties</h4>' +
+        ((payload.properties && payload.properties.length)
+          ? '<div class="webui-table-wrap">' +
+              '<table class="webui-table webui-table-compact">' +
+                '<thead><tr><th>name</th><th>value</th></tr></thead>' +
+                '<tbody>' + propertyRows + '</tbody>' +
+              '</table>' +
+            '</div>'
+          : '<div class="webui-empty">none</div>') +
+      '</section>' +
+      '<section class="webui-designer-card">' +
+        '<h4>Events</h4>' +
+        ((payload.events && payload.events.length)
+          ? '<div class="webui-table-wrap">' +
+              '<table class="webui-table webui-table-compact">' +
+                '<thead><tr><th>name</th></tr></thead>' +
+                '<tbody>' + eventRows + '</tbody>' +
+              '</table>' +
+            '</div>'
+          : '<div class="webui-empty">none</div>') +
+      '</section>';
+  }
+
   function inheritanceLabel(member) {
     if (member.inherited && member.inherited.parent) {
       return 'parent';
@@ -637,6 +712,29 @@
     });
   }
 
+  function collectActiveSourceRows(node, fallbackCasaName, rows) {
+    if (!node || !rows) {
+      return;
+    }
+
+    if (node.uName && (node.superType === 'thing' || node.type === 'peersource')) {
+      rows.push({
+        sourceUName: node.uName,
+        ownerCasa: node.ownerCasa || fallbackCasaName,
+        type: node.type || node.superType || 'unknown',
+        priority: node.priority || 0,
+        providerType: node.providerType || 'casa',
+        isPrivate: !!node.local
+      });
+    }
+
+    Object.values(node.myNamedObjects || {}).forEach(function (child) {
+      if (child) {
+        collectActiveSourceRows(child, fallbackCasaName, rows);
+      }
+    });
+  }
+
   function sourceRowsFromTrees(payload) {
     var rows = [];
 
@@ -644,53 +742,10 @@
       return rows;
     }
 
-    Object.values(payload.activeTree && payload.activeTree.myNamedObjects ? payload.activeTree.myNamedObjects : {}).forEach(function (child) {
-      if (child && child.uName) {
-        rows.push({
-          sourceUName: child.uName,
-          ownerCasa: child.ownerCasa || payload.casaName,
-          type: child.type || child.superType || 'unknown',
-          priority: child.priority || 0,
-          state: 'active',
-          tree: 'active'
-        });
-      }
-    });
-
-    Object.values(payload.localBowedTree && payload.localBowedTree.myNamedObjects ? payload.localBowedTree.myNamedObjects : {}).forEach(function (child) {
-      if (child && child.uName) {
-        rows.push({
-          sourceUName: child.uName,
-          ownerCasa: child.ownerCasa || payload.casaName,
-          type: child.type || child.superType || 'unknown',
-          priority: child.priority || 0,
-          state: 'bowed',
-          tree: 'local-bowed'
-        });
-      }
-    });
-
-    (payload.peerTrees || []).forEach(function (peerTree) {
-      Object.values(peerTree.tree && peerTree.tree.myNamedObjects ? peerTree.tree.myNamedObjects : {}).forEach(function (child) {
-        if (child && child.uName) {
-          rows.push({
-            sourceUName: child.uName,
-            ownerCasa: child.ownerCasa || peerTree.casaName,
-            type: child.type || child.superType || 'unknown',
-            priority: child.priority || 0,
-            state: 'bowed',
-            tree: 'peer-bowed'
-          });
-        }
-      });
-    });
+    collectActiveSourceRows(payload.activeTree, payload.casaName, rows);
 
     rows.sort(function (a, b) {
       if (a.sourceUName === b.sourceUName) {
-        if (a.ownerCasa === b.ownerCasa) {
-          return a.tree.localeCompare(b.tree);
-        }
-
         return a.ownerCasa.localeCompare(b.ownerCasa);
       }
 
@@ -701,19 +756,11 @@
   }
 
   function filteredSourceRows(rows) {
-    var mode = sourcesModeEl.value;
     var prefix = (sourcesPrefixEl.value || '').trim();
+    var typeFilter = (sourcesTypeEl.value || '').trim().toLowerCase();
     var search = (sourcesSearchEl.value || '').trim().toLowerCase();
 
     return rows.filter(function (row) {
-      if (mode === 'active' && row.state !== 'active') {
-        return false;
-      }
-
-      if (mode === 'bowed' && row.state !== 'bowed') {
-        return false;
-      }
-
       if (prefix) {
         var normalisedPrefix = prefix.charAt(0) === ':' ? prefix : ':' + prefix;
 
@@ -722,58 +769,113 @@
         }
       }
 
+      if (typeFilter && row.type.toLowerCase().indexOf(typeFilter) === -1) {
+        return false;
+      }
+
       if (!search) {
         return true;
       }
 
       return row.sourceUName.toLowerCase().includes(search) ||
              row.ownerCasa.toLowerCase().includes(search) ||
-             row.type.toLowerCase().includes(search) ||
-             row.tree.toLowerCase().includes(search);
+             row.type.toLowerCase().includes(search);
     });
   }
 
   function renderSources() {
     var rows = filteredSourceRows(sourceRowsFromTrees(latestSourceTrees));
+    var hasSelectedRow = rows.some(function (row) { return row.sourceUName === selectedActiveSourceUName; });
 
-    sourcesCountEl.textContent = 'count: ' + rows.length;
-    sourcesActiveCountEl.textContent = 'active: ' + rows.filter(function (row) { return row.state === 'active'; }).length;
-    sourcesBowedCountEl.textContent = 'bowed: ' + rows.filter(function (row) { return row.state === 'bowed'; }).length;
-    sourcesPeerBowedCountEl.textContent = 'peer bowed: ' + rows.filter(function (row) { return row.tree === 'peer-bowed'; }).length;
+    sourcesActiveCountEl.textContent = 'active: ' + rows.length;
+    sourcesOwnedActiveCountEl.textContent = 'owned active: ' + rows.filter(function (row) { return row.providerType !== 'peercasa'; }).length;
+    sourcesPeerActiveCountEl.textContent = 'peer active: ' + rows.filter(function (row) { return row.providerType === 'peercasa'; }).length;
 
     if (!rows.length) {
-      sourcesBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">No matching sources.</td></tr>';
+      selectedActiveSourceUName = '';
+      renderSourceStateDetail(null);
+      sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">No matching active sources.</td></tr>';
       return;
     }
 
+    if (!selectedActiveSourceUName || !hasSelectedRow) {
+      selectedActiveSourceUName = rows[0].sourceUName;
+    }
+
     sourcesBodyEl.innerHTML = rows.map(function (row) {
-      return '<tr>' +
+      return '<tr class="' + (row.isPrivate ? 'webui-table-row-private ' : '') + (row.sourceUName === selectedActiveSourceUName ? 'webui-table-row-selected' : '') + '" data-source-u-name="' + escapeHtmlAttr(row.sourceUName) + '">' +
         '<td>' + row.sourceUName + '</td>' +
         '<td>' + row.ownerCasa + '</td>' +
         '<td>' + row.type + '</td>' +
         '<td>' + row.priority + '</td>' +
-        '<td>' + row.state + '</td>' +
-        '<td>' + row.tree + '</td>' +
       '</tr>';
     }).join('');
+
+    Array.from(sourcesBodyEl.querySelectorAll('[data-source-u-name]')).forEach(function (rowEl) {
+      rowEl.addEventListener('click', function () {
+        selectedActiveSourceUName = rowEl.getAttribute('data-source-u-name') || '';
+        renderSources();
+        requestDescribeSourceState();
+      });
+    });
+  }
+
+  function requestDescribeSourceState() {
+    if (!socket.connected) {
+      renderSourceStateDetail(null);
+      return;
+    }
+
+    if (!selectedActiveSourceUName) {
+      renderSourceStateDetail(null);
+      return;
+    }
+
+    sourcesDetailEl.innerHTML = '<div class="webui-empty">Loading source detail...</div>';
+    sendCommand({
+      obj: selectedActiveSourceUName,
+      method: 'describeSourceState',
+      arguments: []
+    }, function (payload) {
+      if (!payload.ok) {
+        sourcesSelectedSourceEl.textContent = selectedActiveSourceUName;
+        sourcesSummaryEl.innerHTML = '<span class="webui-chip">source: ' + selectedActiveSourceUName + '</span>';
+        sourcesDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
+        return;
+      }
+
+      renderSourceStateDetail(payload.result);
+    });
+  }
+
+  function getTopologyRowData(data, rowCasaName) {
+    if (!data || !rowCasaName) {
+      return null;
+    }
+
+    var rows = data.rows ? data.rows : [];
+    return rows.find(function (row) {
+      return row.casaName === rowCasaName;
+    }) || null;
   }
 
   function renderTopology() {
     var data = latestTopology;
-    var peers = data && data.peers ? data.peers : [];
-    var localCasaName = data && data.localCasaName ? data.localCasaName : '-';
-    var localCounts = data && data.localSourceCounts ? data.localSourceCounts : { total: 0, active: 0, bowed: 0 };
-    var localBowed = data && typeof data.localBowed === 'number' ? data.localBowed : (localCounts.bowed || 0);
-    var peerBowed = data && typeof data.peerBowed === 'number' ? data.peerBowed : 0;
-    var totalBowed = data && typeof data.totalBowed === 'number' ? data.totalBowed : (localBowed + peerBowed);
+    var rows = data && data.rows ? data.rows : [];
+    var connectedCasaCount = data && typeof data.connectedCasaCount === 'number' ? data.connectedCasaCount : 0;
+    var casaCount = data && typeof data.casaCount === 'number' ? data.casaCount : rows.length;
+    var ownedBowed = rows.reduce(function (count, row) {
+      return count + (typeof row.ownedBowed === 'number' ? row.ownedBowed : 0);
+    }, 0);
+    var peerBowed = rows.reduce(function (count, row) {
+      return count + (typeof row.peerBowed === 'number' ? row.peerBowed : 0);
+    }, 0);
+    var totalBowed = ownedBowed + peerBowed;
 
     topologyGangEl.textContent = 'gang: ' + (data && data.gangName ? data.gangName : '-');
-    topologyLocalEl.textContent = 'local: ' + localCasaName;
-    topologyConnectedPeersEl.textContent = 'connected peers: ' +
-      (data && typeof data.connectedPeerCount === 'number' ? data.connectedPeerCount : 0) +
-      '/' +
-      (data && typeof data.peerCount === 'number' ? data.peerCount : 0);
-    topologyLocalBowedEl.textContent = 'local bowed: ' + localBowed;
+    topologyLocalEl.textContent = 'casas: ' + casaCount;
+    topologyConnectedPeersEl.textContent = 'connected: ' + connectedCasaCount + '/' + casaCount;
+    topologyLocalBowedEl.textContent = 'owned bowed: ' + ownedBowed;
     topologyPeerBowedEl.textContent = 'peer bowed: ' + peerBowed;
     topologyTotalBowedEl.textContent = 'total bowed: ' + totalBowed;
 
@@ -782,32 +884,18 @@
       return;
     }
 
-    var rowNames = [localCasaName].concat(peers.map(function (peer) { return peer.casaName; }))
-      .filter(function (name, index, array) { return name && array.indexOf(name) === index; })
-      .sort(function (a, b) { return a.localeCompare(b); });
+    topologyBodyEl.innerHTML = rows.map(function (row) {
+      var rowClass = row.casaName === currentSelectedCasa ? ' class="webui-table-row-selected"' : '';
 
-    topologyBodyEl.innerHTML = rowNames.map(function (rowCasaName) {
-      var peer = peers.find(function (entry) { return entry.casaName === rowCasaName; });
-      var isLocal = rowCasaName === localCasaName;
-      var sourceTotal = isLocal ? (localCounts.total || 0) : (peer && peer.sourceCounts ? peer.sourceCounts.total : '-');
-      var sourceActive = isLocal ? (localCounts.active || 0) : (peer && peer.sourceCounts ? peer.sourceCounts.active : '-');
-      var localRowBowed = isLocal ? localBowed : (peer && peer.sourceCounts ? peer.sourceCounts.bowed : 0);
-      var remoteRowBowed = isLocal ? peerBowed : 0;
-      var totalRowBowed = isLocal ? totalBowed : (peer && peer.sourceCounts ? peer.sourceCounts.bowed : '-');
-      var disconnected = (typeof sourceTotal === 'number' && typeof sourceActive === 'number' && typeof totalRowBowed === 'number')
-        ? Math.max(0, sourceTotal - sourceActive - totalRowBowed)
-        : '-';
-      var connected = isLocal ? 'yes' : ((peer && peer.connected) ? 'yes' : 'no');
-
-      return '<tr>' +
-        '<td>' + rowCasaName + '</td>' +
-        '<td>' + connected + '</td>' +
-        '<td>' + sourceTotal + '</td>' +
-        '<td>' + sourceActive + '</td>' +
-        '<td>' + localRowBowed + '</td>' +
-        '<td>' + remoteRowBowed + '</td>' +
-        '<td>' + totalRowBowed + '</td>' +
-        '<td>' + disconnected + '</td>' +
+      return '<tr' + rowClass + '>' +
+        '<td>' + row.casaName + '</td>' +
+        '<td>' + row.active + '</td>' +
+        '<td>' + row.owned + '</td>' +
+        '<td>' + row.ownedActive + '</td>' +
+        '<td>' + row.ownedBowed + '</td>' +
+        '<td>' + row.peerActive + '</td>' +
+        '<td>' + row.peerBowed + '</td>' +
+        '<td>' + row.privateCount + '</td>' +
       '</tr>';
     }).join('');
   }
@@ -826,14 +914,15 @@
 
   function requestSourceTrees(callback) {
     if (!socket.connected) {
-      sourcesBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
+      renderSourceStateDetail(null);
+      sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
       if (callback) {
         callback();
       }
       return;
     }
 
-    sourcesBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">Loading source trees...</td></tr>';
+    sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">Loading active sources...</td></tr>';
     sendCommand({
       obj: ':',
       method: 'sourceTrees',
@@ -841,7 +930,9 @@
     }, function (payload) {
       if (!payload.ok) {
         latestSourceTrees = null;
-        sourcesBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">' + payload.error + '</td></tr>';
+        selectedActiveSourceUName = '';
+        renderSourceStateDetail(null);
+        sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">' + payload.error + '</td></tr>';
         if (callback) {
           callback();
         }
@@ -857,22 +948,30 @@
         expandedThingNodes.add(uName);
       });
       renderDesignerTree();
-      requestDescribeThing();
       renderSources();
+      requestDescribeThing(function () {
+        requestDescribeSourceState();
+      });
       if (callback) {
         callback();
       }
     });
   }
 
-  function requestDescribeThing() {
+  function requestDescribeThing(callback) {
     if (!socket.connected) {
       renderDesignerDetail(null);
+      if (callback) {
+        callback();
+      }
       return;
     }
 
     if (!selectedThingUName) {
       renderDesignerDetail(null);
+      if (callback) {
+        callback();
+      }
       return;
     }
 
@@ -886,10 +985,16 @@
         designerSelectedThingEl.textContent = selectedThingUName;
         designerSummaryEl.innerHTML = '<span class="webui-chip">thing: ' + selectedThingUName + '</span>';
         designerDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
+        if (callback) {
+          callback();
+        }
         return;
       }
 
       renderDesignerDetail(payload.result);
+      if (callback) {
+        callback();
+      }
     });
   }
 
@@ -903,11 +1008,7 @@
     }
 
     topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">Loading topology...</td></tr>';
-    sendCommand({
-      obj: ':',
-      method: 'topology',
-      arguments: []
-    }, function (payload) {
+    emitWithReply('getGangTopology', {}, function (payload) {
       if (!payload.ok) {
         latestTopology = null;
         topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">' + payload.error + '</td></tr>';
@@ -970,6 +1071,11 @@
     });
   });
 
+  socket.on('gang-topology-output', function (payload) {
+    handleReply(payload, function () {
+    });
+  });
+
   socket.on('auto-complete-output', function (payload) {
     handleReply(payload, function () {
       setConsoleHints([]);
@@ -1025,8 +1131,8 @@
   designerRefreshButton.addEventListener('click', function () {
     requestSourceTrees();
   });
-  sourcesModeEl.addEventListener('change', renderSources);
   sourcesPrefixEl.addEventListener('input', renderSources);
+  sourcesTypeEl.addEventListener('input', renderSources);
   sourcesSearchEl.addEventListener('input', renderSources);
   tabButtons.forEach(function (button) {
     button.addEventListener('click', function () {
