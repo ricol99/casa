@@ -71,10 +71,29 @@ function Room(_config, _parent) {
    this.roomType = _config.hasOwnProperty("roomType") ? _config.roomType : "room";
    this.buildingName = _config.building;
 
-   _config.subscription = { uName: this.buildingName, subscription: { roomType: this.roomType, roomUsers: _config.hasOwnProperty("users") ? _config.users : {} }};
-
    Thing.call(this, _config, _parent);
    this.thingType = "room";
+
+   if (_config.hasOwnProperty('user')) {
+      _config.users = [ _config.user ];
+   }
+
+   if (!_config.hasOwnProperty("users")) {
+      _config.users = [];
+   }
+
+   this.users = [];
+   var roomUsers = [];
+
+   for (var u = 0; u < _config.users.length; ++u) {
+      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
+      roomUsers.push(_config.users[u].uName);
+   }
+
+   var modeSourceName = this.buildingName.startsWith(":") ? this.buildingName.substr(1) : this.buildingName;
+
+   this.ensurePropertyExists(modeSourceName.replace(/:/g, "-")+"-MODE", "property",
+                             { source: { uName: this.buildingName, property: "MODE", subscription: { roomType: this.roomType, roomUsers: roomUsers } }}, _config);
 
    this.ensurePropertyExists("building-name", "property", { initialValue: this.buildingName }, _config);
    this.ensurePropertyExists("low-light", "property", { source: { uName: this.buildingName, property: "low-light" }}, _config);
@@ -86,20 +105,6 @@ function Room(_config, _parent) {
    else {
       var value = (_config.hasOwnProperty("movementTimeout")) ? _config.movementTimeout : 600;
       this.movementTimeouts = { "day": value, "dull-day": value, "evening": value, "night": value };
-   }
-
-   this.users = [];
-
-   if (_config.hasOwnProperty('user')) {
-      _config.users = [ _config.user ];
-   }
-
-   if (!_config.hasOwnProperty("users")) {
-      _config.users = [];
-   }
-
-   for (var u = 0; u < _config.users.length; ++u) {
-      this.users.push(this.gang.findNamedObject(_config.users[u].uName));
    }
 
    this.roomStates = _config.hasOwnProperty("roomStates") ? _config.roomStates : 

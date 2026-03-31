@@ -35,6 +35,7 @@ var Location = require('./location');
 function Building(_config, _parent) {
    Location.call(this, _config, _parent);
    this.thingType = "building";
+   this.roomSubscriptions = {};
 
    this.bedtimeTimeout = (_config.hasOwnProperty('bedtimeTimeout')) ? _config.bedtimeTimeout : 3600 + 1800;
 
@@ -275,38 +276,84 @@ Building.prototype.hotStart = function() {
 };
 
 // Something wants to watch (and possibly write to) several properties in this service node (read) - called from sourcelistener
-Building.prototype.propertySubscribedTo = function(_property, _subscription, _exists, _firstSource) {
+Building.prototype.propertySubscribedTo = function(_property, _subscription, _exists) {
    console.log(this.uName + ": Property subscription() for " + _property);
 
-   if (_firstSource) {
-      this.processSubscription(_subscription);
+   if (!_subscription || !_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("listeningSource")) {
+      return;
    }
+
+   if (!this.roomSubscriptions.hasOwnProperty(_subscription.listeningSource)) {
+      this.roomSubscriptions[_subscription.listeningSource] = {
+         count: 1,
+         subscription: util.copy(_subscription, true)
+      };
+      this.processSubscription(_subscription);
+      return;
+   }
+
+   this.roomSubscriptions[_subscription.listeningSource].count = this.roomSubscriptions[_subscription.listeningSource].count + 1;
 };
 
 // Something wants to watch (and possibly raise towards) several events in this service node (read) - called from sourcelistener
-Building.prototype.eventSubscribedTo = function(_eventName, _subscription, _firstSource) {
+Building.prototype.eventSubscribedTo = function(_eventName, _subscription) {
    console.log(this.uName + ": Event subscription() for" + _eventName);
 
-   if (_firstSource) {
-      this.processSubscription(_subscription);
+   if (!_subscription || !_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("listeningSource")) {
+      return;
    }
+
+   if (!this.roomSubscriptions.hasOwnProperty(_subscription.listeningSource)) {
+      this.roomSubscriptions[_subscription.listeningSource] = {
+         count: 1,
+         subscription: util.copy(_subscription, true)
+      };
+      this.processSubscription(_subscription);
+      return;
+   }
+
+   this.roomSubscriptions[_subscription.listeningSource].count = this.roomSubscriptions[_subscription.listeningSource].count + 1;
 };
 
 // Something does not want to watch a property anymore - called from sourcelistener
-Building.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists, _lastSource) {
+Building.prototype.propertySubscriptionRemoved = function(_property, _subscription, _exists) {
    console.log(this.uName + ": Property subscription() for " + _property);
 
-   if (_lastSource) {
-      this.processSubscriptionRemoved(_subscription);
+   if (!_subscription || !_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("listeningSource")) {
+      return;
+   }
+
+   if (!this.roomSubscriptions.hasOwnProperty(_subscription.listeningSource)) {
+      return;
+   }
+
+   this.roomSubscriptions[_subscription.listeningSource].count = this.roomSubscriptions[_subscription.listeningSource].count - 1;
+
+   if (this.roomSubscriptions[_subscription.listeningSource].count <= 0) {
+      var roomSubscription = this.roomSubscriptions[_subscription.listeningSource].subscription;
+      delete this.roomSubscriptions[_subscription.listeningSource];
+      this.processSubscriptionRemoved(roomSubscription);
    }
 };
 
 // Something does not want to watch an event anymore - called from sourcelistener
-Building.prototype.eventSubscriptionRemoved = function(_eventName, _subscription, _lastSource) {
+Building.prototype.eventSubscriptionRemoved = function(_eventName, _subscription) {
    console.log(this.uName + ": Event subscription() for" + _eventName);
 
-   if (_lastSource) {
-      this.processSubscriptionRemoved(_subscription);
+   if (!_subscription || !_subscription.hasOwnProperty("roomType") || !_subscription.hasOwnProperty("listeningSource")) {
+      return;
+   }
+
+   if (!this.roomSubscriptions.hasOwnProperty(_subscription.listeningSource)) {
+      return;
+   }
+
+   this.roomSubscriptions[_subscription.listeningSource].count = this.roomSubscriptions[_subscription.listeningSource].count - 1;
+
+   if (this.roomSubscriptions[_subscription.listeningSource].count <= 0) {
+      var roomSubscription = this.roomSubscriptions[_subscription.listeningSource].subscription;
+      delete this.roomSubscriptions[_subscription.listeningSource];
+      this.processSubscriptionRemoved(roomSubscription);
    }
 };
 
@@ -322,7 +369,7 @@ Building.prototype.processSubscription = function(_subscription) {
    else if (_subscription.roomType === "bedroom") {
 
       for (var i = 0; i < this.users.length; ++i) {
-         var listen = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
+         var listen = _subscription.hasOwnProperty("roomUsers") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
 
          if (listen) {
             this.properties[this.users[i].name+"-user-state"].getState("not-present").addNewSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",
@@ -356,7 +403,7 @@ Building.prototype.processSubscriptionRemoved = function(_subscription) {
    else if (_subscription.roomType === "bedroom") {
 
       for (var i = 0; i < this.users.length; ++i) {
-         var listening = _subscription.hasOwnProperty("users") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
+         var listening = _subscription.hasOwnProperty("roomUsers") ? _subscription.roomUsers.includes(this.users[i].uName) : true;
 
          if (listening) {
             this.properties[this.users[i].name+"-user-state"].getState("not-present").removeExistingSource({ "uName": _subscription.listeningSource, "property": this.users[i].name+"-in-bed",

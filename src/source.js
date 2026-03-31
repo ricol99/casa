@@ -10,7 +10,7 @@ function Source(_config, _owner) {
    this.controllerPriority = -1;
    this.controller = null;
 
-   if (_config.hasOwnProperty("subscription")) {
+   /*if (_config.hasOwnProperty("subscription")) {
       _config.subscriptions = [ _config.subscription ];
    }
 
@@ -28,7 +28,7 @@ function Source(_config, _owner) {
          this.ensurePropertyExists(modeSourceName.replace(/:/g, "-")+"-MODE", "property",
                                    { source: { uName: subscriptionUName, property: "MODE", subscription: _config.subscriptions[i].subscription }}, _config);
       }
-   }
+   }*/
 
    if (_config.hasOwnProperty("mirrorSource")) {
       this.mirroring = true;
