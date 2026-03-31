@@ -194,6 +194,39 @@ CasaConsoleApi.prototype.sourceTrees = function(_session, _params, _callback) {
    _callback(null, this.sourceTreesInternal());
 };
 
+CasaConsoleApi.prototype.configuredSourceTreeInternal = function() {
+   var casa = this.gang.casa;
+   var configuredFilter = function(_child, _owner) {
+
+      if (!_child) {
+         return false;
+      }
+
+      if (_child === casa.gang) {
+         return true;
+      }
+
+      if (_child.type === "namedobject") {
+         return true;
+      }
+
+      if (_child.fromPeer || _child.transient || (_child.type === "peersource")) {
+         return false;
+      }
+
+      return !!(_child.superType &&
+                ((_child.superType() === "thing") ||
+                 (_child.superType() === "property") ||
+                 (_child.superType() === "event")));
+   };
+
+   return exportNamedObjectTree(this.gang, configuredFilter, null);
+};
+
+CasaConsoleApi.prototype.configuredSourceTree = function(_session, _params, _callback) {
+   _callback(null, this.configuredSourceTreeInternal());
+};
+
 CasaConsoleApi.prototype.getSourceObjectForUName = function(_sourceUName) {
    var sourceObj = this.gang.findNamedObject(_sourceUName);
 

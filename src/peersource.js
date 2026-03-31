@@ -21,20 +21,22 @@ PeerSource.prototype.export = function(_exportObj) {
 };
 
 PeerSource.prototype.addToMainTree = function() {
+   // Return value is used by peerRoot iteration as a traversal-control signal:
+   // once a peer source has been considered, stop descending below it so the
+   // subtree stands or bows as one unit rather than being processed piecemeal.
    var existingSource = this.gang.findNamedObject(this.uName);
 
    if (existingSource) {
 
       if (existingSource.deferToPeer(this)) {
          this.standUpFromBow();
-         return true;
       }
    }
    else {
       this.standUpFromBow();
    }
 
-   return false;
+   return true;
 };
 
 PeerSource.prototype.subscriptionRegistered = function(_event, _subscription) {

@@ -25,6 +25,7 @@ function thingDescribeNamedObject(_obj) {
    return {
       uName: _obj.uName,
       name: _obj.name,
+      displayName: (typeof _obj.getDisplayName === "function") ? _obj.getDisplayName() : (_obj.displayName || _obj.name),
       type: _obj.type || null,
       superType: (typeof _obj.superType === "function") ? _obj.superType() : null,
       ownerUName: _obj.owner ? _obj.owner.uName : null,
@@ -129,6 +130,47 @@ function thingDescribeExternalMember(_member, _ownerThing) {
       viaThingUName: _ownerThing ? _ownerThing.uName : null,
       viaThingName: _ownerThing ? _ownerThing.name : null
    };
+}
+
+function thingDescribeConfig(_thing) {
+   var configCopy;
+
+   if (!_thing || (_thing.config === undefined)) {
+      return null;
+   }
+
+   try {
+      configCopy = JSON.parse(JSON.stringify(_thing.config));
+   }
+   catch (_err) {
+      return {
+         error: "Unable to serialise config"
+      };
+   }
+
+   delete configCopy.things;
+   delete configCopy.properties;
+   delete configCopy.events;
+   delete configCopy.ignoreParent;
+   delete configCopy.ignoreChildren;
+   delete configCopy.propagateToParent;
+   delete configCopy.propagateToChildren;
+   delete configCopy.ignorePropagation;
+   delete configCopy.propagation;
+   delete configCopy.name;
+   delete configCopy.displayName;
+   delete configCopy.local;
+   delete configCopy.priority;
+   delete configCopy.type;
+
+   for (var key in configCopy) {
+
+      if (configCopy.hasOwnProperty(key) && key.startsWith("_")) {
+         delete configCopy[key];
+      }
+   }
+
+   return configCopy;
 }
 
 function thingBuildInheritanceSummary(_thing, _parentThing, _properties, _events) {
@@ -427,6 +469,7 @@ ThingConsoleApi.prototype.describeThing = function(_session, _params, _callback)
          bowing: !!thing.bowing,
          priority: (thing.priority === undefined) ? null : thing.priority
       },
+      config: thingDescribeConfig(thing),
       parent: parentThing ? {
          object: thingDescribeNamedObject(parentThing),
          propagation: {

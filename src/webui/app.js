@@ -31,11 +31,13 @@
   var sourcesDetailEl = document.getElementById('sources-detail');
   var designerRefreshButton = document.getElementById('designer-refresh-button');
   var designerTreeEl = document.getElementById('designer-tree');
+  var designerDetailHeadingEl = document.getElementById('designer-detail-heading');
   var designerSelectedThingEl = document.getElementById('designer-selected-thing');
   var designerSummaryEl = document.getElementById('designer-summary');
   var designerDetailEl = document.getElementById('designer-detail');
   var latestTopology = null;
   var latestSourceTrees = null;
+  var latestConfiguredTree = null;
   var latestThingNodes = [];
   var selectedActiveSourceUName = '';
   var selectedThingUName = '';
@@ -389,7 +391,7 @@
 
   function renderDesignerTree() {
     if (!latestThingNodes.length) {
-      designerTreeEl.innerHTML = '<div class="webui-empty">No active things found.</div>';
+      designerTreeEl.innerHTML = '<div class="webui-empty">No configured things found.</div>';
       return;
     }
 
@@ -545,21 +547,34 @@
     '</section>';
   }
 
+  function renderDesignerConfig(payload) {
+    if (payload === null || payload === undefined) {
+      return '<section class="webui-designer-card"><h4>Additional Config</h4><div class="webui-empty">none</div></section>';
+    }
+
+    return '<section class="webui-designer-card">' +
+      '<h4>Additional Config</h4>' +
+      '<pre class="webui-designer-code">' + escapeHtml(JSON.stringify(payload, null, 2)) + '</pre>' +
+    '</section>';
+  }
+
   function renderDesignerDetail(payload) {
     if (!payload || !payload.thing || !payload.thing.object) {
+      designerDetailHeadingEl.textContent = 'Thing detail';
       designerSelectedThingEl.textContent = '-';
-      designerSummaryEl.innerHTML = '<span class="webui-chip">thing: -</span>';
+      designerSummaryEl.innerHTML = '<span class="webui-chip">uName: -</span>';
       designerDetailEl.innerHTML = '<div class="webui-empty">Select a thing to inspect.</div>';
       return;
     }
 
+    var detailType = payload.thing.object.type || payload.thing.object.superType || 'Thing';
     designerSelectedThingEl.textContent = payload.thing.object.uName;
+    designerDetailHeadingEl.textContent = String(detailType).toUpperCase() + ' detail';
     designerSummaryEl.innerHTML = [
-      'thing: ' + payload.thing.object.uName,
+      'uName: ' + payload.thing.object.uName,
       'children: ' + (payload.children ? payload.children.length : 0),
       'properties: ' + (payload.properties ? payload.properties.length : 0),
-      'events: ' + (payload.events ? payload.events.length : 0),
-      'bowing: ' + (payload.thing.bowing ? 'yes' : 'no')
+      'events: ' + (payload.events ? payload.events.length : 0)
     ].map(function (label) {
       return '<span class="webui-chip">' + label + '</span>';
     }).join('');
@@ -571,24 +586,19 @@
 
     designerDetailEl.innerHTML =
       '<section class="webui-designer-card">' +
-        '<h4>Thing</h4>' +
         '<dl class="webui-designer-kv">' +
-          '<dt>uName</dt><dd>' + payload.thing.object.uName + '</dd>' +
-          '<dt>type</dt><dd>' + (payload.thing.object.type || '-') + '</dd>' +
-          '<dt>owner casa</dt><dd>' + (payload.thing.object.ownerCasa || '-') + '</dd>' +
+          '<dt>name</dt><dd>' + (payload.thing.object.name || '-') + '</dd>' +
+          '<dt>display name</dt><dd>' + (payload.thing.object.displayName || '-') + '</dd>' +
+          '<dt>private</dt><dd>' + (payload.thing.local ? 'yes' : 'no') + '</dd>' +
           '<dt>priority</dt><dd>' + (payload.thing.priority === null ? '-' : payload.thing.priority) + '</dd>' +
           '<dt>parent</dt><dd>' + parentLabel + '</dd>' +
-        '</dl>' +
-      '</section>' +
-      '<section class="webui-designer-card">' +
-        '<h4>Object propagation</h4>' +
-        '<dl class="webui-designer-kv">' +
           '<dt>ignore parent</dt><dd>' + (payload.propagation.objectLevel.ignoreParent ? 'yes' : 'no') + '</dd>' +
           '<dt>ignore children</dt><dd>' + (payload.propagation.objectLevel.ignoreChildren ? 'yes' : 'no') + '</dd>' +
           '<dt>propagate to parent</dt><dd>' + (payload.propagation.objectLevel.propagateToParent ? 'yes' : 'no') + '</dd>' +
           '<dt>propagate to children</dt><dd>' + (payload.propagation.objectLevel.propagateToChildren ? 'yes' : 'no') + '</dd>' +
         '</dl>' +
       '</section>' +
+      renderDesignerConfig(payload.config) +
       '<section class="webui-designer-card">' +
         '<h4>Children</h4>' +
         '<div class="webui-chip-row">' + childList + '</div>' +
@@ -820,14 +830,20 @@
     });
   }
 
-  function requestDescribeSourceState() {
+  function requestDescribeSourceState(callback) {
     if (!socket.connected) {
       renderSourceStateDetail(null);
+      if (callback) {
+        callback();
+      }
       return;
     }
 
     if (!selectedActiveSourceUName) {
       renderSourceStateDetail(null);
+      if (callback) {
+        callback();
+      }
       return;
     }
 
@@ -841,10 +857,16 @@
         sourcesSelectedSourceEl.textContent = selectedActiveSourceUName;
         sourcesSummaryEl.innerHTML = '<span class="webui-chip">source: ' + selectedActiveSourceUName + '</span>';
         sourcesDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
+        if (callback) {
+          callback();
+        }
         return;
       }
 
       renderSourceStateDetail(payload.result);
+      if (callback) {
+        callback();
+      }
     });
   }
 
@@ -940,7 +962,44 @@
       }
 
       latestSourceTrees = payload.result;
-      latestThingNodes = collectThingNodes(latestSourceTrees && latestSourceTrees.activeTree ? latestSourceTrees.activeTree : null);
+      renderSources();
+      requestDescribeSourceState(callback);
+    });
+  }
+
+  function requestConfiguredSourceTree(callback) {
+    if (!socket.connected) {
+      latestConfiguredTree = null;
+      latestThingNodes = [];
+      selectedThingUName = '';
+      renderDesignerTree();
+      renderDesignerDetail(null);
+      if (callback) {
+        callback();
+      }
+      return;
+    }
+
+    designerTreeEl.innerHTML = '<div class="webui-empty">Loading configured tree...</div>';
+    sendCommand({
+      obj: ':',
+      method: 'configuredSourceTree',
+      arguments: []
+    }, function (payload) {
+      if (!payload.ok) {
+        latestConfiguredTree = null;
+        latestThingNodes = [];
+        selectedThingUName = '';
+        renderDesignerTree();
+        designerDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
+        if (callback) {
+          callback();
+        }
+        return;
+      }
+
+      latestConfiguredTree = payload.result;
+      latestThingNodes = collectThingNodes(latestConfiguredTree);
       if (!selectedThingUName || !treeContains(latestThingNodes, selectedThingUName)) {
         selectedThingUName = findFirstThingUName(latestThingNodes);
       }
@@ -948,13 +1007,11 @@
         expandedThingNodes.add(uName);
       });
       renderDesignerTree();
-      renderSources();
       requestDescribeThing(function () {
-        requestDescribeSourceState();
+        if (callback) {
+          callback();
+        }
       });
-      if (callback) {
-        callback();
-      }
     });
   }
 
@@ -983,7 +1040,7 @@
     }, function (payload) {
       if (!payload.ok) {
         designerSelectedThingEl.textContent = selectedThingUName;
-        designerSummaryEl.innerHTML = '<span class="webui-chip">thing: ' + selectedThingUName + '</span>';
+        designerSummaryEl.innerHTML = '<span class="webui-chip">uName: ' + selectedThingUName + '</span>';
         designerDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
         if (callback) {
           callback();
@@ -1047,7 +1104,9 @@
     renderCasas(payload);
     setConsoleScope(payload && payload.currentScope ? payload.currentScope : ':');
     requestTopology(function () {
-      requestSourceTrees();
+      requestSourceTrees(function () {
+        requestConfiguredSourceTree();
+      });
     });
   });
 
@@ -1129,7 +1188,7 @@
   topologyRefreshButton.addEventListener('click', requestTopology);
   sourcesRefreshButton.addEventListener('click', requestSourceTrees);
   designerRefreshButton.addEventListener('click', function () {
-    requestSourceTrees();
+    requestConfiguredSourceTree();
   });
   sourcesPrefixEl.addEventListener('input', renderSources);
   sourcesTypeEl.addEventListener('input', renderSources);

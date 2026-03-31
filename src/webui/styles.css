@@ -778,6 +778,19 @@ button:hover {
   margin-top: 0;
 }
 
+.webui-designer-code {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 0.8rem;
+  background: rgba(15, 23, 32, 0.05);
+  color: #24313c;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .webui-designer-card .webui-table {
   background: rgba(255, 255, 255, 0.42);
 }

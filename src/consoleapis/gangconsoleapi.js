@@ -757,6 +757,20 @@ GangConsoleApi.prototype.sourceTrees = function(_session, _params, _callback) {
    _callback(null, casaApi.sourceTreesInternal());
 };
 
+GangConsoleApi.prototype.configuredSourceTree = function(_session, _params, _callback) {
+   var casaApi = null;
+
+   if (this.consoleApiService && (typeof this.consoleApiService.findOrCreateConsoleApiObject === "function")) {
+      casaApi = this.consoleApiService.findOrCreateConsoleApiObject(this.gang.casa);
+   }
+
+   if (!casaApi || (typeof casaApi.configuredSourceTreeInternal !== "function")) {
+      return _callback("Unable to build configured source tree");
+   }
+
+   _callback(null, casaApi.configuredSourceTreeInternal());
+};
+
 GangConsoleApi.prototype.previewConfigInternal = function(_options) {
    return ConfigPreviewEngine.previewConfig(_options ? _options : {}, {
       mode: "gang",
