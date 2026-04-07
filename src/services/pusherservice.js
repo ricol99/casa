@@ -144,6 +144,11 @@ function PusherMessageTransport(_owner, _ioMessageSocketService) {
    AsyncEmitter.call(this);
    this.owner = _owner;
    this.ioMessageSocketService = _ioMessageSocketService;
+   this.pendingMessages = {};
+   this.maxPayloadBytes = 5 * 1024;
+   this.maxFragmentCount = 2048;
+   this.pendingMessageTimeoutMs = 30000;
+   this.nextFragmentId = 0;
 }
 
 util.inherits(PusherMessageTransport, AsyncEmitter);
@@ -165,6 +170,12 @@ PusherMessageTransport.prototype.start = function(_pusher) {
    var messageChannel = this.pusher.subscribe("message-channel_" + this.owner.gang.casa.uName.replace(/:/g, ""));
 
    messageChannel.bind("message", (_data) => {
+      _data = this.processIncomingMessage(_data);
+
+      if (!_data) {
+         return;
+      }
+
       console.log(this.owner.uName + ": Message received from " + _data.peerAddress + ", message=",_data.message);
 
       if (_data && _data.hasOwnProperty("peerAddress") && (_data.peerAddress !== this.owner.gang.casa.uName) &&
@@ -179,9 +190,156 @@ PusherMessageTransport.prototype.start = function(_pusher) {
    }, this);
 };
 
+PusherMessageTransport.prototype.isFragmentEnvelope = function(_data) {
+   return _data &&
+          (_data.__casaPusherFragment === true) &&
+          (typeof _data.fragmentId === "string") &&
+          (typeof _data.fragmentIndex === "number") &&
+          (typeof _data.fragmentCount === "number") &&
+          (typeof _data.fragmentData === "string");
+};
+
+PusherMessageTransport.prototype.makeFragmentEnvelope = function(_fragmentId, _fragmentIndex, _fragmentCount, _fragmentData) {
+   return {
+      __casaPusherFragment: true,
+      fragmentId: _fragmentId,
+      fragmentIndex: _fragmentIndex,
+      fragmentCount: _fragmentCount,
+      fragmentData: _fragmentData
+   };
+};
+
+PusherMessageTransport.prototype.serializedSize = function(_payload) {
+   return Buffer.byteLength(JSON.stringify(_payload), "utf8");
+};
+
+PusherMessageTransport.prototype.clearPendingMessage = function(_fragmentId) {
+
+   if (this.pendingMessages.hasOwnProperty(_fragmentId)) {
+      clearTimeout(this.pendingMessages[_fragmentId].timeout);
+      delete this.pendingMessages[_fragmentId];
+   }
+};
+
+PusherMessageTransport.prototype.processIncomingMessage = function(_data) {
+
+   if (!this.isFragmentEnvelope(_data)) {
+      return _data;
+   }
+
+   if ((_data.fragmentCount < 1) ||
+       (_data.fragmentCount > this.maxFragmentCount) ||
+       (_data.fragmentIndex < 0) ||
+       (_data.fragmentIndex >= _data.fragmentCount)) {
+      console.error(this.owner.uName + ": Ignoring malformed fragmented pusher message");
+      return null;
+   }
+
+   if (!this.pendingMessages.hasOwnProperty(_data.fragmentId)) {
+      this.pendingMessages[_data.fragmentId] = {
+         fragmentCount: _data.fragmentCount,
+         fragments: new Array(_data.fragmentCount),
+         received: {},
+         receivedCount: 0,
+         timeout: setTimeout( (_fragmentId) => {
+            console.error(this.owner.uName + ": Timed out waiting for fragmented pusher message " + _fragmentId);
+            this.clearPendingMessage(_fragmentId);
+         }, this.pendingMessageTimeoutMs, _data.fragmentId)
+      };
+   }
+
+   var pending = this.pendingMessages[_data.fragmentId];
+
+   if (pending.fragmentCount !== _data.fragmentCount) {
+      console.error(this.owner.uName + ": Ignoring inconsistent fragmented pusher message " + _data.fragmentId);
+      this.clearPendingMessage(_data.fragmentId);
+      return null;
+   }
+
+   pending.fragments[_data.fragmentIndex] = _data.fragmentData;
+
+   if (!pending.received[_data.fragmentIndex]) {
+      pending.received[_data.fragmentIndex] = true;
+      pending.receivedCount = pending.receivedCount + 1;
+   }
+
+   if (pending.receivedCount < pending.fragmentCount) {
+      return null;
+   }
+
+   var combined = pending.fragments.join("");
+   this.clearPendingMessage(_data.fragmentId);
+
+   try {
+      return JSON.parse(combined);
+   }
+   catch (_error) {
+      console.error(this.owner.uName + ": Unable to parse reconstructed fragmented pusher message", _error);
+      return null;
+   }
+};
+
+PusherMessageTransport.prototype.splitPayload = function(_serializedPayload, _fragmentId) {
+   var fragments = [];
+   var start = 0;
+
+   while (start < _serializedPayload.length) {
+      var low = start + 1;
+      var high = _serializedPayload.length;
+      var bestEnd = start;
+
+      while (low <= high) {
+         var mid = Math.floor((low + high) / 2);
+         var candidate = _serializedPayload.slice(start, mid);
+         var envelope = this.makeFragmentEnvelope(_fragmentId, fragments.length, this.maxFragmentCount, candidate);
+
+         if (this.serializedSize(envelope) <= this.maxPayloadBytes) {
+            bestEnd = mid;
+            low = mid + 1;
+         }
+         else {
+            high = mid - 1;
+         }
+      }
+
+      if (bestEnd === start) {
+         return null;
+      }
+
+      fragments.push(_serializedPayload.slice(start, bestEnd));
+
+      if (fragments.length > this.maxFragmentCount) {
+         return null;
+      }
+
+      start = bestEnd;
+   }
+
+   return fragments;
+};
+
 PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
    _data.message = _message;
-   this.owner.sendMessage("message-channel_" + _data.destAddress.replace(/:/g, ""), "message", _data);
+
+   var channel = "message-channel_" + _data.destAddress.replace(/:/g, "");
+
+   if (this.serializedSize(_data) <= this.maxPayloadBytes) {
+      this.owner.sendMessage(channel, "message", _data);
+      return;
+   }
+
+   var fragmentId = (_data.id ? _data.id : "fragment") + ":" + Date.now() + ":" + this.nextFragmentId++;
+   var fragments = this.splitPayload(JSON.stringify(_data), fragmentId);
+
+   if (!fragments) {
+      console.error(this.owner.uName + ": Unable to split oversized pusher message " + fragmentId);
+      return;
+   }
+
+   // Keep fragmentation hidden inside the bearer so higher-level socket code sees the original envelope.
+   for (var i = 0; i < fragments.length; ++i) {
+      this.owner.sendMessage(channel, "message", this.makeFragmentEnvelope(fragmentId, i, fragments.length, fragments[i]));
+   }
 };
 
 function PusherDiscoveryTransport(_owner, _name, _casaDiscoveryService, _messageTransportName, _tier) {
@@ -257,3 +415,6 @@ PusherDiscoveryTransport.prototype.stopBroadcasting = function() {
 };
 
 module.exports = exports = PusherService;
+module.exports.__testExports = {
+   PusherMessageTransport: PusherMessageTransport
+};
