@@ -10,26 +10,6 @@ function Source(_config, _owner) {
    this.controllerPriority = -1;
    this.controller = null;
 
-   /*if (_config.hasOwnProperty("subscription")) {
-      _config.subscriptions = [ _config.subscription ];
-   }
-
-   if (_config.hasOwnProperty("subscriptions")) {
-
-      for (var i = 0; i < _config.subscriptions.length; ++i) {
-         var subscriptionUName = this.gang.validateUName(_config.subscriptions[i].uName);
-
-         if (typeof subscriptionUName !== "string") {
-            throw new Error(this.uName + ": Invalid subscription uName: " + subscriptionUName);
-         }
-
-         var modeSourceName = subscriptionUName.startsWith(":") ? subscriptionUName.substr(1) : subscriptionUName;
-
-         this.ensurePropertyExists(modeSourceName.replace(/:/g, "-")+"-MODE", "property",
-                                   { source: { uName: subscriptionUName, property: "MODE", subscription: _config.subscriptions[i].subscription }}, _config);
-      }
-   }*/
-
    if (_config.hasOwnProperty("mirrorSource")) {
       this.mirroring = true;
       var SourceListener = require('./sourcelistener');
@@ -96,7 +76,8 @@ Source.prototype.createModeProperty = function(_config) {
          this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, ignoreChildren: false, propagateToParent: true,
                                                                                            propagateToChildren: true, initialValue: timeout }, _config);
 
-         modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" }, nextState: "auto" };
+         modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" },
+                                                                     action: { property: mode.name.toUpperCase()+"-MODE-DURATION", value: -1 }, nextState: "auto" };
 
          if (mode.hasOwnProperty("action")) {
             mode.actions = [ mode.action ];
