@@ -97,11 +97,51 @@ Thing.prototype.hotStart = function() {
    Source.prototype.hotStart.call(this);
 };
 
+// Used to iterate throught the tree.
+// _context - obejct used across the tree (e.g. to export to or import from)
+// _filterObjFunc - used to decide if object should be processed
+// _processObjFunc - procees function to apply if filter object allows
+Thing.prototype.iterateThingTree = function(_context, _filterObjFunc, _processObjFunc) {
+
+   if (_filterObjFunc && !_filterObjFunc.call(this, this, this.owner)) {
+      return false;
+   }
+
+   if (_processObjFunc) {
+
+      if (_processObjFunc.call(this, _context, this, this.owner)) {
+         return true;
+      }
+   }
+
+   for (var obj in this.things) {
+
+      if (this.things.hasOwnProperty(obj)) {
+         var ret = this.things[obj].iterate(_context ? _context.things[obj] : null, _filterObjFunc, _processObjFunc, _createChildren);
+      }
+   }
+
+   return true;
+};
+
 Thing.prototype.createModeProperty = function(_config) {
 
    if (this.topLevelThing) {
       Source.prototype.createModeProperty.call(this, _config);
    }
+};
+
+Thing.prototype.removeInheritedProperties = function() {
+
+   this.iterateThingTree(null, null, (_obj, _owner) => {
+
+      for (var prop in _obj.properties) {
+
+         if (_obj.properties.hasOwnProperty(prop) && (_obj.config.childInherited || _obj.config.parentInherited)) {
+            delete _obj.properties[prop];
+         }
+      }
+   });
 };
 
 Thing.prototype.sortOutInheritedProperties = function() {
