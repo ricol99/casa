@@ -20,7 +20,12 @@ function Source(_config, _owner) {
    this.createChildren(_config.events, "event", this);
 
    if (!this.properties.hasOwnProperty("MODE")) {
-      this.createModeProperty(_config);
+      var modes = [{ name: "manual", triggerOnDurationChange: true, priority: 100, timeout: _config.hasOwnProperty("manualOverrideTimeout") ? _config.manualOverrideTimeout : -1 }]; 
+
+      if (_config.hasOwnProperty("modes")) { 
+         modes.push.apply(modes, _config.modes)
+      };
+      this.ensurePropertyExists("MODE", "modeproperty", { restingMode: { name: "auto", priority: -100 }, modes: modes }, _config);
    }
    else {
       this.properties["MODE"].setPropagation({ ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true });
@@ -56,48 +61,6 @@ Source.prototype.coldStart = function() {
 
 Source.prototype.hotStart = function() {
    SourceBase.prototype.hotStart.call(this);
-};
-
-Source.prototype.createModeProperty = function(_config) {
-   var modeConfig = { initialValue: "auto", ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true,
-                      takeControlOnTransition: true, ignoreControl: true, globalPriority: true,
-                      states: [ { name: "auto", priority: -100, action: { property: "MANUAL-MODE-DURATION", value: -1 },
-                                  source: { property: "MANUAL-MODE-DURATION", guard: { property: "MANUAL-MODE-DURATION", value: -1, invert: true }, nextState: "manual" }},
-                                { name: "manual", priority: 100,
-                                  timeout: { source: { property: "MANUAL-MODE-DURATION" }, action: { property: "MANUAL-MODE-DURATION", value: -1 }, nextState: "auto" }}]};
-
-   if (_config.hasOwnProperty("modes")) {
-
-      for (var i = 0; i < _config.modes.length; ++i) {
-         let mode = _config.modes[i];
-         modeConfig.states.push({ name: mode.name, priority: mode.hasOwnProperty("priority") ? mode.priority : 100 });
-
-         let timeout = mode.hasOwnProperty("timeout") ? mode.timeout : -1;
-         this.ensurePropertyExists(mode.name.toUpperCase()+"-MODE-DURATION", "property", { ignoreParent: false, ignoreChildren: false, propagateToParent: true,
-                                                                                           propagateToChildren: true, initialValue: timeout }, _config);
-
-         modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: mode.name.toUpperCase()+"-MODE-DURATION" },
-                                                                     action: { property: mode.name.toUpperCase()+"-MODE-DURATION", value: -1 }, nextState: "auto" };
-
-         if (mode.hasOwnProperty("action")) {
-            mode.actions = [ mode.action ];
-         }
-
-         if (mode.hasOwnProperty("actions")) {
-            modeConfig.states[modeConfig.states.length - 1].actions = mode.actions;
-         }
-      }
-   }
-
-   if (_config.hasOwnProperty("modeSource")) {
-      modeConfig.source = _config.modeSource;
-   }
-
-   this.ensurePropertyExists("MANUAL-MODE-DURATION", "property",
-                            { ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true,
-                              initialValue: _config.hasOwnProperty('manualOverrideTimeout') ? _config.manualOverrideTimeout : -1 }, _config);
-
-   this.ensurePropertyExists("MODE", "stateproperty", modeConfig, _config);
 };
 
 Source.prototype.refreshSourceListeners  = function() {
