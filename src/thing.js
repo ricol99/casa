@@ -117,7 +117,7 @@ Thing.prototype.iterateThingTree = function(_context, _filterObjFunc, _processOb
    for (var obj in this.things) {
 
       if (this.things.hasOwnProperty(obj)) {
-         var ret = this.things[obj].iterateThingTree(_context ? _context.things[obj] : null, _filterObjFunc, _processObjFunc, _createChildren);
+         var ret = this.things[obj].iterateThingTree(_context, _filterObjFunc, _processObjFunc);
       }
    }
 
