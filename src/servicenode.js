@@ -70,16 +70,16 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
 
    if (_subscription.hasOwnProperty("serviceProperty")) {
       sub.properties[_subscription.serviceProperty] = _subscription.hasOwnProperty("subscriberProperty") ? _subscription.subscriberProperty : _subscription.serviceProperty;
-      this.createProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub);
+      this.createServiceProperty(_subscription.serviceProperty, _subscription.subscriberProperty, sub);
    }
    else if (_subscription.hasOwnProperty("serviceEvent")) {
       sub.events[_subscription.serviceEvent] = _subscription.hasOwnProperty("subscriberEvent") ? _subscription.subscriberEvent : _subscription.serviceEvent;
-      this.createEvent(_subscription.serviceEvent, _subscription.subscriberEvent, sub);
+      this.createServiceEvent(_subscription.serviceEvent, _subscription.subscriberEvent, sub);
    }
    this.newSubscriptionAdded(sub);
 };
 
-ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub) {
+ServiceNode.prototype.createServiceProperty = function(_property, _subscriberProp, _sub) {
 
    if (this.properties.hasOwnProperty(_property)) {
 
@@ -101,7 +101,7 @@ ServiceNode.prototype.createProperty = function(_property, _subscriberProp, _sub
    }
 };
 
-ServiceNode.prototype.createEvent = function(_eventName, _subscriberEvent, _sub) {
+ServiceNode.prototype.createServiceEvent = function(_eventName, _subscriberEvent, _sub) {
 
    if (this.events.hasOwnProperty(_eventName)) {
 
