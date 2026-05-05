@@ -95,6 +95,10 @@ function Room(_config, _parent) {
    this.ensurePropertyExists(modeSourceName.replace(/:/g, "-")+"-MODE", "property",
                              { source: { uName: this.buildingName, property: "MODE", subscription: { roomType: this.roomType, roomUsers: roomUsers } }}, _config);
 
+   this.ensurePropertyExists("BUILDING-SCENE", "stateproperty",
+                             { source: { uName: this.buildingName, property: "SCENE" },
+                               ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true }, _config);
+
    this.ensurePropertyExists("building-name", "property", { initialValue: this.buildingName }, _config);
    this.ensurePropertyExists("low-light", "property", { source: { uName: this.buildingName, property: "low-light" }}, _config);
    this.ensurePropertyExists("night-time", "property", { source: { uName: this.buildingName, property: "night-time" }}, _config);
