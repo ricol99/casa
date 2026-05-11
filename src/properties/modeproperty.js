@@ -40,7 +40,7 @@ function ModeProperty(_config, _owner) {
       modeConfig.states[0].sources.push({ property: "actives-valid", value: false, nextState: "invalid" });
    }
 
-   if (_config.hasOwnProperty("modes")) {
+   if (_config.hasOwnProperty("modes") && _config.modes) {
 
       for (var i = 0; i < _config.modes.length; ++i) {
          let mode = _config.modes[i];
@@ -87,7 +87,7 @@ function ModeProperty(_config, _owner) {
 
    StateProperty.call(this, modeConfig, _owner);
 
-   if (_config.hasOwnProperty("modes")) {
+   if (_config.hasOwnProperty("modes") && _config.modes) {
       var counterConfig = { name: "actives-positive-count", type: "counterproperty", local: true, initialValue: 0, countPositives: true, sources: []};
 
       for (var z = 0; z < _config.modes.length; ++z) {
