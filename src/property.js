@@ -4,6 +4,7 @@ var NamedObject = require('./namedobject');
 
 function Property(_config, _owner) {
    NamedObject.call(this, _config, _owner);
+   console.log(this.uName + ": Creating property: " + this.name);
 
    this.owner = _owner;
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;

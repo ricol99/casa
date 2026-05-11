@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function CounterProperty(_config, _owner) {
    Property.call(this, _config, _owner);
+   this.countPositives = _config.hasOwnProperty("countPositives") ? _config.countPositives : false;
 }
 
 util.inherits(CounterProperty, Property);
@@ -29,7 +30,8 @@ CounterProperty.prototype.newEventReceivedFromSource = function(_sourceListener,
 
    if (!_data.coldStart) {
       console.log(this.uName + ": new event from source, stepping counter");
-      this.updatePropertyInternal(this.value+1, _data);
+      let newVal = this.countPositives ? (_data.value ? this.value+1 : this.value-1) : this.value+1
+      this.updatePropertyInternal(newVal, _data);
    }
 }
 

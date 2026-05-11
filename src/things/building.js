@@ -51,12 +51,15 @@ function Building(_config, _parent) {
 
    this.ensureEventExists("check-empty-house-night-time-event", "event", {}, _config);
 
-   var scenes = [{ name: "none", triggerOnDurationChange: true, priority: 100, timeout: _config.hasOwnProperty("manualOverrideTimeout") ? _config.manualOverrideTimeout : -1 }];
+   //var scenes = [{ name: "none", triggerOnDurationChange: true, priority: 100, timeout: _config.hasOwnProperty("manualOverrideTimeout") ? _config.manualOverrideTimeout : -1 }];
+
+   //if (_config.hasOwnProperty("scenes")) {
+      //scenes.push.apply(scenes, _config.scenes)
+   //};
 
    if (_config.hasOwnProperty("scenes")) {
-      scenes.push.apply(scenes, _config.scenes)
-   };
-   this.ensurePropertyExists("SCENE", "modeproperty", { restingMode: { name: "none", priority: -100 }, modes: scenes }, _config);
+      this.ensurePropertyExists("SCENE", "modeproperty", { modeName: "SCENE", requiresActives: true, restingMode: { name: "none", priority: -100 }, modes: _config.scenes }, _config);
+   }
 
    for (var i = 0; i < this.users.length; ++i) {
       this.userStateConfigs.push({});

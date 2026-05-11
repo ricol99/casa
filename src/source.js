@@ -25,6 +25,7 @@ function Source(_config, _owner) {
       if (_config.hasOwnProperty("modes")) { 
          modes.push.apply(modes, _config.modes)
       };
+
       this.ensurePropertyExists("MODE", "modeproperty", { restingMode: { name: "auto", priority: -100 }, modes: modes }, _config);
    }
    else {
