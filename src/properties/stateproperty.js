@@ -284,6 +284,7 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
 };
 
 StateProperty.prototype.matchState = function(_stateName) {
+   var state = null;
 
    if (this.states.hasOwnProperty(_stateName)) {
       return this.states[_stateName];
@@ -375,14 +376,9 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
          }
       }
       else {
-
-         if (_parentPropertyPriorityDefined) {
-            console.log(this.uName + ": State " + _nextStateName + " is not defined. Using parent priority");
-            this.takeControl(_parentPropertyPriority);
-         }
-         else {
-            console.log(this.uName + ": State " + _nextStateName + " is not defined. No parent priority defined - doing nothng.");
-         }
+         console.log(this.uName + ": State " + _nextStateName + " is not defined. Using parent priority or zero if not defined");
+         let priority = _parentPropertyPriorityDefined ? _parentPropertyPriority : 0;
+         this.takeControl(priority);
       }
    }
    else {
