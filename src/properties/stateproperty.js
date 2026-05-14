@@ -383,6 +383,11 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
    }
    else {
       console.log(this.uName + ": Not changing state as nextMatchedState= " + nextMatchedState.name + " is the same as the current matched state");
+
+      // if transition is DEFAULT to DEFAULT, check if we still have control because the parent may have the state defined and have a different priority
+      if (currentMatchedState && _parentPropertyPriorityDefined) {
+         this.takeControl(_parentPropertyPriority);
+      }
    }
 
    this.flushBufferedActionsInternal();
