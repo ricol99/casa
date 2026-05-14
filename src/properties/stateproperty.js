@@ -284,7 +284,7 @@ StateProperty.prototype.matchRegExState = function(_stateName) {
 };
 
 StateProperty.prototype.matchState = function(_stateName) {
-   var state = null;
+   var state = this.states["DEFAULT"];
 
    if (this.states.hasOwnProperty(_stateName)) {
       return this.states[_stateName];
@@ -312,7 +312,9 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
    var nextMatchedState = this.matchState(_nextStateName);
    var clearTimerResult = {};
 
-   if (currentMatchedState !== nextMatchedState) {
+   // if transition is DEFAULT to DEFAULT, make sure we restart the state and apply actions etc.
+   // The matched local state has not changed, but the parent-defined state/priority may have. (DEFAULT->DEFAULT) or (regex->regex).
+   if ((currentMatchedState !== nextMatchedState) || (nextMatchedState && (nextMatchedState === this.states["DEFAULT"]))) {
 
       if (currentMatchedState) {
 
@@ -384,8 +386,7 @@ StateProperty.prototype.setState = function(_previousStateName, _nextStateName, 
    else {
       console.log(this.uName + ": Not changing state as nextMatchedState= " + nextMatchedState.name + " is the same as the current matched state");
 
-      // if transition is DEFAULT to DEFAULT, check if we still have control because the parent may have the state defined and have a different priority
-      if (currentMatchedState && _parentPropertyPriorityDefined) {
+      if (!nextMatchedState && _parentPropertyPriorityDefined) {
          this.takeControl(_parentPropertyPriority);
       }
    }
