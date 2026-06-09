@@ -7,6 +7,11 @@ var Thing = require('../thing');
 //   or pumpTimeouts - object of timeouts for sump-level-state { empty, low, mid, high, full } (default 60 for all)
 // *maxRetries - number of retries before entering failure (default 2)
 // *retryTimeout - How many secondss to wait until retry occurs (default 10)
+// *assessmentDuration - seconds between level checks (default 5)
+// *assessmentThreshold - minimum level drop required to consider the pump healthy. Lower values are less sensitive. (default 3)
+// *assessmentAveragePeriods - number of assessment periods to include in the rolling average (default 3)
+// *assessmentUseAverage - evaluate pump health from the rolling average instead of the raw single-sample drop (default false)
+// *watchDogPrimingDuration - how long to wait before the watchdog starts evaluating pump health (default assessmentDuration + 1)
 
 // Properties to define
 // level - actual sump level
@@ -47,6 +52,9 @@ function SumpPump(_config, _parent) {
 
    this.assessmentDuration = _config.hasOwnProperty("assessmentDuration") ? _config.assessmentDuration : 5;
    this.assessmentThreshold = _config.hasOwnProperty("assessmentThreshold") ? _config.assessmentThreshold : 3;
+   this.assessmentUseAverage = _config.hasOwnProperty("assessmentUseAverage") && (_config.assessmentUseAverage === true);
+   this.assessmentAveragePeriods = _config.hasOwnProperty("assessmentAveragePeriods") ? _config.assessmentAveragePeriods : 3;
+   this.watchDogPrimingDuration = _config.hasOwnProperty("watchDogPrimingDuration") ? _config.watchDogPrimingDuration : (this.assessmentDuration + 1);
 
    this.ensurePropertyExists('max-retries', 'property', { local: true, initialValue: _config.hasOwnProperty("maxRetries") ? _config.maxRetries : 2 }, _config);
    this.ensurePropertyExists('retry-count', 'property', { local: true, initialValue: 0 }, _config);
@@ -56,8 +64,19 @@ function SumpPump(_config, _parent) {
    this.ensurePropertyExists('sump-level', 'quantiseproperty', { quanta: _config.levels, source: { property: "level"} }, _config);
    this.ensurePropertyExists('delayed-level', 'delayproperty', { local: true, delay: this.assessmentDuration, source: { property: "level"} }, _config);
    this.ensurePropertyExists('assessed-level-difference', 'evalproperty', { local: true, expression: "$values[1] - $values[0]", sources: [{ property: "level"}, { property: "delayed-level" }] }, _config);
-   this.ensurePropertyExists('average-assessed-level-difference', 'rollingaverageproperty', { local: true, periods: 3, floorOutput: true, sources: [{ property: "assessed-level-difference"}] }, _config);
-   this.ensurePropertyExists('watch-dog-happy', 'evalproperty', { local: true, expression: "$values[0] > " + this.assessmentThreshold, sources: [{ property: "assessed-level-difference"}] }, _config);
+   this.ensurePropertyExists('average-assessed-level-difference', 'rollingaverageproperty',
+                             { local: true, periods: this.assessmentAveragePeriods, floorOutput: true, sources: [{ property: "assessed-level-difference"}] }, _config);
+
+   if (this.assessmentUseAverage) {
+      this.ensurePropertyExists('watch-dog-happy', 'evalproperty',
+                                { local: true, expression: "$values[0] > " + this.assessmentThreshold,
+                                  sources: [{ property: "average-assessed-level-difference"}] }, _config);
+   }
+   else {
+      this.ensurePropertyExists('watch-dog-happy', 'evalproperty',
+                                { local: true, expression: "$values[0] > " + this.assessmentThreshold,
+                                  sources: [{ property: "assessed-level-difference"}] }, _config);
+   }
 
    this.ensurePropertyExists('sump-level-state', 'stateproperty', { name: "sump-level-state", ignoreControl: true, takeControlOnTransition: true, type: "stateproperty", initialValue: "sump-empty",
                                                                     source: { property: "sump-level", transform: "\"sump-\" + $value" },
@@ -88,7 +107,7 @@ function SumpPump(_config, _parent) {
 
    this.ensurePropertyExists('pump-watch-dog', 'stateproperty', { name: "pump-watch-dog", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "not-active", 
                                                                        states: [{ name: "not-active", sources: [{ property: "pump-state", value: "pump-active", nextState: "priming" }] },
-                                                                                { name: "priming", timeout: { duration: this.assessmentDuration + 1, nextState: "active" },
+                                                                                { name: "priming", timeout: { duration: this.watchDogPrimingDuration, nextState: "active" },
                                                                                   sources: [{ property: "pump-state", value: "pump-idle", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-timed-out", nextState: "not-active"},
                                                                                             { property: "pump-state", value: "pump-failure", nextState: "not-active"}]},
