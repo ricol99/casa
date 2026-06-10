@@ -12,3 +12,7 @@ git clone git@github.com:abelectronicsuk/ABElectronics_NodeJS_Libraries.git
 # API docs
 # Console API contract for UI/MCP clients:
 # src/docs/console-api-contract.md
+# State machine philosophy note:
+# src/docs/state-machine-philosophy.md
+# State machine authoring guide:
+# src/docs/state-machine-guide.md
