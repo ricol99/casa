@@ -99,11 +99,13 @@ function Building(_config, _parent) {
                              { initialValue: "empty",
                                states: [ { name: "empty",
                                            sources: [{ property: "all-users-away", value: false, nextState: "occupied-awake" },
+                                                     { property: "bedtime-possible", value: true, nextState: "empty-night-time" },
                                                      { guard: { active: false, "property": "all-users-away", value: true }, event: "check-empty-house-night-time-event", nextState: "empty-night-time" }],
                                            schedule: { "name": "check-empty-house-night-time-event", "rules": [ "10 3 * * *" ]}},
 
                                          { name: "empty-night-time",
                                            sources: [{ property: "all-users-away", value: false, nextState: "empty"},
+                                                     { property: "bedtime-possible", value: false, nextState: "empty"},
                                                      { event: "wake-up-empty-house-event", nextState: "empty"},
                                                      { event: "user-arrived", nextState: "empty" }],
                                            schedule: { "name": "wake-up-empty-house-event", "rules": [ "50 7 * * *" ]}},
@@ -145,6 +147,9 @@ function Building(_config, _parent) {
    this.ensurePropertyExists("evening-possible", 'scheduleproperty',
                              { "events": _config.hasOwnProperty("eveningPossibleConfig") ? _config.eveningPossibleConfig
                                                                                        : [{ "rule": "00 5 * * *", "value": false}, { "rule": "00 19 * * *", "value": true }]}, _config);
+   this.ensurePropertyExists("bedtime-possible", 'scheduleproperty',
+                             { "events": _config.hasOwnProperty("bedtimePossibleConfig") ? _config.bedtimePossibleConfig
+                                                                                       : [{ "rule": "00 7 * * *", "value": false}, { "rule": "30 22 * * *", "value": true }]}, _config);
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
    this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
