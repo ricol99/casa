@@ -1091,6 +1091,14 @@ RemoteCasa.prototype.getAddress = function() {
    return this.address;
 };
 
+RemoteCasa.prototype.getHost = function() {
+   return this.address ? this.address.host : null;
+};
+
+RemoteCasa.prototype.getListeningPort = function() {
+   return this.address ? this.address.port : 0;
+};
+
 RemoteCasa.prototype.getDb = function() {
    return this.db;
 };

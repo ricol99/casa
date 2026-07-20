@@ -447,6 +447,11 @@ SourceBase.prototype.changeName = function(_newName) {
 
 // Called by peerSource to check for overriding
 SourceBase.prototype.deferToPeer = function(_newSource) {
+   if (this.local && _newSource && (_newSource.fromPeer || _newSource.type === "peersource")) {
+      console.error(this.uName + ": Local source cannot override global shared source. Bowing local source regardless of priority. localPriority=" + this.priority + ", sharedPriority=" + ((_newSource.priority !== undefined) ? _newSource.priority : "unknown"));
+      return true;
+   }
+
    return (_newSource.priority > this.priority);
 };
 
