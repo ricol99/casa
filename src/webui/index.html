@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="/webui/styles.css">
 </head>
 <body>
-  <main class="webui-shell">
+  <main class="webui-shell" data-active-tab="topology">
     <header class="webui-header">
       <div class="webui-header-main">
-        <p class="webui-kicker">Runtime Hosted</p>
-        <h1>Casa Web UI</h1>
+        <p class="webui-kicker" id="webui-context-label">Gang Collective</p>
+        <h1 id="webui-page-title">Global Things</h1>
       </div>
-      <section class="webui-panel webui-header-casas">
+      <section class="webui-panel webui-header-casas webui-casa-context-panel">
         <div class="webui-panel-header">
           <h2>Connected Casas</h2>
           <div class="webui-selected-casa">
@@ -31,7 +31,7 @@
       <div class="webui-tabs" role="tablist" aria-label="Runtime views">
         <div class="webui-tab-group">
           <span class="webui-tab-group-label">Gang</span>
-          <button type="button" class="webui-tab is-active" data-tab="topology" role="tab" aria-selected="true">Topology</button>
+          <button type="button" class="webui-tab is-active" data-tab="topology" role="tab" aria-selected="true">Global</button>
         </div>
         <div class="webui-tab-group">
           <span class="webui-tab-group-label">Casa</span>
@@ -44,34 +44,88 @@
 
     <section class="webui-panel webui-tab-panel" data-tab-panel="topology">
       <div class="webui-panel-header">
-        <h2>Topology</h2>
-        <button id="topology-refresh-button" type="button">Refresh Topology</button>
+        <h2>Collective Summary</h2>
+        <button id="topology-refresh-button" type="button">Refresh Global</button>
       </div>
-      <div class="webui-chip-row">
-        <span class="webui-chip" id="topology-gang">gang: -</span>
-        <span class="webui-chip" id="topology-local">local: -</span>
-        <span class="webui-chip" id="topology-connected-peers">connected peers: 0/0</span>
-        <span class="webui-chip" id="topology-local-bowed">local bowed: 0</span>
-        <span class="webui-chip" id="topology-peer-bowed">peer bowed: 0</span>
-        <span class="webui-chip" id="topology-total-bowed">total bowed: 0</span>
+      <div class="webui-summary-grid">
+        <section class="webui-summary-item webui-summary-item-primary">
+          <span class="webui-summary-label">Gang</span>
+          <strong id="topology-gang">-</strong>
+          <span id="topology-local">- casas</span>
+        </section>
+        <section class="webui-summary-item">
+          <span class="webui-summary-label">Reach</span>
+          <strong id="topology-connected-peers">0/0</strong>
+          <span id="topology-connectivity-label">waiting for runtime</span>
+        </section>
+        <section class="webui-summary-item">
+          <span class="webui-summary-label">Different Views</span>
+          <strong id="topology-agreement">-</strong>
+          <span id="topology-agreement-label">waiting for standing</span>
+        </section>
+        <section class="webui-summary-item">
+          <span class="webui-summary-label">Bowing Pressure</span>
+          <strong id="topology-total-bowed">0</strong>
+          <span id="topology-bowing-label">owned 0 / peer 0</span>
+        </section>
+        <section class="webui-summary-item">
+          <span class="webui-summary-label">Local-Only Config</span>
+          <strong id="topology-local-private">0</strong>
+          <span id="topology-private-label">private sources</span>
+        </section>
       </div>
-      <div class="webui-table-wrap">
+      <div class="webui-explorer-layout webui-global-layout">
+        <section class="webui-explorer-list">
+          <div class="webui-table-wrap">
+            <table class="webui-table">
+              <caption>Global Things</caption>
+              <thead>
+                <tr>
+                  <th>Thing</th>
+                  <th>Type</th>
+                  <th>Active Owner</th>
+                  <th>Bowed Owners</th>
+                  <th>Seen By</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="global-things-body">
+                <tr>
+                  <td colspan="6" class="webui-empty-cell">No global things loaded yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <aside class="webui-explorer-detail webui-global-detail">
+          <div class="webui-detail-header">
+            <span class="webui-summary-label">Global Inspector</span>
+            <h3 id="global-detail-heading">Thing detail</h3>
+            <p id="global-selected-thing">-</p>
+          </div>
+          <div class="webui-chip-row" id="global-detail-summary">
+            <span class="webui-chip">uName: -</span>
+          </div>
+          <div id="global-detail-body">
+            <div class="webui-empty">Select a global thing to inspect.</div>
+          </div>
+        </aside>
+      </div>
+      <div class="webui-table-wrap webui-conflicts-wrap">
         <table class="webui-table">
+          <caption>Conflicts</caption>
           <thead>
             <tr>
-              <th>casa</th>
-              <th>active</th>
-              <th>owned</th>
-              <th>owned active</th>
-              <th>owned bowed</th>
-              <th>peer active</th>
-              <th>peer bowed</th>
-              <th>private</th>
+              <th>Thing</th>
+              <th>Reason</th>
+              <th>Active Owners</th>
+              <th>Bowed Owners</th>
+              <th>Missing From</th>
             </tr>
           </thead>
-          <tbody id="topology-body">
+          <tbody id="global-conflicts-body">
             <tr>
-              <td colspan="8" class="webui-empty-cell">No topology loaded yet.</td>
+              <td colspan="5" class="webui-empty-cell">No conflicts loaded yet.</td>
             </tr>
           </tbody>
         </table>
@@ -94,13 +148,13 @@
         </label>
         <label class="webui-form-grid-wide">
           <span>Search</span>
-          <input id="sources-search" type="text" placeholder="uName / owner / type">
+          <input id="sources-search" type="text" placeholder="uName / type">
         </label>
       </div>
       <div class="webui-chip-row">
         <span class="webui-chip" id="sources-active-count">active: 0</span>
-        <span class="webui-chip" id="sources-owned-active-count">owned active: 0</span>
-        <span class="webui-chip" id="sources-peer-active-count">peer active: 0</span>
+        <span class="webui-chip" id="sources-owned-active-count">global: 0</span>
+        <span class="webui-chip" id="sources-peer-active-count">local: 0</span>
       </div>
       <div class="webui-sources-layout">
         <div class="webui-sources-list">
@@ -109,14 +163,13 @@
               <thead>
                 <tr>
                   <th>sourceUName</th>
-                  <th>owner</th>
                   <th>type</th>
                   <th>priority</th>
                 </tr>
               </thead>
               <tbody id="sources-body">
                 <tr>
-                  <td colspan="4" class="webui-empty-cell">No active sources loaded yet.</td>
+                  <td colspan="3" class="webui-empty-cell">No active sources loaded yet.</td>
                 </tr>
               </tbody>
             </table>

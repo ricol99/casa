@@ -1,4 +1,7 @@
 (function () {
+  var shellEl = document.querySelector('.webui-shell');
+  var contextLabelEl = document.getElementById('webui-context-label');
+  var pageTitleEl = document.getElementById('webui-page-title');
   var socketStatusEl = document.getElementById('socket-status');
   var selectedCasaLabelEl = document.getElementById('selected-casa-label');
   var casaListEl = document.getElementById('casa-list');
@@ -14,10 +17,19 @@
   var topologyGangEl = document.getElementById('topology-gang');
   var topologyLocalEl = document.getElementById('topology-local');
   var topologyConnectedPeersEl = document.getElementById('topology-connected-peers');
-  var topologyLocalBowedEl = document.getElementById('topology-local-bowed');
-  var topologyPeerBowedEl = document.getElementById('topology-peer-bowed');
+  var topologyConnectivityLabelEl = document.getElementById('topology-connectivity-label');
+  var topologyAgreementEl = document.getElementById('topology-agreement');
+  var topologyAgreementLabelEl = document.getElementById('topology-agreement-label');
   var topologyTotalBowedEl = document.getElementById('topology-total-bowed');
-  var topologyBodyEl = document.getElementById('topology-body');
+  var topologyBowingLabelEl = document.getElementById('topology-bowing-label');
+  var topologyLocalPrivateEl = document.getElementById('topology-local-private');
+  var topologyPrivateLabelEl = document.getElementById('topology-private-label');
+  var globalThingsBodyEl = document.getElementById('global-things-body');
+  var globalConflictsBodyEl = document.getElementById('global-conflicts-body');
+  var globalDetailHeadingEl = document.getElementById('global-detail-heading');
+  var globalSelectedThingEl = document.getElementById('global-selected-thing');
+  var globalDetailSummaryEl = document.getElementById('global-detail-summary');
+  var globalDetailBodyEl = document.getElementById('global-detail-body');
   var sourcesRefreshButton = document.getElementById('sources-refresh-button');
   var sourcesPrefixEl = document.getElementById('sources-prefix');
   var sourcesTypeEl = document.getElementById('sources-type');
@@ -35,10 +47,14 @@
   var designerSelectedThingEl = document.getElementById('designer-selected-thing');
   var designerSummaryEl = document.getElementById('designer-summary');
   var designerDetailEl = document.getElementById('designer-detail');
-  var latestTopology = null;
+  var latestWebUiStatus = null;
+  var latestGlobalThings = null;
+  var latestGlobalThingDetail = null;
+  var latestGlobalThingRuntime = null;
   var latestSourceTrees = null;
   var latestConfiguredTree = null;
   var latestThingNodes = [];
+  var selectedGlobalThingUName = '';
   var selectedActiveSourceUName = '';
   var selectedThingUName = '';
   var expandedThingNodes = new Set();
@@ -60,6 +76,21 @@
 
   function setActiveTab(tabName) {
     activeTab = tabName;
+
+    if (shellEl) {
+      shellEl.setAttribute('data-active-tab', tabName);
+    }
+
+    if (contextLabelEl && pageTitleEl) {
+      if (tabName === 'topology') {
+        contextLabelEl.textContent = 'Gang Collective';
+        pageTitleEl.textContent = 'Global Things';
+      }
+      else {
+        contextLabelEl.textContent = 'Casa Context';
+        pageTitleEl.textContent = 'Casa Detail';
+      }
+    }
 
     tabButtons.forEach(function (button) {
       var isActive = button.getAttribute('data-tab') === tabName;
@@ -209,7 +240,28 @@
     renderConsolePrompt();
   }
 
+  function clearSourceFilters() {
+    sourcesPrefixEl.value = '';
+    sourcesTypeEl.value = '';
+    sourcesSearchEl.value = '';
+  }
+
+  function drillIntoCasaSource(casaName, sourceUName) {
+    if (!casaName || !sourceUName || !socket.connected) {
+      return;
+    }
+
+    clearSourceFilters();
+    selectedActiveSourceUName = sourceUName;
+    setActiveTab('sources');
+    setSelectedCasaLabel(casaName);
+    sourcesDetailEl.innerHTML = '<div class="webui-empty">Opening ' + escapeHtml(sourceUName) + ' on ' + escapeHtml(casaName) + '...</div>';
+    socket.emit('setSelectedCasa', { selectedCasa: casaName });
+  }
+
   function renderCasas(payload) {
+    latestWebUiStatus = payload || null;
+
     var casas = payload && payload.casas ? payload.casas : [];
     var selectedCasa = payload ? payload.selectedCasa : null;
 
@@ -788,23 +840,50 @@
       }
 
       return row.sourceUName.toLowerCase().includes(search) ||
-             row.ownerCasa.toLowerCase().includes(search) ||
              row.type.toLowerCase().includes(search);
     });
   }
 
+  function visibleSourceRows(rows) {
+    var casaName = latestSourceTrees && latestSourceTrees.casaName ? latestSourceTrees.casaName : currentSelectedCasa;
+
+    return rows.filter(function (row) {
+      return row.isPrivate || row.ownerCasa === casaName;
+    });
+  }
+
+  function sourceRowMarkup(row) {
+    return '<tr class="' + (row.isPrivate ? 'webui-table-row-private ' : '') + (row.sourceUName === selectedActiveSourceUName ? 'webui-table-row-selected' : '') + '" data-source-u-name="' + escapeHtmlAttr(row.sourceUName) + '">' +
+      '<td>' + escapeHtml(row.sourceUName) + '</td>' +
+      '<td>' + escapeHtml(row.type) + '</td>' +
+      '<td>' + escapeHtml(row.priority) + '</td>' +
+    '</tr>';
+  }
+
+  function sourceSectionMarkup(label, rows, emptyLabel) {
+    return '<tr class="webui-table-section-row"><td colspan="3">' +
+        '<span class="webui-table-section-title">' + escapeHtml(label) + '</span>' +
+        '<span class="webui-table-section-count">' + rows.length + '</span>' +
+      '</td></tr>' +
+      (rows.length
+        ? rows.map(sourceRowMarkup).join('')
+        : '<tr class="webui-table-empty-row"><td colspan="3" class="webui-empty-cell">' + escapeHtml(emptyLabel) + '</td></tr>');
+  }
+
   function renderSources() {
-    var rows = filteredSourceRows(sourceRowsFromTrees(latestSourceTrees));
+    var rows = filteredSourceRows(visibleSourceRows(sourceRowsFromTrees(latestSourceTrees)));
+    var sharedRows = rows.filter(function (row) { return !row.isPrivate; });
+    var localRows = rows.filter(function (row) { return row.isPrivate; });
     var hasSelectedRow = rows.some(function (row) { return row.sourceUName === selectedActiveSourceUName; });
 
     sourcesActiveCountEl.textContent = 'active: ' + rows.length;
-    sourcesOwnedActiveCountEl.textContent = 'owned active: ' + rows.filter(function (row) { return row.providerType !== 'peercasa'; }).length;
-    sourcesPeerActiveCountEl.textContent = 'peer active: ' + rows.filter(function (row) { return row.providerType === 'peercasa'; }).length;
+    sourcesOwnedActiveCountEl.textContent = 'global: ' + sharedRows.length;
+    sourcesPeerActiveCountEl.textContent = 'local: ' + localRows.length;
 
     if (!rows.length) {
       selectedActiveSourceUName = '';
       renderSourceStateDetail(null);
-      sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">No matching active sources.</td></tr>';
+      sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">No matching active sources.</td></tr>';
       return;
     }
 
@@ -812,14 +891,9 @@
       selectedActiveSourceUName = rows[0].sourceUName;
     }
 
-    sourcesBodyEl.innerHTML = rows.map(function (row) {
-      return '<tr class="' + (row.isPrivate ? 'webui-table-row-private ' : '') + (row.sourceUName === selectedActiveSourceUName ? 'webui-table-row-selected' : '') + '" data-source-u-name="' + escapeHtmlAttr(row.sourceUName) + '">' +
-        '<td>' + row.sourceUName + '</td>' +
-        '<td>' + row.ownerCasa + '</td>' +
-        '<td>' + row.type + '</td>' +
-        '<td>' + row.priority + '</td>' +
-      '</tr>';
-    }).join('');
+    sourcesBodyEl.innerHTML =
+      sourceSectionMarkup('Global', sharedRows, 'No global active sources owned by this casa.') +
+      sourceSectionMarkup('Local', localRows, 'No local active sources.');
 
     Array.from(sourcesBodyEl.querySelectorAll('[data-source-u-name]')).forEach(function (rowEl) {
       rowEl.addEventListener('click', function () {
@@ -870,56 +944,489 @@
     });
   }
 
-  function getTopologyRowData(data, rowCasaName) {
-    if (!data || !rowCasaName) {
-      return null;
-    }
+  function formatList(values, emptyLabel) {
+    return values && values.length ? values.map(escapeHtml).join(', ') : emptyLabel;
+  }
 
-    var rows = data.rows ? data.rows : [];
-    return rows.find(function (row) {
-      return row.casaName === rowCasaName;
+  function chipMarkup(label, className) {
+    return '<span class="' + (className || 'webui-chip') + '">' + escapeHtml(label) + '</span>';
+  }
+
+  function findGlobalThing(uName) {
+    var things = latestGlobalThings && latestGlobalThings.things ? latestGlobalThings.things : [];
+
+    return things.find(function (thing) {
+      return thing.uName === uName;
     }) || null;
   }
 
-  function renderTopology() {
-    var data = latestTopology;
-    var rows = data && data.rows ? data.rows : [];
-    var connectedCasaCount = data && typeof data.connectedCasaCount === 'number' ? data.connectedCasaCount : 0;
-    var casaCount = data && typeof data.casaCount === 'number' ? data.casaCount : rows.length;
-    var ownedBowed = rows.reduce(function (count, row) {
-      return count + (typeof row.ownedBowed === 'number' ? row.ownedBowed : 0);
-    }, 0);
-    var peerBowed = rows.reduce(function (count, row) {
-      return count + (typeof row.peerBowed === 'number' ? row.peerBowed : 0);
-    }, 0);
-    var totalBowed = ownedBowed + peerBowed;
+  function activeOwnerLinkMarkup(casaName, sourceUName) {
+    if (!casaName || casaName === '-' || !sourceUName) {
+      return escapeHtml(casaName || '-');
+    }
 
-    topologyGangEl.textContent = 'gang: ' + (data && data.gangName ? data.gangName : '-');
-    topologyLocalEl.textContent = 'casas: ' + casaCount;
-    topologyConnectedPeersEl.textContent = 'connected: ' + connectedCasaCount + '/' + casaCount;
-    topologyLocalBowedEl.textContent = 'owned bowed: ' + ownedBowed;
-    topologyPeerBowedEl.textContent = 'peer bowed: ' + peerBowed;
-    topologyTotalBowedEl.textContent = 'total bowed: ' + totalBowed;
+    return '<button type="button" class="webui-inline-link" data-drilldown-casa="' + escapeHtmlAttr(casaName) + '" data-drilldown-source="' + escapeHtmlAttr(sourceUName) + '">' +
+      escapeHtml(casaName) +
+    '</button>';
+  }
 
-    if (!data) {
-      topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">No topology loaded yet.</td></tr>';
+  function bindDrilldownLinks(rootEl) {
+    Array.from(rootEl.querySelectorAll('[data-drilldown-casa][data-drilldown-source]')).forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        drillIntoCasaSource(button.getAttribute('data-drilldown-casa') || '', button.getAttribute('data-drilldown-source') || '');
+      });
+    });
+  }
+
+  function appendUnique(array, value) {
+    if (value !== undefined && value !== null && array.indexOf(value) === -1) {
+      array.push(value);
+    }
+  }
+
+  function sortNames(values) {
+    values.sort(function (a, b) {
+      return String(a).localeCompare(String(b));
+    });
+    return values;
+  }
+
+  function preferredGlobalType(rows, ownerCasa) {
+    var best = null;
+
+    rows.forEach(function (row) {
+      if (best) {
+        return;
+      }
+
+      if (row.state === 'active' && row.ownerCasa === ownerCasa && row.providerType === 'casa') {
+        best = row;
+      }
+    });
+
+    rows.forEach(function (row) {
+      if (!best && row.state === 'active') {
+        best = row;
+      }
+    });
+
+    return best ? best.type : '-';
+  }
+
+  function isGlobalThingExportNode(node) {
+    return node &&
+      node.uName &&
+      !node.local &&
+      (node.superType === 'thing' || node.type === 'peersource');
+  }
+
+  function isLocalThingExportNode(node) {
+    return node &&
+      node.uName &&
+      !!node.local &&
+      (node.superType === 'thing' || node.type === 'peersource');
+  }
+
+  function collectGlobalThingRows(node, state, viewCasaName, rows, origin) {
+    if (!node) {
       return;
     }
 
-    topologyBodyEl.innerHTML = rows.map(function (row) {
-      var rowClass = row.casaName === currentSelectedCasa ? ' class="webui-table-row-selected"' : '';
+    if (isGlobalThingExportNode(node)) {
+      rows.push({
+        uName: node.uName,
+        state: state,
+        viewCasaName: viewCasaName,
+        ownerCasa: node.ownerCasa ? node.ownerCasa : viewCasaName,
+        providerType: node.providerType ? node.providerType : 'casa',
+        type: node.type ? node.type : (node.superType ? node.superType : 'thing'),
+        priority: node.priority !== undefined ? node.priority : 0,
+        name: node.name || node.uName,
+        displayName: node.displayName || '',
+        origin: origin
+      });
+    }
 
-      return '<tr' + rowClass + '>' +
-        '<td>' + row.casaName + '</td>' +
-        '<td>' + row.active + '</td>' +
-        '<td>' + row.owned + '</td>' +
-        '<td>' + row.ownedActive + '</td>' +
-        '<td>' + row.ownedBowed + '</td>' +
-        '<td>' + row.peerActive + '</td>' +
-        '<td>' + row.peerBowed + '</td>' +
-        '<td>' + row.privateCount + '</td>' +
+    Object.keys(node.myNamedObjects || {}).forEach(function (childName) {
+      collectGlobalThingRows(node.myNamedObjects[childName], state, viewCasaName, rows, origin);
+    });
+  }
+
+  function countLocalThingExportNodes(node) {
+    var count = 0;
+
+    if (!node) {
+      return count;
+    }
+
+    if (isLocalThingExportNode(node)) {
+      count += 1;
+    }
+
+    Object.keys(node.myNamedObjects || {}).forEach(function (childName) {
+      count += countLocalThingExportNodes(node.myNamedObjects[childName]);
+    });
+
+    return count;
+  }
+
+  function mergeGlobalThings(casaNames, responses) {
+    var rows = [];
+    var connectedCasaCount = 0;
+    var localOnlyTotal = 0;
+
+    responses.forEach(function (response) {
+      if (!response.ok || !response.result) {
+        return;
+      }
+
+      connectedCasaCount += 1;
+      var sourceTrees = response.result;
+      var viewCasaName = sourceTrees.casaName || response.casaName || '-';
+
+      collectGlobalThingRows(sourceTrees.activeTree, 'active', viewCasaName, rows, 'activeTree');
+      collectGlobalThingRows(sourceTrees.localBowedTree, 'bowed', viewCasaName, rows, 'localBowedTree');
+
+      (sourceTrees.peerTrees || []).forEach(function (peerTree) {
+        collectGlobalThingRows(peerTree.tree, 'bowed', viewCasaName, rows, 'peerTree:' + peerTree.casaName);
+      });
+
+      localOnlyTotal += countLocalThingExportNodes(sourceTrees.activeTree) + countLocalThingExportNodes(sourceTrees.localBowedTree);
+    });
+
+    var byName = {};
+    rows.forEach(function (row) {
+      if (!byName[row.uName]) {
+        byName[row.uName] = [];
+      }
+
+      byName[row.uName].push(row);
+    });
+
+    var things = [];
+    var conflicts = [];
+
+    Object.keys(byName).sort(function (a, b) {
+      return a.localeCompare(b);
+    }).forEach(function (uName) {
+      var thingRows = byName[uName];
+      var activeOwners = [];
+      var bowedOwners = [];
+      var seenBy = [];
+
+      thingRows.forEach(function (row) {
+        appendUnique(seenBy, row.viewCasaName);
+
+        if (row.state === 'active') {
+          appendUnique(activeOwners, row.ownerCasa);
+        }
+        else if (row.state === 'bowed') {
+          appendUnique(bowedOwners, row.ownerCasa);
+        }
+      });
+
+      sortNames(activeOwners);
+      sortNames(bowedOwners);
+      sortNames(seenBy);
+
+      var missingFrom = casaNames.filter(function (casaName) {
+        return seenBy.indexOf(casaName) === -1;
+      });
+      var activeOwner = activeOwners.length === 1 ? activeOwners[0] : null;
+      var conflict = activeOwners.length !== 1 || missingFrom.length > 0;
+
+      var thing = {
+        uName: uName,
+        activeOwnerCasa: activeOwner,
+        activeOwners: activeOwners,
+        bowedOwners: bowedOwners,
+        seenBy: seenBy,
+        missingFrom: missingFrom,
+        type: preferredGlobalType(thingRows, activeOwner),
+        name: thingRows.length ? thingRows[0].name : uName,
+        displayName: thingRows.length ? thingRows[0].displayName : '',
+        priority: thingRows.length ? thingRows[0].priority : 0,
+        rows: thingRows,
+        conflict: conflict
+      };
+
+      things.push(thing);
+
+      if (conflict) {
+        conflicts.push({
+          uName: thing.uName,
+          reason: activeOwners.length !== 1 ? 'active-owner-conflict' : 'missing-from-casa',
+          activeOwners: activeOwners,
+          bowedOwners: bowedOwners,
+          seenBy: seenBy,
+          missingFrom: missingFrom
+        });
+      }
+    });
+
+    return {
+      gangName: latestWebUiStatus && latestWebUiStatus.gangName ? latestWebUiStatus.gangName : '-',
+      casaCount: casaNames.length,
+      connectedCasaCount: connectedCasaCount,
+      localOnlyTotal: localOnlyTotal,
+      globalThingCount: things.length,
+      conflictCount: conflicts.length,
+      things: things,
+      conflicts: conflicts
+    };
+  }
+
+  function renderGlobalThings() {
+    var data = latestGlobalThings;
+    var things = data && data.things ? data.things : [];
+    var conflicts = data && data.conflicts ? data.conflicts : [];
+    var connectedCasaCount = data && typeof data.connectedCasaCount === 'number' ? data.connectedCasaCount : 0;
+    var casaCount = data && typeof data.casaCount === 'number' ? data.casaCount : 0;
+    var localOnlyTotal = data && typeof data.localOnlyTotal === 'number' ? data.localOnlyTotal : 0;
+    var globalThingCount = data && typeof data.globalThingCount === 'number' ? data.globalThingCount : things.length;
+    var bowedThingCount = things.reduce(function (count, thing) {
+      return count + (thing.bowedOwners && thing.bowedOwners.length ? 1 : 0);
+    }, 0);
+    var disconnectedCasaCount = Math.max(0, casaCount - connectedCasaCount);
+
+    topologyGangEl.textContent = data && data.gangName ? data.gangName : '-';
+    topologyLocalEl.textContent = globalThingCount + (globalThingCount === 1 ? ' global thing' : ' global things');
+    topologyConnectedPeersEl.textContent = connectedCasaCount + '/' + casaCount;
+    topologyConnectivityLabelEl.textContent = disconnectedCasaCount === 0
+      ? 'all casas connected'
+      : disconnectedCasaCount + (disconnectedCasaCount === 1 ? ' casa unavailable' : ' casas unavailable');
+    topologyAgreementEl.textContent = conflicts.length === 0 ? 'Aligned' : conflicts.length;
+    topologyAgreementLabelEl.textContent = conflicts.length === 0
+      ? 'no different global views'
+      : 'global difference' + (conflicts.length === 1 ? ' needs' : 's need') + ' attention';
+    topologyTotalBowedEl.textContent = bowedThingCount;
+    topologyBowingLabelEl.textContent = bowedThingCount === 1 ? 'thing has bowed contenders' : 'things have bowed contenders';
+    topologyLocalPrivateEl.textContent = localOnlyTotal;
+    topologyPrivateLabelEl.textContent = localOnlyTotal === 1 ? 'private source' : 'private sources';
+
+    if (!data) {
+      selectedGlobalThingUName = '';
+      latestGlobalThingDetail = null;
+      latestGlobalThingRuntime = null;
+      globalThingsBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">No global things loaded yet.</td></tr>';
+      globalConflictsBodyEl.innerHTML = '<tr><td colspan="5" class="webui-empty-cell">No conflicts loaded yet.</td></tr>';
+      renderGlobalThingDetail();
+      return;
+    }
+
+    if (!things.length) {
+      selectedGlobalThingUName = '';
+      latestGlobalThingDetail = null;
+      latestGlobalThingRuntime = null;
+      globalThingsBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">No global things found.</td></tr>';
+      renderGlobalThingDetail();
+    }
+    else {
+      if (!selectedGlobalThingUName || !findGlobalThing(selectedGlobalThingUName)) {
+        selectedGlobalThingUName = things[0].uName;
+        latestGlobalThingDetail = null;
+        latestGlobalThingRuntime = null;
+      }
+
+      globalThingsBodyEl.innerHTML = things.map(function (thing) {
+        var statusClass = thing.conflict ? 'webui-state-pill webui-state-pill-warn' : 'webui-state-pill webui-state-pill-ok';
+        var statusLabel = thing.conflict ? 'conflict' : 'aligned';
+        var rowClass = thing.uName === selectedGlobalThingUName ? ' class="webui-table-row-selected"' : '';
+
+        return '<tr' + rowClass + ' data-global-thing-u-name="' + escapeHtmlAttr(thing.uName) + '">' +
+          '<td><strong>' + escapeHtml(thing.uName) + '</strong></td>' +
+          '<td>' + escapeHtml(thing.type || '-') + '</td>' +
+          '<td>' + (thing.activeOwnerCasa ? activeOwnerLinkMarkup(thing.activeOwnerCasa, thing.uName) : 'conflict') + '</td>' +
+          '<td>' + formatList(thing.bowedOwners, '-') + '</td>' +
+          '<td>' + (thing.seenBy ? thing.seenBy.length : 0) + '/' + casaCount + '</td>' +
+          '<td><span class="' + statusClass + '">' + statusLabel + '</span></td>' +
+        '</tr>';
+      }).join('');
+
+      Array.from(globalThingsBodyEl.querySelectorAll('[data-global-thing-u-name]')).forEach(function (row) {
+        row.addEventListener('click', function () {
+          selectedGlobalThingUName = row.getAttribute('data-global-thing-u-name') || '';
+          latestGlobalThingDetail = null;
+          latestGlobalThingRuntime = null;
+          renderGlobalThings();
+          requestDescribeGlobalThing();
+        });
+      });
+      bindDrilldownLinks(globalThingsBodyEl);
+
+      renderGlobalThingDetail();
+    }
+
+    if (!conflicts.length) {
+      globalConflictsBodyEl.innerHTML = '<tr><td colspan="5" class="webui-empty-cell">No global conflicts detected.</td></tr>';
+    }
+    else {
+      globalConflictsBodyEl.innerHTML = conflicts.map(function (conflict) {
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(conflict.uName) + '</strong></td>' +
+          '<td>' + escapeHtml(conflict.reason) + '</td>' +
+          '<td>' + formatList(conflict.activeOwners, '-') + '</td>' +
+          '<td>' + formatList(conflict.bowedOwners, '-') + '</td>' +
+          '<td>' + formatList(conflict.missingFrom, '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+  }
+
+  function propertyValueRows(properties) {
+    return (properties || []).map(function (entry) {
+      var separatorIndex = String(entry).indexOf('=');
+      var name = separatorIndex === -1 ? entry : String(entry).slice(0, separatorIndex);
+      var value = separatorIndex === -1 ? '' : String(entry).slice(separatorIndex + 1);
+
+      return '<tr>' +
+        '<td>' + escapeHtml(name) + '</td>' +
+        '<td>' + escapeHtml(value) + '</td>' +
       '</tr>';
     }).join('');
+  }
+
+  function simpleNameRows(values) {
+    return (values || []).map(function (value) {
+      return '<tr><td>' + escapeHtml(value) + '</td></tr>';
+    }).join('');
+  }
+
+  function renderGlobalRuntimeCard(runtime) {
+    if (!runtime) {
+      return '<section class="webui-designer-card"><h4>Values</h4><div class="webui-empty">Loading authoritative values...</div></section>';
+    }
+
+    var propertyRows = propertyValueRows(runtime.properties || []);
+    var eventRows = simpleNameRows(runtime.events || []);
+
+    return '<section class="webui-designer-card">' +
+      '<h4>Values</h4>' +
+      ((runtime.properties && runtime.properties.length)
+        ? '<div class="webui-table-wrap">' +
+            '<table class="webui-table webui-table-compact">' +
+              '<thead><tr><th>property</th><th>value</th></tr></thead>' +
+              '<tbody>' + propertyRows + '</tbody>' +
+            '</table>' +
+          '</div>'
+        : '<div class="webui-empty">no properties reported</div>') +
+      '</section>' +
+      '<section class="webui-designer-card">' +
+        '<h4>Events</h4>' +
+        ((runtime.events && runtime.events.length)
+          ? '<div class="webui-table-wrap">' +
+              '<table class="webui-table webui-table-compact">' +
+                '<thead><tr><th>event</th></tr></thead>' +
+                '<tbody>' + eventRows + '</tbody>' +
+              '</table>' +
+            '</div>'
+          : '<div class="webui-empty">none</div>') +
+      '</section>';
+  }
+
+  function renderGlobalStructureCard(detail) {
+    if (!detail || !detail.thing || !detail.thing.object) {
+      return '<section class="webui-designer-card"><h4>Structure</h4><div class="webui-empty">Loading active owner detail...</div></section>';
+    }
+
+    var children = detail.children || [];
+    var propertyCount = detail.properties ? detail.properties.length : 0;
+    var eventCount = detail.events ? detail.events.length : 0;
+    var childList = children.length
+      ? children.map(function (child) { return chipMarkup(child.object.uName); }).join('')
+      : '<div class="webui-empty">none</div>';
+
+    return '<section class="webui-designer-card">' +
+      '<h4>Structure</h4>' +
+      '<dl class="webui-designer-kv">' +
+        '<dt>display name</dt><dd>' + escapeHtml(detail.thing.object.displayName || '-') + '</dd>' +
+        '<dt>children</dt><dd>' + children.length + '</dd>' +
+        '<dt>properties</dt><dd>' + propertyCount + '</dd>' +
+        '<dt>events</dt><dd>' + eventCount + '</dd>' +
+        '<dt>thing priority</dt><dd>' + escapeHtml(detail.thing.priority === null ? '-' : detail.thing.priority) + '</dd>' +
+        '<dt>private</dt><dd>' + (detail.thing.local ? 'yes' : 'no') + '</dd>' +
+      '</dl>' +
+      '</section>' +
+      '<section class="webui-designer-card">' +
+        '<h4>Children</h4>' +
+        '<div class="webui-chip-row">' + childList + '</div>' +
+      '</section>' +
+      renderMemberTable('Configured Properties', detail.properties || []) +
+      renderMemberTable('Configured Events', detail.events || []);
+  }
+
+  function renderGlobalThingDetail() {
+    var thing = selectedGlobalThingUName ? findGlobalThing(selectedGlobalThingUName) : null;
+
+    if (!thing) {
+      globalDetailHeadingEl.textContent = 'Thing detail';
+      globalSelectedThingEl.textContent = '-';
+      globalDetailSummaryEl.innerHTML = chipMarkup('uName: -');
+      globalDetailBodyEl.innerHTML = '<div class="webui-empty">Select a global thing to inspect.</div>';
+      return;
+    }
+
+    var statusLabel = thing.conflict ? 'different view' : 'aligned';
+    var activeOwner = thing.activeOwnerCasa || '-';
+    var detailReady = !!(latestGlobalThingDetail || latestGlobalThingRuntime);
+    var canResolve = !!thing.activeOwnerCasa && !thing.conflict;
+
+    globalDetailHeadingEl.textContent = String(thing.type || 'thing').toUpperCase() + ' detail';
+    globalSelectedThingEl.textContent = thing.uName;
+    globalDetailSummaryEl.innerHTML = [
+      chipMarkup('uName: ' + thing.uName),
+      chipMarkup('type: ' + (thing.type || '-')),
+      chipMarkup('active owner: ' + activeOwner),
+      chipMarkup(statusLabel, thing.conflict ? 'webui-chip webui-chip-warn' : 'webui-chip')
+    ].join('');
+
+    var missingList = thing.missingFrom && thing.missingFrom.length
+      ? thing.missingFrom.map(function (name) { return chipMarkup(name, 'webui-chip webui-chip-warn'); }).join('')
+      : '<div class="webui-empty">none</div>';
+    var bowedList = thing.bowedOwners && thing.bowedOwners.length
+      ? thing.bowedOwners.map(function (name) { return chipMarkup(name); }).join('')
+      : '<div class="webui-empty">none</div>';
+    var seenList = thing.seenBy && thing.seenBy.length
+      ? thing.seenBy.map(function (name) { return chipMarkup(name); }).join('')
+      : '<div class="webui-empty">none</div>';
+
+    var body =
+      '<section class="webui-designer-card">' +
+        '<h4>Identity</h4>' +
+        '<dl class="webui-designer-kv">' +
+          '<dt>uName</dt><dd>' + escapeHtml(thing.uName) + '</dd>' +
+          '<dt>Name</dt><dd>' + escapeHtml(thing.name || '-') + '</dd>' +
+          '<dt>Display name</dt><dd>' + escapeHtml(thing.displayName || '-') + '</dd>' +
+          '<dt>Type</dt><dd>' + escapeHtml(thing.type || '-') + '</dd>' +
+        '</dl>' +
+      '</section>' +
+      '<section class="webui-designer-card">' +
+        '<h4>Standing</h4>' +
+        '<dl class="webui-designer-kv">' +
+          '<dt>Active owner</dt><dd>' + activeOwnerLinkMarkup(thing.activeOwnerCasa, thing.uName) + '</dd>' +
+          '<dt>Seen by</dt><dd>' + escapeHtml((thing.seenBy ? thing.seenBy.length : 0) + '/' + (latestGlobalThings ? latestGlobalThings.casaCount : 0)) + '</dd>' +
+          '<dt>Status</dt><dd>' + escapeHtml(statusLabel) + '</dd>' +
+        '</dl>' +
+        '<div class="webui-detail-subsection"><h5>Bowed owners</h5><div class="webui-chip-row">' + bowedList + '</div></div>' +
+        '<div class="webui-detail-subsection"><h5>Seen by Casas</h5><div class="webui-chip-row">' + seenList + '</div></div>' +
+        '<div class="webui-detail-subsection"><h5>Missing from Casas</h5><div class="webui-chip-row">' + missingList + '</div></div>' +
+      '</section>';
+
+    if (!canResolve) {
+      body += '<section class="webui-designer-card"><h4>Values</h4><div class="webui-empty">Authoritative values need one aligned active owner.</div></section>';
+    }
+    else if (!detailReady) {
+      body += '<section class="webui-designer-card"><h4>Values</h4><div class="webui-empty">Loading authoritative values from ' + escapeHtml(thing.activeOwnerCasa) + '...</div></section>';
+    }
+    else {
+      body += renderGlobalRuntimeCard(latestGlobalThingRuntime);
+      body += renderGlobalStructureCard(latestGlobalThingDetail);
+    }
+
+    globalDetailBodyEl.innerHTML = body;
+    bindDrilldownLinks(globalDetailBodyEl);
   }
 
   var socket = io('/webuiapi/io', {
@@ -937,14 +1444,14 @@
   function requestSourceTrees(callback) {
     if (!socket.connected) {
       renderSourceStateDetail(null);
-      sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
+      sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
       if (callback) {
         callback();
       }
       return;
     }
 
-    sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">Loading active sources...</td></tr>';
+    sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">Loading active sources...</td></tr>';
     sendCommand({
       obj: ':',
       method: 'sourceTrees',
@@ -954,7 +1461,7 @@
         latestSourceTrees = null;
         selectedActiveSourceUName = '';
         renderSourceStateDetail(null);
-        sourcesBodyEl.innerHTML = '<tr><td colspan="4" class="webui-empty-cell">' + payload.error + '</td></tr>';
+        sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">' + payload.error + '</td></tr>';
         if (callback) {
           callback();
         }
@@ -1055,31 +1562,115 @@
     });
   }
 
-  function requestTopology(callback) {
-    if (!socket.connected) {
-      topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
+  function requestDescribeGlobalThing(callback) {
+    var thing = selectedGlobalThingUName ? findGlobalThing(selectedGlobalThingUName) : null;
+
+    latestGlobalThingDetail = null;
+    latestGlobalThingRuntime = null;
+    renderGlobalThingDetail();
+
+    if (!socket.connected || !thing || !thing.activeOwnerCasa || thing.conflict) {
       if (callback) {
         callback();
       }
       return;
     }
 
-    topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">Loading topology...</td></tr>';
-    emitWithReply('getGangTopology', {}, function (payload) {
-      if (!payload.ok) {
-        latestTopology = null;
-        topologyBodyEl.innerHTML = '<tr><td colspan="8" class="webui-empty-cell">' + payload.error + '</td></tr>';
+    var requestedUName = thing.uName;
+
+    sendCommand({
+      targetCasa: thing.activeOwnerCasa,
+      obj: thing.uName,
+      method: 'describeSourceState',
+      arguments: []
+    }, function (payload) {
+      if (selectedGlobalThingUName === requestedUName && payload && payload.ok) {
+        latestGlobalThingRuntime = payload.result;
+        renderGlobalThingDetail();
+      }
+
+      sendCommand({
+        targetCasa: thing.activeOwnerCasa,
+        obj: thing.uName,
+        method: 'describeThing',
+        arguments: []
+      }, function (detailPayload) {
+        if (selectedGlobalThingUName === requestedUName && detailPayload && detailPayload.ok) {
+          latestGlobalThingDetail = detailPayload.result;
+          renderGlobalThingDetail();
+        }
+
         if (callback) {
           callback();
         }
-        return;
-      }
+      });
+    });
+  }
 
-      latestTopology = payload.result;
-      renderTopology();
+  function requestGlobalThings(callback) {
+    var statusCasas = latestWebUiStatus && latestWebUiStatus.casas ? latestWebUiStatus.casas : [];
+    var casaNames = statusCasas.map(function (casa) {
+      return casa.name;
+    }).sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+    var connectedCasas = statusCasas.filter(function (casa) {
+      return casa.connected;
+    });
+
+    if (!socket.connected) {
+      globalThingsBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
+      globalConflictsBodyEl.innerHTML = '<tr><td colspan="5" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
       if (callback) {
         callback();
       }
+      return;
+    }
+
+    globalThingsBodyEl.innerHTML = '<tr><td colspan="6" class="webui-empty-cell">Loading global things...</td></tr>';
+    globalConflictsBodyEl.innerHTML = '<tr><td colspan="5" class="webui-empty-cell">Loading conflicts...</td></tr>';
+    latestGlobalThingDetail = null;
+    latestGlobalThingRuntime = null;
+    renderGlobalThingDetail();
+
+    if (!connectedCasas.length) {
+      latestGlobalThings = mergeGlobalThings(casaNames, []);
+      renderGlobalThings();
+      if (callback) {
+        callback();
+      }
+      return;
+    }
+
+    var responses = [];
+    var pending = connectedCasas.length;
+
+    connectedCasas.forEach(function (casa) {
+      sendCommand({
+        targetCasa: casa.name,
+        obj: ':',
+        method: 'sourceTrees',
+        arguments: []
+      }, function (payload) {
+        if (payload) {
+          payload.casaName = casa.name;
+        }
+
+        responses.push(payload || {
+          ok: false,
+          error: 'No response from ' + casa.name
+        });
+
+        pending -= 1;
+
+        if (pending > 0) {
+          return;
+        }
+
+        latestGlobalThings = mergeGlobalThings(casaNames, responses);
+        renderGlobalThings();
+        requestDescribeGlobalThing(callback);
+      });
     });
   }
 
@@ -1103,7 +1694,7 @@
   socket.on('webui-status', function (payload) {
     renderCasas(payload);
     setConsoleScope(payload && payload.currentScope ? payload.currentScope : ':');
-    requestTopology(function () {
+    requestGlobalThings(function () {
       requestSourceTrees(function () {
         requestConfiguredSourceTree();
       });
@@ -1185,7 +1776,7 @@
       consoleDraftLine = consoleLineEl.value;
     }
   });
-  topologyRefreshButton.addEventListener('click', requestTopology);
+  topologyRefreshButton.addEventListener('click', requestGlobalThings);
   sourcesRefreshButton.addEventListener('click', requestSourceTrees);
   designerRefreshButton.addEventListener('click', function () {
     requestConfiguredSourceTree();
