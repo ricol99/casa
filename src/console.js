@@ -180,6 +180,12 @@ Console.prototype.webUiSocketConnected = function(_socket) {
    });
 };
 
+Console.prototype.emitWebUiLiveUpdateToAll = function(_payload) {
+   this.webUiSockets.forEach( (_socket) => {
+      _socket.emit('webui-live-update', _payload);
+   });
+};
+
 Console.prototype.emitWebUiStatus = function(_socket) {
    _socket.emit('webui-status', this.getWebUiStatus(_socket.webUiState.selectedCasa, _socket.webUiState.currentScope));
 };
@@ -596,6 +602,10 @@ Console.prototype.casaFound = function(_params) {
          }
       });
 
+      remoteCasa.on("live-update", (_data) => {
+         this.emitWebUiLiveUpdateToAll(_data);
+      });
+
       remoteCasa.start();
    }
    else {
@@ -928,6 +938,7 @@ RemoteCasa.prototype.start = function()  {
       this.lastConnectErrorTime = 0;
       this.emit('connected', { name: this.name });
       this.socket.emit('getCasaInfo');
+      this.socket.emit('subscribeLiveUpdates', {});
    });
 
    this.socket.on('casa-info', (_data) => {
@@ -996,6 +1007,14 @@ RemoteCasa.prototype.start = function()  {
       var data = (_data && (typeof _data === "object")) ? _data : { result: _data };
       data.name = this.name;
       this.emit('output', data);
+   });
+
+   this.socket.on('live-update', (_data) => {
+      this.emit('live-update', {
+         casaName: this.name,
+         type: _data ? _data.type : null,
+         data: _data ? _data.data : null
+      });
    });
 
    this.socket.on('extract-tree-output', (_data) => {

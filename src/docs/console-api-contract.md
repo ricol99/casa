@@ -2,8 +2,8 @@
 
 This document defines the current command/API contract for source inspection and config preview used by UI and MCP clients.
 
-Related implementation guide:
-- `src/docs/ui-react-component-map.md`
+Hosted UI implementation:
+- `src/webui`
 
 ## Transport
 
@@ -52,6 +52,30 @@ Related implementation guide:
 Notes:
 - `execute-output` is still the authoritative completion signal.
 - `output` may contain multiple progress messages before completion.
+
+### Live runtime updates
+- Emit event: `subscribeLiveUpdates`
+- Optional unsubscribe event: `unsubscribeLiveUpdates`
+- Subscription acknowledgement event: `live-update-subscription`
+- Runtime update event: `live-update`
+- Payload:
+
+```json
+{
+  "type": "source-property-changed",
+  "data": {
+    "sourceName": ":thing:lamp",
+    "name": "power",
+    "value": true,
+    "propertyOldValue": false,
+    "transaction": 12
+  }
+}
+```
+
+Update `type` values:
+- `source-property-changed`
+- `source-event-raised`
 
 ## Contexts and Methods
 

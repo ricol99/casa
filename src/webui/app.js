@@ -47,12 +47,25 @@
   var designerSelectedThingEl = document.getElementById('designer-selected-thing');
   var designerSummaryEl = document.getElementById('designer-summary');
   var designerDetailEl = document.getElementById('designer-detail');
+  var liveTraceDockEl = document.getElementById('live-trace-dock');
+  var liveTraceCollapseButton = document.getElementById('live-trace-collapse-button');
+  var liveTraceVisibleCountEl = document.getElementById('live-trace-visible-count');
+  var liveTraceTotalCountEl = document.getElementById('live-trace-total-count');
+  var liveTracePausedLabelEl = document.getElementById('live-trace-paused-label');
+  var liveTracePropertiesToggle = document.getElementById('live-trace-properties-toggle');
+  var liveTraceEventsToggle = document.getElementById('live-trace-events-toggle');
+  var liveTraceFilterEl = document.getElementById('live-trace-filter');
+  var liveTracePauseButton = document.getElementById('live-trace-pause-button');
+  var liveTraceClearButton = document.getElementById('live-trace-clear-button');
+  var liveTraceBodyEl = document.getElementById('live-trace-body');
   var latestWebUiStatus = null;
   var latestGlobalThings = null;
   var latestGlobalThingDetail = null;
   var latestGlobalThingRuntime = null;
   var latestSourceTrees = null;
+  var latestSelectedSourceState = null;
   var latestConfiguredTree = null;
+  var latestDesignerThingDetail = null;
   var latestThingNodes = [];
   var selectedGlobalThingUName = '';
   var selectedActiveSourceUName = '';
@@ -69,6 +82,14 @@
     { kind: 'system', text: 'Console is ready.' }
   ];
   var activeConsoleEntryId = null;
+  var liveTraceEntries = [];
+  var liveTraceCollapsed = true;
+  var liveTracePaused = false;
+  var liveTraceFilter = '';
+  var liveTraceShowProperties = true;
+  var liveTraceShowEvents = true;
+  var nextLiveTraceId = 1;
+  var MAX_LIVE_TRACE_ENTRIES = 250;
 
   function escapeHtmlAttr(value) {
     return escapeHtml(value).replace(/"/g, '&quot;');
@@ -119,6 +140,160 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function normaliseUName(uName) {
+    var text = String(uName || '').trim();
+    return text && text.charAt(0) !== ':' ? ':' + text : text;
+  }
+
+  function formatTraceTime(timestamp) {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  function formatLiveValue(value) {
+    if (value === undefined) {
+      return '-';
+    }
+
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
+      return String(value);
+    }
+
+    try {
+      return JSON.stringify(value);
+    }
+    catch (error) {
+      return String(value);
+    }
+  }
+
+  function formatLiveChange(entry) {
+    if (entry.kind === 'property' && entry.oldValue !== undefined) {
+      return formatLiveValue(entry.oldValue) + ' -> ' + formatLiveValue(entry.value);
+    }
+
+    return formatLiveValue(entry.value);
+  }
+
+  function originLabel(entry) {
+    if (entry.casaName) {
+      return entry.casaName;
+    }
+
+    if (entry.fromPeer) {
+      return 'peer';
+    }
+
+    if (entry.local) {
+      return 'local';
+    }
+
+    return '-';
+  }
+
+  function liveTraceEntryMatches(entry) {
+    var filter = liveTraceFilter.trim().toLowerCase();
+
+    if (entry.kind === 'property' && !liveTraceShowProperties) {
+      return false;
+    }
+
+    if (entry.kind === 'event' && !liveTraceShowEvents) {
+      return false;
+    }
+
+    if (!filter) {
+      return true;
+    }
+
+    return [
+      entry.kind,
+      entry.sourceName,
+      entry.name,
+      formatLiveChange(entry),
+      originLabel(entry),
+      entry.transaction === null || entry.transaction === undefined ? '' : String(entry.transaction)
+    ].join(' ').toLowerCase().indexOf(filter) !== -1;
+  }
+
+  function renderLiveTrace() {
+    if (!liveTraceDockEl || !liveTraceBodyEl) {
+      return;
+    }
+
+    var filteredEntries = liveTraceEntries.filter(liveTraceEntryMatches);
+    liveTraceDockEl.classList.toggle('webui-live-trace-dock-collapsed', liveTraceCollapsed);
+    liveTraceDockEl.setAttribute('aria-expanded', liveTraceCollapsed ? 'false' : 'true');
+
+    if (liveTraceCollapseButton) {
+      liveTraceCollapseButton.textContent = liveTraceCollapsed ? 'Show trace' : 'Hide trace';
+      liveTraceCollapseButton.setAttribute('aria-expanded', liveTraceCollapsed ? 'false' : 'true');
+    }
+
+    if (liveTraceVisibleCountEl) {
+      liveTraceVisibleCountEl.textContent = String(filteredEntries.length);
+    }
+
+    if (liveTraceTotalCountEl) {
+      liveTraceTotalCountEl.textContent = String(liveTraceEntries.length);
+    }
+
+    if (liveTracePausedLabelEl) {
+      liveTracePausedLabelEl.hidden = !liveTracePaused;
+    }
+
+    if (liveTracePauseButton) {
+      liveTracePauseButton.textContent = liveTracePaused ? 'Resume' : 'Pause';
+    }
+
+    if (!filteredEntries.length) {
+      liveTraceBodyEl.innerHTML = '<div class="webui-live-trace-empty">No live updates yet.</div>';
+      return;
+    }
+
+    liveTraceBodyEl.innerHTML =
+      '<table class="webui-live-trace-table">' +
+        '<thead>' +
+          '<tr><th>time</th><th>kind</th><th>casa</th><th>source</th><th>name</th><th>value</th><th>tx</th></tr>' +
+        '</thead>' +
+        '<tbody>' +
+          filteredEntries.map(function (entry) {
+            var value = formatLiveChange(entry);
+            return '<tr>' +
+              '<td>' + escapeHtml(formatTraceTime(entry.timestamp)) + '</td>' +
+              '<td><span class="webui-live-trace-kind webui-live-trace-kind-' + escapeHtmlAttr(entry.kind) + '">' + escapeHtml(entry.kind) + '</span></td>' +
+              '<td>' + escapeHtml(originLabel(entry)) + '</td>' +
+              '<td title="' + escapeHtmlAttr(entry.sourceName) + '">' + escapeHtml(entry.sourceName) + '</td>' +
+              '<td>' + escapeHtml(entry.name) + '</td>' +
+              '<td title="' + escapeHtmlAttr(value) + '">' + escapeHtml(value) + '</td>' +
+              '<td>' + escapeHtml(entry.transaction === null || entry.transaction === undefined ? '-' : entry.transaction) + '</td>' +
+            '</tr>';
+          }).join('') +
+        '</tbody>' +
+      '</table>';
+  }
+
+  function appendLiveTraceEntry(entry) {
+    if (liveTracePaused) {
+      return;
+    }
+
+    liveTraceEntries.unshift(Object.assign({
+      id: nextLiveTraceId,
+      timestamp: Date.now()
+    }, entry));
+    nextLiveTraceId += 1;
+    liveTraceEntries = liveTraceEntries.slice(0, MAX_LIVE_TRACE_ENTRIES);
+    renderLiveTrace();
   }
 
   function getConsolePrompt() {
@@ -558,6 +733,185 @@
     return 'local';
   }
 
+  function memberMatchesLiveUpdate(member, thingUName, update) {
+    var sourceName = normaliseUName(update.sourceName);
+    var memberUName = normaliseUName(member.uName);
+    var expectedMemberUName = sourceName + ':' + update.name;
+
+    return memberUName === expectedMemberUName ||
+      (normaliseUName(thingUName) === sourceName && member.name === update.name);
+  }
+
+  function updateMemberArray(members, thingUName, update) {
+    var changed = false;
+    var nextMembers = (members || []).map(function (member) {
+      if (!memberMatchesLiveUpdate(member, thingUName, update) || Object.is(member.value, update.value)) {
+        return member;
+      }
+
+      changed = true;
+      return Object.assign({}, member, {
+        value: update.value
+      });
+    });
+
+    return {
+      members: changed ? nextMembers : members,
+      changed: changed
+    };
+  }
+
+  function updateThingDesignMembers(result, section, update) {
+    if (!result || !result.thing || !result.thing.object) {
+      return result;
+    }
+
+    var thingUName = result.thing.object.uName;
+    var topLevelMembers = updateMemberArray(result[section] || [], thingUName, update);
+    var inheritance = result.inheritance || {};
+    var sectionInheritance = inheritance[section] || {};
+    var localMembers = updateMemberArray(sectionInheritance.local || [], thingUName, update);
+    var parentMembers = updateMemberArray(sectionInheritance.parent || [], thingUName, update);
+    var childMembers = updateMemberArray(sectionInheritance.child || [], thingUName, update);
+
+    if (!topLevelMembers.changed && !localMembers.changed && !parentMembers.changed && !childMembers.changed) {
+      return result;
+    }
+
+    var nextInheritance = Object.assign({}, inheritance);
+    nextInheritance[section] = Object.assign({}, sectionInheritance, {
+      local: localMembers.members,
+      parent: parentMembers.members,
+      child: childMembers.members
+    });
+
+    var nextResult = Object.assign({}, result, {
+      inheritance: nextInheritance
+    });
+    nextResult[section] = topLevelMembers.members;
+
+    return nextResult;
+  }
+
+  function updatePropertyEntries(entries, update) {
+    var changed = false;
+    var found = false;
+    var valueText = update.name + '=' + formatLiveValue(update.value);
+    var nextEntries = (entries || []).map(function (entry) {
+      var text = String(entry);
+      var separatorIndex = text.indexOf('=');
+      var name = separatorIndex === -1 ? text : text.slice(0, separatorIndex);
+
+      if (name !== update.name) {
+        return entry;
+      }
+
+      found = true;
+
+      if (text === valueText) {
+        return entry;
+      }
+
+      changed = true;
+      return valueText;
+    });
+
+    if (!found) {
+      changed = true;
+      nextEntries = nextEntries.concat([valueText]);
+    }
+
+    return {
+      entries: changed ? nextEntries : entries,
+      changed: changed
+    };
+  }
+
+  function updateEventEntries(entries, update) {
+    var nextEntries = entries || [];
+
+    if (nextEntries.indexOf(update.name) !== -1) {
+      return {
+        entries: entries,
+        changed: false
+      };
+    }
+
+    return {
+      entries: nextEntries.concat([update.name]),
+      changed: true
+    };
+  }
+
+  function updateSourceStateSnapshot(snapshot, kind, update) {
+    if (!snapshot || normaliseUName(snapshot.uName) !== normaliseUName(update.sourceName)) {
+      return snapshot;
+    }
+
+    var result = kind === 'property'
+      ? updatePropertyEntries(snapshot.properties || [], update)
+      : updateEventEntries(snapshot.events || [], update);
+
+    if (!result.changed) {
+      return snapshot;
+    }
+
+    if (kind === 'property') {
+      return Object.assign({}, snapshot, {
+        properties: result.entries
+      });
+    }
+
+    return Object.assign({}, snapshot, {
+      events: result.entries
+    });
+  }
+
+  function patchLiveDetailCaches(kind, payload, update) {
+    var memberSection = kind === 'property' ? 'properties' : 'events';
+    var changedSourceState = false;
+    var changedDesignerDetail = false;
+    var changedGlobalDetail = false;
+    var selectedCasaMatches = !payload.casaName || payload.casaName === currentSelectedCasa;
+
+    if (selectedCasaMatches) {
+      var nextSelectedSourceState = updateSourceStateSnapshot(latestSelectedSourceState, kind, update);
+      changedSourceState = nextSelectedSourceState !== latestSelectedSourceState;
+      latestSelectedSourceState = nextSelectedSourceState;
+
+      var nextDesignerThingDetail = updateThingDesignMembers(latestDesignerThingDetail, memberSection, update);
+      changedDesignerDetail = nextDesignerThingDetail !== latestDesignerThingDetail;
+      latestDesignerThingDetail = nextDesignerThingDetail;
+    }
+
+    var selectedGlobalThing = selectedGlobalThingUName ? findGlobalThing(selectedGlobalThingUName) : null;
+    var globalOwnerMatches = selectedGlobalThing &&
+      selectedGlobalThing.activeOwnerCasa &&
+      selectedGlobalThing.activeOwnerCasa === payload.casaName;
+
+    if (globalOwnerMatches) {
+      var nextGlobalRuntime = updateSourceStateSnapshot(latestGlobalThingRuntime, kind, update);
+      changedGlobalDetail = nextGlobalRuntime !== latestGlobalThingRuntime;
+      latestGlobalThingRuntime = nextGlobalRuntime;
+
+      var nextGlobalDetail = updateThingDesignMembers(latestGlobalThingDetail, memberSection, update);
+      changedGlobalDetail = nextGlobalDetail !== latestGlobalThingDetail || changedGlobalDetail;
+      latestGlobalThingDetail = nextGlobalDetail;
+    }
+
+    if (changedSourceState) {
+      renderSourceStateDetail(latestSelectedSourceState);
+    }
+
+    if (changedDesignerDetail) {
+      renderDesignerDetail(latestDesignerThingDetail);
+    }
+
+    if (changedGlobalDetail) {
+      renderGlobalThingDetail();
+    }
+  }
+
   function renderMemberTable(title, members) {
     if (!members || !members.length) {
       return '<section class="webui-designer-card"><h4>' + title + '</h4><div class="webui-empty">none</div></section>';
@@ -567,14 +921,15 @@
       '<h4>' + title + '</h4>' +
       '<div class="webui-table-wrap">' +
         '<table class="webui-table webui-table-compact">' +
-          '<thead><tr><th>name</th><th>type</th><th>inheritance</th><th>listeners</th></tr></thead>' +
+          '<thead><tr><th>name</th><th>type</th><th>value</th><th>inheritance</th><th>listeners</th></tr></thead>' +
           '<tbody>' +
             members.map(function (member) {
               return '<tr>' +
-                '<td>' + member.name + '</td>' +
-                '<td>' + (member.type || '-') + '</td>' +
-                '<td>' + inheritanceLabel(member) + '</td>' +
-                '<td>' + member.sourceListenerCount + '</td>' +
+                '<td>' + escapeHtml(member.name) + '</td>' +
+                '<td>' + escapeHtml(member.type || '-') + '</td>' +
+                '<td>' + escapeHtml(formatLiveValue(member.value)) + '</td>' +
+                '<td>' + escapeHtml(inheritanceLabel(member)) + '</td>' +
+                '<td>' + escapeHtml(member.sourceListenerCount === undefined || member.sourceListenerCount === null ? '-' : member.sourceListenerCount) + '</td>' +
               '</tr>';
             }).join('') +
           '</tbody>' +
@@ -882,6 +1237,7 @@
 
     if (!rows.length) {
       selectedActiveSourceUName = '';
+      latestSelectedSourceState = null;
       renderSourceStateDetail(null);
       sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">No matching active sources.</td></tr>';
       return;
@@ -906,6 +1262,7 @@
 
   function requestDescribeSourceState(callback) {
     if (!socket.connected) {
+      latestSelectedSourceState = null;
       renderSourceStateDetail(null);
       if (callback) {
         callback();
@@ -914,6 +1271,7 @@
     }
 
     if (!selectedActiveSourceUName) {
+      latestSelectedSourceState = null;
       renderSourceStateDetail(null);
       if (callback) {
         callback();
@@ -928,6 +1286,7 @@
       arguments: []
     }, function (payload) {
       if (!payload.ok) {
+        latestSelectedSourceState = null;
         sourcesSelectedSourceEl.textContent = selectedActiveSourceUName;
         sourcesSummaryEl.innerHTML = '<span class="webui-chip">source: ' + selectedActiveSourceUName + '</span>';
         sourcesDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
@@ -937,7 +1296,8 @@
         return;
       }
 
-      renderSourceStateDetail(payload.result);
+      latestSelectedSourceState = payload.result;
+      renderSourceStateDetail(latestSelectedSourceState);
       if (callback) {
         callback();
       }
@@ -1443,6 +1803,8 @@
 
   function requestSourceTrees(callback) {
     if (!socket.connected) {
+      latestSourceTrees = null;
+      latestSelectedSourceState = null;
       renderSourceStateDetail(null);
       sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">Socket is not connected yet.</td></tr>';
       if (callback) {
@@ -1459,6 +1821,7 @@
     }, function (payload) {
       if (!payload.ok) {
         latestSourceTrees = null;
+        latestSelectedSourceState = null;
         selectedActiveSourceUName = '';
         renderSourceStateDetail(null);
         sourcesBodyEl.innerHTML = '<tr><td colspan="3" class="webui-empty-cell">' + payload.error + '</td></tr>';
@@ -1477,6 +1840,7 @@
   function requestConfiguredSourceTree(callback) {
     if (!socket.connected) {
       latestConfiguredTree = null;
+      latestDesignerThingDetail = null;
       latestThingNodes = [];
       selectedThingUName = '';
       renderDesignerTree();
@@ -1495,6 +1859,7 @@
     }, function (payload) {
       if (!payload.ok) {
         latestConfiguredTree = null;
+        latestDesignerThingDetail = null;
         latestThingNodes = [];
         selectedThingUName = '';
         renderDesignerTree();
@@ -1524,6 +1889,7 @@
 
   function requestDescribeThing(callback) {
     if (!socket.connected) {
+      latestDesignerThingDetail = null;
       renderDesignerDetail(null);
       if (callback) {
         callback();
@@ -1532,6 +1898,7 @@
     }
 
     if (!selectedThingUName) {
+      latestDesignerThingDetail = null;
       renderDesignerDetail(null);
       if (callback) {
         callback();
@@ -1546,6 +1913,7 @@
       arguments: []
     }, function (payload) {
       if (!payload.ok) {
+        latestDesignerThingDetail = null;
         designerSelectedThingEl.textContent = selectedThingUName;
         designerSummaryEl.innerHTML = '<span class="webui-chip">uName: ' + selectedThingUName + '</span>';
         designerDetailEl.innerHTML = '<div class="webui-empty">' + payload.error + '</div>';
@@ -1555,7 +1923,8 @@
         return;
       }
 
-      renderDesignerDetail(payload.result);
+      latestDesignerThingDetail = payload.result;
+      renderDesignerDetail(latestDesignerThingDetail);
       if (callback) {
         callback();
       }
@@ -1681,8 +2050,6 @@
 
   socket.on('disconnect', function () {
     setSocketStatus('error', 'disconnected');
-    casaDbEl.textContent = '-';
-    gangDbEl.textContent = '-';
     addConsoleSystemLine('Local runtime socket disconnected.');
   });
 
@@ -1700,6 +2067,42 @@
       });
     });
   });
+
+  function isRuntimeLiveUpdate(payload) {
+    return payload &&
+      payload.data &&
+      typeof payload.data.sourceName === 'string' &&
+      typeof payload.data.name === 'string';
+  }
+
+  function handleLiveUpdate(payload) {
+    if (!isRuntimeLiveUpdate(payload)) {
+      return;
+    }
+
+    var update = payload.data;
+    var kind = payload.type === 'source-event-raised' ? 'event' : 'property';
+
+    if (payload.type !== 'source-property-changed' && payload.type !== 'source-event-raised') {
+      return;
+    }
+
+    appendLiveTraceEntry({
+      kind: kind,
+      casaName: payload.casaName || '',
+      sourceName: update.sourceName,
+      name: update.name,
+      value: update.value,
+      oldValue: update.propertyOldValue,
+      transaction: update.transaction,
+      local: update.local,
+      fromPeer: update.fromPeer
+    });
+
+    patchLiveDetailCaches(kind, payload, update);
+  }
+
+  socket.on('webui-live-update', handleLiveUpdate);
 
   function handleReply(payload, fallback) {
     var callback = payload && payload.id ? pendingRequests[payload.id] : null;
@@ -1784,6 +2187,30 @@
   sourcesPrefixEl.addEventListener('input', renderSources);
   sourcesTypeEl.addEventListener('input', renderSources);
   sourcesSearchEl.addEventListener('input', renderSources);
+  liveTraceCollapseButton.addEventListener('click', function () {
+    liveTraceCollapsed = !liveTraceCollapsed;
+    renderLiveTrace();
+  });
+  liveTracePauseButton.addEventListener('click', function () {
+    liveTracePaused = !liveTracePaused;
+    renderLiveTrace();
+  });
+  liveTraceClearButton.addEventListener('click', function () {
+    liveTraceEntries = [];
+    renderLiveTrace();
+  });
+  liveTraceFilterEl.addEventListener('input', function () {
+    liveTraceFilter = liveTraceFilterEl.value || '';
+    renderLiveTrace();
+  });
+  liveTracePropertiesToggle.addEventListener('change', function () {
+    liveTraceShowProperties = liveTracePropertiesToggle.checked;
+    renderLiveTrace();
+  });
+  liveTraceEventsToggle.addEventListener('change', function () {
+    liveTraceShowEvents = liveTraceEventsToggle.checked;
+    renderLiveTrace();
+  });
   tabButtons.forEach(function (button) {
     button.addEventListener('click', function () {
       setActiveTab(button.getAttribute('data-tab'));
@@ -1793,4 +2220,5 @@
   renderConsolePrompt();
   setConsoleHints([]);
   renderConsoleTranscript();
+  renderLiveTrace();
 })();

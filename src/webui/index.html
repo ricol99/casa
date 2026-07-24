@@ -243,7 +243,35 @@
         <div id="console-hints" class="webui-console-hints"></div>
       </div>
     </section>
+
   </main>
+
+  <section id="live-trace-dock" class="webui-live-trace-dock webui-live-trace-dock-collapsed" aria-label="Live update trace">
+    <div class="webui-live-trace-header">
+      <div class="webui-live-trace-title">
+        <strong>Live Trace</strong>
+        <span><span id="live-trace-visible-count">0</span>/<span id="live-trace-total-count">0</span></span>
+        <span id="live-trace-paused-label" hidden>paused</span>
+      </div>
+      <div class="webui-live-trace-actions">
+        <label class="webui-live-trace-toggle">
+          <input id="live-trace-properties-toggle" type="checkbox" checked>
+          properties
+        </label>
+        <label class="webui-live-trace-toggle">
+          <input id="live-trace-events-toggle" type="checkbox" checked>
+          events
+        </label>
+        <input id="live-trace-filter" class="webui-live-trace-filter" type="text" placeholder="filter">
+        <button id="live-trace-pause-button" type="button" class="webui-live-trace-action">Pause</button>
+        <button id="live-trace-clear-button" type="button" class="webui-live-trace-action">Clear</button>
+      </div>
+      <button id="live-trace-collapse-button" type="button" class="webui-live-trace-collapse" aria-expanded="false">Show trace</button>
+    </div>
+    <div id="live-trace-body" class="webui-live-trace-body">
+      <div class="webui-live-trace-empty">No live updates yet.</div>
+    </div>
+  </section>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/webui/app.js"></script>
