@@ -1,4 +1,5 @@
 import { consoleSocket } from "./socket";
+import type { LiveUpdatePayload } from "./socket";
 import type {
   ExplainResult,
   PreviewResult,
@@ -73,6 +74,10 @@ export class ConsoleApiClient {
 
   onOutput(handler: (payload: unknown) => void): () => void {
     return consoleSocket.onOutput(handler);
+  }
+
+  onLiveUpdate(handler: (payload: LiveUpdatePayload) => void): () => void {
+    return consoleSocket.onLiveUpdate(handler);
   }
 
   isConnected(): boolean {

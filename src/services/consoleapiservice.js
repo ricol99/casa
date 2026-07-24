@@ -177,6 +177,7 @@ function ConsoleApiSession(_id, _console, _owner) {
    this.console = _console;
    this.owner = _owner;
    this.consoleApiObjs = {};
+   this.liveUpdateHandlers = null;
 }
 
 ConsoleApiSession.prototype.serveClient = function(_socket) {
@@ -231,6 +232,14 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
       });
    });
 
+   this.socket.on('subscribeLiveUpdates', (_data) => {
+      this.subscribeLiveUpdates(_data);
+   });
+
+   this.socket.on('unsubscribeLiveUpdates', (_data) => {
+      this.unsubscribeLiveUpdates(_data);
+   });
+
    this.socket.on('disconnect', (_data) => {
 
       if (!this.closed) {
@@ -247,6 +256,60 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          this.sessionClosed();
       }
    });
+};
+
+ConsoleApiSession.prototype.emitLiveUpdate = function(_type, _data) {
+
+   if (this.socket) {
+      this.socket.emit('live-update', {
+         type: _type,
+         data: _data
+      });
+   }
+};
+
+ConsoleApiSession.prototype.subscribeLiveUpdates = function(_data) {
+
+   if (this.liveUpdateHandlers) {
+      this.socket.emit('live-update-subscription', { subscribed: true });
+      return;
+   }
+
+   var casa = this.owner && this.owner.gang ? this.owner.gang.casa : null;
+
+   if (!casa || (typeof casa.on !== 'function')) {
+      this.socket.emit('live-update-subscription', { subscribed: false, error: 'Casa event source not available' });
+      return;
+   }
+
+   this.liveUpdateHandlers = {
+      sourcePropertyChanged: (_eventData) => {
+         this.emitLiveUpdate('source-property-changed', _eventData);
+      },
+      sourceEventRaised: (_eventData) => {
+         this.emitLiveUpdate('source-event-raised', _eventData);
+      }
+   };
+
+   casa.on('source-property-changed', this.liveUpdateHandlers.sourcePropertyChanged);
+   casa.on('source-event-raised', this.liveUpdateHandlers.sourceEventRaised);
+   this.socket.emit('live-update-subscription', { subscribed: true });
+};
+
+ConsoleApiSession.prototype.unsubscribeLiveUpdates = function(_data) {
+   var casa = this.owner && this.owner.gang ? this.owner.gang.casa : null;
+   var silent = _data && _data.silent;
+
+   if (this.liveUpdateHandlers && casa && (typeof casa.removeListener === 'function')) {
+      casa.removeListener('source-property-changed', this.liveUpdateHandlers.sourcePropertyChanged);
+      casa.removeListener('source-event-raised', this.liveUpdateHandlers.sourceEventRaised);
+   }
+
+   this.liveUpdateHandlers = null;
+
+   if (this.socket && !silent) {
+      this.socket.emit('live-update-subscription', { subscribed: false });
+   }
 };
 
 ConsoleApiSession.prototype.performOneShotHttpRequest = function(_command, _request, _response) {
@@ -471,6 +534,7 @@ ConsoleApiSession.prototype.writeOutput = function(_output) {
 };
 
 ConsoleApiSession.prototype.sessionClosed = function() {
+   this.unsubscribeLiveUpdates({ silent: true });
 
    for (var consoleApiObj in this.consoleApiObjs) {
 

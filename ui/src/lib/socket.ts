@@ -8,6 +8,24 @@ type ExecuteRequest = {
 
 type OutputHandler = (payload: unknown) => void;
 
+export type LiveUpdateType = "source-property-changed" | "source-event-raised" | string;
+
+export interface LiveUpdatePayload {
+  type: LiveUpdateType;
+  data: {
+    sourceName?: string;
+    name?: string;
+    value?: unknown;
+    propertyOldValue?: unknown;
+    transaction?: unknown;
+    local?: boolean;
+    fromPeer?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+type LiveUpdateHandler = (payload: LiveUpdatePayload) => void;
+
 const EXECUTE_TIMEOUT_MS = 60_000;
 const CONSOLE_URL_STORAGE_KEY = "casa.console.url";
 
@@ -70,6 +88,8 @@ export class ConsoleSocket {
   private socket: any | null = null;
   private connectPromise: Promise<void> | null = null;
   private outputHandlers = new Set<OutputHandler>();
+  private liveUpdateHandlers = new Set<LiveUpdateHandler>();
+  private liveUpdatesSubscribed = false;
   private queue: Promise<unknown> = Promise.resolve();
   private targetUrl: string | null = null;
 
@@ -90,13 +110,35 @@ export class ConsoleSocket {
         reconnection: true,
         forceNew: true
       } as any);
+      let socketHandlersAttached = false;
 
-      const onConnect = () => {
-        this.socket = socket;
-        cleanup();
+      const attachSocketHandlers = () => {
+        if (socketHandlersAttached) {
+          return;
+        }
+
+        socketHandlersAttached = true;
         socket.on("output", (payload: unknown) => {
           this.outputHandlers.forEach((handler) => handler(payload));
         });
+        socket.on("live-update", (payload: LiveUpdatePayload) => {
+          this.liveUpdateHandlers.forEach((handler) => handler(payload));
+        });
+        socket.on("disconnect", () => {
+          this.liveUpdatesSubscribed = false;
+        });
+        socket.on("reconnect", () => {
+          this.liveUpdatesSubscribed = false;
+          this.subscribeLiveUpdates();
+        });
+      };
+
+      const onConnect = () => {
+        this.socket = socket;
+        this.liveUpdatesSubscribed = false;
+        attachSocketHandlers();
+        cleanup();
+        this.subscribeLiveUpdates();
         resolve();
       };
 
@@ -130,16 +172,34 @@ export class ConsoleSocket {
     };
   }
 
+  onLiveUpdate(handler: LiveUpdateHandler): () => void {
+    this.liveUpdateHandlers.add(handler);
+
+    void this.connect()
+      .then(() => this.subscribeLiveUpdates())
+      .catch(() => undefined);
+
+    return () => {
+      this.liveUpdateHandlers.delete(handler);
+
+      if (this.liveUpdateHandlers.size === 0) {
+        this.unsubscribeLiveUpdates();
+      }
+    };
+  }
+
   isConnected(): boolean {
     return !!this.socket?.connected;
   }
 
   disconnect(): void {
     if (this.socket) {
+      this.unsubscribeLiveUpdates();
       this.socket.disconnect();
       this.socket = null;
     }
     this.connectPromise = null;
+    this.liveUpdatesSubscribed = false;
   }
 
   reset(): void {
@@ -154,6 +214,24 @@ export class ConsoleSocket {
     const next = this.queue.then(task, task);
     this.queue = next.then(() => undefined, () => undefined);
     return next;
+  }
+
+  private subscribeLiveUpdates(): void {
+    if (!this.socket || this.liveUpdatesSubscribed || this.liveUpdateHandlers.size === 0) {
+      return;
+    }
+
+    this.socket.emit("subscribeLiveUpdates", {});
+    this.liveUpdatesSubscribed = true;
+  }
+
+  private unsubscribeLiveUpdates(): void {
+    if (!this.socket || !this.liveUpdatesSubscribed) {
+      return;
+    }
+
+    this.socket.emit("unsubscribeLiveUpdates", {});
+    this.liveUpdatesSubscribed = false;
   }
 
   private async executeInternal<T>(request: ExecuteRequest): Promise<T> {

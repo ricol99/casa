@@ -5,8 +5,10 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./app/router";
 import { queryClient } from "./lib/queryClient";
 import { consoleApiClient } from "./lib/consoleApiClient";
+import { installLiveUpdates } from "./lib/liveUpdates";
 import "./styles.css";
 
+installLiveUpdates();
 void consoleApiClient.connect().catch(() => undefined);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
