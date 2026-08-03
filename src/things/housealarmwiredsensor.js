@@ -93,19 +93,22 @@ function HouseAlarmWiredSensor(_config, _parent) {
    this.ensurePropertyExists('sensor-state', 'quantiseproperty',
                              { quanta: this.minimumVoltages, bufferTimers: this.stateBuffers, source: { property: "sensor-voltage"} }, _config);
 
-   this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", initialValue: false,
-                                                         source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")" }}, _config);
+   this.ensurePropertyExists('raw-active', 'property', { name: "raw-active", type: "property", valueType: "boolean", initialValue: false,
+                                                         source: { property: "sensor-state", transform: "($value === \"active\") || ($value === \"fault-active\")",
+                                                                   valueType: "boolean" }}, _config);
 
    if (faultyDevice) {
-      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: true }, _config);
+      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", valueType: "boolean", initialValue: true }, _config);
    }
    else {
-      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", initialValue: false,
-                                                       source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")" }}, _config);
+      this.ensurePropertyExists('fault', 'property', { name: "fault", type: "property", valueType: "boolean", initialValue: false,
+                                                       source: { property: "sensor-state", transform: "($value === \"fault\") || ($value === \"fault-active\")",
+                                                                 valueType: "boolean" }}, _config);
    }
 
-   this.ensurePropertyExists('tamper', 'property', { name: "tamper", type: "property", initialValue: false,
-                                                     source: { property: "sensor-state", transform: "($value === \"tamper\") || ($value === \"tamper-high\")" }}, _config);
+   this.ensurePropertyExists('tamper', 'property', { name: "tamper", type: "property", valueType: "boolean", initialValue: false,
+                                                     source: { property: "sensor-state", transform: "($value === \"tamper\") || ($value === \"tamper-high\")",
+                                                               valueType: "boolean" }}, _config);
 }
 
 util.inherits(HouseAlarmWiredSensor, HouseAlarmSensor);

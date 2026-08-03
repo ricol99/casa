@@ -329,6 +329,7 @@ SourceBase.prototype.emitPropertyChange = function(_propName, _propValue, _data)
    sendData.sourceName = this.uName;
    sendData.name = _propName;
    sendData.value = _propValue;
+   sendData.valueType = this.properties[_propName].getValueType();
    sendData.local = this.local;
    sendData.fromPeer = this.fromPeer;
 

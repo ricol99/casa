@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function CounterProperty(_config, _owner) {
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
    this.countPositives = _config.hasOwnProperty("countPositives") ? _config.countPositives : false;
 }
@@ -24,6 +25,10 @@ CounterProperty.prototype.coldStart = function() {
 
 CounterProperty.prototype.hotStart = function() {
    Property.prototype.hotStart.call(this);
+};
+
+CounterProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   return;
 };
 
 CounterProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

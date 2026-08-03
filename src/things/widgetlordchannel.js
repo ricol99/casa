@@ -14,8 +14,8 @@ function WidgetLordChannel(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('reading', 'serviceproperty', { id: this.channelId, serviceType: "channel", serviceName: this.serviceName, sync: "read" }, _config);
-   this.ensurePropertyExists('interval', 'serviceproperty', { id: this.channelId, initialValue: this.interval, serviceType: "channel", serviceName: this.serviceName, sync: "write" }, _config);
+   this.ensurePropertyExists('reading', 'serviceproperty', { valueType: "number", id: this.channelId, serviceType: "channel", serviceName: this.serviceName, sync: "read" }, _config);
+   this.ensurePropertyExists('interval', 'serviceproperty', { valueType: "number", id: this.channelId, initialValue: this.interval, serviceType: "channel", serviceName: this.serviceName, sync: "write" }, _config);
 }
 
 util.inherits(WidgetLordChannel, Thing);

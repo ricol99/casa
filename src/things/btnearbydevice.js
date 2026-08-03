@@ -15,8 +15,8 @@ function BtNearbyDevice(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('available', 'serviceproperty', { id: this.macId, serviceType: "nearby", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
-   this.ensurePropertyExists('interval', 'serviceproperty', { id: this.macId, initialValue: this.interval, serviceType: "nearby", serviceName: this.serviceName, sync: "write", serviceArgs: { macAddress: this.macAddress } }, _config);
+   this.ensurePropertyExists('available', 'serviceproperty', { valueType: "boolean", id: this.macId, serviceType: "nearby", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
+   this.ensurePropertyExists('interval', 'serviceproperty', { valueType: "number", id: this.macId, initialValue: this.interval, serviceType: "nearby", serviceName: this.serviceName, sync: "write", serviceArgs: { macAddress: this.macAddress } }, _config);
 }
 
 util.inherits(BtNearbyDevice, Thing);

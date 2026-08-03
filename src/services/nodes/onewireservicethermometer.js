@@ -7,7 +7,7 @@ function OneWireServiceThermometer(_config, _owner) {
    console.log(this.uName + ": New thermometer created");
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 10000000;
    this.started = false;
-   this.ensurePropertyExists("temperature", 'property', { initialValue: 0, }, this.config);
+   this.ensurePropertyExists("temperature", 'property', { valueType: "number", initialValue: 0, }, this.config);
 }
 
 util.inherits(OneWireServiceThermometer, ServiceNode);
@@ -80,4 +80,3 @@ OneWireServiceThermometer.prototype.processPropertyChanged = function(_transacti
 };
 
 module.exports = exports = OneWireServiceThermometer;
-

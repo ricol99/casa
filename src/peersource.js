@@ -71,6 +71,7 @@ PeerSource.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
       sendData.value = _propValue;
+      sendData.valueType = this.properties[_propName].getValueType();
       sendData.fromPeer = true;
 
       if (sendData.hasOwnProperty("transaction")) {
@@ -141,7 +142,7 @@ PeerSource.prototype.raiseEvent = function(_eventName, _data) {
 PeerSource.prototype.sourceHasChangedProperty = function(_data) {
    console.log(this.uName + ': received changed-property event from peer.');
 
-   let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name });
+   let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name, valueType: _data.valueType });
 
    if (newPropAdded) {
       this.properties[_data.name].coldStart();

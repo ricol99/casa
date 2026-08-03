@@ -14,27 +14,27 @@ function SonosZone(_config, _parent) {
    this.inAlarmStatus = false;
    this.devices = [];
 
-   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('volume', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('volume-writable', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('muted', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('playing', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('current-playlist', 'property', { initialValue: "" }, _config);
-   this.ensurePropertyExists('current-track', 'property', { initialValue: "" }, _config);
-   this.ensurePropertyExists('play-mode', 'property', { initialValue: "" }, _config);
+   this.ensurePropertyExists('ACTIVE', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('volume', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('volume-writable', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('muted', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('playing', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('current-playlist', 'property', { valueType: "string", initialValue: "" }, _config);
+   this.ensurePropertyExists('current-track', 'property', { valueType: "string", initialValue: "" }, _config);
+   this.ensurePropertyExists('play-mode', 'property', { valueType: "string", initialValue: "" }, _config);
 
    if (_config.alarmUrl) {
       this.alarmUrls['alarm'] = _config.alarmUrl;
       this.alarmRepeatTimes['alarm'] = _config.alarmRepeatTime;
       this.alarmVolumes['alarm'] = _config.hasOwnProperty("alarmVolume") ? _config.alarmVolume : 60;
-      this.ensurePropertyExists('alarm', 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists('alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
    }
 
    if (_config.fireAlarmUrl) {
       this.alarmUrls['fire-alarm'] = _config.fireAlarmUrl;
       this.alarmRepeatTimes['fire-alarm'] = _config.fireAlarmRepeatTime;
       this.alarmVolumes['fire-alarm'] = _config.hasOwnProperty("fireAlarmVolume") ? _config.fireAlarmVolume : 60;
-      this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists('fire-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
    }
 
    this.service = (_config.hasOwnProperty("service")) ? _config.service : "sonosservice";
@@ -53,8 +53,8 @@ function SonosZone(_config, _parent) {
       this.serviceName = service.uName+":"+this.zone.replace(/ /g, "-");
    }
 
-   this.ensurePropertyExists('host', 'property', { initialValue: null, source: { uName: this.serviceName, property: "host" }}, _config);
-   this.ensurePropertyExists('port', 'property', { initialValue: null, source: { uName: this.serviceName, property: "port" }}, _config);
+   this.ensurePropertyExists('host', 'property', { valueType: "string", initialValue: null, source: { uName: this.serviceName, property: "host" }}, _config);
+   this.ensurePropertyExists('port', 'property', { valueType: "number", initialValue: null, source: { uName: this.serviceName, property: "port" }}, _config);
 }
 
 util.inherits(SonosZone, Thing);

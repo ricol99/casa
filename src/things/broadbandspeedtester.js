@@ -7,11 +7,11 @@ function BroadbandSpeedTester(_config, _parent) {
 
    this.maxTime = (_config.hasOwnProperty('maxTime')) ? _config.maxTime : 10000;
 
-   this.ensurePropertyExists('upload-speed', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('download-speed', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('ping-time', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('server-address', 'property', { initialValue: '' }, _config);
-   this.ensurePropertyExists('test-result', 'property', { initialValue: '' }, _config);
+   this.ensurePropertyExists('upload-speed', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('download-speed', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('ping-time', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('server-address', 'property', { valueType: "string", initialValue: '' }, _config);
+   this.ensurePropertyExists('test-result', 'property', { valueType: "string", initialValue: '' }, _config);
 }
 
 util.inherits(BroadbandSpeedTester, Thing);

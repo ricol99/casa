@@ -16,7 +16,7 @@ function HomekitLightAccessory(_config, _parent) {
    this.colourTempSupported = _config.colourTempSupported;
    this.powerProp = _config.hasOwnProperty("powerProp") ? _config.powerProp : "power";
 
-   this.ensurePropertyExists(this.powerProp, 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists(this.powerProp, 'property', { valueType: "boolean", initialValue: false }, _config);
 
    this.hkAccessory
       .addService(Service.Lightbulb, this.displayName) // services exposed to the user should have "names" like "Light" for this case
@@ -32,7 +32,7 @@ function HomekitLightAccessory(_config, _parent) {
       });
 
    if (this.brightnessSupported) {
-      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
+      this.ensurePropertyExists('brightness', 'property', { valueType: "number", initialValue: 100 }, _config);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -47,7 +47,7 @@ function HomekitLightAccessory(_config, _parent) {
    }
 
    if (this.saturationSupported) {
-      this.ensurePropertyExists('saturation', 'property', { initialValue: 0 }, _config);
+      this.ensurePropertyExists('saturation', 'property', { valueType: "number", initialValue: 0 }, _config);
 
       this.hkAccessory
         .getService(Service.Lightbulb)
@@ -62,7 +62,7 @@ function HomekitLightAccessory(_config, _parent) {
    }
 
    if (this.hueSupported) {
-      this.ensurePropertyExists('hue', 'property', { initialValue: 0 }, _config);
+      this.ensurePropertyExists('hue', 'property', { valueType: "number", initialValue: 0 }, _config);
 
       this.hkAccessory
          .getService(Service.Lightbulb)
@@ -77,7 +77,7 @@ function HomekitLightAccessory(_config, _parent) {
    }
 
    if (this.colourTempSupported) {
-      this.ensurePropertyExists('colour-temp', 'property', { initialValue: 0 }, _config);
+      this.ensurePropertyExists('colour-temp', 'property', { valueType: "number", initialValue: 0 }, _config);
 
       this.hkAccessory
          .getService(Service.Lightbulb)

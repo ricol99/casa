@@ -10,9 +10,9 @@ function SonosServiceZone(_config, _owner) {
    this.port = _config.port;
    this.devices = [];
 
-   this.ensurePropertyExists('zone', 'property', { initialValue: this.zone }, _config);
-   this.ensurePropertyExists('host', 'property', { initialValue: this.host }, _config);
-   this.ensurePropertyExists('port', 'property', { initialValue: this.port }, _config);
+   this.ensurePropertyExists('zone', 'property', { valueType: "string", initialValue: this.zone }, _config);
+   this.ensurePropertyExists('host', 'property', { valueType: "string", initialValue: this.host }, _config);
+   this.ensurePropertyExists('port', 'property', { valueType: "number", initialValue: this.port }, _config);
 }
 
 util.inherits(SonosServiceZone, Thing);
@@ -36,4 +36,3 @@ SonosServiceZone.prototype.hotStart = function() {
 };
 
 module.exports = exports = SonosServiceZone;
-

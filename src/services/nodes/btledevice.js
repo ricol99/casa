@@ -3,7 +3,7 @@ var ServiceNode = require('../../servicenode');
 
 function BtleDevice(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
-   this.ensurePropertyExists("available", 'property', { initialValue: false, allSourcesRequiredForValidity: false }, this.config);
+   this.ensurePropertyExists("available", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false }, this.config);
 }
 
 util.inherits(BtleDevice, ServiceNode);

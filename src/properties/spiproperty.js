@@ -12,6 +12,7 @@ const Mcpadc = require('mcp-spi-adc');
 // prceisionDelta - reading precision delta allowed before update
 
 function SpiProperty(_config, _owner) {
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
 
    this.device = _config.device;

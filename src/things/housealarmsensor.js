@@ -23,7 +23,8 @@ function HouseAlarmSensor(_config, _parent) {
                                                                                 { name: "active", timeout: { duration: this.activeTimeout, nextState: "inactive" },
                                                                                                   source: { property: "raw-active", "value": true, nextState: "active" }} ]}, _config);
 
-   this.ensurePropertyExists('active', 'property', { name: "active", type: "property", initialValue: false, source: { property: "active-state", transform: "($value === \"active\")" }}, _config);
+   this.ensurePropertyExists('active', 'property', { name: "active", type: "property", valueType: "boolean", initialValue: false,
+                                                     source: { property: "active-state", transform: "($value === \"active\")", valueType: "boolean" }}, _config);
 }
 
 util.inherits(HouseAlarmSensor, Thing);

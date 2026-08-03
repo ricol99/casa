@@ -33,7 +33,7 @@ function BtleEddyBeacon(_config, _parent) {
       args.advertisement = this.advertisement;
    }
 
-   this.ensurePropertyExists('available', 'serviceproperty', { id: id, serviceType: "eddybeacon", serviceName: this.serviceName, sync: "read", serviceArgs: args }, _config);
+   this.ensurePropertyExists('available', 'serviceproperty', { valueType: "boolean", id: id, serviceType: "eddybeacon", serviceName: this.serviceName, sync: "read", serviceArgs: args }, _config);
 }
 
 util.inherits(BtleEddyBeacon, Thing);

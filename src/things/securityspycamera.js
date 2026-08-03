@@ -8,9 +8,9 @@ function SecuritySpyCamera(_config, _parent) {
 
    this.id = _config.id;
 
-   this.ensurePropertyExists('continuous-capture', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('motion-capture', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('actions', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('continuous-capture', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('motion-capture', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('actions', 'property', { valueType: "boolean", initialValue: false }, _config);
 
    this.service = (_config.hasOwnProperty("service")) ? _config.service :  "securityspyservice";
    this.securitySpyService =  this.casa.findService(this.service);
@@ -114,4 +114,3 @@ SecuritySpyCamera.prototype.receivedEventFromSource = function(_data) {
 };
 
 module.exports = exports = SecuritySpyCamera;
-

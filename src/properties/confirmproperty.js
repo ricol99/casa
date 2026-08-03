@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function ConfirmProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = false;
+   _config.valueType = "boolean";
    Property.call(this, _config, _owner);
    this.confirmationInputs = _config.confirmationInputs;
    this.confirmationTimeout = _config.confirmationTimeout;

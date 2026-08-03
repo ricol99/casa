@@ -15,7 +15,7 @@ function BtleIBeacon(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('available', 'serviceproperty', { id: this.uuid, serviceType: "ibeacon", serviceName: this.serviceName, sync: "read", serviceArgs: { uuid: this.uuid, major: this.major, minor: this.minor } }, _config);
+   this.ensurePropertyExists('available', 'serviceproperty', { valueType: "boolean", id: this.uuid, serviceType: "ibeacon", serviceName: this.serviceName, sync: "read", serviceArgs: { uuid: this.uuid, major: this.major, minor: this.minor } }, _config);
 }
 
 util.inherits(BtleIBeacon, Thing);

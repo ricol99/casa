@@ -256,6 +256,7 @@ Thing.prototype.inheritChildProps = function() {
                if (!ignoreChildProp && !this.properties.hasOwnProperty(prop)) {
                   console.info(this.uName + ": Adding new prop from child "+prop);
                   var oSpec = { name: prop, initialValue: childProp.value,
+                                valueType: childProp.getValueType(),
                                 local: childProp.local, childInherited: true };
 
                   util.assign(oSpec, childProp.getPropagation());
@@ -316,6 +317,7 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
          if (parentProps.hasOwnProperty(prop) && !this.properties.hasOwnProperty(prop)) {
             console.log(this.uName + ": Adding new prop from parent "+prop);
             var oSpec = { name: prop, initialValue: parentProps[prop].value,
+                          valueType: parentProps[prop].getValueType(),
                           local: true, parentInherited: true };
             let propertyType = "property";
 

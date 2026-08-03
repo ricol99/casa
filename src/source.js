@@ -211,6 +211,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       sendData.sourceName =  this.uName;
       sendData.name = _propName;
       sendData.propertyOldValue = oldValue;
+      sendData.valueType = this.properties[_propName].getValueType();
       sendData.fromPeer = false;
 
       if (!sendData.hasOwnProperty("transaction")) {
@@ -439,7 +440,7 @@ Source.prototype.setManualMode = function(_duration) {
          this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
       }
       else {
-         this.alignPropertyValue("MODE", "manual");
+         this.alignPropertyValue("MANUAL-MODE-ACTIVE", true);
       }
    }
 };
@@ -449,7 +450,13 @@ Source.prototype.getAutoMode = function() {
 };
 
 Source.prototype.setAutoMode = function() {
-   this.alignPropertyValue("MODE", "auto");
+
+   for (var propertyName in this.properties) {
+
+      if (this.properties.hasOwnProperty(propertyName) && propertyName.endsWith("-MODE-ACTIVE") && this.properties[propertyName].value) {
+         this.alignPropertyValue(propertyName, false);
+      }
+   }
 };
 
 //
@@ -473,7 +480,7 @@ Source.prototype.receivedEventFromSource = function(_data) {
    if (this.mirroring) {
 
       if (_data.propertyChange) {
-         this.ensurePropertyExists(_data.name, "property", {}, this.config);
+         this.ensurePropertyExists(_data.name, "property", { valueType: _data.valueType }, this.config);
          this.alignPropertyValue(_data.name, _data.value);
       }
       else {

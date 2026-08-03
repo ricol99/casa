@@ -10,10 +10,10 @@ function LightwaveRfAccessory(_config, _parent) {
 
    if (_config.moods != undefined) {
       this.moods = {};
-      this.ensurePropertyExists('mood', 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists('mood', 'property', { valueType: "string", initialValue: false }, _config);
       this.brightnessSupported = true;
-      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
-      this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists('brightness', 'property', { valueType: "number", initialValue: 100 }, _config);
+      this.ensurePropertyExists('power', 'property', { valueType: "boolean", initialValue: false }, _config);
 
       for (var index = 0; index < _config.moods.length; ++index) {
          this.moods[_config.moods[index].name] = copyObject(_config.moods[index]);	// name, id, low, high
@@ -27,11 +27,11 @@ function LightwaveRfAccessory(_config, _parent) {
       this.deviceId = _config.deviceId;
    }
 
-   this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('power', 'property', { valueType: "boolean", initialValue: false }, _config);
 
    if (_config.brightnessSupported) {
       this.brightnessSupported = true;
-      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
+      this.ensurePropertyExists('brightness', 'property', { valueType: "number", initialValue: 100 }, _config);
    }
 
    this.displayName = _config.displayName;

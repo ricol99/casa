@@ -6,7 +6,7 @@ var Thing = require('./thing');
 // text - Text of notification
 // responseTimeout - maximum time the notification should remain
 // responses - undefined assumes no response required.
-//   - Either property based [ { label: "a:" property: "a-prop", initialValue: false, responseValue: true, default: true } ] for multiple choice.
+//   - Either property based [ { label: "a:" property: "a-prop", valueType: "boolean", initialValue: false, responseValue: true, default: true } ] for multiple choice.
 //   - Or event based [ { label: "a:" event: "an-event", default: true } ] for multiple choice.
 
 // Resulting properties
@@ -50,9 +50,20 @@ function Notifier(_config, _parent) {
          if (this.responses[j].hasOwnProperty("property")) {
             respondSources.push({ property: this.responses[j].property, value: this.responses[j].responseValue, nextState: "responded" });
 
+            if (!this.responses[j].hasOwnProperty("valueType")) {
+               console.error(this.uName + ": notifier response property " + this.responses[j].property + " missing required valueType");
+            }
+
+            var responseConfig = { serviceName: responseServiceName, initialValue: this.responses[j].initialValue,
+                                   source: { property: "notifier-state", value: "idle", transformMap: { "idle": this.responses[j].initialValue } } };
+
+            if (this.responses[j].hasOwnProperty("valueType")) {
+               responseConfig.valueType = this.responses[j].valueType;
+               responseConfig.source.valueType = this.responses[j].valueType;
+            }
+
             this.ensurePropertyExists(this.responses[j].property, responseServicePropertyType,
-                                      { serviceName: responseServiceName, initialValue: this.responses[j].initialValue,
-                                        source: { property: "notifier-state", value: "idle", transformMap: { "idle": this.responses[j].initialValue }}}, _config);
+                                      responseConfig, _config);
          }
          else if (this.responses[j].hasOwnProperty("event")) {
             respondSources.push({ event: this.responses[j].event, nextState: "responded" });
@@ -70,7 +81,7 @@ function Notifier(_config, _parent) {
                                         { name: "responded", timeout: { duration: 1, nextState: "idle" }},
                                         { name: "timed-out", timeout: { duration: 1, nextState: "idle" }} ]}, _config);
 
-   this.ensurePropertyExists("service-notifier-state", 'serviceproperty', this._formConfig(serviceConfig, { source: { "property": "notifier-state" }}, "write"), _config);
+   this.ensurePropertyExists("service-notifier-state", 'serviceproperty', this._formConfig(serviceConfig, { valueType: "string", source: { "property": "notifier-state" }}, "write"), _config);
 }
 
 util.inherits(Notifier, Thing);

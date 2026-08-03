@@ -65,6 +65,18 @@ function SourceListener(_config, _owner) {
    this.matchingValueDefined = _config.hasOwnProperty('value');
    this.sourceEventName = SourceListener.getSourceEventName(this.sourceName, _config);
 
+   if (_config.hasOwnProperty("valueType")) {
+      if (!_config.hasOwnProperty("transform") && !_config.hasOwnProperty("transformMap") && !_config.hasOwnProperty("outputValues")) {
+         console.error("sourcelistener: valueType is only valid with transform, transformMap or outputValues");
+      }
+      else if ((_config.valueType !== "boolean") && (_config.valueType !== "number") && (_config.valueType !== "string")) {
+         console.error("sourcelistener: valueType must be one of boolean, number or string");
+      }
+      else {
+         this.valueType = _config.valueType;
+      }
+   }
+
    if (this.matchingValueDefined) {
       this.matchingValue = _config.value;
       this.invertMatchingValue = _config.hasOwnProperty("invert") ? _config.invert : false;
@@ -160,6 +172,11 @@ SourceListener.prototype.establishListeners = function() {
             console.log(this.uName + ": Sourcelistener listening to non-existent property " + this.eventName + " on source " + this.source.uName + ". Fix config!");
             this.valid = false;
          }
+         else {
+            if (!this.hasOwnProperty("transform") && !this.hasOwnProperty("transformMap") && (Object.keys(this.outputValues).length === 0)) {
+               this.valueType = this.source.properties[this.eventName].getValueType();
+            }
+         }
       }
       else if (this.capturingAllEvents) {
          this.source.on('property-changed', this.propertyChangedHandler, this.subscription);
@@ -167,6 +184,10 @@ SourceListener.prototype.establishListeners = function() {
       }
       else {
          this.source.on('event-raised', this.eventRaisedHandler, this.subscription);
+      }
+
+      if (this.valid && this.hasOwnProperty("valueType") && this.owner && (typeof this.owner.checkSourceListenerValueType === "function")) {
+         this.owner.checkSourceListenerValueType(this);
       }
 
       this.source.on('invalid', this.invalidHandler);
@@ -354,6 +375,10 @@ SourceListener.prototype.transformInput = function(_data) {
 
 SourceListener.prototype.getPropertyValue = function() {
    return this.sourcePropertyValue;
+};
+
+SourceListener.prototype.getValueType = function() {
+   return this.valueType;
 };
 
 SourceListener.prototype.getSource = function() {

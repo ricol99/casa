@@ -6,9 +6,11 @@ function HouseAlarm(_config, _parent) {
 
    this.mainSentry = _config.mainSentry;
 
-   this.ensurePropertyExists("alarm-error", "property", { source: { property: this.mainSentry+"-alarm-error" }}, _config);
-   this.ensurePropertyExists("current-state", "property", { source: { property: this.mainSentry+"-current-state", transform: "($value === \"confirmed\") ? \"triggered\" : $value" }}, _config);
-   this.ensurePropertyExists("target-state", "property", { initialValue: "disarmed" }, _config);
+   this.ensurePropertyExists("alarm-error", "property", { valueType: "string", source: { property: this.mainSentry+"-alarm-error" }}, _config);
+   this.ensurePropertyExists("current-state", "property", { valueType: "string",
+                                                            source: { property: this.mainSentry+"-current-state",
+                                                                      transform: "($value === \"confirmed\") ? \"triggered\" : $value", valueType: "string" }}, _config);
+   this.ensurePropertyExists("target-state", "property", { valueType: "string", initialValue: "disarmed" }, _config);
 
    for (var i = 0; i < _config.sentries.length; ++i) {
       this.createSentry(_config.sentries[i], _config, _config.sentries[i].name === this.mainSentry);
@@ -19,9 +21,9 @@ util.inherits(HouseAlarm, Thing);
 
 HouseAlarm.prototype.createSentry = function(_config, _mainConfig, _mainSentry) {
    var defaultTimeouts = { exit: 0, entry: 0, triggered: 120 };
-   this.ensurePropertyExists(_config.name+"-max-retries", "property", { initialValue: _mainConfig.hasOwnProperty("maxRetries") ? _mainConfig.maxRetries : 2 }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-retry-count", "property", { initialValue: 0 }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-retry-allowed", "evalproperty", { initialValue: true,
+   this.ensurePropertyExists(_config.name+"-max-retries", "property", { valueType: "number", initialValue: _mainConfig.hasOwnProperty("maxRetries") ? _mainConfig.maxRetries : 2 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-retry-count", "property", { valueType: "number", initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-retry-allowed", "evalproperty", { valueType: "boolean", initialValue: true,
                                                                               sources: [{ property: _config.name+"-retry-count" }, { property: _config.name+"-max-retries" }],
                                                                               expression: "($values[0] < $values[1])" }, _mainConfig);
    // Set timeouts
@@ -32,48 +34,51 @@ HouseAlarm.prototype.createSentry = function(_config, _mainConfig, _mainSentry) 
       if (!mode.hasOwnProperty("entryTimeout")) mode.entryTimeout = defaultTimeouts.entry;
       if (!mode.hasOwnProperty("triggeredTimeout")) mode.triggeredTimeout = defaultTimeouts.triggered;
 
-      this.ensurePropertyExists(_config.name+"-"+mode.name+"-exit-timeout", "property", { initialValue: mode.exitTimeout }, _mainConfig);
-      this.ensurePropertyExists(_config.name+"-"+mode.name+"-entry-timeout", "property", { initialValue: mode.entryTimeout }, _mainConfig);
-      this.ensurePropertyExists(_config.name+"-"+mode.name+"-triggered-timeout", "property", { initialValue: mode.triggeredTimeout }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-exit-timeout", "property", { valueType: "number", initialValue: mode.exitTimeout }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-entry-timeout", "property", { valueType: "number", initialValue: mode.entryTimeout }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-"+mode.name+"-triggered-timeout", "property", { valueType: "number", initialValue: mode.triggeredTimeout }, _mainConfig);
 
       this.ensurePropertyExists(_config.name+"-"+mode.name+"-armed", "property",
-                                { initialValue: false,
+                                { valueType: "boolean", initialValue: false,
                                   source: { property: _config.name+"-alarm-state",
                                             transform: "($value === \""+mode.name+"-armed\") || ($value === \""+mode.name+"-entry\") || \
                                                         ($value === \""+mode.name+"-triggered\") || ($value === \""+mode.name+"-triggered-timed-out\") || \
-                                                        ($value === \""+mode.name+"-confirmed\")" }}, _mainConfig);
+                                                        ($value === \""+mode.name+"-confirmed\")", valueType: "boolean" }}, _mainConfig);
    }
 
    // Internal - current timeouts based on arm state selected
-   this.ensurePropertyExists(_config.name+"-exit-timeout", "property", { initialValue: 0 }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-entry-timeout", "property", { initialValue: 0 }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-triggered-timeout", "property", { initialValue: 120 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-exit-timeout", "property", { valueType: "number", initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-entry-timeout", "property", { valueType: "number", initialValue: 0 }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-triggered-timeout", "property", { valueType: "number", initialValue: 120 }, _mainConfig);
 
    if (_mainSentry) {
-      this.ensurePropertyExists(_config.name+"-target-state", "property", { source: { property: "target-state" }}, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-target-state", "property", { valueType: "string", source: { property: "target-state" }}, _mainConfig);
    }
    else {
-      this.ensurePropertyExists(_config.name+"-target-state", "property", { initialValue: "disarmed" }, _mainConfig);
+      this.ensurePropertyExists(_config.name+"-target-state", "property", { valueType: "string", initialValue: "disarmed" }, _mainConfig);
    }
 
-   this.ensurePropertyExists(_config.name+"-current-state", "property", { initialValue: "disarmed" }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-current-state", "property", { valueType: "string", initialValue: "disarmed" }, _mainConfig);
 
    // Alarm status properties
-   this.ensurePropertyExists(_config.name+"-alarm", "property", { initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-alarm", "property", { valueType: "boolean", initialValue: false }, _mainConfig);
    this.ensurePropertyExists(_config.name+"-in-exit-entry", "property",
-                             { initialValue: false, source: { property: _config.name+"-"+"arm-state", transform: "($value === \"entry\") || ($value === \"exit\")" }}, _mainConfig);
+                             { valueType: "boolean", initialValue: false,
+                               source: { property: _config.name+"-"+"arm-state", transform: "($value === \"entry\") || ($value === \"exit\")",
+                                         valueType: "boolean" }}, _mainConfig);
 
    this.ensurePropertyExists(_config.name+"-zone-alarm", "property",
-                             { initialValue: false,
+                             { valueType: "boolean", initialValue: false,
                                source: { property: _config.name+"-"+"arm-state",
-                                         transform: "($value === \"triggered\") || ($value === \"confirmed\") || ($value === \"triggered-timed-out\")" }}, _mainConfig);
+                                         transform: "($value === \"triggered\") || ($value === \"confirmed\") || ($value === \"triggered-timed-out\")",
+                                         valueType: "boolean" }}, _mainConfig);
 
-   this.ensurePropertyExists(_config.name+"-confirmed-alarm", "property", { initialValue: false }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-entry-zone-active", "property", { initialValue: false }, _mainConfig);
-   this.ensurePropertyExists(_config.name+"-guard-zone-active", "property", { initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-confirmed-alarm", "property", { valueType: "boolean", initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-entry-zone-active", "property", { valueType: "boolean", initialValue: false }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-guard-zone-active", "property", { valueType: "boolean", initialValue: false }, _mainConfig);
 
    // Internal properties
-   this.ensurePropertyExists(_config.name+"-target-arm-state", "property", { initialValue: "disarmed" }, _mainConfig);
+   this.ensurePropertyExists(_config.name+"-target-arm-state", "property", { valueType: "string", initialValue: "disarmed" }, _mainConfig);
 
    // Core state machines
    var armModeConfig = { type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "idle",

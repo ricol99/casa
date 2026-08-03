@@ -4,7 +4,7 @@ var eddystoneBeacon = require('eddystone-beacon');
 
 function BtleEddyBeacon(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
-   this.ensurePropertyExists("available", 'property', { initialValue: false, allSourcesRequiredForValidity: false }, this.config);
+   this.ensurePropertyExists("available", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false }, this.config);
    this.advertise = false;
    this.scan = false;
    this.advertising = false;

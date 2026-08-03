@@ -55,15 +55,15 @@ function Bedroom(_config, _parent) {
    this.ensureEventExists("pre-wake-up-event", "event", {}, _config);
    this.ensureEventExists("wake-up-event", "event", {}, _config);
 
-   this.ensurePropertyExists("pre-wake-up-duration", "property", { initialValue: -1 }, _config);
-   this.ensurePropertyExists("clean-mode", "property", { initialValue: false }, _config);
+   this.ensurePropertyExists("pre-wake-up-duration", "property", { valueType: "number", initialValue: -1 }, _config);
+   this.ensurePropertyExists("clean-mode", "property", { valueType: "boolean", initialValue: false }, _config);
    this.userStateConfigs = [];
 
    this.awakeInBedTimeout = _config.hasOwnProperty("awakeInBedTimeout") ? _config.awakeInBedTimeout : 60*30;
-   this.ensurePropertyExists("awake-in-bed-duration", "property", { initialValue: this.awakeInBedTimeout }, _config);
+   this.ensurePropertyExists("awake-in-bed-duration", "property", { valueType: "number", initialValue: this.awakeInBedTimeout }, _config);
 
    this.readingInBedTimeout = _config.hasOwnProperty("readingInBedTimeout") ? _config.readingInBedTimeout : -1;
-   this.ensurePropertyExists("reading-in-bed-duration", "property", { initialValue: this.readingInBedTimeout }, _config);
+   this.ensurePropertyExists("reading-in-bed-duration", "property", { valueType: "number", initialValue: this.readingInBedTimeout }, _config);
 
    this.usersPresentAndAwakeConfig = { initialValue: false, sources: [] };
    this.usersPresentAndAsleepConfig = { initialValue: false, sources: [] };
@@ -179,20 +179,23 @@ function Bedroom(_config, _parent) {
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
 
       this.ensurePropertyExists(this.users[i].name+"-asleep", 'property',
-                                { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value === \"asleep-in-bed\") || ($value === \"waking-up-in-bed\")" }},  _config);
+                                { valueType: "boolean", "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
+                                                                     "transform": "($value === \"asleep-in-bed\") || ($value === \"waking-up-in-bed\")",
+                                                                     valueType: "boolean" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-present", 'property',
-                                { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\") && ($value !== \"clean-mode-override\") && ($value !== \"room-switch-touched\")" }},  _config);
+                                { valueType: "boolean", "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
+                                                                     "transform": "($value !== \"not-present\") && ($value !== \"clean-mode-override\") && ($value !== \"room-switch-touched\")",
+                                                                     valueType: "boolean" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-in-bed", 'property',
-                                { "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
-                                                                     "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\") && ($value !== \"clean-mode-override\") && ($value !== \"room-switch-touched\")" }},  _config);
+                                { valueType: "boolean", "initialValue": false, "source": { "property": this.users[i].name+"-user-state",
+                                                                     "transform": "($value !== \"not-present\") && ($value !== \"awake-in-bed\") && ($value !== \"clean-mode-override\") && ($value !== \"room-switch-touched\")",
+                                                                     valueType: "boolean" }},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-present-and-awake", 'andproperty',
-                                { "initialValue": false, "sources": [{ "property": this.users[i].name+"-asleep", "transform": "!$value" },
-                                                                     { "property": this.users[i].name+"-in-bed", "transform": "!$value" },
+                                { "initialValue": false, "sources": [{ "property": this.users[i].name+"-asleep", "transform": "!$value", valueType: "boolean" },
+                                                                     { "property": this.users[i].name+"-in-bed", "transform": "!$value", valueType: "boolean" },
                                                                      { "property": this.users[i].name+"-in-building" } ]},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-present-and-asleep", 'andproperty',
@@ -204,8 +207,8 @@ function Bedroom(_config, _parent) {
                                                                      { "property": this.users[i].name+"-in-building" } ]},  _config);
 
       this.ensurePropertyExists(this.users[i].name+"-in-building", 'property',
-                                { "initialValue": false, "source": { "uName": this.buildingName, "property": this.users[i].name+"-user-state",
-                                                                     "transform": "$value !== \"not-present\"" }}, _config);
+                                { valueType: "boolean", "initialValue": false, "source": { "uName": this.buildingName, "property": this.users[i].name+"-user-state",
+                                                                     "transform": "$value !== \"not-present\"", valueType: "boolean" }}, _config);
 
       this.usersPresentAndAwakeConfig.sources.push({ property: this.users[i].name+"-present-and-awake" });
       this.usersPresentAndAsleepConfig.sources.push({ property: this.users[i].name+"-present-and-asleep" });
@@ -220,7 +223,7 @@ function Bedroom(_config, _parent) {
 
    this.ensurePropertyExists("bed-part-full", 'xorproperty', this.bedFullConfig, _config);
    this.ensurePropertyExists("bed-full", 'andproperty', this.bedFullConfig, _config);
-   this.ensurePropertyExists("night-time", 'property', { initialValue: false, source: { uName: this.buildingName, property: "night-time" }});
+   this.ensurePropertyExists("night-time", 'property', { valueType: "boolean", initialValue: false, source: { uName: this.buildingName, property: "night-time" }});
                                                                                         //subscription: { roomType: "bedroom", roomName: this.uName } } }, _config);
 
    this.ensurePropertyExists("some-present-users-awake", 'orproperty', this.usersPresentAndAwakeConfig, _config);
@@ -229,15 +232,15 @@ function Bedroom(_config, _parent) {
 
    this.ensurePropertyExists("all-present-users-awake", 'andproperty',
                              { initialValue: false, sources:[{ property: "some-present-users-awake"},
-                                                             { property: "some-present-users-asleep", transform: "!$value" }] }, _config);
+                                                             { property: "some-present-users-asleep", transform: "!$value", valueType: "boolean" }] }, _config);
 
    this.ensurePropertyExists("all-present-users-asleep", 'andproperty',
                              { initialValue: false, sources:[{ property: "some-present-users-asleep"},
-                                                             { property: "some-present-users-awake", transform: "!$value" }] }, _config);
+                                                             { property: "some-present-users-awake", transform: "!$value", valueType: "boolean" }] }, _config);
 
    this.ensurePropertyExists("all-present-users-in-bed", 'andproperty',
                              { initialValue: false, sources:[{ property: "some-present-users-in-bed"},
-                                                             { property: "some-present-users-awake", transform: "!$value" }] }, _config);
+                                                             { property: "some-present-users-awake", transform: "!$value", valueType: "boolean" }] }, _config);
 
 
    this.ensurePropertyExists("users-sensitive", 'orproperty', { initialValue: false, sources: [{ property: "all-present-users-in-bed" },

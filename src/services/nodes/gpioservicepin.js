@@ -14,7 +14,7 @@ function GpioServicePin(_config, _owner) {
    this.ready = false;
    this.listening = false;
 
-   this.ensurePropertyExists("state", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("state", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(GpioServicePin, ServiceNode);
@@ -136,4 +136,3 @@ GpioServicePin.prototype.processGetState = function(_transaction, _callback) {
 };
 
 module.exports = exports = GpioServicePin;
-

@@ -65,6 +65,7 @@ ServiceNode.prototype.processSubscription = function(_subscription) {
 
    sub.sync = _subscription.hasOwnProperty("sync") ? _subscription.sync : "read";
    sub.serviceProperty = _subscription.serviceProperty;
+   sub.valueType = _subscription.valueType;
    this.sync.read = this.sync.read || _subscription.sync.startsWith("read");
    this.sync.write = this.sync.write || _subscription.sync.endsWith("write");
 
@@ -90,10 +91,10 @@ ServiceNode.prototype.createServiceProperty = function(_property, _subscriberPro
    else {
 
       if (_sub.sync === "read") {
-         this.ensurePropertyExists(_property, 'property', { initialValue: 0, allSourcesRequiredForValidity: false, generateNewTransaction: true });
+         this.ensurePropertyExists(_property, 'property', { valueType: _sub.valueType, initialValue: 0, allSourcesRequiredForValidity: false, generateNewTransaction: true });
       }
       else {
-         this.ensurePropertyExists(_property, 'property', { allSourcesRequiredForValidity: false,
+         this.ensurePropertyExists(_property, 'property', { valueType: _sub.valueType, allSourcesRequiredForValidity: false,
                                                             source: { uName: _sub.uName, property: _subscriberProp }});
       }
 
@@ -170,4 +171,3 @@ ServiceNode.prototype.processEventRaised = function(_transaction, _callback) {
 };
 
 module.exports = exports = ServiceNode;
-

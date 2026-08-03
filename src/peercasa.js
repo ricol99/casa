@@ -53,7 +53,7 @@ function PeerCasa(_config, _owner) {
    this.casa.on('source-added', this.sourceAddedCasaHandler);
    this.casa.on('source-removed', this.sourceRemovedCasaHandler);
 
-   this.ensurePropertyExists('ACTIVE', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('ACTIVE', 'property', { valueType: "boolean", initialValue: false }, _config);
 }
 
 util.inherits(PeerCasa, SourceBase);

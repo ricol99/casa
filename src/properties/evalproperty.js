@@ -30,6 +30,10 @@ EvalProperty.prototype.coldStart = function () {
    Property.prototype.coldStart.call(this);
 };
 
+EvalProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   return;
+};
+
 EvalProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
    var newValue = this.calculateOutputValue();
  

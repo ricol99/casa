@@ -5,7 +5,7 @@ function KasaServicePlug(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
    console.log(this.uName + ": New Kasa Plug Node created");
-   this.ensurePropertyExists("power", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("power", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(KasaServicePlug, ServiceNode);
@@ -75,4 +75,3 @@ KasaServicePlug.prototype.processGetState = function(_transaction, _callback) {
 };
 
 module.exports = exports = KasaServicePlug;
-

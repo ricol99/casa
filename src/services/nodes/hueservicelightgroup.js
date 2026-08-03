@@ -5,7 +5,7 @@ function HueServiceLightGroup(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
 
    console.log(this.uName + ": New Hue Light Group Node created");
-   this.ensurePropertyExists("power", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("power", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(HueServiceLightGroup, ServiceNode);
@@ -67,4 +67,3 @@ HueServiceLightGroup.prototype.processSetState = function(_transaction, _callbac
 }
 
 module.exports = exports = HueServiceLightGroup;
-

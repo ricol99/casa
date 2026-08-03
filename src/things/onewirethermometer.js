@@ -13,7 +13,7 @@ function OneWireThermometer(_config, _parent) {
    this.pollDuration = _config.hasOwnProperty("pollDuration") ? _config.pollDuration : 60000;
 
    this.deviceId = _config.deviceId;
-   this.ensurePropertyExists('temperature', 'onewireproperty', { initialValue: 0, deviceId: this.deviceId, deviceType: "28", serviceProperty: "temperature", serviceName: this.serviceName, sync: "read", serviceArgs: { pollDuration: this.pollDuration} }, _config);
+   this.ensurePropertyExists('temperature', 'onewireproperty', { valueType: "number", initialValue: 0, deviceId: this.deviceId, deviceType: "28", serviceProperty: "temperature", serviceName: this.serviceName, sync: "read", serviceArgs: { pollDuration: this.pollDuration} }, _config);
    this.thingType = "onewire-thermometer";
 }
 

@@ -4,15 +4,15 @@ var Thing = require('../thing');
 function Hifi(_config, _parent) {
    Thing.call(this, _config, _parent);
 
-   this.ensurePropertyExists('power-amp-temperature', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('power-amp-cold-temp', 'property', { initialValue: 20 }, _config);
-   this.ensurePropertyExists('power-amp-hot-temp', 'property', { initialValue: 35 }, _config);
-   this.ensurePropertyExists('shelf-hue', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('shelf-saturation', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('shelf-cold-hue', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('shelf-hot-hue', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('shelf-cold-saturation', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('shelf-hot-saturation', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('power-amp-temperature', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('power-amp-cold-temp', 'property', { valueType: "number", initialValue: 20 }, _config);
+   this.ensurePropertyExists('power-amp-hot-temp', 'property', { valueType: "number", initialValue: 35 }, _config);
+   this.ensurePropertyExists('shelf-hue', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-saturation', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-cold-hue', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-hot-hue', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-cold-saturation', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('shelf-hot-saturation', 'property', { valueType: "number", initialValue: 0 }, _config);
 }
 
 util.inherits(Hifi, Thing);

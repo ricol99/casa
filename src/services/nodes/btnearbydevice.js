@@ -3,8 +3,8 @@ var ServiceNode = require('../../servicenode');
 
 function BtNearbyDevice(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
-   this.ensurePropertyExists("available", 'property', { initialValue: false, allSourcesRequiredForValidity: false }, this.config);
-   this.ensurePropertyExists("interval", 'property', { initialValue: 10, allSourcesRequiredForValidity: false }, this.config);
+   this.ensurePropertyExists("available", 'property', { valueType: "boolean", initialValue: false, allSourcesRequiredForValidity: false }, this.config);
+   this.ensurePropertyExists("interval", 'property', { valueType: "number", initialValue: 10, allSourcesRequiredForValidity: false }, this.config);
 }
 
 util.inherits(BtNearbyDevice, ServiceNode);

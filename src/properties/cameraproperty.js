@@ -3,6 +3,7 @@ var Property = require('../property');
 var http = require('http');
 
 function CameraProperty(_config, _owner) {
+   _config.valueType = "boolean";
    Property.call(this, _config, _owner);
 
    this.options = { hostname: _config.cctvHostname, port: _config.cctvPort, auth: _config.userId + ':' + _config.password };

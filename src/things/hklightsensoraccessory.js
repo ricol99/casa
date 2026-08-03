@@ -10,7 +10,7 @@ function HomekitLightSensorAccessory(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-light-accessory";
 
-   this.ensurePropertyExists('light-level', 'property', { initialValue: 1 }, _config);
+   this.ensurePropertyExists('light-level', 'property', { valueType: "number", initialValue: 1 }, _config);
 
    this.hkAccessory
       .addService(Service.LightSensor, this.displayName) // services exposed to the user should have "names" like "LightSensor" for this case
@@ -55,4 +55,3 @@ HomekitLightSensorAccessory.prototype.propertyAboutToChange = function(_propName
 };
 
 module.exports = exports = HomekitLightSensorAccessory;
-

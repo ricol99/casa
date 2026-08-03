@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function ThresholdProperty(_config, _owner) {
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
 
    // Thresholds with buffer must not overlap

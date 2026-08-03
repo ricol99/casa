@@ -23,7 +23,7 @@ function KasaPlug(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('power', 'serviceproperty', { initialValue: false, id: this.deviceId, serviceType: "plug",
+   this.ensurePropertyExists('power', 'serviceproperty', { valueType: "boolean", initialValue: false, id: this.deviceId, serviceType: "plug",
                                                            serviceName: this.serviceName, sync: "write", serviceArgs: { host: this.host, port: this.port, alias: this.alias } }, _config);
 }
 

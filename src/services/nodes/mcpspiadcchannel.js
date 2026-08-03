@@ -10,8 +10,8 @@ function McpSpiAdcChannel(_config, _owner) {
    this.ready = false;
    this.initialisationStarted = false;
 
-   this.ensurePropertyExists("reading", 'property', { initialValue: false, allSourcesRequiredForValidity: false });
-   this.ensurePropertyExists("interval", 'property', { initialValue: 1000000, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("reading", 'property', { valueType: "number", initialValue: false, allSourcesRequiredForValidity: false });
+   this.ensurePropertyExists("interval", 'property', { valueType: "number", initialValue: 1000000, allSourcesRequiredForValidity: false });
 }
 
 util.inherits(McpSpiAdcChannel, ServiceNode);
@@ -133,4 +133,3 @@ McpSpiAdcChannel.prototype.processFetchReading = function(_transaction, _callbac
 };
 
 module.exports = exports = McpSpiAdcChannel;
-

@@ -31,10 +31,10 @@ PusherSource.prototype.newSubscriptionAdded = function(_subscription) {
    console.log(this.uName + ": newSubscriptionAdded() serviceProperty=" + _subscription.serviceProperty + ", args = ", _subscription.args);
    this.pusherSource = _subscription.args.pusherSource;
    
-   this.start(_subscription.serviceProperty);
+   this.start(_subscription.serviceProperty, _subscription.valueType);
 };
 
-PusherSource.prototype.start = function(_property) {
+PusherSource.prototype.start = function(_property, _valueType) {
 
    try {
 
@@ -53,7 +53,7 @@ PusherSource.prototype.start = function(_property) {
       }
 
       if (!this.subscriptions.hasOwnProperty(_property)) {
-         this.subscriptions[_property] = new Subscription(_property, this);
+         this.subscriptions[_property] = new Subscription(_property, _valueType, this);
       }
    }
    catch (_error) {
@@ -66,17 +66,18 @@ PusherSource.prototype.processPropertyChanged = function(_transaction, _callback
    _callback(null, true);
 };
 
-function Subscription(_property, _owner) {
+function Subscription(_property, _valueType, _owner) {
    this.owner = _owner;
    this.property = _property;
-   this.owner.owner.sendMessage("control-channel", "subscription-request", { sourceName: this.owner.gang.casa.uName, uName: this.owner.pusherSource, propName: _property });
+   this.valueType = _valueType;
+   this.owner.owner.sendMessage("control-channel", "subscription-request", { sourceName: this.owner.gang.casa.uName, uName: this.owner.pusherSource, propName: _property, valueType: this.valueType });
    this.resetTimeout();
 };
 
 Subscription.prototype.resetTimeout = function() {
 
    this.timeout = setTimeout( () => {
-      this.owner.owner.sendMessage("control-channel", "subscription-request", { sourceName: this.owner.gang.casa.uName, uName: this.owner.pusherSource, propName: this.property });
+      this.owner.owner.sendMessage("control-channel", "subscription-request", { sourceName: this.owner.gang.casa.uName, uName: this.owner.pusherSource, propName: this.property, valueType: this.valueType });
       this.resetTimeout();
    }, 23*3600000);
 };

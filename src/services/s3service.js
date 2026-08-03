@@ -18,7 +18,7 @@ function S3Service(_config, _owner) {
    this.endpoint = _config.hasOwnProperty("endpoint") ? _config.endpoint : null;
    this.sslEnabled = _config.hasOwnProperty("sslEnabled") ? _config.sslEnabled : true;
 
-   this.ensurePropertyExists('syncing', 'property', { initialValue: this.syncing }, _config);
+   this.ensurePropertyExists('syncing', 'property', { valueType: "boolean", initialValue: this.syncing }, _config);
 
    _mainInstance = this;
    this.syncQueue = [];

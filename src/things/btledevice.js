@@ -14,7 +14,7 @@ function BtleDevice(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('available', 'serviceproperty', { id: this.macId, serviceType: "device", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
+   this.ensurePropertyExists('available', 'serviceproperty', { valueType: "boolean", id: this.macId, serviceType: "device", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
 }
 
 util.inherits(BtleDevice, Thing);

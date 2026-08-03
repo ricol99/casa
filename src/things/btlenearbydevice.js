@@ -14,7 +14,7 @@ function BtleNearbyDevice(_config, _parent) {
       process.exit();
    }
 
-   this.ensurePropertyExists('available', 'serviceproperty', { id: this.macId, serviceType: "nearby", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
+   this.ensurePropertyExists('available', 'serviceproperty', { valueType: "boolean", id: this.macId, serviceType: "nearby", serviceName: this.serviceName, sync: "read", serviceArgs: { macAddress: this.macAddress } }, _config);
 }
 
 util.inherits(BtleNearbyDevice, Thing);

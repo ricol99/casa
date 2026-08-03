@@ -10,10 +10,10 @@ function HomekitGarageDoorOpenerAccessory(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-humidifier-dehumidifier-accessory";
 
-   this.ensurePropertyExists('target', 'property', {}, _config);
-   this.ensurePropertyExists('target-state', 'property', {}, _config);
-   this.ensurePropertyExists('current-state', 'property', {}, _config);
-   this.ensurePropertyExists('obstruction-detected', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('target', 'property', { valueType: "string" }, _config);
+   this.ensurePropertyExists('target-state', 'property', { valueType: "number" }, _config);
+   this.ensurePropertyExists('current-state', 'property', { valueType: "number" }, _config);
+   this.ensurePropertyExists('obstruction-detected', 'property', { valueType: "boolean", initialValue: false }, _config);
 
    this.hkService = this.hkAccessory.addService(Service.GarageDoorOpener, this.displayName) // services exposed to the user should have "names" like "HumiditySensor" for this case
 
@@ -97,4 +97,3 @@ HomekitGarageDoorOpenerAccessory.prototype.propertyAboutToChange = function(_pro
 };
 
 module.exports = exports = HomekitGarageDoorOpenerAccessory;
-

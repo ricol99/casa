@@ -4,6 +4,7 @@ var Property = require('../property');
 function AndProperty(_config, _owner) {
 
    _config.allSourcesRequiredForValidity = true;
+   _config.valueType = "boolean";
    Property.call(this, _config, _owner);
 }
 

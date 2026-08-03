@@ -64,24 +64,25 @@ function Access(_config, _parent) {
    this.thingType = "access";
 
    // Config properties
-   this.ensurePropertyExists('opening-timeout', 'property', { initialValue: 20 }, _config);
-   this.ensurePropertyExists('closing-timeout', 'property', { initialValue: 20 }, _config);
-   this.ensurePropertyExists('auto-close', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('pause-time', 'property', { initialValue: 120 }, _config);
-   this.ensurePropertyExists('max-retries', 'property', { initialValue: 2 }, _config);
-   this.ensurePropertyExists('retry-timeout', 'property', { initialValue: 10 }, _config);
-   this.ensurePropertyExists('response-timeout', 'property', { initialValue: 5 }, _config);
-   this.ensurePropertyExists('start-pulse-length', 'property', { initialValue: 1 }, _config);
-   this.ensurePropertyExists('movement-timeout', 'property', { initialValue: 5 }, _config);
+   this.ensurePropertyExists('opening-timeout', 'property', { valueType: "number", initialValue: 20 }, _config);
+   this.ensurePropertyExists('closing-timeout', 'property', { valueType: "number", initialValue: 20 }, _config);
+   this.ensurePropertyExists('auto-close', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('pause-time', 'property', { valueType: "number", initialValue: 120 }, _config);
+   this.ensurePropertyExists('max-retries', 'property', { valueType: "number", initialValue: 2 }, _config);
+   this.ensurePropertyExists('retry-timeout', 'property', { valueType: "number", initialValue: 10 }, _config);
+   this.ensurePropertyExists('response-timeout', 'property', { valueType: "number", initialValue: 5 }, _config);
+   this.ensurePropertyExists('start-pulse-length', 'property', { valueType: "number", initialValue: 1 }, _config);
+   this.ensurePropertyExists('movement-timeout', 'property', { valueType: "number", initialValue: 5 }, _config);
 
    if (_config.simulateFullyOpen) {
-      this.ensurePropertyExists('fully-open', 'property', { initialValue: false }, _config);
-      this.ensurePropertyExists('simulated-opening-time', 'property', { initialValue: 10 }, _config);
-      this.ensurePropertyExists('previous-simulated-opening-time', 'property', { initialValue: this.getProperty("simulated-opening-time"), source: { property: "simulated-opening-time" }}, _config);
-      this.ensurePropertyExists('simulated-opening-response-time', 'property', { initialValue: 0.5 }, _config);
-      this.ensurePropertyExists('simulated-security-alert-response-time', 'property', { initialValue: 1 }, _config);
-      this.ensurePropertyExists('simulated-closing-timeout', 'property', { initialValue: this.getProperty("closing-timeout")-0.1, source: { property: "closing-timeout", transform: "$value-0.1" }}, _config);
-      this.ensurePropertyExists('adjusted-simulated-opening-time', 'evalproperty', { local: true, initialValue: 0,
+      this.ensurePropertyExists('fully-open', 'property', { valueType: "boolean", initialValue: false }, _config);
+      this.ensurePropertyExists('simulated-opening-time', 'property', { valueType: "number", initialValue: 10 }, _config);
+      this.ensurePropertyExists('previous-simulated-opening-time', 'property', { valueType: "number", initialValue: this.getProperty("simulated-opening-time"), source: { property: "simulated-opening-time" }}, _config);
+      this.ensurePropertyExists('simulated-opening-response-time', 'property', { valueType: "number", initialValue: 0.5 }, _config);
+      this.ensurePropertyExists('simulated-security-alert-response-time', 'property', { valueType: "number", initialValue: 1 }, _config);
+      this.ensurePropertyExists('simulated-closing-timeout', 'property', { valueType: "number", initialValue: this.getProperty("closing-timeout")-0.1,
+                                                                          source: { property: "closing-timeout", transform: "$value-0.1", valueType: "number" }}, _config);
+      this.ensurePropertyExists('adjusted-simulated-opening-time', 'evalproperty', { valueType: "number", local: true, initialValue: 0,
                                                                                      sources: [{ property: "previous-simulated-opening-time" }, { property: "simulated-security-alert-response-time" }], expression: "$values[0] + $values[1]" }, _config);
 
 
@@ -118,18 +119,20 @@ function Access(_config, _parent) {
    }
 
    if (this.properties.hasOwnProperty("target")) {
-      this.properties["target"].addNewSource({ uName: this.uName, event: "open-access", transform: "\"open\"" });
-      this.properties["target"].addNewSource({ uName: this.uName, event: "close-access", transform: "\"closed\"" });
+      this.properties["target"].addNewSource({ uName: this.uName, event: "open-access", transform: "\"open\"", valueType: "string" });
+      this.properties["target"].addNewSource({ uName: this.uName, event: "close-access", transform: "\"closed\"", valueType: "string" });
    }
    else {
-      this.ensurePropertyExists('target', 'property', { initialValue: "unknown", sources: [{ event: "open-access", transform: "\"open\"" }, { event: "close-access", transform: "\"closed\"" }] }, _config);
+      this.ensurePropertyExists('target', 'property', { valueType: "string", initialValue: "unknown",
+                                                        sources: [{ event: "open-access", transform: "\"open\"", valueType: "string" },
+                                                                  { event: "close-access", transform: "\"closed\"", valueType: "string" }] }, _config);
    }
 
-   this.ensurePropertyExists('start', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('open', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('close', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('retry-count', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('retry-allowed', 'evalproperty', { initialValue: true,
+   this.ensurePropertyExists('start', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('open', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('close', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('retry-count', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('retry-allowed', 'evalproperty', { valueType: "boolean", initialValue: true,
                                                                 sources: [{ property: "retry-count" }, { property: "max-retries" }, { property: "alarm-state" }], expression: "($values[0] < $values[1]) && ($values[2] !== \"safety-alert\")" }, _config);
 
    this.ensurePropertyExists('movement-state', 'stateproperty', { initialValue: "no-movement", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
@@ -137,7 +140,9 @@ function Access(_config, _parent) {
                                                                            { name: "movement", timeout: { property: "movement-timeout", nextState: "no-movement" } } ]}, _config);
 
    this.ensurePropertyExists('movement-access-state', 'combinestateproperty', { separator: "-", sources: [{ property: "movement-state" }, { property: "access-state" }] }, _config);
-   this.ensurePropertyExists('movement-when-closed', 'property', { sources: [{ property: "movement-access-state", transform: "$value === \"movement-access-closed\"" }] }, _config);
+   this.ensurePropertyExists('movement-when-closed', 'property', { valueType: "boolean",
+                                                                   sources: [{ property: "movement-access-state", transform: "$value === \"movement-access-closed\"",
+                                                                               valueType: "boolean" }] }, _config);
 
    this.ensurePropertyExists('access-state', 'stateproperty', { name: "access-state", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true, initialValue: "access-unknown", 
                                                                 states: [{ name: "access-unknown",

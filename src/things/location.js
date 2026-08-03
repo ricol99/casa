@@ -20,15 +20,15 @@ function Location(_config, _parent) {
 
    for (var u = 0; u < _config.users.length; ++u) {
       this.users.push(this.gang.findNamedObject(_config.users[u].uName));
-      this.ensurePropertyExists(this.users[u].name+"-present", 'property', { name: this.users[u].name+"-present", initialValue: false }, _config);
+      this.ensurePropertyExists(this.users[u].name+"-present", 'property', { name: this.users[u].name+"-present", valueType: "boolean", initialValue: false }, _config);
    }
 
    if (_config.hasOwnProperty("latitude")) {
-      this.ensurePropertyExists("latitude", "property", { initialValue: _config.latitude }, _config);
+      this.ensurePropertyExists("latitude", "property", { valueType: "number", initialValue: _config.latitude }, _config);
    }
 
    if (_config.hasOwnProperty("longitude")) {
-      this.ensurePropertyExists("longitude", "property", { initialValue: _config.longitude }, _config);
+      this.ensurePropertyExists("longitude", "property", { valueType: "number", initialValue: _config.longitude }, _config);
    }
 }
 

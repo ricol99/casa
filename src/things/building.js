@@ -46,11 +46,11 @@ function Building(_config, _parent) {
    var userAwokenConfig = { "name": "user-awoken", "type": "event", "sources": [] };
 
    this.ensurePropertyExists("dark", 'property',
-                             { "name": "dark", "initialValue": false, "writable": false,
-                               "source": { "property": "daylight", "transform": "!$value" }}, _config);
+                             { "name": "dark", valueType: "boolean", "initialValue": false, "writable": false,
+                               "source": { "property": "daylight", "transform": "!$value", valueType: "boolean" }}, _config);
 
    this.ensureEventExists("check-empty-house-night-time-event", "event", {}, _config);
-   this.ensurePropertyExists("SCENE", "modeproperty", { modeName: "SCENE", requiresActives: true, restingMode: { name: "none", priority: -100 }, modes: _config.scenes }, _config);
+   this.ensurePropertyExists("SCENE", "modeproperty", { modeName: "SCENE", restingMode: { name: "none", priority: -100 }, modes: _config.scenes }, _config);
 
    for (var i = 0; i < this.users.length; ++i) {
       this.userStateConfigs.push({});
@@ -78,11 +78,11 @@ function Building(_config, _parent) {
       };
 
       this.ensurePropertyExists(this.users[i].name+"-user-state", 'stateproperty', this.userStateConfigs[i], _config);
-      this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].name+"-user-state" }}, {});
+      this.users[i].ensurePropertyExists(this.name+"-building-state", 'property', { valueType: "string", "initialValue": 'not-present', "source": { "uName": this.uName, "property": this.users[i].name+"-user-state" }}, {});
 
-      allUsersAwayConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"not-present\"" });
-      allUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value!==\"present\"" });
-      someUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"in-bed\"" });
+      allUsersAwayConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"not-present\"", valueType: "boolean" });
+      allUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value!==\"present\"", valueType: "boolean" });
+      someUsersInBedConfig.sources.push({ "property": this.users[i].name+"-user-state", "transform": "$value===\"in-bed\"", valueType: "boolean" });
    }
 
    allUsersInBedConfig.sources.push({ "property": "some-users-in-bed" });
@@ -145,16 +145,18 @@ function Building(_config, _parent) {
    var anyUsersSensitiveConfig = { "name": "any-users-sensitive", "type": "orproperty", "initialValue": false, "sources": [] };
 
    this.ensurePropertyExists("evening-possible", 'scheduleproperty',
-                             { "events": _config.hasOwnProperty("eveningPossibleConfig") ? _config.eveningPossibleConfig
+                             { valueType: "boolean", "events": _config.hasOwnProperty("eveningPossibleConfig") ? _config.eveningPossibleConfig
                                                                                        : [{ "rule": "00 5 * * *", "value": false}, { "rule": "00 19 * * *", "value": true }]}, _config);
    this.ensurePropertyExists("bedtime-possible", 'scheduleproperty',
-                             { "events": _config.hasOwnProperty("bedtimePossibleConfig") ? _config.bedtimePossibleConfig
+                             { valueType: "boolean", "events": _config.hasOwnProperty("bedtimePossibleConfig") ? _config.bedtimePossibleConfig
                                                                                        : [{ "rule": "00 7 * * *", "value": false}, { "rule": "30 22 * * *", "value": true }]}, _config);
    this.ensurePropertyExists("movement", "orproperty", movementConfig, _config);
    this.ensurePropertyExists("any-users-sensitive", "orproperty", anyUsersSensitiveConfig, _config);
 
    // night-time property
-   this.ensurePropertyExists("night-time", 'property', { intialValue: false, source: { property: "users-state", transform: "$value===\"occupied-asleep\" || $value===\"empty-night-time\"" }}, _config);
+   this.ensurePropertyExists("night-time", 'property', { valueType: "boolean", intialValue: false,
+                                                         source: { property: "users-state", transform: "$value===\"occupied-asleep\" || $value===\"empty-night-time\"",
+                                                                   valueType: "boolean" }}, _config);
 
    // Alarm state property definition
    this.allUsersLeftTimeout = _config.hasOwnProperty("allUsersLeftTimeout") ? _config.allUsersLeftTimeout : 240;
@@ -238,27 +240,27 @@ function Building(_config, _parent) {
 
    this.ensurePropertyExists("alarm-state", 'stateproperty', this.alarmStateConfig, _config);
 
-   this.ensurePropertyExists('line-failure', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('ac-power-failure', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('battery-failure', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('fire-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('medical-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('panic-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('duress-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('attack-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('armed-normal', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('part-armed', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('stay-armed', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('night-armed', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('away-armed', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('zone-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('confirmed-alarm', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('in-exit-entry', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('system-failure', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('engineer-mode', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('alarm-error', 'property', { initialValue: '' }, _config);
+   this.ensurePropertyExists('line-failure', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('ac-power-failure', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('battery-failure', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('fire-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('medical-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('panic-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('duress-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('attack-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('carbon-monoxide-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('tamper-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('armed-normal', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('part-armed', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('stay-armed', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('night-armed', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('away-armed', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('zone-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('confirmed-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('in-exit-entry', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('system-failure', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('engineer-mode', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('alarm-error', 'property', { valueType: "string", initialValue: '' }, _config);
 }
 
 util.inherits(Building, Location);

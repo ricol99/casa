@@ -2,6 +2,7 @@ var util = require('util');
 var StateProperty = require('./stateproperty');
 
 function CombineStateProperty(_config, _owner) {
+   _config.valueType = "string";
    StateProperty.call(this, _config, _owner);
 
    this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";
@@ -61,6 +62,10 @@ CombineStateProperty.prototype.coldStart = function() {
    }
 
    StateProperty.prototype.coldStart.call(this);
+};
+
+CombineStateProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   return;
 };
 
 CombineStateProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

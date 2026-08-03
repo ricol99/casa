@@ -10,7 +10,7 @@ function HomekitTempSensorAccessory(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-temperature-accessory";
 
-   this.ensurePropertyExists("temperature", 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists("temperature", 'property', { valueType: "number", initialValue: 0 }, _config);
 
    this.hkAccessory
       .addService(Service.TemperatureSensor, this.displayName) // services exposed to the user should have "names" like "TempSensor" for this case
@@ -55,4 +55,3 @@ HomekitTempSensorAccessory.prototype.propertyAboutToChange = function(_propName,
 };
 
 module.exports = exports = HomekitTempSensorAccessory;
-

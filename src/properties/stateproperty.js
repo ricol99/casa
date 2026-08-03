@@ -6,6 +6,7 @@ var Gang = require('../gang');
 var State = require('../state');
 
 function StateProperty(_config, _owner) {
+   _config.valueType = "string";
    Property.call(this, _config, _owner);
 
    this.gang = Gang.mainInstance();
@@ -537,6 +538,15 @@ StateProperty.prototype.becomeController = function() {
 
 StateProperty.prototype.ceasedToBeController = function(_newController) {
    this.controllingOwner = false;
+};
+
+StateProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+
+   if (_sourceListener.stateOwned) {
+      return;
+   }
+
+   Property.prototype.checkSourceListenerValueType.call(this, _sourceListener);
 };
 
 StateProperty.prototype.fetchOrCreateSourceListener = function(_config, _refreshNewSource) {

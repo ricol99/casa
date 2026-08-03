@@ -126,7 +126,7 @@ Subscriber.prototype.addSubscription = function(_data) {
       this.subscriptions[_data.uName+":"+_data.propName] = { node: node, uName: _data.uName, property: _data.propName,
                                                              timeout: setTimeout( (_uName, property) => { this.removeSubscription(_uName, _property); }, 24*3600000, _data.uName, _data.propName) };
       this.noOfSubscriptions = this.noOfSubscriptions + 1;
-      node.processSubscription({ subscriber: _data.uName, sync: "write", serviceProperty: _data.propName, subscriberProperty: _data.propName, args: { subscriptionUName: _data.uName, sourceName: _data.sourceName} });
+      node.processSubscription({ subscriber: _data.uName, sync: "write", serviceProperty: _data.propName, subscriberProperty: _data.propName, valueType: _data.valueType, args: { subscriptionUName: _data.uName, sourceName: _data.sourceName} });
    }
 };
 

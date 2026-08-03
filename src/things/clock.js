@@ -12,12 +12,12 @@ function Clock(_config, _parent) {
 
    Thing.call(this, _config, _parent);
 
-   this.ensurePropertyExists('seconds', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('minutes', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('hours', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('day', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('month', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('year', 'property', { initialValue: 0 }, _config);
+   this.ensurePropertyExists('seconds', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('minutes', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('hours', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('day', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('month', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('year', 'property', { valueType: "number", initialValue: 0 }, _config);
 
    this.resolution = _config.hasOwnProperty("resolution") ? _config.resolution : "none";
 

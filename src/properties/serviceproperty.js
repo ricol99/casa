@@ -20,7 +20,8 @@ function ServiceProperty(_config, _owner) {
       _config.sources = [];
    }
 
-   var sourceConfig = { uName: sourceName, property: this.serviceProperty, subscription: { subscriber: _owner.uName, sync: this.sync, args: this.serviceArgs } };
+   var sourceConfig = { uName: sourceName, property: this.serviceProperty, subscription: { subscriber: _owner.uName, sync: this.sync, args: this.serviceArgs,
+                                                                                            valueType: _config.valueType } };
 
    if (this.sync === "write") {
       sourceConfig.ignoreSourceUpdates = true;

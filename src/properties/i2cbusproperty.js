@@ -10,6 +10,7 @@ const I2c = require('i2c-bus');
 // precision - reading precision - top update only when a change larger than state precision (1000, 100, 10, 1) -> (1/1000, 1/100, 1/10, 1) - default = 10
 
 function I2cBusProperty(_config, _owner) {
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
 
    this.bus = _config.hasOwnProperty("bus") ? _config.bus : 0;

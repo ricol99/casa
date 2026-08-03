@@ -15,9 +15,9 @@ function EventLoggingService(_config, _owner) {
    this.logRaisedEvents = _config.hasOwnProperty("logRaisedEvents") ? _config.logRaisedEvents : true;
    this.logReceivedEvents = _config.hasOwnProperty("logReceivedEvents") ? _config.logReceivedEvents : false;
 
-   this.ensurePropertyExists('logging', 'property', { initialValue: this.logging }, _config);
-   this.ensurePropertyExists('log-raised-events', 'property', { initialValue: this.logRaisedEvents }, _config);
-   this.ensurePropertyExists('log-received-events', 'property', { initialValue: this.logReceivedEvents }, _config);
+   this.ensurePropertyExists('logging', 'property', { valueType: "boolean", initialValue: this.logging }, _config);
+   this.ensurePropertyExists('log-raised-events', 'property', { valueType: "boolean", initialValue: this.logRaisedEvents }, _config);
+   this.ensurePropertyExists('log-received-events', 'property', { valueType: "boolean", initialValue: this.logReceivedEvents }, _config);
 
    this.writingLog = false;
    _mainInstance = this;

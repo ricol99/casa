@@ -6,31 +6,31 @@ function LightGroup(_config, _parent) {
    this.thingType = "light-group";
    this.displayName = _config.displayName;
 
-   this.ensurePropertyExists('power', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('power', 'property', { valueType: "boolean", initialValue: false }, _config);
    this.brightnessSupported = _config.hasOwnProperty("brightnessSupported") ? _config.brightnessSupported : true;
 
    if (this.brightnessSupported)  {
-      this.ensurePropertyExists('brightness', 'property', { initialValue: 100 }, _config);
+      this.ensurePropertyExists('brightness', 'property', { valueType: "number", initialValue: 100 }, _config);
    }
 
    if (_config.hasOwnProperty("hueSupported")) {
 
       if (_config.hueSupported) {
          this.hueSupported = true;
-         this.ensurePropertyExists('hue', 'property', { initialValue: 360 }, _config);
+         this.ensurePropertyExists('hue', 'property', { valueType: "number", initialValue: 360 }, _config);
       }
 
       if (_config.saturationSupported) {
          this.saturationSupported = true;
-         this.ensurePropertyExists('saturation', 'property', { initialValue: 100 }, _config);
+         this.ensurePropertyExists('saturation', 'property', { valueType: "number", initialValue: 100 }, _config);
       }
    }
    else if (_config.colourTempSupported) {
       this.colourTempSupported = true;
-      this.ensurePropertyExists('colour-temp', 'property', { initialValue: 153 }, _config);
+      this.ensurePropertyExists('colour-temp', 'property', { valueType: "number", initialValue: 153 }, _config);
    }
 
-   this.ensurePropertyExists('scene', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('scene', 'property', { valueType: "string", initialValue: false }, _config);
 }
 
 util.inherits(LightGroup, Thing);

@@ -16,18 +16,18 @@ function SevenSegmentDisplay(_config, _parent) {
    this.resolution = _config.hasOwnProperty("resolution") ? _config.resolution : "none";
    this.display = new SevenSegment(0x70, 1);
 
-   this.ensurePropertyExists('brightness', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('digit-0', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('digit-1', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('digit-2', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('digit-3', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('point-0', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('point-1', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('point-2', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('point-3', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('colon', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('display-clock', 'property', { initialValue: false }, _config);
-   this.ensurePropertyExists('resolution', 'property', { initialValue: "minutes" }, _config);
+   this.ensurePropertyExists('brightness', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('digit-0', 'property', { valueType: "number", initialValue: false }, _config);
+   this.ensurePropertyExists('digit-1', 'property', { valueType: "number", initialValue: false }, _config);
+   this.ensurePropertyExists('digit-2', 'property', { valueType: "number", initialValue: false }, _config);
+   this.ensurePropertyExists('digit-3', 'property', { valueType: "number", initialValue: false }, _config);
+   this.ensurePropertyExists('point-0', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('point-1', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('point-2', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('point-3', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('colon', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('display-clock', 'property', { valueType: "boolean", initialValue: false }, _config);
+   this.ensurePropertyExists('resolution', 'property', { valueType: "string", initialValue: "minutes" }, _config);
 
    this.now  = { year: 0, month: 0, day: 0, hours: 0, minutes: 0, seconds: 0 };
    this.tick = true;

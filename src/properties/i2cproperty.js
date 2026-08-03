@@ -5,6 +5,7 @@ var i2c = require('./ABElectronics_NodeJS_Libraries/lib/adcpi/adcpi');
 // I2C Device
 function I2CProperty(_config, _owner) {
 
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
 
    this.writable = false;

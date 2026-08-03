@@ -7,9 +7,21 @@ function Property(_config, _owner) {
    console.log(this.uName + ": Creating property: " + this.name);
 
    this.owner = _owner;
+
+   if (!_config.hasOwnProperty("valueType")) {
+      console.error(this.uName + ": missing required valueType");
+   }
+   else if ((_config.valueType !== "boolean") && (_config.valueType !== "number") && (_config.valueType !== "string")) {
+      console.error(this.uName + ": valueType must be one of boolean, number or string");
+   }
+   else {
+      this.valueType = _config.valueType;
+   }
+
    this.allSourcesRequiredForValidity = (_config.hasOwnProperty('allSourcesRequiredForValidity')) ? _config.allSourcesRequiredForValidity : true;
    this.ignoreInvalid = _config.hasOwnProperty("ignoreInvalid") ? _config.ignoreInvalid : false;
    this.initialValueSet = _config.hasOwnProperty("initialValue");
+
    this.value = _config.initialValue;
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
@@ -104,6 +116,7 @@ Property.prototype.getPropagation = function() {
 // Called when system state is required
 Property.prototype.export = function(_exportObj) {
    NamedObject.prototype.export.call(this, _exportObj);
+   _exportObj.valueType = this.valueType;
    _exportObj.value = this.value;
    _exportObj.rawPropertyValue = this.rawPropertyValue;
    _exportObj.cold = this.cold;
@@ -206,6 +219,18 @@ Property.prototype.sourceRemoved = function(_config) {
 //
 Property.prototype.getValue = function() {
    return this.value;
+};
+
+Property.prototype.getValueType = function() {
+   return this.valueType;
+};
+
+Property.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   var sourceValueType = _sourceListener.getValueType();
+
+   if (sourceValueType !== this.getValueType()) {
+      console.error(this.uName + ": source " + _sourceListener.sourceEventName + " valueType " + sourceValueType + " does not match property valueType " + this.getValueType());
+   }
 };
 
 //

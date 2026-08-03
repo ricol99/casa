@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function QuantiseProperty(_config, _owner) {
+   _config.valueType = "string";
    Property.call(this, _config, _owner);
    this.quanta = _config.quanta;
    this.boundaries = [];
@@ -40,6 +41,10 @@ QuantiseProperty.prototype.hotStart = function() {
 // Called to start a cold system
 QuantiseProperty.prototype.coldStart = function () {
    Property.prototype.coldStart.call(this);
+};
+
+QuantiseProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   return;
 };
 
 QuantiseProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {

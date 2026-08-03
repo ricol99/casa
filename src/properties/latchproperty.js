@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function LatchProperty(_config, _owner) {
    this.minOutputTime = _config.minOutputTime;
+   _config.valueType = "boolean";
    Property.call(this, _config, _owner);
 
    this.minOutputTimeObj = null;

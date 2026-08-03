@@ -4,6 +4,7 @@ var ModelProperty = require('./modelproperty');
 function DebounceProperty(_config, _owner) {
    this.threshold = _config.threshold;
    this.ignoreUnderThreshold = _config.hasOwnProperty("ignoreUnderThreshold") ? _config.ignoreUnderThreshold : false;
+   _config.valueType = "boolean";
    _config.modelInitialState = "not-set";
 
 

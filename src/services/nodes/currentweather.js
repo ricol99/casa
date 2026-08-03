@@ -5,16 +5,16 @@ function CurrentWeather(_config, _owner) {
    ServiceNode.call(this, _config, _owner);
    console.log(this.uName + ": New Current Wather Monitor created");
    this.started = false;
-   this.ensurePropertyExists("temperature", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("temperature-feels-like", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("visibility", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("three-hour-precipitation-total", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("three-hour-snow-total", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("wind-direction", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("average-wind-speed", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("max-wind-gust", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("humidity", 'property', { initialValue: 0 }, this.config);
-   this.ensurePropertyExists("uv-index", 'property', { initialValue: 0 }, this.config);
+   this.ensurePropertyExists("temperature", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("temperature-feels-like", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("visibility", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("three-hour-precipitation-total", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("three-hour-snow-total", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("wind-direction", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("average-wind-speed", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("max-wind-gust", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("humidity", 'property', { valueType: "number", initialValue: 0 }, this.config);
+   this.ensurePropertyExists("uv-index", 'property', { valueType: "number", initialValue: 0 }, this.config);
 }
 
 util.inherits(CurrentWeather, ServiceNode);
@@ -139,4 +139,3 @@ module.exports = exports = CurrentWeather;
   probOfHail: 0,
   probOfSferics: 0 }
 */
-

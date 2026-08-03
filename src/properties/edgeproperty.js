@@ -35,6 +35,10 @@ EdgeProperty.prototype.coldStart = function () {
    Property.prototype.coldStart.call(this);
 };
 
+EdgeProperty.prototype.checkSourceListenerValueType = function(_sourceListener) {
+   return;
+};
+
 EdgeProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
    if (this.value && !_data.value && this.hasOwnProperty('trailingEdgeOutput')) {

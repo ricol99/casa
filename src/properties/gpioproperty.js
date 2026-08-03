@@ -5,6 +5,7 @@ function GPIOProperty(_config, _owner) {
    _config.id = _config.gpioPin;
    _config.serviceType = "pin";
    _config.serviceProperty = "state";
+   _config.valueType = "boolean";
    _config.serviceName = _config.hasOwnProperty("serviceName") ? _config.serviceName : _owner.gang.casa.findServiceName("gpioservice");
    _config.serviceArgs = { triggerLow: _config.hasOwnProperty("triggerLow") ? _config.triggerLow : false };
 

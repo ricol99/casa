@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function SmootherProperty(_config, _owner) {
+   _config.valueType = "number";
    Property.call(this, _config, _owner);
 
    this.rate = _config.rate;                    // Change allowed per second

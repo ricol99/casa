@@ -100,7 +100,7 @@ function Car(_config, _parent) {
 
       occupiedConfig.sources.push({ property: this.users[i].name+"-aboard" });
 
-      this.ensurePropertyExists(this.users[i].name+"-aboard", 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists(this.users[i].name+"-aboard", 'property', { valueType: "boolean", initialValue: false }, _config);
    }
 
    this.ensurePropertyExists("occupied", 'orproperty', occupiedConfig, _config);

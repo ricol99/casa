@@ -25,7 +25,7 @@ function TouchSwitch(_config, _parent) {
       this.ensurePropertyExists(this.feedbackProp, 'gpioproperty', { initialValue: false, gpioPin: this.gpioFeedbackPin, direction: "out" }, _config);
    }
    else {
-      this.ensurePropertyExists(this.feedbackProp, 'property', { initialValue: false }, _config);
+      this.ensurePropertyExists(this.feedbackProp, 'property', { valueType: "boolean", initialValue: false }, _config);
    }
 
    this.switchProp = _config.hasOwnProperty("switchProp") ? _config.switchProp : "switch-active";
@@ -41,7 +41,7 @@ function TouchSwitch(_config, _parent) {
    this.holdStartTimerDuration = (_config.hasOwnProperty("holdStartTimerDuration")) ? _config.holdStartTimerDuration : 1;
    this.holdTimerDuration = (_config.hasOwnProperty("holdTimerDuration")) ? _config.holdTimerDuration : 2;
 
-   this.ensurePropertyExists("hold-switch-event", "property", { initialValue: _config.hasOwnProperty("holdSwitchEvent") ? _config.holdSwitchEvent : false }, _config);
+   this.ensurePropertyExists("hold-switch-event", "property", { valueType: "boolean", initialValue: _config.hasOwnProperty("holdSwitchEvent") ? _config.holdSwitchEvent : false }, _config);
 
    this.ensurePropertyExists("switch-state", "stateproperty", { initialValue: "idle", type: "stateproperty", ignoreControl: true, takeControlOnTransition: true,
                                                                 states: [{ name: "idle",

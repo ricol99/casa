@@ -16,46 +16,46 @@ function CurrentWeather(_config, _parent) {
       process.exit();
    }
 
-   let spec = { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read", serviceArgs: { latitude: this.latitude, longitude:this.longitude }};
+   let spec = { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read", serviceArgs: { latitude: this.latitude, longitude:this.longitude }};
 
    this.ensurePropertyExists("temperature", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("temperature-feels-like", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("visibility", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("three-hour-precipitation-total", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("three-hour-snow-total", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("wind-direction", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("average-wind-speed", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("max-wind-gust", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("humidity", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
    this.ensurePropertyExists("uv-index", 'serviceproperty',
-                             { initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
+                             { valueType: "number", initialValue: 0, id: this.coords, serviceType: this.serviceType, serviceName: this.serviceName, sync: "read",
                                serviceArgs: { latitude: this.latitude, longitude:this.longitude }}, this.config);
 
 }

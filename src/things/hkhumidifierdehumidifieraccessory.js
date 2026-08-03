@@ -10,11 +10,11 @@ function HomekitHumidifierDehumidifierAccessory(_config, _parent) {
    HomekitAccessory.call(this, _config, _parent);
    this.thingType = "homekit-humidifier-dehumidifier-accessory";
 
-   this.ensurePropertyExists('water-level', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('current-relative-humidity', 'property', { initialValue: 0 }, _config);
-   this.ensurePropertyExists('active-state', 'property', { initialValue: Characteristic.Active.INACTIVE }, _config);
-   this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER }, _config);
-   this.ensurePropertyExists('current-state', 'property', { initialValue: Characteristic.CurrentHumidifierDehumidifierState.INACTIVE }, _config);
+   this.ensurePropertyExists('water-level', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('current-relative-humidity', 'property', { valueType: "number", initialValue: 0 }, _config);
+   this.ensurePropertyExists('active-state', 'property', { valueType: "number", initialValue: Characteristic.Active.INACTIVE }, _config);
+   this.ensurePropertyExists('target-state', 'property', { valueType: "number", initialValue: Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER }, _config);
+   this.ensurePropertyExists('current-state', 'property', { valueType: "number", initialValue: Characteristic.CurrentHumidifierDehumidifierState.INACTIVE }, _config);
 
    this.hkService = this.hkAccessory.addService(Service.HumidifierDehumidifier, this.displayName) // services exposed to the user should have "names" like "HumiditySensor" for this case
 
@@ -135,4 +135,3 @@ HomekitHumidifierDehumidifierAccessory.prototype.propertyAboutToChange = functio
 };
 
 module.exports = exports = HomekitHumidifierDehumidifierAccessory;
-

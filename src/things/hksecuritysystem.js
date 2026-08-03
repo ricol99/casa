@@ -14,12 +14,12 @@ function HomekitSecuritySystem(_config, _parent) {
    //this.ensurePropertyExists('target-state', 'property', { initialValue: Characteristic.SecuritySystemTargetState.DISARM }, _config);
    //this.ensurePropertyExists('system-fault', 'property', { initialValue: Characteristic.StatusFault.NO_FAULT }, _config);
    //this.ensurePropertyExists('tamper-state', 'property', { initialValue: Characteristic.StatusTampered.NOT_TAMPERED }, _config);
-   this.ensurePropertyExists('current-state', 'property', { }, _config);
-   this.ensurePropertyExists('target-state', 'property', { }, _config);
-   this.ensurePropertyExists('system-fault', 'property', { }, _config);
-   this.ensurePropertyExists('tamper-state', 'property', { }, _config);
+   this.ensurePropertyExists('current-state', 'property', { valueType: "number" }, _config);
+   this.ensurePropertyExists('target-state', 'property', { valueType: "number" }, _config);
+   this.ensurePropertyExists('system-fault', 'property', { valueType: "number" }, _config);
+   this.ensurePropertyExists('tamper-state', 'property', { valueType: "number" }, _config);
 
-   this.ensurePropertyExists('tamper-alarm', 'property', { initialValue: false }, _config);
+   this.ensurePropertyExists('tamper-alarm', 'property', { valueType: "boolean", initialValue: false }, _config);
 
    this.hkAccessory
       .addService(Service.SecuritySystem, this.displayName)
