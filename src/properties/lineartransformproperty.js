@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function LinearTransformProperty(_config, _owner) {
    _config.valueType = "number";
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    this.inputMin = _config.inputMin;

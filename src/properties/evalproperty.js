@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function EvalProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = true;
+   _config.writable = false;
    this.expression = _config.expression;
 
    Property.call(this, _config, _owner);

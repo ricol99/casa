@@ -25,6 +25,7 @@ function Property(_config, _owner) {
    this.value = _config.initialValue;
    this.rawPropertyValue = _config.initialValue;
    this.local = (_config.hasOwnProperty('local')) ? _config.local : false;
+   this.writable = _config.hasOwnProperty("writable") ? _config.writable : true;
 
    if (_config.hasOwnProperty("generateNewTransaction")) {
       this.generateNewTransaction = _config.generateNewTransaction;
@@ -118,6 +119,7 @@ Property.prototype.export = function(_exportObj) {
    NamedObject.prototype.export.call(this, _exportObj);
    _exportObj.valueType = this.valueType;
    _exportObj.value = this.value;
+   _exportObj.writable = this.writable;
    _exportObj.rawPropertyValue = this.rawPropertyValue;
    _exportObj.cold = this.cold;
    _exportObj.valid = this.valid;
@@ -127,6 +129,7 @@ Property.prototype.export = function(_exportObj) {
 Property.prototype.import = function(_importObj) {
    NamedObject.prototype.import.call(this, _importObj);
    this.value = _importObj.value;
+   this.writable = _importObj.hasOwnProperty("writable") ? _importObj.writable : this.writable;
    this.rawPropertyValue = _importObj.rawPropertyValue;
    this.cold = _importObj.cold;
    this.valid = _importObj.valid;

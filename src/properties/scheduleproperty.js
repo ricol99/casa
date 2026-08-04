@@ -4,6 +4,7 @@ var Gang = require('../gang');
 
 function ScheduleProperty(_config, _owner) {
 
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    this.gang = Gang.mainInstance();

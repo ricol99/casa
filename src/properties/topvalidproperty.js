@@ -4,6 +4,7 @@ var Property = require('../property');
 function TopValidProperty(_config, _owner) {
 
    _config.allSourcesRequiredForValidity = false;
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    this.highestValidSource = null;

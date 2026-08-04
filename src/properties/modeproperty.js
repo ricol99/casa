@@ -3,6 +3,7 @@ var StateProperty = require('./stateproperty');
 
 function ModeProperty(_config, _owner) {
    var modeConfig = util.copy(_config);
+   modeConfig.writable = false;
 
    modeConfig.initialValue = _config.hasOwnProperty("initialValue") ? _config.initialValue : _config.restingMode.name;
    modeConfig.ignoreParent = _config.hasOwnProperty("ignoreParent") ? _config.ignoreParent : false;

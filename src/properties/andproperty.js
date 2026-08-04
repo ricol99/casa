@@ -5,6 +5,7 @@ function AndProperty(_config, _owner) {
 
    _config.allSourcesRequiredForValidity = true;
    _config.valueType = "boolean";
+   _config.writable = false;
    Property.call(this, _config, _owner);
 }
 

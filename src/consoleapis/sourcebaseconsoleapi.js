@@ -689,6 +689,22 @@ SourceBaseConsoleApi.prototype.describeSourceState = function(_session, _params,
 
       var events = this.myObj().events ? this.myObj().events : {};
       var eventNames = [];
+      var propertyDetails = [];
+
+      for (var propertyName in this.myObj().properties) {
+
+         if (this.myObj().properties.hasOwnProperty(propertyName)) {
+            var property = this.myObj().properties[propertyName];
+            propertyDetails.push({
+               name: property.name,
+               value: property.getValue(),
+               valueType: (typeof property.getValueType === "function") ? property.getValueType() : null,
+               writable: (property.writable === undefined) ? null : !!property.writable,
+               local: !!property.local,
+               valid: (property.valid === undefined) ? null : !!property.valid
+            });
+         }
+      }
 
       for (var eventName in events) {
 
@@ -697,6 +713,7 @@ SourceBaseConsoleApi.prototype.describeSourceState = function(_session, _params,
          }
       }
 
+      propertyDetails.sort( (_a, _b) => _a.name.localeCompare(_b.name) );
       eventNames.sort();
 
       _callback(null, {
@@ -710,6 +727,7 @@ SourceBaseConsoleApi.prototype.describeSourceState = function(_session, _params,
          fromPeer: !!this.myObj().fromPeer,
          bowed: !!this.myObj().bowing,
          properties: _properties || [],
+         propertyDetails: propertyDetails,
          events: eventNames
       });
    });

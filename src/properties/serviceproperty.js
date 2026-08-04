@@ -9,6 +9,10 @@ function ServiceProperty(_config, _owner) {
    this.serviceArgs = _config.hasOwnProperty("serviceArgs") ? _config.serviceArgs : {};
    this.sync = _config.hasOwnProperty("sync") ? _config.sync : "read";
 
+   if (!_config.hasOwnProperty("writable")) {
+      _config.writable = this.sync.endsWith("write");
+   }
+
    var sourceName = this.serviceName + ":" + this.serviceType + "-" + this.id;
 
    if (_config.source) {

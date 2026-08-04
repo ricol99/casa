@@ -3,6 +3,7 @@ var StateProperty = require('./stateproperty');
 
 function CombineStateProperty(_config, _owner) {
    _config.valueType = "string";
+   _config.writable = false;
    StateProperty.call(this, _config, _owner);
 
    this.separator = _config.hasOwnProperty("separator") ? _config.separator : ":";

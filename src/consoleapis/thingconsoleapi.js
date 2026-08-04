@@ -70,6 +70,8 @@ function thingDescribeMember(_member, _thing) {
       valid: (_member.valid === undefined) ? null : !!_member.valid,
       cold: (_member.cold === undefined) ? null : !!_member.cold,
       value: (_member.value === undefined) ? null : _member.value,
+      valueType: (typeof _member.getValueType === "function") ? _member.getValueType() : null,
+      writable: (_member.writable === undefined) ? null : !!_member.writable,
       inherited: {
          parent: !!(_member.config && _member.config.parentInherited),
          child: !!(_member.config && _member.config.childInherited)

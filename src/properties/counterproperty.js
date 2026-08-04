@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function CounterProperty(_config, _owner) {
    _config.valueType = "number";
+   _config.writable = false;
    Property.call(this, _config, _owner);
    this.countPositives = _config.hasOwnProperty("countPositives") ? _config.countPositives : false;
 }

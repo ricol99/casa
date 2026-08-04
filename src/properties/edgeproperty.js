@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function EdgeProperty(_config, _owner) {
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    if (_config.hasOwnProperty('leadingEdgeOutput')) {

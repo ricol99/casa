@@ -11,6 +11,7 @@ const I2c = require('i2c-bus');
 
 function I2cBusProperty(_config, _owner) {
    _config.valueType = "number";
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    this.bus = _config.hasOwnProperty("bus") ? _config.bus : 0;

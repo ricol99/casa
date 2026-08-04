@@ -922,6 +922,68 @@ button:hover {
   background: rgba(11, 126, 121, 0.08);
 }
 
+.webui-property-value {
+  display: inline-block;
+  min-width: 4rem;
+  overflow-wrap: anywhere;
+}
+
+.webui-property-editor {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 1fr) auto minmax(3.4rem, auto);
+  gap: 0.42rem;
+  align-items: center;
+  min-width: 15rem;
+}
+
+.webui-property-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(106, 113, 118, 0.2);
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--webui-text);
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.webui-property-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-width: 5rem;
+  color: var(--webui-text);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.webui-property-toggle input {
+  accent-color: var(--webui-accent);
+}
+
+.webui-property-editor button {
+  min-height: 2rem;
+  padding: 0.38rem 0.66rem;
+  font-size: 0.8rem;
+}
+
+.webui-property-edit-status {
+  min-width: 3.4rem;
+  color: #6a7381;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.webui-property-edit-status[data-state="ok"] {
+  color: var(--webui-accent-deep);
+}
+
+.webui-property-edit-status[data-state="error"] {
+  color: var(--webui-rust);
+}
+
 .webui-sources-layout {
   display: grid;
   grid-template-columns: minmax(340px, 1fr) minmax(0, 0.92fr);

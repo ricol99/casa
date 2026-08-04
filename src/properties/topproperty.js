@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function TopProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = false;
+   _config.writable = false;
 
    Property.call(this, _config, _owner);
    this.sources = [];
@@ -13,7 +14,7 @@ function TopProperty(_config, _owner) {
    else if (_config.hasOwnProperty('sources')) {
 
       for (var i = 0; i < _config.sources.length; ++i) {
-         this.sources.push(this.sourceListeners[_config.sources[i].uName];
+         this.sources.push(this.sourceListeners[_config.sources[i].uName]);
       }
    }
 }

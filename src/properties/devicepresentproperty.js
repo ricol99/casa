@@ -7,6 +7,7 @@ function DevicePresentProperty(_config, _owner) {
    this.host = _config.host;
    this.interval = (_config.interval == undefined) ? 60 : _config.interval;
    _config.valueType = "boolean";
+   _config.writable = false;
 
    Property.call(this, _config, _owner);
 }

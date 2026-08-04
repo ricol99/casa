@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function RollingAverageProperty(_config, _owner) {
    _config.valueType = "number";
+   _config.writable = false;
    Property.call(this, _config, _owner);
    this.periods = _config.hasOwnProperty("periods") ? _config.periods : 5;
    this.floorOutput = _config.hasOwnProperty("floorOutput") ? _config.floorOutput : false;

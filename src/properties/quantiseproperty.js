@@ -3,6 +3,7 @@ var Property = require('../property');
 
 function QuantiseProperty(_config, _owner) {
    _config.valueType = "string";
+   _config.writable = false;
    Property.call(this, _config, _owner);
    this.quanta = _config.quanta;
    this.boundaries = [];

@@ -176,6 +176,155 @@
     }
   }
 
+  function normaliseValueType(valueType) {
+    var text = String(valueType || '').trim().toLowerCase();
+    return text || undefined;
+  }
+
+  function isEditableValueType(valueType) {
+    return valueType === 'boolean' || valueType === 'number' || valueType === 'string';
+  }
+
+  function writableLabel(writable) {
+    if (writable === true) {
+      return 'yes';
+    }
+
+    if (writable === false) {
+      return 'no';
+    }
+
+    return '-';
+  }
+
+  function parsePropertyValue(inputEl, valueType) {
+    if (valueType === 'boolean') {
+      return !!inputEl.checked;
+    }
+
+    if (valueType === 'number') {
+      var text = String(inputEl.value || '').trim();
+      var value = Number(text);
+
+      if (text === '' || !isFinite(value)) {
+        throw new Error('Enter a number.');
+      }
+
+      return value;
+    }
+
+    return inputEl.value;
+  }
+
+  function propertyDetailsFromLegacyEntries(entries) {
+    return (entries || []).map(function (entry) {
+      var text = String(entry);
+      var separatorIndex = text.indexOf('=');
+
+      return {
+        name: separatorIndex === -1 ? text : text.slice(0, separatorIndex),
+        value: separatorIndex === -1 ? '' : text.slice(separatorIndex + 1)
+      };
+    });
+  }
+
+  function propertyDetailsFromState(payload) {
+    if (payload && payload.propertyDetails && payload.propertyDetails.length) {
+      return payload.propertyDetails;
+    }
+
+    return propertyDetailsFromLegacyEntries(payload ? payload.properties : []);
+  }
+
+  function propertyEditStatusMarkup() {
+    return '<span class="webui-property-edit-status" data-property-edit-status></span>';
+  }
+
+  function renderPropertyEditor(property, options) {
+    var valueType = normaliseValueType(property.valueType);
+    var value = property.value;
+    var sourceUName = options && options.sourceUName ? options.sourceUName : '';
+    var targetCasa = options && options.targetCasa ? options.targetCasa : '';
+    var name = property.name || '';
+    var inputMarkup;
+
+    if (!sourceUName || property.writable !== true || !isEditableValueType(valueType)) {
+      return '<span class="webui-property-value">' + escapeHtml(formatLiveValue(value)) + '</span>';
+    }
+
+    if (valueType === 'boolean') {
+      inputMarkup =
+        '<label class="webui-property-toggle">' +
+          '<input data-property-edit-input type="checkbox"' + (value === true ? ' checked' : '') + '>' +
+          '<span>' + (value === true ? 'true' : 'false') + '</span>' +
+        '</label>';
+    }
+    else {
+      inputMarkup =
+        '<input class="webui-property-input" data-property-edit-input type="' + (valueType === 'number' ? 'number' : 'text') + '" value="' + escapeHtmlAttr(value === undefined ? '' : formatLiveValue(value)) + '">';
+    }
+
+    return '<form class="webui-property-editor" data-property-edit-form ' +
+      'data-source-u-name="' + escapeHtmlAttr(sourceUName) + '" ' +
+      'data-target-casa="' + escapeHtmlAttr(targetCasa) + '" ' +
+      'data-property-name="' + escapeHtmlAttr(name) + '" ' +
+      'data-value-type="' + escapeHtmlAttr(valueType) + '">' +
+        inputMarkup +
+        '<button type="submit">Set</button>' +
+        propertyEditStatusMarkup() +
+      '</form>';
+  }
+
+  function setPropertyEditStatus(formEl, state, message) {
+    var statusEl = formEl.querySelector('[data-property-edit-status]');
+
+    if (!statusEl) {
+      return;
+    }
+
+    statusEl.dataset.state = state || '';
+    statusEl.textContent = message || '';
+  }
+
+  function submitPropertyEdit(formEl) {
+    var inputEl = formEl.querySelector('[data-property-edit-input]');
+    var sourceUName = formEl.getAttribute('data-source-u-name') || '';
+    var targetCasa = formEl.getAttribute('data-target-casa') || '';
+    var propertyName = formEl.getAttribute('data-property-name') || '';
+    var valueType = normaliseValueType(formEl.getAttribute('data-value-type'));
+    var value;
+
+    if (!inputEl || !sourceUName || !propertyName) {
+      return;
+    }
+
+    try {
+      value = parsePropertyValue(inputEl, valueType);
+    }
+    catch (error) {
+      setPropertyEditStatus(formEl, 'error', error.message || String(error));
+      return;
+    }
+
+    setPropertyEditStatus(formEl, 'pending', 'Saving');
+    sendCommand({
+      targetCasa: targetCasa || null,
+      obj: sourceUName,
+      method: 'setProperty',
+      arguments: [propertyName, value]
+    }, function (payload) {
+      if (!payload || !payload.ok) {
+        setPropertyEditStatus(formEl, 'error', payload && payload.error ? payload.error : 'Update failed.');
+        return;
+      }
+
+      setPropertyEditStatus(formEl, 'ok', 'Saved');
+      window.setTimeout(function () {
+        setPropertyEditStatus(formEl, '', '');
+      }, 1500);
+    });
+  }
+
   function formatLiveChange(entry) {
     if (entry.kind === 'property' && entry.oldValue !== undefined) {
       return formatLiveValue(entry.oldValue) + ' -> ' + formatLiveValue(entry.value);
@@ -672,14 +821,18 @@
       return '<span class="webui-chip">' + label + '</span>';
     }).join('');
 
-    var propertyRows = (payload.properties || []).map(function (entry) {
-      var separatorIndex = entry.indexOf('=');
-      var name = separatorIndex === -1 ? entry : entry.slice(0, separatorIndex);
-      var value = separatorIndex === -1 ? '' : entry.slice(separatorIndex + 1);
+    var propertyDetails = propertyDetailsFromState(payload);
+    var propertyRows = propertyDetails.map(function (property) {
+      var valueType = normaliseValueType(property.valueType);
 
       return '<tr>' +
-        '<td>' + escapeHtml(name) + '</td>' +
-        '<td>' + escapeHtml(value) + '</td>' +
+        '<td>' + escapeHtml(property.name) + '</td>' +
+        '<td>' + escapeHtml(valueType || '-') + '</td>' +
+        '<td>' + renderPropertyEditor(property, {
+          sourceUName: payload.uName,
+          targetCasa: payload.fromPeer ? payload.ownerCasa : ''
+        }) + '</td>' +
+        '<td>' + escapeHtml(writableLabel(property.writable)) + '</td>' +
       '</tr>';
     }).join('');
 
@@ -699,10 +852,10 @@
       '</section>' +
       '<section class="webui-designer-card">' +
         '<h4>Properties</h4>' +
-        ((payload.properties && payload.properties.length)
+        (propertyDetails.length
           ? '<div class="webui-table-wrap">' +
               '<table class="webui-table webui-table-compact">' +
-                '<thead><tr><th>name</th><th>value</th></tr></thead>' +
+                '<thead><tr><th>name</th><th>value type</th><th>value</th><th>writable</th></tr></thead>' +
                 '<tbody>' + propertyRows + '</tbody>' +
               '</table>' +
             '</div>'
@@ -751,7 +904,8 @@
 
       changed = true;
       return Object.assign({}, member, {
-        value: update.value
+        value: update.value,
+        valueType: update.valueType || member.valueType
       });
     });
 
@@ -827,6 +981,42 @@
     };
   }
 
+  function updatePropertyDetailEntries(entries, update) {
+    var changed = false;
+    var found = false;
+    var nextEntries = (entries || []).map(function (entry) {
+      if (!entry || entry.name !== update.name) {
+        return entry;
+      }
+
+      found = true;
+
+      if (Object.is(entry.value, update.value) && (!update.valueType || entry.valueType === update.valueType)) {
+        return entry;
+      }
+
+      changed = true;
+      return Object.assign({}, entry, {
+        value: update.value,
+        valueType: update.valueType || entry.valueType
+      });
+    });
+
+    if (!found) {
+      changed = true;
+      nextEntries = nextEntries.concat([{
+        name: update.name,
+        value: update.value,
+        valueType: update.valueType
+      }]);
+    }
+
+    return {
+      entries: changed ? nextEntries : entries,
+      changed: changed
+    };
+  }
+
   function updateEventEntries(entries, update) {
     var nextEntries = entries || [];
 
@@ -851,14 +1041,18 @@
     var result = kind === 'property'
       ? updatePropertyEntries(snapshot.properties || [], update)
       : updateEventEntries(snapshot.events || [], update);
+    var detailResult = kind === 'property'
+      ? updatePropertyDetailEntries(snapshot.propertyDetails || [], update)
+      : { entries: snapshot.propertyDetails, changed: false };
 
-    if (!result.changed) {
+    if (!result.changed && !detailResult.changed) {
       return snapshot;
     }
 
     if (kind === 'property') {
       return Object.assign({}, snapshot, {
-        properties: result.entries
+        properties: result.entries,
+        propertyDetails: detailResult.entries
       });
     }
 
@@ -912,7 +1106,10 @@
     }
   }
 
-  function renderMemberTable(title, members) {
+  function renderMemberTable(title, members, options) {
+    var canRenderEditors = !!(options && options.allowEdit && options.sourceUName);
+    var showPropertyMetadata = canRenderEditors || !!(options && options.showPropertyMetadata);
+
     if (!members || !members.length) {
       return '<section class="webui-designer-card"><h4>' + title + '</h4><div class="webui-empty">none</div></section>';
     }
@@ -921,9 +1118,23 @@
       '<h4>' + title + '</h4>' +
       '<div class="webui-table-wrap">' +
         '<table class="webui-table webui-table-compact">' +
-          '<thead><tr><th>name</th><th>type</th><th>value</th><th>inheritance</th><th>listeners</th></tr></thead>' +
+          (showPropertyMetadata
+            ? '<thead><tr><th>name</th><th>type</th><th>value type</th><th>value</th><th>writable</th><th>inheritance</th><th>listeners</th></tr></thead>'
+            : '<thead><tr><th>name</th><th>type</th><th>value</th><th>inheritance</th><th>listeners</th></tr></thead>') +
           '<tbody>' +
             members.map(function (member) {
+              if (showPropertyMetadata) {
+                return '<tr>' +
+                  '<td>' + escapeHtml(member.name) + '</td>' +
+                  '<td>' + escapeHtml(member.type || '-') + '</td>' +
+                  '<td>' + escapeHtml(normaliseValueType(member.valueType) || '-') + '</td>' +
+                  '<td>' + (canRenderEditors ? renderPropertyEditor(member, options) : escapeHtml(formatLiveValue(member.value))) + '</td>' +
+                  '<td>' + escapeHtml(writableLabel(member.writable)) + '</td>' +
+                  '<td>' + escapeHtml(inheritanceLabel(member)) + '</td>' +
+                  '<td>' + escapeHtml(member.sourceListenerCount === undefined || member.sourceListenerCount === null ? '-' : member.sourceListenerCount) + '</td>' +
+                '</tr>';
+              }
+
               return '<tr>' +
                 '<td>' + escapeHtml(member.name) + '</td>' +
                 '<td>' + escapeHtml(member.type || '-') + '</td>' +
@@ -1010,7 +1221,7 @@
         '<h4>Children</h4>' +
         '<div class="webui-chip-row">' + childList + '</div>' +
       '</section>' +
-      renderMemberTable('Properties', payload.properties || []) +
+      renderMemberTable('Properties', payload.properties || [], { showPropertyMetadata: true }) +
       renderMemberTable('Events', payload.events || []) +
       renderExternalList('Blocked from parent', payload.inheritance && payload.inheritance.blocked ? payload.inheritance.blocked.fromParent.properties.concat(payload.inheritance.blocked.fromParent.events) : [], 'none') +
       renderExternalList('Blocked from children', payload.inheritance && payload.inheritance.blocked ? payload.inheritance.blocked.fromChildren.properties.concat(payload.inheritance.blocked.fromChildren.events) : [], 'none');
@@ -1635,15 +1846,15 @@
     }
   }
 
-  function propertyValueRows(properties) {
-    return (properties || []).map(function (entry) {
-      var separatorIndex = String(entry).indexOf('=');
-      var name = separatorIndex === -1 ? entry : String(entry).slice(0, separatorIndex);
-      var value = separatorIndex === -1 ? '' : String(entry).slice(separatorIndex + 1);
+  function propertyValueRows(runtime, options) {
+    var properties = propertyDetailsFromState(runtime);
 
+    return properties.map(function (property) {
       return '<tr>' +
-        '<td>' + escapeHtml(name) + '</td>' +
-        '<td>' + escapeHtml(value) + '</td>' +
+        '<td>' + escapeHtml(property.name) + '</td>' +
+        '<td>' + escapeHtml(normaliseValueType(property.valueType) || '-') + '</td>' +
+        '<td>' + renderPropertyEditor(property, options) + '</td>' +
+        '<td>' + escapeHtml(writableLabel(property.writable)) + '</td>' +
       '</tr>';
     }).join('');
   }
@@ -1654,20 +1865,24 @@
     }).join('');
   }
 
-  function renderGlobalRuntimeCard(runtime) {
+  function renderGlobalRuntimeCard(runtime, targetCasa) {
     if (!runtime) {
       return '<section class="webui-designer-card"><h4>Values</h4><div class="webui-empty">Loading authoritative values...</div></section>';
     }
 
-    var propertyRows = propertyValueRows(runtime.properties || []);
+    var propertyDetails = propertyDetailsFromState(runtime);
+    var propertyRows = propertyValueRows(runtime, {
+      sourceUName: runtime.uName,
+      targetCasa: targetCasa || runtime.ownerCasa
+    });
     var eventRows = simpleNameRows(runtime.events || []);
 
     return '<section class="webui-designer-card">' +
       '<h4>Values</h4>' +
-      ((runtime.properties && runtime.properties.length)
+      (propertyDetails.length
         ? '<div class="webui-table-wrap">' +
             '<table class="webui-table webui-table-compact">' +
-              '<thead><tr><th>property</th><th>value</th></tr></thead>' +
+              '<thead><tr><th>property</th><th>value type</th><th>value</th><th>writable</th></tr></thead>' +
               '<tbody>' + propertyRows + '</tbody>' +
             '</table>' +
           '</div>'
@@ -1713,7 +1928,7 @@
         '<h4>Children</h4>' +
         '<div class="webui-chip-row">' + childList + '</div>' +
       '</section>' +
-      renderMemberTable('Configured Properties', detail.properties || []) +
+      renderMemberTable('Configured Properties', detail.properties || [], { showPropertyMetadata: true }) +
       renderMemberTable('Configured Events', detail.events || []);
   }
 
@@ -1781,7 +1996,7 @@
       body += '<section class="webui-designer-card"><h4>Values</h4><div class="webui-empty">Loading authoritative values from ' + escapeHtml(thing.activeOwnerCasa) + '...</div></section>';
     }
     else {
-      body += renderGlobalRuntimeCard(latestGlobalThingRuntime);
+      body += renderGlobalRuntimeCard(latestGlobalThingRuntime, thing.activeOwnerCasa);
       body += renderGlobalStructureCard(latestGlobalThingDetail);
     }
 
@@ -2210,6 +2425,44 @@
   liveTraceEventsToggle.addEventListener('change', function () {
     liveTraceShowEvents = liveTraceEventsToggle.checked;
     renderLiveTrace();
+  });
+  document.addEventListener('submit', function (event) {
+    var formEl = event.target.closest('[data-property-edit-form]');
+
+    if (!formEl) {
+      return;
+    }
+
+    event.preventDefault();
+    submitPropertyEdit(formEl);
+  });
+  document.addEventListener('change', function (event) {
+    var inputEl = event.target.closest('[data-property-edit-input]');
+    var formEl;
+    var labelEl;
+
+    if (!inputEl || inputEl.type !== 'checkbox') {
+      return;
+    }
+
+    formEl = inputEl.closest('[data-property-edit-form]');
+    labelEl = inputEl.parentNode ? inputEl.parentNode.querySelector('span') : null;
+
+    if (labelEl) {
+      labelEl.textContent = inputEl.checked ? 'true' : 'false';
+    }
+
+    if (formEl) {
+      setPropertyEditStatus(formEl, '', '');
+    }
+  });
+  document.addEventListener('input', function (event) {
+    var inputEl = event.target.closest('[data-property-edit-input]');
+    var formEl = inputEl ? inputEl.closest('[data-property-edit-form]') : null;
+
+    if (formEl) {
+      setPropertyEditStatus(formEl, '', '');
+    }
   });
   tabButtons.forEach(function (button) {
     button.addEventListener('click', function () {

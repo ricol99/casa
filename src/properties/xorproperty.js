@@ -4,6 +4,7 @@ var Property = require('../property');
 function XorProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = false;
    _config.valueType = "boolean";
+   _config.writable = false;
 
    Property.call(this, _config, _owner);
 }
@@ -84,4 +85,3 @@ XorProperty.prototype.amIValid = function() {
 };
 
 module.exports = exports = XorProperty;
-

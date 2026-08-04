@@ -2,6 +2,7 @@ var util = require('util');
 var Property = require('../property');
 
 function DelayProperty(_config, _owner) {
+   _config.writable = false;
    Property.call(this, _config, _owner);
    this.delay = (_config.delay) ? _config.delay : 0;
    this.delayedEvents = [];

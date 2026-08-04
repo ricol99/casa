@@ -13,6 +13,7 @@ const Mcpadc = require('mcp-spi-adc');
 
 function SpiProperty(_config, _owner) {
    _config.valueType = "number";
+   _config.writable = false;
    Property.call(this, _config, _owner);
 
    this.device = _config.device;
