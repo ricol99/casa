@@ -54,6 +54,7 @@
   var liveTracePausedLabelEl = document.getElementById('live-trace-paused-label');
   var liveTracePropertiesToggle = document.getElementById('live-trace-properties-toggle');
   var liveTraceEventsToggle = document.getElementById('live-trace-events-toggle');
+  var liveTraceLocalToggle = document.getElementById('live-trace-local-toggle');
   var liveTraceFilterEl = document.getElementById('live-trace-filter');
   var liveTracePauseButton = document.getElementById('live-trace-pause-button');
   var liveTraceClearButton = document.getElementById('live-trace-clear-button');
@@ -88,6 +89,7 @@
   var liveTraceFilter = '';
   var liveTraceShowProperties = true;
   var liveTraceShowEvents = true;
+  var liveTraceShowLocal = true;
   var nextLiveTraceId = 1;
   var MAX_LIVE_TRACE_ENTRIES = 250;
 
@@ -357,6 +359,10 @@
     }
 
     if (entry.kind === 'event' && !liveTraceShowEvents) {
+      return false;
+    }
+
+    if (entry.local && !liveTraceShowLocal) {
       return false;
     }
 
@@ -2424,6 +2430,10 @@
   });
   liveTraceEventsToggle.addEventListener('change', function () {
     liveTraceShowEvents = liveTraceEventsToggle.checked;
+    renderLiveTrace();
+  });
+  liveTraceLocalToggle.addEventListener('change', function () {
+    liveTraceShowLocal = liveTraceLocalToggle.checked;
     renderLiveTrace();
   });
   document.addEventListener('submit', function (event) {
