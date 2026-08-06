@@ -28,16 +28,20 @@ function runAsyncTest(_name, _fn) {
 
 function createTransportHarness() {
    var sent = [];
+   var subscribedChannels = [];
+   var channelHandlers = {};
    var fakeMessageChannel = {
       bind: function(_event, _handler) {
-         this.handlers[_event] = _handler;
-      },
-      handlers: {}
+         channelHandlers[this.name + ":" + _event] = _handler;
+      }
    };
    var fakePusher = {
       subscribe: function(_channelName) {
-         assert.strictEqual(_channelName, "message-channel_remote");
-         return fakeMessageChannel;
+         subscribedChannels.push(_channelName);
+         return {
+            name: _channelName,
+            bind: fakeMessageChannel.bind
+         };
       }
    };
    var fakeIoMessageSocketService = {
@@ -69,6 +73,8 @@ function createTransportHarness() {
    return {
       fakeMessageChannel: fakeMessageChannel,
       fakePusher: fakePusher,
+      subscribedChannels: subscribedChannels,
+      channelHandlers: channelHandlers,
       sent: sent,
       transport: transport
    };
@@ -101,7 +107,8 @@ runTest("oversized console payloads are fragmented below the conservative pusher
    assert.ok(harness.sent.length > 1);
 
    for (var i = 0; i < harness.sent.length; ++i) {
-      assert.strictEqual(harness.sent[i].channel, "message-channel_remote");
+      assert.ok(harness.sent[i].channel === harness.transport.messageChannelName(":remote") ||
+                harness.sent[i].channel === harness.transport.legacyMessageChannelName(":remote"));
       assert.strictEqual(harness.sent[i].message, "message");
       assert.strictEqual(harness.transport.serializedSize(harness.sent[i].body) <= harness.transport.maxPayloadBytes, true);
       assert.strictEqual(harness.sent[i].body.__casaPusherFragment, true);
@@ -127,9 +134,16 @@ runTest("small console payloads stay as a single bearer message", function() {
 
    harness.transport.sendMessage("message", envelope);
 
-   assert.strictEqual(harness.sent.length, 1);
+   assert.strictEqual(harness.sent.length, 2);
    assert.strictEqual(harness.sent[0].body.__casaPusherFragment, undefined);
    assert.strictEqual(harness.sent[0].body.message, "message");
+});
+
+runTest("canonical pusher channel names keep colon-separated casas distinct", function() {
+   var harness = createTransportHarness();
+
+   assert.notStrictEqual(harness.transport.messageChannelName(":ab"), harness.transport.messageChannelName(":a:b"));
+   assert.strictEqual(harness.transport.legacyMessageChannelName(":ab"), harness.transport.legacyMessageChannelName(":a:b"));
 });
 
 runAsyncTest("fragmented payloads are reassembled before socket listeners receive them", function(_done) {
@@ -153,7 +167,9 @@ runAsyncTest("fragmented payloads are reassembled before socket listeners receiv
    });
 
    harness.transport.sendMessage("message", envelope);
-   harness.sent.reverse().forEach( (_item) => {
-      harness.fakeMessageChannel.handlers.message(_item.body);
+   harness.sent.forEach( (_item) => {
+      var handler = harness.channelHandlers[_item.channel + ":message"];
+      assert.ok(handler);
+      handler(_item.body);
    });
 });

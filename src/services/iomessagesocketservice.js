@@ -6,6 +6,7 @@ function IoMessageSocketService(_config, _owner) {
    Service.call(this, _config, _owner);
    this.setMaxListeners(0);
    this.messageTransports = {};
+   this.nextLocalSocketId = 0;
 }
 
 util.inherits(IoMessageSocketService, Service);
@@ -27,6 +28,12 @@ IoMessageSocketService.prototype.createSocket = function(_messageTransport) {
 
 IoMessageSocketService.prototype.deleteSocket = function(_socket) {
    _socket.getMessageTransport().deleteSocket(_socket);
+};
+
+IoMessageSocketService.prototype.createSocketId = function(_messageTransport, _route) {
+   var casaName = this.gang && this.gang.casa ? this.gang.casa.uName : "unknown-casa";
+   var route = _route ? _route : "pending";
+   return _messageTransport.getName() + "/" + casaName + "/" + route + ":" + Date.now() + ":" + this.nextLocalSocketId++;
 };
 
 IoMessageSocketService.prototype.addMessageTransport = function(_transportName, _transport) {
@@ -84,7 +91,7 @@ function IoMessageSocket(_owner, _messageTransport) {
    this.route = "";
    this.serverSocket = false;
    this.state = "idle";
-   this.id = this.messageTransport.getName() + "/" + this.route + ":" + Date.now();
+   this.id = this.owner.createSocketId(this.messageTransport, this.route);
    this.connectConfig = {};
 };
 
@@ -184,14 +191,14 @@ IoMessageSocket.prototype.error = function(_error) {
 
    if ((this.state === "connecting") || (this.state === "connected")) {
       this.sendMessageOnTransport("error", { error: _error });
-      this.clearHeartbeatTimeouts();
    }
 
-   this.asyncEmit("error", { error: "Connection timed out!" });
+   this.clearHeartbeatTimeouts();
    this.state = "idle";
    this.clearConnectingTimeout();
    this.clearDisconnectingTimeout();
    this.owner.deleteSocket(this);
+   this.asyncEmit("error", { error: _error });
 };
 
 IoMessageSocket.prototype.clearConnectingTimeout = function() {
@@ -304,9 +311,11 @@ IoMessageSocket.prototype.receivedDisconnectFromTransport = function(_data) {
    }
 
    this.clearHeartbeatTimeouts();
+   this.clearConnectingTimeout();
    this.asyncEmit("disconnect");
    this.sendMessageOnTransport("disconnect-response", {});
    this.state = "idle";
+   this.owner.deleteSocket(this);
 };
 
 IoMessageSocket.prototype.receivedDisconnectRespFromTransport = function(_data) {
@@ -316,16 +325,23 @@ IoMessageSocket.prototype.receivedDisconnectRespFromTransport = function(_data) 
       return;
    }
 
-   util.clearTimeout(this.disconnectingTimeout)
+   util.clearTimeout(this.disconnectingTimeout);
+   this.clearHeartbeatTimeouts();
    this.state = "idle";
+   this.owner.deleteSocket(this);
+   this.asyncEmit("disconnect");
 };
 
 IoMessageSocket.prototype.receivedErrorFromTransport = function(_data) {
 
    if (this.state !== "idle") {
-      this.state = "idle";
       let err = _data.hasOwnProperty("error") ? _data.error : "Unspecified reason";
-      this.error("error", { error: "Transport Error: " + err });
+      this.clearHeartbeatTimeouts();
+      this.clearConnectingTimeout();
+      this.clearDisconnectingTimeout();
+      this.state = "idle";
+      this.owner.deleteSocket(this);
+      this.asyncEmit("error", { error: "Transport Error: " + err });
    }
 };
 
@@ -508,3 +524,7 @@ IoRoute.prototype.executeCallback = function() {
 };
 
 module.exports = exports = IoMessageSocketService;
+module.exports.__testExports = {
+   IoMessageSocket: IoMessageSocket,
+   IoMessageTransport: IoMessageTransport
+};

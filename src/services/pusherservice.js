@@ -149,6 +149,10 @@ function PusherMessageTransport(_owner, _ioMessageSocketService) {
    this.maxFragmentCount = 2048;
    this.pendingMessageTimeoutMs = 30000;
    this.nextFragmentId = 0;
+   this.completedFragmentMessages = {};
+   this.nextPusherMessageId = 0;
+   this.receivedPusherMessages = {};
+   this.receivedPusherMessageTimeoutMs = 60000;
 }
 
 util.inherits(PusherMessageTransport, AsyncEmitter);
@@ -167,7 +171,15 @@ PusherMessageTransport.prototype.start = function(_pusher) {
       }
    }
 
-   var messageChannel = this.pusher.subscribe("message-channel_" + this.owner.gang.casa.uName.replace(/:/g, ""));
+   var channelNames = this.messageChannelNames(this.owner.gang.casa.uName);
+
+   for (var i = 0; i < channelNames.length; ++i) {
+      this.subscribeMessageChannel(channelNames[i]);
+   }
+};
+
+PusherMessageTransport.prototype.subscribeMessageChannel = function(_channelName) {
+   var messageChannel = this.pusher.subscribe(_channelName);
 
    messageChannel.bind("message", (_data) => {
       _data = this.processIncomingMessage(_data);
@@ -175,6 +187,12 @@ PusherMessageTransport.prototype.start = function(_pusher) {
       if (!_data) {
          return;
       }
+
+      if (this.hasSeenPusherMessage(_data)) {
+         return;
+      }
+
+      delete _data.pusherMessageId;
 
       console.log(this.owner.uName + ": Message received from " + _data.peerAddress + ", message=",_data.message);
 
@@ -188,6 +206,57 @@ PusherMessageTransport.prototype.start = function(_pusher) {
          console.error(this.uName + ": Receive malformed message on message channel");
       }
    }, this);
+};
+
+PusherMessageTransport.prototype.legacyMessageChannelName = function(_address) {
+   return "message-channel_" + _address.replace(/:/g, "");
+};
+
+PusherMessageTransport.prototype.messageChannelName = function(_address) {
+   var encodedAddress = Buffer.from(_address, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+   return "message-channel_v2_" + encodedAddress;
+};
+
+PusherMessageTransport.prototype.messageChannelNames = function(_address) {
+   var names = [this.messageChannelName(_address)];
+   var legacyName = this.legacyMessageChannelName(_address);
+
+   if (legacyName !== names[0]) {
+      names.push(legacyName);
+   }
+
+   return names;
+};
+
+PusherMessageTransport.prototype.createPusherMessageId = function(_data) {
+   return [
+      this.owner.gang.casa.uName,
+      _data.destAddress,
+      _data.id,
+      Date.now(),
+      this.nextPusherMessageId++
+   ].join(":");
+};
+
+PusherMessageTransport.prototype.hasSeenPusherMessage = function(_data) {
+
+   if (!_data.pusherMessageId) {
+      return false;
+   }
+
+   if (this.receivedPusherMessages.hasOwnProperty(_data.pusherMessageId)) {
+      return true;
+   }
+
+   this.receivedPusherMessages[_data.pusherMessageId] = setTimeout( (_pusherMessageId) => {
+      delete this.receivedPusherMessages[_pusherMessageId];
+   }, this.receivedPusherMessageTimeoutMs, _data.pusherMessageId);
+
+   if (this.receivedPusherMessages[_data.pusherMessageId].unref) {
+      this.receivedPusherMessages[_data.pusherMessageId].unref();
+   }
+
+   return false;
 };
 
 PusherMessageTransport.prototype.isFragmentEnvelope = function(_data) {
@@ -221,6 +290,16 @@ PusherMessageTransport.prototype.clearPendingMessage = function(_fragmentId) {
    }
 };
 
+PusherMessageTransport.prototype.markCompletedFragmentMessage = function(_fragmentId) {
+   this.completedFragmentMessages[_fragmentId] = setTimeout( (_completedFragmentId) => {
+      delete this.completedFragmentMessages[_completedFragmentId];
+   }, this.pendingMessageTimeoutMs, _fragmentId);
+
+   if (this.completedFragmentMessages[_fragmentId].unref) {
+      this.completedFragmentMessages[_fragmentId].unref();
+   }
+};
+
 PusherMessageTransport.prototype.processIncomingMessage = function(_data) {
 
    if (!this.isFragmentEnvelope(_data)) {
@@ -235,6 +314,10 @@ PusherMessageTransport.prototype.processIncomingMessage = function(_data) {
       return null;
    }
 
+   if (this.completedFragmentMessages.hasOwnProperty(_data.fragmentId)) {
+      return null;
+   }
+
    if (!this.pendingMessages.hasOwnProperty(_data.fragmentId)) {
       this.pendingMessages[_data.fragmentId] = {
          fragmentCount: _data.fragmentCount,
@@ -246,6 +329,10 @@ PusherMessageTransport.prototype.processIncomingMessage = function(_data) {
             this.clearPendingMessage(_fragmentId);
          }, this.pendingMessageTimeoutMs, _data.fragmentId)
       };
+
+      if (this.pendingMessages[_data.fragmentId].timeout.unref) {
+         this.pendingMessages[_data.fragmentId].timeout.unref();
+      }
    }
 
    var pending = this.pendingMessages[_data.fragmentId];
@@ -269,6 +356,7 @@ PusherMessageTransport.prototype.processIncomingMessage = function(_data) {
 
    var combined = pending.fragments.join("");
    this.clearPendingMessage(_data.fragmentId);
+   this.markCompletedFragmentMessage(_data.fragmentId);
 
    try {
       return JSON.parse(combined);
@@ -320,11 +408,14 @@ PusherMessageTransport.prototype.splitPayload = function(_serializedPayload, _fr
 
 PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
    _data.message = _message;
+   _data.pusherMessageId = this.createPusherMessageId(_data);
 
-   var channel = "message-channel_" + _data.destAddress.replace(/:/g, "");
+   var channelNames = this.messageChannelNames(_data.destAddress);
 
    if (this.serializedSize(_data) <= this.maxPayloadBytes) {
-      this.owner.sendMessage(channel, "message", _data);
+      for (var channelIndex = 0; channelIndex < channelNames.length; ++channelIndex) {
+         this.owner.sendMessage(channelNames[channelIndex], "message", _data);
+      }
       return;
    }
 
@@ -338,7 +429,9 @@ PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
 
    // Keep fragmentation hidden inside the bearer so higher-level socket code sees the original envelope.
    for (var i = 0; i < fragments.length; ++i) {
-      this.owner.sendMessage(channel, "message", this.makeFragmentEnvelope(fragmentId, i, fragments.length, fragments[i]));
+      for (var channelIndex = 0; channelIndex < channelNames.length; ++channelIndex) {
+         this.owner.sendMessage(channelNames[channelIndex], "message", this.makeFragmentEnvelope(fragmentId, i, fragments.length, fragments[i]));
+      }
    }
 };
 
