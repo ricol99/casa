@@ -18,6 +18,16 @@ function thingApplyInheritedStateSpec(_spec, _property) {
    }
 }
 
+function thingSetPassiveModeState(_property) {
+
+   if (_property instanceof StateProperty) {
+      _property.writable = false;
+      _property.ignoreControl = true;
+      _property.takeControlOnTransition = true;
+      _property.globalPriority = true;
+   }
+}
+
 function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
    var topOfTransaction = !_config.hasOwnProperty("notTopOfTransaction");
@@ -39,6 +49,10 @@ function Thing(_config, _owner) {
    }
 
    Source.call(this, _config, _owner);
+
+   if (!this.topLevelThing && this.properties.hasOwnProperty("MODE")) {
+      thingSetPassiveModeState(this.properties["MODE"]);
+   }
 
    var parent = { public: true, protected: false, private: false, parent: true, children: false, both: true };
    var child = { public: true, protected: true, private: false, parent: false, children: true, both: true };
