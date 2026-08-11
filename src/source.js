@@ -20,15 +20,10 @@ function Source(_config, _owner) {
    this.createChildren(_config.events, "event", this);
 
    if (!this.properties.hasOwnProperty("MODE")) {
-      var modes = [{ name: "manual", triggerOnDurationChange: true, priority: 100, timeout: _config.hasOwnProperty("manualOverrideTimeout") ? _config.manualOverrideTimeout : -1 }]; 
-
-      if (_config.hasOwnProperty("modes")) { 
-         modes.push.apply(modes, _config.modes)
-      };
-
-      this.ensurePropertyExists("MODE", "modeproperty", { restingMode: { name: "auto", priority: -100 }, modes: modes }, _config);
+      this.createModeProperty(_config);
    }
-   else {
+
+   if (this.properties.hasOwnProperty("MODE")) {
       this.properties["MODE"].setPropagation({ ignoreParent: false, ignoreChildren: false, propagateToParent: true, propagateToChildren: true });
    }
 
@@ -100,6 +95,16 @@ Source.prototype.createProperty = function(_config) {
 
    this.ensurePropertyExists(_config.name, (_config.hasOwnProperty("type")) ? _config.type : 'property', _config); 
    return true;
+};
+
+Source.prototype.createModeProperty = function(_config) {
+   var modes = [{ name: "manual", triggerOnDurationChange: true, priority: 100, timeout: _config.hasOwnProperty("manualOverrideTimeout") ? _config.manualOverrideTimeout : -1 }];
+
+   if (_config.hasOwnProperty("modes")) {
+      modes.push.apply(modes, _config.modes);
+   }
+
+   this.ensurePropertyExists("MODE", "modeproperty", { restingMode: { name: "auto", priority: -100 }, modes: modes }, _config);
 };
 
 Source.prototype.changeName = function(_newName) {

@@ -1,6 +1,22 @@
 var util = require('./util');
 var Source = require('./source');
 var Gang = require('./gang');
+var StateProperty = require('./properties/stateproperty');
+
+function thingApplyInheritedStateSpec(_spec, _property) {
+   _spec.writable = _property.writable;
+   _spec.ignoreControl = _property.ignoreControl;
+   _spec.takeControlOnTransition = _property.takeControlOnTransition;
+   _spec.globalPriority = _property.globalPriority;
+   _spec.states = [];
+
+   for (var state in _property.states) {
+
+      if (_property.states.hasOwnProperty(state)) {
+         _spec.states.push({ name: state, priority: _property.states[state].priority });
+      }
+   }
+}
 
 function Thing(_config, _owner) {
    var gang = Gang.mainInstance();
@@ -16,14 +32,6 @@ function Thing(_config, _owner) {
 
       if (!_config.hasOwnProperty("local")) {
          _config.local = true;
-      }
-
-      if (!_config.hasOwnProperty("properties")) {
-         _config.properties = [];
-      }
-
-      if (!_config.properties.some((prop) => prop && prop.name === "MODE")) {
-         _config.properties.push({ name: "MODE", type: "stateproperty", initialValue: "auto", ignoreControl: true, writable: false, takeControlOnTransition: true, globalPriority: true });
       }
    }
    else {
@@ -266,9 +274,15 @@ Thing.prototype.inheritChildProps = function() {
                   var oSpec = { name: prop, initialValue: childProp.value,
                                 valueType: childProp.getValueType(),
                                 local: childProp.local, childInherited: true };
+                  var propertyType = "property";
+
+                  if (childProp instanceof StateProperty && childProp.globalPriority) {
+                     propertyType = "stateproperty";
+                     thingApplyInheritedStateSpec(oSpec, childProp);
+                  }
 
                   util.assign(oSpec, childProp.getPropagation());
-                  this.ensurePropertyExists(prop, "property", oSpec, this.config);
+                  this.ensurePropertyExists(prop, propertyType, oSpec, this.config);
                }
             }
          }
@@ -329,16 +343,9 @@ Thing.prototype.inheritParentProps = function(_parentProps) {
                           local: true, parentInherited: true };
             let propertyType = "property";
 
-            if (parentProps[prop].type === "stateproperty" && parentProps[prop].globalPriority) {
+            if (parentProps[prop] instanceof StateProperty && parentProps[prop].globalPriority) {
                propertyType = "stateproperty";
-               oSpec.states = [];
-
-               for (var state in parentProps[prop].states) {
-
-                  if (parentProps[prop].states.hasOwnProperty(state)) {
-                     oSpec.states.push({ name: state, priority: parentProps[prop].states[state].priority });
-                  }
-               }
+               thingApplyInheritedStateSpec(oSpec, parentProps[prop]);
             }
 
             util.assign(oSpec, parentProps[prop].getPropagation());
