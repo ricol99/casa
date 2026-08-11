@@ -17,6 +17,14 @@ function Thing(_config, _owner) {
       if (!_config.hasOwnProperty("local")) {
          _config.local = true;
       }
+
+      if (!_config.hasOwnProperty("properties")) {
+         _config.properties = [];
+      }
+
+      if (!_config.properties.some((prop) => prop && prop.name === "MODE")) {
+         _config.properties.push({ name: "MODE", type: "stateproperty", initialValue: "auto", ignoreControl: true, writable: false, takeControlOnTransition: true, globalPriority: true });
+      }
    }
    else {
       this.topLevelThing = true;

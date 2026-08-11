@@ -984,6 +984,90 @@ button:hover {
   color: var(--webui-rust);
 }
 
+.webui-member-name-stack {
+  --member-prop-button-size: 1.15rem;
+  display: inline-grid;
+  grid-template-columns: minmax(5.5rem, max-content);
+  gap: 0.02rem;
+  vertical-align: top;
+  max-width: 100%;
+}
+
+.webui-member-name-line {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  padding: 0.04rem 0;
+}
+
+.webui-member-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.webui-member-name-stack.is-inherited .webui-member-name-text {
+  font-style: italic;
+}
+
+.webui-member-name-stack.is-override .webui-member-name-text {
+  font-weight: 700;
+}
+
+.webui-member-prop-marks {
+  display: grid;
+  grid-template-columns: repeat(2, var(--member-prop-button-size));
+  gap: 0.16rem;
+  min-height: var(--member-prop-button-size);
+  color: var(--webui-text);
+}
+
+.webui-member-prop-marks-parent {
+  justify-self: start;
+}
+
+.webui-member-prop-marks-children {
+  justify-self: end;
+}
+
+.webui-member-prop-button {
+  width: var(--member-prop-button-size);
+  height: var(--member-prop-button-size);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--webui-border);
+  border-radius: 999px;
+  background: var(--webui-panel-strong);
+}
+
+.webui-member-prop-button.is-unset {
+  background: rgba(77, 90, 103, 0.08);
+  opacity: 0.42;
+}
+
+.webui-member-prop-button.is-blocked {
+  color: var(--webui-rust);
+  border-color: rgba(138, 92, 36, 0.28);
+  background: rgba(138, 92, 36, 0.08);
+}
+
+.webui-member-prop-button svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  overflow: visible;
+}
+
+.webui-member-prop-button svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .webui-sources-layout {
   display: grid;
   grid-template-columns: minmax(340px, 1fr) minmax(0, 0.92fr);

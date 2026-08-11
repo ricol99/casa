@@ -98,8 +98,9 @@ function ModeProperty(_config, _owner) {
             activeSources.push({ property: durationPropName, transform: "$value !== -1", valueType: "boolean" });
          }
 
-         this.createProperty({ name: activePropName, type: "property", valueType: "boolean", initialValue: modeConfig.initialValue === mode.name,
-                               sources: activeSources}, _config);
+         this.createProperty({ name: activePropName, type: "property", valueType: "boolean", ignoreParent: modeConfig.ignoreParent, ignoreChildren: modeConfig.ignoreChildren,
+                               propagateToParent: modeConfig.propagateToParent, propagateToChildren: modeConfig.propagateToChildren,
+                               initialValue: modeConfig.initialValue === mode.name, sources: activeSources}, _config);
 
       }
 

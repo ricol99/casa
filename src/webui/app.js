@@ -892,6 +892,74 @@
     return 'local';
   }
 
+  function isInheritedMember(member) {
+    return !!(member && member.inherited && (member.inherited.parent || member.inherited.child));
+  }
+
+  function memberPropagationIcon(direction, blocked) {
+    if (blocked) {
+      return '<svg viewBox="0 0 14 18" aria-hidden="true">' +
+        '<path d="M2 2L12 16"></path>' +
+        '<path d="M12 2L2 16"></path>' +
+      '</svg>';
+    }
+
+    if (direction === 'up') {
+      return '<svg viewBox="0 0 14 18" aria-hidden="true">' +
+        '<path d="M7 16V4"></path>' +
+        '<path d="M3 8L7 4L11 8"></path>' +
+      '</svg>';
+    }
+
+    return '<svg viewBox="0 0 14 18" aria-hidden="true">' +
+      '<path d="M7 2V14"></path>' +
+      '<path d="M3 10L7 14L11 10"></path>' +
+    '</svg>';
+  }
+
+  function memberPropagationButton(direction, rawValue, effectiveValue, allowLabel, blockLabel, inheritedLabel, inverted) {
+    var isUnset = rawValue === null || rawValue === undefined;
+    var blocked = inverted ? rawValue === true : rawValue === false;
+    var effectiveBlocked = inverted ? effectiveValue === true : effectiveValue === false;
+    var stateClass = isUnset ? ' is-unset' : (blocked ? ' is-blocked' : ' is-allowed');
+    var title = isUnset
+      ? inheritedLabel + ': using thing policy, ' + (effectiveBlocked ? blockLabel : allowLabel)
+      : (blocked ? blockLabel : allowLabel);
+    var icon = isUnset ? '' : memberPropagationIcon(direction, blocked);
+
+    return '<span class="webui-member-prop-button' + stateClass + '" title="' + escapeHtmlAttr(title) + '">' + icon + '</span>';
+  }
+
+  function renderMemberPropagationMarks(member, side) {
+    var propagation = member.propagation || {};
+    var raw = propagation.raw || {};
+    var effective = propagation.effective || {};
+
+    if (side === 'parent') {
+      return '<span class="webui-member-prop-marks webui-member-prop-marks-parent" aria-label="Parent property overrides">' +
+        memberPropagationButton('down', raw.ignoreParent, effective.ignoreParent, 'listens to parent', 'ignores parent', 'parent input', true) +
+        memberPropagationButton('up', raw.propagateToParent, effective.propagateToParent, 'propagates to parent', 'does not propagate to parent', 'parent output', false) +
+      '</span>';
+    }
+
+    return '<span class="webui-member-prop-marks webui-member-prop-marks-children" aria-label="Child property overrides">' +
+      memberPropagationButton('down', raw.propagateToChildren, effective.propagateToChildren, 'propagates to children', 'does not propagate to children', 'child output', false) +
+      memberPropagationButton('up', raw.ignoreChildren, effective.ignoreChildren, 'listens to children', 'ignores children', 'child input', true) +
+    '</span>';
+  }
+
+  function renderMemberName(member) {
+    var inheritedClass = isInheritedMember(member) ? ' is-inherited' : '';
+
+    return '<span class="webui-member-name-stack' + inheritedClass + '">' +
+      renderMemberPropagationMarks(member, 'parent') +
+      '<span class="webui-member-name-line">' +
+        '<span class="webui-member-name-text">' + escapeHtml(member.name) + '</span>' +
+      '</span>' +
+      renderMemberPropagationMarks(member, 'children') +
+    '</span>';
+  }
+
   function memberMatchesLiveUpdate(member, thingUName, update) {
     var sourceName = normaliseUName(update.sourceName);
     var memberUName = normaliseUName(member.uName);
@@ -1131,21 +1199,21 @@
             members.map(function (member) {
               if (showPropertyMetadata) {
                 return '<tr>' +
-                  '<td>' + escapeHtml(member.name) + '</td>' +
+                  '<td>' + renderMemberName(member) + '</td>' +
                   '<td>' + escapeHtml(member.type || '-') + '</td>' +
                   '<td>' + escapeHtml(normaliseValueType(member.valueType) || '-') + '</td>' +
                   '<td>' + (canRenderEditors ? renderPropertyEditor(member, options) : escapeHtml(formatLiveValue(member.value))) + '</td>' +
                   '<td>' + escapeHtml(writableLabel(member.writable)) + '</td>' +
-                  '<td>' + escapeHtml(inheritanceLabel(member)) + '</td>' +
+                  '<td>' + (isInheritedMember(member) ? 'inherited' : 'defined') + '</td>' +
                   '<td>' + escapeHtml(member.sourceListenerCount === undefined || member.sourceListenerCount === null ? '-' : member.sourceListenerCount) + '</td>' +
                 '</tr>';
               }
 
               return '<tr>' +
-                '<td>' + escapeHtml(member.name) + '</td>' +
+                '<td>' + renderMemberName(member) + '</td>' +
                 '<td>' + escapeHtml(member.type || '-') + '</td>' +
                 '<td>' + escapeHtml(formatLiveValue(member.value)) + '</td>' +
-                '<td>' + escapeHtml(inheritanceLabel(member)) + '</td>' +
+                '<td>' + (isInheritedMember(member) ? 'inherited' : 'defined') + '</td>' +
                 '<td>' + escapeHtml(member.sourceListenerCount === undefined || member.sourceListenerCount === null ? '-' : member.sourceListenerCount) + '</td>' +
               '</tr>';
             }).join('') +
