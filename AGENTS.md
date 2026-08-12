@@ -8,6 +8,7 @@
 - Keep filtering policy in one reusable predicate and apply it consistently across Casa, PeerCasa, and MCP outputs.
 - Build from authoritative runtime structures (`sources`, named-object tree ownership) and avoid duplicating state derivations when existing models already track it.
 - Prefer composition over special-case registries; use tree roots (for example bow roots) when that aligns with existing named-object mechanics.
+- Prefer prototype methods for class/module behavior, including internal helpers when they operate on instance state, so `this` consistently means the object instance. Avoid free helper functions for instance behavior unless there is a clear reason to prefer lexical or stateless handling.
 - Preserve behavior compatibility at handshake boundaries (`login` and `loginAACCKK`) whenever serialization format changes.
 - Add targeted integration checks for peer login/ack import, bow/stand transitions, and tree reconstruction before/after refactors.
 - Add lightweight guardrails for refactors: method-name checks, traversal coverage checks, and small focused tests to catch regressions early.

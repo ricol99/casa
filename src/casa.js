@@ -174,6 +174,13 @@ Casa.prototype.coldStart = function() {
       var peerCasa = this.gang.createPeerCasa("anonymous-"+Date.now(), true);
       peerCasa.serveClient(_socket);
    }, "all");
+
+   this.mainWebService.addIoRoute('/peergangcasa', (_socket) => {
+      console.log('a peer gang casa has joined');
+      var PeerGangCasa = require('./peergangcasa');
+      var peerGangCasa = new PeerGangCasa({ name: "anonymous-"+Date.now() }, this.gang);
+      peerGangCasa.serveClient(_socket);
+   }, "all");
 };
 
 Casa.prototype.hotStart = function() {

@@ -4,8 +4,8 @@ var Gang = require('./gang');
 
 function SourceBase(_config, _owner) {
    NamedObject.call(this, _config, _owner);
-   this.gang = Gang.mainInstance();
-   this.casa = this.gang.casa;
+   this.gang = _config.gang || Gang.mainInstance();
+   this.casa = this.gang ? this.gang.casa : null;
    this.bowing = false;
    this.currentTransaction = null;
    this.properties = {};

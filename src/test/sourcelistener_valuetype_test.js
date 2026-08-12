@@ -78,6 +78,83 @@ runTest("event source listener with valueType still runs property valueType chec
    assert.strictEqual(harness.getCheckCalls(), 1);
 });
 
+runTest("remote gang source listener resolves through PeerGang", function() {
+   var subscribeCalls = 0;
+   var localFindCalls = 0;
+   var source = {
+      uName: ":building",
+      bowing: false,
+      properties: {
+         "gate-open": {
+            getValueType: function() {
+               return "boolean";
+            }
+         }
+      },
+      bound: [],
+      on: function(_event, _handler, _subscription) {
+         this.bound.push({ event: _event, handler: _handler, subscription: _subscription });
+      },
+      hasProperty: function(_property) {
+         return this.properties.hasOwnProperty(_property);
+      }
+   };
+   var peerGang = {
+      subscribeSourceListener: function(_sourceListener) {
+         subscribeCalls = subscribeCalls + 1;
+         assert.strictEqual(_sourceListener.sourceGangName, "farm-gate");
+      },
+      findNamedObject: function(_uName) {
+         assert.strictEqual(_uName, ":building");
+         return source;
+      }
+   };
+   var listener = Object.create(SourceListener.prototype);
+   listener.uName = ":target:listener";
+   listener.sourceName = ":building";
+   listener.sourceGangName = "farm-gate";
+   listener.remoteGangSource = true;
+   listener.sourceEventName = "farm-gate::building:gate-open";
+   listener.listeningToPropertyChange = true;
+   listener.capturingAllEvents = false;
+   listener.eventName = "gate-open";
+   listener.subscription = { sourceName: ":building", property: "gate-open", gang: "farm-gate" };
+   listener.outputValues = {};
+   listener.listening = false;
+   listener.gang = {
+      name: "home",
+      findNamedObject: function() {
+         localFindCalls = localFindCalls + 1;
+         return null;
+      },
+      findOrCreatePeerGang: function(_gangName) {
+         assert.strictEqual(_gangName, "farm-gate");
+         return peerGang;
+      }
+   };
+
+   assert.strictEqual(listener.establishListeners(), true);
+   assert.strictEqual(subscribeCalls, 1);
+   assert.strictEqual(localFindCalls, 0);
+   assert.strictEqual(source.bound[0].event, "property-changed");
+   assert.strictEqual(source.bound[0].subscription.gang, "farm-gate");
+});
+
+runTest("remote gang source event name includes gang only when remote", function() {
+   assert.strictEqual(
+      SourceListener.getSourceEventName(":building", { gang: "farm-gate", property: "gate-open" }, "home"),
+      "farm-gate::building:gate-open"
+   );
+   assert.strictEqual(
+      SourceListener.getSourceEventName(":building", { gang: "home", property: "gate-open" }, "home"),
+      ":building:gate-open"
+   );
+   assert.strictEqual(
+      SourceListener.getSourceEventName(":building", { property: "gate-open" }, "home"),
+      ":building:gate-open"
+   );
+});
+
 runTest("property valueType mismatch logs instead of throwing", function() {
    var errors = [];
    var oldConsoleError = console.error;

@@ -3,6 +3,7 @@ var Service = require('../service');
 var Pusher = require("pusher-js");
 var PusherServer = require("pusher");
 var AsyncEmitter = require('../asyncemitter');
+var GangCasaAddress = require('../gangcasaaddress');
 
 function PusherService(_config, _owner) {
    Service.call(this, _config, _owner);
@@ -153,6 +154,13 @@ function PusherMessageTransport(_owner, _ioMessageSocketService) {
    this.nextPusherMessageId = 0;
    this.receivedPusherMessages = {};
    this.receivedPusherMessageTimeoutMs = 60000;
+   this.pusherOriginId = [
+      this.owner.gang.name,
+      this.owner.gang.casa.uName,
+      Date.now(),
+      Math.floor(Math.random() * 1000000000)
+   ].join(":");
+   this.subscribedChannels = {};
 }
 
 util.inherits(PusherMessageTransport, AsyncEmitter);
@@ -171,7 +179,7 @@ PusherMessageTransport.prototype.start = function(_pusher) {
       }
    }
 
-   var channelNames = this.messageChannelNames(this.owner.gang.casa.uName);
+   var channelNames = this.messageChannelNames(this.localPeerAddress());
 
    for (var i = 0; i < channelNames.length; ++i) {
       this.subscribeMessageChannel(channelNames[i]);
@@ -179,58 +187,73 @@ PusherMessageTransport.prototype.start = function(_pusher) {
 };
 
 PusherMessageTransport.prototype.subscribeMessageChannel = function(_channelName) {
+
+   if (this.subscribedChannels[_channelName + ":message"]) {
+      return;
+   }
+
+   this.subscribedChannels[_channelName + ":message"] = true;
+
    var messageChannel = this.pusher.subscribe(_channelName);
 
    messageChannel.bind("message", (_data) => {
-      _data = this.processIncomingMessage(_data);
-
-      if (!_data) {
-         return;
-      }
-
-      if (this.hasSeenPusherMessage(_data)) {
-         return;
-      }
-
-      delete _data.pusherMessageId;
-
-      console.log(this.owner.uName + ": Message received from " + _data.peerAddress + ", message=",_data.message);
-
-      if (_data && _data.hasOwnProperty("peerAddress") && (_data.peerAddress !== this.owner.gang.casa.uName) &&
-          _data.hasOwnProperty("route") && _data.hasOwnProperty("id") &&
-          _data.hasOwnProperty("destAddress") && _data.hasOwnProperty("message") &&  _data.hasOwnProperty("messageData")) { 
-
-          this.asyncEmit(_data.message, _data);
-      }
-      else {
-         console.error(this.uName + ": Receive malformed message on message channel");
-      }
+      this.receivedPusherTransportMessage(_data);
    }, this);
 };
 
-PusherMessageTransport.prototype.legacyMessageChannelName = function(_address) {
-   return "message-channel_" + _address.replace(/:/g, "");
+PusherMessageTransport.prototype.receivedPusherTransportMessage = function(_data) {
+   _data = this.processIncomingMessage(_data);
+
+   if (!_data) {
+      return;
+   }
+
+   if (_data.pusherOriginId && (_data.pusherOriginId === this.pusherOriginId)) {
+      return;
+   }
+
+   if (this.hasSeenPusherMessage(_data)) {
+      return;
+   }
+
+   delete _data.pusherMessageId;
+   delete _data.pusherOriginId;
+
+   console.log(this.owner.uName + ": Message received from " + _data.peerAddress + ", message=",_data.message);
+
+   if (_data && _data.hasOwnProperty("peerAddress") &&
+       _data.hasOwnProperty("route") && _data.hasOwnProperty("id") &&
+       _data.hasOwnProperty("destAddress") && _data.hasOwnProperty("message") &&  _data.hasOwnProperty("messageData")) {
+
+       this.asyncEmit(_data.message, _data);
+   }
+   else {
+      console.error(this.uName + ": Receive malformed message on message channel");
+   }
+};
+
+PusherMessageTransport.prototype.base64UrlEncode = function(_value) {
+   return Buffer.from(_value, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 };
 
 PusherMessageTransport.prototype.messageChannelName = function(_address) {
-   var encodedAddress = Buffer.from(_address, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-   return "message-channel_v2_" + encodedAddress;
+   return "message-channel_v2_" + this.base64UrlEncode(_address);
 };
 
 PusherMessageTransport.prototype.messageChannelNames = function(_address) {
-   var names = [this.messageChannelName(_address)];
-   var legacyName = this.legacyMessageChannelName(_address);
+   return [this.messageChannelName(_address)];
+};
 
-   if (legacyName !== names[0]) {
-      names.push(legacyName);
-   }
-
-   return names;
+PusherMessageTransport.prototype.localPeerAddress = function() {
+   return new GangCasaAddress({
+      gang: this.owner.gang.name,
+      casa: this.owner.gang.casa.uName
+   }).toString();
 };
 
 PusherMessageTransport.prototype.createPusherMessageId = function(_data) {
    return [
-      this.owner.gang.casa.uName,
+      this.pusherOriginId,
       _data.destAddress,
       _data.id,
       Date.now(),
@@ -406,16 +429,13 @@ PusherMessageTransport.prototype.splitPayload = function(_serializedPayload, _fr
    return fragments;
 };
 
-PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
+PusherMessageTransport.prototype.sendTransportMessageOnChannel = function(_channelName, _message, _data) {
    _data.message = _message;
+   _data.pusherOriginId = this.pusherOriginId;
    _data.pusherMessageId = this.createPusherMessageId(_data);
 
-   var channelNames = this.messageChannelNames(_data.destAddress);
-
    if (this.serializedSize(_data) <= this.maxPayloadBytes) {
-      for (var channelIndex = 0; channelIndex < channelNames.length; ++channelIndex) {
-         this.owner.sendMessage(channelNames[channelIndex], "message", _data);
-      }
+      this.owner.sendMessage(_channelName, "message", _data);
       return;
    }
 
@@ -429,10 +449,12 @@ PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
 
    // Keep fragmentation hidden inside the bearer so higher-level socket code sees the original envelope.
    for (var i = 0; i < fragments.length; ++i) {
-      for (var channelIndex = 0; channelIndex < channelNames.length; ++channelIndex) {
-         this.owner.sendMessage(channelNames[channelIndex], "message", this.makeFragmentEnvelope(fragmentId, i, fragments.length, fragments[i]));
-      }
+      this.owner.sendMessage(_channelName, "message", this.makeFragmentEnvelope(fragmentId, i, fragments.length, fragments[i]));
    }
+};
+
+PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
+   this.sendTransportMessageOnChannel(this.messageChannelName(_data.destAddress), _message, _data);
 };
 
 function PusherDiscoveryTransport(_owner, _name, _casaDiscoveryService, _messageTransportName, _tier) {
@@ -455,41 +477,139 @@ PusherDiscoveryTransport.prototype.start = function(_pusher, _controlChannel) {
    this.controlChannel = _controlChannel;
 
    this.controlChannel.bind("status-request", (_data) => {
+      if (!_data) {
+         return;
+      }
+
       console.log(this.owner.uName + ":" + this.name + ": Status update requested: name: " + _data.casaName);
-         
-      if (_data && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
+      this.processGangCasaStatus(_data);
+
+      if (_data.hasOwnProperty("gang") && (_data.gang !== this.owner.gang.name)) {
+         return;
+      }
+
+      if (_data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
 
          if (_data.hasOwnProperty("status")) {
 
             if (this.searching) {
-               this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
+               this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.address, this.name, this.messageTransportName, this.tier);
             }
          }
    
          if (this.broadcasting && ((_data.hasOwnProperty("status") && (_data.status === "up")) || !_data.hasOwnProperty("status"))) {
-            this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "up" });
+            this.sendStatusUpdate("up");
          }
       }
    }, this);
    
    this.controlChannel.bind("status-update", (_data) => {
-      console.log(this.owner.uName + ":" + this.name + ": Status update received/requested: name: " + _data.casaName);
+      if (!_data) {
+         return;
+      }
 
-      if (_data && _data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
+      console.log(this.owner.uName + ":" + this.name + ": Status update received/requested: name: " + _data.casaName);
+      this.processGangCasaStatus(_data);
+
+      if (_data.hasOwnProperty("gang") && (_data.gang !== this.owner.gang.name)) {
+         return;
+      }
+
+      if (_data.hasOwnProperty("status") && _data.hasOwnProperty("casaName") && (_data.casaName !== this.owner.gang.casa.name)) {
 
          if (this.searching) {
-            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.casaName, this.name, this.messageTransportName, this.tier);
+            this.casaDiscoveryService.casaStatusUpdate(_data.casaName, _data.status, _data.address, this.name, this.messageTransportName, this.tier);
          }
       }
    }, this);
+
+   this.controlChannel.bind("source-owner-request", (_data) => {
+      this.sourceOwnerRequest(_data);
+   }, this);
+
+   this.controlChannel.bind("source-owner-response", (_data) => {
+      this.sourceOwnerResponse(_data);
+   }, this);
+};
+
+PusherDiscoveryTransport.prototype.localPeerAddress = function() {
+   return new GangCasaAddress({
+      gang: this.owner.gang.name,
+      casa: this.owner.gang.casa.uName
+   }).toString();
+};
+
+PusherDiscoveryTransport.prototype.sendStatusUpdate = function(_status) {
+   this.owner.sendMessage("control-channel", "status-update", {
+      gang: this.owner.gang.name,
+      casaName: this.owner.gang.casa.name,
+      address: this.localPeerAddress(),
+      status: _status
+   });
+};
+
+PusherDiscoveryTransport.prototype.processGangCasaStatus = function(_data) {
+
+   if (!_data.hasOwnProperty("gang") || !_data.hasOwnProperty("status") ||
+       !_data.hasOwnProperty("casaName") || !_data.hasOwnProperty("address")) {
+      return;
+   }
+
+   if ((_data.gang === this.owner.gang.name) && (_data.casaName === this.owner.gang.casa.name)) {
+      return;
+   }
+
+   this.casaDiscoveryService.gangCasaStatusUpdate(_data.gang, _data.casaName, _data.status, _data.address, this.name, this.messageTransportName, this.tier);
+};
+
+PusherDiscoveryTransport.prototype.discoverSourceOwner = function(_request) {
+   this.owner.sendMessage("control-channel", "source-owner-request", {
+      requestId: _request.requestId,
+      gang: _request.gang,
+      uName: _request.uName,
+      property: _request.property,
+      event: _request.event,
+      requesterGang: this.owner.gang.name,
+      requesterCasa: this.owner.gang.casa.uName
+   });
+};
+
+PusherDiscoveryTransport.prototype.sourceOwnerRequest = function(_data) {
+
+   if (!_data || (_data.requesterGang === this.owner.gang.name && _data.requesterCasa === this.owner.gang.casa.uName)) {
+      return;
+   }
+
+   if (!this.casaDiscoveryService.canServeSourceOwnerRequest(_data)) {
+      return;
+   }
+
+   this.owner.sendMessage("control-channel", "source-owner-response", {
+      requestId: _data.requestId,
+      gang: this.owner.gang.name,
+      uName: _data.uName,
+      property: _data.property,
+      event: _data.event,
+      casaName: this.owner.gang.casa.uName,
+      address: this.localPeerAddress()
+   });
+};
+
+PusherDiscoveryTransport.prototype.sourceOwnerResponse = function(_data) {
+
+   if (!_data) {
+      return;
+   }
+
+   this.casaDiscoveryService.sourceOwnerStatusUpdate(_data, this.name, this.messageTransportName, this.tier);
 };
 
 PusherDiscoveryTransport.prototype.goingDown = function(_err) {
-   this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "down" });
+   this.sendStatusUpdate("down");
 };
 
 PusherDiscoveryTransport.prototype.startSearching = function() {
-   this.owner.sendMessage("control-channel", "status-request",  { casaName: this.owner.gang.casa.name });
+   this.owner.sendMessage("control-channel", "status-request",  { gang: this.owner.gang.name, casaName: this.owner.gang.casa.name });
    this.searching = true;
 };
 
@@ -498,16 +618,22 @@ PusherDiscoveryTransport.prototype.stopSearching = function() {
 };
 
 PusherDiscoveryTransport.prototype.startBroadcasting = function() {
-   this.owner.sendMessage("control-channel", "status-request",  { casaName: this.owner.gang.casa.name, status: "up" });
+   this.owner.sendMessage("control-channel", "status-request",  {
+      gang: this.owner.gang.name,
+      casaName: this.owner.gang.casa.name,
+      address: this.localPeerAddress(),
+      status: "up"
+   });
    this.broadcasting = true;
 };
 
 PusherDiscoveryTransport.prototype.stopBroadcasting = function() {
-   this.owner.sendMessage("control-channel", "status-update", { casaName: this.owner.gang.casa.name, status: "down" });
+   this.sendStatusUpdate("down");
    this.broadcasting = false;
 };
 
 module.exports = exports = PusherService;
 module.exports.__testExports = {
-   PusherMessageTransport: PusherMessageTransport
+   PusherMessageTransport: PusherMessageTransport,
+   PusherDiscoveryTransport: PusherDiscoveryTransport
 };

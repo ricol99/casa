@@ -7,6 +7,8 @@ function SourceListener(_config, _owner) {
    this.gang = Gang.mainInstance();
    this.casa = this.gang.casa;
 
+   this.sourceGangName = _config.hasOwnProperty("gang") ? _config.gang : this.gang.name;
+   this.remoteGangSource = this.sourceGangName && (this.sourceGangName !== this.gang.name);
    this.sourceName = this.gang.validateUName(_config.uName);
 
    if (_config.uName == undefined) {
@@ -18,7 +20,7 @@ function SourceListener(_config, _owner) {
    }
 
    // TBD: HACK!
-   if ((this.sourceName === _owner.uName) || (_owner.hasOwnProperty("owner") && (this.sourceName === _owner.owner.uName))) {
+   if (!this.remoteGangSource && ((this.sourceName === _owner.uName) || (_owner.hasOwnProperty("owner") && (this.sourceName === _owner.owner.uName)))) {
       this.listeningToMyself = true;
    }
 
@@ -48,6 +50,10 @@ function SourceListener(_config, _owner) {
       this.subscription.sourceName = this.sourceName;
    }
 
+   if (this.remoteGangSource && !this.subscription.hasOwnProperty("gang")) {
+      this.subscription.gang = this.sourceGangName;
+   }
+
    if (this.listeningToPropertyChange) {
       this.eventName = _config.property;
       this.subscription.property = this.eventName;
@@ -63,7 +69,7 @@ function SourceListener(_config, _owner) {
    }
 
    this.matchingValueDefined = _config.hasOwnProperty('value');
-   this.sourceEventName = SourceListener.getSourceEventName(this.sourceName, _config);
+   this.sourceEventName = SourceListener.getSourceEventName(this.sourceName, _config, this.gang.name);
 
    if (_config.hasOwnProperty("valueType")) {
       if (!_config.hasOwnProperty("transform") && !_config.hasOwnProperty("transformMap") && !_config.hasOwnProperty("outputValues")) {
@@ -99,9 +105,10 @@ function SourceListener(_config, _owner) {
 
 util.inherits(SourceListener, NamedObject);
 
-SourceListener.getSourceEventName = function(_sourceUName, _sourceConfig) {
+SourceListener.getSourceEventName = function(_sourceUName, _sourceConfig, _localGangName) {
    let eventName = _sourceConfig.hasOwnProperty("property") ? _sourceConfig.property : _sourceConfig.event;
    var valueStr;
+   var gangStr = (_sourceConfig.hasOwnProperty("gang") && (_sourceConfig.gang !== _localGangName)) ? _sourceConfig.gang + ":" : "";
 
    if (_sourceConfig.hasOwnProperty("value")) {
        valueStr = (_sourceConfig.hasOwnProperty("invert") && _sourceConfig.invert) ? ":"+_sourceConfig.value.toString()+":inverse" : ":"+_sourceConfig.value.toString();
@@ -110,7 +117,7 @@ SourceListener.getSourceEventName = function(_sourceUName, _sourceConfig) {
       valueStr = "";
    }
 
-   return _sourceUName + ":" + eventName + valueStr;
+   return gangStr + _sourceUName + ":" + eventName + valueStr;
 }; 
 
 // Used to classify the type and understand where to load the javascript module
@@ -159,7 +166,7 @@ SourceListener.prototype.establishListeners = function() {
    this.invalidHandler = SourceListener.prototype.invalidCb.bind(this);
 
    // refresh source
-   this.source = this.gang.findNamedObject(this.sourceName);
+   this.source = this.findSource();
    this.valid = this.source && !this.source.bowing;
 
    if (this.valid && !this.listening) {
@@ -197,6 +204,23 @@ SourceListener.prototype.establishListeners = function() {
    return this.valid;
 }
 
+SourceListener.prototype.findSource = function() {
+
+   if (!this.remoteGangSource) {
+      return this.gang.findNamedObject(this.sourceName);
+   }
+
+   if (!this.peerGang) {
+      this.peerGang = this.gang.findOrCreatePeerGang(this.sourceGangName);
+   }
+
+   if (this.peerGang && (typeof this.peerGang.subscribeSourceListener === "function")) {
+      this.peerGang.subscribeSourceListener(this);
+   }
+
+   return this.peerGang ? this.peerGang.findNamedObject(this.sourceName) : null;
+};
+
 SourceListener.prototype.stopListening = function() {
 
    if (this.listening) {
@@ -212,6 +236,11 @@ SourceListener.prototype.stopListening = function() {
    }
 
    this.casa.removeSourceListener(this);
+
+   if (this.remoteGangSource && this.peerGang && (typeof this.peerGang.unsubscribeSourceListener === "function")) {
+      this.peerGang.unsubscribeSourceListener(this);
+   }
+
    this.listening = false;
 };
 

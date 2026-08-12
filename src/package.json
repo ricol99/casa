@@ -13,6 +13,13 @@
     "test:previewconfig": "node test/previewconfigengine_test.js",
     "test:consoleapi-progress": "node test/consoleapi_progress_integration_test.js",
     "test:iomessagesocket-session": "node test/iomessagesocketservice_session_test.js",
+    "test:casadiscovery-source-owner": "node test/casadiscovery_source_owner_test.js",
+    "test:peer-protocol-helpers": "node test/peer_protocol_helpers_test.js",
+    "test:peergang": "node test/peergang_test.js",
+    "test:peergang-architecture": "node test/peergang_architecture_guard_test.js",
+    "test:peergang-lan-integration": "node test/peergang_lan_integration_test.js",
+    "test:peergangcasa": "node test/peergangcasa_test.js",
+    "test:gangcasaaddress": "node test/gangcasaaddress_test.js",
     "test:pusher-fragmentation": "node test/pusherservice_fragmentation_test.js",
     "test:sourcelistener-valuetype": "node test/sourcelistener_valuetype_test.js",
     "test:pushersource-subscription": "node test/pushersource_subscription_test.js"

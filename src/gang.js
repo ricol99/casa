@@ -10,6 +10,7 @@ function Gang(_config, _loader) {
    NamedObject.call(this, _config);
    this.dbCallbacks = {};
    this.peercasas = {};
+   this.peerGangs = {};
    this.loader = _loader;
 
    this.casa = new Casa(_config.casa, this);
@@ -150,6 +151,28 @@ Gang.prototype.findUser = function (_userName) {
 
 Gang.prototype.findPeerCasa = function (_casaName) {
    return this.peercasas[_casaName];
+};
+
+Gang.prototype.findPeerGang = function(_gangName) {
+   return this.peerGangs[_gangName];
+};
+
+Gang.prototype.findOrCreatePeerGang = function(_gangName) {
+
+   if (!_gangName || (_gangName === this.name)) {
+      return this;
+   }
+
+   if (!this.peerGangs.hasOwnProperty(_gangName)) {
+      var PeerGang = require('./peergang');
+      this.peerGangs[_gangName] = new PeerGang({ name: _gangName }, this);
+   }
+
+   return this.peerGangs[_gangName];
+};
+
+Gang.prototype.removePeerGang = function(_peerGang) {
+   delete this.peerGangs[_peerGang.gangName];
 };
 
 Gang.prototype.findService = function(_serviceName) {
