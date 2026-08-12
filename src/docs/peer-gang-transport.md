@@ -50,9 +50,13 @@ Discovers LAN gang-casa availability through mDNS adverts and queries LAN candid
 
 Uses the Pusher control channel for remote status and source-owner request/response.
 
+`WhRelayDiscoveryTransport`
+
+Uses a Webhook Relay bucket for the same status and source-owner request/response flow as Pusher.
+
 `IoMessageSocketService`
 
-Provides socket-like sessions over bearer transports such as `http` and `pusher`.
+Provides socket-like sessions over bearer transports such as `http`, `pusher`, and `whrelay`.
 
 `PeerSocketSession`
 
@@ -90,6 +94,39 @@ source-owner-response
 Status messages include gang, casa name, concrete address, and status. `CasaDiscoveryService` emits `gang-casa-up` and `gang-casa-down` separately from same-gang `casa-up` and `casa-down`.
 
 Message sessions use channel names derived from the gang-casa address. The address is base64url encoded internally so the public socket API can stay readable.
+
+## Webhook Relay Flow
+
+Webhook Relay can also act as an organisation-scoped cloud bearer when all gangs share the same bucket and API credentials. It does not require a Casa cloud host; it just carries discovery and socket envelopes through the existing Webhook Relay service.
+
+Whrelay transport messages are normal webhook bodies with these additional fields:
+
+```js
+{
+   __casaWhRelayTransport: true,
+   whrelayKind: "discovery" // or "message"
+}
+```
+
+Discovery uses the same logical control messages as Pusher:
+
+```text
+status-request
+status-update
+source-owner-request
+source-owner-response
+```
+
+Message sessions use the readable gang-casa address directly in the envelope:
+
+```js
+{
+   peerAddress: "gang-casa://main-house/:home-controller",
+   destAddress: "gang-casa://farm-gate/:barn-controller"
+}
+```
+
+Whrelay source routing is preserved. Existing whrelay property/event webhooks still route to registered whrelay sources; transport webhooks are identified by `__casaWhRelayTransport`.
 
 ## LAN Flow
 
@@ -223,6 +260,7 @@ npm run test:peergangcasa
 npm run test:peergang-lan-integration
 npm run test:peergang-architecture
 npm run test:pusher-fragmentation
+npm run test:whrelay-transport
 ```
 
 The LAN integration test uses real source-owner HTTP handling, real `IoMessageSocketService`, and real `PeerGang` / `PeerGangCasa` subscription flow with a deterministic in-memory LAN bearer.

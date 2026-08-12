@@ -6,6 +6,8 @@ var PeerGangSource = require('../peergangsource');
 var PeerSocketSession = require('../peersocketsession');
 var PeerSourceCommandProtocol = require('../peersourcecommandprotocol');
 var PeerSourceSubscriptionProtocol = require('../peersourcesubscriptionprotocol');
+var PusherService = require('../services/pusherservice');
+var WhRelayService = require('../services/whrelayservice');
 
 function runTest(_name, _fn) {
    try {
@@ -42,6 +44,39 @@ runTest("PeerGang architecture primitives keep expected prototype method shape",
       "serviceDown",
       "querySourceOwnerCandidate",
       "sourceOwnerHttpResponse"
+   ]);
+
+   assertPrototypeMethods("PusherMessageTransport", PusherService.__testExports.PusherMessageTransport.prototype, [
+      "localPeerAddress",
+      "normaliseOutgoingPeerAddress",
+      "sendMessage"
+   ]);
+
+   assertPrototypeMethods("WhRelayService", WhRelayService.prototype, [
+      "startTransports",
+      "processTransportWebhook",
+      "createWhRelayMessageId",
+      "hasSeenWhRelayMessage",
+      "sendTransportMessage"
+   ]);
+
+   assertPrototypeMethods("WhRelayMessageTransport", WhRelayService.__testExports.WhRelayMessageTransport.prototype, [
+      "start",
+      "localPeerAddress",
+      "normaliseOutgoingPeerAddress",
+      "sendMessage",
+      "receivedWhRelayTransportMessage"
+   ]);
+
+   assertPrototypeMethods("WhRelayDiscoveryTransport", WhRelayService.__testExports.WhRelayDiscoveryTransport.prototype, [
+      "start",
+      "localPeerAddress",
+      "sendDiscoveryMessage",
+      "receivedWhRelayDiscoveryMessage",
+      "discoverSourceOwner",
+      "sendStatusUpdate",
+      "startSearching",
+      "startBroadcasting"
    ]);
 
    assertPrototypeMethods("PeerGang", PeerGang.prototype, [

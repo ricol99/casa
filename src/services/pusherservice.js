@@ -251,6 +251,13 @@ PusherMessageTransport.prototype.localPeerAddress = function() {
    }).toString();
 };
 
+PusherMessageTransport.prototype.normaliseOutgoingPeerAddress = function(_data) {
+
+   if (_data && (_data.peerAddress === this.owner.gang.casa.uName)) {
+      _data.peerAddress = this.localPeerAddress();
+   }
+};
+
 PusherMessageTransport.prototype.createPusherMessageId = function(_data) {
    return [
       this.pusherOriginId,
@@ -454,7 +461,10 @@ PusherMessageTransport.prototype.sendTransportMessageOnChannel = function(_chann
 };
 
 PusherMessageTransport.prototype.sendMessage = function(_message, _data) {
-   this.sendTransportMessageOnChannel(this.messageChannelName(_data.destAddress), _message, _data);
+   var data = util.copy(_data, true);
+
+   this.normaliseOutgoingPeerAddress(data);
+   this.sendTransportMessageOnChannel(this.messageChannelName(data.destAddress), _message, data);
 };
 
 function PusherDiscoveryTransport(_owner, _name, _casaDiscoveryService, _messageTransportName, _tier) {
@@ -591,13 +601,20 @@ PusherDiscoveryTransport.prototype.sourceOwnerRequest = function(_data) {
       property: _data.property,
       event: _data.event,
       casaName: this.owner.gang.casa.uName,
-      address: this.localPeerAddress()
+      address: this.localPeerAddress(),
+      requesterGang: _data.requesterGang,
+      requesterCasa: _data.requesterCasa
    });
 };
 
 PusherDiscoveryTransport.prototype.sourceOwnerResponse = function(_data) {
 
    if (!_data) {
+      return;
+   }
+
+   if ((_data.requesterGang || _data.requesterCasa) &&
+       ((_data.requesterGang !== this.owner.gang.name) || (_data.requesterCasa !== this.owner.gang.casa.uName))) {
       return;
    }
 

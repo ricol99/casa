@@ -444,7 +444,9 @@ runTest("pusher discovery answers source owner requests for locally owned source
          property: "gate-open",
          event: undefined,
          casaName: ":barn-controller",
-         address: "gang-casa://farm-gate/:barn-controller"
+         address: "gang-casa://farm-gate/:barn-controller",
+         requesterGang: "home",
+         requesterCasa: ":home-casa"
       }
    });
 });
@@ -476,6 +478,23 @@ runTest("pusher discovery forwards source owner responses to CasaDiscoveryServic
    });
 });
 
+runTest("pusher discovery ignores source owner responses for other requesters", function() {
+   var harness = createDiscoveryTransportHarness();
+
+   harness.handlers["source-owner-response"]({
+      requestId: "request-1",
+      gang: "farm-gate",
+      uName: ":building",
+      property: "gate-open",
+      casaName: ":barn-controller",
+      address: "gang-casa://farm-gate/:barn-controller",
+      requesterGang: "other-gang",
+      requesterCasa: ":other-casa"
+   });
+
+   assert.strictEqual(harness.sourceOwnerResponses.length, 0);
+});
+
 runAsyncTest("gang casa address connects directly to the gang-qualified casa channel", function(_done) {
    var sharedPusher = createSharedPusher();
    var sent = [];
@@ -501,7 +520,7 @@ runAsyncTest("gang casa address connects directly to the gang-qualified casa cha
    requester.sendMessage("connect", {
       id: "socket-1",
       route: "/peergangcasa",
-      peerAddress: requester.localPeerAddress(),
+      peerAddress: ":same-casa-name",
       destAddress: responderAddress,
       messageData: {
          config: { heartbeat: 0 }
@@ -512,6 +531,46 @@ runAsyncTest("gang casa address connects directly to the gang-qualified casa cha
    assert.strictEqual(sent[0].channel, requester.messageChannelName(responderAddress));
    assert.strictEqual(sent[0].message, "message");
    assert.strictEqual(sent[0].body.message, "connect");
+   assert.strictEqual(sent[0].body.peerAddress, requester.localPeerAddress());
+
+   sharedPusher.trigger(sent[0].channel, sent[0].message, sent[0].body);
+});
+
+runAsyncTest("gang casa response returns on the normalized requester channel", function(_done) {
+   var sharedPusher = createSharedPusher();
+   var sent = [];
+   var requester = createTransport("main-house", ":home-controller", sharedPusher, sent);
+   var responder = createTransport("farm-gate", ":barn-controller", sharedPusher, sent);
+
+   requester.on("connect-response", function(_data) {
+
+      try {
+         assert.strictEqual(_data.id, "socket-1");
+         assert.strictEqual(_data.peerAddress, responder.localPeerAddress());
+         assert.strictEqual(_data.destAddress, requester.localPeerAddress());
+         assert.deepStrictEqual(_data.messageData, { accept: true });
+      }
+      catch (_err) {
+         return _done(_err);
+      }
+
+      _done();
+   });
+
+   responder.sendMessage("connect-response", {
+      id: "socket-1",
+      route: "/peergangcasa",
+      peerAddress: responder.owner.gang.casa.uName,
+      destAddress: requester.localPeerAddress(),
+      messageData: {
+         accept: true
+      }
+   });
+
+   assert.strictEqual(sent.length, 1);
+   assert.strictEqual(sent[0].channel, responder.messageChannelName(requester.localPeerAddress()));
+   assert.strictEqual(sent[0].body.peerAddress, responder.localPeerAddress());
+   assert.strictEqual(sent[0].body.destAddress, requester.localPeerAddress());
 
    sharedPusher.trigger(sent[0].channel, sent[0].message, sent[0].body);
 });

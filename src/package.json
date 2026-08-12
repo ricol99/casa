@@ -21,6 +21,7 @@
     "test:peergangcasa": "node test/peergangcasa_test.js",
     "test:gangcasaaddress": "node test/gangcasaaddress_test.js",
     "test:pusher-fragmentation": "node test/pusherservice_fragmentation_test.js",
+    "test:whrelay-transport": "node test/whrelay_transport_test.js",
     "test:sourcelistener-valuetype": "node test/sourcelistener_valuetype_test.js",
     "test:pushersource-subscription": "node test/pushersource_subscription_test.js"
   },
