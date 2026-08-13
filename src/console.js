@@ -555,6 +555,10 @@ Console.prototype.validateGangDbSyncDocs = function(_localDb, _remoteDocs, _stat
 
       var localOrganisation = _localGangConfig && _localGangConfig.organisation ? _localGangConfig.organisation : null;
 
+      if (!localOrganisation && this.gang && (typeof this.gang.getOrganisation === "function")) {
+         localOrganisation = this.gang.getOrganisation() ? this.gang.getOrganisation() : null;
+      }
+
       if (localOrganisation && (localOrganisation !== remoteOrganisation)) {
          return _callback(null, {
             shouldPull: false,

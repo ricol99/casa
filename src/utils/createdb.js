@@ -56,7 +56,7 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
          }
       }
       else {
-         collections.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
+         collections.gang = { "name": "", "type": "", "displayName": "", "organisation": "", "parentCasa": {} };
 
          for (var param in collections.gang) {
 
@@ -164,4 +164,3 @@ function loadSecureConfig(_name, _config) {
 function secureRequire(_name) {
    return require(process.env['HOME']+'/.casa-keys/secure-config/' + _name);
 };
-

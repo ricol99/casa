@@ -219,14 +219,38 @@ Loader.prototype.startConsole = function() {
 };
 
 Loader.prototype.initialiseEmptyConsoleGangDb = function(_callback) {
-   this.gangDb.appendToCollection("gang", {
+   var gangConfig = {
       name: this.gangName,
       type: "gang",
       secureMode: this.secureMode,
       certPath: this.certPath,
       configPath: this.configPath,
       listeningPort: 8999
-   }, (_err) => {
+   };
+
+   if (this.gangConfig.organisation) {
+      gangConfig.organisation = this.gangConfig.organisation;
+   }
+
+   this.gangDb.appendToCollection("gang", gangConfig, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.gangDb.updateHashInternal(_callback);
+   });
+};
+
+Loader.prototype.backfillConsoleGangOrganisation = function(_gangConfig, _callback) {
+
+   if (!this.gangConfig.organisation || !_gangConfig || _gangConfig.organisation) {
+      return _callback(null);
+   }
+
+   _gangConfig.organisation = this.gangConfig.organisation;
+
+   this.gangDb.update(_gangConfig, (_err) => {
 
       if (_err) {
          return _callback(_err);
@@ -256,19 +280,27 @@ Loader.prototype.loadConsole = function() {
    this.gangDb.on('connected', (_data) => {
 
       this.gangDb.readCollection("gang", (_err, _gangConfig) => {
+         var gangDbConfig = (!_err && _gangConfig && (_gangConfig.length > 0)) ? _gangConfig[0] : null;
          
-         if (!_err && _gangConfig && (_gangConfig.length > 0) && _gangConfig[0].organisation) {
-            this.gangConfig.organisation = _gangConfig[0].organisation;
-            this.gang.organisation = _gangConfig[0].organisation;
+         if (gangDbConfig && gangDbConfig.organisation) {
+            this.gangConfig.organisation = gangDbConfig.organisation;
+            this.gang.organisation = gangDbConfig.organisation;
          }
 
-         this.gangDb.readCollection("gangServices", (_err, _services) => {
+         this.backfillConsoleGangOrganisation(gangDbConfig, (_backfillErr) => {
             
-            if (!_err) {
-               this.gangConfig.services = _services;
+            if (_backfillErr) {
+               process.stderr.write("Unable to backfill console gang organisation. Error=" + _backfillErr + "\n");
             }
 
-            this.startConsole();
+            this.gangDb.readCollection("gangServices", (_err, _services) => {
+               
+               if (!_err) {
+                  this.gangConfig.services = _services;
+               }
+
+               this.startConsole();
+            });
          });
       });
    });

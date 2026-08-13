@@ -842,7 +842,7 @@ GangConsoleCmd.prototype.importDb = function(_arguments, _callback) {
 
    db.on('connected', () => {
       var collections = {};
-      collections.gang = { "name": "", "type": "", "displayName": "", "parentCasa": {} };
+      collections.gang = { "name": "", "type": "", "displayName": "", "organisation": "", "parentCasa": {} };
 
       for (var param in collections.gang) {
 
