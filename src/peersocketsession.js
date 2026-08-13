@@ -6,6 +6,7 @@ function PeerSocketSession(_config) {
    this.lastHeartbeat = Date.now();
    this.heartbeatIntervalMs = _config.hasOwnProperty("heartbeatIntervalMs") ? _config.heartbeatIntervalMs : 60000;
    this.heartbeatTimeoutMs = _config.hasOwnProperty("heartbeatTimeoutMs") ? _config.heartbeatTimeoutMs : 120000;
+   this.initialHeartbeatGraceMs = _config.hasOwnProperty("initialHeartbeatGraceMs") ? _config.initialHeartbeatGraceMs : 0;
    this.intervalId = null;
    this.handlers = {};
 }
@@ -59,7 +60,7 @@ PeerSocketSession.prototype.sendMessage = function(_message, _data) {
 };
 
 PeerSocketSession.prototype.establishHeartbeat = function(_heartbeatDataFunc, _timeoutFunc) {
-   this.lastHeartbeat = Date.now();
+   this.lastHeartbeat = Date.now() + this.initialHeartbeatGraceMs;
 
    if (!this.intervalId) {
       this.intervalId = setInterval( () => {

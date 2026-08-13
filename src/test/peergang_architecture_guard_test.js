@@ -1,5 +1,6 @@
 var assert = require('assert');
 var CasaDiscoveryService = require('../services/casadiscoveryservice');
+var PeerCasa = require('../peercasa');
 var PeerGang = require('../peergang');
 var PeerGangCasa = require('../peergangcasa');
 var PeerGangSource = require('../peergangsource');
@@ -102,6 +103,26 @@ runTest("PeerGang architecture primitives keep expected prototype method shape",
       "addLocalEventSubscription"
    ]);
 
+   assertPrototypeMethods("PeerCasa", PeerCasa.prototype, [
+      "establishListeners",
+      "establishHeartbeat",
+      "stopHeartbeat",
+      "sendMessage",
+      "updateSourceCommandProtocol",
+      "sendSourceCommandRequest",
+      "completeSourceCommandResponse",
+      "updateSourceSubscriptionProtocol",
+      "publishSourcePropertyChanged",
+      "publishSourceEventRaised",
+      "publishSourceSubscriptionRegistered",
+      "publishSourceSubscriptionRemoved",
+      "publishSourceInterestInNewChild",
+      "deleteSocket",
+      "socketConnectCb",
+      "socketLoginCb",
+      "socketLoginSuccessCb"
+   ]);
+
    assertPrototypeMethods("PeerGangSource", PeerGangSource.prototype, [
       "sourceHasChangedProperty",
       "sourceHasRaisedEvent",
@@ -119,6 +140,7 @@ runTest("PeerGang architecture primitives keep expected prototype method shape",
    ]);
 
    assertPrototypeMethods("PeerSourceCommandProtocol", PeerSourceCommandProtocol.prototype, [
+      "sendSourceTransaction",
       "sendSetSourceProperty",
       "sendSetSourcePropertyWithRamp",
       "sendRaiseSourceEvent",
@@ -130,6 +152,9 @@ runTest("PeerGang architecture primitives keep expected prototype method shape",
       "unsubscribeSource",
       "publishSourcePropertyChanged",
       "publishSourceEventRaised",
+      "publishSourceSubscriptionRegistered",
+      "publishSourceSubscriptionRemoved",
+      "publishSourceInterestInNewChild",
       "publishSourceInvalid"
    ]);
 });

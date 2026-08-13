@@ -40,6 +40,18 @@ PeerSourceSubscriptionProtocol.prototype.publishSourceEventRaised = function(_da
    this.socket.emit("source-event-raised", _data);
 };
 
+PeerSourceSubscriptionProtocol.prototype.publishSourceSubscriptionRegistered = function(_data) {
+   this.socket.emit("source-subscription-registered", _data);
+};
+
+PeerSourceSubscriptionProtocol.prototype.publishSourceSubscriptionRemoved = function(_data) {
+   this.socket.emit("source-subscription-removed", _data);
+};
+
+PeerSourceSubscriptionProtocol.prototype.publishSourceInterestInNewChild = function(_data) {
+   this.socket.emit("source-interest-in-new-child", _data);
+};
+
 PeerSourceSubscriptionProtocol.prototype.publishSourceInvalid = function(_data) {
    this.socket.emit("source-invalid", _data);
 };

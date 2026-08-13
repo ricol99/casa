@@ -6,6 +6,7 @@ function PeerSourceCommandProtocol(_config) {
    this.incompleteRequests = _config.incompleteRequests || {};
    this.requestPrefix = _config.requestPrefix;
    this.requestor = _config.requestor;
+   this.casaName = _config.casaName;
    this.reqId = 0;
 }
 
@@ -79,6 +80,10 @@ PeerSourceCommandProtocol.prototype.requestData = function(_data, _requestId) {
 
    data.requestId = _requestId;
    data.requestor = this.requestor;
+
+   if (this.casaName) {
+      data.casaName = this.casaName;
+   }
 
    return data;
 };

@@ -109,6 +109,9 @@ runTest("PeerSourceSubscriptionProtocol sends subscription and update messages",
    protocol.subscribeSource(":building", { property: "gate-open", subscription: { gang: "farm-gate" } });
    protocol.publishSourcePropertyChanged({ sourceName: ":building", name: "gate-open", value: true });
    protocol.unsubscribeSource(":building", { property: "gate-open" });
+   protocol.publishSourceSubscriptionRegistered({ sourceName: ":building", event: "property-changed", subscription: { property: "gate-open" } });
+   protocol.publishSourceSubscriptionRemoved({ sourceName: ":building", event: "property-changed", subscription: { property: "gate-open" } });
+   protocol.publishSourceInterestInNewChild({ sourceName: ":building", uName: ":building:door" });
 
    assert.strictEqual(socket.emitted[0].message, "subscribe-source");
    assert.deepStrictEqual(socket.emitted[0].data, {
@@ -118,6 +121,9 @@ runTest("PeerSourceSubscriptionProtocol sends subscription and update messages",
    });
    assert.strictEqual(socket.emitted[1].message, "source-property-changed");
    assert.strictEqual(socket.emitted[2].message, "unsubscribe-source");
+   assert.strictEqual(socket.emitted[3].message, "source-subscription-registered");
+   assert.strictEqual(socket.emitted[4].message, "source-subscription-removed");
+   assert.strictEqual(socket.emitted[5].message, "source-interest-in-new-child");
 });
 
 runTest("PeerSocketSession registers and removes prototype-style handlers", function() {
