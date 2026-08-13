@@ -25,6 +25,14 @@ OfflineCasaConsoleCmd.prototype.hotStart = function() {
    ConsoleCmd.prototype.hotStart.call(this);
 };
 
+OfflineCasaConsoleCmd.prototype.organisation = function(_arguments, _callback) {
+   this.console.gangConsoleCmd.organisation(_arguments, _callback);
+};
+
+OfflineCasaConsoleCmd.prototype.pusher = function(_arguments, _callback) {
+   this.console.gangConsoleCmd.pusher(_arguments, _callback);
+};
+
 OfflineCasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    var name = (_arguments && _arguments.length > 0) ? _arguments[0] : this.gang.name;

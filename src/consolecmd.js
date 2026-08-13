@@ -1,6 +1,7 @@
 var util = require('util');
 var NamedObject = require('./namedobject');
 var Gang = require('./gang');
+var Db = require('./db');
 
 function ConsoleCmd(_config, _owner, _console) {
    _config.transient = true;
@@ -59,6 +60,128 @@ ConsoleCmd.prototype.executeParsedCommandOnAllCasas = function(_method, _argumen
          this.console.updatePrompt();
          return _callback(_err, _result);
       }
+   });
+};
+
+ConsoleCmd.prototype.dbSyncState = function(_localDb, _remoteDbInfo) {
+
+   if (!_remoteDbInfo || !_remoteDbInfo.dbName || !_remoteDbInfo.hash) {
+      return { error: "Remote database information is not available" };
+   }
+
+   if (!_localDb || _localDb.consoleCreatedEmptyDb || !_localDb.getHash || !_localDb.getHash()) {
+      return { shouldPull: true, reason: "local-missing" };
+   }
+
+   var localHash = _localDb.getHash();
+
+   if (localHash.hash === _remoteDbInfo.hash) {
+      return { shouldPull: false, reason: "same" };
+   }
+
+   if (new Date(_remoteDbInfo.lastModified) > new Date(localHash.lastModified)) {
+      return { shouldPull: true, reason: "remote-newer" };
+   }
+
+   return { shouldPull: false, reason: "local-newer" };
+};
+
+ConsoleCmd.prototype.writeSyncedDb = function(_dbName, _docs, _callback) {
+
+   if (!(_docs instanceof Array)) {
+      return _callback("Remote exportDb did not return database documents");
+   }
+
+   var db = new Db(_dbName, this.gang.configPath(), true, null);
+
+   db.on('connected', () => {
+      var afterAppend = (_err) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         db.updateHashInternal((_hashErr) => {
+
+            if (_hashErr) {
+               return _callback(_hashErr);
+            }
+
+            db.setOwner(this.gang);
+            _callback(null, db);
+         });
+      };
+
+      if (_docs.length === 0) {
+         return afterAppend(null);
+      }
+
+      db.append(_docs, afterAppend);
+   });
+
+   db.on('error', (_data) => {
+      _callback(_data && _data.error ? _data.error : "Unable to write database");
+   });
+
+   db.on('connect-error', (_data) => {
+      _callback(_data && _data.error ? _data.error : "Unable to create database");
+   });
+
+   db.connect();
+};
+
+ConsoleCmd.prototype.syncDbFromRemoteCasa = function(_options, _callback) {
+   var remoteCasa = _options ? _options.remoteCasa : null;
+   var remoteDbInfo = _options ? _options.remoteDbInfo : null;
+   var localDb = _options ? _options.localDb : null;
+   var dbName = _options && _options.dbName ? _options.dbName : (remoteDbInfo ? remoteDbInfo.dbName : null);
+   var objUName = _options && _options.objUName ? _options.objUName : this.uName;
+   var afterWrite = _options ? _options.afterWrite : null;
+   var state = this.dbSyncState(localDb, remoteDbInfo);
+
+   if (!remoteCasa || !remoteCasa.connected) {
+      return _callback("Remote casa is not connected");
+   }
+
+   if (!dbName) {
+      return _callback("Database name is not available");
+   }
+
+   if (state.error) {
+      return _callback(state.error);
+   }
+
+   if (!state.shouldPull) {
+      return _callback(null, {
+         dbName: dbName,
+         action: state.reason === "same" ? "unchanged" : "skipped",
+         reason: state.reason
+      });
+   }
+
+   this.console.sendCommandToCasa(remoteCasa, [ objUName, "exportDb", [] ], "executeParsedCommand", (_err, _docs) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.writeSyncedDb(dbName, _docs, (_writeErr, _db) => {
+
+         if (_writeErr) {
+            return _callback(_writeErr);
+         }
+
+         if (afterWrite) {
+            afterWrite(_db);
+         }
+
+         _callback(null, {
+            dbName: dbName,
+            action: "pulled",
+            reason: state.reason,
+            hash: _db.getHash()
+         });
+      });
    });
 };
 

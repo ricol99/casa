@@ -239,6 +239,327 @@ GangConsoleCmd.prototype.hotStart = function() {
    ConsoleCmd.prototype.hotStart.call(this);
 };
 
+GangConsoleCmd.prototype.updateGangDbHash = function(_callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.updateHashInternal !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.updateHashInternal(_callback);
+};
+
+GangConsoleCmd.prototype.findGangDocument = function(_callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.find !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.find(this.gang.name, _callback);
+};
+
+GangConsoleCmd.prototype.upsertGangDocument = function(_updates, _callback) {
+   var db = this.gang.getDb();
+
+   this.findGangDocument((_err, _document) => {
+      var document = _document ? _document : { name: this.gang.name, type: "gang" };
+
+      if (_err && _document !== null) {
+         return _callback(_err);
+      }
+
+      for (var key in _updates) {
+
+         if (_updates.hasOwnProperty(key)) {
+            document[key] = _updates[key];
+         }
+      }
+
+      if (_document) {
+         db.update(document, (_updateErr) => {
+
+            if (_updateErr) {
+               return _callback(_updateErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
+         });
+      }
+      else {
+         db.appendToCollection("gang", document, (_appendErr) => {
+
+            if (_appendErr) {
+               return _callback(_appendErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
+         });
+      }
+   });
+};
+
+GangConsoleCmd.prototype.findGangServiceConfig = function(_serviceType, _serviceName, _callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.readCollection !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.readCollection("gangServices", (_err, _services) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      for (var i = 0; _services && (i < _services.length); ++i) {
+
+         if (((_serviceName && (_services[i].name === _serviceName)) ||
+              (_serviceType && (_services[i].type === _serviceType)))) {
+            return _callback(null, _services[i]);
+         }
+      }
+
+      _callback(null, null);
+   });
+};
+
+GangConsoleCmd.prototype.upsertGangServiceConfig = function(_serviceConfig, _callback) {
+   var db = this.gang.getDb();
+
+   this.findGangServiceConfig(_serviceConfig.type, _serviceConfig.name, (_err, _existing) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      if (_existing) {
+         _serviceConfig.name = _existing.name;
+         _serviceConfig._collection = _existing._collection;
+         _serviceConfig._id = _existing._id;
+
+         db.update(_serviceConfig, (_updateErr) => {
+
+            if (_updateErr) {
+               return _callback(_updateErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
+         });
+      }
+      else {
+         db.appendToCollection("gangServices", _serviceConfig, (_appendErr) => {
+
+            if (_appendErr) {
+               return _callback(_appendErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
+         });
+      }
+   });
+};
+
+GangConsoleCmd.prototype.parseOrganisationArgs = function(_arguments) {
+   var subCommand = (_arguments && (_arguments.length > 0)) ? _arguments[0] : "show";
+
+   if (subCommand === "show") {
+
+      if (_arguments && (_arguments.length > 1)) {
+         return { error: "Too many arguments. Usage: organisation show" };
+      }
+
+      return { command: "show" };
+   }
+
+   if (subCommand !== "set") {
+      return { error: "Unsupported organisation command \"" + subCommand + "\". Usage: organisation show|set --name <name>" };
+   }
+
+   var definitions = [
+      { name: 'name', alias: 'n', defaultOption: true, type: String }
+   ];
+   var options;
+
+   try {
+      options = commandLineArgs(definitions, { argv: _arguments.slice(1), stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse organisation command" };
+   }
+
+   if (options._unknown && (options._unknown.length > 0)) {
+      return { error: "Too many arguments. Usage: organisation set --name <name>" };
+   }
+
+   if (!options.name || (String(options.name).trim().length === 0)) {
+      return { error: "Organisation name not provided. Usage: organisation set --name <name>" };
+   }
+
+   return { command: "set", name: String(options.name).trim() };
+};
+
+GangConsoleCmd.prototype.parsePusherArgs = function(_arguments) {
+   var subCommand = (_arguments && (_arguments.length > 0)) ? _arguments[0] : "show";
+
+   if (subCommand === "show") {
+
+      if (_arguments && (_arguments.length > 1)) {
+         return { error: "Too many arguments. Usage: pusher show" };
+      }
+
+      return { command: "show" };
+   }
+
+   if (subCommand !== "set") {
+      return { error: "Unsupported pusher command \"" + subCommand + "\". Usage: pusher show|set --id <id> --key <key> --secret <secret> --cluster <cluster>" };
+   }
+
+   var definitions = [
+      { name: 'id', type: String },
+      { name: 'key', type: String },
+      { name: 'secret', type: String },
+      { name: 'cluster', type: String }
+   ];
+   var options;
+
+   try {
+      options = commandLineArgs(definitions, { argv: _arguments.slice(1), stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse pusher command" };
+   }
+
+   if (options._unknown && (options._unknown.length > 0)) {
+      return { error: "Too many arguments. Usage: pusher set --id <id> --key <key> --secret <secret> --cluster <cluster>" };
+   }
+
+   if (!options.id || !options.key || !options.secret || !options.cluster ||
+       (String(options.id).trim().length === 0) ||
+       (String(options.key).trim().length === 0) ||
+       (String(options.secret).trim().length === 0) ||
+       (String(options.cluster).trim().length === 0)) {
+      return { error: "Missing Pusher credential. Usage: pusher set --id <id> --key <key> --secret <secret> --cluster <cluster>" };
+   }
+
+   return {
+      command: "set",
+      appId: String(options.id).trim(),
+      appKey: String(options.key).trim(),
+      appSecret: String(options.secret).trim(),
+      appCluster: String(options.cluster).trim()
+   };
+};
+
+GangConsoleCmd.prototype.maskSecret = function(_secret) {
+
+   if (!_secret) {
+      return null;
+   }
+
+   return "configured";
+};
+
+GangConsoleCmd.prototype.remoteGangCommandAvailable = function() {
+   return !!(this.console && !this.console.offline &&
+             ((this.console.getCurrentCasa && this.console.getCurrentCasa()) || this.console.defaultCasa));
+};
+
+GangConsoleCmd.prototype.executeRemoteOrLocalGangCommand = function(_method, _params, _localMethod, _callback) {
+
+   if (this.remoteGangCommandAvailable()) {
+      return this.executeParsedCommand(_method, _params, _callback);
+   }
+
+   return Object.getPrototypeOf(this)[_localMethod].call(this, _params, _callback);
+};
+
+GangConsoleCmd.prototype.organisationLocal = function(_params, _callback) {
+   var params = (_params && (_params.length > 0)) ? _params[0] : { command: "show" };
+
+   if (!params || (params.command === "show")) {
+      return _callback(null, {
+         gangName: this.gang.name,
+         organisation: this.gang.getOrganisation ? (this.gang.getOrganisation() || null) : null,
+         source: "local"
+      });
+   }
+
+   if (params.command !== "set") {
+      return _callback("Unsupported organisation command");
+   }
+
+   this.upsertGangDocument({ organisation: params.name }, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.gang.organisation = params.name;
+      this.gang.config.organisation = params.name;
+
+      _callback(null, {
+         gangName: this.gang.name,
+         organisation: params.name,
+         source: "local"
+      });
+   });
+};
+
+GangConsoleCmd.prototype.pusherLocal = function(_params, _callback) {
+   var params = (_params && (_params.length > 0)) ? _params[0] : { command: "show" };
+
+   if (!params || (params.command === "show")) {
+      return this.findGangServiceConfig("pusherservice", "pusher-service", (_err, _serviceConfig) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         _callback(null, {
+            configured: !!_serviceConfig,
+            name: _serviceConfig ? _serviceConfig.name : null,
+            appId: _serviceConfig ? _serviceConfig.appId : null,
+            key: _serviceConfig ? _serviceConfig.appKey : null,
+            secret: _serviceConfig ? this.maskSecret(_serviceConfig.appSecret) : null,
+            cluster: _serviceConfig ? _serviceConfig.appCluster : null,
+            source: "local"
+         });
+      });
+   }
+
+   if (params.command !== "set") {
+      return _callback("Unsupported pusher command");
+   }
+
+   var serviceConfig = {
+      name: "pusher-service",
+      type: "pusherservice",
+      appId: params.appId,
+      appKey: params.appKey,
+      appSecret: params.appSecret,
+      appCluster: params.appCluster
+   };
+
+   this.upsertGangServiceConfig(serviceConfig, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      _callback(null, {
+         configured: true,
+         name: serviceConfig.name,
+         appId: serviceConfig.appId,
+         key: serviceConfig.appKey,
+         secret: this.maskSecret(serviceConfig.appSecret),
+         cluster: serviceConfig.appCluster,
+         source: "local",
+         restartRequired: true
+      });
+   });
+};
+
 GangConsoleCmd.prototype.reboot = function(_arguments, _callback)  {
 
    if (_arguments && (_arguments.length > 0) && (_arguments === "--hard")) {
@@ -282,6 +603,26 @@ GangConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
    }
 };
 
+GangConsoleCmd.prototype.syncDb = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+
+   var remoteCasa = this.console.getCurrentCasa() ? this.console.getCurrentCasa() : this.console.defaultCasa;
+   var remoteDbInfo = remoteCasa ? remoteCasa.gangRemoteDbInfo : null;
+   var localDb = this.gang.getDb();
+   var dbName = remoteDbInfo && remoteDbInfo.dbName ? remoteDbInfo.dbName : (localDb ? localDb.name : this.gang.name + "-db");
+
+   this.syncDbFromRemoteCasa({
+      remoteCasa: remoteCasa,
+      remoteDbInfo: remoteDbInfo,
+      localDb: localDb,
+      dbName: dbName,
+      afterWrite: (_db) => {
+         this.gang.gangDb = _db;
+         this.gang.dbs[dbName] = _db;
+      }
+   }, _callback);
+};
+
 GangConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
 
    this.checkArguments(0, _arguments);
@@ -319,17 +660,23 @@ GangConsoleCmd.prototype.topology = function(_arguments, _callback) {
 };
 
 GangConsoleCmd.prototype.organisation = function(_arguments, _callback) {
-   var subCommand = (_arguments && (_arguments.length > 0)) ? _arguments[0] : "show";
+   var parsed = this.parseOrganisationArgs(_arguments ? _arguments : []);
 
-   if (_arguments && (_arguments.length > 1)) {
-      return _callback("Too many arguments. Usage: organisation show");
+   if (parsed.error) {
+      return _callback(parsed.error);
    }
 
-   if (subCommand !== "show") {
-      return _callback("Unsupported organisation command \"" + subCommand + "\". Usage: organisation show");
+   this.executeRemoteOrLocalGangCommand("organisation", [ parsed ], "organisationLocal", _callback);
+};
+
+GangConsoleCmd.prototype.pusher = function(_arguments, _callback) {
+   var parsed = this.parsePusherArgs(_arguments ? _arguments : []);
+
+   if (parsed.error) {
+      return _callback(parsed.error);
    }
 
-   this.executeParsedCommand("organisation", [], _callback);
+   this.executeRemoteOrLocalGangCommand("pusher", [ parsed ], "pusherLocal", _callback);
 };
 
 GangConsoleCmd.prototype.resolveSource = function(_arguments, _callback) {

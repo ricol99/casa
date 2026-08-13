@@ -495,6 +495,106 @@ Console.prototype.getCasas = function() {
    return casas;
 };
 
+Console.prototype.casaObjUName = function(_remoteCasa) {
+   var name = _remoteCasa ? _remoteCasa.name : "";
+
+   if (!name) {
+      return null;
+   }
+
+   return (name[0] === ":") ? name : ":" + name;
+};
+
+Console.prototype.writeDbSyncResult = function(_scope, _casaName, _err, _result) {
+
+   if (_err) {
+      this.writeOutput("Unable to sync " + _scope + " db from casa " + _casaName + ". Error=" + _err);
+      return;
+   }
+
+   if (!_result) {
+      return;
+   }
+
+   if (_result.action === "pulled") {
+      this.writeOutput("Synced " + _scope + " db from casa " + _casaName + " (" + _result.reason + ")");
+   }
+   else if (_result.reason === "local-newer") {
+      this.writeOutput("Local " + _scope + " db is newer than casa " + _casaName + " db. Leaving local copy unchanged.");
+   }
+};
+
+Console.prototype.syncGangDbFromCasa = function(_remoteCasa, _callback) {
+   var remoteDbInfo = _remoteCasa ? _remoteCasa.gangRemoteDbInfo : null;
+   var localDb = this.gang.getDb();
+   var dbName = remoteDbInfo && remoteDbInfo.dbName ? remoteDbInfo.dbName : (localDb ? localDb.name : this.gang.name + "-db");
+
+   this.gangConsoleCmd.syncDbFromRemoteCasa({
+      remoteCasa: _remoteCasa,
+      remoteDbInfo: remoteDbInfo,
+      localDb: localDb,
+      dbName: dbName,
+      objUName: ":",
+      afterWrite: (_db) => {
+         this.gang.gangDb = _db;
+         this.gang.dbs[dbName] = _db;
+         this.refreshGangMetadataFromDb(_db);
+      }
+   }, _callback);
+};
+
+Console.prototype.refreshGangMetadataFromDb = function(_db) {
+
+   if (!_db || (typeof _db.find !== "function")) {
+      return;
+   }
+
+   _db.find(this.gang.name, (_err, _gangConfig) => {
+
+      if (_err || !_gangConfig) {
+         return;
+      }
+
+      if (_gangConfig.hasOwnProperty("organisation")) {
+         this.gang.organisation = _gangConfig.organisation;
+         this.gang.config.organisation = _gangConfig.organisation;
+      }
+   });
+};
+
+Console.prototype.syncCasaDbFromCasa = function(_remoteCasa, _callback) {
+   var remoteDbInfo = _remoteCasa ? _remoteCasa.getRemoteDbInfo() : null;
+   var localDb = _remoteCasa ? _remoteCasa.getDb() : null;
+   var dbName = remoteDbInfo && remoteDbInfo.dbName ? remoteDbInfo.dbName : (_remoteCasa ? _remoteCasa.getDbName() : null);
+
+   this.gangConsoleCmd.syncDbFromRemoteCasa({
+      remoteCasa: _remoteCasa,
+      remoteDbInfo: remoteDbInfo,
+      localDb: localDb,
+      dbName: dbName,
+      objUName: this.casaObjUName(_remoteCasa),
+      afterWrite: (_db) => {
+         _remoteCasa.db = _db;
+         this.gang.dbs[dbName] = _db;
+      }
+   }, _callback);
+};
+
+Console.prototype.syncDbsFromCasa = function(_remoteCasa) {
+
+   if (!_remoteCasa || !_remoteCasa.connected) {
+      return;
+   }
+
+   this.syncGangDbFromCasa(_remoteCasa, (_gangErr, _gangResult) => {
+      this.writeDbSyncResult("gang", _remoteCasa.name, _gangErr, _gangResult);
+
+      this.syncCasaDbFromCasa(_remoteCasa, (_casaErr, _casaResult) => {
+         this.writeDbSyncResult("casa", _remoteCasa.name, _casaErr, _casaResult);
+      });
+   });
+};
+
 Console.prototype.setSourceCasa = function(_casaName, _callback) {
    //process.stdout.write("AAAAA Console.prototype.setSourceCasa() _casaName="+util.inspect(_casaName)+"\n");
 
@@ -873,7 +973,13 @@ Console.prototype.dbCompare = function() {
    var db = this.gang.getDb();
    var gangRemoteDbInfo = this.sourceCasa.gangRemoteDbInfo;
 
-   return db ? ((db.getHash().hash === gangRemoteDbInfo.hash) ? 0 : ((db.getHash().lastModified > gangRemoteDbInfo.lastModified) ? 1 : -1)) : -1;
+   if (!db || !db.getHash() || !gangRemoteDbInfo) {
+      return -1;
+   }
+
+   var localHash = db.getHash();
+
+   return (localHash.hash === gangRemoteDbInfo.hash) ? 0 : ((new Date(localHash.lastModified) > new Date(gangRemoteDbInfo.lastModified)) ? 1 : -1);
 };
 
 function RemoteCasa(_config, _owner) {
@@ -893,6 +999,9 @@ function RemoteCasa(_config, _owner) {
    this.allowAutoReconnect = true;
    this.lastConnectErrorKey = null;
    this.lastConnectErrorTime = 0;
+   this.dbInfoReady = false;
+   this.gangDbInfoReady = false;
+   this.autoDbSyncRequested = false;
 }
 
 util.inherits(RemoteCasa, AsyncEmitter);
@@ -920,6 +1029,16 @@ RemoteCasa.prototype.scheduleReconnect = function() {
    }, this.reconnectDelayMs);
 };
 
+RemoteCasa.prototype.requestAutoDbSync = function() {
+
+   if (this.autoDbSyncRequested || !this.dbInfoReady || !this.gangDbInfoReady) {
+      return;
+   }
+
+   this.autoDbSyncRequested = true;
+   this.owner.syncDbsFromCasa(this);
+};
+
 RemoteCasa.prototype.start = function()  {
    if (this.connecting || this.connected) {
       return;
@@ -936,6 +1055,9 @@ RemoteCasa.prototype.start = function()  {
       this.clearReconnectTimer();
       this.lastConnectErrorKey = null;
       this.lastConnectErrorTime = 0;
+      this.dbInfoReady = false;
+      this.gangDbInfoReady = false;
+      this.autoDbSyncRequested = false;
       this.emit('connected', { name: this.name });
       this.socket.emit('getCasaInfo');
       this.socket.emit('subscribeLiveUpdates', {});
@@ -950,23 +1072,14 @@ RemoteCasa.prototype.start = function()  {
          this.owner.gang.getDb(this.dbName, undefined, (_err, _db, _data) => {
 
             if (_err) {
-               this.owner.writeOutput("Casa "+this.name+" db is not stored locally. User pullDb to update local version");
+               this.db = null;
             }
             else {
                this.db = _db;
-               //this.owner.writeOutput("AAAAA db.lastModified="+util.inspect(this.db.getHash().lastModified));
-               //this.owner.writeOutput("AAAAA remoteInfo.lastModified="+util.inspect(this.remoteDbInfo.lastModified));
-
-               if (this.remoteDbInfo.hash !== this.db.getHash().hash) {
-
-                  if (this.remoteDbInfo.lastModified > this.db.getHash().lastModified) {
-                     this.owner.writeOutput("Casa "+this.name+" db is newer than local db. User pullDb to update local version");
-                  }
-                  else {
-                     this.owner.writeOutput("Casa "+this.name+" db is older than local db. User pushDB push local version or pullDb to re-sync to current casa version");
-                  }
-               }
             }
+
+            this.dbInfoReady = true;
+            this.requestAutoDbSync();
          });
       }
       else {
@@ -977,6 +1090,8 @@ RemoteCasa.prototype.start = function()  {
          this.gangRemoteDbInfo = { dbName: _data.gangDbInfo.dbName, hash: _data.gangDbInfo.hash, lastModified: new Date(_data.gangDbInfo.lastModified) };
          //this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
          //this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
+         this.gangDbInfoReady = true;
+         this.requestAutoDbSync();
       }
    });
 
@@ -1131,8 +1246,14 @@ RemoteCasa.prototype.getRemoteDbInfo = function() {
 };
 
 RemoteCasa.prototype.dbCompare = function() {
-   return this.db ? ((this.db.getHash().hash === this.remoteDbInfo.hash.hash) ? 0 : ((this.db.getHash().lastModified > this.remoteDbInfo.hash.lastModified) ? 1 : -1)) : -1;
-}
+   if (!this.db || !this.db.getHash() || !this.remoteDbInfo) {
+      return -1;
+   }
+
+   var localHash = this.db.getHash();
+
+   return (localHash.hash === this.remoteDbInfo.hash) ? 0 : ((new Date(localHash.lastModified) > new Date(this.remoteDbInfo.lastModified)) ? 1 : -1);
+};
 
 RemoteCasa.prototype.extractTree = function(_callback) {
    

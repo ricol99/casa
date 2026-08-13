@@ -265,6 +265,19 @@ function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
    });
 }
 
+function normaliseCommandParams(_params) {
+
+   if (!_params || (_params.length === 0)) {
+      return { command: "show" };
+   }
+
+   if ((typeof _params[0] === "object") && !(_params[0] instanceof Array)) {
+      return _params[0];
+   }
+
+   return { command: _params[0] ? _params[0] : "show" };
+}
+
 function findActiveInstance(_resolved) {
 
    if (!_resolved || !_resolved.instances) {
@@ -390,11 +403,223 @@ GangConsoleApi.prototype.cat = function(_session, _params, _callback) {
 };
 
 GangConsoleApi.prototype.organisation = function(_session, _params, _callback) {
+   var params = normaliseCommandParams(_params);
    var organisation = (this.gang && (typeof this.gang.getOrganisation === "function")) ? this.gang.getOrganisation() : null;
 
-   _callback(null, {
-      gangName: this.gang ? this.gang.name : null,
-      organisation: organisation ? organisation : null
+   if (!params || (params.command === "show")) {
+      return _callback(null, {
+         gangName: this.gang ? this.gang.name : null,
+         organisation: organisation ? organisation : null,
+         source: "remote"
+      });
+   }
+
+   if (params.command !== "set") {
+      return _callback("Unsupported organisation command");
+   }
+
+   if (!params.name) {
+      return _callback("Organisation name not provided");
+   }
+
+   this.upsertGangDocument({ organisation: params.name }, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.gang.organisation = params.name;
+      this.gang.config.organisation = params.name;
+
+      _callback(null, {
+         gangName: this.gang.name,
+         organisation: params.name,
+         source: "remote"
+      });
+   });
+};
+
+GangConsoleApi.prototype.updateGangDbHash = function(_callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.updateHashInternal !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.updateHashInternal(_callback);
+};
+
+GangConsoleApi.prototype.findGangDocument = function(_callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.find !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.find(this.gang.name, _callback);
+};
+
+GangConsoleApi.prototype.upsertGangDocument = function(_updates, _callback) {
+   var db = this.gang.getDb();
+
+   this.findGangDocument((_err, _document) => {
+      var document = _document ? _document : { name: this.gang.name, type: "gang" };
+
+      if (_err && _document !== null) {
+         return _callback(_err);
+      }
+
+      for (var key in _updates) {
+
+         if (_updates.hasOwnProperty(key)) {
+            document[key] = _updates[key];
+         }
+      }
+
+      if (_document) {
+         db.update(document, (_updateErr) => {
+
+            if (_updateErr) {
+               return _callback(_updateErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
+         });
+      }
+      else {
+         db.appendToCollection("gang", document, (_appendErr) => {
+
+            if (_appendErr) {
+               return _callback(_appendErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
+         });
+      }
+   });
+};
+
+GangConsoleApi.prototype.findGangServiceConfig = function(_serviceType, _serviceName, _callback) {
+   var db = this.gang.getDb();
+
+   if (!db || (typeof db.readCollection !== "function")) {
+      return _callback("Gang database is not available");
+   }
+
+   db.readCollection("gangServices", (_err, _services) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      for (var i = 0; _services && (i < _services.length); ++i) {
+
+         if (((_serviceName && (_services[i].name === _serviceName)) ||
+              (_serviceType && (_services[i].type === _serviceType)))) {
+            return _callback(null, _services[i]);
+         }
+      }
+
+      _callback(null, null);
+   });
+};
+
+GangConsoleApi.prototype.upsertGangServiceConfig = function(_serviceConfig, _callback) {
+   var db = this.gang.getDb();
+
+   this.findGangServiceConfig(_serviceConfig.type, _serviceConfig.name, (_err, _existing) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      if (_existing) {
+         _serviceConfig.name = _existing.name;
+         _serviceConfig._collection = _existing._collection;
+         _serviceConfig._id = _existing._id;
+
+         db.update(_serviceConfig, (_updateErr) => {
+
+            if (_updateErr) {
+               return _callback(_updateErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
+         });
+      }
+      else {
+         db.appendToCollection("gangServices", _serviceConfig, (_appendErr) => {
+
+            if (_appendErr) {
+               return _callback(_appendErr);
+            }
+
+            this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
+         });
+      }
+   });
+};
+
+GangConsoleApi.prototype.maskSecret = function(_secret) {
+
+   if (!_secret) {
+      return null;
+   }
+
+   return "configured";
+};
+
+GangConsoleApi.prototype.pusher = function(_session, _params, _callback) {
+   var params = normaliseCommandParams(_params);
+
+   if (!params || (params.command === "show")) {
+      return this.findGangServiceConfig("pusherservice", "pusher-service", (_err, _serviceConfig) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         _callback(null, {
+            configured: !!_serviceConfig,
+            name: _serviceConfig ? _serviceConfig.name : null,
+            appId: _serviceConfig ? _serviceConfig.appId : null,
+            key: _serviceConfig ? _serviceConfig.appKey : null,
+            secret: _serviceConfig ? this.maskSecret(_serviceConfig.appSecret) : null,
+            cluster: _serviceConfig ? _serviceConfig.appCluster : null,
+            source: "remote"
+         });
+      });
+   }
+
+   if (params.command !== "set") {
+      return _callback("Unsupported pusher command");
+   }
+
+   var serviceConfig = {
+      name: "pusher-service",
+      type: "pusherservice",
+      appId: params.appId,
+      appKey: params.appKey,
+      appSecret: params.appSecret,
+      appCluster: params.appCluster
+   };
+
+   this.upsertGangServiceConfig(serviceConfig, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      _callback(null, {
+         configured: true,
+         name: serviceConfig.name,
+         appId: serviceConfig.appId,
+         key: serviceConfig.appKey,
+         secret: this.maskSecret(serviceConfig.appSecret),
+         cluster: serviceConfig.appCluster,
+         source: "remote",
+         restartRequired: true
+      });
    });
 };
 
@@ -444,7 +669,7 @@ GangConsoleApi.prototype.updateDb = function(_session, _params, _callback) {
    var dbName = (_params.length > 2) ? _params[2] : this.gang.name;
    var localHash = this.dbService.getDbHash(dbName);
 
-   this.dbService.getPeerDbHash(dbName, localHash, _params[0], _params[1], (_err, _result) => {
+   this.dbService.getPeerDbHash(dbName, localHash.hash, _params[0], _params[1], (_err, _result) => {
 
       if (_err) {
          return _callback(_err);

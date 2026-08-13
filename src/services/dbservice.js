@@ -209,7 +209,7 @@ DbService.prototype.checkGangDbAgainstPeer = function(_address, _port, _callback
          _callback(null, { identical: true });
       }
       else {
-         _callback(null, { identical: false, localNewer: (localHash.lastModified >= _peerHash.lastModified) });
+         _callback(null, { identical: false, localNewer: (new Date(localHash.lastModified) >= new Date(_peerHash.lastModified)) });
       }
    });
 };

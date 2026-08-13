@@ -497,7 +497,7 @@ CasaConsoleApi.prototype.updateDb = function(_session, _params, _callback) {
    var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.name;
    var localHash = this.dbService.getDbHash(dbName);
 
-   this.dbService.getPeerDbHash(dbName, localHash, _params[0], _params[1], (_err, _result) => {
+   this.dbService.getPeerDbHash(dbName, localHash.hash, _params[0], _params[1], (_err, _result) => {
 
       if (_err) {
          return _callback(_err);

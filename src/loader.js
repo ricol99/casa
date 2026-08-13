@@ -197,9 +197,50 @@ Loader.prototype.restoreNode = function(_importObj) {
    this.casaDb.connect();
 };
 
+Loader.prototype.ensureConfigPath = function() {
+
+   if (this.configPath) {
+      fs.mkdirSync(this.configPath, { recursive: true });
+   }
+};
+
+Loader.prototype.startConsole = function() {
+   this.addSystemServices(true);
+   this.gang.buildTree();
+
+   // Give tree time to perfrom async tasks
+   util.setTimeout( () => {
+      this.gang.coldStart();
+
+      var Console = require('./console');
+      this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
+      this.console.coldStart();
+   }, 250);
+};
+
+Loader.prototype.initialiseEmptyConsoleGangDb = function(_callback) {
+   this.gangDb.appendToCollection("gang", {
+      name: this.gangName,
+      type: "gang",
+      secureMode: this.secureMode,
+      certPath: this.certPath,
+      configPath: this.configPath,
+      listeningPort: 8999
+   }, (_err) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.gangDb.updateHashInternal(_callback);
+   });
+};
+
 Loader.prototype.loadConsole = function() {
    this.gangName = this.casaName;
    this.casaName = "casa-console";
+
+   this.ensureConfigPath();
 
    this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, connectToPeers: false, certPath: this.certPath,
                        configPath: this.configPath, listeningPort: 8999, settleTime: this.settleTime };
@@ -214,42 +255,41 @@ Loader.prototype.loadConsole = function() {
 
    this.gangDb.on('connected', (_data) => {
 
-      this.gangDb.readCollection("gangServices", (_err, _services) => {
+      this.gangDb.readCollection("gang", (_err, _gangConfig) => {
          
-         if (!_err) {
-            this.gangConfig.services = _services;
-            this.addSystemServices(true);
-
-            this.gang.buildTree();
-
-            // Give tree time to perfrom async tasks
-            util.setTimeout( () => {
-               this.gang.coldStart();
-
-               var Console = require('./console');
-               this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath }, this.gang);
-               this.console.coldStart();
-            }, 250);
+         if (!_err && _gangConfig && (_gangConfig.length > 0) && _gangConfig[0].organisation) {
+            this.gangConfig.organisation = _gangConfig[0].organisation;
+            this.gang.organisation = _gangConfig[0].organisation;
          }
+
+         this.gangDb.readCollection("gangServices", (_err, _services) => {
+            
+            if (!_err) {
+               this.gangConfig.services = _services;
+            }
+
+            this.startConsole();
+         });
       });
    });
 
    this.gangDb.on('connect-error', (_data) => {
-      gangDb = new Db(this.gangName+"-db", this.configPath, true, null);
+      this.gangDb = new Db(this.gangName+"-db", this.configPath, true, null);
+      this.gangDb.consoleCreatedEmptyDb = true;
+      this.gangDb.setOwner(this.gang);
+      this.gang.gangDb = this.gangDb;
 
       this.gangDb.on('connected', (_data) => {
-         this.gangDb.appendToCollection("gang", { name: this.gangName, type: "gang", secureMode: this.secureMode, certPath: this.certPath, configPath: this.configPath, listeningPort: 8999 });
 
-         this.gang.buildTree();
+         this.initialiseEmptyConsoleGangDb((_err) => {
 
-         // Give tree time to perfrom async tasks
-         util.setTimeout( () => {
-            this.gang.coldStart();
+            if (_err) {
+               process.stderr.write("Unable to initialise console gang database. Error=" + _err + "\n");
+               process.exit(1);
+            }
 
-            var Console = require('./console');
-            this.console = new Console({ gangName: this.gangName, casaName: null, secureMode: this.secureMode, certPath: this.certPath });
-            this.console.coldStart();
-         }, 250);
+            this.startConsole();
+         });
       });
 
       this.gangDb.on('connect-error', (_data) => {

@@ -194,6 +194,26 @@ CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
    }
 };
 
+CasaConsoleCmd.prototype.syncDb = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+
+   var remoteCasa = this.casa;
+   var remoteDbInfo = remoteCasa ? remoteCasa.getRemoteDbInfo() : null;
+   var localDb = remoteCasa ? remoteCasa.getDb() : null;
+   var dbName = remoteDbInfo && remoteDbInfo.dbName ? remoteDbInfo.dbName : (remoteCasa ? remoteCasa.getDbName() : null);
+
+   this.syncDbFromRemoteCasa({
+      remoteCasa: remoteCasa,
+      remoteDbInfo: remoteDbInfo,
+      localDb: localDb,
+      dbName: dbName,
+      afterWrite: (_db) => {
+         remoteCasa.db = _db;
+         this.gang.dbs[dbName] = _db;
+      }
+   }, _callback);
+};
+
 CasaConsoleCmd.prototype.exportDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
