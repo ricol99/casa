@@ -12,6 +12,8 @@
     "test:namedobject": "node test/namedobject_phase2_test.js",
     "test:previewconfig": "node test/previewconfigengine_test.js",
     "test:consoleapi-progress": "node test/consoleapi_progress_integration_test.js",
+    "test:console-gang-db-sync": "node test/console_gang_db_sync_test.js",
+    "test:console-db-push": "node test/console_db_push_test.js",
     "test:iomessagesocket-session": "node test/iomessagesocketservice_session_test.js",
     "test:casadiscovery-source-owner": "node test/casadiscovery_source_owner_test.js",
     "test:peer-protocol-helpers": "node test/peer_protocol_helpers_test.js",

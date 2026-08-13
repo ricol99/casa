@@ -526,6 +526,48 @@ CasaConsoleApi.prototype.updateDbs = function(_session, _params, _callback) {
    });
 };
 
+CasaConsoleApi.prototype.replaceDb = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   var payload = _params[0];
+
+   if (!payload || !payload.dbName || !(payload.docs instanceof Array)) {
+      return _callback("Database payload is malformed");
+   }
+
+   this.dbService.replaceDbFromDocs(payload.dbName, payload.docs, _callback);
+};
+
+CasaConsoleApi.prototype.replaceDbs = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   var payloads = _params[0];
+
+   if (!(payloads instanceof Array) || (payloads.length === 0)) {
+      return _callback("Database payloads are malformed");
+   }
+
+   this.replaceDb(_session, [ payloads[0] ], (_err, _result) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      if (payloads.length <= 1) {
+         return _callback(null, [ _result ]);
+      }
+
+      this.replaceDb(_session, [ payloads[1] ], (_secondErr, _secondResult) => {
+
+         if (_secondErr) {
+            return _callback(_secondErr);
+         }
+
+         _callback(null, [ _result, _secondResult ]);
+      });
+   });
+};
+
 CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
    this.gang.casa.getDb().readAll(_callback);
 };

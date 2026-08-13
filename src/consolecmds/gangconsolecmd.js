@@ -283,6 +283,7 @@ GangConsoleCmd.prototype.upsertGangDocument = function(_updates, _callback) {
                return _callback(_updateErr);
             }
 
+            db.consoleCreatedEmptyDb = false;
             this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
          });
       }
@@ -293,6 +294,7 @@ GangConsoleCmd.prototype.upsertGangDocument = function(_updates, _callback) {
                return _callback(_appendErr);
             }
 
+            db.consoleCreatedEmptyDb = false;
             this.updateGangDbHash(( _hashErr) => _callback(_hashErr, document));
          });
       }
@@ -344,6 +346,7 @@ GangConsoleCmd.prototype.upsertGangServiceConfig = function(_serviceConfig, _cal
                return _callback(_updateErr);
             }
 
+            db.consoleCreatedEmptyDb = false;
             this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
          });
       }
@@ -354,6 +357,7 @@ GangConsoleCmd.prototype.upsertGangServiceConfig = function(_serviceConfig, _cal
                return _callback(_appendErr);
             }
 
+            db.consoleCreatedEmptyDb = false;
             this.updateGangDbHash(( _hashErr) => _callback(_hashErr, _serviceConfig));
          });
       }
@@ -581,15 +585,81 @@ GangConsoleCmd.prototype.restart = function(_arguments, _callback)  {
 };
 
 GangConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
-   this.executeParsedCommandOnAllCasas("updateDbs", [ myAddress, port ], _callback);
+   this.checkArguments(0, _arguments);
+
+   this.dbPushPayload(this.gang.getDb(), (_err, _gangPayload) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.pushGangAndCasaDbPayloadsToAllCasas(_gangPayload, _callback);
+   });
 };
 
 GangConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
-   this.executeParsedCommandOnAllCasas("updateDb", [ myAddress, port ], _callback);
+   this.checkArguments(0, _arguments);
+
+   this.dbPushPayload(this.gang.getDb(), (_err, _payload) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.executeParsedCommandOnAllCasas("replaceDb", [ _payload ], _callback);
+   });
+};
+
+GangConsoleCmd.prototype.pushGangAndCasaDbPayloadsToAllCasas = function(_gangPayload, _callback) {
+   var casaNames = Object.keys(this.console.remoteCasas).sort( (_a, _b) => _a.localeCompare(_b));
+   var firstError = null;
+   var lastResult = null;
+   var pushedCount = 0;
+
+   var pushNext = (_index) => {
+
+      if (_index >= casaNames.length) {
+
+         if (pushedCount === 0) {
+            return _callback(firstError ? firstError : "No Casa connected!");
+         }
+
+         return _callback(firstError, lastResult);
+      }
+
+      var casa = this.console.remoteCasas[casaNames[_index]];
+
+      if (!casa || !casa.connected) {
+         return pushNext(_index + 1);
+      }
+
+      this.dbPushPayload(casa.getDb(), (_payloadErr, _casaPayload) => {
+
+         if (_payloadErr) {
+
+            if (!firstError) {
+               firstError = _payloadErr;
+            }
+
+            return pushNext(_index + 1);
+         }
+
+         this.console.sendCommandToCasa(casa, [ this.uName, "replaceDbs", [ [ _gangPayload, _casaPayload ] ] ], "executeParsedCommand", (_err, _result) => {
+            pushedCount = pushedCount + 1;
+
+            if (_err && !firstError) {
+               firstError = _err;
+            }
+            else if (!_err) {
+               lastResult = _result;
+            }
+
+            pushNext(_index + 1);
+         });
+      });
+   };
+
+   pushNext(0);
 };
 
 GangConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
@@ -799,10 +869,21 @@ GangConsoleCmd.prototype.importDb = function(_arguments, _callback) {
             return _callback("Failed to create DB. Error="+_err);
          }
 
-         var myAddress = util.getLocalIpAddress();
-         var port = this.gang.mainListeningPort();
+         db.updateHashInternal((_hashErr) => {
 
-         this.executeParsedCommandOnAllCasas("updateDb", [ myAddress, port], _callback);
+            if (_hashErr) {
+               return _callback(_hashErr);
+            }
+
+            this.dbPushPayload(db, (_payloadErr, _payload) => {
+
+               if (_payloadErr) {
+                  return _callback(_payloadErr);
+               }
+
+               this.executeParsedCommandOnAllCasas("replaceDb", [ _payload ], _callback);
+            });
+         });
       });
    });
 

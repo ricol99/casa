@@ -1,6 +1,7 @@
 var util = require('util');
 var WebService = require('./webservice');
 var request = require('request');
+var Db = require('../db');
 
 function DbService(_config, _owner) {
    WebService.call(this, _config, _owner);
@@ -179,6 +180,73 @@ DbService.prototype.getDbHash = function(_dbName) {
    return db.getHash();
 };
 
+DbService.prototype.replaceDbFromDocs = function(_dbName, _docs, _callback) {
+
+   if (!_dbName) {
+      return _callback("Database name not provided");
+   }
+
+   if (!(_docs instanceof Array)) {
+      return _callback("Database documents not provided");
+   }
+
+   var db = new Db(_dbName, this.gang.configPath(), true, this.gang);
+   var callbackCalled = false;
+
+   var callbackOnce = (_err, _result) => {
+
+      if (!callbackCalled) {
+         callbackCalled = true;
+         _callback(_err, _result);
+      }
+   };
+
+   db.on('connected', () => {
+      var afterAppend = (_appendErr) => {
+
+         if (_appendErr) {
+            return callbackOnce(_appendErr);
+         }
+
+         db.updateHashInternal((_hashErr, _hash) => {
+
+            if (_hashErr) {
+               return callbackOnce(_hashErr);
+            }
+
+            db.setOwner(this.gang);
+            this.gang.dbs[_dbName] = db;
+
+            if (_dbName === (this.gang.name + "-db")) {
+               this.gang.gangDb = db;
+            }
+
+            if (this.gang.casa && (_dbName === (this.gang.casa.name + "-db"))) {
+               this.gang.casa.db = db;
+            }
+
+            callbackOnce(null, { dbName: _dbName, hash: _hash });
+         });
+      };
+
+      if (_docs.length === 0) {
+         return afterAppend(null);
+      }
+
+      db.append(_docs, afterAppend);
+   });
+
+   db.on('error', (_data) => {
+      callbackOnce(_data && _data.error ? _data.error : "Unable to write database");
+   });
+
+   db.on('connect-error', (_data) => {
+      callbackOnce(_data && _data.error ? _data.error : "Unable to create database");
+   });
+
+   db.connect();
+};
+
 DbService.prototype.dbsRequested = function(_request, _response) {
    console.log(this.uName+": dbsRequested()");
    _response.send([ this.gang.getDb().name, this.gang.casa.getDb().name ]);
@@ -222,7 +290,6 @@ DbService.prototype.updateGangDbFromPeer = function(_address, _port, _callback) 
          _callback("Unable to retrieve peer db, err: " + _err);
       }
       else {
-         var Db = require('../db');
          this.gang.gangDb = new Db(this.gang.name+"-db", this.gang.configPath(), true);
 
          this.gang.gangDb.on('connected', () => {
@@ -270,7 +337,6 @@ DbService.prototype.getAndWritePeerDb = function(_dbName, _address, _port, _outp
          return _callback(_err);
       }
 
-      var Db = require('../db');
       var db = new Db(_dbName, _outputPath, true);
 
       db.on('connected', () => {

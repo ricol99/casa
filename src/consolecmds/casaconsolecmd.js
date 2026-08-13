@@ -168,19 +168,27 @@ CasaConsoleCmd.prototype.previewConfig = function(_arguments, _callback) {
 CasaConsoleCmd.prototype.pushDbs = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
+   this.dbPushPayloads([ this.casa.getDb(), this.gang.getDb() ], (_err, _payloads) => {
 
-   this.executeParsedCommand("updateDbs", [ myAddress, port], _callback);
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.executeParsedCommand("replaceDbs", [ _payloads ], _callback);
+   });
 };
 
 CasaConsoleCmd.prototype.pushDb = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
 
-   var myAddress = util.getLocalIpAddress();
-   var port = this.gang.mainListeningPort();
+   this.dbPushPayload(this.casa.getDb(), (_err, _payload) => {
 
-   this.executeParsedCommand("updateDb", [ myAddress, port], _callback);
+      if (_err) {
+         return _callback(_err);
+      }
+
+      this.executeParsedCommand("replaceDb", [ _payload ], _callback);
+   });
 };
 
 CasaConsoleCmd.prototype.pullDb = function(_arguments, _callback) {
@@ -315,17 +323,28 @@ CasaConsoleCmd.prototype.importDb = function(_arguments, _callback) {
             return _callback("Failed to create DB. Error="+_err);
          }
 
-         var myAddress = util.getLocalIpAddress();
-         var port = this.gang.mainListeningPort();
+         db.updateHashInternal((_hashErr) => {
 
-         this.executeParsedCommand("updateDb", [ myAddress, port], (_err, _res) => {
-            return _callback(_err, true);
-            // TBD
-            if (writeAdditionalGangDb) {
-               var gangConfig = { gang: { "name": collections.casa.name + "-gang", "type": "gang", "displayName": "Gang for " + collections.casa.name, "parentCasa": {} }};
-               //populateDbFromConfig(gangConfig, false); // TBD - call the gang importDB
+            if (_hashErr) {
+               return _callback(_hashErr);
             }
-         }); 
+
+            this.dbPushPayload(db, (_payloadErr, _payload) => {
+
+               if (_payloadErr) {
+                  return _callback(_payloadErr);
+               }
+
+               this.executeParsedCommand("replaceDb", [ _payload ], (_err, _res) => {
+                  return _callback(_err, true);
+                  // TBD
+                  if (writeAdditionalGangDb) {
+                     var gangConfig = { gang: { "name": collections.casa.name + "-gang", "type": "gang", "displayName": "Gang for " + collections.casa.name, "parentCasa": {} }};
+                     //populateDbFromConfig(gangConfig, false); // TBD - call the gang importDB
+                  }
+               });
+            });
+         });
 
       });
    });

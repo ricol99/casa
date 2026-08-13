@@ -130,6 +130,74 @@ ConsoleCmd.prototype.writeSyncedDb = function(_dbName, _docs, _callback) {
    db.connect();
 };
 
+ConsoleCmd.prototype.finishDbSyncPull = function(_dbName, _docs, _state, _afterWrite, _callback) {
+
+   this.writeSyncedDb(_dbName, _docs, (_writeErr, _db) => {
+
+      if (_writeErr) {
+         return _callback(_writeErr);
+      }
+
+      if (_afterWrite) {
+         _afterWrite(_db);
+      }
+
+      _callback(null, {
+         dbName: _dbName,
+         action: "pulled",
+         reason: _state.reason,
+         hash: _db.getHash()
+      });
+   });
+};
+
+ConsoleCmd.prototype.dbPushPayload = function(_db, _callback) {
+
+   if (!_db || (typeof _db.readAll !== "function")) {
+      return _callback("Database is not available");
+   }
+
+   _db.readAll((_err, _docs) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      _callback(null, {
+         dbName: _db.name,
+         hash: (typeof _db.getHash === "function") ? _db.getHash() : null,
+         docs: _docs
+      });
+   });
+};
+
+ConsoleCmd.prototype.dbPushPayloads = function(_dbs, _callback) {
+   var payloads = [];
+
+   if (!(_dbs instanceof Array) || (_dbs.length === 0)) {
+      return _callback("No databases available to push");
+   }
+
+   var addPayload = (_index) => {
+
+      if (_index >= _dbs.length) {
+         return _callback(null, payloads);
+      }
+
+      this.dbPushPayload(_dbs[_index], (_err, _payload) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         payloads.push(_payload);
+         addPayload(_index + 1);
+      });
+   };
+
+   addPayload(0);
+};
+
 ConsoleCmd.prototype.syncDbFromRemoteCasa = function(_options, _callback) {
    var remoteCasa = _options ? _options.remoteCasa : null;
    var remoteDbInfo = _options ? _options.remoteDbInfo : null;
@@ -137,6 +205,7 @@ ConsoleCmd.prototype.syncDbFromRemoteCasa = function(_options, _callback) {
    var dbName = _options && _options.dbName ? _options.dbName : (remoteDbInfo ? remoteDbInfo.dbName : null);
    var objUName = _options && _options.objUName ? _options.objUName : this.uName;
    var afterWrite = _options ? _options.afterWrite : null;
+   var validateRemoteDocs = _options ? _options.validateRemoteDocs : null;
    var state = this.dbSyncState(localDb, remoteDbInfo);
 
    if (!remoteCasa || !remoteCasa.connected) {
@@ -165,23 +234,28 @@ ConsoleCmd.prototype.syncDbFromRemoteCasa = function(_options, _callback) {
          return _callback(_err);
       }
 
-      this.writeSyncedDb(dbName, _docs, (_writeErr, _db) => {
+      if (validateRemoteDocs) {
+         return validateRemoteDocs(_docs, state, (_validationErr, _validationResult) => {
 
-         if (_writeErr) {
-            return _callback(_writeErr);
-         }
+            if (_validationErr) {
+               return _callback(_validationErr);
+            }
 
-         if (afterWrite) {
-            afterWrite(_db);
-         }
+            if (_validationResult && (_validationResult.shouldPull === false)) {
+               return _callback(null, {
+                  dbName: dbName,
+                  action: _validationResult.action ? _validationResult.action : "skipped",
+                  reason: _validationResult.reason ? _validationResult.reason : state.reason,
+                  localOrganisation: _validationResult.localOrganisation,
+                  remoteOrganisation: _validationResult.remoteOrganisation
+               });
+            }
 
-         _callback(null, {
-            dbName: dbName,
-            action: "pulled",
-            reason: state.reason,
-            hash: _db.getHash()
+            this.finishDbSyncPull(dbName, _docs, state, afterWrite, _callback);
          });
-      });
+      }
+
+      this.finishDbSyncPull(dbName, _docs, state, afterWrite, _callback);
    });
 };
 

@@ -519,9 +519,54 @@ Console.prototype.writeDbSyncResult = function(_scope, _casaName, _err, _result)
    if (_result.action === "pulled") {
       this.writeOutput("Synced " + _scope + " db from casa " + _casaName + " (" + _result.reason + ")");
    }
+   else if (_result.reason === "organisation-conflict") {
+      this.writeOutput("Local gang db organisation (" + (_result.localOrganisation ? _result.localOrganisation : "not set") + ") differs from casa " + _casaName + " gang db (" + (_result.remoteOrganisation ? _result.remoteOrganisation : "not set") + "). Leaving local copy unchanged.");
+   }
    else if (_result.reason === "local-newer") {
       this.writeOutput("Local " + _scope + " db is newer than casa " + _casaName + " db. Leaving local copy unchanged.");
    }
+};
+
+Console.prototype.findGangDocumentInDocs = function(_docs) {
+
+   for (var i = 0; _docs && (i < _docs.length); ++i) {
+
+      if ((_docs[i]._collection === "gang") && (_docs[i].name === this.gang.name)) {
+         return _docs[i];
+      }
+   }
+
+   return null;
+};
+
+Console.prototype.validateGangDbSyncDocs = function(_localDb, _remoteDocs, _state, _callback) {
+   var remoteGangConfig = this.findGangDocumentInDocs(_remoteDocs);
+   var remoteOrganisation = remoteGangConfig && remoteGangConfig.organisation ? remoteGangConfig.organisation : null;
+
+   if (!_localDb || (typeof _localDb.find !== "function")) {
+      return _callback(null, { shouldPull: true });
+   }
+
+   _localDb.find(this.gang.name, (_err, _localGangConfig) => {
+
+      if (_err) {
+         return _callback(_err);
+      }
+
+      var localOrganisation = _localGangConfig && _localGangConfig.organisation ? _localGangConfig.organisation : null;
+
+      if (localOrganisation && (localOrganisation !== remoteOrganisation)) {
+         return _callback(null, {
+            shouldPull: false,
+            action: "skipped",
+            reason: "organisation-conflict",
+            localOrganisation: localOrganisation,
+            remoteOrganisation: remoteOrganisation
+         });
+      }
+
+      _callback(null, { shouldPull: true });
+   });
 };
 
 Console.prototype.syncGangDbFromCasa = function(_remoteCasa, _callback) {
@@ -535,6 +580,9 @@ Console.prototype.syncGangDbFromCasa = function(_remoteCasa, _callback) {
       localDb: localDb,
       dbName: dbName,
       objUName: ":",
+      validateRemoteDocs: (_docs, _state, _done) => {
+         this.validateGangDbSyncDocs(localDb, _docs, _state, _done);
+      },
       afterWrite: (_db) => {
          this.gang.gangDb = _db;
          this.gang.dbs[dbName] = _db;
