@@ -12,6 +12,7 @@ function Gang(_config, _loader) {
    this.peercasas = {};
    this.peerGangs = {};
    this.loader = _loader;
+   this.organisation = _config.organisation;
 
    this.casa = new Casa(_config.casa, this);
 };
@@ -63,6 +64,10 @@ Gang.prototype.coldStart = function() {
 
    // Start connecting to Peers
    this.connectToPeers();
+};
+
+Gang.prototype.getOrganisation = function() {
+   return this.organisation;
 };
 
 Gang.prototype.refreshSourceListeners = function() {

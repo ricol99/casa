@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casa Management Console</title>
+  <meta name="description" content="Casa-served management for local-first Casa automation deployments.">
+  <link rel="stylesheet" href="/webui/marketing.css">
+</head>
+<body>
+  <header class="site-header" aria-label="Primary">
+    <a class="brand" href="#top" aria-label="Casa Management Console home">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span>
+        <span class="brand-name">Casa</span>
+        <span class="brand-product">Management Console</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="Page sections">
+      <a href="#operations">Operations</a>
+      <a href="#model">Model</a>
+      <a href="#organisation">Organisation</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-visual" aria-hidden="true">
+        <div class="fleet-board">
+          <div class="fleet-topbar">
+            <span class="window-dot"></span>
+            <span class="window-dot muted"></span>
+            <span class="window-dot muted"></span>
+            <span class="board-title">Organisation overview</span>
+          </div>
+          <div class="fleet-grid">
+            <div class="fleet-panel panel-wide">
+              <span class="panel-label">Managed gangs</span>
+              <strong>12</strong>
+              <div class="status-row"><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="fleet-panel">
+              <span class="panel-label">Online casas</span>
+              <strong>47</strong>
+              <small>LAN + Pusher + whrelay</small>
+            </div>
+            <div class="fleet-panel alert-panel">
+              <span class="panel-label">Attention</span>
+              <strong>2</strong>
+              <small>Transport fallback active</small>
+            </div>
+            <div class="fleet-panel panel-map">
+              <span class="map-node main"></span>
+              <span class="map-node node-a"></span>
+              <span class="map-node node-b"></span>
+              <span class="map-node node-c"></span>
+              <span class="map-line line-a"></span>
+              <span class="map-line line-b"></span>
+              <span class="map-line line-c"></span>
+            </div>
+            <div class="fleet-panel panel-list">
+              <span class="panel-label">Recent events</span>
+              <p><span class="ok"></span> Farm gate synced backup</p>
+              <p><span class="ok"></span> Workshop casa recovered</p>
+              <p><span class="warn"></span> Studio using relay path</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow">Casa-served. Local-first.</p>
+        <h1 id="hero-title">Manage every Casa deployment through the transports you already trust.</h1>
+        <p class="hero-copy">
+          Casa Management Console gives organisations one place to monitor gangs, configure remote access, and recover sites while automation stays local.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#organisation" data-organisation-action>Create Organisation</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="proof-strip" aria-label="Management priorities">
+      <div>
+        <strong>Automation stays local</strong>
+        <span>Casa keeps executing on site.</span>
+      </div>
+      <div>
+        <strong>Transports add reach</strong>
+        <span>Use LAN, Pusher, whrelay, webhooks, and future bearers.</span>
+      </div>
+      <div>
+        <strong>Ops become visible</strong>
+        <span>Status, backups, transport health, and support.</span>
+      </div>
+    </section>
+
+    <section class="section" id="operations">
+      <div class="section-kicker">Operations Layer</div>
+      <div class="section-head">
+        <h2>One console for the work around Casa.</h2>
+        <p>
+          The Management Console manages organisations, gangs, transport reachability, backups, and support access without becoming the automation authority.
+        </p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature">
+          <span class="feature-code">01</span>
+          <h3>Gang and casa health</h3>
+          <p>Track availability, version drift, transport status, and last-seen signals across every managed deployment.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-code">02</span>
+          <h3>Remote access setup</h3>
+          <p>Make relay credentials, bearer choice, and support entry points feel like product workflows rather than infrastructure chores.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-code">03</span>
+          <h3>Backup and restore</h3>
+          <p>Keep encrypted snapshots of configuration and management metadata so a site can recover without being rebuilt by hand.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="model-band" id="model">
+      <div class="model-copy">
+        <div class="section-kicker">Product Model</div>
+        <h2>Management does not need a central Casa cloud.</h2>
+        <p>
+          The console coordinates management through Casa transports. It does not become the automation authority. Gangs define the shared context; the management layer makes them easier to operate.
+        </p>
+      </div>
+      <div class="model-steps" aria-label="Casa management model">
+        <div><span>1</span><strong>Casa</strong><p>Runs automation locally.</p></div>
+        <div><span>2</span><strong>Bearer transports</strong><p>LAN, Pusher, whrelay, webhooks.</p></div>
+        <div><span>3</span><strong>Management Console</strong><p>Observes, configures, and recovers through transports.</p></div>
+      </div>
+    </section>
+
+    <section class="section access-section" id="organisation">
+      <div class="section-kicker">Organisation</div>
+      <div class="section-head">
+        <h2>Start by defining the organisation.</h2>
+        <p>
+          The organisation owns the management context and transport credentials.
+        </p>
+      </div>
+      <div class="access-panel">
+        <div class="organisation-create" data-create-panel>
+          <strong>Create Organisation</strong>
+          <span>Set the organisation name and optional Pusher credentials used by Casa transports.</span>
+          <form class="organisation-form" data-organisation-form>
+            <label class="wide">
+              <span>Organisation name</span>
+              <input type="text" name="name" placeholder="collin-home" autocomplete="organization" required>
+            </label>
+            <label>
+              <span>Pusher app ID</span>
+              <input type="text" name="appId" placeholder="1234567">
+            </label>
+            <label>
+              <span>Pusher key</span>
+              <input type="text" name="key" placeholder="app-key">
+            </label>
+            <label>
+              <span>Pusher secret</span>
+              <input type="password" name="secret" placeholder="app-secret">
+            </label>
+            <label>
+              <span>Pusher cluster</span>
+              <input type="text" name="cluster" placeholder="eu">
+            </label>
+            <div class="form-actions wide">
+              <button class="primary-action compact" type="submit">Create Organisation</button>
+              <span class="form-note" data-form-note aria-live="polite"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="organisation-manage" data-manage-panel hidden>
+          <div>
+            <strong data-organisation-name>Organisation</strong>
+            <span data-organisation-status>Management context is defined for this gang.</span>
+          </div>
+          <dl class="organisation-facts">
+            <div><dt>Slug</dt><dd data-organisation-slug>-</dd></div>
+            <div><dt>Pusher</dt><dd data-pusher-status>missing</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Casa Management Console</span>
+    <span>Local-first management over Casa transports.</span>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/webui/marketing.js"></script>
+</body>
+</html>

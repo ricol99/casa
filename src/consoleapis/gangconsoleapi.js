@@ -389,6 +389,15 @@ GangConsoleApi.prototype.cat = function(_session, _params, _callback) {
    _callback(null, {});
 };
 
+GangConsoleApi.prototype.organisation = function(_session, _params, _callback) {
+   var organisation = (this.gang && (typeof this.gang.getOrganisation === "function")) ? this.gang.getOrganisation() : null;
+
+   _callback(null, {
+      gangName: this.gang ? this.gang.name : null,
+      organisation: organisation ? organisation : null
+   });
+};
+
 GangConsoleApi.prototype.createUser = function(_session, _params, _callback) {
 
    if (params.length < 1) {

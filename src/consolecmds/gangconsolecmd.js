@@ -318,6 +318,20 @@ GangConsoleCmd.prototype.topology = function(_arguments, _callback) {
    this.executeParsedCommand("topology", [], _callback);
 };
 
+GangConsoleCmd.prototype.organisation = function(_arguments, _callback) {
+   var subCommand = (_arguments && (_arguments.length > 0)) ? _arguments[0] : "show";
+
+   if (_arguments && (_arguments.length > 1)) {
+      return _callback("Too many arguments. Usage: organisation show");
+   }
+
+   if (subCommand !== "show") {
+      return _callback("Unsupported organisation command \"" + subCommand + "\". Usage: organisation show");
+   }
+
+   this.executeParsedCommand("organisation", [], _callback);
+};
+
 GangConsoleCmd.prototype.resolveSource = function(_arguments, _callback) {
    this.checkArguments(1, _arguments);
    var parsed = parseSourceCommandArgs(_arguments);
