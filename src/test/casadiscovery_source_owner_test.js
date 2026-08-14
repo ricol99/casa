@@ -285,18 +285,24 @@ function createMdnsTransportHarness() {
       uName: ":discovery",
       sourceOwnerRoute: "/casa/source-owner",
       addDiscoveryTransport: function() {},
-      casaStatusUpdate: function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
-         statusUpdates.push({
+      casaStatusUpdate: function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier, _metadata) {
+         var update = {
             name: _name,
             status: _status,
             address: _address,
             discoveryTransportName: _discoveryTransportName,
             messageTransportName: _messageTransportName,
             tier: _tier
-         });
+         };
+
+         if (_metadata) {
+            update.metadata = _metadata;
+         }
+
+         statusUpdates.push(update);
       },
-      gangCasaStatusUpdate: function(_gang, _name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
-         gangCasaUpdates.push({
+      gangCasaStatusUpdate: function(_gang, _name, _status, _address, _discoveryTransportName, _messageTransportName, _tier, _metadata) {
+         var update = {
             gang: _gang,
             name: _name,
             status: _status,
@@ -304,7 +310,13 @@ function createMdnsTransportHarness() {
             discoveryTransportName: _discoveryTransportName,
             messageTransportName: _messageTransportName,
             tier: _tier
-         });
+         };
+
+         if (_metadata) {
+            update.metadata = _metadata;
+         }
+
+         gangCasaUpdates.push(update);
       },
       sourceOwnerStatusUpdate: function(_data, _discoveryTransportName, _messageTransportName, _tier) {
          sourceOwnerResponses.push({
@@ -370,6 +382,51 @@ runTest("mDNS discovery emits gang-casa status and records LAN candidates", func
    harness.transport.serviceDown({ name: "barn-controller" });
    assert.strictEqual(harness.gangCasaUpdates[1].status, "down");
    assert.strictEqual(harness.transport.gangCasaCandidates.hasOwnProperty("farm-gate::barn-controller"), false);
+});
+
+runTest("mDNS discovery emits unregistered adverts as casa-up metadata", function() {
+   var harness = createMdnsTransportHarness();
+   var serviceUp = {
+      name: "unregistered-aa-bb-cc",
+      host: "pi.local",
+      port: 8999,
+      txt: {
+         gang: "unregistered",
+         casaUName: ":unregistered-aa-bb-cc",
+         unreg: "true",
+         mac: "aa:bb:cc"
+      }
+   };
+
+   harness.transport.serviceUp(serviceUp);
+
+   assert.deepStrictEqual(harness.statusUpdates[0], {
+      name: ":unregistered-aa-bb-cc",
+      status: "up",
+      address: { host: "pi.local", port: 8999 },
+      discoveryTransportName: "mdns",
+      messageTransportName: "http",
+      tier: 1,
+      metadata: {
+         unregistered: true,
+         macAddress: "aa:bb:cc"
+      }
+   });
+
+   harness.transport.serviceDown({ name: "unregistered-aa-bb-cc" });
+
+   assert.deepStrictEqual(harness.statusUpdates[1], {
+      name: ":unregistered-aa-bb-cc",
+      status: "down",
+      address: null,
+      discoveryTransportName: "mdns",
+      messageTransportName: "http",
+      tier: 1,
+      metadata: {
+         unregistered: true,
+         macAddress: "aa:bb:cc"
+      }
+   });
 });
 
 runTest("mDNS discovery queries LAN candidates for source owners", function() {

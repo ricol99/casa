@@ -168,7 +168,7 @@ main,
 h1 {
   margin: 0;
   max-width: 800px;
-  font-size: clamp(46px, 7vw, 88px);
+  font-size: clamp(40px, 6.2vw, 76px);
   line-height: 0.93;
   letter-spacing: 0;
   font-weight: 850;
@@ -463,7 +463,7 @@ h1 {
 }
 
 .feature-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .feature-code {
@@ -477,6 +477,18 @@ h1 {
 
 .feature p {
   margin: 0;
+}
+
+.installer-download {
+  margin-top: 16px;
+}
+
+.installer-note {
+  display: block;
+  min-height: 20px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .model-band {

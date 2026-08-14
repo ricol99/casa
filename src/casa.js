@@ -1,4 +1,5 @@
 var util = require('./util');
+var fs = require('fs');
 var express;
 var app;
 var http;
@@ -121,7 +122,21 @@ Casa.prototype.buildServices = function() {
    }
 
    this.eventLogger = this.findService("eventloggingservice");
+
+   if (!this.eventLogger) {
+      this.eventLogger = this.createNullEventLogger();
+   }
+
    this.createServer();
+};
+
+Casa.prototype.createNullEventLogger = function() {
+   return {
+      logRaisedEvent: function(_event) {
+      },
+      logReceivedEvent: function(_receiver, _event) {
+      }
+   };
 };
   
 Casa.prototype.buildTree = function() {
@@ -251,6 +266,94 @@ Casa.prototype.createServer = function() {
 
    this.casaDiscoveryService.on("casa-up", (_data) => { this.casaUp(_data.name, _data.address, _data.messageTransportName, _data.tier) });
    this.casaDiscoveryService.on("casa-down", (_data) => { this.casaDown(_data.name, _data.address, _data.messageTransportName, _data.tier) });
+};
+
+Casa.prototype.normaliseBootstrapCasaName = function(_casaName) {
+
+   if (typeof _casaName !== "string") {
+      return null;
+   }
+
+   var casaName = _casaName.trim();
+
+   if (casaName[0] === ":") {
+      casaName = casaName.slice(1);
+   }
+
+   if (/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(casaName)) {
+      return casaName;
+   }
+
+   return null;
+};
+
+Casa.prototype.localMacAddress = function() {
+   return util.normaliseMacAddress(util.getLocalMacAddress ? util.getLocalMacAddress() : null);
+};
+
+Casa.prototype.identityPath = function() {
+   return this.configPath + "/casa-identity.json";
+};
+
+Casa.prototype.claimUnregisteredCasa = function(_data, _callback) {
+   var casaName = this.normaliseBootstrapCasaName(_data ? _data.casaName : null);
+   var expectedMacAddress = util.normaliseMacAddress(_data ? (_data.macAddress || _data.address) : null);
+   var localMacAddress = this.localMacAddress();
+   var identity;
+
+   if (!this.gang || !this.gang.isUnregistered || !this.gang.isUnregistered()) {
+      return _callback({ statusCode: 409, message: "casa is already registered" });
+   }
+
+   if (!casaName) {
+      return _callback({ statusCode: 400, message: "valid casaName is required" });
+   }
+
+   if (!expectedMacAddress) {
+      return _callback({ statusCode: 400, message: "valid macAddress is required" });
+   }
+
+   if (localMacAddress && (localMacAddress !== expectedMacAddress)) {
+      return _callback({ statusCode: 403, message: "macAddress does not match this casa" });
+   }
+
+   identity = {
+      casaName: casaName,
+      gangName: (_data && _data.gangName) ? _data.gangName : null,
+      macAddress: localMacAddress ? localMacAddress : expectedMacAddress,
+      claimedAt: new Date().toISOString()
+   };
+
+   fs.mkdir(this.configPath, { recursive: true }, (_mkdirErr) => {
+
+      if (_mkdirErr) {
+         return _callback({ statusCode: 500, message: "unable to create config path: " + _mkdirErr.message });
+      }
+
+      fs.writeFile(this.identityPath(), JSON.stringify(identity, null, 3), (_writeErr) => {
+
+         if (_writeErr) {
+            return _callback({ statusCode: 500, message: "unable to write casa identity: " + _writeErr.message });
+         }
+
+         this.stopBootstrapAdvertising();
+
+         _callback(null, {
+            ok: true,
+            casaName: casaName,
+            gangName: identity.gangName,
+            macAddress: identity.macAddress,
+            restartRequired: true
+         });
+      });
+   });
+};
+
+Casa.prototype.stopBootstrapAdvertising = function() {
+
+   if (this.casaDiscoveryService && (typeof this.casaDiscoveryService.stopBroadcasting === "function")) {
+      this.casaDiscoveryService.stopBroadcasting();
+   }
 };
 
 Casa.prototype.startListening = function () {

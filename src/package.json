@@ -10,6 +10,11 @@
   "license": "MIT",
   "scripts": {
     "test:namedobject": "node test/namedobject_phase2_test.js",
+    "test:casa-bootstrap-claim": "node test/casa_bootstrap_claim_test.js",
+    "test:console-casas-command": "node test/console_casas_command_test.js",
+    "test:consoleapi-unregistered": "node test/consoleapi_unregistered_test.js",
+    "test:gang-config": "node test/gang_config_test.js",
+    "test:loader-identity": "node test/loader_identity_test.js",
     "test:previewconfig": "node test/previewconfigengine_test.js",
     "test:consoleapi-progress": "node test/consoleapi_progress_integration_test.js",
     "test:console-gang-db-sync": "node test/console_gang_db_sync_test.js",

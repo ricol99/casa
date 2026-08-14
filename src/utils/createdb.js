@@ -56,7 +56,7 @@ function populateDbFromConfig(_inputConfig, _casaDb) {
          }
       }
       else {
-         collections.gang = { "name": "", "type": "", "displayName": "", "organisation": "", "parentCasa": {} };
+         collections.gang = { "name": "", "type": "", "displayName": "", "organisation": "", "discoverable": false, "publicDiscoverable": false, "allowedSubscriberGangs": [], "parentCasa": {} };
 
          for (var param in collections.gang) {
 

@@ -43,6 +43,23 @@ function emitPreviewProgress(_api, _session, _scope, _targetCasa, _event) {
    });
 }
 
+CasaConsoleApi.prototype.ensureDbServiceAvailable = function(_callback) {
+   var serviceConfig;
+
+   if (!this.dbService) {
+      this.dbService = this.gang.casa.findService("dbservice");
+   }
+
+   if (!this.dbService) {
+      serviceConfig = { name: "db-service", type: "dbservice" };
+      this.dbService = this.gang.casa.createChild(serviceConfig, "service", this.gang.casa);
+      this.gang.casa.addServiceByType(this.dbService);
+      this.dbService.coldStart();
+   }
+
+   return true;
+};
+
 function exportNamedObjectTree(_root, _filter, _process) {
    if (!_root) {
       return null;
@@ -494,6 +511,10 @@ CasaConsoleApi.prototype.restart = function(_session, _params, _callback) {
 CasaConsoleApi.prototype.updateDb = function(_session, _params, _callback) {
    this.checkParams(2, _params);
 
+   if (!this.ensureDbServiceAvailable(_callback)) {
+      return;
+   }
+
    var dbName = (_params.length > 2) ? _params[2] : this.gang.casa.name;
    var localHash = this.dbService.getDbHash(dbName);
 
@@ -528,6 +549,10 @@ CasaConsoleApi.prototype.updateDbs = function(_session, _params, _callback) {
 
 CasaConsoleApi.prototype.replaceDb = function(_session, _params, _callback) {
    this.checkParams(1, _params);
+
+   if (!this.ensureDbServiceAvailable(_callback)) {
+      return;
+   }
 
    var payload = _params[0];
 
@@ -569,7 +594,23 @@ CasaConsoleApi.prototype.replaceDbs = function(_session, _params, _callback) {
 };
 
 CasaConsoleApi.prototype.exportDb = function(_session, _params, _callback) {
-   this.gang.casa.getDb().readAll(_callback);
+   var db = this.gang.casa.getDb();
+
+   if (!db || (typeof db.readAll !== "function")) {
+      return _callback("Database is not available");
+   }
+
+   db.readAll(_callback);
+};
+
+CasaConsoleApi.prototype.claimUnregisteredCasa = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+
+   if (!this.gang.casa || (typeof this.gang.casa.claimUnregisteredCasa !== "function")) {
+      return _callback("Casa bootstrap claim is not available");
+   }
+
+   this.gang.casa.claimUnregisteredCasa(_params[0], _callback);
 };
 
 module.exports = exports = CasaConsoleApi;

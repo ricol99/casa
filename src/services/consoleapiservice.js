@@ -1,6 +1,5 @@
 var util = require('util');
 var WebService = require('./webservice');
-var request = require('request');
 
 function ConsoleApiService(_config, _owner) {
    _config.socketIoSupported = true;
@@ -184,12 +183,10 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
    this.socket = _socket;
 
    this.socket.on('getCasaInfo', (_data) => {
-      console.log(this.uName + ": AAAAAA this.owner.gang.name=", this.owner.gang.name);
-      
-      this.socket.emit('casa-info', { dbInfo: { dbName: this.owner.gang.casa.getDb().name, hash: this.owner.gang.casa.getDb().getHash().hash,
-                                                lastModified: this.owner.gang.casa.getDb().getHash().lastModified },
-                                      gangDbInfo: { dbName: this.owner.gang.getDb().name, hash: this.owner.gang.getDb().getHash().hash,
-                                                    lastModified: this.owner.gang.getDb().getHash().lastModified }});
+      this.socket.emit('casa-info', {
+         dbInfo: this.dbInfoForDb(this.owner.gang.casa.getDb()),
+         gangDbInfo: this.dbInfoForDb(this.owner.gang.getDb())
+      });
    });
 
    this.socket.on('extractTree', (_data) => {
@@ -256,6 +253,19 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          this.sessionClosed();
       }
    });
+};
+
+ConsoleApiSession.prototype.dbInfoForDb = function(_db) {
+
+   if (!_db || (typeof _db.getHash !== "function") || !_db.getHash()) {
+      return null;
+   }
+
+   return {
+      dbName: _db.name,
+      hash: _db.getHash().hash,
+      lastModified: _db.getHash().lastModified
+   };
 };
 
 ConsoleApiSession.prototype.emitLiveUpdate = function(_type, _data) {

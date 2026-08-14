@@ -7,9 +7,10 @@ const fs = require('fs');
 var _mainInstance = null;
 _loadTime = Date.now();
 
-function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _logEvents, _settleTime, _testUncaughtException) {
+function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath, _version, _console, _logEvents, _settleTime, _testUncaughtException, _listeningPort) {
    this.gang = null;
    this.casaName = _casaName;
+   this.identityFilename = "casa-identity.json";
    this.connectToPeers = _connectToPeers;
    this.secureMode = _secureMode;
    this.certPath = _certPath;
@@ -19,12 +20,114 @@ function Loader(_casaName, _connectToPeers, _secureMode, _certPath, _configPath,
    var settleTime = Number(_settleTime);
    this.settleTime = Number.isFinite(settleTime) && (settleTime > 0) ? settleTime : 30;
    this.logEvents = _logEvents;
+   this.listeningPort = _listeningPort;
 
    if (_testUncaughtException) {
       setTimeout( () => {
          crash; // Intentionally cause an exception as crash does not exist
       }, _testUncaughtException * 1000);
    }
+};
+
+Loader.prototype.defaultListeningPort = function() {
+   return this.listeningPort ? this.listeningPort : 8999;
+};
+
+Loader.prototype.applyListeningPortOverride = function(_config) {
+
+   if (_config && this.listeningPort) {
+      _config.listeningPort = this.listeningPort;
+   }
+};
+
+Loader.prototype.identityPath = function() {
+   return this.configPath + "/" + this.identityFilename;
+};
+
+Loader.prototype.readIdentity = function() {
+   var identityPath = this.identityPath();
+   var identity;
+
+   if (!fs.existsSync(identityPath)) {
+      return null;
+   }
+
+   try {
+      identity = JSON.parse(fs.readFileSync(identityPath, 'utf8'));
+   }
+   catch (_err) {
+      console.error("*LOADER*: Unable to read Casa identity file. Error=" + _err);
+      return null;
+   }
+
+   if (!identity || !identity.casaName) {
+      console.error("*LOADER*: Casa identity file does not define casaName.");
+      return null;
+   }
+
+   return identity;
+};
+
+Loader.prototype.resolveCasaName = function() {
+
+   if (this.casaName) {
+      return true;
+   }
+
+   var identity = this.readIdentity();
+
+   if (identity && identity.casaName) {
+      this.casaName = identity.casaName;
+      return true;
+   }
+
+   return false;
+};
+
+Loader.prototype.unregisteredCasaName = function() {
+   var macAddress = util.getLocalMacAddress ? util.getLocalMacAddress() : null;
+
+   if (macAddress) {
+      return "unregistered-" + macAddress.replace(/:/g, "-");
+   }
+
+   return "unregistered-" + require('os').hostname().replace(/[^A-Za-z0-9_-]/g, "-");
+};
+
+Loader.prototype.createUnregisteredConfig = function() {
+   this.casaName = this.unregisteredCasaName();
+   this.casaConfig = {
+      name: this.casaName,
+      type: "casa",
+      unregistered: true,
+      connectToPeers: this.connectToPeers,
+      secureMode: this.secureMode,
+      certPath: this.certPath,
+      configPath: this.configPath,
+      logEvents: this.logEvents,
+      listeningPort: this.defaultListeningPort(),
+      services: [
+         { name: "casa-discovery-service", type: "casadiscoveryservice" },
+         { name: "console-api-service", type: "consoleapiservice" },
+         { name: "event-logging-service", type: "eventloggingservice" }
+      ],
+      scenes: [],
+      things: [],
+      users: []
+   };
+   this.gangConfig = {
+      name: "unregistered",
+      type: "gang",
+      unregistered: true,
+      discoverable: true,
+      publicDiscoverable: false,
+      allowedSubscriberGangs: [],
+      services: [],
+      scenes: [],
+      things: [],
+      users: [],
+      casa: this.casaConfig
+   };
 };
 
 Loader.prototype.load = function() {
@@ -34,6 +137,10 @@ Loader.prototype.load = function() {
       this.loadConsole();
    }
    else {
+      if (!this.resolveCasaName()) {
+         return this.loadUnregisteredNode();
+      }
+
       if (fs.existsSync(this.configPath + "/hotstate-"+this.casaName+".json")) {
          var importObj = require(this.configPath + "/hotstate-"+this.casaName+".json");
          fs.unlinkSync(this.configPath + "/hotstate-"+this.casaName+".json");
@@ -50,6 +157,19 @@ Loader.prototype.load = function() {
          this.loadNode();
       }
    }
+};
+
+Loader.prototype.loadUnregisteredNode = function() {
+   this.createUnregisteredConfig();
+
+   console.log("*LOADER*: No Casa name or identity file found. Starting unregistered Casa mode as " + this.casaName + ".");
+
+   this.gang = new Gang(this.gangConfig, this);
+   this.gang.buildTree();
+
+   util.setTimeout( () => {
+      this.gang.coldStart();
+   }, 250);
 };
 
 /*process.on('uncaughtException', (_err) => {
@@ -119,6 +239,7 @@ Loader.prototype.loadNode = function() {
          this.casaConfig.certPath = this.certPath;
          this.casaConfig.configPath = this.configPath;
          this.casaConfig.logEvents = this.logEvents;
+         this.applyListeningPortOverride(this.casaConfig);
 
          this.gangDb = new Db(this.casaConfig.gang+"-db", this.configPath, false, null);
 
@@ -140,8 +261,10 @@ Loader.prototype.loadNode = function() {
                this.gang = new Gang(this.gangConfig, this);
                this.casaDb.setOwner(this.gang);
                this.gang.casa.db = this.casaDb;
+               this.gang.addDb(this.casaDb);
                this.gangDb.setOwner(this.gang);
                this.gang.gangDb = this.gangDb;
+               this.gang.addDb(this.gangDb);
 
                this.gang.buildTree();
 
@@ -173,12 +296,18 @@ Loader.prototype.restoreNode = function(_importObj) {
 
       this.gangDb.on('connected', (_data) => {
 
+         if (_importObj.config && _importObj.config.casa) {
+            this.applyListeningPortOverride(_importObj.config.casa);
+         }
+
          this.gang = new Gang(_importObj.config, this);
 
          this.casaDb.setOwner(this.gang);
          this.gang.casa.db = this.casaDb;
+         this.gang.addDb(this.casaDb);
          this.gangDb.setOwner(this.gang);
          this.gang.gangDb = this.gangDb;
+         this.gang.addDb(this.gangDb);
 
          this.gang.buildTree();
          this.gang.importTree(_importObj);
@@ -225,7 +354,10 @@ Loader.prototype.initialiseEmptyConsoleGangDb = function(_callback) {
       secureMode: this.secureMode,
       certPath: this.certPath,
       configPath: this.configPath,
-      listeningPort: 8999
+      listeningPort: this.defaultListeningPort(),
+      discoverable: false,
+      publicDiscoverable: false,
+      allowedSubscriberGangs: []
    };
 
    if (this.gangConfig.organisation) {
@@ -267,7 +399,7 @@ Loader.prototype.loadConsole = function() {
    this.ensureConfigPath();
 
    this.casaConfig = { name: this.casaName, type: "casa", secureMode: this.secureMode, connectToPeers: false, certPath: this.certPath,
-                       configPath: this.configPath, listeningPort: 8999, settleTime: this.settleTime };
+                       configPath: this.configPath, listeningPort: this.defaultListeningPort(), settleTime: this.settleTime };
    this.gangConfig = { name: this.gangName, type: "gang", casa: this.casaConfig };
    this.gangConfig.casa = this.casaConfig;
 
@@ -276,6 +408,7 @@ Loader.prototype.loadConsole = function() {
    this.gangDb = new Db(this.gangName+"-db", this.configPath, false, null);
    this.gangDb.setOwner(this.gang);
    this.gang.gangDb = this.gangDb;
+   this.gang.addDb(this.gangDb);
 
    this.gangDb.on('connected', (_data) => {
 
@@ -310,6 +443,7 @@ Loader.prototype.loadConsole = function() {
       this.gangDb.consoleCreatedEmptyDb = true;
       this.gangDb.setOwner(this.gang);
       this.gang.gangDb = this.gangDb;
+      this.gang.addDb(this.gangDb);
 
       this.gangDb.on('connected', (_data) => {
 

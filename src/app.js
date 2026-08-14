@@ -14,16 +14,11 @@ var optionDefinitions = [
   { name: 'nopeer', type: Boolean },
   { name: 'logevents', type: Boolean },
   { name: 'settle', type: String },
+  { name: 'port', type: Number },
   { name: 'crash', type: String },
 ]
 
 var options = commandLineArgs(optionDefinitions)
-
-if (options.casa == undefined) {
-   console.log("Usage: casa [--secure] [--certs dir] [--config dir] [--nopeer] [--localconsole | --console] [--settle settle-time-secs] [--crash delay(s)] <casa-or-gang-name>");
-   process.exit(1);
-}
-
 
 var connectToPeers = (options.nopeer == undefined) ? true : !options.nopeer;
 var secureMode = (options.secure == undefined) ? false : options.secure;
@@ -32,7 +27,14 @@ var configPath = (options.config == undefined) ? process.env['HOME']+'/.casa-key
 var casaName = options.casa;
 var logEvents = options.logevents;
 var settleTime = options.settle;
+var listeningPort = options.port;
 var crash = options.crash;
+
+if ((listeningPort !== undefined) &&
+    (!Number.isInteger(listeningPort) || (listeningPort <= 0) || (listeningPort > 65535))) {
+   console.log("Usage: casa [--secure] [--certs dir] [--config dir] [--nopeer] [--localconsole | --console] [--settle settle-time-secs] [--port port] [--crash delay(s)] <casa-or-gang-name>");
+   process.exit(1);
+}
 
 var logs;
 if (options.localconsole || options.console) {
@@ -47,7 +49,11 @@ require('./console-stamp')(console, '[HH:MM:ss.l]', undefined, logs);
 
 var consoleRequired = (options.console) ? "global" : (options.localconsole) ? "local" : false;
 
-Loader = require('./loader');
-var loader = new Loader(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired, logEvents, settleTime, crash);
-loader.load();
+if ((options.casa == undefined) && consoleRequired) {
+   console.log("Usage: casa [--secure] [--certs dir] [--config dir] [--nopeer] [--localconsole | --console] [--settle settle-time-secs] [--port port] [--crash delay(s)] <casa-or-gang-name>");
+   process.exit(1);
+}
 
+Loader = require('./loader');
+var loader = new Loader(casaName, connectToPeers, secureMode, certPath, configPath, version, consoleRequired, logEvents, settleTime, crash, listeningPort);
+loader.load();

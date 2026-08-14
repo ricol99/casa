@@ -12,6 +12,7 @@ function Console(_params, _owner) {
    this.gangName = _params.gangName;
    this.casaName = _params.casaName;
    this.remoteCasas = {};
+   this.unregisteredCasas = {};
    this.offline = true;
    this.connectedCasas = 0;
    this.defaultCasa = null;
@@ -77,11 +78,11 @@ Console.prototype.registerWebUi = function() {
    var webUiPath = path.join(__dirname, 'webui');
 
    this.gang.casa.mainWebService.addRoute('/webui', (req, res) => {
-      res.sendFile(path.join(webUiPath, 'index.html'));
+      res.sendFile(path.join(webUiPath, 'marketing.html'));
    });
 
    this.gang.casa.mainWebService.addRoute('/webui/', (req, res) => {
-      res.sendFile(path.join(webUiPath, 'index.html'));
+      res.sendFile(path.join(webUiPath, 'marketing.html'));
    });
 
    this.gang.casa.mainWebService.addRoute('/webui/:filename', (req, res) => {
@@ -94,6 +95,11 @@ Console.prototype.registerWebUi = function() {
 Console.prototype.webUiSocketConnected = function(_socket) {
    this.webUiSockets.add(_socket);
 
+   _socket.on('disconnect', (_reason) => {
+      this.webUiSockets.delete(_socket);
+      console.log(this.gang.casa.uName + ': webui socket disconnected, reason=' + _reason);
+   });
+
    _socket.webUiState = {
       selectedCasa: null,
       currentScope: ":"
@@ -101,6 +107,25 @@ Console.prototype.webUiSocketConnected = function(_socket) {
 
    _socket.on('getWebUiStatus', (_data) => {
       this.emitWebUiStatus(_socket);
+   });
+
+   _socket.on('getUnregisteredCasas', (_data) => {
+      _socket.emit('unregistered-casas-output', {
+         id: _data && _data.id ? _data.id : null,
+         ok: true,
+         result: this.getUnregisteredCasas()
+      });
+   });
+
+   _socket.on('addUnregisteredCasa', (_data) => {
+      this.gangConsoleCmd.casas([ "add", "--name", _data ? _data.name : "", "--address", _data ? _data.address : "" ], (_err, _result) => {
+         _socket.emit('add-unregistered-casa-output', {
+            id: _data && _data.id ? _data.id : null,
+            ok: !_err,
+            result: _result,
+            error: _err
+         });
+      });
    });
 
    _socket.on('getGangTopology', (_data) => {
@@ -175,9 +200,6 @@ Console.prototype.webUiSocketConnected = function(_socket) {
       });
    });
 
-   _socket.on('disconnect', () => {
-      this.webUiSockets.delete(_socket);
-   });
 };
 
 Console.prototype.emitWebUiLiveUpdateToAll = function(_payload) {
@@ -214,6 +236,7 @@ Console.prototype.getWebUiStatus = function(_selectedCasaName, _currentScope) {
       selectedCasa: selectedCasaName,
       currentScope: _currentScope ? _currentScope : ':',
       casas: this.getCasas(),
+      unregisteredCasas: this.getUnregisteredCasas(),
       dbInfo: casaDb ? {
          dbName: casaDb.name,
          hash: casaDb.getHash().hash,
@@ -410,12 +433,11 @@ Console.prototype.executeWebUiCommand = function(_params, _selectedCasaName, _ca
    var obj = _params ? _params.obj : null;
    var method = _params ? _params.method : null;
    var arguments = (_params && _params.arguments instanceof Array) ? _params.arguments : [];
+   var casa = null;
 
    if (!obj || !method) {
       return _callback("Malformed web UI command");
    }
-
-   var casa = null;
 
    if (targetCasaName) {
       casa = this.remoteCasas.hasOwnProperty(targetCasaName) ? this.remoteCasas[targetCasaName] : null;
@@ -424,15 +446,8 @@ Console.prototype.executeWebUiCommand = function(_params, _selectedCasaName, _ca
          return _callback("Target casa not connected");
       }
    }
-   else if (_selectedCasaName) {
-      casa = this.remoteCasas.hasOwnProperty(_selectedCasaName) ? this.remoteCasas[_selectedCasaName] : null;
-
-      if (!casa || !casa.connected) {
-         return _callback("Selected casa not connected");
-      }
-   }
    else {
-      casa = this.defaultCasa;
+      casa = this.identifyCasaForWebUi(_selectedCasaName);
 
       if (!casa) {
          return _callback("No default casa connected");
@@ -493,6 +508,172 @@ Console.prototype.getCasas = function() {
       }
    }
    return casas;
+};
+
+Console.prototype.getUnregisteredCasas = function() {
+   var casas = [];
+
+   for (var casa in this.unregisteredCasas) {
+
+      if (this.unregisteredCasas.hasOwnProperty(casa)) {
+         casas.push(this.unregisteredCasaOutput(this.unregisteredCasas[casa]));
+      }
+   }
+
+   return casas;
+};
+
+Console.prototype.findUnregisteredCasaByAddress = function(_address) {
+   var macAddress = util.normaliseMacAddress(_address);
+
+   if (!macAddress) {
+      return null;
+   }
+
+   for (var casa in this.unregisteredCasas) {
+
+      if (this.unregisteredCasas.hasOwnProperty(casa) &&
+          (util.normaliseMacAddress(this.unregisteredCasas[casa].macAddress) === macAddress)) {
+         return this.unregisteredCasas[casa];
+      }
+   }
+
+   return null;
+};
+
+Console.prototype.claimUnregisteredCasa = function(_params, _callback) {
+   var unregisteredCasa = this.findUnregisteredCasaByAddress(_params ? _params.address : null);
+   var macAddress = util.normaliseMacAddress(_params ? _params.address : null);
+   var casaName = _params ? _params.name : null;
+
+   if (!unregisteredCasa) {
+      return _callback("Unable to find unregistered casa with address \"" + (_params ? _params.address : "") + "\"");
+   }
+
+   this.sendUnregisteredCasaClaim(unregisteredCasa, {
+      casaName: casaName,
+      gangName: this.gang ? this.gang.name : this.gangName,
+      macAddress: macAddress
+   }, _callback);
+};
+
+Console.prototype.waitForUnregisteredCasaConnection = function(_unregisteredCasa, _callback) {
+   var remoteCasa = _unregisteredCasa ? _unregisteredCasa.remoteCasa : null;
+   var timeoutMs = 5000;
+   var start = Date.now();
+
+   if (!remoteCasa) {
+      return _callback("Unregistered casa \"" + (_unregisteredCasa ? _unregisteredCasa.name : "") + "\" has no remote connection");
+   }
+
+   var wait = () => {
+
+      if (remoteCasa.connected) {
+         return _callback(null, remoteCasa);
+      }
+
+      if (!remoteCasa.connecting) {
+         remoteCasa.start();
+      }
+
+      if ((Date.now() - start) >= timeoutMs) {
+         var error = "Unregistered casa \"" + _unregisteredCasa.name + "\" is not connected";
+
+         if (_unregisteredCasa.lastError) {
+            error = error + " (" + _unregisteredCasa.lastError + ")";
+         }
+
+         return _callback(error);
+      }
+
+      setTimeout(wait, 100);
+   };
+
+   wait();
+};
+
+Console.prototype.sendUnregisteredCasaClaim = function(_unregisteredCasa, _payload, _callback) {
+   this.waitForUnregisteredCasaConnection(_unregisteredCasa, (_connectErr, _remoteCasa) => {
+
+      if (_connectErr) {
+         return _callback(_connectErr);
+      }
+
+      if (!_remoteCasa.executeParsedCommand([ _unregisteredCasa.name, "claimUnregisteredCasa", [ _payload ] ], (_err, _body) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         if (typeof _body === "string") {
+            return _callback(_body);
+         }
+
+         _callback(null, {
+            casaName: _body ? _body.casaName : null,
+            gangName: _body ? _body.gangName : null,
+            macAddress: _body ? _body.macAddress : null,
+            restartRequired: !!(_body && _body.restartRequired)
+         });
+      })) {
+         return _callback("Unable to claim unregistered casa \"" + _unregisteredCasa.name + "\"");
+      }
+   });
+};
+
+Console.prototype.createUnregisteredRemoteCasa = function(_unregisteredCasa) {
+   var remoteCasa = new RemoteCasa({
+      name: _unregisteredCasa.name,
+      address: _unregisteredCasa.address,
+      messageTransportName: _unregisteredCasa.messageTransportName,
+      tier: _unregisteredCasa.tier,
+      autoReconnect: true,
+      autoDbSync: false,
+      requestCasaInfo: true,
+      subscribeLiveUpdates: false
+   }, this);
+
+   return remoteCasa;
+};
+
+Console.prototype.connectUnregisteredCasa = function(_entry) {
+
+   if (!_entry.remoteCasa) {
+      _entry.remoteCasa = this.createUnregisteredRemoteCasa(_entry);
+
+      _entry.remoteCasa.on("connected", () => {
+         _entry.connected = true;
+      });
+
+      _entry.remoteCasa.on("disconnected", () => {
+         _entry.connected = false;
+      });
+
+      _entry.remoteCasa.on("connect_error", (_data) => {
+         _entry.connected = false;
+         _entry.lastError = _data && _data.summary ? _data.summary : (_data && _data.error ? _data.error : _data);
+      });
+   }
+   else {
+      _entry.remoteCasa.address = _entry.address;
+      _entry.remoteCasa.messageTransportName = _entry.messageTransportName;
+      _entry.remoteCasa.discoveryTier = _entry.tier;
+   }
+
+   _entry.remoteCasa.start();
+};
+
+Console.prototype.removeUnregisteredCasa = function(_entry) {
+
+   if (!_entry) {
+      return;
+   }
+
+   if (_entry.remoteCasa) {
+      _entry.remoteCasa.disconnect({ disableAutoReconnect: true, silent: true });
+   }
+
+   delete this.unregisteredCasas[_entry.name];
 };
 
 Console.prototype.casaObjUName = function(_remoteCasa) {
@@ -674,20 +855,46 @@ Console.prototype.setSourceCasa = function(_casaName, _callback) {
    });
 };
 
+Console.prototype.refreshConnectedCasaState = function() {
+   var connectedCasas = this.getConnectedCasas();
+
+   this.connectedCasas = connectedCasas.length;
+
+   if (this.connectedCasas === 0) {
+      this.offline = true;
+      this.defaultCasa = null;
+      this.currentScope = ":";
+      this.currentCmdObj = this.gangConsoleCmd;
+      this.sourceCasa = null;
+      return connectedCasas;
+   }
+
+   this.offline = false;
+
+   if (!this.defaultCasa || !this.defaultCasa.connected) {
+      this.defaultCasa = this.remoteCasas[connectedCasas[0]];
+   }
+
+   if (this.sourceCasa && !this.sourceCasa.connected) {
+      this.sourceCasa = null;
+   }
+
+   return connectedCasas;
+};
+
 Console.prototype.casaFound = function(_params) {
+
+   if (_params && _params.metadata && _params.metadata.unregistered) {
+      this.unregisteredCasaFound(_params);
+      return;
+   }
 
    if (!this.remoteCasas.hasOwnProperty(_params.name)) {
       var remoteCasa = new RemoteCasa(_params, this);
       this.remoteCasas[_params.name] = remoteCasa;
 
       remoteCasa.on("connected", (_data) => {
-         this.connectedCasas = this.connectedCasas + 1;
-
-         if (this.offline) {
-            this.defaultCasa = this.remoteCasas[_data.name];
-            this.offline = false;
-         }
-
+         this.refreshConnectedCasaState();
          this.updatePromptMidLine(_params.tier);
          this.emitWebUiStatusToAll();
       });
@@ -698,19 +905,7 @@ Console.prototype.casaFound = function(_params) {
             return;
          }
 
-         this.connectedCasas = this.connectedCasas - 1;
-
-         if (this.connectedCasas < 0) {
-            this.connectedCasas = 0;
-         }
-
-         if (this.connectedCasas === 0) {
-            this.offline = true;
-            this.currentScope = ":";
-            this.currentCmdObj = this.gangConsoleCmd;
-            this.sourceCasa = null;
-         }
-
+         this.refreshConnectedCasaState();
          this.updatePrompt();
 
          if (!_data.upgrading) {
@@ -719,27 +914,6 @@ Console.prototype.casaFound = function(_params) {
          //else {
             this.writeOutput("Casa "+_data.name+" disconnected");
          }
-
-         if (this.connectedCasas >  0)  {
-
-            if ((this.defaultCasa && this.defaultCasa === this.remoteCasas[_data.name])) {
-               this.defaultCasa = null;
-
-               for (var casa in this.remoteCasas) {
-
-                  if (this.remoteCasas.hasOwnProperty(casa) && this.remoteCasas[casa].connected) {
-                     this.defaultCasa = this.remoteCasas[casa];
-                     break;
-                  }
-               }
-            }
-
-            if (this.sourceCasa && this.sourceCasa === this.remoteCasas[_data.name]) {
-               this.sourceCasa = null;
-               this.updatePrompt();
-            }
-         }
-
          this.emitWebUiStatusToAll();
       });
 
@@ -766,6 +940,57 @@ Console.prototype.casaFound = function(_params) {
 };
 
 Console.prototype.casaLost = function(_params) {
+
+   if (_params && _params.metadata && _params.metadata.unregistered) {
+      this.unregisteredCasaLost(_params);
+   }
+};
+
+Console.prototype.unregisteredCasaFound = function(_params) {
+   var entry;
+
+   if (!_params || !_params.metadata || !_params.metadata.unregistered) {
+      return;
+   }
+
+   entry = this.unregisteredCasas[_params.name] ? this.unregisteredCasas[_params.name] : {};
+
+   entry.name = _params.name;
+   entry.gang = _params.gang;
+   entry.address = _params.address;
+   entry.discoveryTransportName = _params.discoveryTransportName;
+   entry.messageTransportName = _params.messageTransportName;
+   entry.tier = _params.tier;
+   entry.macAddress = _params.metadata.macAddress || null;
+   entry.connected = entry.remoteCasa ? entry.remoteCasa.connected : false;
+
+   this.unregisteredCasas[_params.name] = entry;
+   this.connectUnregisteredCasa(entry);
+};
+
+Console.prototype.unregisteredCasaOutput = function(_entry) {
+   return {
+      name: _entry.name,
+      gang: _entry.gang,
+      address: _entry.address,
+      discoveryTransportName: _entry.discoveryTransportName,
+      messageTransportName: _entry.messageTransportName,
+      tier: _entry.tier,
+      macAddress: _entry.macAddress,
+      connected: !!_entry.connected,
+      connecting: !!(_entry.remoteCasa && _entry.remoteCasa.connecting),
+      lastError: _entry.lastError
+   };
+};
+
+Console.prototype.unregisteredCasaLost = function(_params) {
+   var entry = _params ? this.unregisteredCasas[_params.name] : null;
+
+   if (!_params || !_params.metadata || !_params.metadata.unregistered) {
+      return;
+   }
+
+   this.removeUnregisteredCasa(entry);
 };
 
 Console.prototype.identifyCasa = function(_line) {
@@ -995,7 +1220,10 @@ Console.prototype.setPrompt = function(_prompt) {
    }
    else {
       var cmdObj = this.gangConsoleCmd.findNamedObject(_prompt.split(" :")[0]);
-      var casaName = (cmdObj && cmdObj.sourceCasa)  ?  cmdObj.sourceCasa : this.defaultCasa ? this.defaultCasa.name : "null";
+      var cmdObjCasa = (cmdObj && cmdObj.sourceCasa &&
+                        this.remoteCasas.hasOwnProperty(cmdObj.sourceCasa) &&
+                        this.remoteCasas[cmdObj.sourceCasa].connected) ? cmdObj.sourceCasa : null;
+      var casaName = cmdObjCasa ? cmdObjCasa : this.defaultCasa ? this.defaultCasa.name : "null";
       this.rl.setPrompt(colour + "[" + casaName + "*:" + this.connectedCasas + "] " + _prompt + " > \x1b[0m");
   }
 };
@@ -1046,9 +1274,13 @@ function RemoteCasa(_config, _owner) {
    this.gangRemoteDbInfo = { dbName: "", hash: '', lastModified: new Date(0) };
    this.connected = false;
    this.connecting = false;
-   this.reconnectDelayMs = 5000;
+   this.reconnectDelayMs = _config.reconnectDelayMs ? _config.reconnectDelayMs : 5000;
    this.reconnectTimer = null;
-   this.allowAutoReconnect = true;
+   this.autoReconnectEnabled = _config.hasOwnProperty("autoReconnect") ? !!_config.autoReconnect : true;
+   this.allowAutoReconnect = this.autoReconnectEnabled;
+   this.autoDbSyncEnabled = _config.hasOwnProperty("autoDbSync") ? !!_config.autoDbSync : true;
+   this.requestCasaInfoEnabled = _config.hasOwnProperty("requestCasaInfo") ? !!_config.requestCasaInfo : true;
+   this.subscribeLiveUpdatesEnabled = _config.hasOwnProperty("subscribeLiveUpdates") ? !!_config.subscribeLiveUpdates : true;
    this.lastConnectErrorKey = null;
    this.lastConnectErrorTime = 0;
    this.dbInfoReady = false;
@@ -1083,7 +1315,15 @@ RemoteCasa.prototype.scheduleReconnect = function() {
 
 RemoteCasa.prototype.requestAutoDbSync = function() {
 
+   if (!this.autoDbSyncEnabled) {
+      return;
+   }
+
    if (this.autoDbSyncRequested || !this.dbInfoReady || !this.gangDbInfoReady) {
+      return;
+   }
+
+   if (!this.remoteDbInfo.dbName || !this.gangRemoteDbInfo.dbName) {
       return;
    }
 
@@ -1097,7 +1337,7 @@ RemoteCasa.prototype.start = function()  {
    }
 
    this.clearReconnectTimer();
-   this.allowAutoReconnect = true;
+   this.allowAutoReconnect = this.autoReconnectEnabled;
    this.connecting = true;
    this.socket = this.owner.gang.casa.mainWebService.newIoSocket(this.address, "/consoleapi/io", this.owner.secureMode, this.messageTransportName);
 
@@ -1111,39 +1351,57 @@ RemoteCasa.prototype.start = function()  {
       this.gangDbInfoReady = false;
       this.autoDbSyncRequested = false;
       this.emit('connected', { name: this.name });
-      this.socket.emit('getCasaInfo');
-      this.socket.emit('subscribeLiveUpdates', {});
+
+      if (this.requestCasaInfoEnabled) {
+         this.socket.emit('getCasaInfo');
+      }
+
+      if (this.subscribeLiveUpdatesEnabled) {
+         this.socket.emit('subscribeLiveUpdates', {});
+      }
    });
 
    this.socket.on('casa-info', (_data) => {
 
       if (_data.hasOwnProperty("dbInfo")) {
-         this.dbName = _data.dbInfo.dbName;
-         this.remoteDbInfo = { dbName: _data.dbInfo.dbName, hash: _data.dbInfo.hash, lastModified: new Date(_data.dbInfo.lastModified) };
-
-         this.owner.gang.getDb(this.dbName, undefined, (_err, _db, _data) => {
-
-            if (_err) {
-               this.db = null;
-            }
-            else {
-               this.db = _db;
-            }
-
+         if (!_data.dbInfo) {
             this.dbInfoReady = true;
             this.requestAutoDbSync();
-         });
+         }
+         else {
+            this.dbName = _data.dbInfo.dbName;
+            this.remoteDbInfo = { dbName: _data.dbInfo.dbName, hash: _data.dbInfo.hash, lastModified: new Date(_data.dbInfo.lastModified) };
+
+            this.owner.gang.getDb(this.dbName, undefined, (_err, _db, _data) => {
+
+               if (_err) {
+                  this.db = null;
+               }
+               else {
+                  this.db = _db;
+               }
+
+               this.dbInfoReady = true;
+               this.requestAutoDbSync();
+            });
+         }
       }
       else {
          this.owner.writeOutput("Casa "+this.name+" responded with a badly formatted information!");
       }
 
       if (_data.hasOwnProperty("gangDbInfo")) {
-         this.gangRemoteDbInfo = { dbName: _data.gangDbInfo.dbName, hash: _data.gangDbInfo.hash, lastModified: new Date(_data.gangDbInfo.lastModified) };
-         //this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
-         //this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
-         this.gangDbInfoReady = true;
-         this.requestAutoDbSync();
+         if (!_data.gangDbInfo) {
+            this.gangDbInfoReady = true;
+            this.requestAutoDbSync();
+         }
+         else {
+            this.gangRemoteDbInfo = { dbName: _data.gangDbInfo.dbName, hash: _data.gangDbInfo.hash, lastModified: new Date(_data.gangDbInfo.lastModified) };
+            //this.owner.writeOutput("AAAAA gangDb.lastModified="+util.inspect(this.owner.gang.getDb().getHash().lastModified));
+            //this.owner.writeOutput("AAAAA gangRemoteInfo.lastModified="+util.inspect(this.gangRemoteDbInfo.lastModified));
+            this.gangDbInfoReady = true;
+            this.requestAutoDbSync();
+         }
       }
    });
 
@@ -1161,7 +1419,7 @@ RemoteCasa.prototype.start = function()  {
          this.lastConnectErrorKey = errKey;
          this.lastConnectErrorTime = now;
          data.summary = errCode + " " + errAddress + ":" + errPort;
-         if (this.owner.reconnectLogEnabled) {
+         if (this.owner.reconnectLogEnabled || !this.autoReconnectEnabled) {
             this.emit('connect_error', data);
          }
       }
@@ -1232,6 +1490,9 @@ RemoteCasa.prototype.start = function()  {
          this.connected = false;
          this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
+      else if (!this.autoReconnectEnabled) {
+         this.emit('connect_error', { name: this.name, error: _data && _data.message ? _data.message : "socket error" });
+      }
 
       this.scheduleReconnect();
    });
@@ -1243,7 +1504,7 @@ RemoteCasa.prototype.reconnect = function(_params) {
       this.disconnect({ disableAutoReconnect: true });
 
       util.setTimeout( () => {
-         this.allowAutoReconnect = true;
+         this.allowAutoReconnect = this.autoReconnectEnabled;
          this.reconnect(_params);
       }, 3000);
    }
@@ -1251,13 +1512,14 @@ RemoteCasa.prototype.reconnect = function(_params) {
       this.address = _params.address;
       this.messageTransportName = _params.messageTransportName;
       this.discoveryTier = _params.tier;
-      this.allowAutoReconnect = true;
+      this.allowAutoReconnect = this.autoReconnectEnabled;
       this.start();
    }
 };
 
 RemoteCasa.prototype.disconnect = function(_params) {
    var disableAutoReconnect = _params && _params.disableAutoReconnect;
+   var silent = _params && _params.silent;
 
    if (this.connected || this.connecting) {
       if (disableAutoReconnect) {
@@ -1269,7 +1531,10 @@ RemoteCasa.prototype.disconnect = function(_params) {
       this.connected = false;
       this.connecting = false;
       this.socket.disconnect();
-      this.emit('disconnected', { name: this.name, upgrading: true, error: "Upgrading transport!", wasConnected: wasConnected });
+
+      if (!silent) {
+         this.emit('disconnected', { name: this.name, upgrading: true, error: "Upgrading transport!", wasConnected: wasConnected });
+      }
    }
 };
 
@@ -1425,6 +1690,18 @@ OfflineCasa.prototype.executeCommandLine = function(_command, _callback) {
 };
 
 OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {
+   var obj = (_command && (_command.length > 0)) ? _command[0] : null;
+   var method = (_command && (_command.length > 1)) ? _command[1] : null;
+   var args = (_command && (_command[2] instanceof Array)) ? _command[2] : [];
+   var commandObj = this.owner ? this.owner.gangConsoleCmd : null;
+
+   if ((obj === ":") &&
+       (method === "organisation") &&
+       commandObj &&
+       (typeof commandObj[method] === "function")) {
+      return Object.getPrototypeOf(commandObj)[method].call(commandObj, args, _callback);
+   }
+
    _callback("Casa is offline!");
 };
 
@@ -1446,3 +1723,7 @@ OfflineCasa.prototype.getCasa = function(_name) {
 };
 
 module.exports = exports = Console;
+module.exports.__testExports = {
+   RemoteCasa: RemoteCasa,
+   OfflineCasa: OfflineCasa
+};

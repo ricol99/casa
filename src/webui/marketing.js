@@ -6,10 +6,13 @@
   var createPanel = document.querySelector('[data-create-panel]');
   var managePanel = document.querySelector('[data-manage-panel]');
   var organisationAction = document.querySelector('[data-organisation-action]');
+  var organisationTitle = document.querySelector('[data-organisation-title]');
+  var organisationCopy = document.querySelector('[data-organisation-copy]');
   var organisationName = document.querySelector('[data-organisation-name]');
   var organisationStatus = document.querySelector('[data-organisation-status]');
   var organisationSlug = document.querySelector('[data-organisation-slug]');
-  var pusherStatus = document.querySelector('[data-pusher-status]');
+  var piImageDownload = document.querySelector('[data-pi-image-download]');
+  var piImageNote = document.querySelector('[data-pi-image-note]');
 
   function slugify(value) {
     return String(value || '')
@@ -88,15 +91,6 @@
     return true;
   }
 
-  function pusherIsConfigured(organisation) {
-    return !!(organisation &&
-      organisation.pusher &&
-      organisation.pusher.appId &&
-      organisation.pusher.key &&
-      organisation.pusher.secret &&
-      organisation.pusher.cluster);
-  }
-
   function readForm() {
     var formData = new FormData(form);
     var name = String(formData.get('name') || '').trim();
@@ -135,8 +129,19 @@
       managePanel.hidden = !hasOrganisation;
     }
 
+    if (organisationTitle) {
+      organisationTitle.textContent = hasOrganisation ? 'Organisation is defined.' : 'Start by defining the organisation.';
+    }
+
+    if (organisationCopy) {
+      organisationCopy.textContent = hasOrganisation ?
+        'This gang is already attached to one organisation. Management opens the console for this gang.' :
+        'The organisation owns the management context and transport credentials.';
+    }
+
     if (organisationAction) {
       organisationAction.textContent = hasOrganisation ? 'Manage ' + organisation.name : 'Create Organisation';
+      organisationAction.setAttribute('href', hasOrganisation ? '/webui/index.html' : '#organisation');
     }
 
     if (!hasOrganisation) {
@@ -155,10 +160,6 @@
 
     if (organisationSlug) {
       organisationSlug.textContent = organisation.slug || '-';
-    }
-
-    if (pusherStatus) {
-      pusherStatus.textContent = pusherIsConfigured(organisation) ? 'configured' : 'missing';
     }
   }
 
@@ -246,6 +247,16 @@
 
   if (form) {
     form.addEventListener('submit', submitForm);
+  }
+
+  if (piImageDownload) {
+    piImageDownload.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      if (piImageNote) {
+        piImageNote.textContent = 'Pi image download will be added here.';
+      }
+    });
   }
 
   loadGangOrganisation();

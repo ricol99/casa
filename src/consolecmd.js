@@ -2,6 +2,8 @@ var util = require('util');
 var NamedObject = require('./namedobject');
 var Gang = require('./gang');
 var Db = require('./db');
+var commandLineArgs = require('command-line-args');
+var fs = require('fs');
 
 function ConsoleCmd(_config, _owner, _console) {
    _config.transient = true;
@@ -259,8 +261,287 @@ ConsoleCmd.prototype.syncDbFromRemoteCasa = function(_options, _callback) {
    });
 };
 
+ConsoleCmd.prototype.parseCasasArgs = function(_arguments) {
+   var subCommand = (_arguments && (_arguments.length > 0)) ? _arguments[0] : "show";
+   var options;
+
+   if (subCommand === "show") {
+      return this.parseCasasShowArgs(_arguments ? _arguments.slice(1) : []);
+   }
+   else if (subCommand === "add") {
+      return this.parseCasasAddArgs(_arguments ? _arguments.slice(1) : []);
+   }
+
+   return { error: "Unsupported casas command \"" + subCommand + "\". Usage: casas show [--unregistered] | casas add --name <name> --address <mac-address>" };
+};
+
+ConsoleCmd.prototype.parseCasasShowArgs = function(_arguments) {
+   var options;
+
+   try {
+      options = commandLineArgs([
+         { name: 'unregistered', type: Boolean }
+      ], { argv: _arguments, stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse casas command" };
+   }
+
+   if (options._unknown && (options._unknown.length > 0)) {
+      return { error: "Too many arguments. Usage: casas show [--unregistered]" };
+   }
+
+   return { command: "show", unregistered: options.unregistered === true };
+};
+
+ConsoleCmd.prototype.parseCasasAddArgs = function(_arguments) {
+   var options;
+
+   try {
+      options = commandLineArgs([
+         { name: 'name', type: String },
+         { name: 'address', type: String }
+      ], { argv: _arguments, stopAtFirstUnknown: true });
+   }
+   catch (_err) {
+      return { error: _err.message ? _err.message : "Unable to parse casas command" };
+   }
+
+   if (options._unknown && (options._unknown.length > 0)) {
+      return { error: "Too many arguments. Usage: casas add --name <name> --address <mac-address>" };
+   }
+
+   if (!options.name) {
+      return { error: "Casa name not provided. Usage: casas add --name <name> --address <mac-address>" };
+   }
+
+   if (!options.address) {
+      return { error: "Casa address not provided. Usage: casas add --name <name> --address <mac-address>" };
+   }
+
+   return { command: "add", name: options.name, address: options.address };
+};
+
 ConsoleCmd.prototype.casas = function(_arguments, _callback) {
+   var params = this.parseCasasArgs(_arguments);
+
+   if (params.error) {
+      return _callback(params.error);
+   }
+
+   if (params.unregistered) {
+      if (typeof this.console.getUnregisteredCasas !== "function") {
+         return _callback(null, []);
+      }
+
+      return _callback(null, this.console.getUnregisteredCasas());
+   }
+
+   if (params.command === "add") {
+      return this.addCasa(params, _callback);
+   }
+
    _callback(null, this.console.getCasas());
+};
+
+ConsoleCmd.prototype.unregisteredCasaAddressSummary = function() {
+   var casas = (this.console && (typeof this.console.getUnregisteredCasas === "function")) ?
+      this.console.getUnregisteredCasas() : [];
+   var addresses = [];
+
+   for (var i = 0; casas && (i < casas.length); ++i) {
+
+      if (casas[i].macAddress) {
+         addresses.push(casas[i].macAddress);
+      }
+   }
+
+   return addresses.length > 0 ? addresses.join(", ") : null;
+};
+
+ConsoleCmd.prototype.addCasa = function(_params, _callback) {
+   var unregisteredCasa = (this.console && (typeof this.console.findUnregisteredCasaByAddress === "function")) ?
+      this.console.findUnregisteredCasaByAddress(_params.address) : null;
+
+   if (!unregisteredCasa) {
+      var knownAddresses = this.unregisteredCasaAddressSummary();
+      var error = "Unable to find unregistered casa with address \"" + _params.address + "\"";
+
+      if (knownAddresses) {
+         error = error + ". Known unregistered addresses: " + knownAddresses;
+      }
+
+      return _callback(error);
+   }
+
+   this.console.claimUnregisteredCasa(_params, (_claimErr, _claimResult) => {
+
+      if (_claimErr) {
+         return _callback(_claimErr);
+      }
+
+      this.pushBootstrapDbsToUnregisteredCasa(unregisteredCasa, _params.name, (_pushErr, _pushResult) => {
+
+         if (_pushErr) {
+            return _callback(_pushErr);
+         }
+
+         this.restartUnregisteredCasa(unregisteredCasa, (_restartErr, _restartResult) => {
+
+            if (_restartErr) {
+               return _callback(_restartErr);
+            }
+
+            if (this.console && (typeof this.console.removeUnregisteredCasa === "function")) {
+               this.console.removeUnregisteredCasa(unregisteredCasa);
+            }
+
+            _callback(null, {
+               casaName: _claimResult ? _claimResult.casaName : _params.name,
+               gangName: _claimResult ? _claimResult.gangName : (this.gang ? this.gang.name : null),
+               macAddress: _claimResult ? _claimResult.macAddress : _params.address,
+               dbsPushed: true,
+               dbResult: _pushResult,
+               restartOrdered: true
+            });
+         });
+      });
+   });
+};
+
+ConsoleCmd.prototype.pushBootstrapDbsToUnregisteredCasa = function(_unregisteredCasa, _casaName, _callback) {
+
+   this.bootstrapDbPayloads(_unregisteredCasa, _casaName, (_payloadErr, _payloads) => {
+
+      if (_payloadErr) {
+         return _callback(_payloadErr);
+      }
+
+      this.console.sendCommandToCasa(_unregisteredCasa.remoteCasa, [ _unregisteredCasa.name, "replaceDbs", [ _payloads ] ], "executeParsedCommand", _callback);
+   });
+};
+
+ConsoleCmd.prototype.bootstrapDbPayloads = function(_unregisteredCasa, _casaName, _callback) {
+
+   this.dbPushPayload(this.gang.getDb(), (_gangErr, _gangPayload) => {
+
+      if (_gangErr) {
+         return _callback(_gangErr);
+      }
+
+      this.bootstrapCasaDbPayload(_unregisteredCasa, _casaName, (_casaErr, _casaPayload) => {
+
+         if (_casaErr) {
+            return _callback(_casaErr);
+         }
+
+         _callback(null, [ _gangPayload, _casaPayload ]);
+      });
+   });
+};
+
+ConsoleCmd.prototype.bootstrapCasaDbName = function(_casaName) {
+   return this.normaliseCasaName(_casaName) + "-db";
+};
+
+ConsoleCmd.prototype.normaliseCasaName = function(_casaName) {
+   var casaName = _casaName ? _casaName.trim() : "";
+
+   if (casaName[0] === ":") {
+      casaName = casaName.slice(1);
+   }
+
+   return casaName;
+};
+
+ConsoleCmd.prototype.bootstrapCasaDbPath = function(_dbName) {
+   return this.gang.configPath() + "/" + _dbName + ".db";
+};
+
+ConsoleCmd.prototype.bootstrapCasaDbPayload = function(_unregisteredCasa, _casaName, _callback) {
+   var dbName = this.bootstrapCasaDbName(_casaName);
+   var existingDb = this.gang.getDb(dbName);
+
+   if (existingDb) {
+      return this.dbPushPayload(existingDb, _callback);
+   }
+
+   if (fs.existsSync(this.bootstrapCasaDbPath(dbName))) {
+      return this.gang.getDb(dbName, null, (_err, _db) => {
+
+         if (_err) {
+            return _callback(_err);
+         }
+
+         this.dbPushPayload(_db, _callback);
+      });
+   }
+
+   this.createBootstrapCasaDb(_unregisteredCasa, _casaName, dbName, (_createErr, _db) => {
+
+      if (_createErr) {
+         return _callback(_createErr);
+      }
+
+      this.dbPushPayload(_db, _callback);
+   });
+};
+
+ConsoleCmd.prototype.createBootstrapCasaDb = function(_unregisteredCasa, _casaName, _dbName, _callback) {
+   var casaName = this.normaliseCasaName(_casaName);
+   var docs = [ {
+      _collection: "casa",
+      _id: casaName,
+      name: casaName,
+      type: "casa",
+      displayName: casaName,
+      location: {},
+      listeningPort: (_unregisteredCasa && _unregisteredCasa.address) ? _unregisteredCasa.address.port : 8999,
+      gang: this.gang.name
+   } ];
+
+   this.writeSyncedDb(_dbName, docs, (_writeErr, _db) => {
+
+      if (_writeErr) {
+         return _callback(_writeErr);
+      }
+
+      this.gang.dbs[_dbName] = _db;
+      _callback(null, _db);
+   });
+};
+
+ConsoleCmd.prototype.restartUnregisteredCasa = function(_unregisteredCasa, _callback) {
+   var remoteCasa = _unregisteredCasa ? _unregisteredCasa.remoteCasa : null;
+   var callbackCalled = false;
+   var callbackOnce = (_err, _result) => {
+
+      if (callbackCalled) {
+         return;
+      }
+
+      callbackCalled = true;
+      _callback(_err, _result);
+   };
+
+   if (!remoteCasa || !remoteCasa.connected) {
+      return _callback("Unregistered casa \"" + (_unregisteredCasa ? _unregisteredCasa.name : "") + "\" is not connected");
+   }
+
+   if (!remoteCasa.executeParsedCommand([ _unregisteredCasa.name, "restart", [ true ] ], (_err) => {
+
+      if (_err) {
+         return callbackOnce(_err);
+      }
+
+      callbackOnce(null, true);
+   })) {
+      return _callback("Unable to order restart for unregistered casa \"" + _unregisteredCasa.name + "\"");
+   }
+
+   setTimeout(() => {
+      callbackOnce(null, true);
+   }, 250);
 };
 
 ConsoleCmd.prototype.cc = function(_arguments, _callback) {

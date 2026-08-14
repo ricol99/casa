@@ -16,9 +16,12 @@
       <section class="webui-panel webui-header-casas webui-casa-context-panel">
         <div class="webui-panel-header">
           <h2>Connected Casas</h2>
-          <div class="webui-selected-casa">
-            Selected:
-            <strong id="selected-casa-label">-</strong>
+          <div class="webui-casa-header-actions">
+            <div class="webui-selected-casa">
+              Selected:
+              <strong id="selected-casa-label">-</strong>
+            </div>
+            <button id="add-casa-button" class="webui-icon-button" type="button" title="Add Casa" aria-label="Add Casa">+</button>
           </div>
         </div>
         <div id="casa-list" class="webui-casa-list">
@@ -245,6 +248,26 @@
     </section>
 
   </main>
+
+  <section id="add-casa-modal" class="webui-modal" hidden aria-labelledby="add-casa-title" aria-modal="true" role="dialog">
+    <div class="webui-modal-backdrop" data-close-add-casa></div>
+    <div class="webui-modal-panel">
+      <div class="webui-modal-header">
+        <div>
+          <span class="webui-summary-label">Gang Installer</span>
+          <h2 id="add-casa-title">Add Casa</h2>
+        </div>
+        <button class="webui-icon-button webui-modal-close" type="button" data-close-add-casa aria-label="Close">x</button>
+      </div>
+      <div id="add-casa-status" class="webui-add-casa-status" aria-live="polite"></div>
+      <div class="webui-modal-actions">
+        <button id="refresh-unregistered-casas-button" type="button">Refresh</button>
+      </div>
+      <div id="unregistered-casa-list" class="webui-unregistered-casa-list">
+        <div class="webui-empty">No unregistered Casas loaded yet.</div>
+      </div>
+    </div>
+  </section>
 
   <section id="live-trace-dock" class="webui-live-trace-dock webui-live-trace-dock-collapsed" aria-label="Live update trace">
     <div class="webui-live-trace-header">

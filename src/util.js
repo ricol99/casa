@@ -34,6 +34,41 @@ Util.getLocalIpAddress = function() {
    }
 };
 
+Util.getLocalMacAddress = function() {
+   var os = require( 'os' );
+   var networkInterfaces = os.networkInterfaces( );
+
+   for (var ni in networkInterfaces) {
+
+      for (var i = 0; i < networkInterfaces[ni].length; ++i) {
+         var networkInterface = networkInterfaces[ni][i];
+
+         if (!networkInterface.internal &&
+             networkInterface.mac &&
+             (networkInterface.mac !== "00:00:00:00:00:00")) {
+            return networkInterface.mac.toLowerCase();
+         }
+      }
+   }
+
+   return null;
+};
+
+Util.normaliseMacAddress = function(_macAddress) {
+
+   if (typeof _macAddress !== "string") {
+      return null;
+   }
+
+   var macAddress = _macAddress.trim().toLowerCase().replace(/-/g, ":");
+
+   if (/^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/.test(macAddress)) {
+      return macAddress;
+   }
+
+   return null;
+};
+
 Util.getClassHierarchy = function(_obj) {
    var list = [];
    var proto = Object.getPrototypeOf(_obj);

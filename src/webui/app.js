@@ -5,6 +5,11 @@
   var socketStatusEl = document.getElementById('socket-status');
   var selectedCasaLabelEl = document.getElementById('selected-casa-label');
   var casaListEl = document.getElementById('casa-list');
+  var addCasaButton = document.getElementById('add-casa-button');
+  var addCasaModalEl = document.getElementById('add-casa-modal');
+  var addCasaStatusEl = document.getElementById('add-casa-status');
+  var refreshUnregisteredCasasButton = document.getElementById('refresh-unregistered-casas-button');
+  var unregisteredCasaListEl = document.getElementById('unregistered-casa-list');
   var tabButtons = Array.from(document.querySelectorAll('[data-tab]'));
   var tabPanels = Array.from(document.querySelectorAll('[data-tab-panel]'));
   var consoleScopeLabelEl = document.getElementById('console-scope-label');
@@ -60,6 +65,7 @@
   var liveTraceClearButton = document.getElementById('live-trace-clear-button');
   var liveTraceBodyEl = document.getElementById('live-trace-body');
   var latestWebUiStatus = null;
+  var latestUnregisteredCasas = [];
   var latestGlobalThings = null;
   var latestGlobalThingDetail = null;
   var latestGlobalThingRuntime = null;
@@ -92,6 +98,10 @@
   var liveTraceShowLocal = true;
   var nextLiveTraceId = 1;
   var MAX_LIVE_TRACE_ENTRIES = 250;
+  var pendingAcquiredCasas = {};
+  var pendingAcquiredCasaPollTimer = null;
+  var PENDING_ACQUIRED_CASA_MAX_AGE_MS = 180000;
+  var socketHasConnected = false;
 
   function escapeHtmlAttr(value) {
     return escapeHtml(value).replace(/"/g, '&quot;');
@@ -564,6 +574,29 @@
     }, callback);
   }
 
+  function requestUnregisteredCasas(callback) {
+    if (!socket.connected) {
+      if (callback) {
+        callback({ ok: false, error: 'Socket is not connected.' });
+      }
+      return;
+    }
+
+    emitWithReply('getUnregisteredCasas', {}, callback || function () {});
+  }
+
+  function addUnregisteredCasa(name, address, callback) {
+    if (!socket.connected) {
+      callback({ ok: false, error: 'Socket is not connected.' });
+      return;
+    }
+
+    emitWithReply('addUnregisteredCasa', {
+      name: name,
+      address: address
+    }, callback);
+  }
+
   function setSelectedCasaLabel(name) {
     currentSelectedCasa = name || '-';
     selectedCasaLabelEl.textContent = currentSelectedCasa;
@@ -594,10 +627,14 @@
 
     var casas = payload && payload.casas ? payload.casas : [];
     var selectedCasa = payload ? payload.selectedCasa : null;
+    var pendingCasaNames;
+
+    prunePendingAcquiredCasas(casas);
+    pendingCasaNames = Object.keys(pendingAcquiredCasas);
 
     casaListEl.innerHTML = '';
 
-    if (!casas.length) {
+    if (!casas.length && !pendingCasaNames.length) {
       casaListEl.innerHTML = '<span class="webui-empty">No connected casas yet.</span>';
       setSelectedCasaLabel(selectedCasa);
       return;
@@ -608,14 +645,208 @@
       button.type = 'button';
       button.className = 'webui-casa-chip';
       button.dataset.selected = String(casa.name === selectedCasa);
-      button.innerHTML = '<span>' + casa.name + '</span><small>' + (casa.connected ? 'connected' : 'disconnected') + '</small>';
-      button.addEventListener('click', function () {
-        socket.emit('setSelectedCasa', { selectedCasa: casa.name });
-      });
+      button.dataset.connected = String(!!casa.connected);
+      button.disabled = !casa.connected;
+      button.innerHTML = '<span>' + escapeHtml(casa.name) + '</span><small>' + (casa.connected ? 'connected' : 'disconnected') + '</small>';
+
+      if (casa.connected) {
+        button.addEventListener('click', function () {
+          socket.emit('setSelectedCasa', { selectedCasa: casa.name });
+        });
+      }
+
+      casaListEl.appendChild(button);
+    });
+
+    pendingCasaNames.forEach(function (casaName) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'webui-casa-chip webui-casa-chip-pending';
+      button.disabled = true;
+      button.innerHTML = '<span>' + escapeHtml(casaName) + '</span><small>restarting</small>';
       casaListEl.appendChild(button);
     });
 
     setSelectedCasaLabel(selectedCasa);
+    stopPendingAcquiredCasaWatchIfDone();
+  }
+
+  function prunePendingAcquiredCasas(casas) {
+    var now = Date.now();
+    var connectedCasaNames = {};
+
+    (casas || []).forEach(function (casa) {
+      if (casa && casa.connected) {
+        connectedCasaNames[casa.name] = true;
+      }
+    });
+
+    Object.keys(pendingAcquiredCasas).forEach(function (casaName) {
+      var pending = pendingAcquiredCasas[casaName];
+
+      if (connectedCasaNames[casaName] ||
+          (pending && pending.startedAt && ((now - pending.startedAt) > PENDING_ACQUIRED_CASA_MAX_AGE_MS))) {
+        delete pendingAcquiredCasas[casaName];
+      }
+    });
+  }
+
+  function startPendingAcquiredCasaWatch() {
+    if (pendingAcquiredCasaPollTimer) {
+      return;
+    }
+
+    pendingAcquiredCasaPollTimer = window.setInterval(function () {
+      if (!Object.keys(pendingAcquiredCasas).length) {
+        stopPendingAcquiredCasaWatchIfDone();
+        return;
+      }
+
+      requestCasaInfo();
+    }, 5000);
+  }
+
+  function stopPendingAcquiredCasaWatchIfDone() {
+    if (pendingAcquiredCasaPollTimer && !Object.keys(pendingAcquiredCasas).length) {
+      window.clearInterval(pendingAcquiredCasaPollTimer);
+      pendingAcquiredCasaPollTimer = null;
+    }
+  }
+
+  function setAddCasaStatus(state, message) {
+    if (!addCasaStatusEl) {
+      return;
+    }
+
+    addCasaStatusEl.dataset.state = state || '';
+    addCasaStatusEl.textContent = message || '';
+  }
+
+  function validCasaName(name) {
+    return /^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(String(name || '').trim());
+  }
+
+  function unregisteredCasaTitle(row) {
+    return row && row.macAddress ? row.macAddress : row && row.name ? row.name : '-';
+  }
+
+  function renderUnregisteredCasas(rows) {
+    latestUnregisteredCasas = rows || [];
+
+    if (!unregisteredCasaListEl) {
+      return;
+    }
+
+    if (!latestUnregisteredCasas.length) {
+      unregisteredCasaListEl.innerHTML = '<div class="webui-empty">No unregistered Casas found.</div>';
+      return;
+    }
+
+    unregisteredCasaListEl.innerHTML = latestUnregisteredCasas.map(function (row, index) {
+      var connected = !!(row && row.connected);
+      var status = connected ? 'connected' : row && row.connecting ? 'connecting' : 'unavailable';
+      var address = row && row.macAddress ? row.macAddress : '';
+      var host = row && row.address ? [row.address.host, row.address.port].filter(Boolean).join(':') : '-';
+      var name = row && row.name ? row.name : '-';
+      var error = row && row.lastError ? '<p class="webui-unregistered-error">' + escapeHtml(row.lastError) + '</p>' : '';
+
+      return '<form class="webui-unregistered-casa-row" data-add-casa-form data-address="' + escapeHtmlAttr(address) + '">' +
+        '<div class="webui-unregistered-casa-main">' +
+          '<strong>' + escapeHtml(unregisteredCasaTitle(row)) + '</strong>' +
+          '<span>' + escapeHtml(name) + '</span>' +
+          '<small>' + escapeHtml(host) + ' · ' + escapeHtml(status) + '</small>' +
+          error +
+        '</div>' +
+        '<label class="webui-add-casa-name">' +
+          '<span>Name</span>' +
+          '<input name="casaName" type="text" placeholder="kitchen" autocomplete="off" data-add-casa-name="' + index + '">' +
+        '</label>' +
+        '<button type="submit"' + (connected ? '' : ' disabled') + '>Add</button>' +
+      '</form>';
+    }).join('');
+  }
+
+  function refreshUnregisteredCasas() {
+    setAddCasaStatus('pending', 'Searching for unregistered Casas...');
+
+    if (unregisteredCasaListEl) {
+      unregisteredCasaListEl.innerHTML = '<div class="webui-empty">Searching...</div>';
+    }
+
+    requestUnregisteredCasas(function (payload) {
+      if (!payload || !payload.ok) {
+        setAddCasaStatus('error', payload && payload.error ? payload.error : 'Unable to load unregistered Casas.');
+        renderUnregisteredCasas([]);
+        return;
+      }
+
+      renderUnregisteredCasas(payload.result || []);
+      setAddCasaStatus('', '');
+    });
+  }
+
+  function openAddCasaModal() {
+    if (!addCasaModalEl) {
+      return;
+    }
+
+    addCasaModalEl.hidden = false;
+    refreshUnregisteredCasas();
+  }
+
+  function closeAddCasaModal() {
+    if (!addCasaModalEl) {
+      return;
+    }
+
+    addCasaModalEl.hidden = true;
+    setAddCasaStatus('', '');
+  }
+
+  function submitAddCasaForm(formEl) {
+    var inputEl = formEl.querySelector('[name="casaName"]');
+    var casaName = inputEl ? String(inputEl.value || '').trim() : '';
+    var address = formEl.getAttribute('data-address') || '';
+    var submitButton = formEl.querySelector('button[type="submit"]');
+
+    if (!validCasaName(casaName)) {
+      setAddCasaStatus('error', 'Enter a valid Casa name.');
+      if (inputEl) {
+        inputEl.focus();
+      }
+      return;
+    }
+
+    if (!address) {
+      setAddCasaStatus('error', 'Unregistered Casa address is not available.');
+      return;
+    }
+
+    setAddCasaStatus('pending', 'Adding ' + casaName + '...');
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
+    addUnregisteredCasa(casaName, address, function (payload) {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+
+      if (!payload || !payload.ok) {
+        setAddCasaStatus('error', payload && payload.error ? payload.error : 'Unable to add Casa.');
+        return;
+      }
+
+      pendingAcquiredCasas[casaName] = {
+        name: casaName,
+        startedAt: Date.now()
+      };
+      closeAddCasaModal();
+      addConsoleSystemLine('Restart ordered for ' + casaName + '. Waiting for it to reconnect.');
+      renderCasas(latestWebUiStatus || { casas: [], selectedCasa: null });
+      startPendingAcquiredCasaWatch();
+      requestCasaInfo();
+    });
   }
 
   function collectThingNodes(node) {
@@ -2334,17 +2565,32 @@
 
   socket.on('connect', function () {
     setSocketStatus('connected', 'connected');
+
+    if (socketHasConnected) {
+      addConsoleSystemLine('Local runtime socket reconnected.');
+    }
+
+    socketHasConnected = true;
     requestCasaInfo();
   });
 
-  socket.on('disconnect', function () {
+  socket.on('disconnect', function (reason) {
     setSocketStatus('error', 'disconnected');
-    addConsoleSystemLine('Local runtime socket disconnected.');
+    addConsoleSystemLine('Local runtime socket disconnected: ' + (reason || 'unknown reason') + '.');
   });
 
   socket.on('connect_error', function (error) {
     setSocketStatus('error', 'error');
     addConsoleSystemLine('Unable to connect to local runtime: ' + (error && error.message ? error.message : 'unknown error'));
+  });
+
+  socket.on('reconnect_attempt', function (attempt) {
+    setSocketStatus('pending', 'reconnecting');
+    addConsoleSystemLine('Reconnecting to local runtime, attempt ' + attempt + '.');
+  });
+
+  socket.on('reconnect_error', function (error) {
+    addConsoleSystemLine('Reconnect failed: ' + (error && error.message ? error.message : 'unknown error'));
   });
 
   socket.on('webui-status', function (payload) {
@@ -2418,6 +2664,16 @@
     });
   });
 
+  socket.on('unregistered-casas-output', function (payload) {
+    handleReply(payload, function () {
+    });
+  });
+
+  socket.on('add-unregistered-casa-output', function (payload) {
+    handleReply(payload, function () {
+    });
+  });
+
   socket.on('auto-complete-output', function (payload) {
     handleReply(payload, function () {
       setConsoleHints([]);
@@ -2469,6 +2725,19 @@
     }
   });
   topologyRefreshButton.addEventListener('click', requestGlobalThings);
+  if (addCasaButton) {
+    addCasaButton.addEventListener('click', openAddCasaModal);
+  }
+  if (refreshUnregisteredCasasButton) {
+    refreshUnregisteredCasasButton.addEventListener('click', refreshUnregisteredCasas);
+  }
+  if (addCasaModalEl) {
+    addCasaModalEl.addEventListener('click', function (event) {
+      if (event.target.closest('[data-close-add-casa]')) {
+        closeAddCasaModal();
+      }
+    });
+  }
   sourcesRefreshButton.addEventListener('click', requestSourceTrees);
   designerRefreshButton.addEventListener('click', function () {
     requestConfiguredSourceTree();
@@ -2506,6 +2775,13 @@
   });
   document.addEventListener('submit', function (event) {
     var formEl = event.target.closest('[data-property-edit-form]');
+    var addCasaFormEl = event.target.closest('[data-add-casa-form]');
+
+    if (addCasaFormEl) {
+      event.preventDefault();
+      submitAddCasaForm(addCasaFormEl);
+      return;
+    }
 
     if (!formEl) {
       return;
@@ -2540,6 +2816,11 @@
 
     if (formEl) {
       setPropertyEditStatus(formEl, '', '');
+    }
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && addCasaModalEl && !addCasaModalEl.hidden) {
+      closeAddCasaModal();
     }
   });
   tabButtons.forEach(function (button) {

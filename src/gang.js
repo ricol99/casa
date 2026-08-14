@@ -9,10 +9,15 @@ var _mainInstance = null;
 function Gang(_config, _loader) {
    NamedObject.call(this, _config);
    this.dbCallbacks = {};
+   this.dbs = {};
    this.peercasas = {};
    this.peerGangs = {};
    this.loader = _loader;
+   this.unregistered = _config.unregistered === true;
    this.organisation = _config.organisation;
+   this.discoverable = _config.discoverable === true;
+   this.publicDiscoverable = _config.publicDiscoverable === true;
+   this.allowedSubscriberGangs = this.normaliseAllowedSubscriberGangs(_config.allowedSubscriberGangs);
 
    this.casa = new Casa(_config.casa, this);
 };
@@ -68,6 +73,73 @@ Gang.prototype.coldStart = function() {
 
 Gang.prototype.getOrganisation = function() {
    return this.organisation;
+};
+
+Gang.prototype.isUnregistered = function() {
+   return this.unregistered;
+};
+
+Gang.prototype.isDiscoverable = function() {
+   return this.discoverable;
+};
+
+Gang.prototype.isPublicDiscoverable = function() {
+   return this.publicDiscoverable;
+};
+
+Gang.prototype.normaliseAllowedSubscriberGangs = function(_allowedSubscriberGangs) {
+   var allowedSubscriberGangs = [];
+
+   if (!(_allowedSubscriberGangs instanceof Array)) {
+      return allowedSubscriberGangs;
+   }
+
+   for (var i = 0; i < _allowedSubscriberGangs.length; ++i) {
+      var entry = _allowedSubscriberGangs[i];
+      var gangName = null;
+
+      if (typeof entry === "string") {
+         gangName = entry;
+         entry = { gang: gangName };
+      }
+      else if (entry && (typeof entry === "object")) {
+         gangName = entry.gang || entry.name;
+      }
+
+      if (gangName) {
+         allowedSubscriberGangs.push({
+            gang: gangName,
+            readOnly: entry.readOnly === false ? false : true
+         });
+      }
+   }
+
+   return allowedSubscriberGangs;
+};
+
+Gang.prototype.getAllowedSubscriberGangs = function() {
+   return this.allowedSubscriberGangs;
+};
+
+Gang.prototype.getAllowedSubscriberGang = function(_gangName) {
+
+   for (var i = 0; this.allowedSubscriberGangs && (i < this.allowedSubscriberGangs.length); ++i) {
+
+      if (this.allowedSubscriberGangs[i].gang === _gangName) {
+         return this.allowedSubscriberGangs[i];
+      }
+   }
+
+   return null;
+};
+
+Gang.prototype.canGangSubscribe = function(_gangName) {
+   return !!this.getAllowedSubscriberGang(_gangName);
+};
+
+Gang.prototype.canGangWrite = function(_gangName) {
+   var entry = this.getAllowedSubscriberGang(_gangName);
+   return !!(entry && (entry.readOnly === false));
 };
 
 Gang.prototype.refreshSourceListeners = function() {
@@ -204,8 +276,21 @@ Gang.prototype.getDbs = function() {
    return [ this.name+"-db", this.casa.name+"-db" ];
 };
 
+Gang.prototype.addDb = function(_db) {
+
+   if (_db && _db.name) {
+      this.dbs[_db.name] = _db;
+   }
+
+   return _db;
+};
+
 Gang.prototype.getDb = function(_dbName, _meta, _callback) {
    var dbName = (_dbName) ? _dbName : this.name+"-db";
+
+   if (!this.dbs) {
+      this.dbs = {};
+   }
 
    if (this.dbs.hasOwnProperty(dbName)) {
 

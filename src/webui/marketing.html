@@ -75,7 +75,7 @@
           Casa Management Console gives organisations one place to monitor gangs, configure remote access, and recover sites while automation stays local.
         </p>
         <div class="hero-actions">
-          <a class="primary-action" href="#organisation" data-organisation-action>Create Organisation</a>
+          <a class="primary-action" href="#organisation" data-organisation-action>Checking Organisation</a>
         </div>
       </div>
     </section>
@@ -119,6 +119,13 @@
           <h3>Backup and restore</h3>
           <p>Keep encrypted snapshots of configuration and management metadata so a site can recover without being rebuilt by hand.</p>
         </article>
+        <article class="feature">
+          <span class="feature-code">04</span>
+          <h3>Pi installer image</h3>
+          <p>Start a new Casa node from a ready-to-flash Raspberry Pi image, then capture it from the local console.</p>
+          <a class="secondary-action compact installer-download" href="#" data-pi-image-download aria-disabled="true">Download Pi Image</a>
+          <span class="installer-note" data-pi-image-note aria-live="polite"></span>
+        </article>
       </div>
     </section>
 
@@ -140,13 +147,13 @@
     <section class="section access-section" id="organisation">
       <div class="section-kicker">Organisation</div>
       <div class="section-head">
-        <h2>Start by defining the organisation.</h2>
-        <p>
+        <h2 data-organisation-title>Start by defining the organisation.</h2>
+        <p data-organisation-copy>
           The organisation owns the management context and transport credentials.
         </p>
       </div>
       <div class="access-panel">
-        <div class="organisation-create" data-create-panel>
+        <div class="organisation-create" data-create-panel hidden>
           <strong>Create Organisation</strong>
           <span>Set the organisation name and optional Pusher credentials used by Casa transports.</span>
           <form class="organisation-form" data-organisation-form>
@@ -184,7 +191,6 @@
           </div>
           <dl class="organisation-facts">
             <div><dt>Slug</dt><dd data-organisation-slug>-</dd></div>
-            <div><dt>Pusher</dt><dd data-pusher-status>missing</dd></div>
           </dl>
         </div>
       </div>

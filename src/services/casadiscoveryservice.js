@@ -212,9 +212,10 @@ CasaDiscoveryService.prototype.removeDiscoveryTransport =  function(_name) {
    }
 };
 
-CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
+CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _address, _discoveryTransportName, _messageTransportName, _tier, _metadata) {
    var statusChanged = true;
    var previousStatus = "down";
+   var status;
 
    if (this.casas.hasOwnProperty(_name)) {
 
@@ -227,8 +228,15 @@ CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _addr
       this.casas[_name] = { discoveryTransports: {} };
    }
 
-   this.casas[_name].discoveryTransports[_discoveryTransportName] = { name: _name, status: _status, previousStatus: previousStatus,
-                                                                      address: _address, messageTransportName: _messageTransportName, tier: _tier };
+   status = { name: _name, status: _status, previousStatus: previousStatus,
+              gang: this.gang.name, address: _address, discoveryTransportName: _discoveryTransportName,
+              messageTransportName: _messageTransportName, tier: _tier };
+
+   if (_metadata && (util.memberCount(_metadata) > 0)) {
+      status.metadata = _metadata;
+   }
+
+   this.casas[_name].discoveryTransports[_discoveryTransportName] = status;
 
    if ((_status === "up") && !statusChanged) {
       // A service can come back without a prior serviceDown callback.
@@ -241,8 +249,8 @@ CasaDiscoveryService.prototype.casaStatusUpdate = function(_name, _status, _addr
    }
 };
 
-CasaDiscoveryService.prototype.gangCasaStatusUpdate = function(_gang, _name, _status, _address, _discoveryTransportName, _messageTransportName, _tier) {
-   this.emit(_status === "up" ? "gang-casa-up" : "gang-casa-down", {
+CasaDiscoveryService.prototype.gangCasaStatusUpdate = function(_gang, _name, _status, _address, _discoveryTransportName, _messageTransportName, _tier, _metadata) {
+   var status = {
       gang: _gang,
       name: _name,
       casaName: _name,
@@ -251,7 +259,13 @@ CasaDiscoveryService.prototype.gangCasaStatusUpdate = function(_gang, _name, _st
       discoveryTransportName: _discoveryTransportName,
       messageTransportName: _messageTransportName,
       tier: _tier
-   });
+   };
+
+   if (_metadata && (util.memberCount(_metadata) > 0)) {
+      status.metadata = _metadata;
+   }
+
+   this.emit(_status === "up" ? "gang-casa-up" : "gang-casa-down", status);
 };
 
 CasaDiscoveryService.prototype.createSourceOwnerRequestId = function() {
@@ -449,20 +463,37 @@ MdnsDiscoveryTransport.prototype.serviceUp = function(_service) {
 
    var gangName = _service.txt.gang;
    var casaName = _service.txt.casaUName || _service.txt.id || _service.name;
+   var metadata = {};
+   var statusMetadata = null;
    var address = {
       host: this.normalizedHost(_service.host),
       port: _service.port
    };
 
+   if ((_service.txt.unreg === "true") || (_service.txt.unregistered === "true")) {
+      metadata.unregistered = true;
+
+      if (_service.txt.mac || _service.txt.macAddress) {
+         metadata.macAddress = _service.txt.mac || _service.txt.macAddress;
+      }
+   }
+
+   if (util.memberCount(metadata) > 0) {
+      statusMetadata = metadata;
+   }
+
    if (this.isLocalAdvert(gangName, casaName, _service.name)) {
       return;
    }
 
-   this.addGangCasaCandidate(gangName, casaName, _service.name, address);
-   this.owner.gangCasaStatusUpdate(gangName, casaName, "up", address, this.discoveryTransportName, this.messageTransportName, this.tier);
+   this.addGangCasaCandidate(gangName, casaName, _service.name, address, statusMetadata);
+   this.owner.gangCasaStatusUpdate(gangName, casaName, "up", address, this.discoveryTransportName, this.messageTransportName, this.tier, statusMetadata);
 
-   if ((gangName === this.owner.gang.name) && (_service.name !== this.name)) {
-      this.owner.casaStatusUpdate(_service.name, "up", address, this.name, this.messageTransportName, this.tier);
+   if (metadata.unregistered) {
+      this.owner.casaStatusUpdate(casaName, "up", address, this.discoveryTransportName, this.messageTransportName, this.tier, statusMetadata);
+   }
+   else if ((gangName === this.owner.gang.name) && (_service.name !== this.name)) {
+      this.owner.casaStatusUpdate(_service.name, "up", address, this.discoveryTransportName, this.messageTransportName, this.tier);
    }
 };
 
@@ -473,18 +504,21 @@ MdnsDiscoveryTransport.prototype.serviceDown = function(_service) {
    if (candidate) {
       delete this.gangCasaCandidates[key];
       delete this.serviceNameToCandidateKey[_service.name];
-      this.owner.gangCasaStatusUpdate(candidate.gang, candidate.casaName, "down", candidate.address, this.discoveryTransportName, this.messageTransportName, this.tier);
+      this.owner.gangCasaStatusUpdate(candidate.gang, candidate.casaName, "down", candidate.address, this.discoveryTransportName, this.messageTransportName, this.tier, candidate.metadata);
 
-      if ((candidate.gang === this.owner.gang.name) && (_service.name !== this.name)) {
-         this.owner.casaStatusUpdate(_service.name, "down", null, this.name, this.messageTransportName, this.tier);
+      if (candidate.metadata && candidate.metadata.unregistered) {
+         this.owner.casaStatusUpdate(candidate.casaName, "down", null, this.discoveryTransportName, this.messageTransportName, this.tier, candidate.metadata);
+      }
+      else if ((candidate.gang === this.owner.gang.name) && (_service.name !== this.name)) {
+         this.owner.casaStatusUpdate(_service.name, "down", null, this.discoveryTransportName, this.messageTransportName, this.tier, candidate.metadata);
       }
    }
    else if (_service.name !== this.name) {
-      this.owner.casaStatusUpdate(_service.name, "down", null, this.name, this.messageTransportName, this.tier);
+      this.owner.casaStatusUpdate(_service.name, "down", null, this.discoveryTransportName, this.messageTransportName, this.tier);
    }
 };
 
-MdnsDiscoveryTransport.prototype.addGangCasaCandidate = function(_gang, _casaName, _serviceName, _address) {
+MdnsDiscoveryTransport.prototype.addGangCasaCandidate = function(_gang, _casaName, _serviceName, _address, _metadata) {
    var key = this.candidateKey(_gang, _casaName);
 
    this.gangCasaCandidates[key] = {
@@ -495,6 +529,11 @@ MdnsDiscoveryTransport.prototype.addGangCasaCandidate = function(_gang, _casaNam
       messageTransportName: this.messageTransportName,
       tier: this.tier
    };
+
+   if (_metadata && (util.memberCount(_metadata) > 0)) {
+      this.gangCasaCandidates[key].metadata = _metadata;
+   }
+
    this.serviceNameToCandidateKey[_serviceName] = key;
 };
 
@@ -617,7 +656,9 @@ MdnsDiscoveryTransport.prototype.startBroadcasting = function() {
          txt: {
             id: this.casaName,
             casaUName: this.owner.gang.casa.uName,
-            gang: this.owner.gang.name
+            gang: this.owner.gang.name,
+            unreg: this.owner.gang.isUnregistered && this.owner.gang.isUnregistered() ? "true" : "false",
+            mac: util.getLocalMacAddress ? (util.getLocalMacAddress() || "") : ""
          }
       });
  

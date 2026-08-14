@@ -124,6 +124,24 @@ body {
   font-weight: 700;
 }
 
+.webui-casa-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.webui-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 .webui-tabs-panel {
   padding: 0;
   margin-bottom: -0.35rem;
@@ -253,6 +271,35 @@ body {
   border-color: var(--webui-accent);
 }
 
+.webui-casa-chip[data-connected="false"],
+.webui-casa-chip[data-connected="false"]:disabled {
+  border-color: rgba(86, 98, 114, 0.32);
+  background: rgba(246, 247, 249, 0.78);
+  color: #7b8491;
+  cursor: default;
+}
+
+.webui-casa-chip[data-connected="false"]:hover {
+  border-color: rgba(86, 98, 114, 0.32);
+  background: rgba(246, 247, 249, 0.78);
+  color: #7b8491;
+}
+
+.webui-casa-chip-pending,
+.webui-casa-chip-pending:disabled {
+  border-style: dashed;
+  border-color: rgba(86, 98, 114, 0.42);
+  background: rgba(239, 241, 244, 0.72);
+  color: #566272;
+  cursor: default;
+}
+
+.webui-casa-chip-pending:hover {
+  background: rgba(239, 241, 244, 0.72);
+  border-color: rgba(86, 98, 114, 0.42);
+  color: #566272;
+}
+
 .webui-casa-chip small {
   display: block;
   margin-top: 0.08rem;
@@ -262,6 +309,143 @@ body {
 
 .webui-empty {
   color: #6a7381;
+}
+
+.webui-modal[hidden] {
+  display: none;
+}
+
+.webui-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.webui-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 36, 43, 0.38);
+}
+
+.webui-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  max-height: min(760px, calc(100vh - 2rem));
+  overflow: auto;
+  border: 1px solid var(--webui-border);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--webui-shadow);
+  padding: 1rem;
+}
+
+.webui-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.webui-modal-header h2 {
+  margin: 0.1rem 0 0;
+  font-size: 1.2rem;
+}
+
+.webui-modal-close {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--webui-text-soft);
+  border-color: var(--webui-border);
+}
+
+.webui-modal-close:hover {
+  background: var(--webui-accent);
+  color: #fff;
+}
+
+.webui-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.7rem;
+}
+
+.webui-add-casa-status {
+  min-height: 1.35rem;
+  margin-top: 0.65rem;
+  color: var(--webui-text-soft);
+  font-size: 0.88rem;
+}
+
+.webui-add-casa-status[data-state="pending"] {
+  color: #7a5d12;
+}
+
+.webui-add-casa-status[data-state="ok"] {
+  color: #117557;
+}
+
+.webui-add-casa-status[data-state="error"] {
+  color: #aa2f2f;
+}
+
+.webui-unregistered-casa-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+}
+
+.webui-unregistered-casa-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr) auto;
+  gap: 0.8rem;
+  align-items: end;
+  padding: 0.72rem;
+  border: 1px solid rgba(106, 113, 118, 0.14);
+  border-radius: 0.6rem;
+  background: rgba(248, 249, 250, 0.8);
+}
+
+.webui-unregistered-casa-main {
+  min-width: 0;
+}
+
+.webui-unregistered-casa-main strong,
+.webui-unregistered-casa-main span,
+.webui-unregistered-casa-main small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.webui-unregistered-casa-main span,
+.webui-unregistered-casa-main small {
+  color: var(--webui-text-soft);
+}
+
+.webui-unregistered-casa-main small {
+  margin-top: 0.14rem;
+  font-size: 0.76rem;
+}
+
+.webui-unregistered-error {
+  margin-top: 0.35rem;
+  color: #aa2f2f;
+  font-size: 0.82rem;
+}
+
+.webui-add-casa-name {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.webui-add-casa-name span {
+  color: var(--webui-text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .webui-list {
@@ -1428,6 +1612,11 @@ button:hover {
 
   .webui-sources-layout {
     grid-template-columns: 1fr;
+  }
+
+  .webui-unregistered-casa-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .webui-live-trace-header {
