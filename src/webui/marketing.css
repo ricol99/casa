@@ -66,7 +66,7 @@ main,
 .nav-links,
 .hero-actions,
 .form-actions,
-.manage-actions {
+.account-actions {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -106,7 +106,7 @@ main,
 .model-steps p,
 .proof-strip span,
 .access-panel span,
-.organisation-facts dd,
+.cloud-facts dd,
 .form-note,
 .site-footer {
   color: var(--muted);
@@ -152,7 +152,7 @@ main,
 
 .eyebrow,
 .section-kicker,
-.organisation-form label span,
+.runtime-form label span,
 .panel-label {
   color: var(--teal);
   font-size: 12px;
@@ -550,24 +550,24 @@ h1 {
   margin-top: 4px;
 }
 
-.organisation-form {
+.runtime-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 18px;
 }
 
-.organisation-form label {
+.runtime-form label {
   display: grid;
   gap: 6px;
 }
 
-.organisation-form .wide,
+.runtime-form .wide,
 .form-actions {
   grid-column: 1 / -1;
 }
 
-.organisation-form input {
+.runtime-form input {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line-strong);
@@ -577,16 +577,18 @@ h1 {
   padding: 10px 12px;
 }
 
-.organisation-form input:focus {
+.runtime-form input:focus {
   border-color: var(--teal);
   outline: 3px solid rgba(8, 127, 122, 0.12);
 }
 
-.form-actions {
+.form-actions,
+.account-actions {
   flex-wrap: wrap;
 }
 
-.organisation-manage {
+.cloud-signup,
+.cloud-manage {
   display: grid;
   gap: 14px;
 }
@@ -595,13 +597,13 @@ h1 {
   display: none !important;
 }
 
-.organisation-facts {
+.cloud-facts {
   display: grid;
   gap: 8px;
   margin: 8px 0;
 }
 
-.organisation-facts div {
+.cloud-facts div {
   display: flex;
   justify-content: space-between;
   gap: 14px;
@@ -609,12 +611,12 @@ h1 {
   padding-top: 8px;
 }
 
-.organisation-facts dt,
-.organisation-facts dd {
+.cloud-facts dt,
+.cloud-facts dd {
   margin: 0;
 }
 
-.organisation-facts dt {
+.cloud-facts dt {
   font-weight: 850;
 }
 
@@ -670,7 +672,7 @@ h1 {
   }
 
   .fleet-grid,
-  .organisation-form {
+  .runtime-form {
     grid-template-columns: 1fr;
   }
 

@@ -1696,7 +1696,7 @@ OfflineCasa.prototype.executeParsedCommand = function(_command, _callback) {
    var commandObj = this.owner ? this.owner.gangConsoleCmd : null;
 
    if ((obj === ":") &&
-       (method === "organisation") &&
+       ((method === "organisation") || (method === "pusher")) &&
        commandObj &&
        (typeof commandObj[method] === "function")) {
       return Object.getPrototypeOf(commandObj)[method].call(commandObj, args, _callback);

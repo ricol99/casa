@@ -663,4 +663,52 @@ runTest("web ui gang organisation command works through offline casa", function(
    });
 });
 
+runTest("web ui gang pusher command works through offline casa", function() {
+   function FakeGangConsoleCmd() {
+   }
+
+   var capturedArgs = null;
+   var consoleObj = Object.create(Console.prototype);
+
+   FakeGangConsoleCmd.prototype.pusher = function(_arguments, _callback) {
+      capturedArgs = _arguments;
+      _callback(null, {
+         configured: true,
+         name: "pusher-service",
+         appId: "1234567",
+         key: "app-key",
+         secret: "configured",
+         cluster: "eu",
+         source: "local"
+      });
+   };
+
+   consoleObj.offline = true;
+   consoleObj.remoteCasas = {};
+   consoleObj.defaultCasa = null;
+   consoleObj.silentWebUiOutputCount = 0;
+   consoleObj.gangConsoleCmd = new FakeGangConsoleCmd();
+   consoleObj.offlineCasa = Object.create(OfflineCasa.prototype);
+   consoleObj.offlineCasa.name = "offlinecasa";
+   consoleObj.offlineCasa.owner = consoleObj;
+
+   consoleObj.executeWebUiCommand({
+      obj: ":",
+      method: "pusher",
+      arguments: []
+   }, "stale-casa", function(_err, _result) {
+      assert.strictEqual(_err, null);
+      assert.deepStrictEqual(capturedArgs, []);
+      assert.deepStrictEqual(_result, {
+         configured: true,
+         name: "pusher-service",
+         appId: "1234567",
+         key: "app-key",
+         secret: "configured",
+         cluster: "eu",
+         source: "local"
+      });
+   });
+});
+
 process.stdout.write("All console casas command tests passed.\n");

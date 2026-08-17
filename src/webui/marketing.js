@@ -1,34 +1,41 @@
 (function () {
-  var storageKey = 'casa-webui-organisation';
+  var cloudStorageKey = 'casa-cloud-account';
+  var cloudBaseUrl = window.CASA_CLOUD_CONSOLE_URL || '/cloud';
   var pendingRequests = {};
-  var form = document.querySelector('[data-organisation-form]');
-  var note = document.querySelector('[data-form-note]');
-  var createPanel = document.querySelector('[data-create-panel]');
-  var managePanel = document.querySelector('[data-manage-panel]');
-  var organisationAction = document.querySelector('[data-organisation-action]');
-  var organisationTitle = document.querySelector('[data-organisation-title]');
-  var organisationCopy = document.querySelector('[data-organisation-copy]');
-  var organisationName = document.querySelector('[data-organisation-name]');
-  var organisationStatus = document.querySelector('[data-organisation-status]');
-  var organisationSlug = document.querySelector('[data-organisation-slug]');
+  var socket = null;
+  var pusherForm = document.querySelector('[data-pusher-form]');
+  var pusherNote = document.querySelector('[data-pusher-note]');
+  var runtimeAction = document.querySelector('[data-runtime-action]');
+  var pusherTitle = document.querySelector('[data-pusher-title]');
+  var pusherCopy = document.querySelector('[data-pusher-copy]');
+  var pusherStatus = document.querySelector('[data-pusher-status]');
+  var pusherSummary = document.querySelector('[data-pusher-summary]');
+  var cloudSignupPanel = document.querySelector('[data-cloud-signup-panel]');
+  var cloudManagePanel = document.querySelector('[data-cloud-manage-panel]');
+  var cloudTitle = document.querySelector('[data-cloud-title]');
+  var cloudCopy = document.querySelector('[data-cloud-copy]');
+  var cloudName = document.querySelector('[data-cloud-name]');
+  var cloudStatus = document.querySelector('[data-cloud-status]');
+  var cloudOrganisation = document.querySelector('[data-cloud-organisation]');
+  var cloudPlan = document.querySelector('[data-cloud-plan]');
+  var cloudSignup = document.querySelector('[data-cloud-signup]');
+  var cloudSignin = document.querySelector('[data-cloud-signin]');
+  var cloudOpen = document.querySelector('[data-cloud-open]');
+  var cloudSignout = document.querySelector('[data-cloud-signout]');
   var piImageDownload = document.querySelector('[data-pi-image-download]');
   var piImageNote = document.querySelector('[data-pi-image-note]');
 
-  function slugify(value) {
-    return String(value || '')
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+  function setCloudLink(element, path) {
+    if (element) {
+      element.setAttribute('href', cloudBaseUrl.replace(/\/$/, '') + path);
+    }
   }
 
-  function getOrganisation() {
+  function getStoredCloudAccount() {
     var value;
 
     try {
-      value = window.localStorage.getItem(storageKey);
+      value = window.localStorage.getItem(cloudStorageKey);
     } catch (_error) {
       return null;
     }
@@ -44,122 +51,154 @@
     }
   }
 
-  function normaliseOrganisation(value) {
-    var organisation;
+  function normaliseCloudAccount(value) {
+    var account;
 
     if (!value) {
       return null;
     }
 
     if (typeof value === 'string') {
-      organisation = {
+      account = {
         name: value,
-        slug: slugify(value)
+        organisation: value
       };
     } else if (typeof value === 'object') {
-      organisation = {
-        name: String(value.name || value.organisation || '').trim(),
-        slug: String(value.slug || '').trim(),
-        pusher: value.pusher || null
+      account = {
+        name: String(value.name || value.account || value.organisation || '').trim(),
+        organisation: String(value.organisation || value.name || '').trim(),
+        plan: String(value.plan || '').trim(),
+        consoleUrl: String(value.consoleUrl || '').trim()
       };
     } else {
       return null;
     }
 
-    if (!organisation.name) {
+    if (!account.name && !account.organisation) {
       return null;
     }
 
-    if (!organisation.slug) {
-      organisation.slug = slugify(organisation.name);
+    if (!account.name) {
+      account.name = account.organisation;
     }
 
-    return organisation;
-  }
-
-  function getStoredOrganisation() {
-    return normaliseOrganisation(getOrganisation());
-  }
-
-  function saveOrganisation(organisation) {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(organisation));
-    } catch (_error) {
-      return false;
+    if (!account.organisation) {
+      account.organisation = account.name;
     }
 
-    return true;
+    return account;
   }
 
-  function readForm() {
-    var formData = new FormData(form);
-    var name = String(formData.get('name') || '').trim();
+  function cloudAccountFromGangOrganisation(value) {
+    if (!value) {
+      return null;
+    }
+
+    return normaliseCloudAccount({
+      name: value,
+      organisation: value
+    });
+  }
+
+  function setPusherNote(message) {
+    if (pusherNote) {
+      pusherNote.textContent = message || '';
+    }
+  }
+
+  function readPusherForm() {
+    var formData = new FormData(pusherForm);
 
     return {
-      name: name,
-      slug: slugify(name),
-      pusher: {
-        appId: String(formData.get('appId') || '').trim(),
-        key: String(formData.get('key') || '').trim(),
-        secret: String(formData.get('secret') || '').trim(),
-        cluster: String(formData.get('cluster') || '').trim()
-      }
+      appId: String(formData.get('appId') || '').trim(),
+      key: String(formData.get('key') || '').trim(),
+      secret: String(formData.get('secret') || '').trim(),
+      cluster: String(formData.get('cluster') || '').trim()
     };
   }
 
-  function setNote(message) {
-    if (note) {
-      note.textContent = message || '';
+  function renderPusher(config) {
+    var configured = !!(config && config.configured);
+
+    if (pusherTitle) {
+      pusherTitle.textContent = configured ? 'Pusher remote access is configured.' : 'Add the Pusher account for this gang.';
+    }
+
+    if (pusherCopy) {
+      pusherCopy.textContent = configured ?
+        'Pusher credentials are saved in the gang services collection as the pusher-service definition.' :
+        'Pusher is required for free runtime remote access. Credentials are stored in the gang services collection as the pusher-service definition.';
+    }
+
+    if (pusherStatus) {
+      pusherStatus.textContent = configured ? 'Pusher is configured.' : 'Pusher is not configured.';
+    }
+
+    if (pusherSummary) {
+      pusherSummary.textContent = configured ?
+        'App ID ' + (config.appId || '-') + ', key ' + (config.key || '-') + ', cluster ' + (config.cluster || '-') + '. Restart the runtime after changes if the service is already running.' :
+        'Remote access is waiting for the Pusher account details.';
+    }
+
+    if (runtimeAction) {
+      runtimeAction.textContent = configured ? 'Open Runtime Console' : 'Configure Pusher';
+      runtimeAction.setAttribute('href', configured ? '/webui/index.html' : '#remote-access');
+    }
+
+    if (pusherForm && configured) {
+      pusherForm.elements.appId.value = config.appId || '';
+      pusherForm.elements.key.value = config.key || '';
+      pusherForm.elements.cluster.value = config.cluster || '';
+      pusherForm.elements.secret.value = '';
+      pusherForm.elements.secret.placeholder = config.secret ? 'configured' : 'app-secret';
     }
   }
 
-  function render(organisation, source) {
+  function renderCloudAccount(account, source) {
+    var connected = !!account;
 
-    if (arguments.length === 0) {
-      organisation = getStoredOrganisation();
+    if (cloudSignupPanel) {
+      cloudSignupPanel.hidden = connected;
     }
 
-    var hasOrganisation = !!organisation;
-
-    if (createPanel) {
-      createPanel.hidden = hasOrganisation;
+    if (cloudManagePanel) {
+      cloudManagePanel.hidden = !connected;
     }
 
-    if (managePanel) {
-      managePanel.hidden = !hasOrganisation;
+    if (cloudTitle) {
+      cloudTitle.textContent = connected ? 'Casa Cloud account is connected.' : 'Use Casa Cloud when one gang becomes many.';
     }
 
-    if (organisationTitle) {
-      organisationTitle.textContent = hasOrganisation ? 'Organisation is defined.' : 'Start by defining the organisation.';
+    if (cloudCopy) {
+      cloudCopy.textContent = connected ?
+        'Organisation details are shown here for status only. Use the hosted cloud console for people, billing, monitoring, installers, and multi-gang management.' :
+        'The runtime console does not require an organisation. Create a paid cloud organisation when you want shared management across gangs, installers, relatives, monitoring users, and alerts.';
     }
 
-    if (organisationCopy) {
-      organisationCopy.textContent = hasOrganisation ?
-        'This gang is already attached to one organisation. Management opens the console for this gang.' :
-        'The organisation owns the management context and transport credentials.';
-    }
-
-    if (organisationAction) {
-      organisationAction.textContent = hasOrganisation ? 'Manage ' + organisation.name : 'Create Organisation';
-      organisationAction.setAttribute('href', hasOrganisation ? '/webui/index.html' : '#organisation');
-    }
-
-    if (!hasOrganisation) {
+    if (!connected) {
       return;
     }
 
-    if (organisationName) {
-      organisationName.textContent = organisation.name;
+    if (cloudName) {
+      cloudName.textContent = account.name;
     }
 
-    if (organisationStatus) {
-      organisationStatus.textContent = source === 'gang' ?
-        'Management context is defined for this gang.' :
-        'Management context is defined for this browser.';
+    if (cloudStatus) {
+      cloudStatus.textContent = source === 'gang' ?
+        'Cloud organisation is recorded for this gang.' :
+        'Cloud account session is stored in this browser.';
     }
 
-    if (organisationSlug) {
-      organisationSlug.textContent = organisation.slug || '-';
+    if (cloudOrganisation) {
+      cloudOrganisation.textContent = account.organisation || '-';
+    }
+
+    if (cloudPlan) {
+      cloudPlan.textContent = account.plan || 'Cloud';
+    }
+
+    if (cloudOpen && account.consoleUrl) {
+      cloudOpen.setAttribute('href', account.consoleUrl);
     }
   }
 
@@ -167,19 +206,18 @@
     return String(Date.now()) + '-' + Math.random().toString(16).slice(2);
   }
 
-  function executeCommand(socket, payload, callback) {
+  function executeCommand(targetSocket, payload, callback) {
     var id = nextRequestId();
 
     pendingRequests[id] = callback;
     payload.id = id;
-    socket.emit('executeCommand', payload);
+    targetSocket.emit('executeCommand', payload);
   }
 
-  function loadGangOrganisation() {
-    var socket;
-
+  function loadRuntimeState() {
     if (typeof io !== 'function') {
-      render();
+      renderPusher(null);
+      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()), 'browser');
       return;
     }
 
@@ -187,19 +225,35 @@
       transports: ['websocket']
     });
 
-    socket.on('connect', function () {
+    function loadCloudAccount() {
       executeCommand(socket, {
         obj: ':',
         method: 'organisation',
         arguments: []
       }, function (payload) {
-        var organisation = null;
+        var account = normaliseCloudAccount(getStoredCloudAccount());
 
-        if (payload && payload.ok && payload.result) {
-          organisation = normaliseOrganisation(payload.result.organisation);
+        if (!account && payload && payload.ok && payload.result) {
+          account = cloudAccountFromGangOrganisation(payload.result.organisation);
         }
 
-        render(organisation, 'gang');
+        renderCloudAccount(account, account ? (payload && payload.ok && payload.result && payload.result.organisation ? 'gang' : 'browser') : null);
+      });
+    }
+
+    socket.on('connect', function () {
+      executeCommand(socket, {
+        obj: ':',
+        method: 'pusher',
+        arguments: []
+      }, function (payload) {
+        if (payload && payload.ok && payload.result) {
+          renderPusher(payload.result);
+        } else {
+          renderPusher(null);
+        }
+
+        loadCloudAccount();
       });
     });
 
@@ -216,37 +270,70 @@
     });
 
     socket.on('connect_error', function () {
-      render();
+      renderPusher(null);
+      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()), 'browser');
     });
   }
 
-  function submitForm(event) {
-    var organisation;
+  function submitPusherForm(event) {
+    var values;
 
     event.preventDefault();
-    organisation = readForm();
+    values = readPusherForm();
 
-    if (!organisation.name) {
-      setNote('Enter the organisation name.');
+    if (!values.appId || !values.key || !values.secret || !values.cluster) {
+      setPusherNote('Enter all Pusher credentials.');
       return;
     }
 
-    if (!organisation.slug) {
-      setNote('Use at least one letter or number in the organisation name.');
+    if (!socket || !socket.connected) {
+      setPusherNote('Runtime API is not connected.');
       return;
     }
 
-    if (!saveOrganisation(organisation)) {
-      setNote('Unable to save organisation in this browser.');
-      return;
-    }
+    setPusherNote('Saving Pusher details...');
+    executeCommand(socket, {
+      obj: ':',
+      method: 'pusher',
+      arguments: [
+        'set',
+        '--id', values.appId,
+        '--key', values.key,
+        '--secret', values.secret,
+        '--cluster', values.cluster
+      ]
+    }, function (payload) {
+      if (!payload || !payload.ok) {
+        setPusherNote((payload && payload.error) ? String(payload.error) : 'Unable to save Pusher details.');
+        return;
+      }
 
-    setNote('');
-    render(organisation);
+      setPusherNote(payload.result && payload.result.restartRequired ? 'Saved. Restart the runtime for the running Pusher service to use the new credentials.' : 'Saved.');
+      renderPusher(payload.result);
+    });
   }
 
-  if (form) {
-    form.addEventListener('submit', submitForm);
+  function clearStoredCloudAccount() {
+    try {
+      window.localStorage.removeItem(cloudStorageKey);
+    } catch (_error) {
+      return;
+    }
+
+    renderCloudAccount(null);
+  }
+
+  setCloudLink(cloudSignup, '/signup');
+  setCloudLink(cloudSignin, '/signin');
+  setCloudLink(cloudOpen, '');
+  setCloudLink(cloudSignout, '/signout');
+
+  if (pusherForm) {
+    pusherForm.addEventListener('submit', submitPusherForm);
+  }
+
+  if (cloudSignout) {
+    cloudSignout.addEventListener('click', clearStoredCloudAccount);
   }
 
   if (piImageDownload) {
@@ -259,5 +346,5 @@
     });
   }
 
-  loadGangOrganisation();
+  loadRuntimeState();
 })();

@@ -19,7 +19,8 @@
     <nav class="nav-links" aria-label="Page sections">
       <a href="#operations">Operations</a>
       <a href="#model">Model</a>
-      <a href="#organisation">Organisation</a>
+      <a href="#remote-access">Remote Access</a>
+      <a href="#cloud-account">Cloud Account</a>
     </nav>
   </header>
 
@@ -31,18 +32,18 @@
             <span class="window-dot"></span>
             <span class="window-dot muted"></span>
             <span class="window-dot muted"></span>
-            <span class="board-title">Organisation overview</span>
+            <span class="board-title">Runtime overview</span>
           </div>
           <div class="fleet-grid">
             <div class="fleet-panel panel-wide">
-              <span class="panel-label">Managed gangs</span>
-              <strong>12</strong>
+              <span class="panel-label">Remote access</span>
+              <strong>Pusher</strong>
               <div class="status-row"><span></span><span></span><span></span><span></span><span></span></div>
             </div>
             <div class="fleet-panel">
-              <span class="panel-label">Online casas</span>
-              <strong>47</strong>
-              <small>LAN + Pusher + whrelay</small>
+              <span class="panel-label">Gang scope</span>
+              <strong>Local</strong>
+              <small>This gang first</small>
             </div>
             <div class="fleet-panel alert-panel">
               <span class="panel-label">Attention</span>
@@ -70,12 +71,12 @@
 
       <div class="hero-content">
         <p class="eyebrow">Casa-served. Local-first.</p>
-        <h1 id="hero-title">Manage every Casa deployment through the transports you already trust.</h1>
+        <h1 id="hero-title">Run this Casa gang locally, with remote access ready from day one.</h1>
         <p class="hero-copy">
-          Casa Management Console gives organisations one place to monitor gangs, configure remote access, and recover sites while automation stays local.
+          The runtime console configures this gang and stores its Pusher credentials in the gang service definition. Cloud organisation tools are available when you need paid multi-gang management.
         </p>
         <div class="hero-actions">
-          <a class="primary-action" href="#organisation" data-organisation-action>Checking Organisation</a>
+          <a class="primary-action" href="#remote-access" data-runtime-action>Checking Pusher</a>
         </div>
       </div>
     </section>
@@ -87,7 +88,7 @@
       </div>
       <div>
         <strong>Transports add reach</strong>
-        <span>Use LAN, Pusher, whrelay, webhooks, and future bearers.</span>
+        <span>Use Pusher for remote access, with LAN and future bearers alongside it.</span>
       </div>
       <div>
         <strong>Ops become visible</strong>
@@ -100,19 +101,19 @@
       <div class="section-head">
         <h2>One console for the work around Casa.</h2>
         <p>
-          The Management Console manages organisations, gangs, transport reachability, backups, and support access without becoming the automation authority.
+          The runtime console manages this gang, transport reachability, backups, and support access without becoming the automation authority.
         </p>
       </div>
       <div class="feature-grid">
         <article class="feature">
           <span class="feature-code">01</span>
           <h3>Gang and casa health</h3>
-          <p>Track availability, version drift, transport status, and last-seen signals across every managed deployment.</p>
+          <p>Track availability, version drift, transport status, and last-seen signals for the local gang.</p>
         </article>
         <article class="feature">
           <span class="feature-code">02</span>
-          <h3>Remote access setup</h3>
-          <p>Make relay credentials, bearer choice, and support entry points feel like product workflows rather than infrastructure chores.</p>
+          <h3>Pusher setup</h3>
+          <p>Make the mandatory remote-access credentials feel like a product workflow rather than an infrastructure chore.</p>
         </article>
         <article class="feature">
           <span class="feature-code">03</span>
@@ -132,66 +133,87 @@
     <section class="model-band" id="model">
       <div class="model-copy">
         <div class="section-kicker">Product Model</div>
-        <h2>Management does not need a central Casa cloud.</h2>
+        <h2>Local runtime first, cloud organisation when you need one.</h2>
         <p>
-          The console coordinates management through Casa transports. It does not become the automation authority. Gangs define the shared context; the management layer makes them easier to operate.
+          The console coordinates this gang through Casa transports. It does not become the automation authority. A cloud organisation adds coordination for multiple gangs, people, and monitoring.
         </p>
       </div>
       <div class="model-steps" aria-label="Casa management model">
         <div><span>1</span><strong>Casa</strong><p>Runs automation locally.</p></div>
-        <div><span>2</span><strong>Bearer transports</strong><p>LAN, Pusher, whrelay, webhooks.</p></div>
-        <div><span>3</span><strong>Management Console</strong><p>Observes, configures, and recovers through transports.</p></div>
+        <div><span>2</span><strong>Pusher</strong><p>Provides remote reach for the free runtime.</p></div>
+        <div><span>3</span><strong>Cloud organisation</strong><p>Unlocks multi-gang coordination when needed.</p></div>
       </div>
     </section>
 
-    <section class="section access-section" id="organisation">
-      <div class="section-kicker">Organisation</div>
+    <section class="section access-section" id="remote-access">
+      <div class="section-kicker">Remote Access</div>
       <div class="section-head">
-        <h2 data-organisation-title>Start by defining the organisation.</h2>
-        <p data-organisation-copy>
-          The organisation owns the management context and transport credentials.
+        <h2 data-pusher-title>Add the Pusher account for this gang.</h2>
+        <p data-pusher-copy>
+          Pusher is required for free runtime remote access. Credentials are stored in the gang services collection as the pusher-service definition.
         </p>
       </div>
       <div class="access-panel">
-        <div class="organisation-create" data-create-panel hidden>
-          <strong>Create Organisation</strong>
-          <span>Set the organisation name and optional Pusher credentials used by Casa transports.</span>
-          <form class="organisation-form" data-organisation-form>
-            <label class="wide">
-              <span>Organisation name</span>
-              <input type="text" name="name" placeholder="collin-home" autocomplete="organization" required>
-            </label>
+        <div data-pusher-panel>
+          <strong data-pusher-status>Pusher is not configured.</strong>
+          <span data-pusher-summary>Remote access is waiting for the Pusher account details.</span>
+          <form class="runtime-form" data-pusher-form>
             <label>
               <span>Pusher app ID</span>
-              <input type="text" name="appId" placeholder="1234567">
+              <input type="text" name="appId" placeholder="1234567" autocomplete="off" required>
             </label>
             <label>
               <span>Pusher key</span>
-              <input type="text" name="key" placeholder="app-key">
+              <input type="text" name="key" placeholder="app-key" autocomplete="off" required>
             </label>
             <label>
               <span>Pusher secret</span>
-              <input type="password" name="secret" placeholder="app-secret">
+              <input type="password" name="secret" placeholder="app-secret" autocomplete="off" required>
             </label>
             <label>
               <span>Pusher cluster</span>
-              <input type="text" name="cluster" placeholder="eu">
+              <input type="text" name="cluster" placeholder="eu" autocomplete="off" required>
             </label>
             <div class="form-actions wide">
-              <button class="primary-action compact" type="submit">Create Organisation</button>
-              <span class="form-note" data-form-note aria-live="polite"></span>
+              <button class="primary-action compact" type="submit">Save Pusher Details</button>
+              <span class="form-note" data-pusher-note aria-live="polite"></span>
             </div>
           </form>
         </div>
+      </div>
+    </section>
 
-        <div class="organisation-manage" data-manage-panel hidden>
-          <div>
-            <strong data-organisation-name>Organisation</strong>
-            <span data-organisation-status>Management context is defined for this gang.</span>
+    <section class="section access-section" id="cloud-account">
+      <div class="section-kicker">Cloud Account</div>
+      <div class="section-head">
+        <h2 data-cloud-title>Use Casa Cloud when one gang becomes many.</h2>
+        <p data-cloud-copy>
+          The runtime console does not require an organisation. Create a paid cloud organisation when you want shared management across gangs, installers, relatives, monitoring users, and alerts.
+        </p>
+      </div>
+      <div class="access-panel">
+        <div class="cloud-signup" data-cloud-signup-panel>
+          <strong>Casa Cloud is optional.</strong>
+          <span>Sign up to define an organisation, manage multiple gangs, connect gangs together, add installers, and let trusted people subscribe to monitoring or panic alarm events.</span>
+          <div class="account-actions">
+            <a class="primary-action compact" href="/cloud/signup" data-cloud-signup>Sign Up For Casa Cloud</a>
+            <a class="secondary-action compact" href="/cloud/signin" data-cloud-signin>Sign In</a>
           </div>
-          <dl class="organisation-facts">
-            <div><dt>Slug</dt><dd data-organisation-slug>-</dd></div>
+        </div>
+
+        <div class="cloud-manage" data-cloud-manage-panel hidden>
+          <div>
+            <strong data-cloud-name>Casa Cloud</strong>
+            <span data-cloud-status>Cloud account is connected for this gang.</span>
+          </div>
+          <dl class="cloud-facts">
+            <div><dt>Organisation</dt><dd data-cloud-organisation>-</dd></div>
+            <div><dt>Plan</dt><dd data-cloud-plan>-</dd></div>
           </dl>
+          <div class="account-actions">
+            <a class="primary-action compact" href="/cloud" data-cloud-open>Open Cloud Console</a>
+            <a class="secondary-action compact" href="/cloud/signout" data-cloud-signout>Disconnect</a>
+          </div>
         </div>
       </div>
     </section>
