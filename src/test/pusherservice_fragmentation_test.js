@@ -295,6 +295,68 @@ runTest("small console payloads stay as a single bearer message", function() {
    assert.strictEqual(harness.sent[0].body.message, "message");
 });
 
+runTest("pusher send failures include details and suppress repeated log noise", function() {
+   var service = Object.create(PusherService.prototype);
+   var oldConsoleError = console.error;
+   var logs = [];
+   var error = new Error("Unexpected status code 413");
+
+   error.name = "PusherRequestError";
+   error.status = 413;
+   error.body = "Payload too large";
+
+   service.uName = ":pusher-service-test";
+   service.pusherSendFailures = {};
+   service.pusherSendFailureLogIntervalMs = 60000;
+   console.error = function() {
+      logs.push(Array.prototype.slice.call(arguments).join(" "));
+   };
+
+   try {
+      service.logPusherSendFailure("message-channel_v2_test", "message", {
+         id: "socket-1",
+         route: "/consoleapi/io",
+         message: "message",
+         messageData: {
+            message: "execute-output"
+         }
+      }, error);
+      service.logPusherSendFailure("message-channel_v2_test", "message", {
+         id: "socket-1",
+         route: "/consoleapi/io",
+         message: "message",
+         messageData: {
+            message: "execute-output"
+         }
+      }, error);
+
+      assert.strictEqual(logs.length, 1);
+      assert.ok(logs[0].indexOf("Unexpected status code 413") >= 0);
+      assert.ok(logs[0].indexOf("status=413") >= 0);
+      assert.ok(logs[0].indexOf("Payload too large") >= 0);
+      assert.ok(logs[0].indexOf("bodyBytes=") >= 0);
+      assert.ok(logs[0].indexOf("route=/consoleapi/io") >= 0);
+      assert.ok(logs[0].indexOf("appMessage=execute-output") >= 0);
+
+      var key = Object.keys(service.pusherSendFailures)[0];
+      service.pusherSendFailures[key].lastLoggedAt = Date.now() - 60001;
+
+      service.logPusherSendFailure("message-channel_v2_test", "message", {
+         __casaPusherFragment: true,
+         fragmentIndex: 1,
+         fragmentCount: 3,
+         fragmentId: "socket-1:fragment"
+      }, error);
+
+      assert.strictEqual(logs.length, 2);
+      assert.ok(logs[1].indexOf("suppressed 1 similar failures") >= 0);
+      assert.ok(logs[1].indexOf("fragment=2/3") >= 0);
+   }
+   finally {
+      console.error = oldConsoleError;
+   }
+});
+
 runTest("canonical pusher channel names keep colon-separated addresses distinct", function() {
    var harness = createTransportHarness();
 

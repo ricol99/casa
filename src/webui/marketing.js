@@ -10,6 +10,8 @@
   var pusherCopy = document.querySelector('[data-pusher-copy]');
   var pusherStatus = document.querySelector('[data-pusher-status]');
   var pusherSummary = document.querySelector('[data-pusher-summary]');
+  var runtimeGang = document.querySelector('[data-runtime-gang]');
+  var gangShort = document.querySelector('[data-gang-short]');
   var cloudSignupPanel = document.querySelector('[data-cloud-signup-panel]');
   var cloudManagePanel = document.querySelector('[data-cloud-manage-panel]');
   var cloudTitle = document.querySelector('[data-cloud-title]');
@@ -89,17 +91,6 @@
     return account;
   }
 
-  function cloudAccountFromGangOrganisation(value) {
-    if (!value) {
-      return null;
-    }
-
-    return normaliseCloudAccount({
-      name: value,
-      organisation: value
-    });
-  }
-
   function setPusherNote(message) {
     if (pusherNote) {
       pusherNote.textContent = message || '';
@@ -121,27 +112,27 @@
     var configured = !!(config && config.configured);
 
     if (pusherTitle) {
-      pusherTitle.textContent = configured ? 'Pusher remote access is configured.' : 'Add the Pusher account for this gang.';
+      pusherTitle.textContent = configured ? 'Private remote access is configured.' : 'Add private remote access for this gang.';
     }
 
     if (pusherCopy) {
       pusherCopy.textContent = configured ?
-        'Pusher credentials are saved in the gang services collection as the pusher-service definition.' :
-        'Pusher is required for free runtime remote access. Credentials are stored in the gang services collection as the pusher-service definition.';
+        'Credentials are saved in this gang\'s private access service definition.' :
+        'The free runtime uses your own access credentials to enable monitoring, support, and recovery.';
     }
 
     if (pusherStatus) {
-      pusherStatus.textContent = configured ? 'Pusher is configured.' : 'Pusher is not configured.';
+      pusherStatus.textContent = configured ? 'Private remote access is configured.' : 'Private remote access is not configured.';
     }
 
     if (pusherSummary) {
       pusherSummary.textContent = configured ?
         'App ID ' + (config.appId || '-') + ', key ' + (config.key || '-') + ', cluster ' + (config.cluster || '-') + '. Restart the runtime after changes if the service is already running.' :
-        'Remote access is waiting for the Pusher account details.';
+        'Private remote access is waiting for account details.';
     }
 
     if (runtimeAction) {
-      runtimeAction.textContent = configured ? 'Open Runtime Console' : 'Configure Pusher';
+      runtimeAction.textContent = configured ? 'Open Runtime Console' : 'Configure Private Access';
       runtimeAction.setAttribute('href', configured ? '/webui/index.html' : '#remote-access');
     }
 
@@ -154,7 +145,24 @@
     }
   }
 
-  function renderCloudAccount(account, source) {
+  function renderGangName(gangName) {
+    if (!gangName) {
+      return;
+    }
+
+    if (runtimeGang) {
+      runtimeGang.textContent = gangName;
+      runtimeGang.setAttribute('title', gangName);
+    }
+
+    if (gangShort) {
+      gangShort.textContent = gangName.length > 12 ? gangName.slice(0, 11) + '...' : gangName;
+      gangShort.setAttribute('title', gangName);
+    }
+
+  }
+
+  function renderCloudAccount(account) {
     var connected = !!account;
 
     if (cloudSignupPanel) {
@@ -171,8 +179,8 @@
 
     if (cloudCopy) {
       cloudCopy.textContent = connected ?
-        'Organisation details are shown here for status only. Use the hosted cloud console for people, billing, monitoring, installers, and multi-gang management.' :
-        'The runtime console does not require an organisation. Create a paid cloud organisation when you want shared management across gangs, installers, relatives, monitoring users, and alerts.';
+        'Use the hosted cloud console for people, billing, monitoring, installers, and multi-gang management.' :
+        'Create a paid cloud account when you want shared management across gangs, installers, relatives, monitoring users, and alerts.';
     }
 
     if (!connected) {
@@ -184,9 +192,7 @@
     }
 
     if (cloudStatus) {
-      cloudStatus.textContent = source === 'gang' ?
-        'Cloud organisation is recorded for this gang.' :
-        'Cloud account session is stored in this browser.';
+      cloudStatus.textContent = 'Cloud account session is stored in this browser.';
     }
 
     if (cloudOrganisation) {
@@ -217,7 +223,7 @@
   function loadRuntimeState() {
     if (typeof io !== 'function') {
       renderPusher(null);
-      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()), 'browser');
+      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()));
       return;
     }
 
@@ -226,22 +232,12 @@
     });
 
     function loadCloudAccount() {
-      executeCommand(socket, {
-        obj: ':',
-        method: 'organisation',
-        arguments: []
-      }, function (payload) {
-        var account = normaliseCloudAccount(getStoredCloudAccount());
-
-        if (!account && payload && payload.ok && payload.result) {
-          account = cloudAccountFromGangOrganisation(payload.result.organisation);
-        }
-
-        renderCloudAccount(account, account ? (payload && payload.ok && payload.result && payload.result.organisation ? 'gang' : 'browser') : null);
-      });
+      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()));
     }
 
     socket.on('connect', function () {
+      socket.emit('getWebUiStatus', {});
+
       executeCommand(socket, {
         obj: ':',
         method: 'pusher',
@@ -255,6 +251,10 @@
 
         loadCloudAccount();
       });
+    });
+
+    socket.on('webui-status', function (payload) {
+      renderGangName(payload && payload.gangName ? payload.gangName : null);
     });
 
     socket.on('execute-output', function (payload) {
@@ -271,7 +271,7 @@
 
     socket.on('connect_error', function () {
       renderPusher(null);
-      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()), 'browser');
+      renderCloudAccount(normaliseCloudAccount(getStoredCloudAccount()));
     });
   }
 
@@ -282,7 +282,7 @@
     values = readPusherForm();
 
     if (!values.appId || !values.key || !values.secret || !values.cluster) {
-      setPusherNote('Enter all Pusher credentials.');
+      setPusherNote('Enter all private access credentials.');
       return;
     }
 
@@ -291,7 +291,7 @@
       return;
     }
 
-    setPusherNote('Saving Pusher details...');
+    setPusherNote('Saving private access details...');
     executeCommand(socket, {
       obj: ':',
       method: 'pusher',
@@ -304,11 +304,11 @@
       ]
     }, function (payload) {
       if (!payload || !payload.ok) {
-        setPusherNote((payload && payload.error) ? String(payload.error) : 'Unable to save Pusher details.');
+        setPusherNote((payload && payload.error) ? String(payload.error) : 'Unable to save private access details.');
         return;
       }
 
-      setPusherNote(payload.result && payload.result.restartRequired ? 'Saved. Restart the runtime for the running Pusher service to use the new credentials.' : 'Saved.');
+      setPusherNote(payload.result && payload.result.restartRequired ? 'Saved. Restart the runtime for the running private access service to use the new credentials.' : 'Saved.');
       renderPusher(payload.result);
     });
   }

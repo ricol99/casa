@@ -133,11 +133,11 @@ main,
 
 .hero {
   display: grid;
-  min-height: min(720px, calc(100vh - 78px));
+  min-height: min(610px, calc(100vh - 140px));
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   gap: 44px;
-  align-items: center;
-  padding: 28px 0 38px;
+  align-items: start;
+  padding: 54px 0 24px;
 }
 
 .hero-visual {
@@ -168,7 +168,7 @@ main,
 h1 {
   margin: 0;
   max-width: 800px;
-  font-size: clamp(40px, 6.2vw, 76px);
+  font-size: clamp(35px, 5.25vw, 62px);
   line-height: 0.93;
   letter-spacing: 0;
   font-weight: 850;
@@ -177,7 +177,7 @@ h1 {
 .hero-copy {
   max-width: 650px;
   margin: 22px 0 0;
-  font-size: 19px;
+  font-size: 18px;
 }
 
 .hero-actions {
@@ -253,9 +253,13 @@ h1 {
 
 .board-title {
   margin-left: auto;
+  max-width: 58%;
+  overflow: hidden;
   color: rgba(239, 247, 247, 0.66);
   font-size: 13px;
   font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fleet-grid {
@@ -266,7 +270,7 @@ h1 {
 }
 
 .fleet-panel {
-  min-height: 138px;
+  min-height: 150px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.07);
@@ -316,74 +320,107 @@ h1 {
 
 .panel-map {
   position: relative;
-  min-height: 190px;
+  min-height: 220px;
+  --node-main-x: 50%;
+  --node-main-y: 52%;
+  --node-a-x: 24%;
+  --node-a-y: 28%;
+  --node-b-x: 82%;
+  --node-b-y: 30%;
+  --node-c-x: 33%;
+  --node-c-y: 82%;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
     linear-gradient(0deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
+.map-links,
 .map-node,
-.map-line {
+.map-pulse {
   position: absolute;
   display: block;
 }
 
+.map-links {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.map-links line {
+  stroke: rgba(183, 227, 94, 0.42);
+  stroke-width: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+
 .map-node {
+  --node-size: 16px;
   width: 16px;
   height: 16px;
   border-radius: 999px;
   background: var(--lime);
   box-shadow: 0 0 0 6px rgba(183, 227, 94, 0.12);
+  animation: node-breathe 4.8s ease-in-out infinite;
+  transform: translate(-50%, -50%);
 }
 
 .map-node.main {
-  top: 48%;
-  left: 48%;
+  top: var(--node-main-y);
+  left: var(--node-main-x);
+  --node-size: 21px;
   width: 21px;
   height: 21px;
+  animation-delay: -1.2s;
 }
 
 .map-node.node-a {
-  top: 24%;
-  left: 22%;
+  top: var(--node-a-y);
+  left: var(--node-a-x);
+  animation-delay: -2.4s;
 }
 
 .map-node.node-b {
-  top: 28%;
-  right: 18%;
+  top: var(--node-b-y);
+  left: var(--node-b-x);
+  animation-delay: -3.2s;
 }
 
 .map-node.node-c {
-  bottom: 18%;
-  left: 30%;
+  top: var(--node-c-y);
+  left: var(--node-c-x);
+  animation-delay: -0.8s;
 }
 
-.map-line {
-  height: 1px;
-  background: rgba(183, 227, 94, 0.42);
-  transform-origin: left center;
+.map-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #efffbd;
+  box-shadow: 0 0 14px rgba(183, 227, 94, 0.78);
+  opacity: 0;
+  transform: translate(-50%, -50%);
 }
 
-.line-a {
-  top: 34%;
-  left: 27%;
-  width: 34%;
-  transform: rotate(24deg);
+.pulse-a {
+  top: var(--node-a-y);
+  left: var(--node-a-x);
+  animation: pulse-a 4.6s ease-in-out infinite;
 }
 
-.line-b {
-  top: 42%;
-  left: 52%;
-  width: 27%;
-  transform: rotate(-24deg);
+.pulse-b {
+  top: var(--node-main-y);
+  left: var(--node-main-x);
+  animation: pulse-b 5.2s ease-in-out infinite;
+  animation-delay: -1.6s;
 }
 
-.line-c {
-  bottom: 34%;
-  left: 35%;
-  width: 28%;
-  transform: rotate(-34deg);
+.pulse-c {
+  top: var(--node-c-y);
+  left: var(--node-c-x);
+  animation: pulse-c 5.8s ease-in-out infinite;
+  animation-delay: -3s;
 }
 
 .panel-list p {
@@ -627,6 +664,99 @@ h1 {
   border-top: 1px solid var(--line);
   padding: 18px 0 28px;
   font-size: 14px;
+}
+
+@keyframes node-breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 6px rgba(183, 227, 94, 0.12);
+  }
+
+  50% {
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 10px rgba(183, 227, 94, 0.2), 0 0 22px rgba(183, 227, 94, 0.3);
+  }
+}
+
+@keyframes pulse-a {
+  0%,
+  22% {
+    opacity: 0;
+    top: var(--node-a-y);
+    left: var(--node-a-x);
+    transform: translate(-50%, -50%);
+  }
+
+  32%,
+  58% {
+    opacity: 1;
+  }
+
+  72%,
+  100% {
+    opacity: 0;
+    top: var(--node-main-y);
+    left: var(--node-main-x);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes pulse-b {
+  0%,
+  18% {
+    opacity: 0;
+    top: var(--node-main-y);
+    left: var(--node-main-x);
+    transform: translate(-50%, -50%);
+  }
+
+  30%,
+  60% {
+    opacity: 1;
+  }
+
+  76%,
+  100% {
+    opacity: 0;
+    top: var(--node-b-y);
+    left: var(--node-b-x);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes pulse-c {
+  0%,
+  16% {
+    opacity: 0;
+    top: var(--node-c-y);
+    left: var(--node-c-x);
+    transform: translate(-50%, -50%);
+  }
+
+  30%,
+  62% {
+    opacity: 1;
+  }
+
+  78%,
+  100% {
+    opacity: 0;
+    top: var(--node-main-y);
+    left: var(--node-main-x);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-node,
+  .map-pulse {
+    animation: none;
+  }
+
+  .map-pulse {
+    display: none;
+  }
 }
 
 @media (max-width: 940px) {

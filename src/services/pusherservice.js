@@ -20,6 +20,8 @@ function PusherService(_config, _owner) {
 
    this.subscribers = {};
    this.routes = {};
+   this.pusherSendFailures = {};
+   this.pusherSendFailureLogIntervalMs = _config.pusherSendFailureLogIntervalMs || 60000;
 }
 
 util.inherits(PusherService, Service);
@@ -97,13 +99,114 @@ PusherService.prototype.start = function() {
 PusherService.prototype.sendMessage = function(_channel, _message, _body) {
 
    try {
-      this.pusherServer.trigger(_channel, _message, _body).catch( (_error) => {
-         console.error(this.uName + ": Unable to send message to pusher channel "+ _channel);
+      this.pusherServer.trigger(_channel, _message, _body).catch((_error) => {
+         this.logPusherSendFailure(_channel, _message, _body, _error);
       });
    }
    catch (_error) {
-      console.error(this.uName + ": Unable to publish message on channel "+_channel +", error="+_error);
+      this.logPusherSendFailure(_channel, _message, _body, _error);
    }
+};
+
+PusherService.prototype.pusherSendBodyBytes = function(_body) {
+
+   try {
+      return Buffer.byteLength(JSON.stringify(_body), "utf8");
+   }
+   catch (_error) {
+      return null;
+   }
+};
+
+PusherService.prototype.pusherSendBodyContext = function(_body) {
+   var context = [];
+
+   if (!_body || (typeof _body !== "object")) {
+      return "";
+   }
+
+   if (_body.route) {
+      context.push("route=" + _body.route);
+   }
+
+   if (_body.id) {
+      context.push("socketId=" + _body.id);
+   }
+
+   if (_body.message) {
+      context.push("socketMessage=" + _body.message);
+   }
+
+   if (_body.messageData && _body.messageData.message) {
+      context.push("appMessage=" + _body.messageData.message);
+   }
+
+   if (_body.__casaPusherFragment) {
+      context.push("fragment=" + (_body.fragmentIndex + 1) + "/" + _body.fragmentCount);
+      context.push("fragmentId=" + _body.fragmentId);
+   }
+
+   return context.length ? ", " + context.join(", ") : "";
+};
+
+PusherService.prototype.pusherSendErrorDetail = function(_error) {
+
+   if (!_error) {
+      return "no error detail";
+   }
+
+   var detail = _error.message ? _error.message : String(_error);
+
+   if (_error.status) {
+      detail = detail + ", status=" + _error.status;
+   }
+
+   if (_error.body) {
+      detail = detail + ", body=" + String(_error.body).slice(0, 500);
+   }
+
+   if (_error.error) {
+      detail = detail + ", cause=" + (_error.error.message ? _error.error.message : String(_error.error));
+   }
+
+   return detail;
+};
+
+PusherService.prototype.pusherSendFailureKey = function(_channel, _message, _error) {
+   var status = (_error && _error.status) ? _error.status : "no-status";
+   var errorName = (_error && _error.name) ? _error.name : "Error";
+   var errorMessage = (_error && _error.message) ? _error.message : String(_error);
+
+   return _channel + ":" + _message + ":" + errorName + ":" + status + ":" + errorMessage;
+};
+
+PusherService.prototype.logPusherSendFailure = function(_channel, _message, _body, _error) {
+   var key = this.pusherSendFailureKey(_channel, _message, _error);
+   var now = Date.now();
+   var failure = this.pusherSendFailures[key];
+
+   if (!failure) {
+      failure = {
+         lastLoggedAt: 0,
+         suppressed: 0
+      };
+      this.pusherSendFailures[key] = failure;
+   }
+
+   if ((now - failure.lastLoggedAt) < this.pusherSendFailureLogIntervalMs) {
+      failure.suppressed = failure.suppressed + 1;
+      return;
+   }
+
+   var suppressedText = failure.suppressed ? " (suppressed " + failure.suppressed + " similar failures)" : "";
+   var bodyBytes = this.pusherSendBodyBytes(_body);
+   var bodyText = (bodyBytes === null) ? "" : ", bodyBytes=" + bodyBytes;
+   var bodyContext = this.pusherSendBodyContext(_body);
+
+   console.error(this.uName + ": Unable to send pusher message " + _message + " to channel " + _channel + suppressedText + bodyText + bodyContext + ", error=" + this.pusherSendErrorDetail(_error));
+
+   failure.lastLoggedAt = now;
+   failure.suppressed = 0;
 };
 
 function Subscriber(_data, _owner) {

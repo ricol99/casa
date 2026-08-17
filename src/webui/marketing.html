@@ -19,7 +19,7 @@
     <nav class="nav-links" aria-label="Page sections">
       <a href="#operations">Operations</a>
       <a href="#model">Model</a>
-      <a href="#remote-access">Remote Access</a>
+      <a href="#remote-access">Private Access</a>
       <a href="#cloud-account">Cloud Account</a>
     </nav>
   </header>
@@ -32,12 +32,12 @@
             <span class="window-dot"></span>
             <span class="window-dot muted"></span>
             <span class="window-dot muted"></span>
-            <span class="board-title">Runtime overview</span>
+            <span class="board-title" data-runtime-gang>Runtime overview</span>
           </div>
           <div class="fleet-grid">
             <div class="fleet-panel panel-wide">
-              <span class="panel-label">Remote access</span>
-              <strong>Pusher</strong>
+              <span class="panel-label">Private access</span>
+              <strong data-gang-short>Ready</strong>
               <div class="status-row"><span></span><span></span><span></span><span></span><span></span></div>
             </div>
             <div class="fleet-panel">
@@ -48,22 +48,27 @@
             <div class="fleet-panel alert-panel">
               <span class="panel-label">Attention</span>
               <strong>2</strong>
-              <small>Transport fallback active</small>
+              <small>Support checks queued</small>
             </div>
             <div class="fleet-panel panel-map">
+              <svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+                <line x1="24" y1="28" x2="50" y2="52"></line>
+                <line x1="50" y1="52" x2="82" y2="30"></line>
+                <line x1="33" y1="82" x2="50" y2="52"></line>
+              </svg>
               <span class="map-node main"></span>
               <span class="map-node node-a"></span>
               <span class="map-node node-b"></span>
               <span class="map-node node-c"></span>
-              <span class="map-line line-a"></span>
-              <span class="map-line line-b"></span>
-              <span class="map-line line-c"></span>
+              <span class="map-pulse pulse-a"></span>
+              <span class="map-pulse pulse-b"></span>
+              <span class="map-pulse pulse-c"></span>
             </div>
             <div class="fleet-panel panel-list">
               <span class="panel-label">Recent events</span>
               <p><span class="ok"></span> Farm gate synced backup</p>
               <p><span class="ok"></span> Workshop casa recovered</p>
-              <p><span class="warn"></span> Studio using relay path</p>
+              <p><span class="warn"></span> Studio requested support</p>
             </div>
           </div>
         </div>
@@ -71,12 +76,12 @@
 
       <div class="hero-content">
         <p class="eyebrow">Casa-served. Local-first.</p>
-        <h1 id="hero-title">Run this Casa gang locally, with remote access ready from day one.</h1>
+        <h1 id="hero-title">Run this Casa gang locally, with private remote access ready from day one.</h1>
         <p class="hero-copy">
-          The runtime console configures this gang and stores its Pusher credentials in the gang service definition. Cloud organisation tools are available when you need paid multi-gang management.
+          The runtime console gets this gang online, visible, backed up, and ready for support. Casa Cloud adds paid multi-gang management, monitoring, installers, and shared access when you need it.
         </p>
         <div class="hero-actions">
-          <a class="primary-action" href="#remote-access" data-runtime-action>Checking Pusher</a>
+          <a class="primary-action" href="#remote-access" data-runtime-action>Checking Private Access</a>
         </div>
       </div>
     </section>
@@ -87,12 +92,12 @@
         <span>Casa keeps executing on site.</span>
       </div>
       <div>
-        <strong>Transports add reach</strong>
-        <span>Use Pusher for remote access, with LAN and future bearers alongside it.</span>
+        <strong>Private support is ready</strong>
+        <span>Enable private access for monitoring, support, and recovery without moving automation into the cloud.</span>
       </div>
       <div>
-        <strong>Ops become visible</strong>
-        <span>Status, backups, transport health, and support.</span>
+        <strong>Backups stay close</strong>
+        <span>The machine running the console keeps the local backup, so recovery starts on site.</span>
       </div>
     </section>
 
@@ -101,19 +106,19 @@
       <div class="section-head">
         <h2>One console for the work around Casa.</h2>
         <p>
-          The runtime console manages this gang, transport reachability, backups, and support access without becoming the automation authority.
+          The runtime console manages this gang, reachability, backups, and support access without becoming the automation authority.
         </p>
       </div>
       <div class="feature-grid">
         <article class="feature">
           <span class="feature-code">01</span>
           <h3>Gang and casa health</h3>
-          <p>Track availability, version drift, transport status, and last-seen signals for the local gang.</p>
+          <p>Track availability, version drift, access status, and last-seen signals for the local gang.</p>
         </article>
         <article class="feature">
           <span class="feature-code">02</span>
-          <h3>Pusher setup</h3>
-          <p>Make the mandatory remote-access credentials feel like a product workflow rather than an infrastructure chore.</p>
+          <h3>Private remote access</h3>
+          <p>Turn private monitoring and support access into a guided setup flow instead of an infrastructure chore.</p>
         </article>
         <article class="feature">
           <span class="feature-code">03</span>
@@ -135,28 +140,28 @@
         <div class="section-kicker">Product Model</div>
         <h2>Local runtime first, cloud organisation when you need one.</h2>
         <p>
-          The console coordinates this gang through Casa transports. It does not become the automation authority. A cloud organisation adds coordination for multiple gangs, people, and monitoring.
+          The console coordinates this gang through local and private remote access paths. It does not become the automation authority. A cloud organisation adds coordination for multiple gangs, people, and monitoring.
         </p>
       </div>
       <div class="model-steps" aria-label="Casa management model">
         <div><span>1</span><strong>Casa</strong><p>Runs automation locally.</p></div>
-        <div><span>2</span><strong>Pusher</strong><p>Provides remote reach for the free runtime.</p></div>
+        <div><span>2</span><strong>Private access</strong><p>Provides reach for setup, support, and recovery through your own access account.</p></div>
         <div><span>3</span><strong>Cloud organisation</strong><p>Unlocks multi-gang coordination when needed.</p></div>
       </div>
     </section>
 
     <section class="section access-section" id="remote-access">
-      <div class="section-kicker">Remote Access</div>
+      <div class="section-kicker">Private Access</div>
       <div class="section-head">
-        <h2 data-pusher-title>Add the Pusher account for this gang.</h2>
+        <h2 data-pusher-title>Add private remote access for this gang.</h2>
         <p data-pusher-copy>
-          Pusher is required for free runtime remote access. Credentials are stored in the gang services collection as the pusher-service definition.
+          The free runtime uses your own access credentials to enable monitoring, support, and recovery.
         </p>
       </div>
       <div class="access-panel">
         <div data-pusher-panel>
-          <strong data-pusher-status>Pusher is not configured.</strong>
-          <span data-pusher-summary>Remote access is waiting for the Pusher account details.</span>
+          <strong data-pusher-status>Private remote access is not configured.</strong>
+          <span data-pusher-summary>Private remote access is waiting for account details.</span>
           <form class="runtime-form" data-pusher-form>
             <label>
               <span>Pusher app ID</span>
@@ -175,7 +180,7 @@
               <input type="text" name="cluster" placeholder="eu" autocomplete="off" required>
             </label>
             <div class="form-actions wide">
-              <button class="primary-action compact" type="submit">Save Pusher Details</button>
+              <button class="primary-action compact" type="submit">Save Private Access</button>
               <span class="form-note" data-pusher-note aria-live="polite"></span>
             </div>
           </form>
@@ -221,7 +226,7 @@
 
   <footer class="site-footer">
     <span>Casa Management Console</span>
-    <span>Local-first management over Casa transports.</span>
+    <span>Local-first management with remote support when needed.</span>
   </footer>
 
   <script src="/socket.io/socket.io.js"></script>

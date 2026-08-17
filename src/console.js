@@ -1275,6 +1275,7 @@ function RemoteCasa(_config, _owner) {
    this.connected = false;
    this.connecting = false;
    this.reconnectDelayMs = _config.reconnectDelayMs ? _config.reconnectDelayMs : 5000;
+   this.transportUpgradeDelayMs = _config.transportUpgradeDelayMs ? _config.transportUpgradeDelayMs : 3000;
    this.reconnectTimer = null;
    this.autoReconnectEnabled = _config.hasOwnProperty("autoReconnect") ? !!_config.autoReconnect : true;
    this.allowAutoReconnect = this.autoReconnectEnabled;
@@ -1329,6 +1330,20 @@ RemoteCasa.prototype.requestAutoDbSync = function() {
 
    this.autoDbSyncRequested = true;
    this.owner.syncDbsFromCasa(this);
+};
+
+RemoteCasa.prototype.discoveryTierValue = function(_tier) {
+   return (typeof _tier === "number") ? _tier : Number.MAX_SAFE_INTEGER;
+};
+
+RemoteCasa.prototype.discoveryParamsAreBetter = function(_params) {
+   return _params && (this.discoveryTierValue(_params.tier) < this.discoveryTierValue(this.discoveryTier));
+};
+
+RemoteCasa.prototype.applyDiscoveryParams = function(_params) {
+   this.address = _params.address;
+   this.messageTransportName = _params.messageTransportName;
+   this.discoveryTier = _params.tier;
 };
 
 RemoteCasa.prototype.start = function()  {
@@ -1500,18 +1515,16 @@ RemoteCasa.prototype.start = function()  {
 
 RemoteCasa.prototype.reconnect = function(_params) {
 
-   if ((this.connecting || this.connected) && (_params.tier < this.discoveryTier)) {
+   if ((this.connecting || this.connected) && this.discoveryParamsAreBetter(_params)) {
       this.disconnect({ disableAutoReconnect: true });
 
       util.setTimeout( () => {
          this.allowAutoReconnect = this.autoReconnectEnabled;
          this.reconnect(_params);
-      }, 3000);
+      }, this.transportUpgradeDelayMs);
    }
    else if (!this.connecting && !this.connected) { 
-      this.address = _params.address;
-      this.messageTransportName = _params.messageTransportName;
-      this.discoveryTier = _params.tier;
+      this.applyDiscoveryParams(_params);
       this.allowAutoReconnect = this.autoReconnectEnabled;
       this.start();
    }

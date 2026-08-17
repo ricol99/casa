@@ -623,6 +623,40 @@ runTest("RemoteCasa executes parsed command after normal connect", function() {
    ]);
 });
 
+runTest("RemoteCasa treats LAN discovery as better than an unknown tier", function() {
+   var remoteCasa = new RemoteCasa({
+      name: ":casa-console",
+      address: "gang-casa://gang-collin/:casa-console",
+      messageTransportName: "pusher",
+      autoDbSync: false,
+      requestCasaInfo: false,
+      subscribeLiveUpdates: false
+   }, {
+      secureMode: false,
+      gang: {
+         casa: {
+            mainWebService: {}
+         }
+      }
+   });
+
+   assert.strictEqual(remoteCasa.discoveryParamsAreBetter({
+      address: { host: "casa-console.local", port: 8999 },
+      messageTransportName: "http",
+      tier: 1
+   }), true);
+
+   remoteCasa.applyDiscoveryParams({
+      address: { host: "casa-console.local", port: 8999 },
+      messageTransportName: "http",
+      tier: 1
+   });
+
+   assert.deepStrictEqual(remoteCasa.address, { host: "casa-console.local", port: 8999 });
+   assert.strictEqual(remoteCasa.messageTransportName, "http");
+   assert.strictEqual(remoteCasa.discoveryTier, 1);
+});
+
 runTest("web ui gang organisation command works through offline casa", function() {
    function FakeGangConsoleCmd() {
    }
