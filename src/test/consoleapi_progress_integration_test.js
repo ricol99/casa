@@ -136,3 +136,53 @@ runAsyncTest("executeCommand streams preview progress via output before final ex
       _done();
    });
 });
+
+runAsyncTest("executeCommand echoes requestId for correlated remote console responses", function(_done) {
+   var ConsoleApiSession = ConsoleApiService.__testExports.ConsoleApiSession;
+   var socket = createFakeSocket();
+   function FakeGangConsoleApi() {}
+
+   FakeGangConsoleApi.prototype.ping = function(_session, _params, _callback) {
+      return _callback(null, { ok: true });
+   };
+
+   FakeGangConsoleApi.prototype.sessionClosed = function() {};
+
+   var owner = {
+      sessions: {},
+      uName: ":console-api-service-test",
+      gang: {
+         findNamedObject: function(_uName) {
+            return (_uName === ":gang") ? { uName: _uName } : null;
+         }
+      },
+      findOrCreateConsoleApiObject: function() {
+         return apiObject;
+      }
+   };
+   var apiObject = new FakeGangConsoleApi();
+   apiObject.uName = ":gang";
+
+   var session = new ConsoleApiSession("test-session-request-id", null, owner);
+   owner.sessions[session.name] = session;
+   session.serveClient(socket);
+
+   socket.trigger("executeCommand", { requestId: "request-1", obj: ":gang", method: "ping", arguments: [] });
+
+   setImmediate(function() {
+      try {
+         var executeOutputs = socket.emissions.filter( (_item) => _item.event === "execute-output" );
+
+         assert.strictEqual(executeOutputs.length, 1);
+         assert.deepStrictEqual(executeOutputs[0].payload, {
+            requestId: "request-1",
+            result: { ok: true }
+         });
+      }
+      catch (_err) {
+         return _done(_err);
+      }
+
+      _done();
+   });
+});

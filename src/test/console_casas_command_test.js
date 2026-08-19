@@ -612,15 +612,84 @@ runTest("RemoteCasa executes parsed command after normal connect", function() {
 
    assert.deepStrictEqual(emitted, [
       { event: "getCasaInfo", data: undefined },
-      {
-         event: "executeCommand",
-         data: {
-            obj: ":unregistered-aa-bb-cc",
-            method: "claimUnregisteredCasa",
-            arguments: [ { casaName: "kitchen" } ]
+	      {
+	         event: "executeCommand",
+	         data: {
+	            obj: ":unregistered-aa-bb-cc",
+	            method: "claimUnregisteredCasa",
+	            arguments: [ { casaName: "kitchen" } ],
+	            requestId: emitted[1].data.requestId
+	         }
+	      }
+	   ]);
+   assert.ok(emitted[1].data.requestId);
+   assert.strictEqual(Object.keys(remoteCasa.pendingConsoleRequests).length, 0);
+});
+
+runTest("RemoteCasa correlates overlapping extractScope responses by request id", function() {
+   var handlers = {};
+   var emitted = [];
+   var callbacks = [];
+   var socket = {
+      on: function(_event, _handler) {
+         handlers[_event] = _handler;
+      },
+      emit: function(_event, _data) {
+         emitted.push({ event: _event, data: _data });
+      },
+      disconnect: function() {
+         this.disconnected = true;
+      }
+   };
+   var remoteCasa = new RemoteCasa({
+      name: ":remote",
+      address: { host: "pi.local", port: 8999 },
+      messageTransportName: "pusher",
+      autoDbSync: false,
+      requestCasaInfo: false,
+      subscribeLiveUpdates: false
+   }, {
+      secureMode: false,
+      currentScope: ":",
+      gang: {
+         casa: {
+            mainWebService: {
+               newIoSocket: function() {
+                  return socket;
+               }
+            }
          }
       }
+   });
+
+   remoteCasa.start();
+   handlers.connect();
+   remoteCasa.extractScope(":", function(_err, _result) {
+      callbacks.push({ name: "first", err: _err, result: _result });
+   }, ":");
+   remoteCasa.extractScope(":", function(_err, _result) {
+      callbacks.push({ name: "second", err: _err, result: _result });
+   }, ":");
+
+   var firstRequest = emitted[0].data;
+   var secondRequest = emitted[1].data;
+
+   assert.notStrictEqual(firstRequest.requestId, secondRequest.requestId);
+
+   handlers["extract-scope-output"]({
+      requestId: secondRequest.requestId,
+      result: { matchingScopes: [ "second:" ], remainingStr: "" }
+   });
+   handlers["extract-scope-output"]({
+      requestId: firstRequest.requestId,
+      result: { matchingScopes: [ "first:" ], remainingStr: "" }
+   });
+
+   assert.deepStrictEqual(callbacks, [
+      { name: "second", err: null, result: { matchingScopes: [ "second:" ], remainingStr: "" } },
+      { name: "first", err: null, result: { matchingScopes: [ "first:" ], remainingStr: "" } }
    ]);
+   assert.strictEqual(Object.keys(remoteCasa.pendingConsoleRequests).length, 0);
 });
 
 runTest("RemoteCasa treats LAN discovery as better than an unknown tier", function() {

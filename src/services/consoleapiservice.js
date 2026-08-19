@@ -195,7 +195,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('extract-tree-output', _result);
+         this.emitCommandResponse('extract-tree-output', _data, _result);
       });
    });
 
@@ -205,7 +205,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('scope-exists-output', _result);
+         this.emitCommandResponse('scope-exists-output', _data, _result);
       });
    });
 
@@ -215,7 +215,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('extract-scope-output', { result: _result });
+         this.emitCommandResponse('extract-scope-output', _data, _result);
       });
    });
 
@@ -225,7 +225,7 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          if (_err) {
             _result = _err;
          }
-         this.socket.emit('execute-output', { result: _result });
+         this.emitCommandResponse('execute-output', _data, _result);
       });
    });
 
@@ -253,6 +253,21 @@ ConsoleApiSession.prototype.serveClient = function(_socket) {
          this.sessionClosed();
       }
    });
+};
+
+ConsoleApiSession.prototype.emitCommandResponse = function(_eventName, _requestData, _result) {
+
+   if (_requestData && _requestData.hasOwnProperty("requestId")) {
+      this.socket.emit(_eventName, { requestId: _requestData.requestId, result: _result });
+      return;
+   }
+
+   if ((_eventName === 'extract-tree-output') || (_eventName === 'scope-exists-output')) {
+      this.socket.emit(_eventName, _result);
+   }
+   else {
+      this.socket.emit(_eventName, { result: _result });
+   }
 };
 
 ConsoleApiSession.prototype.dbInfoForDb = function(_db) {

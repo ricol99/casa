@@ -1287,6 +1287,8 @@ function RemoteCasa(_config, _owner) {
    this.dbInfoReady = false;
    this.gangDbInfoReady = false;
    this.autoDbSyncRequested = false;
+   this.nextConsoleRequestId = 0;
+   this.pendingConsoleRequests = {};
 }
 
 util.inherits(RemoteCasa, AsyncEmitter);
@@ -1458,31 +1460,27 @@ RemoteCasa.prototype.start = function()  {
    });
 
    this.socket.on('extract-tree-output', (_data) => {
-
-      if (this.extractTreeCallback) {
-         this.extractTreeCallback(null, _data);
-      }
+      this.completeConsoleRequest(_data, "extractTreeCallback", (_response) => {
+         return (_response && _response.hasOwnProperty("result")) ? _response.result : _response;
+      });
    });
 
    this.socket.on('scope-exists-output', (_data) => {
-
-      if (this.scopeExistsCallback) {
-         this.scopeExistsCallback(null, _data);
-      }
+      this.completeConsoleRequest(_data, "scopeExistsCallback", (_response) => {
+         return (_response && _response.hasOwnProperty("result")) ? _response.result : _response;
+      });
    });
 
    this.socket.on('extract-scope-output', (_data) => {
-
-      if (this.extractScopeCallback) {
-         this.extractScopeCallback(null, _data.result);
-      }
+      this.completeConsoleRequest(_data, "extractScopeCallback", (_response) => {
+         return _response ? _response.result : _response;
+      });
    });
 
    this.socket.on('execute-output', (_data) => {
-
-      if (this.executeCallback) {
-         this.executeCallback(null, _data.result);
-      }
+      this.completeConsoleRequest(_data, "executeCallback", (_response) => {
+         return _response ? _response.result : _response;
+      });
    });
 
    this.socket.on('disconnect', (_data) => {
@@ -1494,6 +1492,7 @@ RemoteCasa.prototype.start = function()  {
          this.emit('disconnected', { name: this.name, wasConnected: wasConnected });
       }
 
+      this.failPendingConsoleRequests("Remote Casa disconnected");
       this.scheduleReconnect();
    });
 
@@ -1509,8 +1508,78 @@ RemoteCasa.prototype.start = function()  {
          this.emit('connect_error', { name: this.name, error: _data && _data.message ? _data.message : "socket error" });
       }
 
+      this.failPendingConsoleRequests(_data && _data.error ? _data.error : "Remote Casa socket error");
       this.scheduleReconnect();
    });
+};
+
+RemoteCasa.prototype.createConsoleRequestId = function(_command) {
+   return [this.name, _command, Date.now(), this.nextConsoleRequestId++].join(":");
+};
+
+RemoteCasa.prototype.sendConsoleRequest = function(_eventName, _payload, _callback, _legacyCallbackName) {
+
+   if (!this.connected) {
+      return false;
+   }
+
+   var requestId = this.createConsoleRequestId(_eventName);
+   var payload = _payload ? util.copy(_payload, true) : {};
+
+   payload.requestId = requestId;
+   this.pendingConsoleRequests[requestId] = {
+      callback: _callback
+   };
+   this[_legacyCallbackName] = _callback;
+   this.socket.emit(_eventName, payload);
+   return true;
+};
+
+RemoteCasa.prototype.completeConsoleRequest = function(_response, _legacyCallbackName, _resultMapper) {
+
+   if (_response && _response.hasOwnProperty("requestId")) {
+
+      if (!this.pendingConsoleRequests.hasOwnProperty(_response.requestId)) {
+         return;
+      }
+
+      var request = this.pendingConsoleRequests[_response.requestId];
+      delete this.pendingConsoleRequests[_response.requestId];
+      if (this[_legacyCallbackName] === request.callback) {
+         this[_legacyCallbackName] = null;
+      }
+      request.callback(null, _resultMapper(_response));
+      return;
+   }
+
+   if (this[_legacyCallbackName]) {
+      var legacyCallback = this[_legacyCallbackName];
+      this.clearPendingConsoleRequestForCallback(legacyCallback);
+      legacyCallback(null, _resultMapper(_response));
+      this[_legacyCallbackName] = null;
+   }
+};
+
+RemoteCasa.prototype.clearPendingConsoleRequestForCallback = function(_callback) {
+   var requestIds = Object.keys(this.pendingConsoleRequests);
+
+   for (var i = 0; i < requestIds.length; ++i) {
+
+      if (this.pendingConsoleRequests[requestIds[i]].callback === _callback) {
+         delete this.pendingConsoleRequests[requestIds[i]];
+         return;
+      }
+   }
+};
+
+RemoteCasa.prototype.failPendingConsoleRequests = function(_error) {
+   var requestIds = Object.keys(this.pendingConsoleRequests);
+
+   for (var i = 0; i < requestIds.length; ++i) {
+      var request = this.pendingConsoleRequests[requestIds[i]];
+      delete this.pendingConsoleRequests[requestIds[i]];
+      request.callback(_error);
+   }
 };
 
 RemoteCasa.prototype.reconnect = function(_params) {
@@ -1586,65 +1655,29 @@ RemoteCasa.prototype.dbCompare = function() {
 };
 
 RemoteCasa.prototype.extractTree = function(_callback) {
-   
-   if (this.connected) {
-      this.extractTreeCallback = _callback;
-      this.socket.emit('extractTree', { scope: this.owner.currentScope });
-      return true;
-   }
-   else {
-      return false;
-   }     
+   return this.sendConsoleRequest('extractTree', { scope: this.owner.currentScope }, _callback, "extractTreeCallback");
 };    
    
 RemoteCasa.prototype.scopeExists = function(_line, _callback) {
    var scope = arguments.length > 2 ? arguments[2] : this.owner.currentScope;
 
-   if (this.connected) {
-      this.scopeExistsCallback = _callback;
-      this.socket.emit('scopeExists', { scope: scope, line: _line });
-      return true;
-   }
-   else {
-      return false;
-   }
+   return this.sendConsoleRequest('scopeExists', { scope: scope, line: _line }, _callback, "scopeExistsCallback");
 };
 
 RemoteCasa.prototype.extractScope = function(_line, _callback) {
    var scope = arguments.length > 2 ? arguments[2] : this.owner.currentScope;
 
-   if (this.connected) {
-      this.extractScopeCallback = _callback;
-      this.socket.emit('extractScope', { scope: scope, line: _line });
-      return true;
-   }
-   else {
-      return false;
-   }
+   return this.sendConsoleRequest('extractScope', { scope: scope, line: _line }, _callback, "extractScopeCallback");
 };
 
 RemoteCasa.prototype.executeParsedCommand = function(_command, _callback) {
 
-   if (this.connected) {
-      this.executeCallback = _callback;
-      this.socket.emit('executeCommand', { obj: _command[0], method: _command[1], arguments: _command[2] });
-      return true;
-   }
-   else {
-      return false;
-   }
+   return this.sendConsoleRequest('executeCommand', { obj: _command[0], method: _command[1], arguments: _command[2] }, _callback, "executeCallback");
 };
 
 RemoteCasa.prototype.executeCommandLine = function(_command, _callback) {
 
-   if (this.connected) {
-      this.executeCallback = _callback;
-      this.socket.emit('executeCommand', { scope: _command.scope, line: _command.line });
-      return true;
-   }
-   else {
-      return false;
-   }
+   return this.sendConsoleRequest('executeCommand', { scope: _command.scope, line: _command.line }, _callback, "executeCallback");
 };
 
 function OfflineCasa(_config, _owner) {
