@@ -60,9 +60,13 @@ function ModeProperty(_config, _owner) {
 
          modeConfig.states[0].sources.push({ property: activePropName, value: true, nextState: _config.modes[i].name });
          modeConfig.states[modeConfig.states.length - 1].timeout = { source: { property: durationPropName },
-                                                                     actions: [{ property: durationPropName, value: -1 },
-                                                                               { property: activePropName, value: false }],
+                                                                     actions: [{ property: activePropName, value: false }],
                                                                      nextState: "settle-invalid" };
+
+         if (mode.hasOwnProperty("triggerOnDurationChange") && mode.triggerOnDurationChange) {
+            // Consume duration-triggered requests so the same duration can trigger again.
+            modeConfig.states[modeConfig.states.length - 1].timeout.actions.unshift({ property: durationPropName, value: -1 });
+         }
 
          if (mode.hasOwnProperty("action")) {
             modeConfig.states[modeConfig.states.length - 1].actions = [ mode.action ];
