@@ -4,7 +4,7 @@ This note is the short version of how Casa thinks about state.
 
 For implementation detail and config shape, see:
 
-- `src/docs/state-machine-guide.md`
+- [Casa State Machine Guide](state-machine-guide.md)
 
 ## The Problem With One Big State Machine
 

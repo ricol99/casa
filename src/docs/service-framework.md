@@ -111,6 +111,8 @@ This gives a stable boundary:
 
 Direction is controlled by `sync`.
 
+Both bridge types default to `read`. A `serviceproperty` defaults to writable when `sync` enables outbound writes. An explicit `writable` setting takes precedence.
+
 The implementation uses string checks:
 
 - inbound support when `sync.startsWith("read")`
@@ -180,7 +182,7 @@ Examples:
 
 - `serviceName`
 - `serviceType`
-- `id`
+- `id` converted to a string with hyphens removed
 
 and then create a `SourceListener` against the relevant service-node property or event.
 
@@ -192,10 +194,11 @@ For properties this is effectively:
    - `subscriber`
    - `sync`
    - `serviceProperty`
-   - optional `subscriberProperty`
-   - optional `serviceArgs`
+   - `subscriberProperty` for outbound-capable bridges
+   - `args` from the optional `serviceArgs` config
+   - `valueType` from the property config
 
-The same pattern applies to events with `serviceEvent`.
+Event subscriptions carry `serviceEvent` and, for outbound-capable bridges, `subscriberEvent`.
 
 That subscription metadata is what the service node uses to create the correct mirror surface and understand direction.
 

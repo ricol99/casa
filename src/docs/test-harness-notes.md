@@ -1,18 +1,10 @@
 # Casa Test Harness Notes
 
-This note captures the current mental model of the Casa test harness so future work can reuse it consistently.
+This note describes how the Casa test harness runs and verifies scenarios. See [Writing Tests With The Casa Harness](test-harness-authoring.md) for configuration and commands.
 
 ## Purpose
 
-The harness is designed for testing an asynchronous system of Things, properties, and events.
-
-A test run injects external stimuli into the live system and verifies the resulting outward behavior:
-
-- property changes
-- events
-- transaction lineage
-
-The goal is that tests should pass reliably. Acceptable nondeterminism is limited to ordering changes within a single transaction.
+The harness injects stimuli into a live Casa and checks the resulting property changes and events against an expected sequence.
 
 ## Runtime Shape
 
@@ -21,7 +13,7 @@ Tests are exercised through the real application startup path, not through a sep
 - `src/app.js` starts the normal Casa runtime.
 - Configs are supplied through the normal config path selection.
 - All configs must be processed by `src/utils/createdb.js` before they can be run.
-- Harness runs should normally use `--nopeer` so the test node does not try to talk to peer Casas.
+- Run isolated scenarios with `--nopeer` to disable peer connections.
 
 This applies both to automated harness configs and to manual/integration configs.
 
@@ -32,14 +24,13 @@ In those cases, processing only the testcase config is not enough. The shared ga
 - the Casa DB for the testcase config
 - the gang DB for the referenced gang
 
-`test-bedroom.json` is an example of this pattern: it needs both the Casa DB from `test-bedroom.json` and the gang DB from `collin-test-gang.json`.
+`test-bedroom.json` and `test-property.json` both use the shared gang DB produced from `collin-test-gang.json`.
 
 ## Useful Runtime Flags
 
 Some `app.js` flags matter a lot when running the harness.
 
-- `--nopeer` is required for harness work so the node does not try to connect to peers.
-- `--nopeer` also removes the peer-related settling timeout from the harness startup path.
+- `--nopeer` disables peer connections and removes the default peer-related startup delay. An explicit `testRun.delayStart` still applies, as does the per-case `settleTime`.
 - `--logs error` is the usual regression-testing mode.
 - `--logs info` is useful when you want to see property changes and events.
 - `--logs log`, or omitting `--logs`, gives full logging.
@@ -61,7 +52,7 @@ It:
 - supports `preAmble` and `postAmble`
 - supports transcript generation with `generateExpectedOutput`
 - verifies expected output in normal mode
-- tolerates unordered matching inside a single transaction via `simultaneous`
+- tolerates unordered matching within an explicit `simultaneous` group
 
 ### `testthing.js`
 
@@ -71,16 +62,15 @@ It can be used when a scenario needs a custom Thing in the system, but it is not
 
 ## Transaction Model
 
-`transactionId` is used as the causal boundary for async work.
+The `transaction` field in event metadata identifies the causal sequence for async work.
 
-- A new transaction usually starts when something external injects a fresh cause into the system.
-- Examples include sensor input, service callbacks, timer expiry, and ramp progression.
-- Downstream effects produced from that cause are expected to stay associated with that transaction lineage.
+A fresh input, such as a sensor reading or service callback, can start a new transaction. Downstream effects carry that transaction's lineage.
 
 Related async continuations may derive new transaction ids rather than starting unrelated ones.
 
 - ramp steps append `R`
-- scheduler-driven continuations append `T`
+- timeout continuations append `T`
+- scheduled continuations append `S`
 
 This gives both grouping and lineage, which is important for debugging and for test expectations.
 
@@ -95,8 +85,7 @@ Typical fields include:
 - `testRun`
 - `testCases`
 - optional `testSteps`
-- optional `preAmble`
-- optional `postAmble`
+- optional `testRun.preAmble` and `testRun.postAmble`
 
 The harness drives the system with `driveSequence` and verifies `expectedSequence`.
 
@@ -128,12 +117,12 @@ The harness:
 
 ### Transcript mode
 
-If a testcase enables `generateExpectedOutput`, the harness switches into capture mode for that testcase.
+Set `generateExpectedOutput` on the `tester` Thing to the 1-based case number to switch to capture mode for that case.
 
 In this mode it:
 
 - runs the testcase
-- emits a JSON transcript of observed property changes and events
+- emits JSON entries for the observed property changes and events, ready to review for the `expectedSequence` array
 - groups same-transaction outputs into `simultaneous` blocks where appropriate
 - does not verify expectations
 
@@ -152,7 +141,7 @@ The intended rule is:
 
 In transcript generation, transaction ids are used to decide when outputs belong in the same `simultaneous` block.
 
-In verification mode, `tester.js` flattens `simultaneous` expectations into a local fuzzy matching window so the outputs can arrive in any order inside that block.
+In verification mode, `tester.js` matches entries in a `simultaneous` block in any order. The matcher compares source, name and value. Transaction IDs are recorded in the output for diagnosis.
 
 ## Timing Guidance
 
@@ -167,7 +156,7 @@ Too-short delays can create overlap between phases of a scenario and produce mis
 
 ## Config Types In `src/test/configs`
 
-The linked `src/test/configs` directory contains more than one kind of config.
+The linked `src/test/configs` directory points to local fixtures outside the Git checkout. It contains both automated and manual configurations.
 
 ### Automated harness configs
 
@@ -193,24 +182,3 @@ Examples:
 - `test-smee.json`
 
 These still need `createdb` processing before use, because they are normal Casa configs.
-
-## Working Understanding To Preserve
-
-When describing or extending this harness, the most important idea to preserve is:
-
-The harness tests real asynchronous runtime behavior by injecting external causes into the live system and asserting the resulting event/property transcript, with transaction lineage used to model causality and with controlled tolerance for intra-transaction ordering differences.
-
-## Good Follow-up Documentation
-
-This note is a memory/reference note.
-
-A separate authoring guide would also be valuable, focused on:
-
-- how to create a new harness config
-- how to choose `sources`
-- how to structure `driveSequence` and `expectedSequence`
-- when to use `testSteps`
-- when to use `simultaneous`
-- how to use `generateExpectedOutput` safely
-- how to choose waits and settle timing
-- how to process configs with `createdb` and then run them through `app.js`

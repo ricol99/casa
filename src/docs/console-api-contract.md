@@ -1,14 +1,20 @@
-# Console API Contract (UI/MCP)
+# Casa Console API Contract
 
-This document defines the current command/API contract for source inspection and config preview used by UI and MCP clients.
+This document covers source inspection and configuration preview in the Casa device repository.
 
-Hosted UI implementation:
-- `src/webui`
+## Interfaces
 
-## Transport
+| Interface | Entry point | Implementation |
+| --- | --- | --- |
+| Runtime console | `/consoleapi/io` on a running Casa | [`src/services/consoleapiservice.js`](../services/consoleapiservice.js) |
+| Browser console | `/webui/index.html` and `/webuiapi/io` on the global console | [`src/console.js`](../console.js), [`src/webui/app.js`](../webui/app.js) |
+| MCP | HTTP at `/mcp` by default when configured | [`src/services/mcpservice.js`](../services/mcpservice.js) |
 
-### Socket.IO namespace
-- Connect to `/consoleapi/io`.
+The MCP service has its own tool contract. It exposes `casa.get_named_object_tree`, `casa.set_mode_manual` and `casa.set_property`.
+
+## Runtime console transport
+
+Connect to `/consoleapi/io` over Socket.IO. The same command interface is available through configured Pusher and Webhook Relay message transports.
 
 ### Execute a command
 - Emit event: `executeCommand`
@@ -16,18 +22,21 @@ Hosted UI implementation:
 
 ```json
 {
-  "obj": ":gang",
+  "requestId": "preview-1",
+  "obj": ":",
   "method": "previewConfig",
   "arguments": [ { "patch": { "changes": [] } } ]
 }
 ```
 
 - Final response event: `execute-output`
-- Final payload:
+- Final payload (result abbreviated):
 
 ```json
-{ "result": { "ok": true } }
+{ "requestId": "preview-1", "result": { "ok": true } }
 ```
+
+The server echoes `requestId` when supplied. `result` can contain a command error.
 
 ### Streaming output (non-final)
 - Intermediate messages arrive on event: `output`
@@ -51,7 +60,7 @@ Hosted UI implementation:
 
 Notes:
 - `execute-output` is still the authoritative completion signal.
-- `output` may contain multiple progress messages before completion.
+- `output` may contain multiple progress messages before completion. It carries no `requestId`.
 
 ### Live runtime updates
 - Emit event: `subscribeLiveUpdates`
@@ -68,7 +77,7 @@ Notes:
     "name": "power",
     "value": true,
     "propertyOldValue": false,
-    "transaction": 12
+      "transaction": ":thing:lamp-1730000000000"
   }
 }
 ```
@@ -77,23 +86,36 @@ Update `type` values:
 - `source-property-changed`
 - `source-event-raised`
 
+## Browser console transport
+
+Start the global console with `node app.js --console <gang-name>` from `src`. It serves `/webui` as the setup page and `/webui/index.html` as the runtime console. Its browser socket uses `/webuiapi/io`.
+
+- `executeCommand` accepts `{ id, targetCasa, obj, method, arguments }`. `targetCasa` is optional. `execute-output` echoes `id` and returns `ok` with a `result` or `error` as applicable. The `ok` flag describes command execution. A preview result can carry its own `ok: false` and `errors`.
+- Structured browser commands return the final result. Browser console lines use `executeConsoleLine`, can stream `output`, and finish with `console-line-output`.
+- The global console subscribes to connected runtime Casas and forwards their updates as `webui-live-update` with `{ casaName, type, data }`.
+- `getUnregisteredCasas` lists discovered unregistered devices. `addUnregisteredCasa` takes the proposed `name` and the device `address` and invokes the console's `casas add` command. The replies are `unregistered-casas-output` and `add-unregistered-casa-output`.
+
+## Configuration database sync
+
+On a runtime console connection, `getCasaInfo` returns a `casa-info` event with `dbInfo` and `gangDbInfo`. Each available database entry includes `dbName`, `hash` and `lastModified`. When automatic sync is enabled and both entries are available, the global console checks them against its local copies and pulls missing or newer databases using `exportDb`. An explicit `pushDb` or `pushDbs` sends documents through `replaceDb` or `replaceDbs` over the existing console connection.
+
 ## Contexts and Methods
 
-## Gang context (`obj = ":gang"`)
+### Gang context (`obj = ":"`)
 - `resolveSource(sourceUName)`
 - `explainSource(sourceUName)`
 - `sourceUsage(sourceUName, options?)`
 - `sourceTrees()`
 - `previewConfig(options)`
 
-## Casa context (`obj = ":<casaName>"`)
+### Casa context (`obj = ":<casaName>"`)
 - `resolveSource(sourceUName)`
 - `explainSource(sourceUName)`
 - `sourceUsage(sourceUName, options?)`
 - `sourceTrees()`
 - `previewConfig(options)`
 
-## Source context (`obj = ":<...sourceUName>"`)
+### Source context (`obj` is the source's absolute `uName`)
 - `resolve()`
 - `explain()`
 - `usage(options?)`
@@ -102,14 +124,10 @@ Source-context methods are wrappers around the same source model methods and use
 
 ## Routing Semantics
 
-Gang wrappers have two behaviors:
-- `resolveSource`, `explainSource`, `sourceUsage`:
-  - Without `--casa`, they resolve source owner first and route to the active owner casa when connected.
-  - With `--casa`, routing is forced to that casa.
-- `sourceTrees`, `previewConfig`:
-  - Use current execution casa unless `--casa` is provided.
-
-For deterministic UI behavior, always pass explicit casa selection where applicable.
+- The runtime socket executes on the Casa handling the connection.
+- The browser socket uses `targetCasa` when supplied. Otherwise the global console uses the selected or default connected Casa, or its offline console when no Casa is connected.
+- The gang CLI commands `resolveSource`, `explainSource` and `sourceUsage` resolve the active source owner first and use it when connected. They fall back to the current Casa when needed. `sourceTrees` and `previewConfig` use the current execution Casa. All five commands accept `--casa` to select a connected Casa explicitly.
+- `previewConfig`'s `targetCasaName` selects the Casa used by the preview engine for configuration evaluation. Use the socket connection, browser `targetCasa` or CLI `--casa` to select where the command runs.
 
 ## Source Contracts
 
@@ -251,13 +269,13 @@ Semantics:
 
 ## `previewConfig`
 Required options:
-- `patch: object`
+- `patch: object` or a JSON5 string containing an object
 
 Optional options:
 - `includeUsage: boolean`
 - `limit: number` (max impacted sources to process)
 - `targetCasaName: string` (mainly gang context)
-- `progress: boolean` (emit progress via `output` events)
+- `progress: boolean` (emit progress via runtime socket `output` events; `emitProgress` is also accepted)
 - `summaryOnly: boolean` (return no per-source details)
 - `topChanged: number` (return only first N changed source details)
 
@@ -342,7 +360,7 @@ Source scope:
 - `explain`
 - `usage [--activeOnly] [--hasConsumers]`
 
-## Recommended UI Sequence
+## Source inspection workflow
 
 1. Source browser list:
 - `sourceTrees`
@@ -353,7 +371,7 @@ Source scope:
 - `sourceUsage`
 
 3. Config editor:
-- `previewConfig` with `progress=true`
+- `previewConfig` with `progress=true` when the client consumes runtime progress events
 - For low-memory views: `summaryOnly=true` or `topChanged=<N>`
 
 4. Apply flow:

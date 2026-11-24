@@ -1,6 +1,6 @@
 # Writing Tests With The Casa Harness
 
-This guide is for building or extending automated tests that use the Casa runtime harness described in [test-harness-notes.md](/Volumes/Personal/dev/casa/src/docs/test-harness-notes.md).
+This guide is for building or extending automated tests that use the Casa runtime harness described in [Casa Test Harness Notes](test-harness-notes.md).
 
 It focuses on practical authoring: how to structure a config, how to choose expectations, and how to run the result.
 
@@ -29,19 +29,19 @@ If those answers are fuzzy, the testcase will usually become flaky or hard to ma
 
 ## Where Tests Live
 
-Automated harness scenarios are typically stored in the linked config directory under `src/test/configs`.
+Automated harness scenarios are typically stored in the local directory linked at `src/test/configs`. The link and its fixtures are maintained outside Git, so these examples require access to that local fixture directory.
 
 Examples:
 
-- [`test-property.json`](/Volumes/Personal/dev/casa/src/test/configs/test-property.json:1)
-- [`test-access.json`](/Volumes/Personal/dev/casa/src/test/configs/test-access.json:1)
-- [`rtest-building.json`](/Volumes/Personal/dev/casa/src/test/configs/rtest-building.json:1)
+- `test-property.json`
+- `test-access.json`
+- `rtest-building.json`
 
 These files are parsed as JSON5 by `createdb`, so comments and trailing commas are allowed.
 
 ## Minimal Structure
 
-A typical automated config includes:
+A typical config includes the following tester definition. Define the target Thing separately in the same config or the shared gang config, with the input and output names referenced by the tester.
 
 ```json5
 {
@@ -154,11 +154,7 @@ Examples:
 
 These let you add common setup or cleanup sequences around the selected run.
 
-Use them when:
-
-- every selected case needs the same startup state
-- the first selected case needs initialization inputs
-- the last selected case needs a shared cleanup sequence
+`preAmble` is prepended to the first selected case. `postAmble` is appended to the last selected case.
 
 They can include both:
 
@@ -241,6 +237,8 @@ So expectations should be written against stable, meaningful outputs rather than
 
 Use `simultaneous` when multiple outputs are causally part of the same transaction but their internal order is not stable.
 
+Verification only checks that the group's outputs match in some order. Transcript capture groups by transaction ID, which is also printed in verification logs.
+
 Use it when:
 
 - the system is fully asynchronous
@@ -264,7 +262,7 @@ This helps when:
 - hardware simulation needs several repeated phases
 - the same expectation block appears in many cases
 
-[`test-access.json`](/Volumes/Personal/dev/casa/src/test/configs/test-access.json:60) is a good example of this style.
+`test-access.json` is a good example of this style.
 
 A `testStep` can be referenced from both:
 
@@ -282,19 +280,13 @@ Workflow:
 1. Add or update your `driveSequence`.
 2. Temporarily enable `generateExpectedOutput` with the testcase number you want to inspect.
 3. Run the harness.
-4. Capture the emitted JSON transcript.
+4. Capture the emitted JSON entries. The harness emits entries without the enclosing array brackets.
 5. Review it carefully.
 6. Copy only the correct parts into `expectedSequence`.
 7. Remove or comment out `generateExpectedOutput`.
 8. Run again in normal verification mode.
 
-Example:
-
-```json5
-//"generateExpectedOutput": 3,
-```
-
-Then temporarily change it to:
+Set this field on the `tester` Thing, alongside `testRun` and `testCases`. The field's presence selects capture mode.
 
 ```json5
 "generateExpectedOutput": 3,
@@ -339,19 +331,21 @@ This is the workflow I’d recommend for most new tests.
 9. Run only the new testcase first.
 10. When stable, re-run the whole config.
 
-For both transcript generation and normal regression runs, start with `--nopeer`. For transcript generation, also prefer `--logs error`.
+For isolated scenarios, use `--nopeer` in both transcript generation and verification. For transcript generation, also use `--logs error`.
 
 ## Running A Harness Config
 
 Configs must be processed into DB files before the app can load them.
 
-From [`src`](/Volumes/Personal/dev/casa/src):
+From `src`:
 
 ```bash
 node utils/createdb.js test/configs/test-property.json
+node utils/createdb.js test/configs/collin-test-gang.json
+node app.js --nopeer --logs error casa-test-property
 ```
 
-That rebuilds the DB for the config's Casa or Gang name under the default secure-config area.
+The first two commands rebuild the Casa database and its shared gang database in `~/.casa-keys/secure-config`.
 
 ### Shared gang configs
 
@@ -377,31 +371,19 @@ The reason is that `test-bedroom.json` names `gang-collin-test`, so the runtime 
 - `casa-test-bedroom-db.db`
 - `gang-collin-test-db.db`
 
-Then run the Casa by name:
+To run with a different database directory, place the generated database files there and pass the directory with `app.js --config`. `createdb.js` writes to the default directory.
+
+To open the local console while exploring a scenario:
 
 ```bash
-node app.js --nopeer --logs error casa-test-property
-```
-
-If you need a non-default DB/config directory, pass `--config` to `app.js`.
-
-Examples:
-
-```bash
-node app.js --nopeer --logs error --config "$HOME/.casa-keys/secure-config" casa-test-property
-```
-
-```bash
-node app.js --nopeer --logs info --localconsole casa-test-property
+node app.js --nopeer --localconsole casa-test-property
 ```
 
 Practical notes:
 
 - `createdb` recreates the `.db` content for that config name
 - some harness configs also require a shared gang config to be processed first
-- `--nopeer` should be treated as required for harness runs
-- `--nopeer` stops the node trying to talk to peers
-- `--nopeer` also removes the peer-related settling timeout from harness startup
+- `--nopeer` disables peer connections and removes the default peer-related startup delay. An explicit `testRun.delayStart` still applies.
 - `--logs error` is the usual regression-testing mode
 - `--logs info` is useful when you want to see events and property changes
 - `--logs log`, or omitting `--logs`, gives full runtime logging
@@ -434,9 +416,9 @@ Use a manual or integration config when you want:
 
 Examples of manual/integration-style configs include:
 
-- [`test-mqtt.json`](/Volumes/Personal/dev/casa/src/test/configs/test-mqtt.json:1)
-- [`test-mcp.json`](/Volumes/Personal/dev/casa/src/test/configs/test-mcp.json:1)
-- [`test-smee.json`](/Volumes/Personal/dev/casa/src/test/configs/test-smee.json:1)
+- `test-mqtt.json`
+- `test-mcp.json`
+- `test-smee.json`
 
 ## Recommended Style
 

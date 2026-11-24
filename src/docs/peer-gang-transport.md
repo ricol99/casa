@@ -1,6 +1,6 @@
 # Peer Gang Transport
 
-This note captures the current cross-gang source transport architecture. It is intended as a checkpoint before refactoring `PeerCasa`; `PeerCasa` should move toward these primitives, but that refactor is deliberately out of scope for this phase.
+This guide describes cross-gang source discovery and subscriptions, and the session and protocol code shared with same-gang peers.
 
 ## Product Model
 
@@ -8,11 +8,11 @@ A `gang` is the runtime boundary used by Casa. A managed site can map to a gang,
 
 Cross-gang communication is subscription-scoped. A local Casa asks for a specific remote source property or event; it does not receive all global source updates from the remote gang.
 
-Same-gang `PeerCasa` is still broader by policy today: casas within a gang can see normal peer/global updates. The future `PeerCasa` refactor should reuse the transport/session/protocol primitives, while preserving that same-gang policy distinction.
+Same-gang `PeerCasa` exchanges normal peer/global updates within the gang. It shares the session and source protocol helpers with `PeerGangCasa` and keeps its own handshake, tree synchronisation and source ownership behaviour.
 
 ## Addressing
 
-Peer casa sessions use a gang-qualified casa address:
+Cross-gang peer sessions use a gang-qualified casa address:
 
 ```text
 gang-casa://<gang>/<casa-uName>
@@ -60,15 +60,15 @@ Provides socket-like sessions over bearer transports such as `http`, `pusher`, a
 
 `PeerSocketSession`
 
-Owns socket listener registration and heartbeat timers.
+Owns socket listener registration and heartbeat timers for `PeerCasa` and `PeerGangCasa`.
 
 `PeerSourceCommandProtocol`
 
-Carries remote source write commands. `PeerGangCasa` keeps writes disabled by default.
+Shares the command and response machinery for source writes. The peer classes configure their own wire events and handlers.
 
 `PeerSourceSubscriptionProtocol`
 
-Carries `subscribe-source`, `unsubscribe-source`, `source-property-changed`, `source-event-raised`, and `source-invalid`.
+Shares the source subscription and update machinery. Cross-gang events include `subscribe-source`, `unsubscribe-source`, `source-property-changed`, `source-event-raised`, and `source-invalid`. Same-gang peers retain their existing subscription registration and removal events.
 
 `PeerGang`
 
@@ -78,9 +78,13 @@ Local representation of a remote gang namespace. It owns sparse `PeerGangSource`
 
 A session to a remote casa in a remote gang. It handles login, subscriptions, event/property forwarding, and local subscription cleanup.
 
+`PeerCasa`
+
+A session to a casa in the same gang. It exchanges runtime configuration through the `login` / `loginAACCKK` handshake and manages peer source trees and ownership transitions.
+
 ## Pusher Flow
 
-The Pusher app is currently treated as the organisation boundary. The control channel is still named `control-channel`; if a single Pusher app ever spans multiple organisations, this channel must become organisation-scoped.
+Gangs using the same Pusher app share the `control-channel` discovery channel.
 
 Control events:
 
@@ -145,8 +149,11 @@ When an advert is seen, `MdnsDiscoveryTransport` records a LAN candidate and emi
 ```js
 {
    gang: "farm-gate",
+   name: ":barn-controller",
    casaName: ":barn-controller",
+   status: "up",
    address: { host: "barn.local", port: 50000 },
+   discoveryTransportName: "mdns",
    messageTransportName: "http",
    tier: 1
 }
@@ -233,7 +240,7 @@ Acts as an early availability hint. If it names a tracked `PeerGangCasa`, the so
 
 `login-rejected`
 
-Hard reasons currently include:
+The `PeerGang` client treats these rejection reasons as hard failures:
 
 ```text
 wrong-gang
@@ -241,13 +248,11 @@ unauthorized
 forbidden
 ```
 
-Hard rejects invalidate affected sources and remove the `PeerGangCasa` without immediate rediscovery. Other rejection reasons use the transient unavailable path.
+The current login handler emits `wrong-gang` when the requested target gang differs from the receiving gang. Hard rejects invalidate affected sources and remove the `PeerGangCasa` without immediate rediscovery. Other rejection reasons use the transient unavailable path.
 
 ## Write Policy
 
-Remote writes through `PeerGangCasa` are disabled by default. `allowWrites` must be explicitly set on the `PeerGangCasa` config before command protocol calls can be sent.
-
-The permission model for cross-gang writes is not yet designed. Until it is, subscription-only read propagation is the supported cross-gang behavior.
+Cross-gang sessions support subscription-only propagation. `PeerGangCasa` defaults `allowWrites` to `false`. The flag gates outbound command helpers, while the receiving cross-gang session registers command-response listeners only. Same-gang `PeerCasa` handles remote source commands through its own listeners.
 
 ## Test Coverage
 
@@ -259,21 +264,12 @@ npm run test:peergang
 npm run test:peergangcasa
 npm run test:peergang-lan-integration
 npm run test:peergang-architecture
+npm run test:peer-protocol-helpers
+npm run test:peercasa-lifecycle
+npm run test:peercasa-command-protocol
+npm run test:peercasa-subscription-protocol
 npm run test:pusher-fragmentation
 npm run test:whrelay-transport
 ```
 
 The LAN integration test uses real source-owner HTTP handling, real `IoMessageSocketService`, and real `PeerGang` / `PeerGangCasa` subscription flow with a deterministic in-memory LAN bearer.
-
-## PeerCasa Refactor Direction
-
-Do not refactor `PeerCasa` in this phase.
-
-When that work starts, the first thin slice should be socket/session plumbing:
-
-1. Add tests around current `PeerCasa` login and login ack behavior.
-2. Move listener registration and heartbeat toward `PeerSocketSession`.
-3. Keep current same-gang wire messages compatible.
-4. Move source command/subscription behavior toward `PeerSourceCommandProtocol` and `PeerSourceSubscriptionProtocol`.
-
-The goal is for `PeerCasa` and `PeerGangCasa` to become policy classes over the same discovery/session/protocol spine.

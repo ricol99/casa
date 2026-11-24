@@ -33,8 +33,8 @@ A Casa state machine is just a property whose value is the current state name.
   - start a timer
   - subscribe to source events/properties
   - react to schedules
-- count repeated source hits
-- change controller priority
+  - count repeated source hits
+  - change controller priority
 - Leaving a state clears active guarded state and delayed actions for that state.
 
 The current state name is still just a normal property value, so other properties can read it, transform it, combine it, or expose it externally.
@@ -713,12 +713,11 @@ This is how `room`, `access`, `housealarm`, and `sumppump` build higher-level st
 
 `modeproperty` is a specialized wrapper that builds a `stateproperty` for mutually exclusive modes.
 
-It adds patterns like:
+Configure a resting mode with `restingMode` and the alternatives with `modes`. Each alternative gets a boolean `<MODE>-MODE-ACTIVE` property and a numeric `<MODE>-MODE-DURATION` property. The duration is in seconds and starts at the mode's `timeout`, or `-1` when no timeout is configured. Setting `modeName` changes the middle segment of both generated names.
 
-- resting mode
-- per-mode duration properties
-- per-mode active flags
-- optional “requires exactly one active mode” validation
+Use the active flag to select a mode. Casa's generated validity check allows zero or one alternative flag to be active. When a timed mode expires, Casa clears the active flag and normally keeps the duration for the next activation. Set `triggerOnDurationChange: true` on a mode to let a duration change activate it. On expiry that mode resets its duration to `-1`, so the same duration can be submitted again.
+
+The timeout regression check is `node test/modeproperty_timeout_test.js` from `src`.
 
 Use it when the problem is “select one mode for a duration” rather than a free-form state machine.
 
