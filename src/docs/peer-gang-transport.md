@@ -10,6 +10,8 @@ Cross-gang communication is subscription-scoped. A local Casa asks for a specifi
 
 Same-gang `PeerCasa` exchanges normal peer/global updates within the gang. It shares the session and source protocol helpers with `PeerGangCasa` and keeps its own handshake, tree synchronisation and source ownership behaviour.
 
+Same-gang peer formation currently accepts only tier-1 (LAN) discovery: `Casa.casaUp()` ignores higher transport tiers. Availability of Pusher or Webhook Relay for console and cross-gang sessions does not enable same-gang peers over those bearers.
+
 ## Addressing
 
 Cross-gang peer sessions use a gang-qualified casa address:
@@ -256,7 +258,7 @@ Cross-gang sessions support subscription-only propagation. `PeerGangCasa` defaul
 
 ## Test Coverage
 
-Important tests:
+Run these from `src` (the repository-root package does not declare these scripts):
 
 ```text
 npm run test:casadiscovery-source-owner

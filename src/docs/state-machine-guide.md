@@ -217,6 +217,7 @@ That lets parts of a Thing define behavior locally while still feeding a larger 
   "states": [
     {
       "name": "closed",
+      "action": { "property": "motor-close", "value": false },
       "sources": [
         { "event": "open-requested", "nextState": "opening" }
       ]
@@ -349,7 +350,7 @@ Guard fields:
 - `value`: required value. Defaults to `true`.
 - `invert`: invert the equality check.
 - `previousState`: require a specific previous state.
-- `active`: if `true`, the guard is live-watched as its own source listener.
+- `active`: property guards on sources and actions default to `true` and are live-watched through source listeners; set `false` for evaluation only when the enclosing source/action is checked. Non-property guards are not live-watched.
 
 Example:
 
@@ -370,7 +371,7 @@ This distinction matters a lot.
 
 - `active: false`:
   - the guard is only checked when the enclosing source/action is being evaluated
-  - this is the simpler default
+  - set this explicitly when the guard should not trigger re-evaluation
 - `active: true`:
   - Casa creates a listener for the guard property itself
   - if the guard flips into a matching value while the state is active, Casa can immediately re-evaluate the guarded source/action
@@ -386,7 +387,7 @@ In practice, the clearer and more common pattern in this codebase is to put guar
 - a source
 - an action
 
-State-level guards are best treated as an advanced facility for immediate-on-entry checks.
+State-level guards are intended for immediate-on-entry checks, but the current `State.checkStateGuards()` also indexes `this.sources[i]` while evaluating guard `i`. A guard without a corresponding source can throw. Prefer source/action guards until this path is repaired.
 
 ## Actions
 
@@ -544,7 +545,8 @@ Counter fields:
 
 - `limit`: threshold that triggers the counter.
 - `nextState`: optional transition after the threshold is met.
-- `action` or inherited `actions`: actions to apply when the threshold is met.
+- `action`: a single action to apply when the threshold is met.
+- `actions`: the current constructor copies this array only when the enclosing state also has an `actions` field; it does not inherit the state's actions. Prefer the single `action` form when possible.
 - `unique`: if `true`, each counted source only contributes once.
 - `from`: inherit count state from specific previous states.
 
@@ -582,13 +584,13 @@ Important schedule fields:
 - `active`: optional, defaults to `true`.
 - `value`: optional event value.
 - `nextState`: optional transition if the schedule fires while this state is current.
-- `guard` or `guards`: optional guards checked when the schedule fires.
+- `guard` or `guards`: optional guards checked before the scheduled transition. They do not suppress the named event.
 
 Schedule behavior:
 
 - schedules are registered once when the `State` is created
 - the callback only takes effect if this is still the current state
-- on trigger, Casa starts a scheduled transaction, raises the named event, and optionally transitions
+- on trigger in the current state, Casa starts a scheduled transaction and raises the named event before checking guards for an optional transition
 - using schedules requires `scheduleservice`
 
 ## Regex States
@@ -703,7 +705,8 @@ Config:
 
 Behavior:
 
-- on cold start, it reads all configured source properties and builds the initial combined value
+- on cold start, it builds the combined value only if no initial value is set and all configured source listeners exist and are no longer cold
+- `separator` defaults to `:`; the example explicitly uses `-`
 - on source updates, it rebuilds the combined string and sets itself to that value
 - the resulting value is then matched against exact states, regex states, or `DEFAULT`
 
@@ -723,7 +726,7 @@ Use it when the problem is “select one mode for a duration” rather than a fr
 
 ## `modelproperty`
 
-`modelproperty` creates a hidden companion state property named:
+`modelproperty` creates a companion state property named:
 
 - `<name>-model`
 
@@ -888,7 +891,7 @@ These dynamic sources:
 - create source listeners immediately
 - can participate in guards, counters, and transitions
 
-This is an advanced facility and is mostly useful when a Thing discovers new inputs after startup.
+This is an advanced facility and is mostly useful when a Thing discovers new inputs after startup. The current removal implementation references an undefined `mappedSource` variable and does not remove the entry from `this.sources`; do not rely on dynamic removal until it is repaired.
 
 ## Patterns Used in This Repo
 
@@ -938,7 +941,9 @@ These are worth knowing when authoring configs:
 - Exact state names are simpler than regex states; prefer exact names unless you truly need pattern matching.
 - Source-level guards and action-level guards are more common and clearer than top-level state guards.
 - If a timeout references a property or source, make sure the resolved value is numeric or a numeric string.
-- Delayed actions belong to the state; they are cleared when the state exits.
+- Delayed actions belong to the state and are cancelled on exit, but the current delayed callback in `State.filterActions()` references `index` instead of `_index` and can throw when it fires. Treat delayed execution as a known implementation defect.
+- A zero-duration timeout takes its immediate transition without running timeout actions; use entry actions when those effects must occur.
+- Hot-start timer restoration currently supplies `action` while the timeout callback reads `actions`, so restored timeout actions are not replayed through that path.
 - `ignoreControl: true` is common for internal orchestration state machines because it avoids fights with normal source controllers.
 - `takeControlOnTransition: true` is useful when you want priority/controller state to follow the machine even when the transition itself does not emit property actions.
 

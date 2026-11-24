@@ -265,7 +265,7 @@ Key file:
 
 Each service owns a queue.
 
-`queueQuant` controls pacing between dispatch attempts.
+`queueQuant` controls pacing between dispatch attempts in milliseconds (default `100`). `optimiseTransactions` defaults to `true`.
 
 The queue is per-service, so all outbound work for a given service is serialized through one scheduling point.
 
@@ -375,9 +375,9 @@ The mirror is the handshake boundary.
 Normal Casa code should mostly think in terms of properties and events.
 Service code should mostly think in terms of translating mirror changes to and from the external system.
 
-## Good Fit For `smhubservice`
+## Proposed Fit For `smhubservice`
 
-An `smhubservice` should follow this model.
+There is no `smhubservice` implementation in the current source tree. The following is design guidance for a future integration. An `smhubservice` should follow this model.
 
 Recommended shape:
 

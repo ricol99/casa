@@ -182,3 +182,9 @@ Examples:
 - `test-smee.json`
 
 These still need `createdb` processing before use, because they are normal Casa configs.
+
+## Verification limits
+
+The matcher checks source, property/event name and value; it does not assert transaction IDs. `simultaneous` is implemented as a bounded look-ahead/reordering window, so transaction boundaries are an authoring convention rather than an enforced assertion. Transcript generation uses transaction IDs for grouping.
+
+Verification has no overall deadline for missing expected output: if an expected event never arrives, a run can remain waiting. Use an external timeout when running unattended. The tester also adds `settleTime` (default 3 seconds) before each case; `--nopeer` does not remove it.
