@@ -953,7 +953,7 @@ These are worth knowing when authoring configs:
 2. Keep the first version small: named states, direct `sources`, direct `actions`.
 3. Add `timeout` only after the base transition graph is stable.
 4. Use `combinestateproperty` to compose smaller machines rather than building one giant graph too early.
-5. Use `active: true` guards only when you need a state to react to guard changes after entry.
+5. For source or action property guards, set `active: false` when the guard should be evaluated only when the source or action is checked. By default, Casa watches the property for changes.
 6. Add counters only when you need multi-hit confirmation.
 7. Reach for `modeproperty` only when the behavior is truly mode-like.
 
