@@ -34,11 +34,21 @@ CounterProperty.prototype.checkSourceListenerValueType = function(_sourceListene
 
 CounterProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
 
-   if (!_data.coldStart) {
-      console.log(this.uName + ": new event from source, stepping counter");
-      let newVal = this.countPositives ? (_data.value ? this.value+1 : this.value-1) : this.value+1
-      this.updatePropertyInternal(newVal, _data);
+   if (this.countPositives) {
+      // Count current inputs, including startup values, rather than notification edges.
+      var count = 0;
+      for (var name in this.sourceListeners) {
+         if (this.sourceListeners.hasOwnProperty(name) && this.sourceListeners[name] &&
+             this.sourceListeners[name].sourcePropertyValue) {
+            ++count;
+         }
+      }
+      this.updatePropertyInternal(count, _data);
    }
-}
+   else if (!_data.coldStart) {
+      console.log(this.uName + ": new event from source, stepping counter");
+      this.updatePropertyInternal(this.value + 1, _data);
+   }
+};
 
 module.exports = exports = CounterProperty;

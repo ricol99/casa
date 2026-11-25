@@ -19,10 +19,12 @@ function ModeProperty(_config, _owner) {
    modeConfig.takeControlOnTransition = true;
    modeConfig.ignoreControl = true;
 
-   modeConfig.states = [ _config.restingMode ];
+   // State normalisation mutates its config; keep the caller's resting mode reusable.
+   modeConfig.states = [ util.copy(_config.restingMode, true) ];
 
    if (modeConfig.states[0].hasOwnProperty("action")) {
       modeConfig.states[0].actions = [ util.copy(modeConfig.states[0].action) ];
+      delete modeConfig.states[0].action;
    }
    else if (!modeConfig.states[0].hasOwnProperty("actions")) {
       modeConfig.states[0].actions = [];
@@ -33,6 +35,7 @@ function ModeProperty(_config, _owner) {
 
    if (modeConfig.states[0].hasOwnProperty("source")) {
       modeConfig.states[0].sources = [ util.copy(modeConfig.states[0].source) ];
+      delete modeConfig.states[0].source;
    }
    else if (!modeConfig.states[0].hasOwnProperty("sources")) {
       modeConfig.states[0].sources = [];
@@ -115,6 +118,24 @@ function ModeProperty(_config, _owner) {
 }
 
 util.inherits(ModeProperty, StateProperty);
+
+// Button updates during settling must still resolve competing selections. Handle
+// notifications here rather than entry guards, which would choose by config order.
+ModeProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
+   if (this.currentState && ["settle-invalid", "invalid"].indexOf(this.currentState.name) !== -1 &&
+       _data.value === true && this.sourceListeners[_sourceListener.sourceEventName] === _sourceListener) {
+      var modeName = this.config.hasOwnProperty("modeName") ? this.config.modeName : "MODE";
+      var modes = this.config.modes || [];
+      var buttons = modes.map(function(mode) { return mode.name.toUpperCase() + "-" + modeName + "-ACTIVE"; });
+      if (buttons.indexOf(_data.name) !== -1) {
+         if (_data.hasOwnProperty("transaction")) this.owner.setTransaction(_data.transaction);
+         this.alignActions(buttons.filter(function(name) { return name !== _data.name; }).map(function(name) {
+            return { property: name, value: false };
+         }), this.currentState.priority);
+      }
+   }
+   StateProperty.prototype.newEventReceivedFromSource.call(this, _sourceListener, _data);
+};
 
 // Called when system state is required
 ModeProperty.prototype.export = function(_exportObj) {
