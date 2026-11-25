@@ -73,7 +73,7 @@ StateProperty.prototype.import = function(_importObj) {
 StateProperty.prototype.hotStart = function() {
    Property.prototype.hotStart.call(this);
 
-   if (this.currentState && (this.currentState.hasOwnProperty("timeout"))) {
+   if ((this.stateTimer !== null) && (this.stateTimer !== undefined) && this.currentState && (this.currentState.hasOwnProperty("timeout"))) {
      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.stateTimer,
                                         { nextState: this.currentState.timeout.nextState, actions: this.currentState.timeout.actions });
    }

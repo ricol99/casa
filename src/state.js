@@ -309,7 +309,7 @@ State.prototype.hotStart = function() {
             this.owner.alignActions([this.actionTimeouts[_index].action], this.priority);
             this.actionTimeouts[_index] = null;
 
-         }, this.actionTimeouts[i].timeout, this.actionTimeouts.length-1);
+         }, this.actionTimeouts[i].timeout, i);
       }
    }
 };
