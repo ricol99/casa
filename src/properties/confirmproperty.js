@@ -39,8 +39,8 @@ ConfirmProperty.prototype.newEventReceivedFromSource = function(_sourceListener,
 
    if (_data.value) {
 
-      if (this.bufferedSources.hasOwnProperty(_sourceListener.uName)) {
-         this.bufferedSources[_sourceListener.uName].reset();
+      if (this.buffer.hasOwnProperty(_sourceListener.uName)) {
+         this.buffer[_sourceListener.uName].reset();
       }
       else {
          this.buffer[_sourceListener.uName] = new ConfEvent(this, _sourceListener, _data);

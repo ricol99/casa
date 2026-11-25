@@ -611,7 +611,7 @@ State.prototype.filterActions = function(_actions) {
 
          this.actionTimeouts.push({ action: _actions[i], timeout: util.setTimeout( (_index) => {
 
-            if ((this.actionTimeouts.length > _index) && this.actionTimeouts[index]) {
+            if ((this.actionTimeouts.length > _index) && this.actionTimeouts[_index]) {
 
                if ( this.actionTimeouts[_index].action.hasOwnProperty("handler")) {
                   this.launchActionHandlers([ this.actionTimeouts[_index].action]);

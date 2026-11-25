@@ -36,8 +36,8 @@ McpSpiAdcChannel.prototype.hotStart = function() {
 
 McpSpiAdcChannel.prototype.newSubscriptionAdded = function(_subscription) {
 
-   if (_subscription.interval < this.getProperty("interval")) {
-      this.alignPropertyValue('interval', _subscription.interval);
+   if (_subscription.args && (_subscription.args.interval < this.getProperty("interval"))) {
+      this.alignPropertyValue('interval', _subscription.args.interval);
    }
    
    if (!this.initialisationStarted) {

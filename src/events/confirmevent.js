@@ -44,7 +44,7 @@ ConfirmEvent.prototype.newEventReceivedFromSource = function(_sourceListener, _d
    }
 
    if (this.shouldRaiseEvent()) {
-      this.raiseEvent(_data);
+      this.raise(_data);
    }
 };
 

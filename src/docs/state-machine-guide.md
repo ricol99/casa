@@ -941,7 +941,7 @@ These are worth knowing when authoring configs:
 - Exact state names are simpler than regex states; prefer exact names unless you truly need pattern matching.
 - Source-level guards and action-level guards are more common and clearer than top-level state guards.
 - If a timeout references a property or source, make sure the resolved value is numeric or a numeric string.
-- Delayed actions belong to the state and are cancelled on exit, but the current delayed callback in `State.filterActions()` references `index` instead of `_index` and can throw when it fires. Treat delayed execution as a known implementation defect.
+- Delayed actions belong to the state and are cancelled on exit. Each callback uses its own queued action index; `src/test/state_delayed_actions_test.js` covers delayed dispatch, multiple pending actions, handlers and exit cancellation.
 - A zero-duration timeout takes its immediate transition without running timeout actions; use entry actions when those effects must occur.
 - Hot-start timer restoration currently supplies `action` while the timeout callback reads `actions`, so restored timeout actions are not replayed through that path.
 - `ignoreControl: true` is common for internal orchestration state machines because it avoids fights with normal source controllers.

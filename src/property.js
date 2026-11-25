@@ -40,7 +40,7 @@ function Property(_config, _owner) {
    }
 
    if (_config.hasOwnProperty("alwaysUpdate")) {
-      this.alwaysUpdate = _config.alwaysUpdate;
+      this._alwaysUpdate = _config.alwaysUpdate;
    }
 
    this.setPropagation(_config);
@@ -240,7 +240,7 @@ Property.prototype.checkSourceListenerValueType = function(_sourceListener) {
 // Should we update even though the values are the same?
 //
 Property.prototype.alwaysUpdate = function() {
-   return this.hasOwnProperty("alwaysUpdate") && this.alwaysUpdate;
+   return this.hasOwnProperty("_alwaysUpdate") && this._alwaysUpdate;
 };
 
 // Used internally by derived Property to set a new value for the property

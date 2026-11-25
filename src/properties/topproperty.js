@@ -1,5 +1,7 @@
 var util = require('util');
 var Property = require('../property');
+var SourceListener = require('../sourcelistener');
+var Gang = require('../gang');
 
 function TopProperty(_config, _owner) {
    _config.allSourcesRequiredForValidity = false;
@@ -8,13 +10,14 @@ function TopProperty(_config, _owner) {
    Property.call(this, _config, _owner);
    this.sources = [];
 
-   if (_config.hasOwnProperty('source')) {
-      this.sources.push(this.sourceListeners[_config.source.uName]);
-   }
-   else if (_config.hasOwnProperty('sources')) {
+   // Property normalises singular sources and fills in omitted source names.
+   if (_config.hasOwnProperty('sources')) {
+      var gang = Gang.mainInstance();
 
       for (var i = 0; i < _config.sources.length; ++i) {
-         this.sources.push(this.sourceListeners[_config.sources[i].uName]);
+         var source = _config.sources[i];
+         var key = SourceListener.getSourceEventName(gang.validateUName(source.uName), source, gang.name);
+         this.sources.push(this.sourceListeners[key]);
       }
    }
 }
