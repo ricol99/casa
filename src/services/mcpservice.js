@@ -513,20 +513,47 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                }
             },
             {
+               name: "casa.get_control_status",
+               title: "Get Control Status",
+               description: "Read current MODE, manual override countdown and expected return to auto. Times are estimates, not guarantees of hardware state.",
+               inputSchema: {
+                  type: "object",
+                  properties: { uName: { type: "string" } },
+                  required: [ "uName" ]
+               },
+               annotations: { readOnlyHint: true }
+            },
+            {
                name: "casa.set_mode_manual",
                title: "Set Manual Mode",
-               description: "Set MODE to manual for a named object",
+               description: "Enter manual mode and return control status. An existing manual override is unchanged; use renew to replace its remaining duration. Duration is positive seconds; omitted uses the configured default.",
                inputSchema: {
                   type: "object",
                   properties: {
                      uName: { type: "string" },
-                     duration: { type: "number" }
+                     duration: { type: "number", exclusiveMinimum: 0 }
                   },
                   required: [ "uName" ]
                },
                annotations: {
                   readOnlyHint: false
                }
+            },
+            {
+               name: "casa.release_manual_override",
+               title: "Release Manual Override",
+               description: "Release only manual mode and return observed control status. Other active modes are preserved.",
+               inputSchema: { type: "object", properties: { uName: { type: "string" } }, required: [ "uName" ] },
+               annotations: { readOnlyHint: false }
+            },
+            {
+               name: "casa.renew_manual_override",
+               title: "Renew Manual Override",
+               description: "Replace the remaining time of an active manual override with duration seconds from now, including an unchanged duration. Return observed control status.",
+               inputSchema: { type: "object", properties: {
+                  uName: { type: "string" }, duration: { type: "number", exclusiveMinimum: 0 }
+               }, required: [ "uName", "duration" ] },
+               annotations: { readOnlyHint: false }
             },
             {
                name: "casa.set_property",
@@ -545,7 +572,7 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                   readOnlyHint: false
                }
             }
-         ]
+         ].concat(this.getManagementTools())
       });
    }
 
@@ -560,6 +587,30 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
 
    if (!_params || !_params.name) {
       return this.sendJsonRpcError(_response, _id, -32602, "Invalid params");
+   }
+
+   if (this.getManagementTools().some(function(tool) { return tool.name === _params.name; })) {
+      return this.handleManagementTool(_id, _params, _response);
+   }
+
+   if (_params.name === "casa.get_control_status") {
+      var statusArgs = _params.arguments || {};
+      if (typeof statusArgs.uName !== "string" || !statusArgs.uName.trim()) {
+         return this.sendJsonRpcError(_response, _id, -32602, "uName is required");
+      }
+      var statusTarget = this.gang.findNamedObject(statusArgs.uName);
+      if (!statusTarget) {
+         return this.sendJsonRpcError(_response, _id, -32000, "Object not found");
+      }
+      if (!statusTarget.properties || !statusTarget.properties.MODE) {
+         return this.sendJsonRpcError(_response, _id, -32000, "Target does not expose MODE");
+      }
+      var status = this.getControlStatus(statusTarget);
+      return this.sendJsonRpcResult(_response, _id, {
+         content: [{ type: "text", text: JSON.stringify(status) }],
+         structuredContent: status,
+         isError: false
+      });
    }
 
    if (_params.name === "casa.get_named_object_tree") {
@@ -580,26 +631,8 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
       });
    }
 
-   if (_params.name === "casa.set_mode_manual") {
-      var args = _params.arguments || {};
-      var target = args.uName ? this.gang.findNamedObject(args.uName) : null;
-
-      if (!target || !target.setManualMode) {
-         return this.sendJsonRpcError(_response, _id, -32000, "Target does not support manual mode");
-      }
-
-      if (args.hasOwnProperty("duration")) {
-         target.setManualMode(args.duration);
-      }
-      else {
-         target.setManualMode();
-      }
-
-      return this.sendJsonRpcResult(_response, _id, {
-         content: [ { type: "text", text: "ok" } ],
-         structuredContent: { ok: true },
-         isError: false
-      });
+   if (["casa.set_mode_manual", "casa.release_manual_override", "casa.renew_manual_override"].indexOf(_params.name) !== -1) {
+      return this.handleManualControl(_id, _params, _response);
    }
 
    if (_params.name === "casa.set_property") {
@@ -610,20 +643,253 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
          return this.sendJsonRpcError(_response, _id, -32000, "Target does not support setProperty");
       }
 
-      var result = target2.setProperty(args2.property, args2.value, { sourceName: "mcp" });
-
-      if (!result) {
-         return this.sendJsonRpcError(_response, _id, -32000, "Property not found or rejected");
-      }
-
-      return this.sendJsonRpcResult(_response, _id, {
-         content: [ { type: "text", text: "ok" } ],
-         structuredContent: { ok: true },
-         isError: false
+      return this.invokeConsoleCommand(target2, "setProperty", [args2.property, args2.value, { sourceName: "mcp" }], (error, result) => {
+         if (error || !result) {
+            return this.sendJsonRpcError(_response, _id, -32000, error ? (error.message || String(error)) : "Property not found or rejected");
+         }
+         return this.sendJsonRpcResult(_response, _id, {
+            content: [ { type: "text", text: "ok" } ],
+            structuredContent: { ok: true }, isError: false
+         });
       });
    }
 
    return this.sendJsonRpcError(_response, _id, -32601, "Unknown tool");
+};
+
+McpService.prototype.getManagementTools = function() {
+   return [
+      { name: "casa.export_config", title: "Export Stored Configuration",
+        description: "Export the local Casa or gang database documents and revision hash. Stored configuration, not live state; may contain configured credentials.",
+        inputSchema: { type: "object", properties: { scope: { enum: ["casa", "gang"] } }, required: ["scope"] },
+        annotations: { readOnlyHint: true } },
+      { name: "casa.preview_config", title: "Preview Configuration Changes",
+        description: "Use the existing configuration preview engine to inspect proposed changes without saving. This is not full hardware or runtime validation.",
+        inputSchema: { type: "object", properties: { options: { type: "object" } }, required: ["options"] },
+        annotations: { readOnlyHint: true } },
+      { name: "casa.deploy_config", title: "Save Configuration for Restart",
+        description: "Replace one local configuration database using edited documents from export_config. Requires its current revision. Saves a backup; does not restart or hot-apply. Use this for modifying an existing setup or deploying a replacement configuration.",
+        inputSchema: { type: "object", properties: { scope: { enum: ["casa", "gang"] },
+           expectedRevision: { type: "string" }, docs: { type: "array", items: { type: "object" } }
+        }, required: ["scope", "expectedRevision", "docs"] },
+        annotations: { readOnlyHint: false, destructiveHint: true } },
+      { name: "casa.restart", title: "Restart Casa Process",
+        description: "Request restart of this endpoint's Casa process, not a Pi reboot. Requires its exact Casa name. A process supervisor must restart it; this response does not confirm recovery.",
+        inputSchema: { type: "object", properties: { casaName: { type: "string" } }, required: ["casaName"] },
+        annotations: { readOnlyHint: false, destructiveHint: true } }
+   ];
+};
+
+McpService.prototype.handleManagementTool = function(_id, _params, _response) {
+   var args = _params.arguments || {};
+   var casa = this.gang.casa;
+   var reply = (value) => this.sendJsonRpcResult(_response, _id, {
+      content: [{ type: "text", text: JSON.stringify(value) }], structuredContent: value, isError: false
+   });
+   var fail = (error) => this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
+   if (_params.name === "casa.restart") {
+      if (args.casaName !== casa.name) return fail("casaName must match this endpoint's Casa");
+      if (this.gang.ignoreRestart) return fail("Restart is disabled by ignoreRestart");
+      if (this.configWriteInProgress) return fail("Configuration write in progress");
+      if (this.restartPending) return fail("Restart already requested");
+      try { this.getConsoleApi(casa); } catch (error) { return fail(error); }
+      this.restartPending = true;
+      // Wait until the response is handed off before invoking the existing restart path.
+      _response.once("finish", () => setTimeout(() => this.restartCasaProcess(), 100));
+      return reply({ accepted: true, casaName: casa.name, action: "restart_process", recoveryConfirmed: false });
+   }
+   if (_params.name === "casa.preview_config") {
+      if (!args.options || typeof args.options !== "object" || Array.isArray(args.options)) return fail("options must be an object");
+      return this.invokeConsoleCommand(casa, "previewConfig", [args.options], (error, result) => error ? fail(error) : reply(result));
+   }
+   if (args.scope !== "casa" && args.scope !== "gang") return fail("scope must be casa or gang");
+   var dbName = (args.scope === "casa" ? casa.name : this.gang.name) + "-db";
+   var db = this.gang.getDb(dbName);
+   if (!db) return fail("Configuration database is unavailable");
+   if (this.configWriteInProgress || this.restartPending) return fail("Configuration write or restart in progress");
+   var deploy = _params.name === "casa.deploy_config";
+   if (deploy) {
+      if (typeof args.expectedRevision !== "string" || !args.expectedRevision || !Array.isArray(args.docs) || !args.docs.length) {
+         return fail("expectedRevision and a nonempty docs array are required");
+      }
+      var ids = new Set();
+      for (var doc of args.docs) {
+         if (!doc || typeof doc !== "object" || typeof doc._id !== "string" || !doc._id ||
+             typeof doc._collection !== "string" || !doc._collection || ids.has(doc._id)) {
+            return fail("Each document requires a unique _id and _collection");
+         }
+         ids.add(doc._id);
+      }
+      var identity = args.scope === "casa" ? casa.name : this.gang.name;
+      if (!args.docs.some(function(doc) { return doc._collection === args.scope && doc.name === identity; })) {
+         return fail("Replacement must retain the target's identity document");
+      }
+      this.configWriteInProgress = true;
+   }
+   this.invokeConsoleCommand(args.scope === "casa" ? casa : this.gang, "exportDb", [], (error, docs) => {
+      if (error) { this.configWriteInProgress = false; return fail(error); }
+      var revision = this.configurationRevision(docs);
+      if (!deploy) return reply({ casaName: casa.name, scope: args.scope, dbName: dbName, revision: revision, docs: docs });
+      if (revision !== args.expectedRevision) {
+         this.configWriteInProgress = false;
+         return fail("Configuration changed; export it again before deploying");
+      }
+      var fs = require("fs");
+      var path = require("path");
+      var backup = path.join(this.gang.configPath(), dbName + ".mcp-backup-" + Date.now() + "-" + crypto.randomBytes(4).toString("hex") + ".json");
+      fs.writeFile(backup, JSON.stringify({ dbName: dbName, revision: revision, docs: docs }, null, 2), { flag: "wx", mode: 0o600 }, (backupError) => {
+         if (backupError) { this.configWriteInProgress = false; return fail(backupError); }
+         this.invokeConsoleCommand(casa, "replaceDb", [{ dbName: dbName, docs: args.docs }], (writeError) => {
+            if (writeError) {
+               return this.invokeConsoleCommand(casa, "replaceDb", [{ dbName: dbName, docs: docs }], (restoreError) => {
+                  this.configWriteInProgress = false;
+                  return fail("Deployment failed; backup: " + backup + "; rollback " + (restoreError ? "failed: " + String(restoreError) : "completed") + "; " + String(writeError));
+               });
+            }
+            this.invokeConsoleCommand(args.scope === "casa" ? casa : this.gang, "exportDb", [], (readError, savedDocs) => {
+               this.configWriteInProgress = false;
+               if (readError) return fail("Configuration saved but readback failed; backup: " + backup + "; " + String(readError));
+               var savedRevision = this.configurationRevision(savedDocs);
+               if (savedRevision !== this.configurationRevision(args.docs)) {
+                  return fail("Configuration readback differs from requested documents; export before retrying; backup: " + backup);
+               }
+               return reply({ ok: true, casaName: casa.name, dbName: dbName,
+                  revision: savedRevision, backup: backup, restartRequired: true, appliedToRuntime: false });
+            });
+         });
+      });
+   });
+};
+
+McpService.prototype.configurationRevision = function(_docs) {
+   // NeDB read order is not a revision; hash a stable ordering of stored documents.
+   var ordered = _docs.slice().sort(function(a, b) { return String(a._id).localeCompare(String(b._id)); });
+   return crypto.createHash("sha256").update(JSON.stringify(ordered)).digest("hex");
+};
+
+McpService.prototype.restartCasaProcess = function() {
+   this.invokeConsoleCommand(this.gang.casa, "restart", [], (error) => {
+      this.restartPending = false;
+      if (error) console.error(error);
+   });
+};
+
+McpService.prototype.getConsoleApi = function(_target) {
+   var consoleService = this.gang.casa.findService("consoleapiservice");
+   if (!consoleService) throw new Error("Console API service is unavailable");
+   var api = consoleService.findOrCreateConsoleApiObject(_target);
+   if (!api) throw new Error("Console API object is unavailable");
+   return api;
+};
+
+McpService.prototype.invokeConsoleCommand = function(_target, _command, _params, _callback) {
+   try {
+      var api = this.getConsoleApi(_target);
+      if (typeof api[_command] !== "function") return _callback("Command is not supported by this object");
+      return api[_command]({ name: "mcp" }, _params, _callback);
+   }
+   catch (error) { return _callback(error); }
+};
+
+McpService.prototype.handleManualControl = function(_id, _params, _response) {
+   var args = _params.arguments || {};
+   var renew = _params.name === "casa.renew_manual_override";
+   var release = _params.name === "casa.release_manual_override";
+   if (typeof args.uName !== "string" || !args.uName.trim() ||
+       ((renew || args.hasOwnProperty("duration")) && (!Number.isFinite(args.duration) || args.duration <= 0))) {
+      return this.sendJsonRpcError(_response, _id, -32602, "uName and, when supplied, a positive finite duration in seconds are required");
+   }
+   var target = this.gang.findNamedObject(args.uName);
+   var mode = target && target.properties && target.properties.MODE;
+   if (!mode || mode.type !== "modeproperty" || target.fromPeer || target.bowing ||
+       !mode.valid || mode.cold || !target.properties["MANUAL-MODE-DURATION"] || !target.properties["MANUAL-MODE-ACTIVE"] ||
+       typeof target.setManualMode !== "function" || typeof target.renewManualMode !== "function" || typeof target.releaseManualMode !== "function") {
+      return this.sendJsonRpcError(_response, _id, -32000, "Target requires a valid locally controlled manual mode; use its owning source/Casa");
+   }
+   var requestedAt = Date.now();
+   // Property events and the MODE settling state are asynchronous. Observe for a bounded period.
+   var respond = () => {
+      var status = this.getControlStatus(target);
+      var completed = status.modeValid && (release
+         ? (target.properties["MANUAL-MODE-ACTIVE"].value === false && ["manual", "invalid", "settle-invalid"].indexOf(status.mode) === -1)
+         : status.mode === "manual");
+      if (renew) {
+         completed = completed && status.manualOverride.status === "timed" &&
+            Date.parse(status.manualOverride.endsAt) >= requestedAt + args.duration * 1000 - 100;
+      }
+      if (!completed && Date.now() - requestedAt < 1000) {
+         setTimeout(respond, 20);
+         return;
+      }
+      var result = { ok: true, completed: completed, controlStatus: status };
+      this.sendJsonRpcResult(_response, _id, {
+         content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result, isError: false
+      });
+   };
+   var command = renew ? "renewManualOverride" : release ? "releaseManualOverride" : "setManualMode";
+   this.invokeConsoleCommand(target, command, release ? [] : [args.duration], (error) => {
+      if (error) return this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
+      respond();
+   });
+};
+
+McpService.prototype.getControlStatus = function(_target) {
+   var mode = _target.properties.MODE;
+   var now = Date.now();
+   var valid = mode.valid === true && !mode.cold;
+   var local = !_target.fromPeer && !_target.bowing;
+   var result = {
+      uName: _target.uName,
+      displayName: _target.displayName || _target.name,
+      observedAt: new Date(now).toISOString(),
+      mode: mode.value === undefined ? null : mode.value,
+      modeValid: valid,
+      timingAuthority: local ? "local" : "peer",
+      controller: _target.controller ? {
+         uName: _target.controller.uName,
+         state: _target.controller.currentState ? _target.controller.currentState.name : null
+      } : null,
+      manualOverride: { status: "unknown", remainingSeconds: null, endsAt: null },
+      returnToAuto: { status: "unknown", expectedAt: null }
+   };
+
+   if (!valid) return result;
+   if (mode.value !== "manual") {
+      result.manualOverride.status = "inactive";
+      if (mode.value === "auto") result.returnToAuto.status = "already_auto";
+      return result;
+   }
+
+   // Only a locally running standard mode machine can explain its timer.
+   if (!local || mode.type !== "modeproperty" || !mode.currentState || mode.currentState.name !== "manual") {
+      return result;
+   }
+   var timer = mode.stateTimer;
+   if (timer && typeof timer.left === "function") {
+      var remaining = timer.left();
+      // The callback may be queued even though its deadline has just passed.
+      if (remaining < 0 && timer.timeout) remaining = 0;
+      if (Number.isFinite(remaining) && remaining >= 0) {
+         result.manualOverride.status = "timed";
+         result.manualOverride.remainingSeconds = Math.ceil(remaining / 1000);
+         result.manualOverride.endsAt = new Date(now + remaining).toISOString();
+         if (mode.config && mode.config.restingMode && mode.config.restingMode.name === "auto") {
+            result.returnToAuto = {
+               status: "expected",
+               expectedAt: result.manualOverride.endsAt,
+               condition: "After manual mode expires and settles, provided no other mode or override intervenes."
+            };
+         }
+      }
+   }
+   else {
+      var duration = _target.properties["MANUAL-MODE-DURATION"];
+      if (duration && duration.valid === true && !duration.cold && duration.value === -1) {
+         result.manualOverride.status = "indefinite";
+         result.returnToAuto.status = "not_scheduled";
+      }
+   }
+   return result;
 };
 
 McpService.prototype.sendJsonRpcResult = function(_response, _id, _result) {

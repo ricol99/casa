@@ -454,6 +454,22 @@ Source.prototype.getAutoMode = function() {
    return this.properties['MODE'].value === 'auto';
 };
 
+Source.prototype.releaseManualMode = function() {
+   this.alignPropertyValue("MANUAL-MODE-DURATION", -1);
+   this.alignPropertyValue("MANUAL-MODE-ACTIVE", false);
+};
+
+Source.prototype.renewManualMode = function(_duration) {
+   if (!Number.isFinite(_duration) || _duration <= 0 || !this.getManualMode()) return false;
+   var mode = this.properties.MODE;
+   if (!mode.currentState || mode.currentState.name !== "manual" || typeof mode.resetStateTimer !== "function") return false;
+   var unchanged = this.getProperty("MANUAL-MODE-DURATION") === _duration;
+   this.alignPropertyValue("MANUAL-MODE-DURATION", _duration);
+   // Changed durations reset through their source event; identical values emit no event.
+   if (unchanged) mode.resetStateTimer(mode.currentState);
+   return true;
+};
+
 Source.prototype.setAutoMode = function() {
 
    for (var propertyName in this.properties) {

@@ -10,9 +10,36 @@ This document covers source inspection and configuration preview in the Casa dev
 | Browser console | `/webui/index.html` and `/webuiapi/io` on the global console | [`src/console.js`](../console.js), [`src/webui/app.js`](../webui/app.js) |
 | MCP | HTTP at `/mcp` by default when configured | [`src/services/mcpservice.js`](../services/mcpservice.js) |
 
-The MCP service has its own tool contract. It exposes `casa.get_named_object_tree`, `casa.set_mode_manual` and `casa.set_property`.
+The MCP service has its own tool contract. It exposes `casa.get_named_object_tree`, `casa.get_control_status`, `casa.set_mode_manual`, `casa.release_manual_override`, `casa.renew_manual_override` `casa.set_property`, `casa.export_config`, `casa.preview_config`, `casa.deploy_config` and `casa.restart`.
+
+`casa.get_control_status` is read-only and requires `{ "uName": ":room" }`. Its text and structured results contain the same status object: object identity/display name, `observedAt` (UTC ISO timestamp), current `mode`, `modeValid`, `timingAuthority` (`local` or `peer`), and controller identity/state without numeric priorities.
+
+`manualOverride.status` is `inactive`, `timed`, `indefinite` or `unknown`. A timed override includes `remainingSeconds` (rounded up from the live timer) and `endsAt` (UTC ISO timestamp); otherwise those fields are null. The configured duration is never presented as a countdown. Invalid/cold mode values, inherited plain MODE properties and peer/bowing objects do not provide authoritative local manual timing.
+
+`returnToAuto.status` is `already_auto`, `expected`, `not_scheduled` or `unknown`. `expectedAt` is populated only for a timed local mode machine whose resting mode is auto. It estimates manual expiry, followed by normal settling, provided no other mode or override intervenes. An indefinite local override reports `not_scheduled`. This supports wording such as “The room is in manual mode; automatic control is expected to resume in about two minutes.” It does not promise a particular output or hardware state. The tool does not change mode, renew timers, set properties or start a transaction. Missing arguments, unknown targets and targets without MODE return JSON-RPC errors. Focused coverage: `src/test/mcp_control_status_test.js`.
+
+## MCP configuration management
+
+MCP resolves each real object to its paired Console API object through `ConsoleApiService.findOrCreateConsoleApiObject`. Configuration operations invoke the existing `exportDb`, `previewConfig`, `replaceDb` and `restart` commands. Manual writes invoke `SourceConsoleApi.setManualMode`, `releaseManualOverride` and `renewManualOverride`; property writes invoke `setProperty`, retaining MCP source attribution.
+
+- `casa.export_config({scope: "casa" | "gang"})` returns local stored database `docs`, `dbName`, and `revision`. These are configuration records, not live runtime state, and can include configured credentials.
+- `casa.preview_config({options})` passes the existing preview options described below to `previewConfig`. It previews supported ownership/source changes; it is not a validator for a complete exported database. Its patch format is separate from the raw documents used for deployment.
+- `casa.deploy_config({scope, expectedRevision, docs})` saves edited exported records to one local database. Preserve the unique `_id`, `_collection`, and target identity record. A stale revision is rejected. The tool writes a private backup, uses the existing database replacement command and reads back the saved configuration. On replacement failure it attempts to restore the backup and reports whether restoration succeeded. Success returns the new revision, backup path, `restartRequired: true` and `appliedToRuntime: false`.
+- `casa.restart({casaName})` requires the exact name of this endpoint's Casa. It replies before requesting process exit through the existing restart command; a supervisor must relaunch Casa. It respects `ignoreRestart`. Acceptance does not confirm recovery. It does not reboot the Pi.
+
+The normal edit flow is export, edit the records, deploy using the exported revision, then separately request restart when ready. Deployment does not hot-apply or restart automatically. Operations target the Casa serving this endpoint; they do not distribute configuration to other Pis. Existing MCP authentication applies. MCP prevents overlapping deployment/restart requests, but this is not a transaction across separate console clients or multiple databases. Database replacement is not crash-atomic; the backup is available for recovery. Structural checks and readback do not prove that a configuration will start successfully or operate hardware correctly.
+
+Focused checks cover paired command dispatch, revision rejection, backup/rollback and deferred restart in `src/test/mcp_management_test.js`, and manual operations in `src/test/mcp_manual_control_test.js`.
 
 ## Runtime console transport
+
+### MCP manual control
+
+- `casa.set_mode_manual({uName, duration?})` enters manual mode. A supplied duration must be positive finite seconds; omission uses the configured default. Calling it while already manual leaves that override unchanged.
+- `casa.renew_manual_override({uName, duration})` requires an active manual state and replaces its remaining duration from now. Repeating the same duration restarts the timer too.
+- `casa.release_manual_override({uName})` clears the manual duration/active flag without clearing other modes. Releasing an already inactive manual override is harmless; another mode can remain active.
+
+All three require a valid local modeproperty and return `{ok: true, completed, controlStatus}` in both text and structured content. `ok` acknowledges the request, not physical device completion. They observe asynchronous mode processing for up to one second; `completed: false` means the requested state was not observed within that window, and the accompanying status is the actual latest snapshot. Poll `get_control_status` to follow it. Peer/bowing sources and inherited plain MODE properties must be addressed through the owning source/Casa. Invalid arguments or unsupported targets return JSON-RPC errors. These tools do not set device outputs.
 
 Connect to `/consoleapi/io` over Socket.IO. The same command interface is available through configured Pusher and Webhook Relay message transports.
 
@@ -356,6 +383,10 @@ Casa:
 - `previewConfig '<json>' [--file path] [--include usage] [--limit N] [--progress] [--summaryOnly] [--topChanged N]`
 
 Source scope:
+- `setManualMode [seconds]` (default duration if omitted; existing manual override unchanged)
+- `renewManualOverride <seconds>` (restart the active manual timer)
+- `releaseManualOverride` (clear only the manual override)
+- All three manual commands support `--help`; durations must be positive finite seconds.
 - `resolve`
 - `explain`
 - `usage [--activeOnly] [--hasConsumers]`

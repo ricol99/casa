@@ -31,6 +31,35 @@ SourceConsoleCmd.prototype.set = function(_arguments, _callback) {
    this.executeParsedCommand("setProperty", _arguments, _callback);
 };
 
+SourceConsoleCmd.prototype.setManualMode = function(_arguments, _callback) {
+   return this.executeManualCommand("setManualMode", _arguments, 0, 1, _callback);
+};
+
+SourceConsoleCmd.prototype.renewManualOverride = function(_arguments, _callback) {
+   return this.executeManualCommand("renewManualOverride", _arguments, 1, 1, _callback);
+};
+
+SourceConsoleCmd.prototype.releaseManualOverride = function(_arguments, _callback) {
+   return this.executeManualCommand("releaseManualOverride", _arguments, 0, 0, _callback);
+};
+
+SourceConsoleCmd.prototype.executeManualCommand = function(_command, _arguments, _min, _max, _callback) {
+   var args = _arguments || [];
+   var usage = "Usage: " + _command + (_max ? (_min ? " <seconds>" : " [seconds]") : "");
+   if (args.length === 1 && (args[0] === "--help" || args[0] === "--usage")) {
+      this.console.write(usage);
+      return _callback(null, true);
+   }
+   if (args.length < _min || args.length > _max) return _callback(usage);
+   var params = [];
+   if (args.length) {
+      var duration = (typeof args[0] === "string" || typeof args[0] === "number") ? Number(args[0]) : NaN;
+      if (!Number.isFinite(duration) || duration <= 0) return _callback("Duration must be positive finite seconds. " + usage);
+      params.push(duration);
+   }
+   return this.executeParsedCommand(_command, params, _callback);
+};
+
 SourceConsoleCmd.prototype.events = function(_arguments, _callback) {
 
    if (_arguments && (_arguments.length > 0)) {
