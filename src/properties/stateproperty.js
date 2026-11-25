@@ -75,7 +75,7 @@ StateProperty.prototype.hotStart = function() {
 
    if (this.currentState && (this.currentState.hasOwnProperty("timeout"))) {
      this.stateTimer = util.setTimeout(StateProperty.prototype.timeoutInternal.bind(this), this.stateTimer,
-                                        { nextState: this.currentState.timeout.nextState, action: this.currentState.timeout.actions });
+                                        { nextState: this.currentState.timeout.nextState, actions: this.currentState.timeout.actions });
    }
 };
 

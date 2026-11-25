@@ -77,6 +77,12 @@ ConfirmProperty.prototype.amIValid = function() {
 ConfirmProperty.prototype.popConfEvent = function(_confEvent) {
    delete this.buffer[_confEvent.sourceListener.uName];
    this.bufferLength--;
+
+   var newValue = this.calculateOutputValue();
+
+   if (newValue !== this.value) {
+      this.updatePropertyInternal(newValue, { sourceName: this.owner.uName });
+   }
 };
 
 function ConfEvent(_owner, _sourceListener, _data) {

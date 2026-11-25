@@ -387,7 +387,7 @@ In practice, the clearer and more common pattern in this codebase is to put guar
 - a source
 - an action
 
-State-level guards are intended for immediate-on-entry checks, but the current `State.checkStateGuards()` also indexes `this.sources[i]` while evaluating guard `i`. A guard without a corresponding source can throw. Prefer source/action guards until this path is repaired.
+State-level guards are checked on entry. A matching guard with its own `nextState` requests an immediate transition unless that destination is the current state's name. The first eligible guard wins; no corresponding source entry is required. Specify the comparison `value` explicitly. These entry checks are separate from active guards attached to sources or actions. See `src/test/state_entry_guards_test.js` for focused coverage.
 
 ## Actions
 
@@ -891,7 +891,7 @@ These dynamic sources:
 - create source listeners immediately
 - can participate in guards, counters, and transitions
 
-This is an advanced facility and is mostly useful when a Thing discovers new inputs after startup. The current removal implementation references an undefined `mappedSource` variable and does not remove the entry from `this.sources`; do not rely on dynamic removal until it is repaired.
+This is an advanced facility and is mostly useful when a Thing discovers new inputs after startup. Removal deletes one matching source from the state's source list, event mapping and active-guard queue. It releases the source listener and active-guard listener references; listeners shared with other sources or states remain until their last reference is released. Removing an absent source does nothing. See `src/test/state_dynamic_sources_test.js` for focused coverage.
 
 ## Patterns Used in This Repo
 
@@ -943,7 +943,7 @@ These are worth knowing when authoring configs:
 - If a timeout references a property or source, make sure the resolved value is numeric or a numeric string.
 - Delayed actions belong to the state and are cancelled on exit. Each callback uses its own queued action index; `src/test/state_delayed_actions_test.js` covers delayed dispatch, multiple pending actions, handlers and exit cancellation.
 - A zero-duration timeout takes its immediate transition without running timeout actions; use entry actions when those effects must occur.
-- Hot-start timer restoration currently supplies `action` while the timeout callback reads `actions`, so restored timeout actions are not replayed through that path.
+- Hot-start timer restoration passes `actions` to the timeout callback. Regex state definitions are also registered by name in `states` through NamedObject ownership, so saved current/previous definition references can be restored there. The concrete property value is restored separately. See `src/test/stateproperty_hotstart_test.js` for focused timer/action and regex-reference checks.
 - `ignoreControl: true` is common for internal orchestration state machines because it avoids fights with normal source controllers.
 - `takeControlOnTransition: true` is useful when you want priority/controller state to follow the machine even when the transition itself does not emit property actions.
 

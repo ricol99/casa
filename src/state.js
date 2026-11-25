@@ -103,7 +103,7 @@ function State(_config, _owner) {
       if (_config.timeout.hasOwnProperty('action')) {
          this.timeout.actions = [ util.copy(_config.timeout.action, true) ];
       }
-      else if (_config.hasOwnProperty("actions")) {
+      else if (_config.timeout.hasOwnProperty("actions")) {
          this.timeout.actions = util.copy(_config.timeout.actions, true);
       }
    }
@@ -129,7 +129,7 @@ function State(_config, _owner) {
       if (_config.counter.hasOwnProperty('action')) {
          this.counter.actions = [ util.copy(_config.counter.action, true) ];
       }
-      else if (_config.hasOwnProperty("actions")) {
+      else if (_config.counter.hasOwnProperty("actions")) {
          this.counter.actions = util.copy(_config.counter.actions, true);
       }
    }
@@ -668,7 +668,7 @@ State.prototype.checkStateGuards = function() {
          if (this.checkGuard({ guards: [ this.guards[i] ] }) && this.guards[i].hasOwnProperty("nextState")) {
 
             // Property already matches so move to next state immediately
-            if (this.sources[i].hasOwnProperty("nextState") && (this.sources[i].nextState !== this.name)) {
+            if (this.guards[i].nextState !== this.name) {
                immediateNextState = this.guards[i].nextState;
                console.log(this.uName+": Immediate state transition required as guard has matched! Property="+this.guards[i].property+" value="+this.guards[i].value+", nextState="+immediateNextState);
                break;
@@ -817,16 +817,35 @@ State.prototype.removeExistingSource = function(_config) {
    for (var i = this.sources.length-1; i >= 0 ; --i) {
 
      if (this.sources[i].hasOwnProperty("id") && this.sources[i].id === sourceId) {
-        var mappedSources = this.sourceMap[this.sources[i].sourceListener.sourceEventName];
+        var source = this.sources[i];
+        var listenerName = source.sourceListener.sourceEventName;
+        var mappedSources = this.sourceMap[listenerName];
 
-        if (mappedSources && (mappedSource.length > 0)) {
+        if (mappedSources) {
+           var mappedIndex = mappedSources.indexOf(source);
 
-           if (mappedSources.length === 1) {
-              delete this.sourceMap[this.sources[i].sourceListener.sourceEventName];
-              this.owner.removeSourceListenerIfNecessary(this.sources[i].sourceListener.sourceEventName);
+           if (mappedIndex >= 0) {
+              mappedSources.splice(mappedIndex, 1);
            }
-           else {
-              mappedSources.splice(mappedSources.indexOf(this.sources[i]));
+
+           if (mappedSources.length === 0) {
+              delete this.sourceMap[listenerName];
+           }
+        }
+
+        this.sources.splice(i, 1);
+        this.activeGuardedSources = this.activeGuardedSources.filter(function(_source) {
+           return _source !== source;
+        });
+
+        this.owner.removeSourceListenerIfNecessary(listenerName);
+
+        if (source.guards) {
+           for (var k = 0; k < source.guards.length; ++k) {
+              var guard = source.guards[k];
+              if (guard.active && guard.sourceListener) {
+                 this.owner.removeSourceListenerIfNecessary(guard.sourceListener.sourceEventName);
+              }
            }
         }
         break;
