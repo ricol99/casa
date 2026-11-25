@@ -246,6 +246,9 @@ StateProperty.prototype.setStateTimer = function(_previousState, _state, _timeou
       }
 
       if (timeoutDuration === 0) {
+         if (_state.timeout.actions) {
+            this.alignActions(_state.timeout.actions, _state.priority);
+         }
          return timeoutNextState;
       }
       else if (timeoutDuration > 0) {

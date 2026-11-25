@@ -942,7 +942,7 @@ These are worth knowing when authoring configs:
 - Source-level guards and action-level guards are more common and clearer than top-level state guards.
 - If a timeout references a property or source, make sure the resolved value is numeric or a numeric string.
 - Delayed actions belong to the state and are cancelled on exit. Each callback uses its own queued action index; `src/test/state_delayed_actions_test.js` covers delayed dispatch, multiple pending actions, handlers and exit cancellation.
-- A zero-duration timeout takes its immediate transition without running timeout actions; use entry actions when those effects must occur.
+- A zero-duration timeout processes its timeout actions before requesting the immediate transition. This also applies when a property, source or inherited remaining duration resolves to zero. Actions use the ordinary timeout action path, including control arbitration and buffering; no asynchronous timer is scheduled.
 - Hot-start timer restoration passes `actions` to the timeout callback. Regex state definitions are also registered by name in `states` through NamedObject ownership, so saved current/previous definition references can be restored there. The concrete property value is restored separately. See `src/test/stateproperty_hotstart_test.js` for focused timer/action and regex-reference checks.
 - `ignoreControl: true` is common for internal orchestration state machines because it avoids fights with normal source controllers.
 - `takeControlOnTransition: true` is useful when you want priority/controller state to follow the machine even when the transition itself does not emit property actions.
