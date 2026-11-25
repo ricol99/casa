@@ -93,6 +93,58 @@ if (mode === 'build') {
       for (let i = 0; i < 10; ++i) { button('a', true); await sleep(10); button('b', true); await sleep(10); }
       await check('rapid switching preserves existing manual override and selects B', 'b');
       button('b', false); await check('release preserves existing manual override', 'none');
+      // Exercise MCP and console commands through the runtime's paired Building API.
+      const mcp = Object.create(require('../services/mcpservice').prototype); mcp.gang = gang;
+      const call = (name, args) => new Promise(resolve => mcp.handleToolCall(1, { name: 'casa.' + name, arguments: args }, {
+         status() { return this; }, json: resolve
+      }));
+      const command = Object.create(require('../consolecmds/buildingconsolecmd').prototype);
+      command.console = { write() {} };
+      command.executeParsedCommand = (name, args, cb) => mcp.invokeConsoleCommand(building, name, args, cb);
+      const cmd = (name, args) => new Promise((resolve, reject) => command[name](args, (err, result) => err ? reject(new Error(String(err))) : resolve(result)));
+      let reply = await call('list_scenes', { uName: building.uName });
+      assert(!reply.error, JSON.stringify(reply));
+      assert.deepStrictEqual(reply.result.structuredContent.scenes.map(scene => scene.name), ['a', 'b']);
+      assert.strictEqual(reply.result.structuredContent.scenes[0].defaultDurationSeconds, -1);
+      assert.deepStrictEqual((await cmd('listScenes', [])).scenes, reply.result.structuredContent.scenes);
+      reply = await call('set_scene', { uName: building.uName, scene: 'b' });
+      assert(!reply.error, JSON.stringify(reply));
+      assert.strictEqual(reply.result.structuredContent.completed, true);
+      await check('MCP set scene preserves manual override', 'b');
+      reply = await call('get_scene_status', { uName: building.uName });
+      assert.strictEqual(reply.result.structuredContent.selectedScene, 'b');
+      assert.strictEqual(reply.result.structuredContent.expiry.status, 'indefinite');
+      assert.strictEqual(reply.result.structuredContent.rooms.length, 2);
+      assert(reply.result.structuredContent.rooms.every(room => room.sceneHasControl === true));
+      assert.strictEqual((await cmd('getSceneStatus', [])).selectedScene, 'b');
+      reply = await call('set_scene', { uName: building.uName, scene: 'missing' }); assert(reply.error);
+      reply = await call('set_scene', { uName: building.uName }); assert.strictEqual(reply.error.code, -32602);
+      reply = await call('set_scene', { uName: rooms[0].uName, scene: 'b' }); assert(reply.error);
+      assert.deepStrictEqual(manualSnapshot(), expectedManual);
+      assert.strictEqual((await cmd('releaseScene', [])).completed, true);
+      await check('console release preserves manual override', 'none');
+      assert.strictEqual((await cmd('setScene', ['b'])).completed, true);
+      await check('console set preserves manual override', 'b');
+      reply = await call('release_scene', { uName: building.uName });
+      assert.strictEqual(reply.result.structuredContent.completed, true);
+      await check('MCP release preserves manual override', 'none');
+      for (const name of ['listScenes', 'getSceneStatus', 'setScene', 'releaseScene']) assert.strictEqual(await cmd(name, ['--help']), true);
+      await assert.rejects(cmd('setScene', []));
+      await assert.rejects(cmd('releaseScene', ['b']));
+      // Room manual control is reported separately from the building selection.
+      rooms[0].setManualMode();
+      await waitFor('room manual', () => value(rooms[0], 'MODE') === 'manual');
+      await sleep(200); expectedManual = manualSnapshot(); manualChanges = [];
+      reply = await call('set_scene', { uName: building.uName, scene: 'b' });
+      assert.strictEqual(reply.result.structuredContent.completed, true);
+      await sleep(200);
+      reply = await call('get_scene_status', { uName: building.uName });
+      const roomStatus = reply.result.structuredContent.rooms.find(room => room.uName === rooms[0].uName);
+      assert.strictEqual(roomStatus.mode, 'manual'); assert.strictEqual(roomStatus.sceneHasControl, false);
+      assert.strictEqual(reply.result.structuredContent.selectedScene, 'b');
+      await call('release_scene', { uName: building.uName });
+      assert.deepStrictEqual(manualSnapshot(), expectedManual); assert.deepStrictEqual(manualChanges, []);
+      console.error('[PASS] Four MCP scene tools and four console commands; building/room manual modes preserved');
       console.error('[PASS] All scene switching integration checks');
       process.exit(0);
    })().catch(error => { console.error(error.stack); process.exit(1); });

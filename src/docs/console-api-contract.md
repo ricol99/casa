@@ -10,13 +10,32 @@ This document covers source inspection and configuration preview in the Casa dev
 | Browser console | `/webui/index.html` and `/webuiapi/io` on the global console | [`src/console.js`](../console.js), [`src/webui/app.js`](../webui/app.js) |
 | MCP | HTTP at `/mcp` by default when configured | [`src/services/mcpservice.js`](../services/mcpservice.js) |
 
-The MCP service has its own tool contract. It exposes `casa.get_named_object_tree`, `casa.get_control_status`, `casa.set_mode_manual`, `casa.release_manual_override`, `casa.renew_manual_override` `casa.set_property`, `casa.export_config`, `casa.preview_config`, `casa.deploy_config` and `casa.restart`.
+The MCP service has its own tool contract. It exposes `casa.get_named_object_tree`, `casa.get_control_status`, `casa.set_mode_manual`, `casa.release_manual_override`, `casa.renew_manual_override`, `casa.set_property`, `casa.export_config`, `casa.preview_config`, `casa.deploy_config` `casa.restart`, `casa.list_scenes`, `casa.get_scene_status`, `casa.set_scene` and `casa.release_scene`.
 
 `casa.get_control_status` is read-only and requires `{ "uName": ":room" }`. Its text and structured results contain the same status object: object identity/display name, `observedAt` (UTC ISO timestamp), current `mode`, `modeValid`, `timingAuthority` (`local` or `peer`), and controller identity/state without numeric priorities.
 
 `manualOverride.status` is `inactive`, `timed`, `indefinite` or `unknown`. A timed override includes `remainingSeconds` (rounded up from the live timer) and `endsAt` (UTC ISO timestamp); otherwise those fields are null. The configured duration is never presented as a countdown. Invalid/cold mode values, inherited plain MODE properties and peer/bowing objects do not provide authoritative local manual timing.
 
 `returnToAuto.status` is `already_auto`, `expected`, `not_scheduled` or `unknown`. `expectedAt` is populated only for a timed local mode machine whose resting mode is auto. It estimates manual expiry, followed by normal settling, provided no other mode or override intervenes. An indefinite local override reports `not_scheduled`. This supports wording such as “The room is in manual mode; automatic control is expected to resume in about two minutes.” It does not promise a particular output or hardware state. The tool does not change mode, renew timers, set properties or start a transaction. Missing arguments, unknown targets and targets without MODE return JSON-RPC errors. Focused coverage: `src/test/mcp_control_status_test.js`.
+
+## Building scenes: MCP and console commands
+
+Scene commands resolve the building's paired `BuildingConsoleApi` object. They operate the existing `SCENE` modeproperty buttons, without entering, renewing or releasing manual mode. The separate room `scene-state` cycle is not exposed by these tools.
+
+| MCP tool and arguments | Building-scope console command | Result |
+| --- | --- | --- |
+| `casa.list_scenes({uName})` | `listScenes` | Configured scene names/default durations and current `sceneStatus`. A default of -1 means no timeout. |
+| `casa.get_scene_status({uName})` | `getSceneStatus` | Current scene status. |
+| `casa.set_scene({uName, scene})` | `setScene <name>` | Select a configured scene through its Boolean selector, returning `{ok, completed, sceneStatus}`. Selecting an already active scene does not renew its timer. |
+| `casa.release_scene({uName})` | `releaseScene` | Clear configured scene selectors, returning `{ok, completed, sceneStatus}`. |
+
+Console commands support `--help` and `--usage`. The API method names match the console commands. Writes require a valid local building SCENE modeproperty; unknown scenes, unsupported objects and peer/bowing targets return errors. Use the owning building's Casa endpoint. Both transports use the same API observation: up to one second for the requested state. `completed: false` means it was not observed within that period. No result confirms physical hardware output.
+
+Status includes `state`, `selectedScene`, `valid`, `settling`, `observedAt`, `timingAuthority` and `expiry`. Expiry is `timed` with live `remainingSeconds`/UTC `endsAt`, `indefinite`, `inactive` or `unknown`. The settling timer is not presented as scene expiry. Peer/bowing timing and invalid/cold state are not reported as authoritative local countdowns.
+
+`rooms` lists observed room objects referencing this building, with their scene, MODE, controller identity/state and `sceneHasControl`. For local valid room scene properties, this flag compares the actual room controller with its BUILDING-SCENE property; unknown/peer ownership is null. This distinguishes “Movie is selected” from “The lounge is in manual mode.” It is an observed runtime view, not confirmation that every remote room or physical output has updated. Scene selection and release preserve existing building and room manual overrides; release permits whichever remaining controller wins, rather than guaranteeing auto.
+
+Coverage: `building_scene_status_test.js` tests timing, unknown states, ownership and tool discovery. `scene_switching_runtime_test.js` uses a real isolated building/two-room runtime, paired API dispatch, all four MCP tools and console commands, and checks manual mode remains unchanged. HTTP listening/discovery are disabled and no HomeKit hardware is connected.
 
 ## MCP configuration management
 

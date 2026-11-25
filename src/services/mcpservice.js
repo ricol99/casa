@@ -572,7 +572,7 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                   readOnlyHint: false
                }
             }
-         ].concat(this.getManagementTools())
+         ].concat(this.getManagementTools(), this.getSceneTools())
       });
    }
 
@@ -587,6 +587,22 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
 
    if (!_params || !_params.name) {
       return this.sendJsonRpcError(_response, _id, -32602, "Invalid params");
+   }
+
+   var sceneCommands = { "casa.list_scenes": "listScenes", "casa.get_scene_status": "getSceneStatus",
+      "casa.set_scene": "setScene", "casa.release_scene": "releaseScene" };
+   if (Object.prototype.hasOwnProperty.call(sceneCommands, _params.name)) {
+      var sceneArgs = _params.arguments || {};
+      if (typeof sceneArgs.uName !== "string" || !sceneArgs.uName.trim() ||
+          (_params.name === "casa.set_scene" && (typeof sceneArgs.scene !== "string" || !sceneArgs.scene.trim()))) {
+         return this.sendJsonRpcError(_response, _id, -32602, "uName and a scene name for set_scene are required");
+      }
+      var building = this.gang.findNamedObject(sceneArgs.uName);
+      if (!building) return this.sendJsonRpcError(_response, _id, -32000, "Object not found");
+      return this.invokeConsoleCommand(building, sceneCommands[_params.name], _params.name === "casa.set_scene" ? [sceneArgs.scene] : [], (error, result) => {
+         if (error) return this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
+         this.sendJsonRpcResult(_response, _id, { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result, isError: false });
+      });
    }
 
    if (this.getManagementTools().some(function(tool) { return tool.name === _params.name; })) {
@@ -655,6 +671,19 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
    }
 
    return this.sendJsonRpcError(_response, _id, -32601, "Unknown tool");
+};
+
+McpService.prototype.getSceneTools = function() {
+   return [
+      ["list_scenes", "List configured building scenes and current status", true],
+      ["get_scene_status", "Observe selected building scene, expiry and room control; physical outputs are not confirmed", true],
+      ["set_scene", "Select a named building scene through its button, leaving manual mode unchanged", false],
+      ["release_scene", "Release building scene buttons, leaving manual mode unchanged", false]
+   ].map(function(entry) {
+      var schema = { type: "object", properties: { uName: { type: "string" } }, required: ["uName"] };
+      if (entry[0] === "set_scene") { schema.properties.scene = { type: "string" }; schema.required.push("scene"); }
+      return { name: "casa." + entry[0], description: entry[1], inputSchema: schema, annotations: { readOnlyHint: entry[2] } };
+   });
 };
 
 McpService.prototype.getManagementTools = function() {
