@@ -550,7 +550,7 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
             {
                name: "casa.renew_manual_override",
                title: "Renew Manual Override",
-               description: "Replace the remaining time of an active manual override with duration seconds from now, including an unchanged duration. Return observed control status.",
+               description: "Replace the remaining time of an active manual override with duration seconds from now, including an unchanged duration. Return observed control status; peer timing may be unknown and completed false even when the owner renews successfully.",
                inputSchema: { type: "object", properties: {
                   uName: { type: "string" }, duration: { type: "number", exclusiveMinimum: 0 }
                }, required: [ "uName", "duration" ] },
@@ -840,21 +840,21 @@ McpService.prototype.handleManualControl = function(_id, _params, _response) {
    }
    var target = this.gang.findNamedObject(args.uName);
    var mode = target && target.properties && target.properties.MODE;
-   if (!mode || mode.type !== "modeproperty" || target.fromPeer || target.bowing ||
-       !mode.valid || mode.cold || !target.properties["MANUAL-MODE-DURATION"] || !target.properties["MANUAL-MODE-ACTIVE"] ||
-       typeof target.setManualMode !== "function" || typeof target.renewManualMode !== "function" || typeof target.releaseManualMode !== "function") {
-      return this.sendJsonRpcError(_response, _id, -32000, "Target requires a valid locally controlled manual mode; use its owning source/Casa");
+   if (!mode || !mode.valid || mode.cold || !target.properties["MANUAL-MODE-DURATION"] || !target.properties["MANUAL-MODE-ACTIVE"]) {
+      return this.sendJsonRpcError(_response, _id, -32000, "Target requires valid MODE and manual duration/active properties");
    }
+   var previousEnd = renew ? this.getControlStatus(target).manualOverride.endsAt : null;
    var requestedAt = Date.now();
    // Property events and the MODE settling state are asynchronous. Observe for a bounded period.
    var respond = () => {
       var status = this.getControlStatus(target);
       var completed = status.modeValid && (release
-         ? (target.properties["MANUAL-MODE-ACTIVE"].value === false && ["manual", "invalid", "settle-invalid"].indexOf(status.mode) === -1)
+         ? (target.getProperty("MANUAL-MODE-ACTIVE") === false && ["manual", "invalid", "settle-invalid"].indexOf(status.mode) === -1)
          : status.mode === "manual");
       if (renew) {
          completed = completed && status.manualOverride.status === "timed" &&
-            Date.parse(status.manualOverride.endsAt) >= requestedAt + args.duration * 1000 - 100;
+            Date.parse(status.manualOverride.endsAt) >= requestedAt + args.duration * 1000 - 100 &&
+            status.manualOverride.endsAt !== previousEnd;
       }
       if (!completed && Date.now() - requestedAt < 1000) {
          setTimeout(respond, 20);
@@ -881,7 +881,7 @@ McpService.prototype.getControlStatus = function(_target) {
       uName: _target.uName,
       displayName: _target.displayName || _target.name,
       observedAt: new Date(now).toISOString(),
-      mode: mode.value === undefined ? null : mode.value,
+      mode: _target.getProperty("MODE") === undefined ? null : _target.getProperty("MODE"),
       modeValid: valid,
       timingAuthority: local ? "local" : "peer",
       controller: _target.controller ? {
@@ -893,41 +893,35 @@ McpService.prototype.getControlStatus = function(_target) {
    };
 
    if (!valid) return result;
-   if (mode.value !== "manual") {
+   if (result.mode !== "manual") {
       result.manualOverride.status = "inactive";
-      if (mode.value === "auto") result.returnToAuto.status = "already_auto";
+      if (result.mode === "auto") result.returnToAuto.status = "already_auto";
       return result;
    }
 
-   // Only a locally running standard mode machine can explain its timer.
-   if (!local || mode.type !== "modeproperty" || !mode.currentState || mode.currentState.name !== "manual") {
-      return result;
-   }
-   var timer = mode.stateTimer;
-   if (timer && typeof timer.left === "function") {
-      var remaining = timer.left();
-      // The callback may be queued even though its deadline has just passed.
-      if (remaining < 0 && timer.timeout) remaining = 0;
-      if (Number.isFinite(remaining) && remaining >= 0) {
-         result.manualOverride.status = "timed";
-         result.manualOverride.remainingSeconds = Math.ceil(remaining / 1000);
-         result.manualOverride.endsAt = new Date(now + remaining).toISOString();
-         if (mode.config && mode.config.restingMode && mode.config.restingMode.name === "auto") {
-            result.returnToAuto = {
-               status: "expected",
-               expectedAt: result.manualOverride.endsAt,
-               condition: "After manual mode expires and settles, provided no other mode or override intervenes."
-            };
-         }
+   var expiry = _target.properties["MODE-EXPIRES-AT"];
+   if (!expiry || !expiry.valid || expiry.cold) return result;
+   var expiresAt = _target.getProperty("MODE-EXPIRES-AT");
+   if (Number.isFinite(expiresAt) && expiresAt > 0 && expiresAt <= 8640000000000000) {
+      result.manualOverride.status = "timed";
+      result.manualOverride.remainingSeconds = Math.ceil(Math.max(0, expiresAt - now) / 1000);
+      result.manualOverride.endsAt = new Date(expiresAt).toISOString();
+      var resting = _target.properties["MODE-RESTING-STATE"];
+      if (resting && resting.valid && !resting.cold && _target.getProperty("MODE-RESTING-STATE") === "auto") {
+         result.returnToAuto = {
+            status: "expected", expectedAt: result.manualOverride.endsAt,
+            condition: "After manual mode expires and settles, provided no other mode or override intervenes."
+         };
       }
    }
-   else {
+   else if (expiresAt === -1) {
       var duration = _target.properties["MANUAL-MODE-DURATION"];
-      if (duration && duration.valid === true && !duration.cold && duration.value === -1) {
+      if (duration && duration.valid && !duration.cold && _target.getProperty("MANUAL-MODE-DURATION") === -1) {
          result.manualOverride.status = "indefinite";
          result.returnToAuto.status = "not_scheduled";
       }
    }
+
    return result;
 };
 

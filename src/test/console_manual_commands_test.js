@@ -4,10 +4,10 @@ var SourceConsoleApi = require('../consoleapis/sourceconsoleapi');
 var cmd = Object.create(SourceConsoleCmd.prototype);
 var api = Object.create(SourceConsoleApi.prototype);
 var calls = [], output = [];
+var currentMode = 'auto';
 api.myObj = function() { return {
-   setManualMode: function(duration) { calls.push(['set', duration]); },
-   renewManualMode: function(duration) { calls.push(['renew', duration]); return true; },
-   releaseManualMode: function() { calls.push(['release']); }
+   getProperty: function() { return currentMode; },
+   setProperty: function(name, value, data) { calls.push([name, value, data]); return true; }
 }; };
 cmd.console = { write: function(text) { output.push(text); } };
 cmd.executeParsedCommand = function(command, params, callback) {
@@ -24,9 +24,10 @@ function call(command, args, expectedError) {
 }
 call('setManualMode', []);
 call('setManualMode', ['120']);
+currentMode = 'manual';
 call('renewManualOverride', ['60.5']);
 call('releaseManualOverride', []);
-assert.deepStrictEqual(calls, [['set', undefined], ['set', 120], ['renew', 60.5], ['release']]);
+assert.deepStrictEqual(calls, [['MANUAL-MODE-ACTIVE', true, {}], ['MANUAL-MODE-DURATION', 120, {}], ['MANUAL-MODE-DURATION', 60.5, { forceUpdate: true }], ['MANUAL-MODE-DURATION', -1, {}], ['MANUAL-MODE-ACTIVE', false, {}]]);
 var count = calls.length;
 call('renewManualOverride', [], true);
 call('releaseManualOverride', ['60'], true);

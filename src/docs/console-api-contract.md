@@ -14,9 +14,9 @@ The MCP service has its own tool contract. It exposes `casa.get_named_object_tre
 
 `casa.get_control_status` is read-only and requires `{ "uName": ":room" }`. Its text and structured results contain the same status object: object identity/display name, `observedAt` (UTC ISO timestamp), current `mode`, `modeValid`, `timingAuthority` (`local` or `peer`), and controller identity/state without numeric priorities.
 
-`manualOverride.status` is `inactive`, `timed`, `indefinite` or `unknown`. A timed override includes `remainingSeconds` (rounded up from the live timer) and `endsAt` (UTC ISO timestamp); otherwise those fields are null. The configured duration is never presented as a countdown. Invalid/cold mode values, inherited plain MODE properties and peer/bowing objects do not provide authoritative local manual timing.
+`manualOverride.status` is `inactive`, `timed`, `indefinite` or `unknown`. A timed override includes `remainingSeconds` (rounded up from the owning mode’s published expiry) and `endsAt` (UTC ISO timestamp); otherwise those fields are null. The configured duration is never presented as a countdown. The owner publishes `MODE-EXPIRES-AT` (UTC epoch milliseconds; -1 means no active mode timer) and `MODE-RESTING-STATE`. Both are ordinary mirrored properties. Missing, cold or invalid metadata yields unknown timing, including peers running older code.
 
-`returnToAuto.status` is `already_auto`, `expected`, `not_scheduled` or `unknown`. `expectedAt` is populated only for a timed local mode machine whose resting mode is auto. It estimates manual expiry, followed by normal settling, provided no other mode or override intervenes. An indefinite local override reports `not_scheduled`. This supports wording such as “The room is in manual mode; automatic control is expected to resume in about two minutes.” It does not promise a particular output or hardware state. The tool does not change mode, renew timers, set properties or start a transaction. Missing arguments, unknown targets and targets without MODE return JSON-RPC errors. Focused coverage: `src/test/mcp_control_status_test.js`.
+`returnToAuto.status` is `already_auto`, `expected`, `not_scheduled` or `unknown`. `expectedAt` is populated when the published expiry is timed and `MODE-RESTING-STATE` is auto. It estimates manual expiry, followed by normal settling, provided no other mode or override intervenes. An indefinite override reports `not_scheduled`. This supports wording such as “The room is in manual mode; automatic control is expected to resume in about two minutes.” It does not promise a particular output or hardware state. The tool does not change mode, renew timers, set properties or start a transaction. Missing arguments, unknown targets and targets without MODE return JSON-RPC errors. Focused coverage: `src/test/mcp_control_status_test.js`.
 
 ## Generic property writes across Casas
 
@@ -31,7 +31,7 @@ source.setProperty('MANUAL-MODE-DURATION', 300, {
 
 Boolean `forceUpdate: true` makes an unchanged value follow the normal property-update notification path for this write. For an active mode whose timeout listens to that duration property, the notification resets its timer. It does not change the persistent `alwaysUpdate` configuration or enter manual mode by itself. Ordinary subsequent equal-value writes remain suppressed. The Property gate also honours configured `alwaysUpdate`, matching the existing Thing and Source checks.
 
-PeerSource copies the caller data; PeerCasa passes it to `PeerSourceCommandProtocol`, which preserves metadata for ordinary and ramped writes across Socket.IO. The method arguments supply the target/property/value or ramp, and the request layer supplies request identity. The receiver passes the request data to the generic owning-source method. Source removes `forceUpdate` from emitted notifications so listeners do not inherit a forced-write instruction. This is a write option, not a new remote renewal command. Existing MCP manual tools still have the restrictions described below; migrating those tools is separate work.
+PeerSource copies the caller data; PeerCasa passes it to `PeerSourceCommandProtocol`, which preserves metadata for ordinary and ramped writes across Socket.IO. The method arguments supply the target/property/value or ramp, and the request layer supplies request identity. The receiver passes the request data to the generic owning-source method. Source removes `forceUpdate` from emitted notifications so listeners do not inherit a forced-write instruction. This is a write option, not a new remote renewal command. MCP manual tools use these generic property writes through the shared SourceBaseConsoleApi for local and peer targets.
 
 Coverage includes `peercasa_command_protocol_test.js` for metadata and dispatch, and `scene_switching_runtime_test.js` for local and real loopback Socket.IO timer renewal, ordinary equal-value suppression, and preservation of manual mode. No physical hardware is used.
 
@@ -56,7 +56,7 @@ Coverage: `building_scene_status_test.js` tests timing, unknown states, ownershi
 
 ## MCP configuration management
 
-MCP resolves each real object to its paired Console API object through `ConsoleApiService.findOrCreateConsoleApiObject`. Configuration operations invoke the existing `exportDb`, `previewConfig`, `replaceDb` and `restart` commands. Manual writes invoke `SourceConsoleApi.setManualMode`, `releaseManualOverride` and `renewManualOverride`; property writes invoke `setProperty`, retaining MCP source attribution.
+MCP resolves each real object to its paired Console API object through `ConsoleApiService.findOrCreateConsoleApiObject`. Configuration operations invoke the existing `exportDb`, `previewConfig`, `replaceDb` and `restart` commands. Manual writes invoke inherited `SourceBaseConsoleApi.setManualMode`, `releaseManualOverride` and `renewManualOverride`; property writes invoke `setProperty`, retaining MCP source attribution.
 
 - `casa.export_config({scope: "casa" | "gang"})` returns local stored database `docs`, `dbName`, and `revision`. These are configuration records, not live runtime state, and can include configured credentials.
 - `casa.preview_config({options})` passes the existing preview options described below to `previewConfig`. It previews supported ownership/source changes; it is not a validator for a complete exported database. Its patch format is separate from the raw documents used for deployment.
@@ -75,7 +75,9 @@ Focused checks cover paired command dispatch, revision rejection, backup/rollbac
 - `casa.renew_manual_override({uName, duration})` requires an active manual state and replaces its remaining duration from now. Repeating the same duration restarts the timer too.
 - `casa.release_manual_override({uName})` clears the manual duration/active flag without clearing other modes. Releasing an already inactive manual override is harmless; another mode can remain active.
 
-All three require a valid local modeproperty and return `{ok: true, completed, controlStatus}` in both text and structured content. `ok` acknowledges the request, not physical device completion. They observe asynchronous mode processing for up to one second; `completed: false` means the requested state was not observed within that window, and the accompanying status is the actual latest snapshot. Poll `get_control_status` to follow it. Peer/bowing sources and inherited plain MODE properties must be addressed through the owning source/Casa. Invalid arguments or unsupported targets return JSON-RPC errors. These tools do not set device outputs.
+All three require valid MODE and manual duration/active properties and return `{ok: true, completed, controlStatus}` in both text and structured content. The shared `SourceBaseConsoleApi` uses generic `getProperty`/`setProperty` for local sources and peer mirrors; renewal sets the duration with `forceUpdate: true`. No concrete source/property type or locality gate is used for control. Matching console commands are inherited from `SourceBaseConsoleCmd`.
+
+`ok` acknowledges write submission, not physical device completion. Immediate write rejection returns an error. The tools observe asynchronous mode processing for up to one second. `completed: false` means completion could not be observed. For renewal, the observed timer deadline must change and match the requested duration. Peer mirrors observe the owner’s published expiry, so remote renewal can report completion too. Older owners without expiry metadata still return unknown timing and cannot confirm renewal completion. Do not retry a renewal solely because completion is unobservable. Set and release can be observed through mirrored mode values. These tools do not set device outputs or clear other modes.
 
 Connect to `/consoleapi/io` over Socket.IO. The same command interface is available through configured Pusher and Webhook Relay message transports.
 
@@ -443,3 +445,8 @@ Source scope:
 
 4. Apply flow:
 - use preview output for confirmation, then apply with existing config write/apply path.
+
+
+### Mode timer metadata
+
+Each modeproperty generates read-only `<NAME>-EXPIRES-AT` (number) and `<NAME>-RESTING-STATE` (string), using its property name, e.g. MODE or SCENE. The timestamp comes from the actual scheduled timer, not the configured duration. It changes on entry/renewal, clears to -1 on cancellation or transition to an untimed mode, excludes internal invalid/settling timers, and is recomputed from restored remaining time on hot start. These properties use the mode's composite propagation settings and ordinary peer mirroring. Control status reads them through the generic property interface. Countdown accuracy across hosts depends on their clocks agreeing; it is an observation, not a physical-output guarantee. Scene status currently retains its separate timing implementation.

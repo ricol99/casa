@@ -144,6 +144,9 @@ if (mode === 'build') {
          const receiver = Object.create(PeerCasa.prototype);
          receiver.uName = ':test-casa'; receiver.gang = gang; receiver.socket = socket;
          socket.on('set-source-property-req', data => receiver.socketSetSourcePropertyReqCb(data));
+         const publish = data => { if (!data.local) socket.emit('source-property-changed', data); };
+         building.on('property-changed', publish);
+         socket.on('disconnect', () => building.removeListener('property-changed', publish));
       });
       sender.socket = require('socket.io-client')('http://127.0.0.1:' + server.address().port, { reconnection: false });
       sender.updateSourceCommandProtocol();
@@ -170,6 +173,57 @@ if (mode === 'build') {
          assert.strictEqual(modeProperty.stateTimer, afterRemote);
          assert.strictEqual(durationEvents.length, eventsAfterRemote);
          console.error('[PASS] PeerSource and real Socket.IO forced renewal; ordinary writes and manual mode preserved');
+         remote.fromPeer = true;
+         remote.properties = {};
+         Object.keys(building.properties).forEach(name => {
+            const property = building.properties[name];
+            remote.properties[name] = { type: 'property', valid: property.valid, cold: property.cold,
+               value: building.getProperty(name), getValue() { return this.value; },
+               getValueType() { return property.valueType; }, propertyAboutToChange(value) { return value; } };
+         });
+         remote.asyncEmit = function() {};
+         const mirrorUpdate = data => remote.updateProperty(data.name, data.value, data);
+         sender.socket.on('source-property-changed', mirrorUpdate);
+         try {
+            for (const entry of [[building, require('../consoleapis/sourceconsoleapi')], [remote, require('../consoleapis/peersourceconsoleapi')]]) {
+               const target = entry[0];
+               const api = Object.create(entry[1].prototype); api.myObj = () => target;
+               const manualMcp = Object.create(require('../services/mcpservice').prototype);
+               manualMcp.gang = { findNamedObject: () => target, casa: { findService: () => ({ findOrCreateConsoleApiObject: () => api }) } };
+               const manualCall = (name, args) => new Promise(resolve => manualMcp.handleToolCall(1,
+                  { name: 'casa.' + name, arguments: Object.assign({ uName: target.uName }, args) }, { status() { return this; }, json: resolve }));
+               let reply = await manualCall('release_manual_override');
+               assert(!reply.error, JSON.stringify(reply));
+               assert.strictEqual(reply.result.structuredContent.completed, true);
+               reply = await manualCall('set_mode_manual', { duration: 30 });
+               assert(!reply.error, JSON.stringify(reply));
+               assert.strictEqual(reply.result.structuredContent.completed, true);
+               await waitFor('manual timer starts', () => modeProperty.stateTimer && modeProperty.currentState.name === 'manual');
+               const started = modeProperty.stateTimer;
+               await manualCall('set_mode_manual', { duration: 60 });
+               assert.strictEqual(modeProperty.stateTimer, started, 'set while manual must not renew');
+               await sleep(30);
+               reply = await manualCall('renew_manual_override', { duration: 30 });
+               assert(!reply.error, JSON.stringify(reply));
+               assert.notStrictEqual(modeProperty.stateTimer, started, 'MCP equal duration renewal must reach owner');
+               assert(modeProperty.stateTimer.left() > 28000);
+               assert.strictEqual(reply.result.structuredContent.completed, true);
+               assert.strictEqual(target.getProperty('MODE-EXPIRES-AT'), building.getProperty('MODE-EXPIRES-AT'));
+               assert.strictEqual(reply.result.structuredContent.controlStatus.returnToAuto.status, 'expected');
+               assert.strictEqual(reply.result.structuredContent.controlStatus.manualOverride.status, 'timed');
+               reply = await manualCall('release_manual_override');
+               assert.strictEqual(reply.result.structuredContent.completed, true);
+               assert.strictEqual(building.getProperty('MODE'), 'auto');
+               assert.strictEqual(building.getProperty('MODE-EXPIRES-AT'), -1);
+               assert.deepStrictEqual(manualSnapshot().slice(1), manualBeforeForce.slice(1));
+               reply = await manualCall('set_mode_manual', { duration: 0.2 });
+               assert.strictEqual(reply.result.structuredContent.controlStatus.manualOverride.status, 'timed');
+               await waitFor('manual expiry clears mirrored timestamp', () => target.getProperty('MODE') === 'auto' && target.getProperty('MODE-EXPIRES-AT') === -1);
+
+            }
+            console.error('[PASS] Local and Socket.IO peer MCP manual set, equal-duration renewal and release');
+         } finally { sender.socket.removeListener('source-property-changed', mirrorUpdate); }
+
       } finally {
          Object.keys(sender.incompleteRequests).forEach(id => sender.incompleteRequests[id].completeRequest(false));
          sender.socket.close();

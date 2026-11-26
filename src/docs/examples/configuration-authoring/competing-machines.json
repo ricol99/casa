@@ -1,0 +1,344 @@
+{
+  "casa": {
+    "name": "casa-config-guide",
+    "type": "casa",
+    "listeningPort": 50998,
+    "services": [],
+    "scenes": [],
+    "things": []
+  },
+  "gang": {
+    "name": "gang-config-guide",
+    "things": [
+      {
+        "name": "training-room",
+        "type": "thing",
+        "propagation": "private",
+        "events": [
+          {
+            "name": "movie-start"
+          },
+          {
+            "name": "movie-end"
+          },
+          {
+            "name": "manual-on"
+          },
+          {
+            "name": "manual-release"
+          }
+        ],
+        "properties": [
+          {
+            "name": "occupied",
+            "valueType": "boolean",
+            "initialValue": false
+          },
+          {
+            "name": "dark",
+            "valueType": "boolean",
+            "initialValue": true
+          },
+          {
+            "name": "lighting-needed",
+            "type": "andproperty",
+            "sources": [
+              {
+                "property": "occupied"
+              },
+              {
+                "property": "dark"
+              }
+            ]
+          },
+          {
+            "name": "requested-power",
+            "valueType": "boolean",
+            "initialValue": false
+          },
+          {
+            "name": "normal-lighting",
+            "type": "stateproperty",
+            "initialValue": "off",
+            "priority": 10,
+            "states": [
+              {
+                "name": "off",
+                "source": {
+                  "property": "lighting-needed",
+                  "value": true,
+                  "nextState": "on"
+                },
+                "action": {
+                  "property": "requested-power",
+                  "value": false
+                }
+              },
+              {
+                "name": "on",
+                "source": {
+                  "property": "lighting-needed",
+                  "value": false,
+                  "nextState": "off"
+                },
+                "action": {
+                  "property": "requested-power",
+                  "value": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "movie-scene",
+            "type": "stateproperty",
+            "initialValue": "inactive",
+            "takeControlOnTransition": true,
+            "states": [
+              {
+                "name": "inactive",
+                "priority": -100,
+                "source": {
+                  "event": "movie-start",
+                  "nextState": "active"
+                }
+              },
+              {
+                "name": "active",
+                "priority": 50,
+                "source": {
+                  "event": "movie-end",
+                  "nextState": "inactive"
+                },
+                "action": {
+                  "property": "requested-power",
+                  "value": false
+                }
+              }
+            ]
+          },
+          {
+            "name": "manual-lighting",
+            "type": "stateproperty",
+            "initialValue": "inactive",
+            "takeControlOnTransition": true,
+            "states": [
+              {
+                "name": "inactive",
+                "priority": -100,
+                "source": {
+                  "event": "manual-on",
+                  "nextState": "forced-on"
+                }
+              },
+              {
+                "name": "forced-on",
+                "priority": 100,
+                "source": {
+                  "event": "manual-release",
+                  "nextState": "inactive"
+                },
+                "timeout": {
+                  "duration": 30,
+                  "nextState": "inactive"
+                },
+                "action": {
+                  "property": "requested-power",
+                  "value": true
+                }
+              }
+            ]
+          }
+        ],
+        "things": [
+          {
+            "name": "lamp",
+            "type": "thing",
+            "propagation": "private",
+            "properties": [
+              {
+                "name": "power",
+                "valueType": "boolean",
+                "writable": false,
+                "source": {
+                  "uName": ":training-room",
+                  "property": "requested-power"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "training-room-tester",
+        "type": "tester",
+        "loadPath": "test/things",
+        "targetUnderTest": ":training-room",
+        "sources": [
+          {
+            "uName": ":training-room:lamp",
+            "property": "power"
+          }
+        ],
+        "testRun": {
+          "testCases": []
+        },
+        "testCases": [
+          {
+            "name": "Scene and manual override handover",
+            "driveSequence": [
+              {
+                "property": "occupied",
+                "value": true
+              },
+              {
+                "wait": 1,
+                "event": "movie-start"
+              },
+              {
+                "wait": 1,
+                "event": "manual-on"
+              },
+              {
+                "wait": 1,
+                "event": "manual-release"
+              },
+              {
+                "wait": 1,
+                "event": "movie-end"
+              },
+              {
+                "wait": 1,
+                "property": "occupied",
+                "value": false
+              }
+            ],
+            "expectedSequence": [
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              }
+            ]
+          },
+          {
+            "name": "Manual timeout releases to unoccupied normal state",
+            "driveSequence": [
+              {
+                "event": "manual-on"
+              }
+            ],
+            "expectedSequence": [
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              }
+            ]
+          },
+          {
+            "name": "Normal state tracks occupancy while scene owns output",
+            "driveSequence": [
+              {
+                "property": "occupied",
+                "value": true
+              },
+              {
+                "wait": 1,
+                "event": "movie-start"
+              },
+              {
+                "wait": 1,
+                "property": "occupied",
+                "value": false
+              },
+              {
+                "wait": 1,
+                "event": "manual-on"
+              },
+              {
+                "wait": 1,
+                "event": "manual-release"
+              },
+              {
+                "wait": 1,
+                "event": "movie-end"
+              },
+              {
+                "wait": 1,
+                "property": "occupied",
+                "value": true
+              },
+              {
+                "wait": 1,
+                "property": "occupied",
+                "value": false
+              }
+            ],
+            "expectedSequence": [
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": true
+              },
+              {
+                "source": ":training-room:lamp",
+                "property": "power",
+                "value": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

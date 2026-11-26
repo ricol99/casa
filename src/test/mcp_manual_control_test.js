@@ -1,6 +1,5 @@
 var assert = require('assert');
 var McpService = require('../services/mcpservice');
-var Source = require('../source');
 var SourceConsoleApi = require('../consoleapis/sourceconsoleapi');
 
 (async function() {
@@ -12,20 +11,17 @@ var SourceConsoleApi = require('../consoleapis/sourceconsoleapi');
          resets++;
          var end = Date.now() + target.getProperty('MANUAL-MODE-DURATION') * 1000;
          this.stateTimer = { left: function() { return end - Date.now(); } };
+         target.properties['MODE-EXPIRES-AT'].value = end;
       }
    };
    var target = { uName: ':room', name: 'room', properties: {
-      MODE: mode, 'MANUAL-MODE-DURATION': { value: -1, valid: true },
+      MODE: mode, 'MODE-EXPIRES-AT': { value: -1, valid: true }, 'MODE-RESTING-STATE': { value: 'auto', valid: true }, 'MANUAL-MODE-DURATION': { value: -1, valid: true },
       'MANUAL-MODE-ACTIVE': { value: false }, 'HOLIDAY-MODE-ACTIVE': { value: true }
    }, getProperty: function(name) { return this.properties[name].value; },
-      getManualMode: Source.prototype.getManualMode,
-      setManualMode: Source.prototype.setManualMode,
-      renewManualMode: Source.prototype.renewManualMode,
-      releaseManualMode: Source.prototype.releaseManualMode,
-      alignPropertyValue: function(name, value) {
+      setProperty: function(name, value, data) {
          var changed = this.properties[name].value !== value;
          this.properties[name].value = value;
-         if (!changed) return;
+         if (!changed && !data.forceUpdate) return;
          setTimeout(function() {
             if (name === 'MANUAL-MODE-DURATION' && value > 0 || name === 'MANUAL-MODE-ACTIVE' && value === true) {
                mode.value = 'manual'; mode.currentState = { name: 'manual' };
@@ -33,7 +29,7 @@ var SourceConsoleApi = require('../consoleapis/sourceconsoleapi');
                if (target.getProperty('MANUAL-MODE-DURATION') > 0) mode.resetStateTimer();
             }
             else {
-               mode.value = 'auto'; mode.currentState = { name: 'auto' }; mode.stateTimer = null;
+               mode.value = 'auto'; mode.currentState = { name: 'auto' }; mode.stateTimer = null; target.properties['MODE-EXPIRES-AT'].value = -1;
                target.properties['MANUAL-MODE-ACTIVE'].value = false;
             }
          }, 5);
@@ -74,7 +70,27 @@ var SourceConsoleApi = require('../consoleapis/sourceconsoleapi');
    result = await call('renew_manual_override', { uName: ':room' });
    assert.strictEqual(result.error.code, -32602);
    target.fromPeer = true;
-   result = await call('set_mode_manual', { uName: ':room' });
+   mode.type = 'property';
+   api = Object.create(require('../consoleapis/peersourceconsoleapi').prototype);
+   api.myObj = function() { return target; };
+   result = await call('set_mode_manual', { uName: ':room', duration: 30 });
+   assert.strictEqual(result.result.structuredContent.completed, true);
+   before = resets;
+   result = await call('renew_manual_override', { uName: ':room', duration: 30 });
+   assert.strictEqual(resets, before + 1);
+   assert.strictEqual(result.result.structuredContent.completed, true, 'mirrored expiry verifies renewal');
+   assert.strictEqual(result.result.structuredContent.controlStatus.manualOverride.status, 'timed');
+   result = await call('release_manual_override', { uName: ':room' });
+   assert.strictEqual(result.result.structuredContent.completed, true);
+   var originalWrite = target.setProperty;
+   target.setProperty = function() { return false; };
+   result = await call('set_mode_manual', { uName: ':room', duration: 30 });
    assert.strictEqual(result.error.code, -32000);
+   result = await call('release_manual_override', { uName: ':room' });
+   assert.strictEqual(result.error.code, -32000);
+   mode.value = 'manual';
+   result = await call('renew_manual_override', { uName: ':room', duration: 30 });
+   assert.strictEqual(result.error.code, -32000);
+   target.setProperty = originalWrite;
    process.stdout.write('[PASS] MCP manual set/release/renew, unchanged renewal, async status and validation\n');
 })().catch(function(error) { console.error(error); process.exitCode = 1; });

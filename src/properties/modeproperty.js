@@ -86,6 +86,13 @@ function ModeProperty(_config, _owner) {
 
    StateProperty.call(this, modeConfig, _owner);
 
+   this.createProperty({ name: _config.name.toUpperCase() + "-EXPIRES-AT", type: "property", valueType: "number",
+                         initialValue: -1, writable: false, ignoreParent: modeConfig.ignoreParent, ignoreChildren: modeConfig.ignoreChildren,
+                         propagateToParent: modeConfig.propagateToParent, propagateToChildren: modeConfig.propagateToChildren });
+   this.createProperty({ name: _config.name.toUpperCase() + "-RESTING-STATE", type: "property", valueType: "string",
+                         initialValue: _config.restingMode.name, writable: false, ignoreParent: modeConfig.ignoreParent, ignoreChildren: modeConfig.ignoreChildren,
+                         propagateToParent: modeConfig.propagateToParent, propagateToChildren: modeConfig.propagateToChildren });
+
    if (_config.hasOwnProperty("modes") && _config.modes) {
       var counterConfig = { name: activesPositiveCountPropName, type: "counterproperty", local: true, initialValue: 0, countPositives: true, sources: []};
 
@@ -119,6 +126,25 @@ function ModeProperty(_config, _owner) {
 
 util.inherits(ModeProperty, StateProperty);
 
+// Publish timer metadata through ordinary properties so peers need no timer internals.
+ModeProperty.prototype.updateExpiry = function() {
+   var settling = this.currentState && ["invalid", "settle-invalid"].indexOf(this.currentState.name) !== -1;
+   var expiresAt = this.stateTimer && !settling ? this.stateTimer.expiration() : -1;
+   this.owner.setProperty(this.name.toUpperCase() + "-EXPIRES-AT", expiresAt, { sourceName: this.owner.uName });
+};
+
+ModeProperty.prototype.setStateTimer = function(_previousState, _state, _timeoutDuration) {
+   var nextState = StateProperty.prototype.setStateTimer.call(this, _previousState, _state, _timeoutDuration);
+   this.updateExpiry();
+   return nextState;
+};
+
+ModeProperty.prototype.clearStateTimer = function() {
+   var result = StateProperty.prototype.clearStateTimer.call(this);
+   this.updateExpiry();
+   return result;
+};
+
 // Button updates during settling must still resolve competing selections. Handle
 // notifications here rather than entry guards, which would choose by config order.
 ModeProperty.prototype.newEventReceivedFromSource = function(_sourceListener, _data) {
@@ -150,6 +176,7 @@ ModeProperty.prototype.import = function(_importObj) {
 // Called after system state has been restored
 ModeProperty.prototype.hotStart = function() {
    StateProperty.prototype.hotStart.call(this);
+   this.updateExpiry();
 };
 
 // Called to start a cold system

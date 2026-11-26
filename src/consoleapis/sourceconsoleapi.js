@@ -75,35 +75,6 @@ SourceConsoleApi.prototype.persistUpdatedSource = function(_member, _newMember, 
    });
 };
 
-SourceConsoleApi.prototype.setProperty = function(_session, _params, _callback) {
-   this.checkParams(2, _params);
-   _callback(null, this.myObj().setProperty(_params[0], _params[1], _params[2] || {}));
-};
-
-// These commands share the source's manual-mode behavior with other transports.
-SourceConsoleApi.prototype.setManualMode = function(_session, _params, _callback) {
-   var duration = _params && _params[0];
-   if (duration !== undefined && (!Number.isFinite(duration) || duration <= 0)) {
-      return _callback("duration must be positive finite seconds");
-   }
-   this.myObj().setManualMode(duration);
-   _callback(null, true);
-};
-
-SourceConsoleApi.prototype.releaseManualOverride = function(_session, _params, _callback) {
-   this.myObj().releaseManualMode();
-   _callback(null, true);
-};
-
-SourceConsoleApi.prototype.renewManualOverride = function(_session, _params, _callback) {
-   this.checkParams(1, _params);
-   if (!Number.isFinite(_params[0]) || _params[0] <= 0) {
-      return _callback("duration must be positive finite seconds");
-   }
-   if (!this.myObj().renewManualMode(_params[0])) return _callback("Target is not in an active manual state");
-   _callback(null, true);
-};
-
 SourceConsoleApi.prototype.events = function(_session, _params, _callback) {
    this.checkParams(0, _params);
    _callback(null, this.myObj().events);

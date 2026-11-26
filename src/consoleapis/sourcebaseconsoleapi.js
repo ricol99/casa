@@ -10,6 +10,47 @@ function SourceBaseConsoleApi(_config, _owner) {
 
 util.inherits(SourceBaseConsoleApi, ConsoleApi);
 
+SourceBaseConsoleApi.prototype.setProperty = function(_session, _params, _callback) {
+   this.checkParams(2, _params);
+   _callback(null, this.myObj().setProperty(_params[0], _params[1], _params[2] || {}));
+};
+
+// Manual control uses the same property interface on local sources and peer mirrors.
+SourceBaseConsoleApi.prototype.setManualMode = function(_session, _params, _callback) {
+   var duration = _params && _params[0];
+   if (duration !== undefined && (!Number.isFinite(duration) || duration <= 0)) {
+      return _callback("duration must be positive finite seconds");
+   }
+   var source = this.myObj();
+   if (source.getProperty("MODE") !== "manual") {
+      var accepted = duration !== undefined
+         ? source.setProperty("MANUAL-MODE-DURATION", duration, {})
+         : source.setProperty("MANUAL-MODE-ACTIVE", true, {});
+      if (accepted === false) return _callback("Manual mode write was not accepted");
+   }
+   _callback(null, true);
+};
+
+SourceBaseConsoleApi.prototype.releaseManualOverride = function(_session, _params, _callback) {
+   var source = this.myObj();
+   if (source.setProperty("MANUAL-MODE-DURATION", -1, {}) === false) return _callback("Manual duration write was not accepted");
+   if (source.setProperty("MANUAL-MODE-ACTIVE", false, {}) === false) return _callback("Manual release write was not accepted");
+   _callback(null, true);
+};
+
+SourceBaseConsoleApi.prototype.renewManualOverride = function(_session, _params, _callback) {
+   this.checkParams(1, _params);
+   if (!Number.isFinite(_params[0]) || _params[0] <= 0) {
+      return _callback("duration must be positive finite seconds");
+   }
+   var source = this.myObj();
+   if (source.getProperty("MODE") !== "manual") return _callback("Target is not in an active manual state");
+   if (source.setProperty("MANUAL-MODE-DURATION", _params[0], { forceUpdate: true }) === false) {
+      return _callback("Manual renewal write was not accepted");
+   }
+   _callback(null, true);
+};
+
 function sbGetSourceProviderType(_source) {
 
    if (_source && _source.casa && (typeof _source.casa.superType === "function")) {

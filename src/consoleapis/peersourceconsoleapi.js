@@ -1,5 +1,5 @@
 var util = require('util');
-var PeerSourceBaseConsoleApi = require('./sourcebaseconsoleapi');
+var SourceBaseConsoleApi = require('./sourcebaseconsoleapi');
 
 function PeerSourceConsoleApi(_config, _owner) {
    SourceBaseConsoleApi.call(this, _config, _owner);

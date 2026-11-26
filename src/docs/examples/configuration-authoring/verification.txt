@@ -1,0 +1,50 @@
+Casa configuration guide repository verification — 2026-11-26
+Baseline: 1784c48 plus accompanying generic MCP manual-control changes.
+Synthetic fixtures only; no deployed configs, HomeKit accessories or live hardware.
+Command: node src/docs/examples/configuration-authoring/run-isolated.js
+Result: ALL TEST CASES (3) PASSED (6, 2, 6 expected transitions).
+The real DB builder/loader/runtime verifies scene/manual handover, the real
+30-second manual timeout, and occupancy changes under competing control.
+The runner creates disposable databases and suppresses runtime HTTP/discovery.
+No changes to the synthetic JSON fixtures or runner were needed.
+
+Related focused checks passed:
+- mcp_manual_control_test: local/peer generic writes, equal-duration renewal,
+  invalid inputs, immediate write rejection and published peer expiry status.
+- console_manual_commands_test: command dispatch, parsing, validation and help.
+- mcp_control_status_test: observed mode and authoritative timer reporting.
+- mcp_management_test: existing management commands remain functional.
+- building_scene_status_test: existing scene API remains functional.
+- scene_switching_runtime_test: local and real loopback Socket.IO peer manual
+  set/renew/release, owner timer renewal and unchanged other room overrides,
+  plus scene switching, console/MCP dispatch and manual preservation.
+- modeproperty_expiry_test: timestamp publication/clearing, indefinite/settling
+  modes, and hot-start recomputation. Socket.IO runtime also verifies timestamp
+  notifications back to the mirror and actual timeout clearing.
+Loopback Socket.IO test requires permission to bind a local listener.
+No live Pi deployment, hardware test or full suite rerun is claimed.
+
+Historical evidence follows; these checks are attributed to their original run.
+
+Casa configuration guide v0.2 verification — 2026-11-25
+Device revision: 78310eb6523782eaf5a28b967417584bc1bef1b5
+Synthetic fixtures only; HTTP listening and discovery startup suppressed.
+Three tester cases: PASS (6, 2, 6 expected transitions).
+Capture case 1: completed, expected true/false alternating six times.
+Command: node src/docs/examples/configuration-authoring/run-isolated.js
+Command: node src/docs/examples/configuration-authoring/run-isolated.js capture 1
+Existing checks (node src/test/<name>_test.js):
+v16.0.0
+modeproperty_timeout: PASS
+namedobject_phase2: PASS
+loader_identity: PASS
+gang_config: PASS
+sourcelistener_valuetype: PASS
+previewconfigengine: PASS
+peergang: PASS
+peergangcasa: PASS
+peercasa_lifecycle: PASS
+peercasa_command_protocol: PASS
+peercasa_subscription_protocol: PASS
+peer_protocol_helpers: PASS
+peergang_architecture_guard: PASS
