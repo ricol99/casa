@@ -1,6 +1,6 @@
 # Casa Configuration Authoring Guide — v0.3
 
-Runtime reference: Casa device repository at `d6ce0fff96ecf577d584674280ae0908e294958d`. Unified deployment model reference: schema `0.1`.
+Runtime reference: Casa device repository at `1200b041dc3ebf81c2d369f1d66892aeeb1b8faa`. Unified deployment model reference: schema `0.1`.
 
 The v0.2 device review is by **Casa Codex**. This revision adds composition guidance and the Thing catalogue by **Hannah**, 25 November 2026.
 
@@ -1100,7 +1100,7 @@ Modeproperty generates `<NAME>-EXPIRES-AT` (number, UTC epoch milliseconds) and 
 
 ### Peer property validity — 26 November 2026
 
-Latest pushed device commit: [d6ce0fff96ecf577d584674280ae0908e294958d](https://github.com/ricol99/casa/commit/d6ce0fff96ecf577d584674280ae0908e294958d), “Propagate owner validity in existing peer property updates”.
+Peer validity fix commit: [d6ce0fff96ecf577d584674280ae0908e294958d](https://github.com/ricol99/casa/commit/d6ce0fff96ecf577d584674280ae0908e294958d), “Propagate owner validity in existing peer property updates”.
 
 **Observed issue.** The hosted Casa Home readback showed Dumgoyne’s `richard-present` and `natalie-present` values as true but valid=false after successful writes. A direct read-only Socket.IO console request to pi-env confirmed that `:dumgoyne` was the active local building on casa-env (fromPeer=false, bowed=false), with both values true and valid=true. The invalid flags were stale on the peer mirror. This was a presence-property validity issue, distinct from the earlier Cinema command-dispatch error.
 
@@ -1112,7 +1112,7 @@ This is six production lines in Source and PeerSource. SourceBase, Property, Sou
 
 **Live verification — 26 November 2026.** Richard subsequently tested the presence values and confirmed that Dumgoyne’s `richard-present` and `natalie-present` are both set and valid. This verifies the reported presence write/readback problem is resolved in live use. This is Richard’s live confirmation, not a new independent Casa Codex test or verification of the exact revision running on every Pi. False→true and true→false transitions at an unchanged value remain covered by the focused automated test rather than this user report.
 
-The latest pushed source reference remains `d6ce0fff96ecf577d584674280ae0908e294958d`. Earlier sections retain their historical test and deployment attribution; this live result supersedes the previous absence of post-fix presence verification only for the two properties above. This repository update preserves Hannah’s composition guidance and catalogue.
+The source reference for this presence fix is `d6ce0fff96ecf577d584674280ae0908e294958d`. Earlier sections retain their historical test and deployment attribution; this live result supersedes the previous absence of post-fix presence verification only for the two properties above. This repository update preserves Hannah’s composition guidance and catalogue.
 
 
 ### Peer Console API management routing — 26 November 2026
@@ -1134,3 +1134,11 @@ The four building scene tools also accept explicit `casa` routing. Without it th
 The command reuses the configured local-tree filter and `NamedObject.iterate` over the active gang tree and local bowed root. It includes `local = true` compound members, excludes peer mirrors and transient/configuration-excluded nodes, and selects source records using the host's authoritative `sources` registry. Records contain `uName`, `parent`, `name`, `displayName`, `type`, `local` and `active`; there are no property values or configuration payloads. Bowed instances are marked inactive. Results remain grouped by Casa rather than merged; use the group's Casa name with the discovered address for subsequent description or control. The matching manual console command is `discoverObjects` on a Casa.
 
 This is on-demand management traffic: no new PeerSources, subscriptions, cached trees, or changed mirroring/export handshakes. Older hosts may report unsupported commands or time out. `mcp_discovery_test.js` verifies real loopback console transport, parallel dispatch, nested local compound discovery, bowed records, exclusion of mirrors/property payloads, partial errors/deadlines, late replies, console command dispatch, and console-only socket traffic with unchanged PeerSource registries. No live Pis or hardware were contacted.
+
+### Live MCP discovery and remote read — 26 November 2026
+
+After Richard reported deployment and the refreshed Casa Home tool list became available, Casa Codex called `casa.discover_objects` through the hosted MCP connection with `timeoutSeconds: 10`. The result returned `complete: true`, with all queried Casas responding. It discovered `:lounge:christmas-tree` under `:lounge` on `casa-env`, named “Living Room - Christmas Tree Lights”, type `kasaplug`, with `local: true` and `active: true`.
+
+Casa Codex then called `casa.describe_source_state` through the same MCP connection with `casa: "casa-env"` and `uName: ":lounge:christmas-tree"`. The owner returned `fromPeer: false`, `bowed: false`, `power: true` and `MODE: "auto"`; both power and mode were valid. `MANUAL-MODE-ACTIVE` was false and `BUILDING-SCENE` was `none`. These values describe the observation at test time, not a promise of the current state.
+
+This verifies end-to-end hosted MCP discovery and a read from the remote hosting Casa for a local compound member. The checks were read-only: no properties, modes, configurations or mirroring settings were changed. The unchanged mirror/subscription behavior is covered by the automated tests; live network traffic was not separately instrumented. This exercise does not verify remote writes or physically confirm the lights were illuminated. Source reference remains `1200b041dc3ebf81c2d369f1d66892aeeb1b8faa`; the exact running revision on every Pi was not independently checked. Earlier no-live-verification statements describe their historical test runs and are superseded only for this discovery/read exercise.
