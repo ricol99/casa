@@ -457,6 +457,40 @@ PeerCasa.prototype.socketSourceRemovedCb = function(_data) {
    }
 };
 
+// Management commands use the existing Console API, with a session per request.
+PeerCasa.prototype.sendConsoleCommand = function(_command, _callback) {
+   if (!this.connected) return _callback("Hosting Casa is disconnected");
+   return this.sendSourceCommandRequest((_protocol) => {
+      return _protocol.sendConsoleCommand(_command, _callback);
+   });
+};
+
+PeerCasa.prototype.socketConsoleCommandReqCb = function(_data) {
+   var socket = this.socket;
+   var service = this.casa.findService("consoleapiservice");
+   var session;
+   var finished = false;
+   var respond = (_error, _result) => {
+      if (finished) return;
+      finished = true;
+      if (session) session.sessionClosed();
+      socket.emit('console-command-resp', {
+         requestId: _data.requestId, requestor: _data.requestor,
+         result: { error: _error ? (_error.message || String(_error)) : null, result: _result }
+      });
+   };
+   if (!service) return respond("Console API service is unavailable");
+   try {
+      session = service.getSession("peer-console:" + this.uName + ":" + _data.requestId, null);
+      session.executeCommand({ obj: _data.obj, method: _data.method, arguments: _data.arguments }, respond);
+   }
+   catch (error) { respond(error); }
+};
+
+PeerCasa.prototype.socketConsoleCommandRespCb = function(_data) {
+   this.completeSourceCommandResponse('console-command-resp', _data);
+};
+
 PeerCasa.prototype.socketConsoleCommandCb = function(_data) {
    console.log(this.uName + ': Event received from my peer. Event name: console-command, source: ' + _data.sourceName);
 
@@ -735,6 +769,8 @@ PeerCasa.prototype.establishListeners = function(_force) {
       this.session.addHandler('source-added', this.socketSourceAddedHandler);
       this.session.addHandler('source-removed', this.socketSourceRemovedHandler);
       this.session.addHandler('console-command', this.socketConsoleCommandHandler);
+      this.session.addHandler('console-command-req', PeerCasa.prototype.socketConsoleCommandReqCb.bind(this));
+      this.session.addHandler('console-command-resp', PeerCasa.prototype.socketConsoleCommandRespCb.bind(this));
       this.session.addHandler('set-source-transaction-req', this.socketSetSourceTransactionReqHandler);
       this.session.addHandler('set-source-property-req', this.socketSetSourcePropertyReqHandler);
       this.session.addHandler('raise-source-event-req', this.socketRaiseSourceEventReqHandler);
@@ -848,6 +884,9 @@ PeerCasa.prototype.resendIncompleteRequests = function() {
 
       if (this.incompleteRequests.hasOwnProperty(prop)){
 
+         if (this.incompleteRequests[prop].replay === false) {
+            continue; // Management requests retain their original timeout; do not replay.
+         }
          this.incompleteRequests[prop].resendRequest( (_requestId) => {
             toDelete.push(_requestId);
          });

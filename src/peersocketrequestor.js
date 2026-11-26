@@ -4,6 +4,7 @@ function PeerSocketRequestor(_config) {
    this.requestId = _config.requestId;
    this.callback = _config.callback;
    this.socket = _config.socket;
+   this.replay = _config.replay !== false;
    this.timeoutMs = _config.hasOwnProperty("timeoutMs") ? _config.timeoutMs : 30000;
    this.timeout = null;
    this.message = null;

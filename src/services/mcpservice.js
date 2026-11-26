@@ -559,12 +559,13 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
             {
                name: "casa.set_property",
                title: "Set Property",
-               description: "Set a property value on a named object",
+               description: "Set a property on its hosting Casa, including unmirrored compound members. Supply casa when the object is not visible here.",
                inputSchema: {
                   type: "object",
                   properties: {
                      uName: { type: "string" },
                      property: { type: "string" },
+                     casa: { type: "string", description: "Hosting Casa name" },
                      value: {}
                   },
                   required: [ "uName", "property", "value" ]
@@ -573,7 +574,7 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                   readOnlyHint: false
                }
             }
-         ].concat(this.getManagementTools(), this.getSceneTools())
+         ].concat(this.getManagementTools(), this.getSceneTools(), this.getInspectionTools())
       });
    }
 
@@ -590,6 +591,18 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
       return this.sendJsonRpcError(_response, _id, -32602, "Invalid params");
    }
 
+   var inspectionCommands = { "casa.describe_thing": "describeThing", "casa.describe_source_state": "describeSourceState" };
+   if (Object.prototype.hasOwnProperty.call(inspectionCommands, _params.name)) {
+      var inspection = _params.arguments || {};
+      if (typeof inspection.uName !== "string" || !inspection.uName.trim()) {
+         return this.sendJsonRpcError(_response, _id, -32602, "uName is required");
+      }
+      return this.invokeConsoleCommand({ uName: inspection.uName, hostingCasa: inspection.casa }, inspectionCommands[_params.name], [], (error, result) => {
+         if (error) return this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
+         this.sendJsonRpcResult(_response, _id, { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result, isError: false });
+      });
+   }
+
    var sceneCommands = { "casa.list_scenes": "listScenes", "casa.get_scene_status": "getSceneStatus",
       "casa.set_scene": "setScene", "casa.release_scene": "releaseScene" };
    if (Object.prototype.hasOwnProperty.call(sceneCommands, _params.name)) {
@@ -598,7 +611,7 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
           (_params.name === "casa.set_scene" && (typeof sceneArgs.scene !== "string" || !sceneArgs.scene.trim()))) {
          return this.sendJsonRpcError(_response, _id, -32602, "uName and a scene name for set_scene are required");
       }
-      var building = this.gang.findNamedObject(sceneArgs.uName);
+      var building = sceneArgs.casa ? { uName: sceneArgs.uName, hostingCasa: sceneArgs.casa } : this.gang.findNamedObject(sceneArgs.uName);
       if (!building) return this.sendJsonRpcError(_response, _id, -32000, "Object not found");
       return this.invokeBuildingSceneCommand(building, sceneCommands[_params.name], _params.name === "casa.set_scene" ? [sceneArgs.scene] : [], (error, result) => {
          if (error) return this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
@@ -654,11 +667,10 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
 
    if (_params.name === "casa.set_property") {
       var args2 = _params.arguments || {};
-      var target2 = args2.uName ? this.gang.findNamedObject(args2.uName) : null;
-
-      if (!target2 || !target2.setProperty) {
-         return this.sendJsonRpcError(_response, _id, -32000, "Target does not support setProperty");
+      if (typeof args2.uName !== "string" || !args2.uName.trim() || typeof args2.property !== "string" || !Object.prototype.hasOwnProperty.call(args2, "value")) {
+         return this.sendJsonRpcError(_response, _id, -32602, "uName, property and value are required");
       }
+      var target2 = { uName: args2.uName, hostingCasa: args2.casa };
 
       return this.invokeConsoleCommand(target2, "setProperty", [args2.property, args2.value, { sourceName: "mcp" }], (error, result) => {
          if (error || !result) {
@@ -681,7 +693,7 @@ McpService.prototype.getSceneTools = function() {
       ["set_scene", "Select a named building scene through its button, leaving manual mode unchanged", false],
       ["release_scene", "Release building scene buttons, leaving manual mode unchanged", false]
    ].map(function(entry) {
-      var schema = { type: "object", properties: { uName: { type: "string" } }, required: ["uName"] };
+      var schema = { type: "object", properties: { uName: { type: "string" }, casa: { type: "string", description: "Hosting Casa name" } }, required: ["uName"] };
       if (entry[0] === "set_scene") { schema.properties.scene = { type: "string" }; schema.required.push("scene"); }
       return { name: "casa." + entry[0], description: entry[1], inputSchema: schema, annotations: { readOnlyHint: entry[2] } };
    });
@@ -814,6 +826,12 @@ McpService.prototype.getConsoleApi = function(_target) {
 
 // The tool selects the building interface; property access handles its placement.
 McpService.prototype.invokeBuildingSceneCommand = function(_target, _command, _params, _callback) {
+   try {
+      if (_target.hostingCasa) {
+         return this.invokeConsoleCommand(_target, _command, _params, _callback);
+      }
+   }
+   catch (error) { return _callback(error); }
    var api = Object.create(BuildingConsoleApi.prototype);
    api.gang = this.gang;
    api.uName = _target.uName;
@@ -821,9 +839,46 @@ McpService.prototype.invokeBuildingSceneCommand = function(_target, _command, _p
    catch (error) { return _callback(error); }
 };
 
+McpService.prototype.getInspectionTools = function() {
+   return [
+      { name: "casa.describe_thing", title: "Describe Thing", description: "Inspect a Thing and discover its compound children on the hosting Casa, including local-only members." },
+      { name: "casa.describe_source_state", title: "Describe Source State", description: "Read current properties and validity directly from the hosting Casa." }
+   ].map(function(tool) {
+      tool.inputSchema = { type: "object", properties: {
+         uName: { type: "string" }, casa: { type: "string", description: "Hosting Casa name; required when no visible ancestor identifies the host" }
+      }, required: ["uName"] };
+      tool.annotations = { readOnlyHint: true };
+      return tool;
+   });
+};
+
+McpService.prototype.getConsoleHost = function(_target) {
+   if (_target.hostingCasa) {
+      var name = _target.hostingCasa.replace(/^:/, "");
+      if (name === this.gang.casa.name) return this.gang.casa;
+      var peer = this.gang.findPeerCasa(name);
+      if (!peer) throw new Error("Hosting Casa not found: " + name);
+      return peer;
+   }
+   var object = _target;
+   var address = _target.uName;
+   while (address) {
+      object = this.gang.findNamedObject ? this.gang.findNamedObject(address) : object;
+      if (object && object.casa) return object.casa;
+      address = address.slice(0, address.lastIndexOf(":"));
+   }
+   return this.gang.casa;
+};
+
 McpService.prototype.invokeConsoleCommand = function(_target, _command, _params, _callback) {
    try {
-      var api = this.getConsoleApi(_target);
+      var host = this.getConsoleHost(_target);
+      if (host !== this.gang.casa) {
+         return host.sendConsoleCommand({ obj: _target.uName, method: _command, arguments: _params }, _callback);
+      }
+      var target = this.gang.findNamedObject ? this.gang.findNamedObject(_target.uName) : _target;
+      if (!target) return _callback("Object not found");
+      var api = this.getConsoleApi(target);
       if (typeof api[_command] !== "function") return _callback("Command is not supported by this object");
       return api[_command]({ name: "mcp" }, _params, _callback);
    }

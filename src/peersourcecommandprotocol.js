@@ -51,7 +51,14 @@ PeerSourceCommandProtocol.prototype.sendRaiseSourceEvent = function(_source, _ev
    }, _callback);
 };
 
-PeerSourceCommandProtocol.prototype.sendRequest = function(_message, _kind, _data, _callback) {
+PeerSourceCommandProtocol.prototype.sendConsoleCommand = function(_command, _callback) {
+   return this.sendRequest("console-command-req", "console", _command, function(_error, _response) {
+      if (_error) return _callback(_error);
+      _callback(_response.error, _response.result);
+   }, false);
+};
+
+PeerSourceCommandProtocol.prototype.sendRequest = function(_message, _kind, _data, _callback, _replay) {
    var id = this.nextRequestId(_kind);
    var data = this.requestData(_data, id);
    var callback = _callback ? _callback : function() {};
@@ -59,7 +66,8 @@ PeerSourceCommandProtocol.prototype.sendRequest = function(_message, _kind, _dat
    this.incompleteRequests[id] = new PeerSocketRequestor({
       requestId: id,
       callback: callback,
-      socket: this.socket
+      socket: this.socket,
+      replay: _replay
    });
 
    this.incompleteRequests[id].sendRequest({ message: _message, data: data }, (_requestId) => {

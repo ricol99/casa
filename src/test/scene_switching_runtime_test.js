@@ -142,7 +142,8 @@ if (mode === 'build') {
       sender.connected = true; sender.incompleteRequests = {}; sender.reqId = 0;
       io.on('connection', socket => {
          const receiver = Object.create(PeerCasa.prototype);
-         receiver.uName = ':test-casa'; receiver.gang = gang; receiver.socket = socket;
+         receiver.uName = ':test-casa'; receiver.gang = gang; receiver.casa = gang.casa; receiver.socket = socket;
+         socket.on('console-command-req', data => receiver.socketConsoleCommandReqCb(data));
          socket.on('set-source-property-req', data => receiver.socketSetSourcePropertyReqCb(data));
          const publish = data => { if (!data.local) socket.emit('source-property-changed', data); };
          building.on('property-changed', publish);
@@ -151,6 +152,7 @@ if (mode === 'build') {
       sender.socket = require('socket.io-client')('http://127.0.0.1:' + server.address().port, { reconnection: false });
       sender.updateSourceCommandProtocol();
       sender.socket.on('set-source-property-resp', data => sender.socketSetSourcePropertyRespCb(data));
+      sender.socket.on('console-command-resp', data => sender.socketConsoleCommandRespCb(data));
       try {
          await new Promise((resolve, reject) => {
             sender.socket.once('connect', resolve);
@@ -189,7 +191,8 @@ if (mode === 'build') {
                const target = entry[0];
                const api = Object.create(entry[1].prototype); api.myObj = () => target;
                const manualMcp = Object.create(require('../services/mcpservice').prototype);
-               manualMcp.gang = { findNamedObject: () => target, casa: { findService: () => ({ findOrCreateConsoleApiObject: () => api }) } };
+               manualMcp.gang = { findNamedObject: () => target, casa: gang.casa };
+               manualMcp.getConsoleApi = () => api;
                const manualCall = (name, args) => new Promise(resolve => manualMcp.handleToolCall(1,
                   { name: 'casa.' + name, arguments: Object.assign({ uName: target.uName }, args) }, { status() { return this; }, json: resolve }));
                let reply = await manualCall('release_manual_override');
