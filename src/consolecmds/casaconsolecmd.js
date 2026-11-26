@@ -52,6 +52,11 @@ CasaConsoleCmd.prototype.exportData = function(_arguments, _callback)  {
    this.executeParsedCommand("exportData", _arguments, _callback);
 };
 
+CasaConsoleCmd.prototype.discoverObjects = function(_arguments, _callback) {
+   this.checkArguments(0, _arguments);
+   this.executeParsedCommand("discoverObjects", [], _callback);
+};
+
 CasaConsoleCmd.prototype.sourceTrees = function(_arguments, _callback) {
    this.checkArguments(0, _arguments);
    this.executeParsedCommand("sourceTrees", [], _callback);

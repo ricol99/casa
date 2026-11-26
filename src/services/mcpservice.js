@@ -574,7 +574,12 @@ McpService.prototype.handleJsonRpc = function(_body, _request, _response) {
                   readOnlyHint: false
                }
             }
-         ].concat(this.getManagementTools(), this.getSceneTools(), this.getInspectionTools())
+         ].concat(this.getManagementTools(), this.getSceneTools(), this.getInspectionTools(), [{
+            name: "casa.discover_objects", title: "Discover Objects Across Casas",
+            description: "Query known Casas in parallel for compact local object inventories, including compound members. Results are grouped by host; unavailable Casas are reported. No mirrors or subscriptions are added.",
+            inputSchema: { type: "object", properties: { timeoutSeconds: { type: "number", minimum: 1, maximum: 30, default: 5 } } },
+            annotations: { readOnlyHint: true }
+         }])
       });
    }
 
@@ -589,6 +594,16 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
 
    if (!_params || !_params.name) {
       return this.sendJsonRpcError(_response, _id, -32602, "Invalid params");
+   }
+
+   if (_params.name === "casa.discover_objects") {
+      var timeout = (_params.arguments || {}).timeoutSeconds;
+      if (timeout !== undefined && (!Number.isFinite(timeout) || timeout < 1 || timeout > 30)) {
+         return this.sendJsonRpcError(_response, _id, -32602, "timeoutSeconds must be between 1 and 30");
+      }
+      return this.discoverObjects(timeout === undefined ? 5 : timeout, (result) => {
+         this.sendJsonRpcResult(_response, _id, { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result, isError: false });
+      });
    }
 
    var inspectionCommands = { "casa.describe_thing": "describeThing", "casa.describe_source_state": "describeSourceState" };
@@ -837,6 +852,31 @@ McpService.prototype.invokeBuildingSceneCommand = function(_target, _command, _p
    api.uName = _target.uName;
    try { return api[_command]({ name: "mcp" }, _params, _callback); }
    catch (error) { return _callback(error); }
+};
+
+McpService.prototype.discoverObjects = function(_timeoutSeconds, _callback) {
+   var hosts = [this.gang.casa].concat(Object.keys(this.gang.peercasas || {}).map((name) => this.gang.peercasas[name]));
+   var remaining = hosts.length;
+   var results = new Array(remaining);
+   var finish = (index, error, inventory) => {
+      if (results[index]) return;
+      results[index] = error
+         ? { casa: hosts[index].name, error: error.message || String(error) }
+         : inventory;
+      if (--remaining === 0) {
+         clearTimeout(timer);
+         results.sort(function(a, b) { return a.casa.localeCompare(b.casa); });
+         _callback({ complete: results.every(function(result) { return !result.error; }), casas: results });
+      }
+   };
+   var timer = setTimeout(() => {
+      hosts.forEach(function(host, index) { finish(index, "Discovery timed out"); });
+   }, _timeoutSeconds * 1000);
+   hosts.forEach((host, index) => {
+      this.invokeConsoleCommand({ uName: host.uName, hostingCasa: host.name }, "discoverObjects", [], (error, inventory) => {
+         finish(index, error, inventory);
+      });
+   });
 };
 
 McpService.prototype.getInspectionTools = function() {

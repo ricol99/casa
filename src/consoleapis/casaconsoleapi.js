@@ -211,33 +211,45 @@ CasaConsoleApi.prototype.sourceTrees = function(_session, _params, _callback) {
    _callback(null, this.sourceTreesInternal());
 };
 
+// Shared local-tree policy: local compound members are included; peer mirrors are not.
+CasaConsoleApi.prototype.isConfiguredTreeMember = function(_child) {
+   if (!_child) return false;
+   if (_child === this.gang || _child === this.gang.casa.bowingRoot) return true;
+   if (_child.type === "namedobject") return true;
+   if (_child.fromPeer || _child.transient || (_child.type === "peersource")) return false;
+   return !!(_child.superType &&
+      ["thing", "property", "event"].indexOf(_child.superType()) !== -1);
+};
+
 CasaConsoleApi.prototype.configuredSourceTreeInternal = function() {
+   return exportNamedObjectTree(this.gang, this.isConfiguredTreeMember.bind(this), null);
+};
+
+CasaConsoleApi.prototype.collectDiscoveryObject = function(_objects, _context, _source, _owner) {
    var casa = this.gang.casa;
-   var configuredFilter = function(_child, _owner) {
+   if (casa.sources[_source.uName] === _source) {
+      _objects.push({
+         uName: _source.uName,
+         parent: _owner ? _owner.uName : null,
+         name: _source.name,
+         displayName: _source.displayName || _source.name,
+         type: _source.type,
+         local: !!_source.local,
+         active: this.gang.findNamedObject(_source.uName) === _source
+      });
+   }
+   return false;
+};
 
-      if (!_child) {
-         return false;
-      }
-
-      if (_child === casa.gang) {
-         return true;
-      }
-
-      if (_child.type === "namedobject") {
-         return true;
-      }
-
-      if (_child.fromPeer || _child.transient || (_child.type === "peersource")) {
-         return false;
-      }
-
-      return !!(_child.superType &&
-                ((_child.superType() === "thing") ||
-                 (_child.superType() === "property") ||
-                 (_child.superType() === "event")));
-   };
-
-   return exportNamedObjectTree(this.gang, configuredFilter, null);
+CasaConsoleApi.prototype.discoverObjects = function(_session, _params, _callback) {
+   var objects = [];
+   var filter = this.isConfiguredTreeMember.bind(this);
+   var collect = this.collectDiscoveryObject.bind(this, objects);
+   this.gang.iterate(null, filter, collect, false);
+   var bowed = this.gang.casa.bowingRoot;
+   if (bowed) bowed.iterate(null, filter, collect, false);
+   objects.sort(function(a, b) { return a.uName.localeCompare(b.uName); });
+   _callback(null, { casa: this.gang.casa.name, objects: objects });
 };
 
 CasaConsoleApi.prototype.configuredSourceTree = function(_session, _params, _callback) {
