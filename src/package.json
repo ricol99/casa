@@ -9,6 +9,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "test:cloudflare-tunnel": "node test/cloudflaretunnelservice_test.js && node test/cloudflaretunnelservice_process_test.js",
     "test:namedobject": "node test/namedobject_phase2_test.js",
     "test:casa-bootstrap-claim": "node test/casa_bootstrap_claim_test.js",
     "test:console-casas-command": "node test/console_casas_command_test.js",
@@ -85,5 +86,8 @@
     "bt-presence": "^2.0.0",
     "node-beacon-scanner": "^0.2.2",
     "eddystone-beacon": "^1.0.7"
+  },
+  "optionalDependencies": {
+    "cloudflared": "0.7.3"
   }
 }
