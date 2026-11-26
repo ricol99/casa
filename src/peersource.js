@@ -144,6 +144,11 @@ PeerSource.prototype.sourceHasChangedProperty = function(_data) {
 
    let newPropAdded = this.ensurePropertyExists(_data.name, 'property', { name: _data.name, valueType: _data.valueType });
 
+   // Mirror owner metadata even when the value itself has not changed.
+   if (typeof _data.valid === "boolean") {
+      this.properties[_data.name].valid = _data.valid;
+   }
+
    if (newPropAdded) {
       this.properties[_data.name].coldStart();
    }

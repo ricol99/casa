@@ -248,6 +248,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       console.info(this.uName + ': Property Changed: ' + _propName + ': ' + newPropValue, this.bowing ? "(BOWING)" : "");
       this.properties[_propName]._actuallySetPropertyValue(newPropValue, _data);
+      sendData.valid = this.properties[_propName].valid;
 
       if (sendData.hasOwnProperty("priority")) {
          _data.priority = sendData.priority;
