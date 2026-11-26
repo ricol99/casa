@@ -18,9 +18,26 @@ The MCP service has its own tool contract. It exposes `casa.get_named_object_tre
 
 `returnToAuto.status` is `already_auto`, `expected`, `not_scheduled` or `unknown`. `expectedAt` is populated only for a timed local mode machine whose resting mode is auto. It estimates manual expiry, followed by normal settling, provided no other mode or override intervenes. An indefinite local override reports `not_scheduled`. This supports wording such as “The room is in manual mode; automatic control is expected to resume in about two minutes.” It does not promise a particular output or hardware state. The tool does not change mode, renew timers, set properties or start a transaction. Missing arguments, unknown targets and targets without MODE return JSON-RPC errors. Focused coverage: `src/test/mcp_control_status_test.js`.
 
+## Generic property writes across Casas
+
+Control implementations use the generic source interface for local sources and `PeerSource` mirrors. A remote object's `type` is `peersource`, regardless of whether the owner is a building, room or device. Domain commands remain in their appropriate Console API, but must not depend on the owner's concrete class or local state-machine methods.
+
+```js
+source.setProperty('MANUAL-MODE-DURATION', 300, {
+   sourceName: 'console',
+   forceUpdate: true
+});
+```
+
+Boolean `forceUpdate: true` makes an unchanged value follow the normal property-update notification path for this write. For an active mode whose timeout listens to that duration property, the notification resets its timer. It does not change the persistent `alwaysUpdate` configuration or enter manual mode by itself. Ordinary subsequent equal-value writes remain suppressed. The Property gate also honours configured `alwaysUpdate`, matching the existing Thing and Source checks.
+
+PeerSource copies the caller data; PeerCasa passes it to `PeerSourceCommandProtocol`, which preserves metadata for ordinary and ramped writes across Socket.IO. The method arguments supply the target/property/value or ramp, and the request layer supplies request identity. The receiver passes the request data to the generic owning-source method. Source removes `forceUpdate` from emitted notifications so listeners do not inherit a forced-write instruction. This is a write option, not a new remote renewal command. Existing MCP manual tools still have the restrictions described below; migrating those tools is separate work.
+
+Coverage includes `peercasa_command_protocol_test.js` for metadata and dispatch, and `scene_switching_runtime_test.js` for local and real loopback Socket.IO timer renewal, ordinary equal-value suppression, and preservation of manual mode. No physical hardware is used.
+
 ## Building scenes: MCP and console commands
 
-Scene commands resolve the building's paired `BuildingConsoleApi` object. They operate the existing `SCENE` modeproperty buttons, without entering, renewing or releasing manual mode. The separate room `scene-state` cycle is not exposed by these tools.
+Scene commands use `BuildingConsoleApi` through the building's generic property interface, including peer mirrors. They operate the existing `SCENE` modeproperty buttons, without entering, renewing or releasing manual mode. The separate room `scene-state` cycle is not exposed by these tools.
 
 | MCP tool and arguments | Building-scope console command | Result |
 | --- | --- | --- |
@@ -29,13 +46,13 @@ Scene commands resolve the building's paired `BuildingConsoleApi` object. They o
 | `casa.set_scene({uName, scene})` | `setScene <name>` | Select a configured scene through its Boolean selector, returning `{ok, completed, sceneStatus}`. Selecting an already active scene does not renew its timer. |
 | `casa.release_scene({uName})` | `releaseScene` | Clear configured scene selectors, returning `{ok, completed, sceneStatus}`. |
 
-Console commands support `--help` and `--usage`. The API method names match the console commands. Writes require a valid local building SCENE modeproperty; unknown scenes, unsupported objects and peer/bowing targets return errors. Use the owning building's Casa endpoint. Both transports use the same API observation: up to one second for the requested state. `completed: false` means it was not observed within that period. No result confirms physical hardware output.
+Console commands support `--help` and `--usage`. The API method names match the console commands. Commands use the building's SCENE property and scene selector properties for both local buildings and peer mirrors. Scene names are case-insensitive; unknown scene names return errors. Remote writes use the generic peer transport. Both transports use the same API observation: up to one second for the requested state. `completed: false` means it was not observed within that period. No result confirms physical hardware output.
 
 Status includes `state`, `selectedScene`, `valid`, `settling`, `observedAt`, `timingAuthority` and `expiry`. Expiry is `timed` with live `remainingSeconds`/UTC `endsAt`, `indefinite`, `inactive` or `unknown`. The settling timer is not presented as scene expiry. Peer/bowing timing and invalid/cold state are not reported as authoritative local countdowns.
 
 `rooms` lists observed room objects referencing this building, with their scene, MODE, controller identity/state and `sceneHasControl`. For local valid room scene properties, this flag compares the actual room controller with its BUILDING-SCENE property; unknown/peer ownership is null. This distinguishes “Movie is selected” from “The lounge is in manual mode.” It is an observed runtime view, not confirmation that every remote room or physical output has updated. Scene selection and release preserve existing building and room manual overrides; release permits whichever remaining controller wins, rather than guaranteeing auto.
 
-Coverage: `building_scene_status_test.js` tests timing, unknown states, ownership and tool discovery. `scene_switching_runtime_test.js` uses a real isolated building/two-room runtime, paired API dispatch, all four MCP tools and console commands, and checks manual mode remains unchanged. HTTP listening/discovery are disabled and no HomeKit hardware is connected.
+Coverage: `building_scene_status_test.js` tests timing, unknown states, ownership and tool discovery. `scene_switching_runtime_test.js` uses a real isolated building/two-room runtime, paired API dispatch, all four MCP tools and console commands, and checks manual mode remains unchanged. Casa HTTP listening/discovery are disabled; the transport regression starts a temporary loopback Socket.IO listener. No HomeKit hardware is connected.
 
 ## MCP configuration management
 

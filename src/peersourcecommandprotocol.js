@@ -1,3 +1,4 @@
+var util = require('./util');
 var PeerSocketRequestor = require('./peersocketrequestor');
 
 function PeerSourceCommandProtocol(_config) {
@@ -25,21 +26,21 @@ PeerSourceCommandProtocol.prototype.sendSourceTransaction = function(_source, _n
 };
 
 PeerSourceCommandProtocol.prototype.sendSetSourceProperty = function(_source, _propName, _propValue, _data, _callback) {
-   return this.sendRequest("set-source-property-req", "changeprop", {
-      sourceName: _source.uName,
-      property: _propName,
-      value: _propValue,
-      transaction: _data.transaction
-   }, _callback);
+   var data = util.copy(_data);
+   data.sourceName = _source.uName;
+   data.property = _propName;
+   data.value = _propValue;
+   delete data.ramp;
+   return this.sendRequest("set-source-property-req", "changeprop", data, _callback);
 };
 
 PeerSourceCommandProtocol.prototype.sendSetSourcePropertyWithRamp = function(_source, _propName, _ramp, _data, _callback) {
-   return this.sendRequest("set-source-property-req", "changeprop", {
-      sourceName: _source.uName,
-      property: _propName,
-      ramp: _ramp,
-      transaction: _data.transaction
-   }, _callback);
+   var data = util.copy(_data);
+   data.sourceName = _source.uName;
+   data.property = _propName;
+   data.ramp = _ramp;
+   delete data.value;
+   return this.sendRequest("set-source-property-req", "changeprop", data, _callback);
 };
 
 PeerSourceCommandProtocol.prototype.sendRaiseSourceEvent = function(_source, _eventName, _data, _callback) {

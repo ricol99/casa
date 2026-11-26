@@ -116,6 +116,42 @@ runTest("PeerCasa command requests preserve existing wire shape", function() {
    completeAllRequests(peerCasa, true);
 });
 
+runTest("PeerSource write metadata survives serialization and dispatch", function() {
+   var peerCasa = createPeerCasa();
+   var mirror = Object.create(require('../peersource').prototype);
+   mirror.uName = ":building";
+   mirror.casa = peerCasa;
+   mirror.checkTransaction = function() { return "tx-generated"; };
+   var metadata = { forceUpdate: true, priority: 20, sourceName: ":caller", property: "wrong", value: 99 };
+   var original = JSON.stringify(metadata);
+   mirror.setProperty("duration", 30, metadata);
+   mirror.setPropertyWithRamp("brightness", { target: 60 }, metadata);
+   assert.strictEqual(JSON.stringify(metadata), original);
+   var received = [];
+   peerCasa.gang = { findNamedObject: function(name) {
+      assert.strictEqual(name, ":building");
+      return { uName: name,
+         setProperty: function(property, value, data) { received.push(data); assert.strictEqual(value, 30); return true; },
+         setPropertyWithRamp: function(property, ramp, data) { received.push(data); assert.strictEqual(ramp.target, 60); return true; }
+      };
+   } };
+   peerCasa.socket.emitted.slice().forEach(function(packet) {
+      peerCasa.socketSetSourcePropertyReqCb(JSON.parse(JSON.stringify(packet.data)));
+   });
+   assert.strictEqual(received.length, 2);
+   received.forEach(function(data) {
+      assert.strictEqual(data.forceUpdate, true);
+      assert.strictEqual(data.priority, 20);
+      assert.strictEqual(data.transaction, "tx-generated");
+      assert.strictEqual(data.sourceName, ":building");
+   });
+   assert.strictEqual(received[0].property, "duration");
+   assert.strictEqual(received[0].ramp, undefined);
+   assert.strictEqual(received[1].property, "brightness");
+   assert.strictEqual(received[1].value, undefined);
+   completeAllRequests(peerCasa, true);
+});
+
 runTest("PeerCasa command requests are not sent while disconnected", function() {
    var peerCasa = createPeerCasa();
 

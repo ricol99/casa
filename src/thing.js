@@ -223,6 +223,7 @@ Thing.prototype.updateProperty = function(_propName, _propValue, _data, _forceAl
    else {
       var updateProp = (data.hasOwnProperty("coldStart") && data.coldStart) ||
                        (prop && prop.alwaysUpdate()) ||
+                       (data.forceUpdate === true) ||
                        (prop && (_propValue !== prop.value));
 
       if (!updateProp) {

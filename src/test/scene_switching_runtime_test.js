@@ -93,6 +93,95 @@ if (mode === 'build') {
       for (let i = 0; i < 10; ++i) { button('a', true); await sleep(10); button('b', true); await sleep(10); }
       await check('rapid switching preserves existing manual override and selects B', 'b');
       button('b', false); await check('release preserves existing manual override', 'none');
+      // A generic forced write renews a live timer without changing manual mode.
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test' });
+      await sleep(200);
+      const durationProperty = building.properties['MANUAL-MODE-DURATION'];
+      const modeProperty = building.properties.MODE;
+      const timerBefore = modeProperty.stateTimer;
+      assert(timerBefore);
+      const durationEvents = [];
+      const collectDuration = data => { if (data.name === 'MANUAL-MODE-DURATION') durationEvents.push(data); };
+      building.on('property-changed', collectDuration);
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test' });
+      await sleep(30);
+      assert.strictEqual(modeProperty.stateTimer, timerBefore, 'ordinary equal write must not renew');
+      assert.strictEqual(durationEvents.length, 0);
+      const manualBeforeForce = manualSnapshot();
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test', forceUpdate: true });
+      await waitFor('forced duration renewal', () => modeProperty.stateTimer !== timerBefore);
+      assert.notStrictEqual(modeProperty.stateTimer, timerBefore, 'forced equal write must reset mode timer');
+      assert(modeProperty.stateTimer.left() > 29000);
+      assert.strictEqual(durationEvents.length, 1);
+      assert.strictEqual(durationEvents[0].value, 30);
+      assert.strictEqual(durationEvents[0].propertyOldValue, 30);
+      assert.strictEqual(durationEvents[0].forceUpdate, undefined, 'listeners must not inherit the write flag');
+      assert.deepStrictEqual(manualSnapshot(), manualBeforeForce);
+      assert.strictEqual(durationProperty.alwaysUpdate(), false, 'force is not persisted');
+      const renewedTimer = modeProperty.stateTimer;
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test' });
+      await sleep(30);
+      assert.strictEqual(modeProperty.stateTimer, renewedTimer, 'next ordinary write remains suppressed');
+      assert.strictEqual(durationEvents.length, 1);
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test', forceUpdate: false });
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test', forceUpdate: 'true' });
+      await sleep(30);
+      assert.strictEqual(durationEvents.length, 1, 'only boolean true forces a write');
+      durationProperty._alwaysUpdate = true;
+      building.setProperty('MANUAL-MODE-DURATION', 30, { sourceName: 'force-update-test' });
+      await waitFor('alwaysUpdate duration renewal', () => modeProperty.stateTimer !== renewedTimer);
+      assert.notStrictEqual(modeProperty.stateTimer, renewedTimer, 'configured alwaysUpdate also passes both gates');
+      delete durationProperty._alwaysUpdate;
+      // Cross a real loopback Socket.IO connection using the production peer path.
+      const PeerCasa = require('../peercasa');
+      const server = require('http').createServer();
+      const io = require('socket.io')(server);
+      await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+      const sender = Object.create(PeerCasa.prototype);
+      sender.uName = ':remote-casa'; sender.casa = { uName: ':test-casa' };
+      sender.connected = true; sender.incompleteRequests = {}; sender.reqId = 0;
+      io.on('connection', socket => {
+         const receiver = Object.create(PeerCasa.prototype);
+         receiver.uName = ':test-casa'; receiver.gang = gang; receiver.socket = socket;
+         socket.on('set-source-property-req', data => receiver.socketSetSourcePropertyReqCb(data));
+      });
+      sender.socket = require('socket.io-client')('http://127.0.0.1:' + server.address().port, { reconnection: false });
+      sender.updateSourceCommandProtocol();
+      sender.socket.on('set-source-property-resp', data => sender.socketSetSourcePropertyRespCb(data));
+      try {
+         await new Promise((resolve, reject) => {
+            sender.socket.once('connect', resolve);
+            sender.socket.once('connect_error', reject);
+         });
+         const remote = Object.create(require('../peersource').prototype);
+         remote.uName = building.uName; remote.casa = sender; remote.checkTransaction = () => 123;
+         const beforeRemote = modeProperty.stateTimer;
+         const metadata = { forceUpdate: true, sourceName: 'peer-test' };
+         remote.setProperty('MANUAL-MODE-DURATION', 30, metadata);
+         await waitFor('Socket.IO forced renewal', () => modeProperty.stateTimer !== beforeRemote && Object.keys(sender.incompleteRequests).length === 0);
+         assert(modeProperty.stateTimer.left() > 29000);
+         assert.deepStrictEqual(metadata, { forceUpdate: true, sourceName: 'peer-test' });
+         assert.deepStrictEqual(manualSnapshot(), manualBeforeForce);
+         const afterRemote = modeProperty.stateTimer;
+         const eventsAfterRemote = durationEvents.length;
+         remote.setProperty('MANUAL-MODE-DURATION', 30, {});
+         await waitFor('Socket.IO ordinary write response', () => Object.keys(sender.incompleteRequests).length === 0);
+         await sleep(30);
+         assert.strictEqual(modeProperty.stateTimer, afterRemote);
+         assert.strictEqual(durationEvents.length, eventsAfterRemote);
+         console.error('[PASS] PeerSource and real Socket.IO forced renewal; ordinary writes and manual mode preserved');
+      } finally {
+         Object.keys(sender.incompleteRequests).forEach(id => sender.incompleteRequests[id].completeRequest(false));
+         sender.socket.close();
+         io.close();
+      }
+      building.removeListener('property-changed', collectDuration);
+      building.setProperty('MANUAL-MODE-DURATION', -1, { sourceName: 'force-update-test' });
+      await sleep(200);
+      building.setProperty('MANUAL-MODE-ACTIVE', true, { sourceName: 'force-update-test' });
+      await sleep(200);
+      expectedManual = manualSnapshot(); manualChanges = [];
+      console.error('[PASS] Local forceUpdate renews equal duration once; ordinary writes and manual mode preserved');
       // Exercise MCP and console commands through the runtime's paired Building API.
       const mcp = Object.create(require('../services/mcpservice').prototype); mcp.gang = gang;
       const call = (name, args) => new Promise(resolve => mcp.handleToolCall(1, { name: 'casa.' + name, arguments: args }, {

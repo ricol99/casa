@@ -485,7 +485,7 @@ Property.prototype._actuallySetPropertyValue = function(_newValue, _data) {
 Property.prototype.setPropertyInternal = function(_newValue, _data) {
    console.log(this.uName + ": setPropertyInternal value="+_newValue);
 
-   if ((this.value !== _newValue) || this.cold) {
+   if ((this.value !== _newValue) || this.cold || this.alwaysUpdate() || (_data && _data.forceUpdate === true)) {
 
       if (this.cold) {
          _data.coldStart = true;

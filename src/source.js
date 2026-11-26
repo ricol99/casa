@@ -203,6 +203,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
 
       var updateProp = (_data && _data.hasOwnProperty("coldStart") && _data.coldStart) ||
                        (this.properties[_propName].alwaysUpdate()) ||
+                       (_data && _data.forceUpdate === true) ||
                        (_propValue !== this.properties[_propName].value);
 
       if (!updateProp) {
@@ -253,6 +254,7 @@ Source.prototype.updateProperty = function(_propName, _propValue, _data) {
       }
 
       delete sendData.alignWithParent;	// This should never be emitted - only for composite management
+      delete sendData.forceUpdate; // Applies to this write, not writes made by listeners.
       delete sendData.sourcePeerCasa;
       //console.error(JSON.stringify(sendData));
       this.casa.eventLogger.logRaisedEvent(sendData);
