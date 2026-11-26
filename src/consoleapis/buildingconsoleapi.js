@@ -4,26 +4,29 @@ var ThingConsoleApi = require('./thingconsoleapi');
 function BuildingConsoleApi(config, owner) { ThingConsoleApi.call(this, config, owner); }
 util.inherits(BuildingConsoleApi, ThingConsoleApi);
 
-BuildingConsoleApi.prototype.sceneProperty = function(write) {
-   var building = this.myObj();
-   var scene = building.properties && building.properties.SCENE;
-   if (!scene || scene.type !== 'modeproperty') throw new Error('Building does not expose a SCENE modeproperty');
-   if (write && (building.fromPeer || building.bowing || !scene.valid || scene.cold)) {
-      throw new Error('Scene writes require the valid owning building/Casa');
-   }
-   return scene;
+// Scene selectors are public properties on both buildings and their peer mirrors.
+BuildingConsoleApi.prototype.sceneProperty = function() {
+   return this.myObj().properties.SCENE;
+};
+
+BuildingConsoleApi.prototype.sceneNames = function() {
+   var values = {};
+   this.myObj().getAllProperties(values);
+   return Object.keys(values).filter(function(name) {
+      return name.endsWith('-SCENE-ACTIVE');
+   }).map(function(name) { return name.slice(0, -13).toLowerCase(); });
 };
 
 BuildingConsoleApi.prototype.sceneStatus = function() {
    var building = this.myObj();
-   var scene = this.sceneProperty(false);
-   var valid = scene.valid === true && !scene.cold;
-   var local = !building.fromPeer && !building.bowing;
-   var modes = scene.config.modes || [];
-   var selected = valid && modes.some(function(mode) { return mode.name === scene.value; }) ? scene.value : null;
+   var scene = this.sceneProperty();
+   var valid = !!scene && scene.valid === true && !scene.cold;
+   var local = !!scene && Object.prototype.hasOwnProperty.call(scene, 'stateTimer');
+   var state = building.getProperty('SCENE');
+   var selected = valid && this.sceneNames().includes(state) ? state : null;
    var result = { uName: building.uName, observedAt: new Date().toISOString(), valid: valid,
-      state: valid ? scene.value : null, selectedScene: selected,
-      settling: valid && scene.value === 'settle-invalid', timingAuthority: local ? 'local' : 'peer',
+      state: valid ? state : null, selectedScene: selected,
+      settling: valid && state === 'settle-invalid', timingAuthority: local ? 'local' : 'peer',
       expiry: { status: 'unknown', remainingSeconds: null, endsAt: null }, rooms: [] };
    if (valid && local && selected) {
       var timer = scene.stateTimer;
@@ -32,10 +35,10 @@ BuildingConsoleApi.prototype.sceneStatus = function() {
       if (timer && Number.isFinite(remaining) && remaining >= 0) {
          result.expiry = { status: 'timed', remainingSeconds: Math.ceil(remaining / 1000), endsAt: new Date(Date.now() + remaining).toISOString() };
       } else {
-         var duration = building.properties[selected.toUpperCase() + '-' + (scene.config.modeName || 'MODE') + '-DURATION'];
+         var duration = building.properties[selected.toUpperCase() + '-SCENE-DURATION'];
          if (!timer && duration && duration.valid && !duration.cold && duration.value === -1) result.expiry.status = 'indefinite';
       }
-   } else if (valid && scene.value === scene.config.restingMode.name) result.expiry.status = 'inactive';
+   } else if (valid && state === 'none') result.expiry.status = 'inactive';
    // Observe the existing named-object tree; room membership is not a separate registry.
    this.gang.iterate(null, null, function(context, object) {
       if (object.buildingName !== building.uName || !object.properties || !object.properties['BUILDING-SCENE']) return false;
@@ -59,30 +62,32 @@ BuildingConsoleApi.prototype.getSceneStatus = function(session, params, callback
 };
 
 BuildingConsoleApi.prototype.listScenes = function(session, params, callback) {
-   var scene = this.sceneProperty(false);
-   callback(null, { scenes: (scene.config.modes || []).map(function(mode) {
-      return { name: mode.name, defaultDurationSeconds: mode.hasOwnProperty('timeout') ? mode.timeout : -1 };
+   var building = this.myObj();
+   var scene = this.sceneProperty();
+   var modes = scene && scene.config && scene.config.modes || [];
+   callback(null, { scenes: this.sceneNames().map(function(name) {
+      var mode = modes.find(function(mode) { return mode.name === name; });
+      return { name: name, durationSeconds: building.getProperty(name.toUpperCase() + '-SCENE-DURATION'),
+         defaultDurationSeconds: mode ? (mode.hasOwnProperty('timeout') ? mode.timeout : -1) : null };
    }), sceneStatus: this.sceneStatus() });
 };
 
 BuildingConsoleApi.prototype.setScene = function(session, params, callback) {
-   var scene = this.sceneProperty(true);
    var name = params && params[0];
-   if (typeof name !== 'string' || !(scene.config.modes || []).some(function(mode) { return mode.name === name; })) {
+   if (typeof name !== 'string' || !this.sceneNames().includes(name)) {
       return callback('Unknown scene name; use listScenes');
    }
    // Use the same selector as a HomeKit scene button; never invoke manual mode.
-   this.myObj().setProperty(name.toUpperCase() + '-' + (scene.config.modeName || 'MODE') + '-ACTIVE', true, { sourceName: 'scene-console' });
+   this.myObj().setProperty(name.toUpperCase() + '-SCENE-ACTIVE', true, { sourceName: 'scene-console' });
    this.observeScene(name, callback);
 };
 
 BuildingConsoleApi.prototype.releaseScene = function(session, params, callback) {
-   var scene = this.sceneProperty(true);
    var building = this.myObj();
-   (scene.config.modes || []).forEach(function(mode) {
-      building.setProperty(mode.name.toUpperCase() + '-' + (scene.config.modeName || 'MODE') + '-ACTIVE', false, { sourceName: 'scene-console' });
+   this.sceneNames().forEach(function(name) {
+      building.setProperty(name.toUpperCase() + '-SCENE-ACTIVE', false, { sourceName: 'scene-console' });
    });
-   this.observeScene(scene.config.restingMode.name, callback);
+   this.observeScene('none', callback);
 };
 
 BuildingConsoleApi.prototype.observeScene = function(expected, callback) {

@@ -105,7 +105,7 @@ if (mode === 'build') {
       let reply = await call('list_scenes', { uName: building.uName });
       assert(!reply.error, JSON.stringify(reply));
       assert.deepStrictEqual(reply.result.structuredContent.scenes.map(scene => scene.name), ['a', 'b']);
-      assert.strictEqual(reply.result.structuredContent.scenes[0].defaultDurationSeconds, -1);
+      assert.strictEqual(reply.result.structuredContent.scenes[0].durationSeconds, 0.5);
       assert.deepStrictEqual((await cmd('listScenes', [])).scenes, reply.result.structuredContent.scenes);
       reply = await call('set_scene', { uName: building.uName, scene: 'b' });
       assert(!reply.error, JSON.stringify(reply));
@@ -145,6 +145,42 @@ if (mode === 'build') {
       await call('release_scene', { uName: building.uName });
       assert.deepStrictEqual(manualSnapshot(), expectedManual); assert.deepStrictEqual(manualChanges, []);
       console.error('[PASS] Four MCP scene tools and four console commands; building/room manual modes preserved');
+      // A peer mirror has ordinary properties, no private mode configuration/timer.
+      // Exercise the actual PeerSource.setProperty transport boundary with a test peer.
+      const mirror = Object.create(require('../peersource').prototype);
+      mirror.uName = building.uName; mirror.fromPeer = true; mirror.bowing = true;
+      mirror.properties = {};
+      Object.keys(building.properties).forEach(name => {
+         const property = building.properties[name];
+         mirror.properties[name] = { type: 'property', valid: true, cold: false,
+            getValue: () => property.getValue() };
+         Object.defineProperty(mirror.properties[name], 'value', { get: () => property.getValue() });
+      });
+      mirror.checkTransaction = () => 1;
+      const writes = [];
+      mirror.casa = { setSourceProperty(source, name, newValue, data) {
+         writes.push(name);
+         setTimeout(() => building.setProperty(name, newValue, data), 5);
+      } };
+      mcp.gang = Object.create(gang);
+      mcp.gang.findNamedObject = name => name === building.uName ? mirror : gang.findNamedObject(name);
+      const manualBeforePeer = manualSnapshot();
+      reply = await call('list_scenes', { uName: mirror.uName });
+      assert(!reply.error, JSON.stringify(reply));
+      assert.deepStrictEqual(reply.result.structuredContent.scenes.map(item => item.name), ['a', 'b']);
+      reply = await call('set_scene', { uName: mirror.uName, scene: 'b' });
+      assert(!reply.error, JSON.stringify(reply));
+      assert.strictEqual(reply.result.structuredContent.completed, true);
+      reply = await call('get_scene_status', { uName: mirror.uName });
+      assert.strictEqual(reply.result.structuredContent.selectedScene, 'b');
+      assert.strictEqual(reply.result.structuredContent.expiry.status, 'unknown');
+      reply = await call('release_scene', { uName: mirror.uName });
+      assert.strictEqual(reply.result.structuredContent.completed, true);
+      assert.strictEqual(building.getProperty('SCENE'), 'none');
+      assert(writes.length > 0);
+      assert(writes.every(name => name.endsWith('-SCENE-ACTIVE')));
+      assert.deepStrictEqual(manualSnapshot(), manualBeforePeer);
+      console.error('[PASS] Four scene tools through PeerSource property forwarding; manual overrides unchanged');
       console.error('[PASS] All scene switching integration checks');
       process.exit(0);
    })().catch(error => { console.error(error.stack); process.exit(1); });

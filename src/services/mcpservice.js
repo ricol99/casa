@@ -4,6 +4,7 @@ var crypto = require('crypto');
 var https = require('https');
 var http = require('http');
 var url = require('url');
+var BuildingConsoleApi = require('../consoleapis/buildingconsoleapi');
 
 var MCP_PROTOCOL_VERSION = "2025-06-18";
 
@@ -599,7 +600,7 @@ McpService.prototype.handleToolCall = function(_id, _params, _response) {
       }
       var building = this.gang.findNamedObject(sceneArgs.uName);
       if (!building) return this.sendJsonRpcError(_response, _id, -32000, "Object not found");
-      return this.invokeConsoleCommand(building, sceneCommands[_params.name], _params.name === "casa.set_scene" ? [sceneArgs.scene] : [], (error, result) => {
+      return this.invokeBuildingSceneCommand(building, sceneCommands[_params.name], _params.name === "casa.set_scene" ? [sceneArgs.scene] : [], (error, result) => {
          if (error) return this.sendJsonRpcError(_response, _id, -32000, error.message || String(error));
          this.sendJsonRpcResult(_response, _id, { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result, isError: false });
       });
@@ -809,6 +810,15 @@ McpService.prototype.getConsoleApi = function(_target) {
    var api = consoleService.findOrCreateConsoleApiObject(_target);
    if (!api) throw new Error("Console API object is unavailable");
    return api;
+};
+
+// The tool selects the building interface; property access handles its placement.
+McpService.prototype.invokeBuildingSceneCommand = function(_target, _command, _params, _callback) {
+   var api = Object.create(BuildingConsoleApi.prototype);
+   api.gang = this.gang;
+   api.uName = _target.uName;
+   try { return api[_command]({ name: "mcp" }, _params, _callback); }
+   catch (error) { return _callback(error); }
 };
 
 McpService.prototype.invokeConsoleCommand = function(_target, _command, _params, _callback) {
