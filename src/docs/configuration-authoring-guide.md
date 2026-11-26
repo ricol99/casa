@@ -1,6 +1,6 @@
 # Casa Configuration Authoring Guide — v0.3
 
-Runtime reference: Casa device repository at `1784c48`, plus the accompanying generic MCP manual-control changes in this checkout. Unified deployment model reference: schema `0.1`.
+Runtime reference: Casa device repository at `d6ce0fff96ecf577d584674280ae0908e294958d`. Unified deployment model reference: schema `0.1`.
 
 The v0.2 device review is by **Casa Codex**. This revision adds composition guidance and the Thing catalogue by **Hannah**, 25 November 2026.
 
@@ -1086,7 +1086,7 @@ The Cloudflare/Casa Home section above adds live Pi, hosted OAuth, tree-read and
 
 Building scenes use the generic property interface on local and peer sources (`afea602`), with case-insensitive scene names (`198c1c0`). `1784c48` adds per-write boolean `forceUpdate: true` through Property, Thing, Source, PeerSource and Socket.IO, and fixes the Property gate that previously blocked configured `alwaysUpdate`. The force flag is removed from emitted notifications and does not alter persistent configuration. Write metadata is preserved without mutating caller data.
 
-The accompanying MCP changes move manual commands to shared SourceBaseConsoleApi and console commands to SourceBaseConsoleCmd. Set leaves an existing manual override unchanged; release clears only manual duration/active properties; renewal forces a duration write. Existing local runtime helper methods remain for internal callers, but the MCP/console API no longer invokes them. Read-only control status uses mirrored expiry and resting-state properties for local and remote sources.
+The MCP changes committed in `33a0fe7` move manual commands to shared SourceBaseConsoleApi and console commands to SourceBaseConsoleCmd. Set leaves an existing manual override unchanged; release clears only manual duration/active properties; renewal forces a duration write. Existing local runtime helper methods remain for internal callers, but the MCP/console API no longer invokes them. Read-only control status uses mirrored expiry and resting-state properties for local and remote sources.
 
 Focused verification covers generic local/peer manual dispatch, validation and immediate write rejection, console command parsing, control status, management, and building scenes. The synthetic building/two-room runtime exercises MCP set, equal-duration renewal and release on local and PeerSource targets over a real loopback Socket.IO connection, and confirms the owner timer changes without changing room overrides. These tests do not contact deployed Pis or hardware. The packaged authoring examples and their latest results are recorded in `examples/configuration-authoring/verification.txt`; earlier test tables retain their historical dates and attribution.
 
@@ -1096,3 +1096,20 @@ Focused verification covers generic local/peer manual dispatch, validation and i
 Modeproperty generates `<NAME>-EXPIRES-AT` (number, UTC epoch milliseconds) and `<NAME>-RESTING-STATE` (string), e.g. MODE-EXPIRES-AT and MODE-RESTING-STATE. These read-only metadata properties follow the mode's propagation settings and ordinary peer mirroring. An expiry of -1 means no active mode timer. Entry and renewal publish the real timer deadline; release/expiry clear it, settling timers are excluded, and hot start republishes from the restored remaining duration. Control status needs no concrete property type, timer object or remote configuration. Remote countdowns assume clocks agree. Missing metadata on an older owner remains unknown.
 
 `modeproperty_expiry_test.js` covers publication, cancellation, indefinite and settling modes, and hot-start restoration. Control-status checks cover local/peer values and missing/invalid metadata. The Socket.IO runtime test sends writes to the owner and property notifications back to the mirror, verifies equal-duration renewal completion, and checks timestamp clearing after release and actual timeout. No deployed hardware was exercised.
+
+
+### Peer property validity — 26 November 2026
+
+Latest pushed device commit: [d6ce0fff96ecf577d584674280ae0908e294958d](https://github.com/ricol99/casa/commit/d6ce0fff96ecf577d584674280ae0908e294958d), “Propagate owner validity in existing peer property updates”.
+
+**Observed issue.** The hosted Casa Home readback showed Dumgoyne’s `richard-present` and `natalie-present` values as true but valid=false after successful writes. A direct read-only Socket.IO console request to pi-env confirmed that `:dumgoyne` was the active local building on casa-env (fromPeer=false, bowed=false), with both values true and valid=true. The invalid flags were stale on the peer mirror. This was a presence-property validity issue, distinct from the earlier Cinema command-dispatch error.
+
+**Narrow fix.** `Source.updateProperty()` adds the owning property’s current Boolean `valid` state to its existing outgoing property-change notification. `PeerSource.sourceHasChangedProperty()` applies that metadata before value equality can suppress the update. Both false→true and true→false validity can therefore be reflected when an existing notification arrives, even if the value is unchanged. Messages without a Boolean validity field preserve the peer’s current validity; successful writes do not automatically make properties valid.
+
+This is six production lines in Source and PeerSource. SourceBase, Property, SourceListener and PeerGangSource are unchanged by this commit. It introduces no validity event, no `validityOnly` notification, no additional notification emission and no new race-prone shared receiver path. An earlier broader uncommitted approach was reverted at Richard’s request and is not part of the pushed change.
+
+**Verification and boundary.** `src/test/peer_property_validity_test.js` passed for owner-supplied validity (rather than caller-supplied metadata), both validity transitions with an unchanged value and zero extra notifications, ordinary changed-value notification behaviour, and compatibility with messages lacking valid Boolean metadata. These are focused in-process checks; a full suite was not run for this commit. Subsequent user-confirmed live verification is recorded below. Standalone validity changes are not newly broadcast: synchronization occurs on the next existing property notification or peer snapshot. The owning and receiving Casas need the corresponding updated code for notification-based synchronization.
+
+**Live verification — 26 November 2026.** Richard subsequently tested the presence values and confirmed that Dumgoyne’s `richard-present` and `natalie-present` are both set and valid. This verifies the reported presence write/readback problem is resolved in live use. This is Richard’s live confirmation, not a new independent Casa Codex test or verification of the exact revision running on every Pi. False→true and true→false transitions at an unchanged value remain covered by the focused automated test rather than this user report.
+
+The latest pushed source reference remains `d6ce0fff96ecf577d584674280ae0908e294958d`. Earlier sections retain their historical test and deployment attribution; this live result supersedes the previous absence of post-fix presence verification only for the two properties above. This repository update preserves Hannah’s composition guidance and catalogue.
