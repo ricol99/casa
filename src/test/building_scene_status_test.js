@@ -39,3 +39,26 @@ var sceneTools = response.body.result.tools.filter(function(tool) { return ['cas
 assert.strictEqual(sceneTools.length, 4);
 assert.deepStrictEqual(sceneTools.find(function(tool) { return tool.name === 'casa.set_scene'; }).inputSchema.required, ['uName', 'scene']);
 console.log('[PASS] Scene status countdown, room control, unknown/peer/cold status, generic scene access and MCP discovery');
+
+// Both local mode properties and plain peer mirrors accept caller casing.
+(async function() {
+   for (const peer of [false, true]) {
+      scene.type = peer ? 'property' : 'modeproperty';
+      building.fromPeer = peer;
+      building.setProperty = function(name, value) {
+         assert.strictEqual(name, 'MOVIE-SCENE-ACTIVE');
+         assert.strictEqual(value, true);
+         scene.value = 'movie';
+      };
+      const manualBefore = room.properties.MODE.value;
+      for (const name of ['movie', 'Movie', 'MOVIE', 'mOvIe']) {
+         scene.value = 'none';
+         const result = await new Promise((resolve, reject) => api.setScene({}, [name],
+            (error, result) => error ? reject(new Error(String(error))) : resolve(result)));
+         assert.strictEqual(result.completed, true);
+         assert.strictEqual(result.sceneStatus.selectedScene, 'movie');
+         assert.strictEqual(room.properties.MODE.value, manualBefore);
+      }
+   }
+   console.log('[PASS] Lower, upper and mixed-case scene selection for local and peer properties');
+})().catch(error => { console.error(error); process.exitCode = 1; });

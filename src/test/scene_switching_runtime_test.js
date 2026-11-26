@@ -107,7 +107,7 @@ if (mode === 'build') {
       assert.deepStrictEqual(reply.result.structuredContent.scenes.map(scene => scene.name), ['a', 'b']);
       assert.strictEqual(reply.result.structuredContent.scenes[0].durationSeconds, 0.5);
       assert.deepStrictEqual((await cmd('listScenes', [])).scenes, reply.result.structuredContent.scenes);
-      reply = await call('set_scene', { uName: building.uName, scene: 'b' });
+      reply = await call('set_scene', { uName: building.uName, scene: 'B' });
       assert(!reply.error, JSON.stringify(reply));
       assert.strictEqual(reply.result.structuredContent.completed, true);
       await check('MCP set scene preserves manual override', 'b');
@@ -119,7 +119,7 @@ if (mode === 'build') {
       assert.strictEqual((await cmd('getSceneStatus', [])).selectedScene, 'b');
       reply = await call('set_scene', { uName: building.uName, scene: 'missing' }); assert(reply.error);
       reply = await call('set_scene', { uName: building.uName }); assert.strictEqual(reply.error.code, -32602);
-      reply = await call('set_scene', { uName: rooms[0].uName, scene: 'b' }); assert(reply.error);
+      reply = await call('set_scene', { uName: rooms[0].uName, scene: 'B' }); assert(reply.error);
       assert.deepStrictEqual(manualSnapshot(), expectedManual);
       assert.strictEqual((await cmd('releaseScene', [])).completed, true);
       await check('console release preserves manual override', 'none');
@@ -135,7 +135,7 @@ if (mode === 'build') {
       rooms[0].setManualMode();
       await waitFor('room manual', () => value(rooms[0], 'MODE') === 'manual');
       await sleep(200); expectedManual = manualSnapshot(); manualChanges = [];
-      reply = await call('set_scene', { uName: building.uName, scene: 'b' });
+      reply = await call('set_scene', { uName: building.uName, scene: 'B' });
       assert.strictEqual(reply.result.structuredContent.completed, true);
       await sleep(200);
       reply = await call('get_scene_status', { uName: building.uName });
@@ -168,7 +168,7 @@ if (mode === 'build') {
       reply = await call('list_scenes', { uName: mirror.uName });
       assert(!reply.error, JSON.stringify(reply));
       assert.deepStrictEqual(reply.result.structuredContent.scenes.map(item => item.name), ['a', 'b']);
-      reply = await call('set_scene', { uName: mirror.uName, scene: 'b' });
+      reply = await call('set_scene', { uName: mirror.uName, scene: 'B' });
       assert(!reply.error, JSON.stringify(reply));
       assert.strictEqual(reply.result.structuredContent.completed, true);
       reply = await call('get_scene_status', { uName: mirror.uName });

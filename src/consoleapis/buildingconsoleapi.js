@@ -74,6 +74,7 @@ BuildingConsoleApi.prototype.listScenes = function(session, params, callback) {
 
 BuildingConsoleApi.prototype.setScene = function(session, params, callback) {
    var name = params && params[0];
+   if (typeof name === 'string') name = name.toLowerCase();
    if (typeof name !== 'string' || !this.sceneNames().includes(name)) {
       return callback('Unknown scene name; use listScenes');
    }
